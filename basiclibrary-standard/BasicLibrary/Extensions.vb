@@ -161,8 +161,8 @@ Public Module Extensions
         Return aList.OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).First()
     End Function
     <Extension>
-    Public Function ClosestPastDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime, ByVal comparisonDate As DateTime) As DateTime
-        Return aList.Where(Function(x) bDate.IsBefore(comparisonDate)).OrderBy(Function(x) Math.Abs((bDate - x).Ticks)).First()
+    Public Function ClosestPastDate(ByVal aList As IEnumerable(Of DateTime), ByVal comparisonDate As DateTime) As DateTime
+        Return aList.Where(Function(x) x.IsBefore(comparisonDate)).OrderBy(Function(x) Math.Abs((comparisonDate - x).Ticks)).First()
     End Function
     <Extension>
     Public Function ClosestFutureDate(ByVal aList As IEnumerable(Of DateTime), ByVal bDate As DateTime, ByVal comparisonDate As DateTime) As DateTime
@@ -992,6 +992,15 @@ Public Module Extensions
         Else
             Return subValue
         End If
+    End Function
+    <Extension()>
+    Public Function ToLongDateString(ByVal aDate? As Date) As String
+        If aDate.HasValue Then
+            Return aDate.Value.ToLongDateString()
+        End If
+        
+        Return ""
+        
     End Function
 
     <Extension()>

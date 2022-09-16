@@ -1,15 +1,10 @@
 @{
-    var activities = (List<Activity>)ViewData["Activities"];
-    var groups = (List<ActivityGroup>)ViewData["Groups"];
-    var questions = (List<FormQuestion>)ViewData["Questions"];
-    var questionGroups = (List<FormQuestionGroup>)ViewData["QuestionGroups"];
-    var isReadyOnly = false;
-    var isVolunteers =Request.QueryString["volunteers"] == "true";
-
-    if (ViewData["SearchBarReadOnly"] != null)
-    {
-        isReadyOnly = (bool)ViewData["SearchBarReadOnly"];
-    }
+    var activities = (List<Activity>) ViewData["Activities"];
+    var groups = (List<ActivityGroup>) ViewData["Groups"];
+    var questions = (List<FormQuestion>) ViewData["Questions"];
+    var questionGroups = (List<FormQuestionGroup>) ViewData["QuestionGroups"];
+    var isVolunteers = Request.QueryString["volunteers"] == "true";
+    var isReadOnly = ViewData["SearchBarReadOnly"] != null && (bool) ViewData["SearchBarReadOnly"];
 }
 
 <div class="row">
@@ -17,7 +12,7 @@
     @if (questionGroups.IsNotEmpty())
     {
         <div class="col-md-2 hide">
-            <select id="filter-question" name="filter-question" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"" : "")>
+            <select id="filter-question" name="filter-question" class="form-control" @(isReadOnly ? "readonly=\"readonly\"" : "")>
                 <option value="">All Fields</option>
                 @foreach (var group in questionGroups)
                 {
@@ -31,18 +26,18 @@
             </select>
         </div>
     }
-    
+
     <div class="col-md-3">
         <div class="form-group">
-            <input type="text" name="opensearch" id="opensearch" placeholder="Search for first or last name or email" class="form-control" value="@Request["q"]" @(isReadyOnly ? "readonly=\"readonly\"": "") />
+            <input type="text" name="opensearch" id="opensearch" placeholder="Search for first or last name or email" class="form-control" value="@Request["q"]" @(isReadOnly ? "readonly=\"readonly\"" : "")/>
         </div>
     </div>
 
     <div class="col-md-5">
         <div class="form-group">
-            <select id="activities" class="form-control select2 hide" multiple placeholder="Select student activities" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+            <select id="activities" class="form-control select2 hide" multiple placeholder="Select student activities" @(isReadOnly ? "readonly=\"readonly\"" : "")>
                 <option value="0" @(Request["activity"].IsBlank() && Request["group"].IsBlank() ? "selected=\"selected\"" : "")>
-                     @( isVolunteers ? "All Volunteer Opportunities" : "All Student Activities")
+                    @(isVolunteers ? "All Volunteer Opportunities" : "All Student Activities")
                 </option>
                 @foreach (var groupType in Enum.GetValues(typeof(ActivityGroupType)).Cast<ActivityGroupType>().Where(item => item != ActivityGroupType.NotSet))
                 {
@@ -81,16 +76,14 @@
                         </optgroup>
                     }
                 }
-                @if (activities.Where(x => !x.ActivityGroupId.HasValue).Any())
+                @if (activities.Any(x => !x.ActivityGroupId.HasValue))
                 {
                     <optgroup label="All @UILabel.ActivityLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true)">
                         @foreach (var activity in activities.Where(x => !x.ActivityGroupId.HasValue))
                         {
-                            var selectedActivity = "";
-                            if (Request["activity"].IsNotBlank() && Request["activity"].Split(',').Contains(activity.ID.ToString()))
-                            {
-                                selectedActivity = " selected=\"selected\" ";
-                            }
+                            var selectedActivity = Request["activity"].IsNotBlank() && Request["activity"].Split(',').Contains(activity.ID.ToString())
+                                ? " selected=\"selected\" " 
+                                : "";
                             <option value="activity-@activity.ID" @selectedActivity>
                                 @activity.ToFullDescription()
                             </option>
@@ -103,10 +96,9 @@
 
     <div class="col-md-2">
         <div class="form-group">
-            <select id="assignmenttype" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+            <select id="assignmenttype" class="form-control" @(isReadOnly ? "readonly=\"readonly\"" : "")>
                 <option value="">All Seat Assignments</option>
                 @{
-                    var displayAssignments = Enum.GetValues(typeof(RegistrationAssignmentType));
                     var notToDisplay = new List<RegistrationAssignmentType>();
                     if (isVolunteers)
                     {
@@ -125,8 +117,8 @@
                     {
                         continue;
                     }
-                    <option value="@((int)item)"
-                            @(Request["at"] == ((int)item).ToString() ? " selected=\"selected\" " : "")>
+                    <option value="@((int) item)"
+                            @(Request["at"] == ((int) item).ToString() ? " selected=\"selected\" " : "")>
                         @item.ToString().SplitByUpperCase()
                     </option>
                 }
@@ -136,12 +128,12 @@
 
     <div class="col-md-2">
         <div class="form-group">
-            <select id="regstatus" class="form-control" @(isReadyOnly ? "readonly=\"readonly\"": "")>
+            <select id="regstatus" class="form-control" @(isReadOnly ? "readonly=\"readonly\"" : "")>
                 <option value="">All @UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true)</option>
                 @foreach (var item in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Where(x => x != RegistrationStatus.NotSet))
                 {
-                    <option value="@((int)item)"
-                            @(Request["regstatus"] == ((int)item).ToString() ? " selected=\"selected\" " : "")>
+                    <option value="@((int) item)"
+                            @(Request["regstatus"] == ((int) item).ToString() ? " selected=\"selected\" " : "")>
                         @item.ToString().SplitByUpperCase() Only
                     </option>
                 }
@@ -152,7 +144,7 @@
 
 <script>
     function getQuery() {
-        var q = $('#opensearch').val();
+        let q = $('#opensearch').val();
         //if ($('#filter-question').val().length > 0 && $('#filter-answer').val() && $('#filter-answer').val().length > 0) {
         //    q = $('#filter-answer').val();
         //}
@@ -160,11 +152,10 @@
     }
 
     function getFilterQuestionQS() {
-        var f = '';
         //if ($('#filter-question').val().length > 0) {
         //    f = '&question=' + $('#filter-question').val();
         //}
-        return f;
+        return '';
     }
 
     function getRegStatus() {
@@ -173,15 +164,15 @@
 
     function getActivityOrGroup() { 
 
-        var arr = $('#activities').val();
-        var activity = '';
-        var group = '';
+        let arr = $('#activities').val();
+        let activity = '';
+        let group = '';
 
         if (!arr) return '';
 
-        for (var item of arr) {
+        for (let item of arr) {
 
-            var id = item.split('-')[1];
+            let id = item.split('-')[1];
 
             if (item.indexOf('group-') > -1) {
                 if (group.length > 0) group += ',';
@@ -214,10 +205,10 @@
                         if (data.answers.length > 0) {
 
                             $('#filter-answer').html('');
-                            for (var i = 0; i < data.answers.length; i++) {
-                                var selected = "";
+                            for (let i = 0; i < data.answers.length; i++) {
+                                let selected = '';
 
-                                if (data.answers[i] == '@Request["q"]') {
+                                if (data.answers[i] === '@Request["q"]') {
                                     selected = ' selected="selected" ';
                                 }
 

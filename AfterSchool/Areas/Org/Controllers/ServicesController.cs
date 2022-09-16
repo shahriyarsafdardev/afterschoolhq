@@ -4,10 +4,12 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Stripe.BillingPortal;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -176,6 +178,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        var registrantName = ra.ToRegistrant().Name;
+                        var newAssignmentText = newAssignmentType.ToString().SplitByUpperCase();
+                        var successMessage = new SystemMessage($"{registrantName}'s seat has been moved to {newAssignmentText}.", MessageType.Success);
+                        SetTempMessages(new SystemMessages {successMessage});
                         WriteOutput(new {status = "ok"}, ResponseType.JSON);
                     },
                     onFailure: (SystemMessages fmsgs) =>
@@ -610,23 +616,27 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetStripeBillingLink()
+        public ActionResult GetStripeBillingLink(string returnUrl, int config = 0)
         {
             var msgs = new SystemMessages();
             
             if (msgs.HasNoErrors())
             {
-                var currentAccount = SessionVariables.CurrentAccount;
-                var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                var session = stripeHelper.GetBillingPortalSession(
-                    currentAccount.StripeCustomerId, 
-                    $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}", 
+                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+
+                if (returnUrl.IsNotEmpty())
+                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
+
+                var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
+                    SessionVariables.CurrentAccount,
+                    fullReturnUrl,
+                    config.ToEnum<BillingPortalConfigurationType>(),
                     msgs);
 
                 return Json(new
                 {
                     status = "ok",
-                    link = session.Url
+                    link = link
                 }, JsonRequestBehavior.AllowGet);
             }
 

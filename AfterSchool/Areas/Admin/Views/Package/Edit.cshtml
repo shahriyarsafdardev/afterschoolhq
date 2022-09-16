@@ -85,23 +85,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">For AfterSchoolHQ.com?</label>
-                    <div class="col-sm-6">
-                        @{ Html.RenderPartial(
-                               "~/Views/Shared/_SwitchButton.cshtml",
-                               Model.IsAfterSchool,
-                               new ViewDataDictionary
-                               {
-                                   {"checkboxname", "isafterschool"},
-                                   {"checkboxid", "isafterschool"},
-                               }); }
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label class="col-sm-3 control-label">Description</label>
                     <div class="col-sm-6">
                         <textarea class="form-control" id="description" name="description" onfocus="this.select()">@Model.Description</textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Feature Description</label>
+                    <div class="col-sm-6">
+                        <textarea class="form-control" id="featuredescription" name="featuredescription" onfocus="this.select()">@Model.FeatureDescription</textarea>
+                        <p class="text-muted">
+                            Enter each feature on a separate line
+                        </p>
                     </div>
                 </div>
 

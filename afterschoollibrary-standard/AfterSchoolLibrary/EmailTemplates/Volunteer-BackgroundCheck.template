@@ -1,0 +1,26 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>  
+  
+  <p>@Model.CustomMessage</p>
+
+  <p>
+    Please fill out the background check using the below URL:
+  </p>
+
+  <p>
+    <a href="@Model.BackgroundCheckUrl">@Model.BackgroundCheckUrl</a>
+  </p>
+  
+  <p>
+    If you have any questions or concerns, please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>

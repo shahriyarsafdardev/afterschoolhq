@@ -94,7 +94,8 @@ namespace AfterSchoolLibrary.Models
             SurveyResponse.Create(dc);
             RegistrantInviteCode.Create(dc);
             RefreshToken.Create(dc);
-
+            BillingPortalConfiguration.Create(dc);
+            BackgroundCheck.Create(dc);
 
             return msgs;
         }
@@ -182,7 +183,8 @@ namespace AfterSchoolLibrary.Models
             SurveyResponse.Alter(dc);
             RegistrantInviteCode.Alter(dc);
             RefreshToken.Alter(dc);
-
+            BillingPortalConfiguration.Alter(dc);
+            BackgroundCheck.Alter(dc);
 
             return msgs;
         }

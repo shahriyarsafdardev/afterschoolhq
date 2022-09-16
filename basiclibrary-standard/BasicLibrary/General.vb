@@ -1657,7 +1657,7 @@ Public Class CsvFile
                     csv.Append(",")
                 End If
                 csv.Append("""")
-                csv.Append(table(i)(j))
+                csv.Append(table(i)(j)?.Replace("""", """"""))
                 csv.Append("""")
             Next
             csv.Append(vbCrLf)

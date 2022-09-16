@@ -109,7 +109,6 @@ namespace AfterSchoolLibrary.Services
                     orgName: newLocation.Name,
                     accountType: accountType,
                     loggedInUser: loggedInUser,
-                    isAfterSchool: true,
                     msgs: msgs,
                     dc: dc);
 

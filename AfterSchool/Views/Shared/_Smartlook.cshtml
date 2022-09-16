@@ -1,0 +1,12 @@
+﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@if (Utilities.IsSmartlookDefined(SessionVariables.CurrentAccount, SessionVariables.OriginalLoggedInUser))
+{
+    <script type='text/javascript'>
+        window.smartlook || (function (d) {
+            let o = smartlook = function () { o.api.push(arguments) }, h = d.getElementsByTagName('head')[0];
+            let c = d.createElement('script'); o.api = []; c.async = true; c.type = 'text/javascript';
+            c.charset = 'utf-8'; c.src = 'https://rec.smartlook.com/recorder.js'; h.appendChild(c);
+        })(document);
+        smartlook('init', '4a12ea16e5c85b6e6ec074dac9806b9588793fb2');
+    </script>
+}

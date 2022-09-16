@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -18,7 +20,7 @@ namespace AfterSchool.Controllers
     {
         private readonly IFeatureFlagRepository featureFlagRepository;
 
-        public VolunteerRegistrationController(IFeatureFlagRepository featureFlagRepository)
+        public VolunteerRegistrationController(IFeatureFlagRepository featureFlagRepository, IBackgroundCheckWorkflow backgroundCheckWorkflow)
         {
             this.featureFlagRepository = featureFlagRepository;
         }
@@ -43,7 +45,7 @@ namespace AfterSchool.Controllers
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, true, currentUser, msgs);
+                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = currentUser.GetMasterVolunteerRegistrant(msgs);
@@ -59,8 +61,8 @@ namespace AfterSchool.Controllers
                         msgs);
 
                 var hasCompletedVolunteerProfile = masterRegistrant.IsNotEmpty() && masterRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed &&
-                                                masterRegistrant.PersonTypeId == RegistrantPersonType.Volunteer;
-                
+                                                   masterRegistrant.PersonTypeId == RegistrantPersonType.Volunteer;
+
                 if (hasCompletedVolunteerProfile)
                     return RedirectToAction("Register");
             }
@@ -78,11 +80,11 @@ namespace AfterSchool.Controllers
 
                 return HttpNotFound();
             }
-            
+
             var questions = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
 
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            
+
             // NOTE: Should this be updated for volunteers?
             var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
                 currentUser, questions, false, Request.Params);
@@ -253,7 +255,27 @@ namespace AfterSchool.Controllers
             return null;
         }
 
-        #region AddHomeAddress
+        [HttpGet]
+        public ActionResult ThankYou(string id)
+        {
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
+                return Logout(Request.Url.ToString(), true);
+
+            var msgs = new SystemMessages();
+
+            RegistrationCommon.ResetRegistrationSession();
+
+            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+            var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var registrant = registration.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
+            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
+                assignmentType, msgs);
+            return View(result);
+        }
 
         private List<FormQuestion> GatherAddHomeAddressQuestions(SystemMessages msgs, ParticipationObject participationObject)
         {
@@ -370,10 +392,6 @@ namespace AfterSchool.Controllers
             return View(result);
         }
 
-        #endregion
-
-        #region AddEmergencyContacts
-
         [HttpGet]
         public ActionResult AddEmergencyContacts()
         {
@@ -446,10 +464,6 @@ namespace AfterSchool.Controllers
             return View(result);
         }
 
-        #endregion
-
-        #region Register
-
         [HttpGet]
         public ActionResult Register()
         {
@@ -464,17 +478,16 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
             SessionVariables.CurrentRegistrant = currentRegistrant;
-            var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
             // NOTE: Should be removed for now, since there is no volunteer account portal to actually edit the profile
-            /*if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == currentUser.ID)
-                return RedirectToAction("editpersonal", "family",
-                    new
-                    {
-                        Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid,
-                        student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
-                    });*/
+            // var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
+            // if (!parentOrGuardian.IsProfileCompleted && parentOrGuardian.GetOwner(msgs).ID == currentUser.ID)
+            //     return RedirectToAction("editpersonal", "family", new
+            //     {
+            //         Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid,
+            //         student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
+            //     });
 
             var questions = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
 
@@ -489,11 +502,19 @@ namespace AfterSchool.Controllers
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
                 if (msgs.HasNoErrors())
-                    return RedirectToAction("thankyou", new {id = registration.Uid});
+                    return RedirectToAction("ThankYou", new {id = registration.Uid});
             }
 
-            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
-            return View(result);
+            return AssembleResultAndGoToRegisterView(participationObject, msgs, questions, currentRegistrant);
+        }
+
+        private ActionResult AssembleResultAndGoToRegisterView(ParticipationObject participationObject, SystemMessages msgs,
+            List<FormQuestionViewModel> questions, Registrant currentRegistrant)
+        {
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            var result = new VolunteerRegisterAssembler().AssembleRegisterResult(questions, participationObject,
+                registrationStartPageAccount, currentRegistrant, msgs);
+            return View("Register", result);
         }
 
         private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
@@ -513,9 +534,7 @@ namespace AfterSchool.Controllers
                     SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                     SelectedDates = selectedDates,
                 },
-                true,
-                SessionVariables.CurrentUser,
-                msgs);
+                true, SessionVariables.CurrentUser, msgs);
         }
 
         private static bool CurrentRegistrantHasAlreadySubmitted(RegistrationCompletionStatus registrationCompletionStatusId)
@@ -528,13 +547,6 @@ namespace AfterSchool.Controllers
             return RegistrationCommon.GetSelectedDatesFromCart()?.Where(date =>
                 !currentRegistrant.IsReservedForDate(participationObject, date, null)
             ).ToList();
-        }
-
-        private RegisterResult GatherDataForAndAssembleRegisterResult(ParticipationObject participationObject, Registration registration, SystemMessages msgs,
-            List<FormQuestionViewModel> questions, Registrant currentRegistrant)
-        {
-            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
-            return new RegisterAssembler().AssembleRegisterResult(questions, participationObject, registrationStartPageAccount, currentRegistrant, null, msgs);
         }
 
         [HttpPost]
@@ -563,41 +575,16 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors() && registration != null)
             {
                 if (CurrentRegistrantHasAlreadySubmitted(registration.CompletionStatusId))
-                    return RedirectToAction("select");
+                    return RedirectToAction("Select");
 
                 if (msgs.HasNoErrors())
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
                 if (msgs.HasNoErrors())
-                    return RedirectToAction("thankyou", new {id = registration.Uid});
+                    return RedirectToAction("ThankYou", new {id = registration.Uid});
             }
 
-            var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, qvms, currentRegistrant);
-            return View(result);
-        }
-
-        #endregion
-
-        [HttpGet]
-        public ActionResult ThankYou(string id)
-        {
-            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
-                return Logout(Request.Url.ToString(), true);
-
-            var msgs = new SystemMessages();
-
-            RegistrationCommon.ResetRegistrationSession();
-
-            var registration = Registration.LoadByUid(id.ToGuid(), msgs);
-            var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
-            var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
-            var currentUser = SessionVariables.CurrentUser;
-            var registrant = registration.GetRegistrant(msgs);
-            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
-            var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
-            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
-                assignmentType, msgs);
-            return View(result);
+            return AssembleResultAndGoToRegisterView(participationObject, msgs, qvms, currentRegistrant);
         }
     }
 }

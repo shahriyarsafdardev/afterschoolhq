@@ -226,10 +226,10 @@ namespace AfterSchoolLibrary.Models
             ObjectType = ParticipationObjectType.AccountActivityGroup;
             Uid = activityGroup.Uid;
             Name = activityGroup.Name;
-            Details = activityGroup.Details.IfEmpty(activityGroup.Description);
+            Details = aag.Details ?? activityGroup.Details.IfEmpty(activityGroup.Description);
             GenderRestriction = activityGroup.GenderRestriction;
-            MinGradeId = activityGroup.MinGradeLevelId;
-            MaxGradeId = activityGroup.MaxGradeLevelId;
+            MinGradeId = aag.MinGradeLevelId ?? activityGroup.MinGradeLevelId;
+            MaxGradeId = aag.MaxGradeLevelId ?? activityGroup.MaxGradeLevelId;
             AgeStart = activityGroup.AgeStart;
             AgeEnd = activityGroup.AgeEnd;
             Cost = aag.Cost;
@@ -240,7 +240,6 @@ namespace AfterSchoolLibrary.Models
             ContactName = aag.ContactName;
             ContactEmail = aag.ContactEmail;
             ContactPhone = aag.ContactPhone;
-            // Description = activityGroup.Description;
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
             IsRegistrationFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
             LastModifiedDate = activityGroup.LastModifiedDate;

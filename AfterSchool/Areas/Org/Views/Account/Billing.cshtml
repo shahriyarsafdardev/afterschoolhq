@@ -17,7 +17,26 @@
         </div>
         <div class="panel-body">
             <div class="col-md-8 col-lg-9">
+                
+                <div class="text-center">
+                    <h1 class=""><i class="s7-check-circle text-success"></i> Manage Your Billing Account</h1>
+                    
+                    <p>
+                        Update your billing information and manage your subscription
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <p class="margin-v-30">
+                        <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-success btn-lg">
+                            Manage Billing with Stripe &raquo;
+                        </button>
+                    </p>
+                </div>
+                
+                @*
                 @{Html.RenderPartial("~/Views/Shared/_PaymentDetails.cshtml", Model);}
+                *@
             </div>
         </div>
     </div>

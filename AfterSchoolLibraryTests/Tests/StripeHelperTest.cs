@@ -121,40 +121,6 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Fact]
-        public void DeleteCustomerTest()
-        {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
-
-            var customerReload = StripeHelper.GetStripeHelperConnectAccount().GetCustomer(customer.Id, null, msgs);
-
-            Assert.True((customerReload.Deleted.HasValue && customerReload.Deleted.Value));
-        }
-
-        [Fact]
-        public void GetCustomer()
-        {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
-            Assert.NotNull(StripeHelper.GetStripeHelperConnectAccount().GetCustomer(customer.Id, null, msgs));
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
-        }
-
-        [Fact(Skip = "Need to fix")]
-        public void UpdateCustomerDefaultCardTest()
-        {
-            //var customer = StripeHelper.CreateCustomer("This is my customer", "test@test.com", msgs);
-            //var card = StripeHelper.CreateCard(customer.Id, StripeHelper.GetTestCard(StripeTestCardType.Visa), msgs);
-            
-            //msgs.AddRange(StripeHelper.UpdateCustomerDefaultCard(customer.Id, card.Id));
-
-            //Assert.Equal(card.Id, StripeHelper.GetCustomer(customer.Id, msgs).DefaultSourceId);
-
-            //msgs.AddRange(StripeHelper.DeleteCard(customer.Id, card.Id));
-            //msgs.AddRange(StripeHelper.DeleteCustomer(customer.Id));
-
-        }
-
-        [Fact]
         public void UpdateCustomerTest()
         {
             var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);

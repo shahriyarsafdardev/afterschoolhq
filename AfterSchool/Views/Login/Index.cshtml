@@ -1,106 +1,191 @@
-﻿@{ Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
+﻿@using AfterSchoolLibrary.Helpers
+@{
+    Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages)ViewBag.Messages;
+    var msgs = (SystemMessages) ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
 <style>
     .bg-image {
         background-image: url('../../Assets/img/4k-wallpaper-adorable-blur-boy-1148998-small.jpg');
-        /* Center and scale the image nicely */
         background-repeat: no-repeat;
         background-position: left top;
-        /*background-size: 100% 100%;*/
         background-size: cover;
         flex: 1;
         height: 100%;
     }
+
+    .form-login-welcome,.form-login-sign {
+        text-align: left;
+    }
+
+    .rectangle-login-box {
+        height: 270px;
+        padding: 30px 60px 30px 60px;
+        border-radius: 10px;
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        text-align: left;
+        margin: 175px 30px 0;
+    }
+
+    .login-form-row {
+        margin-top: 56px;
+    }
+
+    .am-checkbox input[type="checkbox"].remember-me {
+        background-color: transparent;
+        border-color: transparent;
+        display: block;
+        height: 100%;
+        margin-top: -7px;
+        width: 100%;
+    }
+</style>
+<style media="all and (max-width: 1199px)">
+    .form-login-welcome,.form-login-sign {
+        text-align: center;
+    }
+
+    .content-sidebar-login {
+        width: 100%;
+    }
+
+    .rectangle-login-box {
+        height: auto;
+        margin-top: 40px;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .login-form-row {
+        left: 0;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40px;
+        padding-left: 35px;
+        padding-right: 35px;
+        padding-top: 35px;
+        right: 0;
+        width: 350px;
+    }
+</style>
+<style media="all and (max-width: 991px)">
+    .login-form-row {
+        padding-left: 25px;
+        padding-right: 25px;
+        padding-top: 30px;
+    }
+</style>
+<style media="all and (max-width: 767px)">
+    .login-form-row {
+        -webkit-overflow-scrolling: touch;
+        height: 100%;
+        overflow: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
+</style>
+<style media="all and (max-width: 479px)">
+    .login-form-row {
+        left: inherit;
+        margin-left: -15px;
+        margin-right: -15px;
+        right: inherit;
+        width: inherit;
+    }
 </style>
 
-<div class="container-login hidden-md hidden-sm hidden-xs">
+<div class="container-login">
     <div class="content-sidebar-login pull-left">
 
-        <div style="position: fixed; top: 30px; left: 30px;">
-            <a href="/"><img src="~/Assets/img/ahq-logo-2-1-1.png" alt="logo" style="width: 325px;"></a>
+        <div style="position: fixed; top: 30px; left: 30px;" class="hidden-md hidden-sm hidden-xs">
+            <a href="/">
+                <img src="~/Assets/img/ahq-logo-2-1-1.png" alt="AfterSchool HQ - Your home for afterschool experiences" style="width: 325px;">
+            </a>
         </div>
 
         <div class="rectangle-login-box">
             <div class="form-group">
-                <p class="form-login-welcome text-left">Welcome back.</p>
-                <p class="form-login-sign text-left">Or <a href="@Url.Action("index", "signup", new { area = ""})">sign up </a> for a free account.</p>
+                <p class="form-login-welcome">Welcome back.</p>
+                <p class="form-login-sign">Or <a href="@Url.Action("index", "signup", new {area = ""})">sign up</a> for a free trial.</p>
             </div>
-            <br /><br />
-
-            @Html.Raw(UI.RenderMessagesToHtml(msgs))
-            <div class="clearfix"></div>
-
-            <form action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal" id="form-login">
-
-                <div class="form-group">
-                    <label class="short-description"> Email </label>
-                    <div class="input-group" style="width: 100%;">
-                        <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
-                        <div class="input-group-email">
-                            <button id="inputGroupEmailPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                <img src="~/Assets/img/envelope.svg" alt="envelope" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="short-description"> Password </label>
-                    <div class="input-group" style="width: 100%;">
-                        <input id="password" name="password" type="password" class="form-control txt-generic-login" required>
-                        <div class="input-group-password">
-                            <button id="inputGroupPassworkPrepend" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                                <img src="~/Assets/img/unlock.svg"  alt="pad lock"/>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="float: left;">
-                    <div class="remember margin-b-10">
-                        <div class="am-checkbox checkbox-inline text-center">
-                            <input type="checkbox" id="remember-login" name="remember" value="1" class="form-control" checked="checked">
-                            <label for="remember-login">Remember me </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group pull-right">
-                    <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
-                    @*<a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
-                </div>
+            <div class="login-form-row">
+                @Html.Raw(UI.RenderMessagesToHtml(msgs))
                 <div class="clearfix"></div>
 
-                <div class="form-group login-submit text-center">
-                    <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Log In</button>
-                    <br />
-                    @if (cleverSsoEnabled)
-                    {
-                        <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                            <img src="~/Assets/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
-                        </a>
-                    }
-                </div>
+                <form action="@Url.Action("index", "login", new {returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"]})" method="post" class="form-horizontal" id="form-login">
 
-            </form>
+                    <div class="form-group">
+                        <label class="short-description" for="username"> Email </label>
+                        <div class="input-group" style="width: 100%;">
+                            <input id="username" name="username" type="text" class="form-control txt-generic-login" required>
+                            <div class="input-group-email">
+                                <img src="~/Assets/img/envelope.svg" alt="Email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="short-description" for="password"> Password </label>
+                        <div class="input-group" style="width: 100%;">
+                            <input id="password" name="password" type="password" class="form-control txt-generic-login">
+                            <div class="input-group-password">
+                                <img src="~/Assets/img/unlock.svg" alt="Password">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="float: left;">
+                        <div class="remember margin-b-10">
+                            <div class="am-checkbox checkbox-inline text-center">
+                                <input type="checkbox" id="remember-login" name="remember" value="1" class="form-control remember-me" checked="checked">
+                                <label for="remember-login">Remember me </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group pull-right">
+                        <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group login-submit text-center">
+                        <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Log In</button>
+                        <br>
+                        @if (cleverSsoEnabled)
+                        {
+                            <a href="@CleverHelper.SSOLinkLogin" class="btn-clever-login">
+                                <img src="~/Assets/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img" alt="Log in with Clever">
+                            </a>
+                        }
+                    </div>
+
+                </form>
+            </div>
             <div class="clearfix"></div>
+            <div class="footer-logo-small-screen text-center hidden-xl hidden-lg">
+                <a href="/">
+                    <img src="~/Assets/img/ahq-logo-2-1-1.png" alt="AfterSchool HQ - Your home for afterschool experiences" style="width: 250px;">
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="bg-image">
+    <div class="bg-image hidden-md hidden-sm hidden-xs">
         <div class="rectangle-thought">
             <span class="thought-header-1">
                 Every kid is a genius in their own way. Our goal is to help them find their genius.
             </span>
-            <br /><br /><br />
+            <br><br><br>
             <span class="thought-header-2">
                 Darye Henry
             </span>
-            <br /><br />
+            <br><br>
             <span class="thought-header-3">
                 Founder, AfterSchool HQ
             </span>
@@ -111,113 +196,31 @@
     </div>
 </div>
 
-<div class="am-content-full hidden-xl hidden-lg">
-
-    <div style="margin-top: 30px;">
-        <div class="form-group">
-            <p class="form-login-welcome text-center">Welcome back.</p>
-            <p class="form-login-sign text-center">Or <a href="#">sign up </a> for a free account.</p>
-        </div>
-    </div>
-    <br />
-
-    <div class="row main-content main-content-medium-screen">
-
-        @Html.Raw(UI.RenderMessagesToHtml(msgs))
-        <div class="clearfix"></div>
-
-        <form id="form-login-small-screens" action="@Url.Action("index", "login", new { returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"] })" method="post" class="form-horizontal">
-
-            <div class="form-group">
-                <label class="short-description"> Email </label>
-                <div class="input-group" style="width: 100%;">
-                    <input id="username-small-screen" name="username" type="text" class="form-control txt-generic-login" required data-test="login-email">
-                    <div class="input-group-email">
-                        <button id="inputGroupEmailPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                            <img src="~/Assets/img/envelope.svg" alt="envelope" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="short-description"> Password </label>
-                <div class="input-group" style="width: 100%;">
-                    <input id="password-small-scrren" name="password" type="password" class="form-control txt-generic-login" required>
-                    <div class="input-group-password">
-                        <button id="inputGroupPassworkPrepend-small-scrren" type="button" class="btn btn-primary btn-sm btn-generic-login">
-                            <img src="~/Assets/img/unlock.svg" alt="pad lock" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group" style="float: left;">
-                <div class="remember margin-b-10">
-                    <div class="am-checkbox checkbox-inline text-center">
-                        <input type="checkbox" id="remember-login-small-scrren" name="remember" value="1" class="form-control" checked="checked">
-                        <label for="remember-login-small-scrren">Remember me </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group pull-right">
-                <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
-                @*TODO: modal is not accessible in this layout <a href="#" class="reset-login-pass" onclick="return showModal('modal-rest-password');">Forgot Password</a>*@
-            </div>
-            <div class="clearfix"></div>
-
-            <div class="form-group login-submit text-center">
-                <button id="btn-login-small-scrren" type="button" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="return validateLogin(true)">Log In</button>
-                <br />
-                @if (cleverSsoEnabled)
-                {
-                    <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkLogin" class="btn-clever-login">
-                        <img src="~/Assets/img/clever-login.png" style="width: 225px; height: 50px;" class="clever-login-img"/>
-                    </a>
-                }
-            </div>
-        </form>
-    </div>
-
-    <div class="footer-logo-small-screen text-center">
-        <a href="/"><img src="~/Assets/img/ahq-logo-2-1-1.png" alt="logo" style="width: 250px;"></a>
-    </div>
-</div>
-
-@*@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }*@
-
-<script type="text/javascript">
-
-    function validateLogin(isMobile) {
-        if (isMobile) {
-
-            var email = $('#username-small-screen');
-            var pass = $('#password-small-scrren');
-            var isEmailValid = validateEmail(email.val());
-            var isPassValid = pass.val() == '' ? false : true;
-
-            if (!isEmailValid) {
-                email.addClass('error-border');
-                setTimeout(function () {
-                    email.removeClass('error-border');
-                }, 3000);
-            }
-
-            if (!isPassValid) {
-                pass.addClass('error-border');
-                setTimeout(function () {
-                    pass.removeClass('error-border');
-                }, 3000);
-            }
-
-            if (isEmailValid == true && isPassValid == true) {
-                btnProcess('btn-login-small-scrren', 'Processing...', true);
-                $('#form-login-small-screens').submit();
-            }
-
-            return;
-        }
-    }
-
-</script>
+@section scripts
+{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#form-login").validate({
+                rules: {
+                    username: {
+                        required: true,
+                        email: true,
+                    },
+                    password: {
+                        required: true,
+                    },
+                },
+                messages: {
+                    username: {
+                        required: "Please enter your email",
+                        email: "Please verify that the entered email is a valid format"
+                    },
+                    password: {
+                        required: "Please enter your password",
+                    },
+                },
+            });
+        });
+    </script>
+}

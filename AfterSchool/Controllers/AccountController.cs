@@ -170,7 +170,7 @@ namespace AfterSchool.Controllers
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
                         registrantAccount =
-                            currentUser.AddNewParentOrStudentRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                            currentUser.AddNewParentOrStudentRegistrantAccount(UserType.Owner, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
@@ -364,10 +364,10 @@ namespace AfterSchool.Controllers
                             );
                         }
 
-                        if (amsgs.HasNoErrors()) 
+                        if (amsgs.HasNoErrors())
                             registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
 
-                        if (amsgs.HasNoErrors()) 
+                        if (amsgs.HasNoErrors())
                             RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
                     smsgs =>
@@ -1222,7 +1222,6 @@ namespace AfterSchool.Controllers
                         password1,
                         location?.ID.Value, // probably should have a school location id
                         textnotifications.IfBlank("0").ToBoolean(),
-                        SessionVariables.IsAfterSchool.Value,
                         questionAnswerModel,
                         parentAccount,
                         msgs);
@@ -1555,7 +1554,7 @@ namespace AfterSchool.Controllers
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Registrant))
                 return Logout(Request.Url.ToString(), true);
-            
+
             var results = CheckRedirect(true);
             if (results.IsNotEmpty()) return Redirect(results);
 
@@ -1586,7 +1585,7 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("registerstudent");
             }
 
-            var students = SessionVariables.CurrentUser.GetChildrenRegistrants(msgs);
+            var students = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
@@ -1763,9 +1762,7 @@ namespace AfterSchool.Controllers
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         SelectedDates = selectedDates,
                     },
-                    true,
-                    SessionVariables.CurrentUser,
-                    msgs);
+                    true, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new {id = registration.Uid});
@@ -2189,7 +2186,8 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
-            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered, assignmentType, msgs);
+            var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
+                assignmentType, msgs);
             return View(result);
         }
 
@@ -2333,7 +2331,6 @@ namespace AfterSchool.Controllers
                             account = user.AddNewParentOrStudentRegistrantAccount(
                                 UserType.Student,
                                 true,
-                                SessionVariables.IsAfterSchool.Value,
                                 user,
                                 amsgs,
                                 adc);
@@ -2748,14 +2745,15 @@ namespace AfterSchool.Controllers
 
         public string CheckRedirect(bool checkForEmptyCart = false)
         {
-            var currentAccountNotRegistrant = SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant;
+            var isCurrentAccountNotRegistrant = SessionVariables.CurrentAccount.IsNotEmpty() &&
+                                                SessionVariables.CurrentAccount.AccountTypeId != AccountType.Registrant;
             var isEmptyCart = checkForEmptyCart && SessionVariables.Cart.IsEmpty();
             if (SessionVariables.RegistrationStartPageAccount.IsNotEmpty())
             {
                 var redirectUrl = SessionVariables.RegistrationStartPageAccount.HomePageUrl;
 
-                var isEmptyUserOrAccount = SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty();
-                if (isEmptyUserOrAccount || currentAccountNotRegistrant || isEmptyCart)
+                var isUserOrAccountEmpty = SessionVariables.CurrentUser.IsEmpty() || SessionVariables.CurrentAccount.IsEmpty();
+                if (isUserOrAccountEmpty || isCurrentAccountNotRegistrant || isEmptyCart)
                     return redirectUrl;
             }
 
@@ -2765,10 +2763,7 @@ namespace AfterSchool.Controllers
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");
 
-            if (currentAccountNotRegistrant)
-                return DetermineUrlForLoginRedirect(null, null);
-
-            if (isEmptyCart)
+            if (isCurrentAccountNotRegistrant || isEmptyCart)
                 return DetermineUrlForLoginRedirect(null, null);
 
             return null;

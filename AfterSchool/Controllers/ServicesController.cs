@@ -555,54 +555,6 @@ namespace AfterSchool.Controllers
 
         #region Profile
 
-        [HttpGet]
-        public ActionResult GetProfiles(int? count)
-        {
-            if (!IsRequestFromApp())
-                return Json(new {status = "error", messages = new SystemMessages()}, JsonRequestBehavior.AllowGet);
-
-            var msgs = new SystemMessages();
-
-            var profiles = AccountProfile.Search(
-                FormConstants.CustomerAccountTypes,
-                null,
-                null,
-                null,
-                null,
-                null,
-                0,
-                count,
-                true,
-                msgs);
-
-            var html = "";
-
-            profiles.ForEach(profile =>
-            {
-                var result = ViewEngines.Engines.FindPartialView(ControllerContext,
-                    "~/Views/Shared/Registration/_BrowseProvider.cshtml");
-
-                if (result.View != null)
-                {
-                    ViewData.Model = profile;
-                    var sb = new StringBuilder();
-                    using (var sw = new StringWriter(sb))
-                    {
-                        using (var output = new HtmlTextWriter(sw))
-                        {
-                            var viewContext = new ViewContext(ControllerContext, result.View, ViewData,
-                                new TempDataDictionary(), output);
-                            result.View.Render(viewContext, output);
-                        }
-                    }
-
-                    html += sb.ToString();
-                }
-            });
-
-            return Json(new {status = "ok", profiles = new List<object>(), html}, JsonRequestBehavior.AllowGet);
-        }
-
         [HttpPost]
         public ActionResult ClaimProfile(string profile, string firstname, string lastname, string email, string phone,
             string g_recaptcha_response)

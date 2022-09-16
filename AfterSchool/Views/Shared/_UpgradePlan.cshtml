@@ -1,4 +1,5 @@
-﻿<div id="upgrade-my-plan">
+﻿@using AfterSchoolLibrary.Enums
+<div id="upgrade-my-plan">
     <div class="Container">
         <button aria-label="Close" class="modal-close-button" onclick="hideUpgradeMyPlan()" type="button">
             <span aria-hidden="true">&times;</span>
@@ -16,7 +17,7 @@
         $('#upgrade-my-plan').fadeIn();
 
         if (name)
-            $('.gain-access').html(`Upgrade to ${name} to access this feature. <a href="#" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif" onclick="return loadUpgradePage()">Upgrade My Plan</a>`);
+            $('.gain-access').html(`Upgrade to the ${name} Plan to access this feature. <a href="javascript:AccountSetup.getStripeBillingLink('', @((int)BillingPortalConfigurationType.SubscriptionUpdate))" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif">Upgrade My Plan</a>`);
   
         if (id)
             featureId = id;
@@ -37,12 +38,7 @@
         featureId = id;
         loadUpgradePage();
     }
-    function loadUpgradePage() {
-        let url = '@Url.Action("newbilling", "account", new {Area = "org", ReturnUrl = "updateThisText"})'
-        url = url.replace("updateThisText", location.pathname);
-        if (featureId)
-            url += `&featureId=${featureId}`;
-
-        location.href = url;
+    function loadUpgradePage() {        
+        AccountSetup.getStripeBillingLink('', @((int)BillingPortalConfigurationType.SubscriptionUpdate));
     }
 </script>

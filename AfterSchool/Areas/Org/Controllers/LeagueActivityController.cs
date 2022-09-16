@@ -1003,9 +1003,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Attendance(string id)
+        public ActionResult Attendance(string id, string msg)
         {
             var msgs = new SystemMessages();
+            if (msg.IsNotEmpty())
+                msgs.Add(msg, msg.Contains("error") || msg.Contains("Error") ? MessageType.UserError : MessageType.Success);
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
@@ -1023,6 +1025,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = Activity.LoadByUid(id.ToGuid());
 
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, null, SessionVariables.CurrentUser, msgs);
+            if (attendance.IsEmpty())
+                return RedirectToAction("Attendance", new {id, msg = "Error: No dates have taken place yet"});
 
             ViewBag.Messages = msgs;
             ViewBag.AttendanceRegistrants = attendance.GetAttendanceRegistrants();

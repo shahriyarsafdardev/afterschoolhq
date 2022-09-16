@@ -3,45 +3,50 @@ setlocal enabledelayedexpansion
 set path="C:\temp\app"
 
 if "%DEPLOYMENT_GROUP_NAME%"=="" (
-    echo "DEPLOYMENT_GROUP_NAME does not exist"
+	echo "DEPLOYMENT_GROUP_NAME does not exist"
 ) else (
-    echo "DEPLOYMENT_GROUP_NAME=%DEPLOYMENT_GROUP_NAME%"
+	echo "DEPLOYMENT_GROUP_NAME=%DEPLOYMENT_GROUP_NAME%"
 	
 	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-QA-Group" (
-	  set target="C:\websites\afterschoolhq\afterschoolhq-qa\afterschool"
+		set target="C:\websites\afterschoolhq\afterschoolhq-qa\afterschool"
 	)
 
 	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-CI-Group" (
-	  set target="C:\websites\afterschoolhq\afterschoolhq-ci\afterschool"
+		set target="C:\websites\afterschoolhq\afterschoolhq-ci\afterschool"
 	)
 
 	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-Staging-Group" (
-	  set target="C:\websites\afterschoolhq\afterschoolhq-staging\afterschool"
+		set target="C:\websites\afterschoolhq\afterschoolhq-staging\afterschool"
 	)
 
 	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-Production-Group" (
-	  set target="C:\websites\afterschoolhq\afterschoolhq-production\afterschool"
+		set target="C:\websites\afterschoolhq\afterschoolhq-production\afterschool"
 	)
 
 	if "%DEPLOYMENT_GROUP_NAME%"=="AfterSchool-RiseProject-Group" (
-	  set target="C:\websites\afterschoolhq\afterschoolhq-riseproject\afterschool"
+		set target="C:\websites\afterschoolhq\afterschoolhq-riseproject\afterschool"
 	)
 
-	
 	if exist !target! rmdir /s /q !target!
 
 	mkdir !target!
 
+	rem It is expected that Microsoft.Data.SqlClient.SNI.x64.dll will be locked, so everything got deleted EXCEPT this file, so don't copy it again.
 	%systemroot%\System32\robocopy %path% !target! /e /xf "Microsoft.Data.SqlClient.SNI.x64.dll"
 
-    echo %ERRORLEVEL%
+	if not exist "!target!\bin\Microsoft.Data.SqlClient.SNI.x64.dll" (
+		echo Microsoft.Data.SqlClient.SNI.x64.dll was not locked, so it is not in the target instance. Copying Microsoft.Data.SqlClient.SNI.x64.dll now...
+		%systemroot%\System32\robocopy %path%\bin !target!\bin "Microsoft.Data.SqlClient.SNI.x64.dll"
+	)
+
+	echo %ERRORLEVEL%
 
 	if %ERRORLEVEL% LSS 8 goto finish
 
-    Echo Something failed & goto :eof
+	Echo Something failed & goto :eof
 
-    :finish
-    Powershell.exe -ExecutionPolicy unrestricted -Command "Invoke-WebRequest -Uri http://localhost/db/update/eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad -UseBasicParsing"
-    
-    Echo All done, no fatal errors.
+	:finish
+	%systemroot%\System32\WindowsPowerShell\v1.0\Powershell.exe -ExecutionPolicy unrestricted -Command "Invoke-WebRequest -Uri http://localhost/db/update/eibfeiwalncdsja32rq9yfwbfg32yewody7832re7ywofaudisfh7238qoweiafb7328qwoadg78027rweubfad -UseBasicParsing"
+
+	Echo All done, no fatal errors.
 )

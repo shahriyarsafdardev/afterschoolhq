@@ -178,7 +178,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     packageId: package.ToInteger(),
                                     packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
                                     timeZone: timezone,
-                                    isAfterSchool: true,
                                     loggedInUser: currentUser,
                                     msgs: amsgs,
                                     dc: adc);
@@ -197,7 +196,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     packageBillingPeriod: (BillingPeriodType) billingperiod.ToInteger(),
                                     timeZone: timezone,
                                     loggedInUser: currentUser,
-                                    isAfterSchool: true,
                                     createWithStripe: false,
                                     msgs: amsgs,
                                     dc: adc);
@@ -265,7 +263,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add($"Account {(account.IsActive ? "activated" : "deactivated")} successfully.", MessageType.Success);
             }
 
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -285,7 +283,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("Account claims changed successfully.", MessageType.Success);
             }
 
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -305,7 +303,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("Account removed successfully.", MessageType.Success);
             }
 
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
 
@@ -325,7 +323,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add($"Account is {(account.IsTest ? "in" : "not in")} test mode  {(account.IsTest ? "now" : "anymore")}.", MessageType.Success);
             }
 
-            SetTempMessage(msgs);
+            SetTempMessages(msgs);
             return View("index", IndexViewBag(pn, rpp, search, type, msgs));
         }
     }

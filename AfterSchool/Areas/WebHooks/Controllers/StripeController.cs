@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Stripe;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
@@ -390,9 +391,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
 
-                if (subscription.Plan.IsNotEmpty() && subscription.Plan.Id.IsNotEmpty())
+                if (subscription.Items.FirstOrDefault().IsNotEmpty() && subscription.Items.FirstOrDefault().Plan.IsNotEmpty() && subscription.Items.First().Plan.Id.IsNotEmpty())
                 {
-                    var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Plan.Id, msgs);
+                    var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Items.FirstOrDefault().Plan.Id, msgs);
                     if (dbSubscription.IsNotEmpty() &&
                         dbSubscription.IsActive)
                     {

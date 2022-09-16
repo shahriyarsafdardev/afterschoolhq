@@ -1,0 +1,21 @@
+﻿@if (SessionVariables.CurrentUser.IsNotEmpty())
+{
+    <script>
+	    var beamer_config = {
+		    product_id : 'igfOVTZz27012', //DO NOT CHANGE: This is your product code on Beamer
+		    user_id : "@SessionVariables.CurrentUser.ID.Value",
+            user_firstname : "@SessionVariables.CurrentUser.FirstName",
+            user_lastname : "@SessionVariables.CurrentUser.LastName",
+            user_email : "@SessionVariables.CurrentUser.Email",
+	    };
+    </script>
+}
+else
+{
+    <script>
+	    var beamer_config = {
+		    product_id : 'igfOVTZz27012', //DO NOT CHANGE: This is your product code on Beamer
+	    };
+    </script>
+}
+<script type="text/javascript" src="https://app.getbeamer.com/js/beamer-embed.js" defer="defer"></script>

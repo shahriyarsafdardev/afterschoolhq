@@ -709,10 +709,7 @@ namespace AfterSchoolLibrary.Helpers
                 var groupAnswers = answers.Where(answer => answer.FormQuestionFormQuestionGroupId == group.ID.Value)
                     .ToList();
 
-                groupAnswers.ForEach(answer =>
-                {
-                    questionsAndAnswers += $"<tr><td>{answer.QuestionText}</td><td>{answer.Text}</td></tr>";
-                });
+                groupAnswers.ForEach(answer => { questionsAndAnswers += $"<tr><td>{answer.QuestionText}</td><td>{answer.Text}</td></tr>"; });
             });
 
             questionsAndAnswers += "</table></p>";
@@ -792,7 +789,7 @@ namespace AfterSchoolLibrary.Helpers
             if (participationObject.CanRegisterPerClass)
                 checkoutObject.SelectedDates.ForEach(date =>
                     description += $"<br />&nbsp;&bull;&nbsp;{date.ToLongDateTimeString()}");
-            
+
             var registrationTable = "";
             var showTable = false;
 
@@ -854,6 +851,85 @@ namespace AfterSchoolLibrary.Helpers
                 EmailTemplates.Registration_Confirmation,
                 model,
                 "Registration_Confirmation-1.2",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(loggedInUser.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            // send bcc to activity contact
+            if (sendBcc)
+            {
+                var emails = new List<string>();
+
+                if (participationObject.ContactEmail.IsEmail() &&
+                    participationObject.ContactEmail.ToLower().NotIn(emails))
+                    emails.Add(participationObject.ContactEmail.ToLower());
+
+                emails.ForEach(email =>
+                    SendGridHelper.SendMail(
+                        Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                        new EmailAddress(email),
+                        $"Registration CC: {subject}",
+                        body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+            }
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendVolunteerBackgroundCheckRequest(CheckoutObject checkoutObject, string customMessage,
+            WebUser loggedInUser, bool sendBcc, string inviteLink, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var participationObject = checkoutObject.ParticipationObject;
+            var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
+            var masterRegistrant = checkoutObject.MasterRegistrant;
+            var registration = checkoutObject.Registration;
+
+            var registrantActivities = registration.GetRegistrantActivities(msgs, dc);
+            var mainRa = registrantActivities.First(ra =>
+                ra.ParticipationObjectId == participationObject.ObjectID &&
+                ra.ParticipationObjectTypeId == participationObject.ObjectType);
+
+            var registrationThankYou = participationObject.GetRegistrationThankYou(mainRa, msgs, dc);
+
+            if (customMessage.IsEmpty())
+            {
+                customMessage = registrationThankYou;
+
+                if (customMessage == "Thank you for registering")
+                    customMessage += ". ";
+            }
+
+            var model = new NameValueCollection
+            {
+                {"FirstName", loggedInUser.FirstName},
+                {"CustomMessage", customMessage},
+                {"BackgroundCheckUrl", inviteLink},
+                {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                {"BillerAccountLink", billingAccount.HomePageUrl},
+                {"BillerAccountName", billingAccount.Name},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+            };
+
+            var subject = $"{participationObject.Name} background check required for {masterRegistrant.FirstName}";
+            var body = ProcessTemplate(
+                EmailTemplates.Volunteer_BackgroundCheck,
+                model,
+                "Volunteer_BackgroundCheck-0.1",
                 msgs);
 
             // SEND EMAILS
@@ -2573,8 +2649,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId,
-            SystemMessages msgs = null)
+        internal static string ProcessTemplate(byte[] emailTemplate, NameValueCollection model, string cacheId, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 

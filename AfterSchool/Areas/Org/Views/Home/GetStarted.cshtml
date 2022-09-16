@@ -14,16 +14,22 @@
                 <h1 style="text-align:center; font-weight: bold;">Welcome, @SessionVariables.CurrentUser.FirstName!</h1>
                 <div class="text-medium-small">
                     <p class="padding-v-20">
-                        Our platform gives you a central location to showcase your programs online allowing parents to easily discover, register, and pay for afterschool @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
+                        Our platform gives you a central location to showcase your programs online allowing parents to easily discover, register, and pay for 
+                        after-school @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()
 
                     </p>
                     <p class="padding-v-20">
-                        Get started by creating your first activity.<span style="font-weight: bold">You are on your way to reducing clutter, increasing parent satisfaction, and increasing afterschool safety and awareness.</span>
+                        Get started by creating your first @UILabel.ActivityLabel(ActivityType.Activity).ToLower().<span style="font-weight: bold">You are on your way to reducing clutter, increasing parent satisfaction, 
+                            and increasing after-school safety and awareness.</span>
                     </p>
                     <p class="padding-v-20">
                         <div style="text-align:center">
                             <div class="">
-                                <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)ActivityType.Activity })" class="btn btn-primary btn-lg" style="border-radius:6px">Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;</a>
+                                <a href="@Url.Action("editsetup", "activity", new {isnew = 1, type = (int) ActivityType.Activity})" 
+                                   class="btn btn-primary btn-lg" 
+                                   style="border-radius:6px">
+                                    Create Your First @UILabel.ActivityLabel(ActivityType.Activity) &raquo;
+                                </a>
                             </div><br /><br />
                             <div class="">
                                 <a href="@Url.Action("index", "activity")" class="text-muted text-small">Explore on my own</a>

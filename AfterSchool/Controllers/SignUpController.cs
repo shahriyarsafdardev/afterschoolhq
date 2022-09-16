@@ -32,7 +32,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, bool quickStart = false, bool isRequestOnlyAccess = false)
+        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, 
+            bool quickStart = false, bool isRequestOnlyAccess = false)
         {
             if (invite.IsBlank() && !quickStart)
                 return RedirectToAction("Welcome");
@@ -132,9 +133,6 @@ namespace AfterSchool.Controllers
                         msgs.AddRange(smsgs);
                         LoadSessionInfo(user, account, msgs: msgs);
 
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
-
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
@@ -151,13 +149,71 @@ namespace AfterSchool.Controllers
 
             return View(model);
         }
+        
+        [HttpGet]
+        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period, string referrer)
+        {
+            var msgs = new SystemMessages();
+            Account invitingAccount = null;
+            Account referrerAccount = null;
+            var signupTypeId = SignUpType.NotSet;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
+            if (invite.IsGuid())
+            {
+                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
+                
+                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
+                {
+                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
+                        return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
+                }
+            }
+            else
+            {
+                signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger()
+                    ? (SignUpType) signuptype.ToInteger()
+                    : SignUpType.TrialSignUp;
+            }
+            
+            if (referrer.IsGuid())
+                referrerAccount = Account.LoadByReferralCode(referrer.ToGuid(), msgs);
+
+            Package selectedPackage = null;
+
+            if (package.IsGuid())
+                selectedPackage = Package.LoadByUid(package.ToGuid(), msgs);
+
+            if (selectedPackage.IsEmpty() && invitingAccount.IsNotEmpty())
+                selectedPackage = PackageService.GetFreePackage(msgs);
+                
+            if (selectedPackage.IsEmpty())
+                selectedPackage = PackageService.GetDefaultCustomerPackage(msgs);
+            
+            var model = new SignUpIndexViewModel()
+            {
+                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
+                InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
+                SignupType = signupTypeId,
+                InvitingAccount = invitingAccount,
+                PackageUid = package,
+                PackageName = selectedPackage.Name,
+                SubscriptionPeriod = period,
+                TrialDays = selectedPackage.GetFeature(FeatureType.TrialDays).GetMaxValue(),
+                ReferrerAccount = referrerAccount,
+                ReferralCode = referrer,
+            };
+            return View(model);
+        }
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult IndexNew(SignUpIndexViewModel model)
         {
             var msgs = new SystemMessages();
             Account invitingAccount = null;
+            Account referrerAccount = null;
 
             if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -189,6 +245,16 @@ namespace AfterSchool.Controllers
                     msgs.Add("Invalid invitation code", MessageType.UserError);
             }
 
+            if (model.ReferralCode.IsNotEmpty())
+            {
+                if (!model.ReferralCode.IsGuid())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
+
+                referrerAccount = Account.LoadByReferralCode(model.ReferralCode.ToGuid());
+                if (referrerAccount.IsEmpty())
+                    msgs.Add("Invalid referral code", MessageType.UserError);
+            }
+
             if (msgs.HasNoErrors())
             {
                 WebUser user = null;
@@ -217,49 +283,46 @@ namespace AfterSchool.Controllers
 
                         // teachers aren't looking to pay and people coming in from an invite should just start on the free account
                         if (model.SignupType == SignUpType.Teacher1099 || invitingAccount.IsNotEmpty())
+                        {
                             account = user.AddNewAccount(
                                 orgName: model.OrgName,
                                 phone: model.Phone,
                                 isActive: true,
                                 accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                packageId: PackageService.GetFreePackage(amsgs, adc).ID.Value,
+                                packageId: PackageService.GetFreePackage(amsgs, adc).ID,
                                 BillingPeriodType.Month,
-                                timeZone: null,
-                                isAfterSchool: true,
+                                timeZone: null, 
+                                signUpTypeId: model.SignupType,
                                 loggedInUser: user,
                                 msgs: amsgs,
                                 dc: adc);
+                        }
                         else
-                            account = user.AddNewAccountWithDefaultPackageWithStripe(
-                                orgName: model.OrgName,
-                                accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
-                                loggedInUser: user,
-                                msgs: amsgs,
-                                dc: adc);
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty() && amsgs.HasNoErrors())
                         {
-                            var webSession = SessionVariables.WebSession;
+                            if (model.PackageUid.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
+                            {
+                                var package = Package.LoadByUid(model.PackageUid.ToGuid(), amsgs, adc);
 
-                            // LOG: WebUserName Created Account Account
-                            webSession.LogActivity(
-                                account: account,
-                                actor: user,
-                                actionType: WebSessionActionType.Created,
-                                objectType: ObjectType.Account,
-                                objectId: account.ID.Value,
-                                objectText: account.Name
-                            );
+                                if (package.IsNotEmpty())
+                                    account = user.AddNewAccountWithPackageWithStripe(
+                                        orgName: model.OrgName,
+                                        accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                        package: package,
+                                        signUpTypeId: model.SignupType,
+                                        billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
+                                        loggedInUser: user,
+                                        msgs: amsgs,
+                                        dc: adc);
+                            }
 
-                            // LOG: WebUserName SignedUp
-                            webSession.LogActivity(
-                                account: account,
-                                actor: user,
-                                actionType: WebSessionActionType.SignedUp,
-                                objectType: ObjectType.WebUser,
-                                objectId: user.ID.Value,
-                                objectText: user.DisplayName
-                            );
+                            if (amsgs.HasNoErrors() && account.IsEmpty())
+                                account = user.AddNewAccountWithDefaultPackageWithStripe(
+                                    orgName: model.OrgName,
+                                    accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
+                                    signUpTypeId: model.SignupType,
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc: adc);
                         }
 
                         if (invitingAccount.IsNotEmpty())
@@ -270,18 +333,58 @@ namespace AfterSchool.Controllers
                             else
                                 invitingAccount.ApproveAccessToAccount(account, user, amsgs, adc);
                         }
+
+                        if (referrerAccount.IsNotEmpty())
+                            account.AddReferrerAccount(referrerAccount, amsgs, adc);
+                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
+                        
                         LoadSessionInfo(user, account, msgs: msgs);
-
-                        if (user.IsNotEmpty() && account.IsNotEmpty())
-                            SendGridHelper.AddOrUpdateContact(account, user, msgs);
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
                         BackgroundJob.Enqueue(() =>
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
+
+                        var invitingAccountName = invitingAccount?.Name ?? "";
+                        
+                        //.. send support email to AHQ just to notifiy the team that a account has been created
+                        BackgroundJob.Enqueue(() =>
+                            EmailHelper.SendEmail(
+                                Email.AppCustomersEmailAddress,
+                                $"AHQ Account Created - {account.Name}",
+                                $"<p>Organization: {account.Name}<br />" +
+                                $"Main Contact Name: {user.DisplayName}<br />" +
+                                $"Email: {user.Email}<br />" +
+                                $"How did you hear about us: {user.HowHearAboutUs} <br />" +
+                                $"Host Account(s): {invitingAccountName}" +
+                                $"</p>",
+                                true)
+                        );
+                        
+                        var webSession = SessionVariables.WebSession;
+
+                        // LOG: WebUserName Created Account Account
+                        webSession.LogActivity(
+                            account: account,
+                            actor: user,
+                            actionType: WebSessionActionType.Created,
+                            objectType: ObjectType.Account,
+                            objectId: account.ID.Value,
+                            objectText: account.Name
+                        );
+
+                        // LOG: WebUserName SignedUp
+                        webSession.LogActivity(
+                            account: account,
+                            actor: user,
+                            actionType: WebSessionActionType.SignedUp,
+                            objectType: ObjectType.WebUser,
+                            objectId: user.ID.Value,
+                            objectText: user.DisplayName
+                        );
                     },
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
@@ -293,6 +396,8 @@ namespace AfterSchool.Controllers
                 if (model.SignupType == SignUpType.Teacher1099)
                     return RedirectToAction("paymentsoptions", "account",
                         new {area = "org", isfullscreen = 1, signuptype = (int) model.SignupType});
+                else if (model.SignupType == SignUpType.DirectPurchase)
+                    return RedirectToAction("startsubscription", "onboarding", new {area = "org"});
                 else if (invitingAccount.IsNotEmpty())
                     return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
                 
@@ -493,9 +598,6 @@ namespace AfterSchool.Controllers
                     }
                     else
                     {
-                        // NOTE: this code should go here, but it is not important right now, we need to use hubspot anyway moving forward
-                        SendGridHelper.AddOrUpdateContact(currentAccount, user, msgs);
-                        
                         switch (currentAccount.OnboardingStepDone)
                         {
                             case OnboardingStepType.AccountType:
@@ -887,7 +989,6 @@ namespace AfterSchool.Controllers
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
                             loggedInUser: SessionVariables.CurrentUser,
-                            isAfterSchool: true,
                             createWithStripe: true,
                             msgs: amsgs,
                             dc: adc);
@@ -1091,7 +1192,7 @@ namespace AfterSchool.Controllers
 
                         if (user.IsNotEmpty())
                             account = user.AddNewParentOrStudentRegistrantAccount(userType: UserType.Owner, isActive: true,
-                                isAfterSchool: true, loggedInUser: user, msgs: amsgs, dc: adc);
+                                loggedInUser: user, msgs: amsgs, dc: adc);
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
@@ -1117,37 +1218,6 @@ namespace AfterSchool.Controllers
 
             return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})},
                 JsonRequestBehavior.AllowGet);
-        }
-
-        [HttpGet]
-        public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype)
-        {
-            Account invitingAccount = null;
-
-            if (invite.IsGuid())
-            {
-                invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid());
-
-                var currentAccount = SessionVariables.CurrentAccount;
-                var currentUser = SessionVariables.CurrentUser;
-
-                if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
-                {
-                    if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
-                        return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
-                }
-            }
-
-            var model = new SignUpIndexViewModel()
-            {
-                IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
-                InviteCodeToShare = invite.IsNotEmpty() ? invite : "",
-                SignupType = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.NotSet,
-                InvitingAccount = invitingAccount,
-            };
-            return View(model);
         }
 
         /// <summary>

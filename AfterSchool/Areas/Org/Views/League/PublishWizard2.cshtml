@@ -13,7 +13,7 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Publish {Model.Name} - Step 2 of 2 - Registration Window "); }
+            @{Html.RenderPartial("~/Views/Shared/_ActivityGroupTitle.cshtml", $"Publish {Model.Name} - Step 2 of 4 - Registration Window "); }
         </div>
         <div class="panel-body">
 
@@ -47,7 +47,7 @@
                                     Name = "opendate",
                                     Value = period.StartDateTime.ToShortDateString()
                                 }
-                            );
+                                );
                         }
                     </div>
                     <div class="col-md-3">
@@ -62,7 +62,7 @@
                                     { "id", "opentime" },
                                     { "required", true }
                                 }
-                            );
+                                );
                         }
 
                     </div>
@@ -80,7 +80,7 @@
                                     Name = "closedate",
                                     Value = period.EndDateTime.ToShortDateString()
                                 }
-                            );
+                                );
                         }
                     </div>
                     <div class="col-md-3">
@@ -94,7 +94,7 @@
                                     { "id", "closetime" },
                                     { "required", true }
                                 }
-                            );
+                                );
                         }
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                             <a href="@Url.Action("publishwizard1", "league", new { id = Model.Uid })" class="text-muted">&laquo; Back</a>
                         </div>
                         <div class="btn-group pull-right">
-                            <button type="submit" class="btn btn-primary btn-lg">Save &amp; Publish &raquo;</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Save &amp; Continue &raquo;</button>
                         </div>
                     </div>
                 </div>
