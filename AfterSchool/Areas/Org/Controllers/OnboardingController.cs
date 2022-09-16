@@ -83,7 +83,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             currentAccount.UpdateOnboardingStep(OnboardingStepType.AccountType, msgs);
             
-            ViewBag.RenewalDate = currentPackage.GetRenewalDate().ToLongDateString();
+            ViewBag.RenewalDate = currentPackage.GetFirstRenewalDate().ToLongDateString();
             ViewBag.RenewalAmount = currentPackage.Price.ToCurrency();
             ViewBag.Messages = msgs;
             return View();

@@ -147,7 +147,7 @@ namespace AfterSchoolLibrary.Services
             return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
         }
 
-        public static DateTime? GetRenewalDate(this AccountPackage accountPackage)
+        public static DateTime? GetFirstRenewalDate(this AccountPackage accountPackage)
         {
             if (accountPackage.StartDate.HasValue)
             {
