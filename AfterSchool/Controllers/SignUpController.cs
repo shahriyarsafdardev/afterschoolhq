@@ -248,7 +248,7 @@ namespace AfterSchool.Controllers
             if (model.ReferralCode.IsNotEmpty())
             {
                 if (!model.ReferralCode.IsGuid())
-                    msgs.Add("Invalid invitation code", MessageType.UserError);
+                    msgs.Add("Invalid referral code", MessageType.UserError);
 
                 referrerAccount = Account.LoadByReferralCode(model.ReferralCode.ToGuid());
                 if (referrerAccount.IsEmpty())
