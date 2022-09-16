@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
@@ -7,9 +8,10 @@ using BasicLibrary;
 
 namespace AfterSchool.Areas.Volunteer.Controllers
 {
+    [HandleError(ExceptionType = typeof(Exception), View = "")]
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> {AccountType.Volunteer,AccountType.Registrant})
+        public HomeController() : base(new List<AccountType> {AccountType.Volunteer})
         {
         }
 
