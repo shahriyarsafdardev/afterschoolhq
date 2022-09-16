@@ -21,6 +21,11 @@
                     <i class="icon s7-users"></i><span>Family</span>
                 </a>
             </li>
+            <li class="@(controller == "family" ? "active" : "")">
+                <a href="@Url.Action("index", "home" , new {area = "Volunteer"})">
+                    <i class="icon s7-users"></i><span>Volunteer</span>
+                </a>
+            </li>
             <li class="@(controller == "activity" ? "active" : "")">
                 <a href="@Url.Action("index", "activity")">
                     <i class="icon s7-gleam"></i><span>@UILabel.ActivityLabel(ActivityType.Activity, true)</span>

@@ -8,10 +8,9 @@ using BasicLibrary;
 
 namespace AfterSchool.Areas.Volunteer.Controllers
 {
-    [HandleError(ExceptionType = typeof(Exception), View = "")]
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> {AccountType.Volunteer})
+        public HomeController() : base(new List<AccountType> {AccountType.Registrant , AccountType.Volunteer})
         {
         }
 
