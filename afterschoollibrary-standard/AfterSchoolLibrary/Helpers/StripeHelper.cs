@@ -2397,7 +2397,7 @@ namespace AfterSchoolLibrary.Billing
             return new Stripe.Checkout.SessionService(StripeClient);
         }
 
-        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, string couponCode, SystemMessages msgs)
+        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, string couponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -2428,12 +2428,12 @@ namespace AfterSchoolLibrary.Billing
                 PaymentMethodTypes = new List<string>() {"card"},
             };
 
-            if (couponCode.IsNotEmpty())
+            if (couponId.IsNotEmpty())
                 options.Discounts = new List<SessionDiscountOptions>()
                 {
                     new SessionDiscountOptions()
                     {
-                        Coupon = couponCode,
+                        Coupon = couponId,
                     },
                 };
             else
