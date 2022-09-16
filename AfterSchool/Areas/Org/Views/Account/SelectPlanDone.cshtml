@@ -1,0 +1,55 @@
+﻿@model Account
+@{ 
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
+
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+}
+
+<style>
+    .top-icon{
+        width:  87px;    
+    }
+    p {
+        margin: 30px;
+    }
+</style>
+
+<div class="main-content-new">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Select Plan - Completed
+        </div>
+        <div class="panel-body padding-lr-zero-sm">
+            <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center">
+                <img class="top-icon" src="~/Assets/img/celebration.svg" alt="Celebration"/>
+                <p class="text-medium">
+                    Great Job. You now are subscribed to the @currentPackage.PackageName Plan.
+                </p>
+                <p class="text-medium">
+                    @if (currentPackage.IsDuringTrial)
+                    {
+                        <span>When your trial ends on @currentPackage.TrialEndDate.ToLongDateString(), your card will be charged automatically for the amount of @currentPackage.Price.ToCurrency().</span>
+                    }
+                    else
+                    {
+                        <span>
+                            Your subscription will automatically renew on <br/>
+                            <b>@currentPackage.GetFirstRenewalDate().ToLongDateString()</b> for 
+                            <b>@currentPackage.Price.ToCurrency()</b>.
+                        </span>
+                    }
+                </p>
+
+                <p>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="location.href='@Url.Action("index", "home")'">Return to Dashboard</button>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>

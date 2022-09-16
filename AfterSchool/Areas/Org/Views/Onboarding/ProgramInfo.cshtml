@@ -6,10 +6,11 @@
     var headline = (string) ViewBag.Headline;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
     var genderRestriction = ViewBag.GenderRestriction;
-
     var organizationLabel = Model.AccountTypeId.ToString().SplitByUpperCase();
     var organizationExampleNames = "";
     var headerText = "Enter info about your organization.";
+    var accountPackage = (AccountPackage) ViewBag.AccountPackage;
+    var totalStepCount = accountPackage.IsFree ? 6 : 5;
 
     if (Model.AccountTypeId == AccountType.ActivityProvider)
     {
@@ -34,12 +35,14 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("programinfo", "onboarding")">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                           new ViewDataDictionary
-                           {
-                               {"count", 6},
-                               {"activeDotNumber", 1},
-                           }); }
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                            new ViewDataDictionary
+                            {
+                                {"count", totalStepCount},
+                                {"activeDotNumber", 1},
+                            });
+                    }
 
                     <div class="col-md-12 onboarding-form-group">
                         <h1 class="text-center register-thankyou-2">@headerText</h1>
@@ -112,11 +115,11 @@
                     <div class="clearfix"></div>
 
                     <div class="visible-sm visible-xs margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save &amp; Continue</button>
                     </div>
 
                     <div class="visible-md visible-lg margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save &amp; Continue</button>
                     </div>
 
                 </form>

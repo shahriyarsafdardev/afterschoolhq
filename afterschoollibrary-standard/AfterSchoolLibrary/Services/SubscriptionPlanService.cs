@@ -329,10 +329,7 @@ namespace AfterSchoolLibrary.Services
                 //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
                 //    stripeUserId = billingAccount.StripeUserId;
 
-                msgs.AddRange(new Billing.StripeHelper().CancelSubscription(
-                    rsp.StripeSubscriptionId,
-                    stripeUserId
-                ));
+                new Billing.StripeHelper().CancelSubscription(rsp.StripeSubscriptionId);
 
                 rsp.MarkAsCancelled(loggedInUser, msgs, dc);
 

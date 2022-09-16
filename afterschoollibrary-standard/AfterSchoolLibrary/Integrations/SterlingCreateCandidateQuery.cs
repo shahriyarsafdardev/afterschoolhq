@@ -8,30 +8,27 @@ namespace AfterSchoolLibrary.Integrations
 {
     public interface ISterlingCreateCandidateQuery
     {
-        Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, Registrant registrant);
+        Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
     }
 
     public class SterlingCreateCandidateQuery : ISterlingCreateCandidateQuery
     {
         private readonly IHttpClient httpClient;
         private readonly IJsonSerializer jsonSerializer;
-        private readonly IWebUserRepository webUserRepository;
 
-        public SterlingCreateCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer, IWebUserRepository webUserRepository)
+        public SterlingCreateCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer)
         {
             this.httpClient = httpClient;
             this.jsonSerializer = jsonSerializer;
-            this.webUserRepository = webUserRepository;
         }
 
-        public async Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, Registrant registrant)
+        public async Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser)
         {
-            var webUser = webUserRepository.LoadById(registrant.WebUserId.Value);
             var sterlingRequest = new SterlingCandidateRequest
             {
-                GivenName = registrant.FirstName,
-                FamilyName = registrant.LastName,
-                Email = registrant.Email,
+                GivenName = webUser.FirstName,
+                FamilyName = webUser.LastName,
+                Email = webUser.Email,
                 ClientReferenceId = webUser.Uid.ToString(),
             };
             var request = new HttpRequest

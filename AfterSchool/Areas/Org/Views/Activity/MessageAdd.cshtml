@@ -26,6 +26,7 @@
     var activityType = Model.ActivityTypeId;
     var isVolunteer = activityType == ActivityType.VolunteerOpportunity;
     var registrantsLabel = UILabel.RegistrantLabel(activityType, true);
+    var cancelRedirectUrl = ViewBag.RedirectUrl ?? Url.Action("messages", "activity", new {id = Model.Uid});
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -57,7 +58,7 @@
                 @if (registrants.Count == 0)
                 {
                     <div>
-                        <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Back to List</a>
+                        <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Message List</a>
                         <p>There are no @registrantsLabel.ToLower() with valid email addresses</p>
                     </div>
                 }
@@ -159,7 +160,7 @@
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-6">
                             <div class="pull-left">
-                                <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="text-muted">
+                                <a href="@cancelRedirectUrl" class="text-muted">
                                     &laquo; Cancel
                                 </a>
                             </div>

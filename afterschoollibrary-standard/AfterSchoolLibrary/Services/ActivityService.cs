@@ -1160,7 +1160,7 @@ namespace AfterSchoolLibrary.Services
                             activity.ActivityLocationTypeId = activityLocationType.ToString().ToInteger()
                                 .ToEnum<ActivityLocationType>();
 
-                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual)
+                            if (activity.ActivityLocationTypeId == ActivityLocationType.Virtual && virtualLocation.IsNotEmpty())
                                 activity.VirtualLocationInfo = virtualLocation.ToString();
 
                             if (amsgs.HasNoErrors())
@@ -1566,7 +1566,6 @@ namespace AfterSchoolLibrary.Services
                         packageBillingPeriod: null,
                         timeZone: activityAccount.TimeZone,
                         loggedInUser: loggedInUser,
-                        isAfterSchool: true,
                         createWithStripe: false,
                         msgs: msgs,
                         dc: dc);

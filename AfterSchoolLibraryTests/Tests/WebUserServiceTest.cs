@@ -146,7 +146,7 @@ namespace AfterSchoolLibraryTests.Tests
             var webUser = WebUserFactory.Create(msgs, dc);
 
             // Act
-            var account = WebUserService.AddNewStudentAccount(user: webUser, userType: UserType.Owner, isActive: true, isAfterSchool: true, loggedInUser: webUser, msgs: msgs, dc: dc);
+            var account = WebUserService.AddNewStudentAccount(user: webUser, userType: UserType.Owner, isActive: true, loggedInUser: webUser, msgs: msgs, dc: dc);
 
             // Assert
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, webUser.ID.Value, msgs, dc);

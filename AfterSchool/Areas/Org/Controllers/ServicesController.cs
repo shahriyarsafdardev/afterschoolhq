@@ -626,24 +626,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (returnUrl.IsNotEmpty())
                     fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
-                
-                var currentAccount = SessionVariables.CurrentAccount;
-                var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                BillingPortalConfiguration bpc = null;
 
-                if (config != 0)
-                    bpc = BillingPortalConfigurationService.GetBillingPortalConfiguration(config.ToEnum<BillingPortalConfigurationType>(), msgs);
-
-                var session = stripeHelper.GetBillingPortalSession(
-                    currentAccount.StripeCustomerId,
-                    bpc?.StripeId,
-                    fullReturnUrl, 
+                var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
+                    SessionVariables.CurrentAccount,
+                    fullReturnUrl,
+                    config.ToEnum<BillingPortalConfigurationType>(),
                     msgs);
 
                 return Json(new
                 {
                     status = "ok",
-                    link = session.Url
+                    link = link
                 }, JsonRequestBehavior.AllowGet);
             }
 
