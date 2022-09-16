@@ -9,7 +9,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
 {
     public class HomeController : BaseLoggedInController
     {
-        public HomeController() : base(new List<AccountType> {AccountType.Volunteer})
+        public HomeController() : base(new List<AccountType> {AccountType.Volunteer,AccountType.Registrant})
         {
         }
 
