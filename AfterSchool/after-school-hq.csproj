@@ -746,7 +746,6 @@
     <Content Include="Areas\Volunteer\Views\Shared\Modals\_Withdraw.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Providers\_BrowseProvider.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Providers\_ProviderContactInfo.cshtml" />
-    <Content Include="Areas\Volunteer\Views\Shared\Registrants\_BrowseRegistrant.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\Schedule\_BrowseOpportunityInstance.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_BillingHeader.cshtml" />
     <Content Include="Areas\Volunteer\Views\Shared\_Layout.cshtml" />

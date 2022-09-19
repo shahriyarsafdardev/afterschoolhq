@@ -27,26 +27,30 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ActionResult Edit(string password1, string password2, string email)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
 
             if (email.IsEmpty())
                 msgs.Add("Email is required", MessageType.UserError);
             else if (!email.IsMatch(Utilities.EmailRegEx))
                 msgs.Add("Email must be valid", MessageType.UserError);
-            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
+            else if (!currentUser.CanEmailBeUsed(email, msgs))
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
 
-            if (password1.Length < 8)
-                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
-            if (password1.IsEmpty() || password2.IsEmpty() || password1 != password2)
-                msgs.Add("Passwords must match", MessageType.UserError);
+            if (!password1.IsEmpty() || !password2.IsEmpty())
+            {
+                if (password1.Length < 8)
+                    msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
+                if (password1 != password2)
+                    msgs.Add("Passwords must match", MessageType.UserError);
+            }
 
 
             if (msgs.HasNoErrors())
             {
-                var user = WebUser.Load(SessionVariables.CurrentUser.ID.Value);
+                var user = WebUser.Load(currentUser.ID.Value);
                 user.Email = email;
                 user.LastModifiedDate = DateTime.UtcNow;
-                user.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                user.LastModifiedBy = currentUser.ID;
 
                 if (!password1.IsEmpty())
                     user.Password = WebUserService.EncryptPassword(password1);
@@ -56,13 +60,13 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Clear();
-                    msgs.Add("Password updated successfully", MessageType.Success);
+                    msgs.Add("Login Credentials updated successfully", MessageType.Success);
                     SessionVariables.CurrentUser = user;
                 }
             }
 
             ViewBag.Messages = msgs;
-            return View(SessionVariables.CurrentUser);
+            return View(currentUser);
         }
     }
 }
