@@ -1410,6 +1410,7 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccountPackage = SessionVariables.AccountPackage;
             var newPackage = Package.LoadByUid(newplan, msgs);
 
             var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
@@ -1422,7 +1423,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs);
 
             // have to cancel the existing subscription in stripe or else it will auto charge on the existing trial
-            StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(SessionVariables.AccountPackage.StripeSubscriptionId, false, msgs);
+            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+            if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+                StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(currentAccountPackage.StripeSubscriptionId, false, msgs);
             
             if (msgs.HasNoErrors() && session.IsNotEmpty())
                 return new RedirectResult(session.Url);
