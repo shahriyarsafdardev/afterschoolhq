@@ -1,5 +1,5 @@
 ﻿@using AfterSchoolLibrary.Billing
-@using AfterSchoolLibrary.Enums
+@using Package = AfterSchoolLibrary.Models.Package
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model Account
 @{ 
@@ -230,66 +230,69 @@
 
                     </div>
                 </div>
-
-                <div id="enter-payment-details">
+                
+                @if (currentPackage.IsDuringTrial)
+                {
+                    <div id="enter-payment-details">
                     
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            3. Enter your payment details
-                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                3. Enter your payment details
+                            </div>
                     
-                        <div class="panel-body hide" id="enter-payment-details-panel-body">
-                            <div class="row">
-                                <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
-                                    <form id="payment-form" class="form">
-                                        <div id="payment-element" class="padding-v-20">
-                                            <!-- Elements will create form elements here -->
-                                        </div>
-                                        <div>
-                                            <div class="pull-left">
-                                                <a href="javascript:updatePlan()">Change Plan</a>
+                            <div class="panel-body hide" id="enter-payment-details-panel-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                                        <form id="payment-form" class="form">
+                                            <div id="payment-element" class="padding-v-20">
+                                                <!-- Elements will create form elements here -->
                                             </div>
-                                            <div class="pull-right">
-                                                <button id="submit" class="btn btn-primary btn-lg">
-                                                    @if (currentPackage.IsDuringTrial)
-                                                    {
-                                                        <span>
-                                                            Save Payment Details
-                                                        </span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>
-                                                            Submit Payment and Start Subscription
-                                                        </span>
-                                                    }
-                                                </button>
+                                            <div>
+                                                <div class="pull-left">
+                                                    <a href="javascript:updatePlan()">Change Plan</a>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="submit" class="btn btn-primary btn-lg">
+                                                        @if (currentPackage.IsDuringTrial)
+                                                        {
+                                                            <span>
+                                                                Save Payment Details
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                Submit Payment and Start Subscription
+                                                            </span>
+                                                        }
+                                                    </button>
+                                                </div>
+                                                <div class="clearfix"></div>
                                             </div>
-                                            <div class="clearfix"></div>
-                                        </div>
-                                        <div id="error-message">
-                                            <!-- Display error message to your customers here -->
-                                        </div>
-                                    </form>
+                                            <div id="error-message">
+                                                <!-- Display error message to your customers here -->
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         
-                        <div class="panel-body hide text-center" id="enter-payment-details-free-panel-body">
-                            <p class="text-medium">
-                                You have chosen to downgrade to the Free Plan. No payment details are required.
-                            </p>
-                            <p class="padding-v-20">
-                                <button type="button" 
-                                        class="btn btn-primary btn-lg" 
-                                        onclick="@Url.Action("DowngradeToFree", "Account", new {newPlan = packages.First(x => x.IsFree(BillingPeriodType.Month)).Uid.ToString()})">
-                                    Switch to Free Plan
-                                </button>
-                            </p>
+                            <div class="panel-body hide text-center" id="enter-payment-details-free-panel-body">
+                                <p class="text-medium">
+                                    You have chosen to downgrade to the Free Plan. No payment details are required.
+                                </p>
+                                <p class="padding-v-20">
+                                    <button type="button" 
+                                            class="btn btn-primary btn-lg" 
+                                            onclick="@Url.Action("DowngradeToFree", "Account", new {newPlan = packages.First(x => x.IsFree(BillingPeriodType.Month)).Uid.ToString()})">
+                                        Switch to Free Plan
+                                    </button>
+                                </p>
+                            </div>
                         </div>
-                    </div>
                     
-                </div>
+                    </div>
+                }
 
             </div>
         </div>
@@ -306,6 +309,7 @@
     <script>
         var selectedPackageUid = '';
         var selectedPeriod = @((int) BillingPeriodType.Year);
+        var priorSubmitButtonText = '';
         
         function showPlans(){        
             $('#select-plan-panel-body').removeClass('hide');
@@ -340,6 +344,18 @@
             selectedPeriod = period;
             selectedPackageUid = packageUid;  
             
+            @if (currentPackage.IsDuringTrial)
+            {
+                @:handleTrial(packageName, price, periodName);
+            }
+            else
+            {
+                @:location.href='@Url.Action("SelectPlanPurchaseAfterTrialEnd", "Account")?newplan=' + selectedPackageUid + '&period=' + selectedPeriod;
+            }
+        }       
+        
+        function handleTrial(packageName, price, periodName){
+            
             $('#selected-package-container').removeClass('hide');            
             $('#select-plan-panel-body').addClass('hide');
             
@@ -353,7 +369,7 @@
             }
             
             setPlanDetails(packageName, price, periodName);
-        }        
+        }
         
         function setPlanDetails(packageName, price, periodName){
             $('#selected-package').html(packageName);
@@ -404,6 +420,10 @@
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 
+                priorSubmitButtonText = $('#submit').html('');                
+                $('#submit').html('Please wait...');
+                $('#submit').prop('disabled', true);
+                
                 const {error} = await stripe.confirmSetup({
                     //`Elements` instance that was used to create the Payment Element
                     elements,
@@ -418,7 +438,10 @@
                     // confirming the payment. Show error to your customer (for example, payment
                     // details incomplete)
                     const messageContainer = document.querySelector('#error-message');
-                    messageContainer.textContent = error.message;
+                    messageContainer.textContent = error.message;  
+                    
+                    $('#submit').html(priorSubmitButtonText);
+                    $('#submit').prop('disabled', false);
                 } else {
                     // Your customer will be redirected to your `return_url`. For some payment
                     // methods like iDEAL, your customer will be redirected to an intermediate

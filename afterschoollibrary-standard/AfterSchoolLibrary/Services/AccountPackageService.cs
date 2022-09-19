@@ -144,7 +144,11 @@ namespace AfterSchoolLibrary.Services
         public static string GetStripePriceId(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var package = accountPackage.GetPackage(msgs, dc);
-            return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+            
+            if (package.IsNotEmpty())
+                return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+
+            return null;
         }
 
         public static DateTime? GetFirstRenewalDate(this AccountPackage accountPackage)

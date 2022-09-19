@@ -1404,6 +1404,36 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("SelectPlanDone");
         }
 
+        public ActionResult SelectPlanPurchaseAfterTrialEnd(Guid newplan, BillingPeriodType period)
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccountPackage = SessionVariables.AccountPackage;
+            var newPackage = Package.LoadByUid(newplan, msgs);
+
+            var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
+                currentAccount.StripeCustomerId,
+                newPackage.GetStripePriceId(period),
+                $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
+                $"?newplan={newplan}&period={(int)period}&returnurl={Url.Action("SelectPlanDone", "Account", new {Area = "org"})}",
+                $"{Utilities.BaseUrl()}/{Url.Action("SelectPlan", "Account", new {Area = "org"})}",
+                currentAccount.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
+                msgs);
+
+            // have to cancel the existing subscription in stripe or else it will auto charge on the existing trial
+            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+            if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+                StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(currentAccountPackage.StripeSubscriptionId, false, msgs);
+            
+            if (msgs.HasNoErrors() && session.IsNotEmpty())
+                return new RedirectResult(session.Url);
+
+            SetTempMessages(msgs);
+            return RedirectToAction("SelectPlan");
+        }
+
         [HttpGet]
         public ActionResult SelectPlanDone()
         {
@@ -1426,7 +1456,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     // if coming from select plan, need to potentially change subscription if changed on select plan screen
                     var newPlanSelected = newPlan.IsGuid() && period.IsInteger();
                     var isPlanDifferent = newPlanSelected && (accountPackage.PackageUid != newPlan.ToGuid() || accountPackage.BillingPeriodTypeId != (BillingPeriodType) period.ToInteger());
-                    if (newPlanSelected)
+                    if (accountPackage.IsDuringTrial && newPlanSelected)
                     {
                         if (isPlanDifferent)
                             currentAccount.SwitchPackagesWithStripe

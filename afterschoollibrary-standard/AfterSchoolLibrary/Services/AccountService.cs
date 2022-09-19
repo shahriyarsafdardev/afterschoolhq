@@ -1669,8 +1669,8 @@ namespace AfterSchoolLibrary.Services
                     var currentAccountPackage = account.GetActiveAccountPackage(amsgs, adc);
                     var stripeSubscription = currentAccountPackage.GetStripeSubscription(amsgs);
 
-                    if (stripeSubscription.IsEmpty())
-                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs).First();
+                    if (stripeSubscription.IsEmpty() || stripeSubscription.CanceledAt.HasValue)
+                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs).FirstOrDefault(x => !x.CanceledAt.HasValue);
 
                     if (stripeSubscription.IsEmpty())
                         return;
@@ -1711,7 +1711,7 @@ namespace AfterSchoolLibrary.Services
                     var stripePlanAmountInDollars = stripePlan.AmountDecimal / 100;
                     
                     // check and update price changes
-                    if (stripeSubscription.Discount.Coupon?.PercentOff > 0)
+                    if (stripeSubscription.Discount?.Coupon?.PercentOff > 0)
                     {
                         currentAccountPackage.Price = stripePlanAmountInDollars * (1 - (stripeSubscription.Discount.Coupon?.PercentOff / 100));
                         amsgs.AddRange(currentAccountPackage.Save(adc));
@@ -1719,6 +1719,13 @@ namespace AfterSchoolLibrary.Services
                     else if (stripePlanAmountInDollars != currentAccountPackage.Price)
                     {
                         currentAccountPackage.Price = stripePlanAmountInDollars;
+                        amsgs.AddRange(currentAccountPackage.Save(adc));
+                    }
+
+                    // ensure billing period is synced
+                    if (!stripePlan.Interval.IsSameAs(currentAccountPackage.BillingPeriodTypeId.ToString().ToLower()))
+                    {
+                        currentAccountPackage.BillingPeriodTypeId = stripePlan.Interval.ToEnum<BillingPeriodType>();
                         amsgs.AddRange(currentAccountPackage.Save(adc));
                     }
 
@@ -2464,10 +2471,10 @@ namespace AfterSchoolLibrary.Services
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
                     
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                    
-                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, msgs);
-
                     var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
+                    
+                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
+
                     var defaultPaymentMethod = "";
 
                     if (!accountPackageToRemove.IsDuringTrial)
