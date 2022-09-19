@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -619,26 +620,23 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult GetStripeBillingLink(string returnUrl, int config = 0)
         {
             var msgs = new SystemMessages();
-            
+            var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
+
+            if (returnUrl.IsNotEmpty())
+                fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
+
+            var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
+                SessionVariables.CurrentAccount,
+                fullReturnUrl,
+                config.ToEnum<BillingPortalConfigurationType>(),
+                msgs);
+
             if (msgs.HasNoErrors())
-            {
-                var fullReturnUrl = $"{Utilities.BaseUrl()}{Url.Action("afterstripeupdate", "account")}";
-
-                if (returnUrl.IsNotEmpty())
-                    fullReturnUrl = $"{fullReturnUrl}?returnUrl={returnUrl}";
-
-                var link = BillingPortalConfigurationService.GetBillingPortalSessionLink(
-                    SessionVariables.CurrentAccount,
-                    fullReturnUrl,
-                    config.ToEnum<BillingPortalConfigurationType>(),
-                    msgs);
-
                 return Json(new
                 {
                     status = "ok",
-                    link = link
+                    link,
                 }, JsonRequestBehavior.AllowGet);
-            }
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }

@@ -1324,10 +1324,10 @@ namespace AfterSchoolLibrary.Billing
                     new Stripe.SubscriptionItemOptions()
                     {
                         Price = priceId,
-                        Quantity = 1
+                        Quantity = 1,
                     }
                 };
-
+            
             if (couponId.IsNotEmpty())
                 options.Coupon = couponId;
             
@@ -1373,7 +1373,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 options = new Stripe.SubscriptionUpdateOptions()
                 {
-                    CancelAt = DateTime.UtcNow.AddSeconds(15),
+                    CancelAt = DateTime.UtcNow.AddSeconds(5),
                 };
             }
 
