@@ -35,10 +35,19 @@
                 </div>*@
                 <div class="row">
                     <div class="col-sm-6 col-sm-offset-3 margin-v-10">
-                        <h4>Change Login Credentials</h4>
-                        <em>
-                            <p class="text-muted">Updating your login credentials will affect both your Volunteer and Parent accounts.</p>
-                        </em>
+                        <h4>Account Settings</h4>
+                        @if (SessionVariables.CurrentUser.HasMultipleAccounts())
+                        {
+                            <em>
+                                <p class="text-muted">Updating your login credentials will affect both your Volunteer and Parent accounts.</p>
+                            </em>
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Mobile Phone</label>
+                    <div class="col-sm-6">
+                        <input type="textbox" class="form-control" id="phone" name="phone" value="@Model.Phone" onfocus="this.select()" required/>
                     </div>
                 </div>
                 <div class="form-group">

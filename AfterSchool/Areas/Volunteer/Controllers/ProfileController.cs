@@ -18,7 +18,6 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         {
         }
 
-
         private List<FormQuestion> GetQuestions(SystemMessages msgs, int type)
         {
             var form = FormService.GetAdministratorAccountStudentForm(msgs);
@@ -112,14 +111,6 @@ namespace AfterSchool.Areas.Volunteer.Controllers
             return null;
         }
 
-
-        // Need functions for 
-        // 1- To validate User Information (Personal Information)
-        // 2- To Update User Information to Database. 
-        // 3- To update Questions information (Emergency Contact)
-        // 4- Add disclaimer text for passwords and personal information. 
-        // 5- Do CSS Styling. 
-
         [HttpGet]
         public ActionResult EditPersonal(string id)
         {
@@ -167,13 +158,13 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         {
             var msgs = new SystemMessages();
             Registrant registrant = null;
-            WebUser user = null;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (id.IsGuid())
             {
                 registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
 
-                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                if (!currentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
                 var questions = GetQuestions(msgs, 1);
@@ -232,7 +223,10 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).ToString();
+                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
+                            registrant.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).ToString();
+                            registrant.LastModifiedBy = currentUser.ID;
                             registrant.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(registrant.Save(adc));
 
@@ -241,17 +235,17 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                                 registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUser: SessionVariables.CurrentUser,
+                                    loggedInUser: currentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
-
-                            user = WebUser.LoadByEmail(formCollection["email"], amsgs, adc);
-                            user.FirstName = formCollection["question-4230"].MaxChars(50);
-                            user.LastName = formCollection["question-4231"].MaxChars(50);
-                            user.Email = formCollection["question-4231"].MaxChars(50);
-                            user.Phone = formCollection["question-4231"].MaxChars(50);
-                            user.Phone = formCollection["question-4231"].MaxChars(50);
+                            
+                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).ToString();
+                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
+                            currentUser.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).ToString();
+                            currentUser.LastModifiedBy = currentUser.ID;
+                            currentUser.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(currentUser.Save(adc));
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
