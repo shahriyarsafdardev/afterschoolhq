@@ -150,8 +150,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 ViewBag.emergencyQuestions = emergencyQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
 
-            ViewBag.Messages = msgs;
-
+            ViewBag.Messages = TempData["msgs"].IsEmpty() ? msgs : TempData["msgs"];
             return View(registrant);
         }
 
@@ -246,23 +245,26 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                             currentUser.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
                             currentUser.LastModifiedBy = currentUser.ID;
                             currentUser.LastModifiedDate = DateTime.UtcNow;
-                            amsgs.AddRange(currentUser.Save(adc));
+                            amsgs.AddRange(
+                                currentUser.Save(adc)
+                            );
                         },
-                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onSuccess: (SystemMessages smsgs) =>
+                        {
+                            msgs.Add("Updated Successfully", MessageType.Success);
+                            msgs.AddRange(smsgs);
+                        },
+                        onFailure: (SystemMessages fmsgs) =>
+                        {
+                            msgs.Add("There was a problem. Please try again.", MessageType.Error);
+                            msgs.AddRange(fmsgs);
+                        },
                         onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                     );
                 }
-                
-                if (msgs.HasNoErrors())
-                {
-                    msgs.Clear();
-                    msgs.Add("Login Credentials updated successfully", MessageType.Success);
-                }
 
-                ViewBag.Messages = msgs;
+                TempData["msgs"] = msgs;
             }
-
             return Redirect(Request.Url.AbsoluteUri);
         }
     }
