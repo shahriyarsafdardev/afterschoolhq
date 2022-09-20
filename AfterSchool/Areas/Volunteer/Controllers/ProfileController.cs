@@ -36,9 +36,11 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     {
                         case QuestionDataType.RegistrantFirstName:
                         case QuestionDataType.RegistrantLastName:
-                        case QuestionDataType.RegistrantEmail:
-                        case QuestionDataType.RegistrantMobilePhone:
                             question.IsRequired = true;
+                            break;
+                        case QuestionDataType.RegistrantMobilePhone:
+                        case QuestionDataType.RegistrantEmail:
+                            question.IsRequired = false;
                             break;
                     }
                 });
@@ -157,7 +159,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ActionResult EditPersonal(string id, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
-            Registrant registrant = null;
+            Registrant registrant;
             var currentUser = SessionVariables.CurrentUser;
 
             if (id.IsGuid())
@@ -170,7 +172,6 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 var questions = GetQuestions(msgs, 1);
                 var emergencyContactQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
-                // This could be potentially refactored.
                 foreach (var ques in GetQuestions(msgs, 2))
                 {
                     questions.Add(ques);
@@ -223,9 +224,9 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).ToString();
-                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
-                            registrant.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).ToString();
+                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                            registrant.MiddleName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).Value;
+                            registrant.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
                             registrant.LastModifiedBy = currentUser.ID;
                             registrant.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(registrant.Save(adc));
@@ -240,9 +241,9 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                                     dc: adc);
                             });
                             
-                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).ToString();
-                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
-                            currentUser.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).ToString();
+                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                            //currentUser.MiddleName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
+                            currentUser.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
                             currentUser.LastModifiedBy = currentUser.ID;
                             currentUser.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(currentUser.Save(adc));
@@ -252,6 +253,14 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                         onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                     );
                 }
+                
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Clear();
+                    msgs.Add("Login Credentials updated successfully", MessageType.Success);
+                }
+
+                ViewBag.Messages = msgs;
             }
 
             return Redirect(Request.Url.AbsoluteUri);

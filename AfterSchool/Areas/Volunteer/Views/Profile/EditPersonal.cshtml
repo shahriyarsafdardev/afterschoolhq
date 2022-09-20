@@ -27,7 +27,7 @@
                     </div>
                 </div>
             }
-            <h3 class="col-md-9 col-md-offset-3 padding-v-20">Personal Information</h3>
+            <h3 class="col-md-9 col-md-offset-1 padding-v-20">Personal Information</h3>
             <p class="col-md-9 col-md-offset-3 padding-v-20">Updating your personal information will effect both your volunteer and parent accounts.</p>
             <form class="form-horizontal"
                   id="form-save-personal"
@@ -43,8 +43,8 @@
                 {
                     Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                 }
-                <h3 class="col-md-9 col-md-offset-3 padding-v-20">Emergency Contact Details</h3>
-                <h4 class="col-md-9 col-md-offset-3 padding-v-20">First Emergency Contact</h4>
+                <h3 class="col-md-9 col-md-offset-1 padding-v-20">Emergency Contact Details</h3>
+                <h4 class="col-md-9 col-md-offset-5 padding-v-20">First Emergency Contact</h4>
                 @foreach (var qvm in emergencyQuestions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
                 {
                     if (qvm.Question.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
@@ -53,7 +53,7 @@
                     }
                 }
 
-                <h4 class="col-md-9 col-md-offset-3 padding-v-20">Second Emergency Contact</h4>
+                <h4 class="col-md-9 col-md-offset-5 padding-v-20">Second Emergency Contact</h4>
                 @foreach (var qvm in emergencyQuestions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
                 {
                     if (qvm.Question.QuestionDataTypeId != QuestionDataType.EmergencyContact2RelationshipToRegistrant)
