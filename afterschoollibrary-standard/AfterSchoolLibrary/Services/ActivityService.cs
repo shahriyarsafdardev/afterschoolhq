@@ -2603,6 +2603,12 @@ namespace AfterSchoolLibrary.Services
             var msgs = new SystemMessages();
             var activity = Activity.Load(activityId, msgs, dc);
             var registrants = activity.GetRegistrants(msgs, dc);
+            var emails = activity.ContactEmail;
+            if (activity.ProviderAccountId != null)
+            {
+                emails = emails + "," + Account.Load((int) activity.ProviderAccountId).Email;
+            }
+
 
             var subject = $"{activity.Name} Registration Summary Report";
             var body =
@@ -2619,7 +2625,7 @@ namespace AfterSchoolLibrary.Services
                 null,
                 RegistrationStatus.NotSet,
                 uiActivityLabel,
-                activity.ContactEmail,
+                emails,
                 subject,
                 body, getVolunteers,
                 msgs,
