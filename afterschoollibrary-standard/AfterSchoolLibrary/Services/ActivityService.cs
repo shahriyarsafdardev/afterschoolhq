@@ -2604,9 +2604,12 @@ namespace AfterSchoolLibrary.Services
             var activity = Activity.Load(activityId, msgs, dc);
             var registrants = activity.GetRegistrants(msgs, dc);
             var emails = activity.ContactEmail;
-            if (activity.ProviderAccountId != null)
+            
+            if (activity.ProviderAccountId.HasValue)
             {
-                emails = emails + "," + Account.Load((int) activity.ProviderAccountId).Email;
+                var providerAccount = activity.GetProvider(msgs, dc);
+                if (providerAccount.IsNotEmpty() && providerAccount.Email.IsNotEmpty())
+                    emails += $",{providerAccount.Email}";
             }
 
 
@@ -2614,7 +2617,7 @@ namespace AfterSchoolLibrary.Services
             var body =
                 $"<p>{activity.ContactName},</p><p>Here's your registration summary report for <strong>{activity.Name}</strong>. You have <strong>{registrants.Count.ToString()}</strong> registrations.</p>";
 
-            msgs.AddRange(RegistrationService.EmailCsvReport(
+            RegistrationService.EmailCsvReport(
                 activity.GetAccount(msgs, dc).ID.Value,
                 null,
                 null,
@@ -2629,7 +2632,7 @@ namespace AfterSchoolLibrary.Services
                 subject,
                 body, getVolunteers,
                 msgs,
-                dc));
+                dc);
 
             return msgs;
         }
