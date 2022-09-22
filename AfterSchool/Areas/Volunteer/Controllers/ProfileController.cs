@@ -159,7 +159,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ActionResult EditPersonal(string id, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
-            Registrant registrant;
+            Registrant registrant = new Registrant();
             var currentUser = SessionVariables.CurrentUser;
 
             if (id.IsGuid())
@@ -168,16 +168,25 @@ namespace AfterSchool.Areas.Volunteer.Controllers
 
                 if (!currentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
+                
+                var questions = new List<FormQuestion>();
 
-                var questions = GetQuestions(msgs, 1);
-                var emergencyContactQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+                var personalQuestions = GetQuestions(msgs, 1);
+                var addressQuestions = GetQuestions(msgs, 2);
 
-                foreach (var ques in GetQuestions(msgs, 2))
+                var emergencyQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+
+                foreach (var ques in personalQuestions)
+                {
+                    questions.Add(ques);
+                }
+                
+                foreach (var ques in addressQuestions)
                 {
                     questions.Add(ques);
                 }
 
-                foreach (var qvm in emergencyContactQuestions.Where(qvm =>
+                foreach (var qvm in emergencyQuestions.Where(qvm =>
                              qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
                 {
                     if (qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
@@ -186,7 +195,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     }
                 }
 
-                foreach (var qvm in emergencyContactQuestions.Where(qvm =>
+                foreach (var qvm in emergencyQuestions.Where(qvm =>
                              qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
                 {
                     if (qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
@@ -263,10 +272,31 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                         onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                     );
                 }
+                
+                
+                var values = new NameValueCollection();
+                personalQuestions.ForEach(question =>
+                {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
 
-                SetTempMessages(msgs);
+                addressQuestions.ForEach(question =>
+                {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
+                emergencyQuestions.ForEach(question =>
+                {
+                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
+                });
+
+                ViewBag.personalQuestions = personalQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+                ViewBag.addressQuestions = addressQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+                ViewBag.emergencyQuestions = emergencyQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+                
             }
-            return RedirectToAction("EditPersonal");
+            
+            ViewBag.msgs = msgs;
+            return View(registrant);
         }
     }
 }

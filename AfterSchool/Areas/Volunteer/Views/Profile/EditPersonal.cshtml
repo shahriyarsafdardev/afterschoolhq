@@ -4,6 +4,10 @@
     var personalQuestions = (List<FormQuestionViewModel>) ViewBag.personalQuestions;
     var addressQuestions = (List<FormQuestionViewModel>) ViewBag.addressQuestions;
     var emergencyQuestions = (List<FormQuestionViewModel>) ViewBag.emergencyQuestions;
+    
+    // Ids for Questions to disable
+    var emailQuestionId = personalQuestions.FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Id;
+    var phoneQuestionId = personalQuestions.FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)?.Id;
 }
 <style>
 .theme-text {
@@ -88,12 +92,12 @@
             $('#btn-save-personal').prop('disabled', true);
         });
         
-        $("#question-4307").prop( "disabled", true );
-        $("#question-4308").prop( "disabled", true );
+        $("#@(emailQuestionId)").prop( "disabled", true );
+        $("#@(phoneQuestionId)").prop( "disabled", true );
         
         $('form').submit(function() {
-          $("#question-4307").prop( "disabled", false );
-          $("#question-4308").prop( "disabled", false );
+          $("@(emailQuestionId)").prop( "disabled", false );
+          $("@(phoneQuestionId)").prop( "disabled", false );
         });  
         
     });
