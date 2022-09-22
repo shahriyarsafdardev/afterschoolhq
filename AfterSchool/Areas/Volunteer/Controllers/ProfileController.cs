@@ -117,6 +117,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ActionResult EditPersonal(string id)
         {
             var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             Registrant registrant = null;
 
             if (id.IsGuid())
@@ -150,7 +151,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 ViewBag.emergencyQuestions = emergencyQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
 
-            ViewBag.Messages = TempData["msgs"].IsEmpty() ? msgs : TempData["msgs"];
+            ViewBag.msgs = msgs;
             return View(registrant);
         }
 
@@ -263,9 +264,9 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     );
                 }
 
-                TempData["msgs"] = msgs;
+                SetTempMessages(msgs);
             }
-            return Redirect(Request.Url.AbsoluteUri);
+            return RedirectToAction("EditPersonal");
         }
     }
 }
