@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = Model.DisplayName;
     var msgs = (SystemMessages) ViewBag.Messages;
+    var currentUser = SessionVariables.CurrentUser;
 }
 
 <div class="main-content">
@@ -36,7 +37,7 @@
                 <div class="row">
                     <div class="col-sm-6 col-sm-offset-3 margin-v-10">
                         <h4>Account Settings</h4>
-                        @if (SessionVariables.CurrentUser.HasMultipleAccounts())
+                        @if (currentUser.HasMultipleAccounts())
                         {
                             <em>
                                 <p class="text-muted">Updating your login credentials will affect both your Volunteer and Parent accounts.</p>

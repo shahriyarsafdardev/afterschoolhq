@@ -8,10 +8,7 @@
 <div class="main-content">
     @foreach (var registrant in Model)
     {
-        if (!registrant.IsVolunteer)
-        {
-            Html.RenderPartial("Registrants/_BrowseRegistrant", registrant);
-        }
+        Html.RenderPartial("Registrants/_BrowseRegistrant", registrant);
     }
 </div>
 

@@ -126,12 +126,12 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return Redirect(Request.Url.AbsoluteUri);
 
-                var peronalQuestions = GetQuestions(msgs, 1);
+                var personalQuestions = GetQuestions(msgs, 1);
                 var addressQuestions = GetQuestions(msgs, 2);
                 var emergencyQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
                 var values = new NameValueCollection();
-                peronalQuestions.ForEach(question =>
+                personalQuestions.ForEach(question =>
                 {
                     values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
                 });
@@ -145,7 +145,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
                 });
 
-                ViewBag.peronalQuestions = peronalQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+                ViewBag.personalQuestions = personalQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
                 ViewBag.addressQuestions = addressQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
                 ViewBag.emergencyQuestions = emergencyQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }

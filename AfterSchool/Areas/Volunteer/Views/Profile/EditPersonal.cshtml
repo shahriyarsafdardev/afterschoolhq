@@ -1,7 +1,7 @@
 ﻿@model Registrant
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
-    var peronalQuestions = (List<FormQuestionViewModel>) ViewBag.peronalQuestions;
+    var personalQuestions = (List<FormQuestionViewModel>) ViewBag.personalQuestions;
     var addressQuestions = (List<FormQuestionViewModel>) ViewBag.addressQuestions;
     var emergencyQuestions = (List<FormQuestionViewModel>) ViewBag.emergencyQuestions;
 }
@@ -39,7 +39,7 @@
                   method="post"
                   action="@Url.Action("editpersonal", "profile", new {id = Model.Uid, reg = Request["reg"], student = Request["student"], returnUrl = Request["returnUrl"]})">
 
-                @foreach (var qvm in peronalQuestions)
+                @foreach (var qvm in personalQuestions)
                 {
                     Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                 }
