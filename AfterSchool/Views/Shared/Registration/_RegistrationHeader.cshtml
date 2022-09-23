@@ -133,29 +133,11 @@
                             @Model.NumberOfStudentsServedFormatted students served
                         </span>
                     }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsOpenDuringCovid)
-                    {
-                        <span class="icon-span icon-span-mobile" title="Open During COVID">
-                            <svg viewBox="0 0 24 24">
-                                <use href="~/Assets/img/clock.svg#svg"></use>
-                            </svg>
-                            Open During COVID
-                        </span>
-                    }
                     @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
                     {
                         <span class="icon-span icon-span-mobile" title="Virtual">
                             <icon class="s7-monitor registration-page-icon old-font-icons"></icon>
                             Virtual
-                        </span>
-                    }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsELearningCenter)
-                    {
-                        <span class="icon-span icon-span-mobile" title="E-Learning Center">
-                            <svg viewBox="0 0 24 24">
-                                <use href="~/Assets/img/clock.svg#svg"></use>
-                            </svg>
-                            E-Learning Center
                         </span>
                     }
                     @if (Model.Followers > 0)
