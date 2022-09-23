@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.Mvc;
+using AfterSchool.Assemblers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -17,113 +18,12 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ProfileController() : base(new List<AccountType> {AccountType.Volunteer})
         {
         }
-
-
-        private List<FormQuestion> GetQuestions(SystemMessages msgs, int type)
-        {
-            var form = FormService.GetAdministratorAccountStudentForm(msgs);
-
-            if (type == 1)
-            {
-                var questionGroup = form.GetQuestionGroups(msgs)
-                    .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-                var questions = questionGroup.GetAllQuestions(msgs);
-
-                questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
-
-                questions.ForEach(question =>
-                {
-                    switch (question.QuestionDataTypeId)
-                    {
-                        case QuestionDataType.RegistrantFirstName:
-                        case QuestionDataType.RegistrantLastName:
-                        case QuestionDataType.RegistrantEmail:
-                        case QuestionDataType.RegistrantMobilePhone:
-                            question.IsRequired = true;
-                            break;
-                    }
-                });
-
-                return questions;
-            }
-
-            if (type == 2)
-            {
-                var questionGroup = form.GetQuestionGroups(msgs)
-                    .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress);
-                var questions = questionGroup.GetAllQuestions(msgs);
-                var personalContactGroup = form.GetQuestionGroups(msgs)
-                    .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
-
-                var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
-                var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>
-                    {
-                        QuestionDataType.RegistrantHomePhone,
-                        QuestionDataType.RegistrantWorkPhone,
-                        QuestionDataType.RegistrantEmployer,
-                    }))
-                    .ToList();
-
-                questions.AddRange(allQuestionsWithPersonalInfo);
-
-                questions.ForEach(question =>
-                {
-                    switch (question.QuestionDataTypeId)
-                    {
-                        case QuestionDataType.RegistrantAddress2:
-                        case QuestionDataType.RegistrantWorkPhone:
-                        case QuestionDataType.RegistrantHomePhone:
-                        case QuestionDataType.RegistrantEmployer:
-                            question.IsRequired = false;
-                            break;
-                        default:
-                            question.IsRequired = true;
-                            break;
-                    }
-                });
-
-                return questions;
-            }
-
-            if (type == 3)
-            {
-                var questionGroup = form.GetQuestionGroups(msgs)
-                    .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 &&
-                                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2); //FirstOrDefault but then null handling?
-                var questions = questionGroup.GetAllQuestions(msgs);
-
-                questions = questions.Where(que =>
-                    que.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant &&
-                    que.QuestionDataTypeId != QuestionDataType.EmergencyContact2RelationshipToRegistrant).ToList();
-
-                questions.ForEach(question =>
-                {
-                    switch (question.QuestionDataTypeId)
-                    {
-                        default:
-                            question.IsRequired = false;
-                            break;
-                    }
-                });
-
-                return questions;
-            }
-
-            return null;
-        }
-
-
-        // Need functions for 
-        // 1- To validate User Information (Personal Information)
-        // 2- To Update User Information to Database. 
-        // 3- To update Questions information (Emergency Contact)
-        // 4- Add disclaimer text for passwords and personal information. 
-        // 5- Do CSS Styling. 
-
+        
         [HttpGet]
         public ActionResult EditPersonal(string id)
         {
             var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             Registrant registrant = null;
 
             if (id.IsGuid())
@@ -131,34 +31,15 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
 
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
-                    return Redirect(Request.Url.AbsoluteUri);
-
-                var peronalQuestions = GetQuestions(msgs, 1);
-                var addressQuestions = GetQuestions(msgs, 2);
-                var emergencyQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
-
-                var values = new NameValueCollection();
-                peronalQuestions.ForEach(question =>
-                {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
-
-                addressQuestions.ForEach(question =>
-                {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
-                emergencyQuestions.ForEach(question =>
-                {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
-
-                ViewBag.peronalQuestions = peronalQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
-                ViewBag.addressQuestions = addressQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
-                ViewBag.emergencyQuestions = emergencyQuestions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
+                    return RedirectToAction("index","Login");
+                
+                var questionsWithAnswers = VolunteerProfileQuestionsAssembler.AssembleVolunteerProfileQuestions(msgs, registrant);
+                ViewBag.personalQuestions = questionsWithAnswers.personalQuestions;
+                ViewBag.addressQuestions = questionsWithAnswers.addressQuestions;
+                ViewBag.emergencyQuestions = questionsWithAnswers.emergencyContactQuestions;
             }
 
-            ViewBag.Messages = msgs;
-
+            ViewBag.msgs = msgs;
             return View(registrant);
         }
 
@@ -166,44 +47,35 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         public ActionResult EditPersonal(string id, FormCollection formCollection)
         {
             var msgs = new SystemMessages();
-            Registrant registrant = null;
-            WebUser user = null;
+            Registrant registrant = new Registrant();
+            var currentUser = SessionVariables.CurrentUser;
 
             if (id.IsGuid())
             {
                 registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
 
-                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
-                    return RedirectToAction("index");
+                if (!currentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index","Login");
+                
+                var questions = new List<FormQuestion>();
 
-                var questions = GetQuestions(msgs, 1);
-                var emergencyContactQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
+                var personalQuestions = VolunteerProfileQuestionsAssembler.GetQuestions(msgs, 1);
+                var addressQuestions = VolunteerProfileQuestionsAssembler.GetQuestions(msgs, 2);
+                var emergencyQuestions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
-                // This could be potentially refactored.
-                foreach (var ques in GetQuestions(msgs, 2))
-                {
-                    questions.Add(ques);
-                }
-
-                foreach (var qvm in emergencyContactQuestions.Where(qvm =>
-                             qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
-                {
-                    if (qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
-                    {
-                        questions.Add(qvm);
-                    }
-                }
-
-                foreach (var qvm in emergencyContactQuestions.Where(qvm =>
-                             qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
-                {
-                    if (qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
-                    {
-                        questions.Add(qvm);
-                    }
-                }
-
-
+                questions.AddRange(personalQuestions);
+                questions.AddRange(addressQuestions);
+                questions.AddRange(
+                    emergencyQuestions.Where(qvm =>
+                        qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 &&
+                        qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
+                    );
+                questions.AddRange(
+                    emergencyQuestions.Where(qvm =>
+                        qvm.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2 &&
+                        qvm.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
+                );
+                
                 // Validation
                 questions.ForEach(question =>
                 {
@@ -232,7 +104,10 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            registrant.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                            registrant.MiddleName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).Value;
+                            registrant.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                            registrant.LastModifiedBy = currentUser.ID;
                             registrant.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(registrant.Save(adc));
 
@@ -241,26 +116,41 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                                 registrant.AddOrUpdateAnswer(
                                     answerText: qvm.Value.IfEmpty("").Trim(),
                                     question: qvm.Question,
-                                    loggedInUser: SessionVariables.CurrentUser,
+                                    loggedInUser: currentUser,
                                     msgs: amsgs,
                                     dc: adc);
                             });
-
-                            user = WebUser.LoadByEmail(formCollection["email"], amsgs, adc);
-                            user.FirstName = formCollection["question-4230"].MaxChars(50);
-                            user.LastName = formCollection["question-4231"].MaxChars(50);
-                            user.Email = formCollection["question-4231"].MaxChars(50);
-                            user.Phone = formCollection["question-4231"].MaxChars(50);
-                            user.Phone = formCollection["question-4231"].MaxChars(50);
+                            
+                            currentUser.FirstName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                            //currentUser.MiddleName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).ToString();
+                            currentUser.LastName = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                            currentUser.LastModifiedBy = currentUser.ID;
+                            currentUser.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(
+                                currentUser.Save(adc)
+                            );
                         },
-                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onSuccess: (SystemMessages smsgs) =>
+                        {
+                            msgs.Add("Updated Successfully", MessageType.Success);
+                            msgs.AddRange(smsgs);
+                        },
+                        onFailure: (SystemMessages fmsgs) =>
+                        {
+                            msgs.Add("There was a problem. Please try again.", MessageType.Error);
+                            msgs.AddRange(fmsgs);
+                        },
                         onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                     );
                 }
+                var questionsWithAnswers = VolunteerProfileQuestionsAssembler.AssembleVolunteerProfileQuestions(msgs, registrant);
+                ViewBag.personalQuestions = questionsWithAnswers.personalQuestions;
+                ViewBag.addressQuestions = questionsWithAnswers.addressQuestions;
+                ViewBag.emergencyQuestions = questionsWithAnswers.emergencyContactQuestions;
             }
-
-            return Redirect(Request.Url.AbsoluteUri);
+            
+            ViewBag.msgs = msgs;
+            return View(registrant);
         }
     }
 }

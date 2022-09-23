@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(string password1, string password2, string email)
+        public ActionResult Edit(string password1, string password2, string email, string phone)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -35,6 +35,11 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                 msgs.Add("Email must be valid", MessageType.UserError);
             else if (!currentUser.CanEmailBeUsed(email, msgs))
                 msgs.Add("Email is already in use by another user", MessageType.UserError);
+
+            if (!phone.IsPhone())
+                msgs.Add("Phone Number is incorrect.", MessageType.UserError);
+            if (!currentUser.CanPhoneBeUsed(phone, msgs))
+                msgs.Add("Phone Number is already in use.", MessageType.UserError);
 
             if (!password1.IsEmpty() || !password2.IsEmpty())
             {
@@ -49,6 +54,7 @@ namespace AfterSchool.Areas.Volunteer.Controllers
             {
                 var user = WebUser.Load(currentUser.ID.Value);
                 user.Email = email;
+                user.Phone = phone;
                 user.LastModifiedDate = DateTime.UtcNow;
                 user.LastModifiedBy = currentUser.ID;
 
