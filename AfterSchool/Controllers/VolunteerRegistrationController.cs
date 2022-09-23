@@ -13,6 +13,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Utilities = BasicLibrary.Utilities;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -84,6 +85,16 @@ namespace AfterSchool.Controllers
             }
 
             var questions = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
+            
+            questions.ForEach(question =>
+            {
+                switch (question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantGender:
+                        question.IsRequired = true;
+                        break;
+                }
+            });
 
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
 
@@ -100,6 +111,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
+            var activity = participationObject.GetActivity();
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -118,6 +130,14 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantMobilePhone:
                         if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                             msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+                    case QuestionDataType.RegistrantGender:
+                        if (activity.IsGenderEnforced)
+                        {
+                            var applicantGender = LibraryUtilities.GetKeyValuePairs(qvm.Value).FirstOrDefault()?.value == "Male" ? GenderType.Male : GenderType.Female;
+                            if((int)activity.GenderRestriction != (int)applicantGender)
+                                msgs.Add($"This opportunity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
+                        }
                         break;
                 }
             });
