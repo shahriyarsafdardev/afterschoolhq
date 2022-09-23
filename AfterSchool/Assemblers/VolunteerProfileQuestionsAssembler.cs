@@ -119,7 +119,7 @@ namespace AfterSchool.Assemblers
             {
                 var questionGroup = form.GetQuestionGroups(msgs)
                     .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1 &&
-                                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2); //FirstOrDefault but then null handling?
+                                    group.QuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2);
                 var questions = questionGroup.GetAllQuestions(msgs);
 
                 questions = questions.Where(que =>
