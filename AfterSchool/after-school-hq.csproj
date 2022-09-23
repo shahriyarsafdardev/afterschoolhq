@@ -644,6 +644,7 @@
     <Compile Include="Assemblers\GetStartedAssembler.cs" />
     <Compile Include="Assemblers\RegisterAssembler.cs" />
     <Compile Include="Assemblers\ThankYouAssembler.cs" />
+    <Compile Include="Assemblers\VolunteerProfileQuestionsAssembler.cs" />
     <Compile Include="Assemblers\VolunteerRegisterAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
