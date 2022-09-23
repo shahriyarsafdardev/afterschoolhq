@@ -14,6 +14,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -844,6 +845,7 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, msgs);
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var activity = RegistrationCommon.GetParticipationObjectFromCart().GetActivity();
 
             questions.ForEach(question =>
             {
@@ -865,6 +867,14 @@ namespace AfterSchool.Controllers
             if (placeid.IsEmpty() && !schoolnotfound) msgs.Add("Location is required", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            
+            if (activity.IsGenderEnforced)
+            {
+                var gender = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value == "Male" ? GenderType.Male : GenderType.Female;
+                if((int)activity.GenderRestriction != (int)gender)
+                    msgs.Add($"This activity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
+            }
+            
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
 
             if (createuseraccount.IsNumber() && !email.IsEmail())
