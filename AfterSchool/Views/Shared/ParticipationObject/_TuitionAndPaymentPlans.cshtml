@@ -17,8 +17,8 @@
 
                 @if (plan.TotalPeriods > 1)
                 {    
-                    <span>each</span>
-                    @plan.BillingPeriodTypeId.ToString().ToLower() @(plan.ID != Model.ParticipationObject.PaymentPlans.Last().ID ? ", or " : "")
+                    <span>every</span>
+                    @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() @(plan.ID != Model.ParticipationObject.PaymentPlans.Last().ID ? ", or " : "")
                 }
             </li>
         }
