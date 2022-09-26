@@ -398,7 +398,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                         packageId: Package.Load(msgs: amsgs, dc: adc).First().ID.Value,
                                         packageBillingPeriod: BillingPeriodType.Month,
                                         timeZone: null,
-                                        isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                                        signUpTypeId: SignUpType.NotSet,
                                         loggedInUser: SessionVariables.CurrentUser,
                                         msgs: amsgs,
                                         dc: adc
@@ -407,19 +407,15 @@ namespace AfterSchool.Areas.Admin.Controllers
 
 
                                // load grade levels
-                               var minGradeLevel = allGradeLevels.Where(grade =>
-                                    (minGrade.Length == 1 &&
-                                    grade.Name.ToLower().First() == minGrade.ToLower().First()) ||
-                                    (minGrade.Length == 2 &&
-                                    grade.Name.ToLower().MaxChars(2) == minGrade.ToLower().MaxChars(2))
-                                ).FirstOrDefault();
+                               var minGradeLevel = allGradeLevels.FirstOrDefault(grade => (minGrade.Length == 1 &&
+                                                                                           grade.Name.ToLower().First() == minGrade.ToLower().First()) ||
+                                                                                          (minGrade.Length == 2 &&
+                                                                                           grade.Name.ToLower().MaxChars(2) == minGrade.ToLower().MaxChars(2)));
 
-                               var maxGradeLevel = allGradeLevels.Where(grade =>
-                                    (maxGrade.Length == 1 &&
-                                    grade.Name.ToLower().First() == maxGrade.ToLower().First()) ||
-                                    (maxGrade.Length == 2 &&
-                                    grade.Name.ToLower().MaxChars(2) == maxGrade.ToLower().MaxChars(2))
-                                ).FirstOrDefault();
+                               var maxGradeLevel = allGradeLevels.FirstOrDefault(grade => (maxGrade.Length == 1 &&
+                                                                                           grade.Name.ToLower().First() == maxGrade.ToLower().First()) ||
+                                                                                          (maxGrade.Length == 2 &&
+                                                                                           grade.Name.ToLower().MaxChars(2) == maxGrade.ToLower().MaxChars(2)));
 
                                if (minGradeLevel.IsNotEmpty())
                                    account.MinGradeLevelOffered = minGradeLevel.ID;

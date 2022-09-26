@@ -32,13 +32,15 @@
 
                         <div id="accounts">
                             @foreach (var account in Model)
-                            {                            
+                            {
                                 <button onclick="selectAccount('@account.Uid')"
-                                        class="btn btn-primary btn-xl btn-space btn-block"
-                                        @(account.AccountTypeId == AccountType.Volunteer ? "disabled=\"disabled\"" : "")>
+                                        class="btn btn-primary btn-xl btn-space btn-block">
                                     @account.Name &raquo;
                                 </button>
                             }
+                            <p class="text-center padding-v-20">
+                                <a href="/logout">Logout</a>
+                            </p>
                         </div>
                         <div id="loading" class="hide padding-30">
                             <p class="text-center text-white text-medium">
@@ -59,4 +61,3 @@
         </div>
     </div>
 </div>
-

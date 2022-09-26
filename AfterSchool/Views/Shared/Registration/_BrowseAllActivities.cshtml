@@ -1,8 +1,15 @@
-﻿@model ParticipationObject
+﻿@using Utilities = BasicLibrary.Utilities
+@model ParticipationObject
 @{
     var showSeatsRemaining = true;
     var showLocation = false;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile;
+
+    var genderOrGradeRestriction = ParticipationObjectUI.PrintAgeGradeRestrictions(Model);
+    if (genderOrGradeRestriction.Contains(':'))
+    {
+        genderOrGradeRestriction = genderOrGradeRestriction.Insert(genderOrGradeRestriction.IndexOf(":"), "</b>").Insert(0, "<b>");
+    }
 
     if (Model.SeatsRemaining.HasValue && Model.SeatsRemaining.Value <= 40)
     {
@@ -10,7 +17,7 @@
         {
             showSeatsRemaining = false;
         }
-        else if (Model.IsActivity() && Model.ActivityType.Value.In(new ActivityType[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+        else if (Model.IsActivity() && Model.ActivityType.Value.In(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
         {
             showSeatsRemaining = false;
         }
@@ -85,11 +92,11 @@
      hasseatsremaining="@Model.HasSeatsAvailable().ToString().ToLower()"
      days="@ParticipationObjectUI.PrintDaysOfWeekList(Model)"
      location="@(Model.Location?.FormatAddress(false))"
-     gender="@((int)Model.GenderRestriction)"
+     gender="@((int) Model.GenderRestriction)"
      name="@Model.Name"
-     isvirtual="@((Model.ActivityLocationType == ActivityLocationType.Virtual) ? "1" : "0")"
-     isphysical="@((Model.ActivityLocationType == ActivityLocationType.Physical || Model.ActivityLocationType == ActivityLocationType.NotSet) ? "1" : "0")"
-     issport="@((Model.IsAccountActivityGroup()) ? "1" : "0")">
+     isvirtual="@(Model.ActivityLocationType == ActivityLocationType.Virtual ? "1" : "0")"
+     isphysical="@(Model.ActivityLocationType == ActivityLocationType.Physical || Model.ActivityLocationType == ActivityLocationType.NotSet ? "1" : "0")"
+     issport="@(Model.IsAccountActivityGroup() ? "1" : "0")">
 
 <div class="activity-rectangle" style="overflow: hidden;">
 
@@ -130,112 +137,112 @@
             </div>
         </div>
     }
-    <div class="panel-body" onclick="location.href='@Model.GetHomePageUrl(true)'" style="cursor:pointer">
+    <div class="panel-body" onclick="location.href='@Model.GetHomePageUrl()'" style="cursor:pointer">
         <div>
-        <div class="col-lg-3 col-md-4 notranslate">
+            <div class="col-lg-3 col-md-4 notranslate">
 
-            <div class="heading panel-h3">
-                <p>
-                    @Model.OwnerAccount.Name
+                <div class="heading panel-h3">
+                    <p>
+                        @Model.OwnerAccount.Name
+                    </p>
+                    <h3>
+                        <strong title="@Model.Name">@Model.Name</strong>
+                        @if (!Model.ObjectID.HasValue)
+                        {
+                            <span class="badge badge-danger">DEMO</span>
+                        }
+                    </h3>
+                </div>
+
+                <div class="margin-t-20">
+                    <p class="text-medium-small">
+                        @if (showLocation && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
+                        {
+                            <span>
+                                @@
+                                @Model.Location.Name
+                            </span>
+                        }
+                    </p>
+                </div>
+
+                <p class="activity-description text-muted hide">
+                    @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
                 </p>
-                <h3>
-                    <strong title="@Model.Name">@Model.Name</strong>
-                    @if (!Model.ObjectID.HasValue)
+
+                <div class="seats-remaining">
+                    @if (showSeatsRemaining)
                     {
-                        <span class="badge badge-danger">DEMO</span>
+                        <strong style="color: #ff7070">
+                            <em>
+                                @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
+                                {
+                                    var remainingSeats = Model.SeatsRemaining.ToString();
+                                    if (Model.ActivityType == ActivityType.VolunteerOpportunity)
+                                    {
+                                        remainingSeats += " volunteers needed";
+                                    }
+                                    else
+                                    {
+                                        remainingSeats += " seats";
+                                        remainingSeats += Model.RegistrationMode == RegistrationMode.Register ? " left" : "";
+
+                                        if (Model.CanRegisterPerClass)
+                                        {
+                                            remainingSeats += " for next class";
+                                        }
+                                    }
+
+                                    <span>@remainingSeats</span>
+                                }
+                                else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
+                                {
+                                    @:Closed
+                                }
+
+                            </em>
+                        </strong>
                     }
-                </h3>
+                </div>
             </div>
 
-            <div class="margin-t-20">
-                <p class="text-medium-small">
-                    @if (showLocation && Model.Location.ID != Model.OwnerAccount.DefaultLocationId)
+            <div class="col-lg-6 col-md-5">
+                <div class="padding-v-10">
+
+                    @if (Model.StartDate.HasValue)
                     {
                         <span>
-                            @@
-                            @Model.Location.Name
+                            <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity && Model.Schedule.RepeatsWeekly ? "Start Date" : "Date")</b>: @Model.StartDate.ToShortDateString() @Model.StartDate.ToShortTimeString()
+                        </span>
+                        <br/>
+                    }
+                    @if (Model.Schedule.IsNotEmpty())
+                    {
+                        <span>
+                            <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity ? Model.Schedule.RepeatsWeekly ? "Days of the Week" : "Days" : "Days of the Week")</b>: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int) x).Select(x => x.ToString().Substring(0, 3)).ToStringList(", ")
+                        </span>
+                        <br/>
+                    }
+                    @if (Model.ActivityType != ActivityType.VolunteerOpportunity)
+                    {
+                        <span>
+                            @Html.Raw(genderOrGradeRestriction)
+                        </span>
+                        <br/>
+                        <span>
+                            <b>Gender Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
                         </span>
                     }
-                </p>
+                    else
+                    {
+                        <span>
+                            <b>Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
+                        </span>
+                    }
+
+
+                </div>
             </div>
-
-            <p class="activity-description text-muted hide">
-                @Html.Raw(Model.Description.MaxChars(80, "...").IfEmpty(BasicLibrary.Utilities.RemoveHTMLAndEntities(Model.Details).MaxChars(80, "...")))
-            </p>
-
-            <div class="seats-remaining">
-                @if (showSeatsRemaining)
-                {
-                    <strong style="color: #ff7070">
-                        <em>
-                            @if (!Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
-                            {
-                                var remainingSeats = Model.SeatsRemaining.ToString();
-                                if (Model.ActivityType == ActivityType.VolunteerOpportunity)
-                                {
-                                    remainingSeats += " volunteers needed";
-                                }
-                                else
-                                {
-                                    remainingSeats += " seats";
-                                    remainingSeats += Model.RegistrationMode == RegistrationMode.Register ? " left" : "";
-
-                                    if (Model.CanRegisterPerClass)
-                                    {
-                                        remainingSeats += " for next class";
-                                    }
-                                }
-
-                                <span>@remainingSeats</span>
-                            }
-                            else if (!Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
-                            {
-                                @:Closed
-                            }
-
-                        </em>
-                    </strong>
-                }
-            </div>
-        </div>
-
-        <div class="col-lg-6 col-md-5">
-            <div class="padding-v-10">
-
-                @if (Model.StartDate.HasValue)
-                {
-                    <span>
-                        <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity && Model.Schedule.RepeatsWeekly == true ? "Start Date" : "Date")</b>: @Model.StartDate.ToShortDateString() @Model.StartDate.ToShortTimeString()
-                    </span>
-                    <br/>
-                }
-                @if (Model.Schedule.IsNotEmpty())
-                {
-                    <span>
-                        <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity ? (Model.Schedule.RepeatsWeekly == true ? "Days of the Week" : "Days") : "Days of the Week:")</b>: @Model.Schedule.GetDaysOfTheWeek().OrderBy(x => (int)x).Select(x => x.ToString().Substring(0, 3)).ToStringList(", ")
-                    </span>
-                    <br/>
-                }
-                @if (Model.ActivityType != ActivityType.VolunteerOpportunity)
-                {
-                    <span>
-                        @Html.Raw(ParticipationObjectUI.PrintAgeGradeRestrictions(Model).Insert(0, "<b>").Insert(7, "</b>"))
-                    </span>
-                    <br/>
-                    <span>
-                        <b>Gender Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
-                    </span>
-                }
-                else
-                {
-                    <span>
-                        <b>Restrictions</b>: @ParticipationObjectUI.PrintGenderRestrictions(Model)
-                    </span>
-                }
-
-
-            </div>
-        </div>
 
             <div class="col-lg-3 col-md-3">
 
@@ -248,7 +255,7 @@
 
                         <div class="row">
                             <div class="@learnMoreColSize">
-                                <a href="@Model.GetHomePageUrl(true)" class="btn @learnMoreStyle">
+                                <a href="@Model.GetHomePageUrl()" class="btn @learnMoreStyle">
                                     View Details &raquo;
                                 </a>
                             </div>
@@ -256,7 +263,9 @@
                             {
                                 <div class="col-md-3">
                                     <button class="btn btn-register btn-cart" in-cart="0" uid="@Model.Uid">
-                                        <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+                                        <span>
+                                            <i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i>
+                                        </span>
                                     </button>
                                 </div>
                             }
@@ -264,7 +273,7 @@
                     }
                     else
                     {
-                        <a href="@Model.GetHomePageUrl(true)" class="btn btn-register btn-block">
+                        <a href="@Model.GetHomePageUrl()" class="btn btn-register btn-block">
                             View Details &raquo;
                         </a>
                     }
@@ -274,7 +283,7 @@
                     </p>
                 </div>
             </div>
-            </div>
+        </div>
     </div>
 </div>
 </div>

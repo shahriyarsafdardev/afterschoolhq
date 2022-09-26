@@ -38,7 +38,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, DateTime? startDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountPackage = new AccountPackage
             {
@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Services
                     ? package.Price
                     : package.PricePerYear,
                 StripeSubscriptionId = stripeSubscriptionId,
-                StartDate = DateTime.UtcNow
+                StartDate = startDate
             };
 
             msgs.AddRange(accountPackage.Save(dc));
@@ -76,6 +76,7 @@ namespace AfterSchoolLibrary.Services
                     billingCycleAnchorUnchanged: null,
                     trialEndDate: accountPackage.TrialStartDate.Value.AddDays(trialDays),
                     prorate: null,
+                    couponId: null,
                     msgs: msgs);
         }
         
@@ -97,7 +98,72 @@ namespace AfterSchoolLibrary.Services
         public static void EndTrialNow(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
         {
             accountPackage.TrialEndDate = DateTime.UtcNow;
+            accountPackage.StartDate = DateTime.UtcNow;
             msgs.AddRange(accountPackage.Save(dc));
+        }
+
+        public static void SyncTrialDates(this AccountPackage accountPackage, DateTime? trialStartDate, DateTime? trialEndDate, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialStartDate = trialStartDate;
+            accountPackage.TrialEndDate = trialEndDate;
+            msgs.AddRange(accountPackage.Save(dc));
+        }
+
+        public static void ContinueTrialFromPreviousPackage(this AccountPackage accountPackage, AccountPackage previousPackage, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.TrialStartDate = previousPackage.TrialStartDate;
+            accountPackage.TrialEndDate = previousPackage.TrialEndDate;
+            
+            msgs.AddRange(accountPackage.Save(dc));
+            
+            accountPackage.AddOrUpdatePackageFeature(
+                FeatureType.TrialDays, 
+                previousPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue(), 
+                loggedInUser, 
+                msgs,
+                dc);
+        }
+
+        public static DateTime? GetTrialEndDate(this AccountPackage accountPackage, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (accountPackage.TrialEndDate.HasValue)
+                return accountPackage.TrialEndDate.Value;
+
+            if (accountPackage.TrialStartDate.HasValue)
+                return accountPackage.TrialStartDate.Value.AddDays((double) accountPackage.GetFeature(FeatureType.TrialDays, msgs, dc).GetMaxValue());
+
+            return new DateTime?();
+        }
+
+        public static void UpdateStripeSubscriptionId(this AccountPackage accountPackage, string stripeSubscriptionId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            accountPackage.StripeSubscriptionId = stripeSubscriptionId;
+            msgs.AddRange(accountPackage.Save(dc));
+        }
+
+        public static string GetStripePriceId(this AccountPackage accountPackage, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var package = accountPackage.GetPackage(msgs, dc);
+            
+            if (package.IsNotEmpty())
+                return accountPackage.BillingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+
+            return null;
+        }
+
+        public static DateTime? GetFirstRenewalDate(this AccountPackage accountPackage)
+        {
+            if (accountPackage.StartDate.HasValue)
+            {
+                if (accountPackage.BillingPeriodTypeId == BillingPeriodType.Month)
+                    return accountPackage.StartDate.Value.AddMonths(1);
+                else if (accountPackage.BillingPeriodTypeId == BillingPeriodType.Year)
+                    return accountPackage.StartDate.Value.AddYears(1);
+            }
+            else if (accountPackage.TrialEndDate.HasValue)
+                return accountPackage.TrialEndDate.Value;
+
+            return null;
         }
     }
 }

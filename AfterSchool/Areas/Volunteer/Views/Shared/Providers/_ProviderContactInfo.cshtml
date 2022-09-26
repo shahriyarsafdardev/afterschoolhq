@@ -1,0 +1,15 @@
+﻿@model ParticipationObject
+<p class="text-center">
+    <div class="label label-default text-small margin-h-10 notranslate">
+        <i class="s7-user"></i>
+        @Model.ContactName
+    </div>
+    <div class="label label-default text-small margin-h-10">
+        <i class="s7-phone"></i>
+        <a href="tel:@Model.ContactPhone" class="text-white">@Model.ContactPhone</a>
+    </div>
+    <div class="label label-default text-small margin-h-10">
+        <i class="s7-mail"></i>
+        <a href="mailto:@Model.ContactEmail" class="text-white">Send Email &raquo;</a>
+    </div>
+</p>

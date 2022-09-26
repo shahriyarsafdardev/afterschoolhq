@@ -92,7 +92,6 @@ namespace AfterSchool.Controllers
                 account = user.AddNewParentOrStudentRegistrantAccount(
                     UserType.Owner,
                     true,
-                    true,
                     user,
                     msgs,
                     dc);
@@ -108,7 +107,6 @@ namespace AfterSchool.Controllers
             if (account.IsEmpty())
                 account = user.AddNewVolunteerAccount(
                     UserType.Owner,
-                    true,
                     true,
                     user,
                     msgs,

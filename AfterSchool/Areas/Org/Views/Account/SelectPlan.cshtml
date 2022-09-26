@@ -1,0 +1,454 @@
+﻿@using AfterSchoolLibrary.Billing
+@using Package = AfterSchoolLibrary.Models.Package
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@model Account
+@{ 
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var packages = (List<Package>) ViewBag.Packages;
+    var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
+    var setupIntentClientSecret = (string) ViewBag.SetupIntentClientSecret;
+    var returnUrl = "";
+    var maxFeatureLines = packages.Max(package => package.FeatureDescription.Split('\n').Length);
+    var colSize = currentPackage.IsDuringTrial ? 4 : 3;
+    
+    packages.ForEach(package =>
+    {
+        var featureLines = package.FeatureDescription.Split('\n').Length;
+        if (featureLines < maxFeatureLines)
+        {
+            package.FeatureDescription += "\n".Repeat(maxFeatureLines - featureLines);
+        }
+    });
+    
+    if (ViewBag.ReturnUrl != null)
+    {
+        returnUrl = (string)ViewBag.ReturnUrl;
+    }
+    else
+    {
+        returnUrl = Url.Action("index", "activity");
+    }
+
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+}
+
+<style>
+    p.package-description {
+        min-height: 60px;
+    }
+</style>
+
+<div class="main-content-new">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Select Plan
+
+            @if (currentPackage.IsDuringTrial)
+            {
+                Html.RenderPartial("_ExitFullScreen", returnUrl);
+            }
+        </div>
+        <div class="panel-body padding-lr-zero-sm">
+            <div class="col-lg-8 col-lg-offset-2 col-md-12">
+
+                <div id="instructions">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" id="instructions-panel-heading">
+                            <div class="pull-left">
+                                1. Review Steps
+                            </div>
+                            <div class="pull-right hide text-success text-bold">
+                                
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        
+                        <div class="panel-body" id="instructions-panel-body">
+                            <div class="row padding-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <p class="text-medium">
+                                        @if (currentPackage.IsDuringTrial)
+                                        {
+                                            <span>
+                                                Your trial expires @currentPackage.TrialEndDate.ToLongDateString()<br />
+                                                <br />
+                                                Enter your payment details early to ensure you don't lose access when your trial expires.<br/>
+                                                <br/>
+                                                Your card won't be charged until your trial ends.
+                                            </span>
+                                        }
+                                        else if (currentPackage.IsTrialExpiredAndUnpaid(Model))
+                                        {
+                                            <span>
+                                                Your trial has expired.<br />
+                                                <br />
+                                                Please pick your plan and enter your payment details to continue using AfterSchool HQ
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>Feel free to upgrade or downgrade as needed.</span>
+                                        }
+                                    </p>
+                                    <p class="padding-v-20">
+                                        <button type="button" class="btn btn-primary btn-lg" onclick="showPlans()">
+                                            Continue
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="select-plan">
+                    <div class="panel panel-default">
+                        
+                        <div class="panel-heading" id="select-plan-panel-heading">
+                            <div class="pull-left">
+                                2. Choose the best plan for your organization
+                            </div>
+                            <div class="pull-right hide text-success text-bold" id="selected-package-container">
+                                <span id="selected-package"></span> Plan - <span id="selected-price"></span> <span id="selected-period"></span>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                        <div class="panel-body hide" id="select-plan-panel-body">
+
+                            <div class="row">
+                                <table class="" style="margin-left: auto; margin-right: auto;">
+                                    <tr>
+                                        <td class="padding-10 text-medium-small">Billing Cycle</td>
+                                        <td class="padding-10 text-medium-small">
+                                            @{
+                                                Html.RenderPartial(
+                                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                                    true,
+                                                    new ViewDataDictionary
+                                                    {
+                                                        {"checkboxname", "annual"},
+                                                        {"checkboxid", "annual"},
+                                                        {"disabled", false},
+                                                        {"onclick", "annualClick()"},
+                                                        {"customoptions", new List<string>() {"Monthly", "Annually"}},
+                                                    });
+                                            }
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="row text-center padding-20">
+                                <p class="text-medium-small">**2 Months free with all annual contracts**</p>
+                            </div>
+                            <div class="row">
+                                @foreach (var package in packages.OrderBy(x => x.Price))
+                                {
+                                    if (currentPackage.IsDuringTrial && package.IsFree(BillingPeriodType.Month))
+                                    {
+                                        continue;
+                                    }
+                                    
+                                    var pricePerMonth = Model.ReferrerAccountId.HasValue ? package.Price.Value * .9M : package.Price;
+                                    var pricePerYear = Model.ReferrerAccountId.HasValue ? package.PricePerYear.Value * .9M : package.PricePerYear;
+                                    
+                                    <div class="col-lg-12 col-xl-@colSize padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
+                                        <p class="text-muted">
+                                            @Html.Raw(Model.ReferrerAccountId.HasValue && !package.IsFree(BillingPeriodType.Month) ? "10% Referral Discount" : "&nbsp;")
+                                        </p>
+                                        <h3 class="text-success">
+                                            <span>@package.Name</span>
+                                            @if (!package.IsFree(BillingPeriodType.Month))
+                                            {
+                                                <span>-</span>
+                                                <span class="monthly hide">
+                                                    @pricePerMonth.ToCurrency() / Mo
+                                                </span>
+                                                <span class="annually">
+                                                    @((pricePerYear / 12).ToCurrency()) / Mo
+                                                </span>
+                                            }
+                                        </h3>
+                                        <p>
+                                            @if (!package.IsFree(BillingPeriodType.Month))
+                                            {
+                                                <span class="monthly hide">
+                                                    <span id="monthly-price-@package.Uid">
+                                                        @pricePerMonth.ToCurrency()
+                                                    </span> Billed Monthly
+                                                </span>
+                                                <span class="annually">
+                                                    <span id="annual-price-@package.Uid">
+                                                        @pricePerYear.ToCurrency()
+                                                    </span> Billed Annually
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span>&nbsp;</span>
+                                            }
+                                        </p>
+                                        <p class="package-description text-medium-small">
+                                            @package.Description
+                                        </p>
+                                        <hr/>
+                                        <p class="padding-v-20">
+                                            @foreach (var featureLine in package.FeatureDescription.Split('\n'))
+                                            {
+                                                <span>@featureLine</span><br/>
+                                            }
+                                        </p>
+                                        <p class="text-center">
+                                            <button type="button"
+                                                    class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
+                                                    onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
+                                                
+                                                @if (currentPackage.PackageId == package.ID)
+                                                {
+                                                    <span>Continue with <strong>@package.Name</strong></span>
+                                                }
+                                                else if (package.Price > currentPackage.PackagePrice)
+                                                {
+                                                    <span>Upgrade to <strong>@package.Name</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Downgrade to <strong>@package.Name</strong></span>
+                                                }
+
+                                            </button>
+                                        </p>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+                
+                @if (currentPackage.IsDuringTrial)
+                {
+                    <div id="enter-payment-details">
+                    
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                3. Enter your payment details
+                            </div>
+                    
+                            <div class="panel-body hide" id="enter-payment-details-panel-body">
+                                <div class="row">
+                                    <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                                        <form id="payment-form" class="form">
+                                            <div id="payment-element" class="padding-v-20">
+                                                <!-- Elements will create form elements here -->
+                                            </div>
+                                            <div>
+                                                <div class="pull-left">
+                                                    <a href="javascript:updatePlan()">Change Plan</a>
+                                                </div>
+                                                <div class="pull-right">
+                                                    <button id="submit" class="btn btn-primary btn-lg">
+                                                        @if (currentPackage.IsDuringTrial)
+                                                        {
+                                                            <span>
+                                                                Save Payment Details
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>
+                                                                Submit Payment and Start Subscription
+                                                            </span>
+                                                        }
+                                                    </button>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </div>
+                                            <div id="error-message">
+                                                <!-- Display error message to your customers here -->
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="panel-body hide text-center" id="enter-payment-details-free-panel-body">
+                                <p class="text-medium">
+                                    You have chosen to downgrade to the Free Plan. No payment details are required.
+                                </p>
+                                <p class="padding-v-20">
+                                    <button type="button" 
+                                            class="btn btn-primary btn-lg" 
+                                            onclick="@Url.Action("DowngradeToFree", "Account", new {newPlan = packages.First(x => x.IsFree(BillingPeriodType.Month)).Uid.ToString()})">
+                                        Switch to Free Plan
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                    
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section head
+{
+    <script src="https://js.stripe.com/v3/"></script>
+}
+
+@section scripts
+{
+    <script>
+        var selectedPackageUid = '';
+        var selectedPeriod = @((int) BillingPeriodType.Year);
+        var priorSubmitButtonText = '';
+        
+        function showPlans(){        
+            $('#select-plan-panel-body').removeClass('hide');
+            $('#instructions-panel-body').addClass('hide');
+        }
+        
+        function annualClick(){
+            $('.annually').addClass('hide');
+            $('.monthly').addClass('hide');
+            
+            if ($('#annual').is(':checked')){
+                $('.annually').removeClass('hide');
+            } else {
+                $('.monthly').removeClass('hide');
+            }            
+            
+            $('#selected-package-container').addClass('hide');   
+        }
+        
+        function selectPackage(packageUid, packageName) {
+                        
+            var period = @((int) BillingPeriodType.Month);
+            var periodName = "Monthly";
+            var price = $('#monthly-price-' + packageUid).html();            
+            
+            if ($('#annual').is(':checked')){
+                period = @((int) BillingPeriodType.Year);
+                periodName = 'Annually';
+                price = $('#annual-price-' + packageUid).html();
+            }
+            
+            selectedPeriod = period;
+            selectedPackageUid = packageUid;  
+            
+            @if (currentPackage.IsDuringTrial)
+            {
+                @:handleTrial(packageName, price, periodName);
+            }
+            else
+            {
+                @:location.href='@Url.Action("SelectPlanPurchaseAfterTrialEnd", "Account")?newplan=' + selectedPackageUid + '&period=' + selectedPeriod;
+            }
+        }       
+        
+        function handleTrial(packageName, price, periodName){
+            
+            $('#selected-package-container').removeClass('hide');            
+            $('#select-plan-panel-body').addClass('hide');
+            
+            if (packageName === 'Free'){
+                price = '$0.00';
+                periodName = '';
+                $('#enter-payment-details-free-panel-body').removeClass('hide');  
+            }               
+            else {
+                $('#enter-payment-details-panel-body').removeClass('hide');   
+            }
+            
+            setPlanDetails(packageName, price, periodName);
+        }
+        
+        function setPlanDetails(packageName, price, periodName){
+            $('#selected-package').html(packageName);
+            $('#selected-price').html(price);
+            $('#selected-period').html(periodName);
+        }
+        
+        function updatePlan(){
+            $('#select-plan-panel-body').removeClass('hide');
+            $('#enter-payment-details-free-panel-body').addClass('hide');  
+            $('#enter-payment-details-panel-body').addClass('hide');
+        }
+        
+        PageEvent.add(PageEvent.AFTER_INIT, function () {
+            
+            $('#select-plan-panel-heading').click(function (){
+                updatePlan();
+            });
+            
+            const stripe = Stripe('@StripeHelper.SubscriptionsPublishableKey');
+            const options = {
+                clientSecret: '@setupIntentClientSecret',
+                // Fully customizable with appearance API.
+                appearance: {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#00b492',
+                        colorBackground: '#ffffff',
+                        colorText: '#30313d',
+                        colorDanger: '#df1b41',
+                        fontFamily: 'Montserrat, Ideal Sans, system-ui, sans-serif',
+                        spacingUnit: '2px',
+                        borderRadius: '0px',
+                        fontSizeBase: '18px',
+                    }
+                },
+            };
+            
+            // Set up Stripe.js and Elements to use in checkout form, passing the client secret obtained in step 2
+            const elements = stripe.elements(options);
+            
+            // Create and mount the Payment Element
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            
+            const form = document.getElementById('payment-form');
+            
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                priorSubmitButtonText = $('#submit').html('');                
+                $('#submit').html('Please wait...');
+                $('#submit').prop('disabled', true);
+                
+                const {error} = await stripe.confirmSetup({
+                    //`Elements` instance that was used to create the Payment Element
+                    elements,
+                    confirmParams: {
+                        return_url: '@Html.Raw($"{Utilities.BaseUrl()}{@Url.Action("AfterStripeUpdate", "Account")}" +
+                                               $"?newplan=' + selectedPackageUid + '&period=' + selectedPeriod + '&returnUrl={Url.Action("SelectPlanDone", "Account")}")',
+                    }
+                });
+                
+                if (error) {
+                    // This point will only be reached if there is an immediate error when
+                    // confirming the payment. Show error to your customer (for example, payment
+                    // details incomplete)
+                    const messageContainer = document.querySelector('#error-message');
+                    messageContainer.textContent = error.message;  
+                    
+                    $('#submit').html(priorSubmitButtonText);
+                    $('#submit').prop('disabled', false);
+                } else {
+                    // Your customer will be redirected to your `return_url`. For some payment
+                    // methods like iDEAL, your customer will be redirected to an intermediate
+                    // site first to authorize the payment, then redirected to the `return_url`.
+                }
+            });
+        });
+        
+    </script>
+}

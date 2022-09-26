@@ -55,7 +55,7 @@ namespace AfterSchool.Controllers
                 if (!profile.AccountIsDeleted && !profile.AccountIsTest && profile.IsAHQApproved)
                 {
                     var account = profile.GetAccount();
-                    var participationObjects = account.GetPublishedParticipationObjects().Where(x => !x.IsInviteOnly).ToList();
+                    var participationObjects = account.GetAllPublishedParticipationObjects().Where(x => !x.IsInviteOnly).ToList();
 
                     xml.Append("<url>");
                     xml.Append($"<loc>{account.HomePageUrl}</loc>");

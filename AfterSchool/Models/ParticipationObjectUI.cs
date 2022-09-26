@@ -14,8 +14,7 @@ namespace AfterSchool.Models
         {
             if (participationObject.RestrictByGrade())
                 return PrintGradeLevels(participationObject);
-            else
-                return PrintAges(participationObject);
+            return PrintAges(participationObject);
         }
 
         public static string PrintGradeLevels(ParticipationObject participationObject)

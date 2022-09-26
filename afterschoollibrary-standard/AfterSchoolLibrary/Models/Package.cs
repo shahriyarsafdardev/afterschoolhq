@@ -79,6 +79,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["IsDefaultCustomerPackage"].Value = value;
         }
 
+        public string FeatureDescription
+        {
+            get => (string) MDV["FeatureDescription"].Value;
+            set => MDV["FeatureDescription"].Value = value;
+        }
+
 
         public Package()
         {
@@ -107,6 +113,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "StripePricePerMonthId", SqlDbType.NVarChar, "50");
                 _dp.Add(className, "StripePricePerYearId", SqlDbType.NVarChar, "50");
                 _dp.Add(className, "IsDefaultCustomerPackage", SqlDbType.Bit);
+                _dp.Add(className, "FeatureDescription", SqlDbType.NVarChar, "Max");
 
                 return _dp;
             }
@@ -221,6 +228,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["IsDefaultCustomerPackage"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FeatureDescription"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 

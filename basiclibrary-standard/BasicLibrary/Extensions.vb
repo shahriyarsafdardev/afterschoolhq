@@ -993,6 +993,15 @@ Public Module Extensions
             Return subValue
         End If
     End Function
+    <Extension()>
+    Public Function ToLongDateString(ByVal aDate? As Date) As String
+        If aDate.HasValue Then
+            Return aDate.Value.ToLongDateString()
+        End If
+        
+        Return ""
+        
+    End Function
 
     <Extension()>
     Public Function ToShortDateTimeString(ByVal aDate As Date) As String

@@ -116,6 +116,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220803_ActivityGroupUseDetailsNotDescription.Do(amsgs, adc);
                     Migration_20220824_AlterActivityAlterDetails.Do(amsgs, adc);
                     Migration_20220907_AddIsGenderEnforced.Do(amsgs, adc);
+                    Migration_20220911_AddDefaultSignUpTypeValue.Do(amsgs, adc);
+                    Migration_20220912_AlterAccountAddReferralCodeAndReferrerId.Do(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)

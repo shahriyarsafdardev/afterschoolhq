@@ -1,0 +1,88 @@
+﻿@model WebUser
+@{
+    ViewBag.Title = Model.DisplayName;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var currentUser = SessionVariables.CurrentUser;
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-user"></i> @Model.DisplayName
+        </div>
+        <div class="panel-body">
+            <form method="post" action="@Url.Action("edit", "setting")" class="form-horizontal">
+                @*Commented Code might be needed for Future*@
+                @*<div class="form-group hide">
+                    <label class="col-sm-3 control-label">First Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.FirstName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group hide">
+                    <label class="col-sm-3 control-label">Last Name</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LastName" onfocus="this.select()" required />
+                    </div>
+                </div>
+                <div class="form-group hide">
+                    <label class="col-sm-3 control-label">Username</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="username" name="username" value="@Model.Username" onfocus="this.select()" required readonly="readonly" />
+                    </div>
+                </div>*@
+                <div class="row">
+                    <div class="col-sm-6 col-sm-offset-3 margin-v-10">
+                        <h4>Account Settings</h4>
+                        @if (currentUser.HasMultipleAccounts())
+                        {
+                            <em>
+                                <p class="text-muted">Updating your login credentials will affect both your Volunteer and Parent accounts.</p>
+                            </em>
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Mobile Phone</label>
+                    <div class="col-sm-6">
+                        <input type="textbox" class="form-control" id="phone" name="phone" value="@Model.Phone" onfocus="this.select()" required/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Login Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required/>
+                    </div>
+                </div>
+                @*<div class="row">
+                    <div class="col-sm-6 col-sm-offset-3 margin-v-10">
+                        <hr />
+                        <h4>Change Password</h4>
+                    </div>
+                </div>*@
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">New Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="password1" name="password1" value="" onfocus="this.select()"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Verify Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control" id="password2" name="password2" value="" onfocus="this.select()"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="reset" class="btn btn-default">Discard Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

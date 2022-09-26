@@ -226,6 +226,11 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+
+        public static string GetStripePriceId(this Package package, BillingPeriodType billingPeriodTypeId)
+        {
+            return billingPeriodTypeId == BillingPeriodType.Month ? package.StripePricePerMonthId : package.StripePricePerYearId;
+        }
     }
 
     public class PackageFeaturePrice

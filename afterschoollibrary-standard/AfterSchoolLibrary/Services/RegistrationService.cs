@@ -25,17 +25,11 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void SendConfirmation(this Registration registration, CheckoutObject checkoutObject,
-            string customMessage, WebUser loggedInUser, bool sendBcc, string backgroundCheckUrl, SystemMessages msgs, DatabaseConnection dc = null)
+            string customMessage, WebUser loggedInUser, bool sendBcc, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (checkoutObject.ParticipationObject.ActivityType == ActivityType.VolunteerOpportunity)
             {
                 msgs.AddRange(EmailHelper.SendVolunteerRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, sendBcc, dc));
-                if (backgroundCheckUrl.IsNotEmpty())
-                {
-                    msgs.AddRange(EmailHelper.SendVolunteerBackgroundCheckRequest(checkoutObject, customMessage, loggedInUser, sendBcc, backgroundCheckUrl,
-                        dc));
-                }
-
                 return;
             }
 
@@ -122,49 +116,45 @@ namespace AfterSchoolLibrary.Services
             registration.DeleteWithRelatedRecords(msgs, dc);
         }
 
-        private static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject,
-            Registrant masterRegistrant, int numberOfSeatsRequested, RegistrantActivity ra, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc = null)
+        internal static RegistrationAssignmentType GetRegistrationAssignmentType(ParticipationObject participationObject, Registrant masterRegistrant,
+            int numberOfSeatsRequested, RegistrationAssignmentType? existingAssignmentTypeId, decimal? amountPaidByRegistrant, int? loggedInWebUserId,
+            bool requiresBackgroundCheck)
         {
             var seatsAvailable = participationObject.SeatsRemaining;
-            var isExistingAndIsPendingOrReserved =
-                ra.IsNotEmpty() && ra.AssignmentTypeId.In(Registration.ReservedStatuses);
 
             if (participationObject.RegistrationMode == RegistrationMode.Apply)
                 return RegistrationAssignmentType.Applied;
 
             // if they're paying for a registration they already completed
-            // or could be just esigning for a student so this will need to be double checked
-            if (isExistingAndIsPendingOrReserved)
+            // or could be just e-signing for a student so this will need to be double checked
+            if (existingAssignmentTypeId.HasValue && existingAssignmentTypeId.Value.In(Registration.ReservedStatuses))
                 return RegistrationAssignmentType.Reserved;
 
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
                 var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() ||
-                                                    (masterRegistrant.WebUserId.HasValue &&
-                                                     loggedInUser.ID == masterRegistrant.WebUserId);
+                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId);
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
                     return RegistrationAssignmentType.ReservedPendingParentalConsent;
 
-                // if the person didn't pay yet
-                var isCompletelyFree = participationObject.IsFree;
-                var noPayments = ra.IsEmpty() ||
-                                 participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc) ==
-                                 0.ToDecimal();
+                var registrantHasNotYetPaid = !amountPaidByRegistrant.HasValue || amountPaidByRegistrant.Value == 0m;
 
-                if (!isCompletelyFree && noPayments && !participationObject.PostPayPlans.Any())
+                if (!participationObject.IsFree && registrantHasNotYetPaid && !participationObject.PostPayPlans.Any())
                     return RegistrationAssignmentType.ReservedPendingPayment;
+
+                if (requiresBackgroundCheck)
+                    return RegistrationAssignmentType.ReservedPendingBackgroundCheck;
 
                 return RegistrationAssignmentType.Reserved;
             }
 
             // this is probably temporary and will break if something else changes
             // assuming that for sessions there are no reserved seat setting saved
-            else if (participationObject.IsActivityGroup() &&
-                     participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+            if (participationObject.IsActivityGroup() &&
+                participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
                 return RegistrationAssignmentType.Reserved;
 
             // forget the limit on waiting list seats, just dump people there for now
@@ -222,14 +212,12 @@ namespace AfterSchoolLibrary.Services
             // but could be problem in the future
             var ra = registration.GetRegistrantActivity(participationObject, msgs, dc);
 
-            var assignmentType = GetRegistrationAssignmentType(
-                participationObject,
-                masterRegistrant,
-                seatsRequested,
-                ra,
-                loggedInUser,
-                msgs,
-                dc);
+            var amountPaidByRegistrant = ra.IsNotEmpty() && ra.RegistrantId.HasValue
+                ? participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc)
+                : (decimal?) null;
+            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject.ActivityType, loggedInUser.ID);
+            var assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
+                amountPaidByRegistrant, loggedInUser.ID, requiresBackgroundCheck);
 
             if (assignmentType == RegistrationAssignmentType.NotSet)
             {
@@ -268,6 +256,14 @@ namespace AfterSchoolLibrary.Services
                         instanceSeats = instance.AddInstanceSeats(ra, loggedInUser, msgs, dc);
                 });
             }
+        }
+
+        internal static bool IsBackgroundCheckRequired(ActivityType? participationObjectActivityType, int? webUserId)
+        {
+            // TODO: Blocked pending some way to approve background checks.
+            // TODO: Check if Account wants to use background checks as not all will.
+            // TODO: Check if Web User has a valid background check with a completed result.
+            return false;
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent,
@@ -331,13 +327,12 @@ namespace AfterSchoolLibrary.Services
 
         #region CSVReport
 
-        public static SystemMessages EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
+        public static void EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
+            msgs ??= new SystemMessages();
 
             var account = Account.Load(accountId, msgs, dc);
 
@@ -346,8 +341,6 @@ namespace AfterSchoolLibrary.Services
                 getVolunteers, msgs, dc);
 
             EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
-
-            return msgs;
         }
 
         public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
@@ -496,8 +489,8 @@ namespace AfterSchoolLibrary.Services
             var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
 
             var questions = FormQuestion.LoadList(questionIds, msgs, dc)
-                .OrderBy(x => x.DisplayOrder)
                 .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                .ThenBy(x => x.DisplayOrder)
                 .ToList();
 
             var standardQuestions = questions

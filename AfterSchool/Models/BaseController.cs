@@ -132,6 +132,7 @@ namespace AfterSchool.Models
 
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");
+            
             if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
@@ -144,9 +145,16 @@ namespace AfterSchool.Models
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
                             return new UrlHelper(ControllerContext.RequestContext).Action("select", "account", new {area = ""});
+                        
                         if (registrationAccount.IsNotEmpty())
                             return new UrlHelper(ControllerContext.RequestContext).Action(registrationAccount.HomePageUrl);
+                        
                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "user"});
+
+                    case AccountType.Volunteer:
+                        if (registrationAccount.IsNotEmpty())
+                            return new UrlHelper(ControllerContext.RequestContext).Action(registrationAccount.HomePageUrl);
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "volunteer"});
 
                     default:
                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "org"});

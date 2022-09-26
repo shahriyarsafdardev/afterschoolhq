@@ -8,6 +8,8 @@
     var location = (Location)ViewBag.Location; 
     var isProfileEmail = (bool)ViewBag.IsProfileEmail;
     var isProfilePhone = (bool)ViewBag.IsProfilePhone;
+    var accountPackage = (AccountPackage) ViewBag.AccountPackage;
+    var totalStepCount = accountPackage.IsFree ? 6 : 5;
 }
 
 <div class="row main-content main-content-welcome-pages">
@@ -19,10 +21,12 @@
 
                 <form class="form form-horizontal" method="post" action="@Url.Action("contactinfo", "onboarding")">
 
-                    @{ Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
-                            new ViewDataDictionary() {
-                               { "count", 6 },
-                               { "activeDotNumber", 3 }
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_Loaders.cshtml",
+                            new ViewDataDictionary()
+                            {
+                                {"count", totalStepCount},
+                                {"activeDotNumber", 3}
                             });
                     }
 
@@ -68,7 +72,7 @@
 
                     <div class="clearfix"></div>
                     <div class="visible-sm visible-xs margin-v-30">
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right col-xs-12 register-continue">Save &amp; Continue</button>
 
                         <div class="clearfix"></div>
                         <div class="text-center margin-v-30">
@@ -80,7 +84,7 @@
                         <a href="@Url.Action("additionalinfo", "onboarding")" class="process-back">
                             <img src="~/Assets/img/welcome-back-arrow.png" />
                         </a>
-                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save and Continue</button>
+                        <button type="submit" class="btn-save-claims btn btn-primary btn-lg pull-right register-continue">Save &amp; Continue</button>
                     </div>
 
                 </form>

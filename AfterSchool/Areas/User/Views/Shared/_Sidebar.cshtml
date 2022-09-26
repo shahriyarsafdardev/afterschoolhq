@@ -1,39 +1,55 @@
-@{ 
+@{
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
     var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var accountType = SessionVariables.CurrentAccount.AccountTypeId;
 }
 <div class="am-left-sidebar">
     <div class="content">
         <div class="am-logo hide"></div>
-        
+
         <ul class="sidebar-elements">
             <li>
-                <img src="/assets/img/footer-icon.png" class="side-menu-logo" />
+                <img src="/assets/img/footer-icon.png" class="side-menu-logo"/>
             </li>
             <li class="@(controller == "home" ? "active" : "")">
-                <a href="@Url.Action("index", "home")"><i class="icon s7-home"></i><span>Home</span></a>
+                <a href="@Url.Action("index", "home")">
+                    <i class="icon s7-home"></i><span>Home</span>
+                </a>
             </li>
             <li class="@(controller == "family" ? "active" : "")">
-                <a href="@Url.Action("index", "family")"><i class="icon s7-users"></i><span>Family</span></a>
+                <a href="@Url.Action("index", "family")">
+                    <i class="icon s7-users"></i><span>Family</span>
+                </a>
             </li>
             <li class="@(controller == "activity" ? "active" : "")">
-                <a href="@Url.Action("index", "activity")"><i class="icon s7-gleam"></i><span>@UILabel.ActivityLabel(ActivityType.Activity, true)</span></a>
+                <a href="@Url.Action("index", "activity")">
+                    <i class="icon s7-gleam"></i><span>@UILabel.ActivityLabel(ActivityType.Activity, true)</span>
+                </a>
             </li>
             <li class="hide @(controller == "schedule" ? "active" : "")">
-                <a href="@Url.Action("index", "schedule")"><i class="icon s7-date"></i><span>Schedule</span></a>
+                <a href="@Url.Action("index", "schedule")">
+                    <i class="icon s7-date"></i><span>Schedule</span>
+                </a>
             </li>
             <li class="@(controller == "billing" ? "active" : "")">
-                <a href="@Url.Action("transactions", "billing")"><i class="icon s7-credit"></i><span>Billing</span></a>
+                <a href="@Url.Action("transactions", "billing")">
+                    <i class="icon s7-credit"></i><span>Billing</span>
+                </a>
             </li>
+
             <li class="@(controller == "profile" ? "active" : "")">
-                <a href="@Url.Action("edit", "profile")"><i class="icon s7-user"></i><span>Profile</span></a>
+                <a href="@Url.Action("edit", "profile")">
+                    <i class="icon s7-user"></i><span>Profile</span>
+                </a>
             </li>
             @if (SessionVariables.CurrentUser.HasMultipleAccounts())
             {
-                <li class=""><a href="@Url.Action("switch", "logout", new { area = "" })"><i class="icon s7-shuffle"></i> Switch Accounts </a></li>
+                <li class="">
+                    <a href="@Url.Action("switch", "logout", new {area = ""})"><i class="icon s7-shuffle"></i> Switch Accounts </a>
+                </li>
             }
             <li>
-                <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i> Logout</a>
+                <a href="@Url.Action("index", "logout", new {area = ""})"><i class="icon s7-power"></i> Logout</a>
             </li>
         </ul>
         <!--Sidebar bottom content-->

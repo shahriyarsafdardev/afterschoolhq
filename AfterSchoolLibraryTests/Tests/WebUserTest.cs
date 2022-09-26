@@ -398,7 +398,7 @@ namespace AfterSchoolLibraryTests.Tests
                             packageId: package.ID,
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
-                            isAfterSchool: true,
+                            signUpTypeId: SignUpType.NotSet,
                             loggedInUser: loggedInUser,
                             msgs: msgs,
                             dc: dc);
@@ -420,7 +420,7 @@ namespace AfterSchoolLibraryTests.Tests
                             packageId: package.ID,
                             packageBillingPeriod: BillingPeriodType.Month,
                             timeZone: null,
-                            isAfterSchool: true,
+                            signUpTypeId: SignUpType.NotSet,
                             loggedInUser: loggedInUser,
                             msgs: msgs,
                             dc: dc);
