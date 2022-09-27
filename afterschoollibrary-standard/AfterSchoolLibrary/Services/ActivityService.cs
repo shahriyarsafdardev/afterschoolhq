@@ -2604,7 +2604,7 @@ namespace AfterSchoolLibrary.Services
             var activity = Activity.Load(activityId, msgs, dc);
             var registrants = activity.GetRegistrants(msgs, dc);
             var emails = activity.ContactEmail;
-            
+
             if (activity.ProviderAccountId.HasValue)
             {
                 var providerAccount = activity.GetProvider(msgs, dc);
@@ -2879,40 +2879,40 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
-            var startDate = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault().StartDateTime.Value;
-            var endDate = schedule.EndDate.Value;
+            var upcomingInstance = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault();
+            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth.Day, schedule, upcomingInstance,
+                DateTime.UtcNow);
+        }
 
-            if (billingPeriodType == BillingPeriodType.Week)
+        internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
+            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, int dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            DateTime utcNow)
+        {
+            if (!activityHasSchedule)
+                return (null, null);
+
+            var startDate = schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
+            var paymentEnd = schedule.EndDate.Value;
+
+            switch (billingPeriodType)
             {
-                //.. if activity schedule starts on November 1st, 2021(Monday) ends on December 1st, 2021(Thursday) and provide choose weekly billing every sunday, 
-                //.. that would mean the parent would be first billed on Sunday Oct 31st and last billed on Sunday Nov 27th.
-                //.. but if start date is of today or past, we will find next sunday or user's choosen day                
-                var startingDay = startDate.AddDays(-1).IsOnOrBefore(DateTime.UtcNow)
-                    ? startDate.AddDays(((int) dayOfWeek - (int) startDate.DayOfWeek + 7) % 7)
-                    : startDate.AddDays(((int) dayOfWeek - (int) startDate.DayOfWeek - 7) % 7);
+                case BillingPeriodType.Week:
+                {
+                    var shouldPickDateInFuture = startDate.AddDays(-1).IsOnOrBefore(utcNow);
+                    var daysToAdd = ((int) dayOfWeek - (int) startDate.DayOfWeek + (shouldPickDateInFuture ? 7 : -7)) % 7;
+                    var paymentStart = startDate.AddDays(daysToAdd);
 
-                //int daysUntilLastPayment = ((int)dayOfWeek - (int)endDate.DayOfWeek - 7) % 7;
-                //var endingDay = endDate.AddDays(daysUntilLastPayment);
-                return (paymentStart: startingDay, paymentEnd: endDate);
+                    return (paymentStart, paymentEnd);
+                }
+                case BillingPeriodType.Month:
+                {
+                    var startingDay = new DateTime(startDate.Year, startDate.Month, dayOfMonth);
+                    var paymentStart = startingDay.IsAfter(utcNow) ? startingDay : utcNow;
+                    return (paymentStart, paymentEnd);
+                }
+                default:
+                    return (null, null);
             }
-            else if (billingPeriodType == BillingPeriodType.Month)
-            {
-                //.. if provider chooses monthly payment cycle in this case with date November 5th,
-                //.. that would mean the parent would be first billed on November 5th.                
-
-                //.. if activity is in future
-                //var endingMonth = endDate.Month;
-                //if (schedule.StartDate.Value.IsAfter(DateTime.Now))
-                //    endingMonth += 1;
-
-                var startingDay = new DateTime(endDate.Year, startDate.Month, dayOfMonth.Day);
-                //var endingDay = new DateTime(endDate.Year, endingMonth, dayOfMonth.Day);
-
-                return (paymentStart: startingDay.IsAfter(DateTime.UtcNow) ? startingDay : DateTime.UtcNow,
-                    paymentEnd: endDate);
-            }
-
-            return (null, null);
         }
 
         public static void RemoveActivitySchedule(this Activity activity, WebUser currentUser, Account currentAccount,
@@ -2960,13 +2960,13 @@ namespace AfterSchoolLibrary.Services
                     RegistrationAssignmentType.ReservedPendingBackgroundCheck,
                 };
             }
-            
+
             else if (activity.ActivityTypeId == ActivityType.PermissionSlip)
             {
                 dropdownOptions.Remove(RegistrationAssignmentType.WaitingList);
                 dropdownOptions.Remove(RegistrationAssignmentType.Applied);
             }
-            
+
             return dropdownOptions;
         }
 
