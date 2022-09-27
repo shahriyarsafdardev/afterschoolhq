@@ -7,7 +7,6 @@ using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using Extensions = BasicLibrary.Extensions;
 
 namespace AfterSchool.Assemblers
 {
@@ -24,17 +23,15 @@ namespace AfterSchool.Assemblers
             ParticipationObject participationObject, Account registrationAccount, WebUser currentUser,
             List<FormQuestion> questions, bool isStudentAllowedToRegister, NameValueCollection requestParams)
         {
-            var questionsForParentRegistration = participationObject.ActivityType == ActivityType.VolunteerOpportunity ? 
-                FilterAndTransformQuestionsForVolunteerRegistration(currentUser, questions, requestParams) : 
-                FilterAndTransformQuestionsForParentRegistration(currentUser, questions, requestParams);
+            var questionsForParentRegistration = participationObject.ActivityType == ActivityType.VolunteerOpportunity
+                ? FilterAndTransformQuestionsForVolunteerRegistration(currentUser, questions, requestParams)
+                : FilterAndTransformQuestionsForParentRegistration(currentUser, questions, requestParams);
 
             // pre-load phone number
             if (currentUser.IsNotEmpty())
-            {
                 questionsForParentRegistration.Find(item =>
                         item.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
                     .Value = currentUser.Phone;
-            }
 
             var result = new AccountController.GetStartedResult
             {
@@ -58,9 +55,9 @@ namespace AfterSchool.Assemblers
                 QuestionDataType.RegistrantEmail,
                 QuestionDataType.RegistrantMiddleName,
             };
-            
+
             questions = questions.Where(question =>
-                Extensions.NotIn(question.QuestionDataTypeId, FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
+                question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
 
             questions.ForEach(question =>
             {
@@ -106,15 +103,16 @@ namespace AfterSchool.Assemblers
             };
 
             questions = questions.Where(question =>
-                            question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInVolunteerPanel())
-                        ).ToList();
+                question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInVolunteerPanel())
+            ).ToList();
 
             questions.ForEach(question =>
             {
                 question.IsRequired = question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName
                                       || question.QuestionDataTypeId == QuestionDataType.RegistrantLastName
                                       || question.QuestionDataTypeId == QuestionDataType.RegistrantEmail
-                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone;
+                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone
+                                      || question.QuestionDataTypeId == QuestionDataType.RegistrantGender;
             });
 
             var qvms = questions.Select(question => new FormQuestionViewModel(question, requestParams)).ToList();

@@ -1,12 +1,15 @@
-﻿@model ParticipationObject
+﻿@using AfterSchoolLibrary.Enums
+@model ParticipationObject
 
 @{
     var condensed = false;
     var accountOwner = Model.OwnerAccount.ID.HasValue ? Model.OwnerAccount.GetAccountOwner() : null;
     var canRegisterFor = true;
-    var session = (ParticipationObject)ViewData["session"];
+    var session = (ParticipationObject) ViewData["session"];
     var currentUser = SessionVariables.CurrentUser;
+    var currentAccount = SessionVariables.CurrentAccount;
     var anotherChild = ViewData["anotherChild"].IsNotEmpty();
+    var activity = Model.GetActivity();
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -82,9 +85,9 @@ else if (!Model.OwnerAccount.CanProcessPayments() && !Model.IsFree)
 {
     if (currentUser.IsNotEmpty() && currentUser.HasAccessTo(Model.OwnerAccount))
     {
-        var redirectUrl = Url.Action("paymentsoptions", "account", new { area = "org", isfullscreen = 1, source = "profile" });
+        var redirectUrl = Url.Action("paymentsoptions", "account", new {area = "org", isfullscreen = 1, source = "profile"});
 
-        <a class="btn btn-header-action-callout btn-block" href="@Url.Action("switch", "logout", new { id = Model.OwnerAccount.Uid, redirectUrl = redirectUrl })">
+        <a class="btn btn-header-action-callout btn-block" href="@Url.Action("switch", "logout", new {id = Model.OwnerAccount.Uid, redirectUrl})">
             @if (condensed)
             {
                 @: Enable Payments
@@ -118,6 +121,12 @@ else if (!Model.OwnerAccount.CanProcessPayments() && !Model.IsFree)
             }
         </button>
     }
+}
+else if (currentUser?.GetMasterParentOrStudentRegistrant()?.PersonTypeId == RegistrantPersonType.Student)
+{
+    <button class="btn btn-register btn-block" disabled title="Activity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
+        <span>Not Eligible </span>
+    </button>
 }
 else if (Model.RegistrationFinalized)
 {
@@ -159,7 +168,9 @@ else
             if (canRegisterFor)
             {
                 <button href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-cart btn-block" in-cart="0" uid="@Model.Uid">
-                    <span><i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i></span>
+                    <span>
+                        <i class="s7-plus icon-medium"></i><i class="s7-cart icon-medium"></i>
+                    </span>
                 </button>
             }
         }
@@ -174,11 +185,17 @@ else
             if (canRegisterFor || !isPublished)
             {
                 if (Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
-                {   
+                {
                     if (!isPublished)
                     {
                         <button class="disabled btn btn-register btn-block" disabled="disabled" False>
                             <span>Select Dates &raquo;</span>
+                        </button>
+                    }
+                    else if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && (int) currentUser.GenderId != (int) activity.GenderRestriction)
+                    {
+                        <button class="btn btn-register btn-block" disabled title="Opportunity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
+                            <span>Not Eligible </span>
                         </button>
                     }
                     else
@@ -193,17 +210,24 @@ else
                     var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
                     var alreadyRegistered = false;
                     var volunteerRegistrant = currentUser?.GetMasterVolunteerRegistrant();
-                    
+
                     if (volunteerRegistrant.IsNotEmpty() && volunteerRegistrant.HasSubmittedFor(Model, null))
                     {
                         alreadyRegistered = true;
                         buttonText = "Already Registered";
                     }
 
+
                     if (!isPublished || alreadyRegistered)
                     {
                         <button class="disabled btn btn-register btn-block" disabled="disabled">
                             <span>@buttonText &raquo;</span>
+                        </button>
+                    }
+                    else if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && (currentAccount.AccountTypeId == AccountType.Volunteer || currentAccount.AccountTypeId == AccountType.Registrant) && (int) currentUser.GenderId != (int) activity.GenderRestriction && !alreadyRegistered)
+                    {
+                        <button class="btn btn-register btn-block" disabled title="Opportunity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
+                            <span>Not Eligible </span>
                         </button>
                     }
                     else
@@ -220,7 +244,7 @@ else
             if (canRegisterFor || !isPublished)
             {
                 var anotherChildString = anotherChild ? " for New Child" : "";
-                
+
                 if (Model.IsActivity() && Model.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                 {
                     if (!isPublished)
@@ -239,7 +263,7 @@ else
                 else
                 {
                     var buttonText = Model.SeatsRemaining == 0 ? "Join Waiting List" : Model.RegistrationMode.ToString();
-                    
+
                     if (!isPublished)
                     {
                         <button class="disabled btn btn-register btn-block" disabled="disabled">

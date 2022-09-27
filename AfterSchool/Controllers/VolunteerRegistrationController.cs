@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
@@ -12,8 +11,8 @@ using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using Utilities = BasicLibrary.Utilities;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -83,16 +82,6 @@ namespace AfterSchool.Controllers
             }
 
             var questions = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
-            
-            questions.ForEach(question =>
-            {
-                switch (question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantGender:
-                        question.IsRequired = true;
-                        break;
-                }
-            });
 
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
 
@@ -132,10 +121,11 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantGender:
                         if (activity.IsGenderEnforced)
                         {
-                            var applicantGender = LibraryUtilities.GetKeyValuePairs(qvm.Value).FirstOrDefault()?.value == "Male" ? GenderType.Male : GenderType.Female;
-                            if((int)activity.GenderRestriction != (int)applicantGender)
+                            var applicantGender = FormService.GetGenderFromAnswer(qvm.Value);
+                            if ((int) activity.GenderRestriction != (int) applicantGender)
                                 msgs.Add($"This opportunity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
                         }
+
                         break;
                 }
             });
@@ -150,7 +140,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
 
@@ -221,7 +211,7 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account);
                     },
                     failureMessages => msgs.AddRange(failureMessages),
-                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog
+                    LibraryUtilities.SystemErrorLog
                 );
             }
 
@@ -260,7 +250,7 @@ namespace AfterSchool.Controllers
             else
             {
                 if (SessionVariables.CurrentUser.IsEmpty())
-                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
+                    return Redirect(LibraryUtilities.LoginUrl());
 
                 if (SessionVariables.CurrentAccount.IsEmpty())
                     return RedirectToAction("select", "login");
@@ -398,7 +388,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -474,7 +464,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())

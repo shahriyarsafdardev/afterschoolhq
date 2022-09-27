@@ -5,6 +5,8 @@ using System.Linq;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+
 
 namespace AfterSchoolLibrary.Services
 {
@@ -44,7 +46,7 @@ namespace AfterSchoolLibrary.Services
             var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
             return administratorAccount.GetDefaultStudentForm(msgs, dc);
         }
-        
+
         public static Form GetAdministratorAccountVolunteerForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var administratorAccount = AccountService.GetAfterSchoolAccount(msgs, dc);
@@ -1220,6 +1222,19 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
             return msgs;
+        }
+
+        public static GenderType GetGenderFromAnswer(string answer)
+        {
+            switch (LibraryUtilities.GetKeyValuePairs(answer).FirstOrDefault()?.value.ToLower())
+            {
+                case "male":
+                    return GenderType.Male;
+                case "female":
+                    return GenderType.Female;
+                default:
+                    return GenderType.NotSet;
+            }
         }
 
         public class QuestionHolder
