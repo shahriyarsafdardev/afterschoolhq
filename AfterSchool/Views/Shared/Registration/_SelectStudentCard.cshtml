@@ -130,7 +130,7 @@
                 case true:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    inElegibleText = "Student must be " + participationObject.GetActivity().GenderRestriction.ToString().SplitByUpperCase() + " to register for this activity";
                     break;
                 default:
                     btnText = register + " &raquo";

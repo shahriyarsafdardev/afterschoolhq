@@ -870,9 +870,7 @@ namespace AfterSchool.Controllers
 
             if (activity.IsGenderEnforced)
             {
-                var gender = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value == "Male"
-                    ? GenderType.Male
-                    : GenderType.Female;
+                var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
                 if ((int) activity.GenderRestriction != (int) gender)
                     msgs.Add($"This activity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
             }
