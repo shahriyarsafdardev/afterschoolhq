@@ -2900,9 +2900,9 @@ namespace AfterSchoolLibrary.Services
                 {
                     var shouldPickDateInFuture = startDate.AddDays(-1).IsOnOrBefore(utcNow);
                     var daysToAdd = ((int) dayOfWeek - (int) startDate.DayOfWeek + (shouldPickDateInFuture ? 7 : -7)) % 7;
-                    var startingDay = startDate.AddDays(daysToAdd);
+                    var paymentStart = startDate.AddDays(daysToAdd);
 
-                    return (paymentStart: startingDay, paymentEnd);
+                    return (paymentStart, paymentEnd);
                 }
                 case BillingPeriodType.Month:
                 {
@@ -2910,10 +2910,6 @@ namespace AfterSchoolLibrary.Services
                     var paymentStart = startingDay.IsAfter(utcNow) ? startingDay : utcNow;
                     return (paymentStart, paymentEnd);
                 }
-                case BillingPeriodType.NotSet:
-                case BillingPeriodType.Year:
-                case BillingPeriodType.Day:
-                case BillingPeriodType.TwoWeeks:
                 default:
                     return (null, null);
             }
