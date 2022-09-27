@@ -27,7 +27,7 @@
     var canStillRegister = false;
 
 
-    var inElegibleText = "";
+    var ineligibleText = "";
 
     var isAgeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model);
     var isGradeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model);
@@ -110,27 +110,27 @@
                 case true when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be in " + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    ineligibleText = "Student must be in " + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
                     break;
                 case true when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    ineligibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
                     break;
                 case false when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " to register for this activity";
+                    ineligibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " to register for this activity";
                     break;
                 case false when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be in" + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " to register for this activity";
+                    ineligibleText = "Student must be in" + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " to register for this activity";
                     break;
                 case true:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    inElegibleText = "Student must be " + participationObject.GetActivity().GenderRestriction.ToString().SplitByUpperCase() + " to register for this activity";
+                    ineligibleText = $"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}";
                     break;
                 default:
                     btnText = register + " &raquo";
@@ -159,7 +159,7 @@
                     @Html.Raw(btnText)
                 </a>
             </p>
-            <p class="text-center" style="color: #b3b3b3;">@Html.Raw(inElegibleText.IsNotEmpty() ? inElegibleText : "<br>")</p>
+            <p class="text-center" style="color: #b3b3b3;">@Html.Raw(ineligibleText.IsNotEmpty() ? ineligibleText : "<br>")</p>
             <p class="text-center">
                 @if (Model.IsProfileCompleted)
                 {

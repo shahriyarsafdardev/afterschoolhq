@@ -1330,7 +1330,7 @@ namespace AfterSchool.Controllers
                         MessageType.UserError);
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && activity.IsGenderEnforced &&
                     (int) activity.GenderRestriction != (int) FormService.GetGenderFromAnswer(answer))
-                    msgs.Add($"Activity is {activity.GenderRestriction}", MessageType.UserError);
+                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}", MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
