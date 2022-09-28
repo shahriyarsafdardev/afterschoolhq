@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
         {
             var schedule = new ActivitySchedule
             {
+                ID = 1,
                 IsOngoing = true,
                 StartDate = new DateTime(2022, 10, 6, 0, 0, 0),
                 EndDate = new DateTime(2032, 11, 21, 0, 0, 0),
