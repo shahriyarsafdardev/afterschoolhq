@@ -203,7 +203,7 @@ namespace AfterSchoolLibrary.Models
             return ID.HasValue ? Load(ID.Value, msgs, dc) : null;
         }
 
-        public static List<BackgroundCheck> LoadByWebUserId(string webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -211,7 +211,8 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<BackgroundCheck> LoadByRequestedForFiscalAccountId(string requestedForFiscalAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByRequestedForFiscalAccountId(int requestedForFiscalAccountId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

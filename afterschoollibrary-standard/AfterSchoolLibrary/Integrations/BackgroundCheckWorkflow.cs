@@ -56,7 +56,8 @@ namespace AfterSchoolLibrary.Integrations
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
-                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.Now,
+                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
             };
             messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
             return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
@@ -70,17 +71,19 @@ namespace AfterSchoolLibrary.Integrations
 
     public class SterlingCredentials
     {
-        public SterlingCredentials(string endpoint, string clientId, string clientSecret, string packageId)
+        public SterlingCredentials(string endpoint, string clientId, string clientSecret, string packageId, string accountId)
         {
             Endpoint = endpoint;
             ClientId = clientId;
             ClientSecret = clientSecret;
             PackageId = packageId;
+            AccountId = accountId;
         }
 
         public string Endpoint { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
         public string PackageId { get; set; }
+        public string AccountId { get; set; }
     }
 }

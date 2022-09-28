@@ -1,0 +1,126 @@
+﻿@model BackgroundCheck
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Complete Registration";
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
+    var registrationStartPageAccount = (Account) ViewBag.RegistrationStartPageAccount;
+}
+
+@{
+    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
+
+    Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", registrationStartPageAccount,
+        new ViewDataDictionary {{"ParticipationObject", participationObject}});
+
+    Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, $"Requesting Background Check for <strong>{participationObject.Name}</strong>", ""),
+        new ViewDataDictionary {{"hidebuttons", true}});
+}
+
+<style>
+    .background-check-table {
+        border: 1px solid black;
+        margin: 0 auto;
+    }
+    .background-check-table td {
+        border: 1px solid black;
+    }
+</style>
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+                <div class="text-center reg-instructions">
+                    <p>
+                        <strong>Request Background Check</strong>
+                    </p>
+                </div>
+                <h3 class="text-center reg-instructions">
+                    You must click the button to request a background check.
+                </h3>
+                <table class="background-check-table">
+                    <tr>
+                        <td>WebUserId</td>
+                        <td>@(Model?.WebUserId)</td>
+                    </tr>
+                    <tr>
+                        <td>RequestedForFiscalAccountId</td>
+                        <td>@(Model?.RequestedForFiscalAccountId)</td>
+                    </tr>
+                    <tr>
+                        <td>BackgroundCheckStatusId</td>
+                        <td>@(Model?.BackgroundCheckStatusId)</td>
+                    </tr>
+                    <tr>
+                        <td>BackgroundCheckSourceId</td>
+                        <td>@(Model?.BackgroundCheckSourceId)</td>
+                    </tr>
+                    <tr>
+                        <td>SterlingCandidateId</td>
+                        <td>@(Model?.SterlingCandidateId)</td>
+                    </tr>
+                    <tr>
+                        <td>SterlingInviteUrl</td>
+                        <td>@(Model?.SterlingInviteUrl)</td>
+                    </tr>
+                    <tr>
+                        <td>ExpirationDate</td>
+                        <td>@(Model?.ExpirationDate)</td>
+                    </tr>
+                    <tr>
+                        <td>SterlingEmailSentDate</td>
+                        <td>@(Model?.SterlingEmailSentDate)</td>
+                    </tr>
+                    <tr>
+                        <td>VolunteerCompletedDate</td>
+                        <td>@(Model?.VolunteerCompletedDate)</td>
+                    </tr>
+                    <tr>
+                        <td>SterlingReviewCompleteDate</td>
+                        <td>@(Model?.SterlingReviewCompleteDate)</td>
+                    </tr>
+                    <tr>
+                        <td>ManualReviewCompleteDate</td>
+                        <td>@(Model?.ManualReviewCompleteDate)</td>
+                    </tr>
+                </table>
+                <h3 class="text-center reg-instructions">
+                    You must click the button to request a background check.
+                </h3>
+                <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("BackgroundCheck", "VolunteerRegistration")" enctype="multipart/form-data">
+                    <input type="hidden" id="signature" name="signature" value=""/>
+                    <div class="row padding-v-20">
+                        <div class="col-md-6 col-md-offset-3">
+                            @if (Model is null)
+                            {
+                                <button type="submit" id="btn-register" class="btn btn-register-primary btn-lg">
+                                    Request Background Check &raquo;
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" id="btn-register" class="btn btn-register-primary btn-lg" disabled="disabled">
+                                    Background Check Requested
+                                </button>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="padding-v-20 text-center">
+                            <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, () => {
+        $('#register-form').submit(() => {
+            $('#btn-register').html('Saving...').prop('disabled', true);
+        });
+    });
+</script>

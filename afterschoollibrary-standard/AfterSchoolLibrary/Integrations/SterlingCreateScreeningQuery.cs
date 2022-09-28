@@ -35,6 +35,7 @@ namespace AfterSchoolLibrary.Integrations
             {
                 CandidateId = candidateId,
                 PackageId = credentials.PackageId,
+                AccountId = credentials.AccountId,
                 Invite = new SterlingScreeningInviteRequest {Method = "link"},
             };
             request.Body = jsonSerializer.Serialize(sterlingRequest);
@@ -56,6 +57,9 @@ namespace AfterSchoolLibrary.Integrations
 
         [JsonProperty(PropertyName = "packageId")]
         public string PackageId { get; set; }
+
+        [JsonProperty(PropertyName = "accountId")]
+        public string AccountId { get; set; }
 
         [JsonProperty(PropertyName = "invite")]
         public SterlingScreeningInviteRequest Invite { get; set; }

@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
                 },
             });
 
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
 
             var query = new SterlingCreateScreeningQuery(http.Object, json.Object);
             const string token = "my-token";
@@ -51,6 +51,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
 
             Assert.That(capturedScreeningRequest.CandidateId, Is.EqualTo(candidateId));
             Assert.That(capturedScreeningRequest.PackageId, Is.EqualTo(credentials.PackageId));
+            Assert.That(capturedScreeningRequest.AccountId, Is.EqualTo(credentials.AccountId));
             Assert.That(capturedScreeningRequest.Invite.Method, Is.EqualTo("link"));
         }
 
@@ -61,7 +62,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             var http = new Mock<IHttpClient>();
             http.Setup(x => x.ExecuteAsync(It.IsAny<IHttpRequest>()))
                 .ReturnsAsync(response);
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             var json = new Mock<IJsonSerializer>();
             var query = new SterlingCreateScreeningQuery(http.Object, json.Object);
             var candidateId = Guid.NewGuid().ToString();
@@ -110,11 +111,12 @@ namespace AfterSchoolLibrary.Tests.Integrations
             {
                 CandidateId = "3e4f84e3-9078-4451-a8b8-5897f4f4f4e3",
                 PackageId = "92979",
+                AccountId = "44771",
                 Invite = new SterlingScreeningInviteRequest {Method = "link"},
             });
 
-            Assert.That(result,
-                Is.EqualTo("{\"candidateId\":\"3e4f84e3-9078-4451-a8b8-5897f4f4f4e3\",\"packageId\":\"92979\",\"invite\":{\"method\":\"link\"}}"));
+            Assert.That(result, Is.EqualTo(
+                "{\"candidateId\":\"3e4f84e3-9078-4451-a8b8-5897f4f4f4e3\",\"packageId\":\"92979\",\"accountId\":\"44771\",\"invite\":{\"method\":\"link\"}}"));
         }
     }
 }
