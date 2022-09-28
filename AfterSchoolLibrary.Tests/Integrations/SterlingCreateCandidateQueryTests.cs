@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
 
             var query = new SterlingCreateCandidateQuery(http.Object, json.Object);
 
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             const string token = "my-token";
             var webUser = new WebUser
             {
@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
 
             http.Setup(x => x.ExecuteAsync(It.IsAny<IHttpRequest>()))
                 .ReturnsAsync(response);
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             var json = new Mock<IJsonSerializer>();
 
             var query = new SterlingCreateCandidateQuery(http.Object, json.Object);

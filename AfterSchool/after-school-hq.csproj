@@ -1483,6 +1483,7 @@
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
+    <Content Include="Views\VolunteerRegistration\BackgroundCheck.cshtml" />
     <Content Include="wooten-center.html" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.all.min.js" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.min.css" />
