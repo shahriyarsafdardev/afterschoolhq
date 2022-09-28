@@ -19,7 +19,7 @@
             : "per class attended"
         : "";
 
-    var startsToday = participationObject.OwnerAccount.ConvertFromAccountTimeZone(SessionVariables.CurrentRegistrant.GetPlanStartDate(subscriptionPlan, participationObject).Date).Date == DateTime.UtcNow.Date;
+    var startsToday = participationObject.OwnerAccount.ConvertFromAccountTimeZone(SessionVariables.CurrentRegistrant.GetPlanStartDate(subscriptionPlan, participationObject)).Date == DateTime.UtcNow.Date;
 }
 
 <div class="margin-t-20 padding-v-20">
@@ -285,9 +285,9 @@
     }
 
     function updateTotals(regFee, regTotalToday) {
-        let total = regFee + regTotalToday + getSubscriptionTotalValue();
+        let total = regFee + regTotalToday;
         if (@Json.Encode(startsToday)) {
-            total += getSubscriptionTotalValueCC();
+            total += getSubscriptionTotalValue();
         }
         $('.total-due-today').html(total.toFixed(2));
     }
