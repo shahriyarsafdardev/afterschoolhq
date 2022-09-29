@@ -1294,7 +1294,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            ViewBag.Messages = new SystemMessages();;
+            ViewBag.Messages = new SystemMessages();
             return View(currentAccount);
         }
 
