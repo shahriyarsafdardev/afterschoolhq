@@ -1294,19 +1294,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var packages = currentAccount.GetAccountPackages(msgs);
-
-            if (packages.Any(package => package.IsActive && package.IsFree))
-            {
-                RedirectToAction("index", "Home");
-            }
-
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Messages = msgs;
-
+            ViewBag.Messages = new SystemMessages();;
             return View(currentAccount);
         }
 
