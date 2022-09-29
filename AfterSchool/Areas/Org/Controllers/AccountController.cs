@@ -1297,8 +1297,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var packages = currentAccount.GetAccountPackages(msgs);
 
-            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
-                return RedirectToAction("NewBilling");
+            if (packages.Any(package => package.IsActive && package.IsFree))
+            {
+                RedirectToAction("index", "Home");
+            }
 
             ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
             ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
