@@ -277,11 +277,8 @@
 
 <script>
     function allowContinue() {
-        if ($('#payinperson').is(':checked')) {
-            $('#btn-continue').prop('disabled', false);
-        } else {
-            $('#btn-continue').prop('disabled', true);
-        }
+        let isPayInPersonIsChecked = $('#payinperson').is(':checked');
+        $('#btn-continue').prop('disabled', !isPayInPersonIsChecked);
     }
 
     function updateTotals(regFee, regTotalToday) {
@@ -307,30 +304,23 @@
     function updateTotalsACH(regFee, regTotalToday) {
         let total = regFee + regTotalToday;
         if (@Json.Encode(startsToday)) {
-            total += getSubscriptionTotalValueACH();
+            total += getSubscriptionTotalValue();
         }
         $('.total-due-today-ach').html(total.toFixed(2));
     }
 
     function getSubscriptionTotalValue() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html());
-        }
-        return 0;
+        let subscriptionTotalValue = $('#subscription-total-value').html();
+        return !isNaN(subscriptionTotalValue)
+            ? parseFloat(subscriptionTotalValue)
+            : 0;
     }
 
     function getSubscriptionTotalValueCC() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html()) + parseFloat($('#subscription-ccf-value').html());
-        }
-        return 0;
-    }
-
-    function getSubscriptionTotalValueACH() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html());
-        }
-        return 0;
+        let subscriptionTotalValue = $('#subscription-total-value').html();
+        return !isNaN(subscriptionTotalValue)
+            ? parseFloat(subscriptionTotalValue) + parseFloat($('#subscription-ccf-value').html())
+            : 0;
     }
 
     function updatePaymentOptionCost(paymentPlanId) {
@@ -341,10 +331,10 @@
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');
 
-        if (paymentPlanId == 0) {
+        if (paymentPlanId === 0) {
             updateTotals(getRegFee(), 0);
             updateTotalsCC(getRegFeeCC(), 0);
-            updateTotalsACH(getRegFeeACH(), 0);
+            updateTotalsACH(getRegFee(), 0);
             $('#registration-fee-row').removeClass('hide');
         } else {
             updateTotals(0, regTotalToday);
@@ -356,31 +346,26 @@
     }
 
     function getRegFee() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html());
-        }
-
-        return 0;
+        let feeTotalValue = $('#fee-total-value').html();
+        return !isNaN(feeTotalValue)
+            ? parseFloat(feeTotalValue)
+            : 0;
     }
 
     function getTotalCCFee(paymentPlanId) {
-        return parseFloat($('#payment-plan-ccf-' + paymentPlanId).html()) + parseFloat($('#subscription-ccf-value').html());
+        let paymentPlanCreditCardFee = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
+        
+        if (@Json.Encode(startsToday)) {
+            paymentPlanCreditCardFee += parseFloat($('#subscription-ccf-value').html());
+        }
+        return paymentPlanCreditCardFee;
     }
 
     function getRegFeeCC() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-ccf').html());
-        }
-
-        return 0;
-    }
-
-    function getRegFeeACH() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html());
-        }
-
-        return 0;
+        let feeTotalValue = $('#fee-total-value').html();
+        return !isNaN(feeTotalValue)
+            ? parseFloat(feeTotalValue) + parseFloat($('#fee-ccf').html())
+            : 0;
     }
 
     function sizePaymentBlock() {
@@ -395,22 +380,16 @@
     }
 
     function updatePaymentFees(paymentPlanId) {
-        var newccf = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
-        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
+        let newCreditCardFee = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
+        let newAchFee = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
 
-        $('#fee-ccf').html(newccf);
-        $('#fee-asf').html(newasf);
-        $('#fee-ccf-text').html('$' + newccf.toFixed(2));
-        $('#fee-asf-text').html('$' + newasf.toFixed(2));
+        $('#fee-ccf').html(newCreditCardFee);
+        $('#fee-asf').html(newAchFee);
+        $('#fee-ccf-text').html('$' + newCreditCardFee.toFixed(2));
+        $('#fee-asf-text').html('$' + newAchFee.toFixed(2));
     }
 
-    function updatePaymentFeesACH(paymentPlanId) {
-        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
-
-        if (!isNaN($('#subscription-total-value').html())) {
-            newasf += parseFloat($('#subscription-asf-value').html());
-        }
-
+    function updatePaymentFeesAch() {
         $('#fee-asf').html(0);
         $('#fee-asf-text').html('$0');
     }
@@ -425,14 +404,14 @@
             let paymentPlanId = $(this).attr('id').split('-')[1];
 
             updatePaymentFees(paymentPlanId);
-            updatePaymentFeesACH(paymentPlanId);
+            updatePaymentFeesAch();
             updatePaymentOptionCost(paymentPlanId);
             unapplyCoupon();
 
         });
 
         updatePaymentFees(0);
-        updatePaymentFeesACH(0);
+        updatePaymentFeesAch();
 
         @if ((participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
         {
@@ -442,7 +421,7 @@
         {
             @: updateTotals(getRegFee(), 0);
             @: updateTotalsCC(getRegFeeCC(), 0);
-            @: updateTotalsACH(getRegFeeACH(), 0);
+            @: updateTotalsACH(getRegFee(), 0);
             @: updateCC(getTotalCCFee(0), 0);
         }
 

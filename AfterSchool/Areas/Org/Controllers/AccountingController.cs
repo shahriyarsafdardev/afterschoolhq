@@ -191,9 +191,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var loginLink = StripeHelper.GetStripeHelperConnectAccount().CreateLoginLink(currentAccount.StripeUserId, msgs);
 
             if (loginLink.IsNotEmpty())
-                return Json(new { status = "ok", link = loginLink.Url }, JsonRequestBehavior.AllowGet);
+                return Json(new {status = "ok", link = loginLink.Url}, JsonRequestBehavior.AllowGet);
 
-            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, JsonRequestBehavior.AllowGet);
         }
 
         #region Payouts
@@ -330,7 +330,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var plans = currentAccount.GetSubscriptionPlans(msgs);
             var subscriptions = new List<RegistrantSubscriptionPlan>();
 
-            plans.ForEach(plan => { subscriptions.AddRange(plan.GetRegistrantSubscriptionPlans(msgs)); });
+            var listsOfRegistrantSubscriptionPlan = plans.Select(plan => plan.GetRegistrantSubscriptionPlans(msgs)).ToList();
+            listsOfRegistrantSubscriptionPlan.ForEach(registrantSubscriptionPlan => subscriptions.AddRange(registrantSubscriptionPlan));
 
             subscriptions = subscriptions.Where(subscription => subscription.CreateDate >= new DateTime(2019, 12, 1))
                 .OrderByDescending(x => x.CreateDate.Value)
@@ -725,6 +726,5 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         #endregion
-        
     }
 }

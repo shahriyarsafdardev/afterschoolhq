@@ -179,120 +179,119 @@ namespace AfterSchoolLibrary.Services
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
-            if (!plan.SplitCostEvenly || participationObject.RegistrationFinalized)
-            {
-                var billingAccount = checkoutObject.BillingAccount;
-                var purchasingAccount = checkoutObject.PayingAccount;
-                var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
-                var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
-                // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
-                var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
-                var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
-                var platformFeePercent = new decimal?();
-                string stripeAccountId = null;
-                string stripeCouponId = null;
-                var isSubscriptionRequired = true; //.. in some case, we will only charge.
-
-                if (useStripeConnectedAccount)
-                {
-                    platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc);
-                    stripeAccountId = billingAccount.StripeUserId;
-                }
-
-                if (plan.SplitCostEvenly)
-                    stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
-                else
-                    stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-
-                //.. charge parent if they tries to join mid-period
-                if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
-                    participationObject.Schedule.IsNotEmpty() &&
-                    participationObject.StartDate.HasValue &&
-                    participationObject.StartDate.Value.IsBefore(DateTime.Now))
-                {
-                    if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
-                        isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
-
-                    // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
-                    submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
-
-                    // we will update starting of subscription for this registrant to next cycle
-                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                        startDateTime = DateTime.UtcNow.LastDateOfWeek().AddDays(1);
-                }
-
-                var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
-
-                // create the subscription on the stripe account (could be added to main account or connected account)
-                if (isSubscriptionRequired)
-                {
-                    var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
-                        customerId: customer.Id,
-                        planId: plan.StripePlanId,
-                        isProrated: billingCycleAnchor.HasValue,
-                        sourceId: sourceId,
-                        platformFeePercent: platformFeePercent,
-                        stripeAccountId: stripeAccountId,
-                        startDate: startDateTime,
-                        endDate: endDateTime,
-                        billingCycleAnchor: billingCycleAnchor,
-                        stripeCouponId: stripeCouponId,
-                        metaData: new Dictionary<string, string>()
-                        {
-                            {"BillingAccountUid", billingAccount.Uid.ToString()},
-                            {"BillingAccountName", billingAccount.Name.ToString()},
-                            {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                            {"PayingAccountName", purchasingAccount.Name.ToString()},
-                            {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
-                            {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
-                            {"SourceId", sourceId},
-                            {"ApprovedBy", loggedInUser.Uid.ToString()},
-                            {"DateRequested", DateTime.Now.ToShortDateTimeString()},
-                        },
-                        msgs: msgs);
-
-                    if (msgs.HasErrors())
-                        return;
-
-                    if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
-                        new StripeHelper().CreateCustomerBalanceTransaction(
-                            subscription.CustomerId,
-                            participationObject.GetCheckoutCostWithConvenienceFee() * -1,
-                            "Credit for registration fee payment",
-                            new Dictionary<string, string>()
-                            {
-                                {"Subscription Id", subscription.Id},
-                                {"Plan Id", subscription.Items.First().Plan.Id},
-                                {"BillingAccountUid", billingAccount.Uid.ToString()},
-                                {"BillingAccountName", billingAccount.Name.ToString()},
-                                {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                                {"PayingAccountName", purchasingAccount.Name.ToString()},
-                                {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
-                                {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
-                            },
-                            msgs);
-
-                    var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
-
-                    checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
-                        submittedRecord,
-                        startDateTime,
-                        purchase,
-                        subscription.Id,
-                        feeObject,
-                        loggedInUser,
-                        msgs,
-                        dc);
-                }
-            }
-            else
+            if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
             {
                 var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
                 ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
+                return;
             }
+
+            var billingAccount = checkoutObject.BillingAccount;
+            var purchasingAccount = checkoutObject.PayingAccount;
+            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
+            // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
+            var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
+            var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
+            var platformFeePercent = new decimal?();
+            string stripeAccountId = null;
+            string stripeCouponId = null;
+            var isSubscriptionRequired = true; //.. in some case, we will only charge.
+
+            if (useStripeConnectedAccount)
+            {
+                platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc);
+                stripeAccountId = billingAccount.StripeUserId;
+            }
+
+            if (plan.SplitCostEvenly)
+                stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
+            else
+                stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+
+            //.. charge parent if they tries to join mid-period
+            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+                participationObject.Schedule.IsNotEmpty() &&
+                participationObject.StartDate.HasValue &&
+                participationObject.StartDate.Value.IsBefore(DateTime.Now))
+            {
+                if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                    isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+
+                // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
+                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
+
+                // we will update starting of subscription for this registrant to next cycle
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
+                    startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
+                    startDateTime = DateTime.UtcNow.LastDateOfWeek().AddDays(1);
+            }
+
+            var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
+
+            // create the subscription on the stripe account (could be added to main account or connected account)
+            if (!isSubscriptionRequired)
+                return;
+
+            var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
+                customerId: customer.Id,
+                planId: plan.StripePlanId,
+                isProrated: billingCycleAnchor.HasValue,
+                sourceId: sourceId,
+                platformFeePercent: platformFeePercent,
+                stripeAccountId: stripeAccountId,
+                startDate: startDateTime,
+                endDate: endDateTime,
+                billingCycleAnchor: billingCycleAnchor,
+                stripeCouponId: stripeCouponId,
+                metaData: new Dictionary<string, string>()
+                {
+                    {"BillingAccountUid", billingAccount.Uid.ToString()},
+                    {"BillingAccountName", billingAccount.Name.ToString()},
+                    {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                    {"PayingAccountName", purchasingAccount.Name.ToString()},
+                    {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+                    {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
+                    {"SourceId", sourceId},
+                    {"ApprovedBy", loggedInUser.Uid.ToString()},
+                    {"DateRequested", DateTime.Now.ToShortDateTimeString()},
+                },
+                msgs: msgs);
+
+            if (msgs.HasErrors())
+                return;
+
+            if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
+                new StripeHelper().CreateCustomerBalanceTransaction(
+                    subscription.CustomerId,
+                    participationObject.GetCheckoutCostWithConvenienceFee() * -1,
+                    "Credit for registration fee payment",
+                    new Dictionary<string, string>()
+                    {
+                        {"Subscription Id", subscription.Id},
+                        {"Plan Id", subscription.Items.First().Plan.Id},
+                        {"BillingAccountUid", billingAccount.Uid.ToString()},
+                        {"BillingAccountName", billingAccount.Name.ToString()},
+                        {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                        {"PayingAccountName", purchasingAccount.Name.ToString()},
+                        {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+                        {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
+                    },
+                    msgs);
+
+            var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
+            var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
+
+            checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
+                submittedRecord,
+                startDateTime,
+                purchase,
+                subscription.Id,
+                feeObject,
+                loggedInUser,
+                msgs,
+                dc);
         }
 
         public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
