@@ -156,26 +156,23 @@ namespace AfterSchoolLibrary.Services
         public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            var subCount = 0;
             var plan = registrant.GetRegistrantSubscriptionPlans(msgs, dc)
                 .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc));
-            if (plan.IsNotEmpty())
-            {
-                var planMain = plan.FirstOrDefault();
-                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc) : null;
-                if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
-                    subCount = planMain.TotalPeriods.Value - payments.Count();
-                else if (payments.IsNotEmpty())
-                    subCount = payments.Count();
-            }
+            if (plan.IsEmpty())
+                return 0;
 
-            return subCount;
+            var planMain = plan.FirstOrDefault();
+            var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc) : null;
+            if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
+                return planMain.TotalPeriods.Value - payments.Count;
+
+            return payments.IsNotEmpty() ? payments.Count : 0;
         }
 
-        public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+        private static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            msgs ??= new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
@@ -190,50 +187,39 @@ namespace AfterSchoolLibrary.Services
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
-            // var stripeCouponId = plan.DoesCouponApply(checkoutObject.Coupon) ? checkoutObject.Coupon.StripeCouponId : null;
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
-            var platformFeePercent = new decimal?();
-            string stripeAccountId = null;
-            string stripeCouponId = null;
-            var isSubscriptionRequired = true; //.. in some case, we will only charge.
 
-            if (useStripeConnectedAccount)
-            {
-                platformFeePercent = billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc);
-                stripeAccountId = billingAccount.StripeUserId;
-            }
+            var platformFeePercent = useStripeConnectedAccount
+                ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
+                : new decimal?();
+            var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
 
-            if (plan.SplitCostEvenly)
-                stripeCouponId = GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc);
-            else
-                stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+            var stripeCouponId = plan.SplitCostEvenly
+                ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
+                : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-            //.. charge parent if they tries to join mid-period
-            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
-                participationObject.Schedule.IsNotEmpty() &&
-                participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.Now))
-            {
-                if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
-                    isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
-
-                // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
-                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
-
-                // we will update starting of subscription for this registrant to next cycle
-                if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                    startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);
-                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
-                    startDateTime = DateTime.UtcNow.LastDateOfWeek().AddDays(1);
-            }
+            // // charge parent if they tries to join mid-period
+            // if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+            //     participationObject.Schedule.IsNotEmpty() &&
+            //     participationObject.StartDate.HasValue &&
+            //     participationObject.StartDate.Value.IsBefore(DateTime.Now))
+            // {
+            //     // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
+            //     submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, true, loggedInUser, msgs, dc);
+            //
+            //     startDateTime = plan.BillingPeriodTypeId switch
+            //     {
+            //         // we will update starting of subscription for this registrant to next cycle
+            //         BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
+            //         BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
+            //         _ => startDateTime,
+            //     };
+            // }
 
             var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
-            if (!isSubscriptionRequired)
-                return;
-
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
@@ -245,12 +231,12 @@ namespace AfterSchoolLibrary.Services
                 endDate: endDateTime,
                 billingCycleAnchor: billingCycleAnchor,
                 stripeCouponId: stripeCouponId,
-                metaData: new Dictionary<string, string>()
+                metaData: new Dictionary<string, string>
                 {
                     {"BillingAccountUid", billingAccount.Uid.ToString()},
-                    {"BillingAccountName", billingAccount.Name.ToString()},
+                    {"BillingAccountName", billingAccount.Name},
                     {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                    {"PayingAccountName", purchasingAccount.Name.ToString()},
+                    {"PayingAccountName", purchasingAccount.Name},
                     {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
                     {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
                     {"SourceId", sourceId},
@@ -267,14 +253,14 @@ namespace AfterSchoolLibrary.Services
                     subscription.CustomerId,
                     participationObject.GetCheckoutCostWithConvenienceFee() * -1,
                     "Credit for registration fee payment",
-                    new Dictionary<string, string>()
+                    new Dictionary<string, string>
                     {
                         {"Subscription Id", subscription.Id},
                         {"Plan Id", subscription.Items.First().Plan.Id},
                         {"BillingAccountUid", billingAccount.Uid.ToString()},
-                        {"BillingAccountName", billingAccount.Name.ToString()},
+                        {"BillingAccountName", billingAccount.Name},
                         {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                        {"PayingAccountName", purchasingAccount.Name.ToString()},
+                        {"PayingAccountName", purchasingAccount.Name},
                         {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
                         {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
                     },
@@ -1891,20 +1877,6 @@ namespace AfterSchoolLibrary.Services
         public static void ProcessActivityPayment(this Registrant registrant, CheckoutObject checkoutObject, Transaction transaction, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            // TODO: this is problematic, but a little better now
-            // you really don't know this is the amount paid, but it works for now
-            // var amountPaid = checkoutObject.TuitionCostNoFees;
-
-            // -- should be fixed now
-            // why is this being passed with no fees?
-
-            // Bharat: response to above question, (hypothetically) because in provider's student panel
-            // Darye wanted to show amount paid by parent without fees, and not the amount that we charged.
-            // Bharat had updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
-            var amountPaid = checkoutObject.OverrideAmount ?? (checkoutObject.PostPayPlan.IsNotEmpty()
-                ? checkoutObject.GetPostPayPlanCostTodayWithFees()
-                : checkoutObject.GetTotalCostWithoutSubscriptionToPurchaseTodayNoFees(msgs, dc));
-
             if (checkoutObject.AmountPaidByParent.HasValue && checkoutObject.AmountReceivedByProvider.HasValue)
             {
                 // need to track a payment for each Activity/ActivityGroup
@@ -1919,20 +1891,23 @@ namespace AfterSchoolLibrary.Services
                     loggedInUser: loggedInUser,
                     msgs: msgs,
                     dc: dc);
+                return;
             }
-            else
-            {
-                // need to track a payment for each Activity/ActivityGroup
-                checkoutObject.ParticipationObject.AddPayment(
-                    amount: amountPaid,
-                    registrant: registrant,
-                    transaction: transaction,
-                    registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
-                    createDate: checkoutObject.Date,
-                    loggedInUser: loggedInUser,
-                    msgs: msgs,
-                    dc: dc);
-            }
+
+            var amountPaidByParentWithoutFees = checkoutObject.OverrideAmount ?? (checkoutObject.PostPayPlan.IsNotEmpty()
+                ? checkoutObject.GetPostPayPlanCostTodayWithFees()
+                : checkoutObject.GetTotalCostWithoutSubscriptionToPurchaseTodayNoFees(msgs, dc));
+
+            // need to track a payment for each Activity/ActivityGroup
+            checkoutObject.ParticipationObject.AddPayment(
+                amount: amountPaidByParentWithoutFees,
+                registrant: registrant,
+                transaction: transaction,
+                registrantSubscriptionPlan: checkoutObject.RegistrantSubscriptionPlan,
+                createDate: checkoutObject.Date,
+                loggedInUser: loggedInUser,
+                msgs: msgs,
+                dc: dc);
         }
 
         private static string GetFormattedAnswerForCheckboxList(string s) => $"[{s}]";

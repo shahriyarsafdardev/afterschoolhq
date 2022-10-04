@@ -549,11 +549,6 @@ namespace AfterSchoolLibrary.Services
             return list;
         }
 
-        public static bool CheckIfSubscriptionRequired(this SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
-        {
-            return true;
-        }
-
         public static DateTime? GetPlanEndDateForRegistrantSubscriptionUtc(this SubscriptionPlan plan, DateTime startDateTime,
             ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
