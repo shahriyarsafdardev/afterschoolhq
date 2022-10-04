@@ -382,8 +382,8 @@ namespace AfterSchoolLibrary.Services
 
             if (!isSubscriptionRequired)
             {
-                //.. if there will be subscrition, we will calculate next cycle also just in case if we miss any classes
-                //.. bascially this will be just adding a cost directly as we will charge whole for next cycle
+                //.. if there will be subscription, we will calculate next cycle also just in case if we miss any classes
+                //.. basically this will be just adding a cost directly as we will charge whole for next cycle
                 var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
 
                 if (classesRemainingInNextCycle > 1)
@@ -1855,16 +1855,9 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return CreateNewContact(account, firstName, lastName, email, phone, false, loggedInUser, msgs, dc);
-        }
-
         public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, bool allowDuplicates,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            Registrant contact = null;
             var doesContactExist = account.DoesContactExist(
                 firstName.IfEmpty("").Trim(),
                 lastName.IfEmpty("").Trim(),
@@ -1872,25 +1865,25 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
-            if (!doesContactExist || allowDuplicates)
-            {
-                contact = new Registrant
-                {
-                    AccountId = account.ID,
-                    CreateDate = DateTime.UtcNow,
-                    LastModifiedDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID,
-                    LastModifiedBy = loggedInUser?.ID,
-                    IsContactOnly = true,
-                    RegistrantTypeId = RegistrantType.Individual,
-                    Email = email.IfEmpty("").Trim(),
-                    FirstName = firstName.IfEmpty("").Trim(),
-                    LastName = lastName.IfEmpty("").Trim(),
-                    Phone = phone.IfEmpty("").Trim(),
-                };
+            if (doesContactExist && !allowDuplicates)
+                return null;
 
-                msgs.AddRange(contact.Save(dc));
-            }
+            var contact = new Registrant
+            {
+                AccountId = account.ID,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID,
+                LastModifiedBy = loggedInUser?.ID,
+                IsContactOnly = true,
+                RegistrantTypeId = RegistrantType.Individual,
+                Email = email.IfEmpty("").Trim(),
+                FirstName = firstName.IfEmpty("").Trim(),
+                LastName = lastName.IfEmpty("").Trim(),
+                Phone = phone.IfEmpty("").Trim(),
+            };
+
+            msgs.AddRange(contact.Save(dc));
 
             return contact;
         }
@@ -1905,20 +1898,16 @@ namespace AfterSchoolLibrary.Services
             // -- should be fixed now
             // why is this being passed with no fees?
 
-            // Bharat: response to above question, (hypothetically) becuase in provider's student panel
-            // you(darye) wanted to show amount paid by parent without fees, and not the amount that we charged.
-            // I have updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
-            var amountPaid = checkoutObject.GetTotalCostToPurchaseTodayNoFees(msgs, dc);
-
-            if (checkoutObject.PostPayPlan.IsNotEmpty())
-                amountPaid = checkoutObject.GetPostPayPlanCostTodayWithFees();
-
-            if (checkoutObject.OverrideAmount.HasValue)
-                amountPaid = checkoutObject.OverrideAmount.Value;
+            // Bharat: response to above question, (hypothetically) because in provider's student panel
+            // Darye wanted to show amount paid by parent without fees, and not the amount that we charged.
+            // Bharat had updated this logic to add both AmountReceivedByProvider and AmountPaidByParent with flag IsAmountProRated
+            var amountPaid = checkoutObject.OverrideAmount ?? (checkoutObject.PostPayPlan.IsNotEmpty()
+                ? checkoutObject.GetPostPayPlanCostTodayWithFees()
+                : checkoutObject.GetTotalCostWithoutSubscriptionToPurchaseTodayNoFees(msgs, dc));
 
             if (checkoutObject.AmountPaidByParent.HasValue && checkoutObject.AmountReceivedByProvider.HasValue)
             {
-                // need to track a payment for each activity/activitygroup
+                // need to track a payment for each Activity/ActivityGroup
                 checkoutObject.ParticipationObject.AddPayment(
                     amountReceivedByProvider: checkoutObject.AmountReceivedByProvider.Value,
                     amountPaidByParent: checkoutObject.AmountPaidByParent.Value,
@@ -1933,7 +1922,7 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                // need to track a payment for each activity/activitygroup
+                // need to track a payment for each Activity/ActivityGroup
                 checkoutObject.ParticipationObject.AddPayment(
                     amount: amountPaid,
                     registrant: registrant,
@@ -1946,12 +1935,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static List<SurveyResponse> GetSurveyRequest(this Registrant registrant)
-        {
-            return SurveyResponse.LoadByRegistrantId(registrant.ID.Value);
-        }
-
-        private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
+        private static string GetFormattedAnswerForCheckboxList(string s) => $"[{s}]";
 
         public static RegistrantHelper PrepareRegistrantDetails(this List<Registrant> registrants, Registrant masterRegistrant, SystemMessages msgs,
             DatabaseConnection dc = null)

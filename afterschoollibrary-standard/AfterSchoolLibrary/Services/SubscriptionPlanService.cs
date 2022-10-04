@@ -551,11 +551,6 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CheckIfSubscriptionRequired(this SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
         {
-            var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime);
-            if ((plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1) ||
-                (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7))
-                return false;
-
             return true;
         }
 
@@ -586,7 +581,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // make sure endDate > startDate for stripe
-            if (endDate.HasValue && DateTimeSpan.CompareDates(startDateTime, endDate.Value).TotalDays < 1)
+            if (endDate.HasValue && Math.Abs((endDate.Value - startDateTime).TotalDays) < 1)
                 endDate = startDateTime.AddDays(1);
 
             return endDate;
@@ -616,7 +611,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             // make sure endDate > startDate for stripe
-            if (endDate.HasValue && DateTimeSpan.CompareDates(startDateTime, endDate.Value).TotalDays < 1)
+            if (endDate.HasValue && Math.Abs((endDate.Value - startDateTime).TotalDays) < 1)
                 endDate = startDateTime.AddDays(1);
 
             return endDate;
