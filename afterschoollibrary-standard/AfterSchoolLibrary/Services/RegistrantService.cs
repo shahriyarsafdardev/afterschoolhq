@@ -210,7 +210,7 @@ namespace AfterSchoolLibrary.Services
                     isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
 
                 // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
-                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, true, loggedInUser, msgs, dc);
+                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
 
                 startDateTime = plan.BillingPeriodTypeId switch
                 {
