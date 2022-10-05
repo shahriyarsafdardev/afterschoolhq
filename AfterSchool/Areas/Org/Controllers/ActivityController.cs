@@ -2295,8 +2295,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (!isparentpricepostpay.IsNumber())
                     isparentpricepostpay = "0";
 
-                if (!cost.IsNumber())
-                    cost = "0";
+                /*if (!cost.IsNumber())
+                    cost = "0";*/
 
                 var values = new Dictionary<string, object>
                 {
