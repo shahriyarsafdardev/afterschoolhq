@@ -189,6 +189,7 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
+            var isSubscriptionRequired = true; //.. in some case, we will only charge.
 
             var platformFeePercent = useStripeConnectedAccount
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
@@ -199,25 +200,31 @@ namespace AfterSchoolLibrary.Services
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-            // // charge parent if they tries to join mid-period
-            // if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
-            //     participationObject.Schedule.IsNotEmpty() &&
-            //     participationObject.StartDate.HasValue &&
-            //     participationObject.StartDate.Value.IsBefore(DateTime.Now))
-            // {
-            //     // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
-            //     submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, true, loggedInUser, msgs, dc);
-            //
-            //     startDateTime = plan.BillingPeriodTypeId switch
-            //     {
-            //         // we will update starting of subscription for this registrant to next cycle
-            //         BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
-            //         BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
-            //         _ => startDateTime,
-            //     };
-            // }
+            // Charge parent if they try to join mid-period.
+            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+                participationObject.Schedule.IsNotEmpty() &&
+                participationObject.StartDate.HasValue &&
+                participationObject.StartDate.Value.IsBefore(DateTime.Now))
+            {
+                if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
+                    isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+
+                // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
+                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, true, loggedInUser, msgs, dc);
+
+                startDateTime = plan.BillingPeriodTypeId switch
+                {
+                    // we will update starting of subscription for this registrant to next cycle
+                    BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
+                    BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
+                    _ => startDateTime,
+                };
+            }
 
             var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
+
+            if (!isSubscriptionRequired)
+                return;
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
