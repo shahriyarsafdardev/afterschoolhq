@@ -1,0 +1,65 @@
+﻿@model Account
+@{ 
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var currentPackage = (AccountPackage)ViewBag.CurrentPackage;
+
+    Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
+}
+
+<style>
+    .top-icon{
+        width:  87px;    
+    }
+    p {
+        margin: 30px;
+    }
+</style>
+
+<div class="main-content-new">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-cash"></i> Extend Free Trial - Completed
+        </div>
+        <div class="panel-body padding-lr-zero-sm">
+            <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center">
+                <img class="top-icon" src="~/Assets/img/thumbs-up.svg" alt="ThumbUp"/>
+                <p class="text-medium">
+                    <span>
+                        We have notified our support team about your trial extension. You can <br/>
+                        expect to hear back from someone in [Time].
+                    </span>
+                </p>
+                <p class="text-medium">
+                    <span>
+                        If you need additional support, please click the contact button below.
+                    </span>
+                </p>
+
+                <div class="col-lg-4 col-lg-offset-4 col-md-6 text-medium-small">
+                    <div class="pull-left">
+                        <button type="button"
+                                data-dismiss="modal"
+                                class="btn btn-primary searchActivitiesBtn btn-md"
+                                onclick='location.href="@Url.Action("SelectPlan" , "Account")"'>
+                            Select Plan
+                        </button>
+                    </div>
+                    <div class="pull-right">
+                        <a type="button"
+                                data-dismiss="modal"
+                                class="btn btn-primary btn-md"
+                                href='https://afterschoolhq.zendesk.com/hc/en-us/requests/new'
+                                target="_blank">
+                            Contact a Support Specialist
+                        </a>
+                    </div>
+                </div>  
+
+            </div>
+        </div>
+    </div>
+</div>

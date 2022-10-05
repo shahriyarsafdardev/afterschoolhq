@@ -1366,6 +1366,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(currentAccount);
         }
+        
 
         [HttpGet]
         public ActionResult DowngradeToFree(string newPlan)
@@ -1423,7 +1424,27 @@ namespace AfterSchool.Areas.Org.Controllers
             SetTempMessages(msgs);
             return RedirectToAction("SelectPlan");
         }
+        
+        [HttpGet]
+        public ActionResult ExtendTrialDone()
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            accountPackage.UpdateTrialDaysWithStripe(accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger() + 2, msgs);
+            
+            if(msgs.HasNoErrors())
+                msgs.AddRange(EmailHelper.SendEmailToSupportAndSale(
+                    $"{currentAccount.Name} has requested to Extend their free trial",
+                    $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
+                ));
 
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+        
         [HttpGet]
         public ActionResult SelectPlanDone()
         {
