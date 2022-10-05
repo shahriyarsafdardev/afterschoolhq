@@ -82,8 +82,6 @@ namespace AfterSchoolLibrary.Services
                 return transaction.Amount.Value;
             }
 
-            ;
-
             return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc), 0);
         }
 
