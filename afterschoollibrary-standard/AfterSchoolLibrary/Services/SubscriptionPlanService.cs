@@ -551,9 +551,9 @@ namespace AfterSchoolLibrary.Services
 
         public static bool CheckIfSubscriptionRequired(this SubscriptionPlan plan, DateTime startDateTime, DateTime endDateTime)
         {
-            var timeSpan = endDateTime - startDateTime;
-            var tooShort = (plan.BillingPeriodTypeId == BillingPeriodType.Month && timeSpan.Days <= 30)
-                           || (plan.BillingPeriodTypeId == BillingPeriodType.Week && timeSpan.Days <= 7);
+            var dateSpan = DateTimeSpan.CompareDates(startDateTime, endDateTime);
+            var tooShort = (plan.BillingPeriodTypeId == BillingPeriodType.Month && dateSpan.Months <= 1)
+                           || (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7);
             return !tooShort;
         }
 
