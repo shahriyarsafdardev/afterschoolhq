@@ -1366,6 +1366,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(currentAccount);
         }
+        
 
         [HttpGet]
         public ActionResult DowngradeToFree(string newPlan)
@@ -1424,6 +1425,54 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("SelectPlan");
         }
 
+        [HttpGet]
+        public ActionResult ExtendTrialDone()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            HandleTempMessages(msgs);
+            
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ExtendTrial()
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
+                    accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs); 
+                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSales(
+                    $"{currentAccount.Name} has requested to Extend their free trial",
+                    $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
+                ));
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+            );
+
+            if (msgs.HasErrors())
+            {
+                SetTempMessages(msgs);
+                return RedirectToAction("SelectPlan");
+            }
+
+            return RedirectToAction("ExtendTrial");
+        }
+        
         [HttpGet]
         public ActionResult SelectPlanDone()
         {
