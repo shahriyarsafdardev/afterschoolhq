@@ -403,18 +403,18 @@
                 </div>
             </div>
                         
-            <div class="panel-body hide text-center" id="enter-payment-details-free-panel-body">
+            @*<div class="panel-body hide text-center" id="enter-payment-details-free-panel-body">
                 <p class="text-medium">
                     You have chosen to downgrade to the Free Plan. No payment details are required.
                 </p>
                 <p class="padding-v-20">
-                    <button type="button" 
-                            class="btn btn-primary btn-lg" 
-                            onclick="@Url.Action("DowngradeToFree", "Account", new {newPlan = packages.First(x => x.IsFree(BillingPeriodType.Month)).Uid.ToString()})">
+                <button type="button" 
+                        class="btn btn-primary btn-lg" 
+                        onclick="@Url.Action("DowngradeToFree", "Account", new {newPlan = packages.First(x => x.IsFree(BillingPeriodType.Month)).Uid.ToString()})">
                         Switch to Free Plan
                     </button>
                 </p>
-            </div>
+            </div>*@
         </div>
                     
     </div>

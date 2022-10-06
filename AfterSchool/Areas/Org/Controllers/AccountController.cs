@@ -1432,7 +1432,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
-            accountPackage.UpdateTrialDaysWithStripe(accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger() + 2, msgs);
+            var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
+                    accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => {msgs.AddRange(smsgs); },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+            );
             
             if(msgs.HasNoErrors())
                 msgs.AddRange(EmailHelper.SendEmailToSupportAndSale(
