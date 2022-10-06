@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing.Imaging;
 using System.IO;
@@ -32,7 +31,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet, 
+        public ActionResult Index(string invite, string orgName, AccountType orgType = AccountType.NotSet, SignUpType signUpType = SignUpType.NotSet,
             bool quickStart = false, bool isRequestOnlyAccess = false)
         {
             if (invite.IsBlank() && !quickStart)
@@ -44,14 +43,14 @@ namespace AfterSchool.Controllers
                 InviteCodeToShare = invite,
                 OrgName = orgName,
                 SignupType = signUpType,
-                OrgType = orgType
+                OrgType = orgType,
             };
 
             ViewBag.Messages = new SystemMessages();
-            
+
             if (quickStart)
                 return View("IndexNew", signupIndexVM);
-            
+
             return View(signupIndexVM);
         }
 
@@ -149,7 +148,7 @@ namespace AfterSchool.Controllers
 
             return View(model);
         }
-        
+
         [HttpGet]
         public ActionResult Welcome(string invite, string isrequestonlyaccess, string signuptype, string package, string period, string referrer)
         {
@@ -163,19 +162,15 @@ namespace AfterSchool.Controllers
             if (invite.IsGuid())
             {
                 invitingAccount = Account.LoadByInviteCodeToShare(invite.ToGuid(), msgs);
-                
+
                 if (currentAccount.IsNotEmpty() && currentUser.IsNotEmpty())
                 {
                     if (currentUser.HasMultipleAccounts() || currentAccount.AccountTypeId != AccountType.Registrant)
                         return RedirectToAction("index", "login", new {returnurl = Request["returnurl"], invite});
                 }
             }
-            else
-            {
-                signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger()
-                    ? (SignUpType) signuptype.ToInteger()
-                    : SignUpType.TrialSignUp;
-            }
+
+            signupTypeId = signuptype.IsNotEmpty() && signuptype.IsInteger() ? (SignUpType) signuptype.ToInteger() : SignUpType.TrialSignUp;
             
             if (referrer.IsGuid())
                 referrerAccount = Account.LoadByReferralCode(referrer.ToGuid(), msgs);
@@ -187,10 +182,10 @@ namespace AfterSchool.Controllers
 
             if (selectedPackage.IsEmpty() && invitingAccount.IsNotEmpty())
                 selectedPackage = PackageService.GetFreePackage(msgs);
-                
+
             if (selectedPackage.IsEmpty())
                 selectedPackage = PackageService.GetDefaultCustomerPackage(msgs);
-            
+
             var model = new SignUpIndexViewModel()
             {
                 IsRequestOnlyAccess = isrequestonlyaccess.IsBoolean() && isrequestonlyaccess.ToBoolean(),
@@ -206,7 +201,7 @@ namespace AfterSchool.Controllers
             };
             return View(model);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult IndexNew(SignUpIndexViewModel model)
@@ -291,7 +286,7 @@ namespace AfterSchool.Controllers
                                 accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                 packageId: PackageService.GetFreePackage(amsgs, adc).ID,
                                 BillingPeriodType.Month,
-                                timeZone: null, 
+                                timeZone: null,
                                 signUpTypeId: model.SignupType,
                                 loggedInUser: user,
                                 msgs: amsgs,
@@ -336,12 +331,11 @@ namespace AfterSchool.Controllers
 
                         if (referrerAccount.IsNotEmpty())
                             account.AddReferrerAccount(referrerAccount, amsgs, adc);
-                        
                     },
                     onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
-                        
+
                         LoadSessionInfo(user, account, msgs: msgs);
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
@@ -349,7 +343,7 @@ namespace AfterSchool.Controllers
                             WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
 
                         var invitingAccountName = invitingAccount?.Name ?? "";
-                        
+
                         //.. send support email to AHQ just to notifiy the team that a account has been created
                         BackgroundJob.Enqueue(() =>
                             EmailHelper.SendEmail(
@@ -363,7 +357,7 @@ namespace AfterSchool.Controllers
                                 $"</p>",
                                 true)
                         );
-                        
+
                         var webSession = SessionVariables.WebSession;
 
                         // LOG: WebUserName Created Account Account
@@ -400,8 +394,8 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("startsubscription", "onboarding", new {area = "org"});
                 else if (invitingAccount.IsNotEmpty())
                     return RedirectToAction("index", "onboarding", new {area = "org", showGettingStarted = true});
-                
-                return RedirectToAction("freetrial", "onboarding", new { area = "org" });
+
+                return RedirectToAction("freetrial", "onboarding", new {area = "org"});
             }
 
 
@@ -578,7 +572,7 @@ namespace AfterSchool.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add("Your account has been verified", MessageType.Success);
-                    
+
                     // this is only here if the user is already logged in, there's a chance the user won't be logged in
                     var currentAccount = SessionVariables.CurrentAccount;
                     var currentUser = SessionVariables.CurrentUser;
@@ -590,7 +584,7 @@ namespace AfterSchool.Controllers
                     // if not logged in you need to redirect to login afterwards.
                     if (currentAccount.IsEmpty() || currentUser.IsEmpty())
                     {
-                        ViewBag.Url = AfterSchoolLibrary.Helpers.Utilities.LoginUrl(redirectUrl);
+                        ViewBag.Url = Utilities.LoginUrl(redirectUrl);
                     }
                     else if (redirectUrl.IsNotEmpty())
                     {
