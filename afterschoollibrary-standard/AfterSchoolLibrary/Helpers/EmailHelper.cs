@@ -46,7 +46,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
         
-        public static SystemMessages SendEmailToSupportAndSale(string subject, string body)
+        public static SystemMessages SendEmailToSupportAndSales(string subject, string body)
         {
             var msgs = new SystemMessages();
             var mailMsgs = SendGridHelper.SendMail(

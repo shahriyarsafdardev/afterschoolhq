@@ -1456,7 +1456,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs); 
-                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSale(
+                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSales(
                     $"{currentAccount.Name} has requested to Extend their free trial",
                     $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
                 ));

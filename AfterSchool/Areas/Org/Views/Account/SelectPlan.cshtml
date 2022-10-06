@@ -10,7 +10,7 @@
     var setupIntentClientSecret = (string) ViewBag.SetupIntentClientSecret;
     var returnUrl = "";
     var maxFeatureLines = packages.Max(package => package.FeatureDescription.Split('\n').Length);
-    var canRequestMoreTime = currentPackage.GetFeature(FeatureType.TrialDays).GetMaxValue() > 14 ? false : true;
+    var canRequestMoreTime = !currentPackage.IsDuringTrial && currentPackage.GetFeature(FeatureType.TrialDays).GetMaxValue() <= 14 ? true : false;
     
     packages.ForEach(package =>
     {
@@ -41,26 +41,6 @@
         font-size: 14px;
         cursor: pointer;
         border-bottom: solid 1px;
-    }
-    
-    .mobile-view
-    {
-        display: none;
-    }
-    .normal-view
-    {
-        display: block;
-    }
-    
-    @@media(max-width: 992px) {
-        .mobile-view
-        {
-            display: block;
-        }
-        .normal-view
-        {
-            display: none;
-        }
     }
 </style>
 
@@ -170,187 +150,29 @@
 <div class="row text-center padding-20">
     <p class="text-medium-small">**2 Months free with all annual contracts**</p>
 </div>
-<div class="row normal-view">
-    @foreach (var package in packages.OrderBy(x => x.Price))
-    {
-        if (currentPackage.IsDuringTrial && package.IsFree(BillingPeriodType.Month))
-        {
-            continue;
-        }
-                                    
-        if(!package.IsFree(BillingPeriodType.Month))
-        {
-            var pricePerMonth = Model.ReferrerAccountId.HasValue ? package.Price.Value * .9M : package.Price;
-            var pricePerYear = Model.ReferrerAccountId.HasValue ? package.PricePerYear.Value * .9M : package.PricePerYear;
-                                    
-            <div class="col-lg-12 col-xl-4 padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
-                <p class="text-muted">
-                    @Html.Raw(Model.ReferrerAccountId.HasValue && !package.IsFree(BillingPeriodType.Month) ? "10% Referral Discount" : "&nbsp;")
-                </p>
-                <h3 class="text-success">
-                    <span>@package.Name</span>
-                    @if (!package.IsFree(BillingPeriodType.Month))
-                    {
-                        <span>-</span>
-                        <span class="monthly hide">
-                            @pricePerMonth.ToCurrency() / Mo
-                        </span>
-                        <span class="annually">
-                            @((pricePerYear / 12).ToCurrency()) / Mo
-                        </span>
-                    }
-                </h3>
-                <p>
-                    @if (!package.IsFree(BillingPeriodType.Month))
-                    {
-                        <span class="monthly hide">
-                            <span id="monthly-price-@package.Uid">
-                                @pricePerMonth.ToCurrency()
-                            </span> Billed Monthly
-                        </span>
-                        <span class="annually">
-                            <span id="annual-price-@package.Uid">
-                                @pricePerYear.ToCurrency()
-                            </span> Billed Annually
-                        </span>
-                    }
-                    else
-                    {
-                        <span>&nbsp;</span>
-                    }
-                </p>
-                <p class="package-description text-medium-small">
-                    @package.Description
-                </p>
-                <hr/>
-                <p class="padding-v-20">
-                    @foreach (var featureLine in package.FeatureDescription.Split('\n'))
-                    {
-                        <span>@featureLine</span><br/>
-                    }
-                </p>
-                <p class="text-center">
-                    <button type="button"
-                            class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
-                            onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
-                                                
-                        @if (currentPackage.PackageId == package.ID)
-                        {
-                            <span>Continue with <strong>@package.Name</strong></span>
-                        }
-                        else if (package.Price > currentPackage.PackagePrice)
-                        {
-                            <span>Upgrade to <strong>@package.Name</strong></span>
-                        }
-                        else
-                        {
-                            <span>Downgrade to <strong>@package.Name</strong></span>
-                        }
+    <div class="row visible-sm visible-md visible-lg visible-xl">
+        
+        @Packages(packages, currentPackage, false);
 
-                    </button>
-                </p>
+        @if (canRequestMoreTime)
+        {
+            <div class="text-center extend-trial">
+                <a onclick="extendTrial()">Need more time to explore your free trial?</a>
             </div>
         }
-    }
-                                
-    @if (canRequestMoreTime && !currentPackage.IsDuringTrial)
-    {
-        <div class="text-center extend-trial">
-            <a onclick="extendTrial()">Need more time to explore your free trial?</a>
-        </div>
-    }
-                                
-</div>
-<div class="row mobile-view">
-    @foreach (var package in packages.OrderBy(x => x.Price).Reverse())
-    {
-        if (currentPackage.IsDuringTrial && package.IsFree(BillingPeriodType.Month))
-        {
-            continue;
-        }
-                                    
-        if(!package.IsFree(BillingPeriodType.Month))
-        {
-            var pricePerMonth = Model.ReferrerAccountId.HasValue ? package.Price.Value * .9M : package.Price;
-            var pricePerYear = Model.ReferrerAccountId.HasValue ? package.PricePerYear.Value * .9M : package.PricePerYear;
-                                    
-            <div class="col-lg-12 col-xl-4 padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
-                <p class="text-muted">
-                    @Html.Raw(Model.ReferrerAccountId.HasValue && !package.IsFree(BillingPeriodType.Month) ? "10% Referral Discount" : "&nbsp;")
-                </p>
-                <h3 class="text-success">
-                    <span>@package.Name</span>
-                    @if (!package.IsFree(BillingPeriodType.Month))
-                    {
-                        <span>-</span>
-                        <span class="monthly hide">
-                            @pricePerMonth.ToCurrency() / Mo
-                        </span>
-                        <span class="annually">
-                            @((pricePerYear / 12).ToCurrency()) / Mo
-                        </span>
-                    }
-                </h3>
-                <p>
-                    @if (!package.IsFree(BillingPeriodType.Month))
-                    {
-                        <span class="monthly hide">
-                            <span id="monthly-price-@package.Uid">
-                                @pricePerMonth.ToCurrency()
-                            </span> Billed Monthly
-                        </span>
-                        <span class="annually">
-                            <span id="annual-price-@package.Uid">
-                                @pricePerYear.ToCurrency()
-                            </span> Billed Annually
-                        </span>
-                    }
-                    else
-                    {
-                        <span>&nbsp;</span>
-                    }
-                </p>
-                <p class="package-description text-medium-small">
-                    @package.Description
-                </p>
-                <hr/>
-                <p class="padding-v-20">
-                    @foreach (var featureLine in package.FeatureDescription.Split('\n'))
-                    {
-                        <span>@featureLine</span><br/>
-                    }
-                </p>
-                <p class="text-center">
-                    <button type="button"
-                            class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
-                            onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
-                                                
-                        @if (currentPackage.PackageId == package.ID)
-                        {
-                            <span>Continue with <strong>@package.Name</strong></span>
-                        }
-                        else if (package.Price > currentPackage.PackagePrice)
-                        {
-                            <span>Upgrade to <strong>@package.Name</strong></span>
-                        }
-                        else
-                        {
-                            <span>Downgrade to <strong>@package.Name</strong></span>
-                        }
 
-                    </button>
-                </p>
+    </div>
+    <div class="row visible-xs">
+        
+        @Packages(packages, currentPackage, true);
+
+        @if (canRequestMoreTime)
+        {
+            <div class="text-center extend-trial">
+                <a onclick=extendTrial()>Need more time to explore your free trial?</a>
             </div>
         }
-    }
-    
-    @if (canRequestMoreTime && !currentPackage.IsDuringTrial)
-    {
-        <div class="text-center extend-trial">
-            <a onclick=extendTrial()>Need more time to explore your free trial?</a>
-        </div>
-    }
-</div>
+    </div>
 
 </div>
 
@@ -459,6 +281,83 @@
         </div>
     </div>
 </div>
+
+@helper Packages(List<Package> packages , AccountPackage currentPackage , bool reverse)
+{
+    foreach (var package in reverse ? packages.Where(x => !x.IsFree(BillingPeriodType.Month)).OrderBy(x => x.Price).Reverse() : packages.Where(x => !x.IsFree(BillingPeriodType.Month)).OrderBy(x => x.Price))
+    {
+        var pricePerMonth = Model.ReferrerAccountId.HasValue ? package.Price.Value * .9M : package.Price;
+            var pricePerYear = Model.ReferrerAccountId.HasValue ? package.PricePerYear.Value * .9M : package.PricePerYear;
+                                    
+            <div class="col-lg-12 col-xl-4 padding-20" style="@(currentPackage.PackageId == package.ID ? "border: solid 1px #999; background-color: #DDEAE0;":"")">
+                <p class="text-muted">
+                    @Html.Raw(Model.ReferrerAccountId.HasValue && !package.IsFree(BillingPeriodType.Month) ? "10% Referral Discount" : "&nbsp;")
+                </p>
+                <h3 class="text-success">
+                    <span>@package.Name</span>
+                    @if (!package.IsFree(BillingPeriodType.Month))
+                    {
+                        <span>-</span>
+                        <span class="monthly hide">
+                            @pricePerMonth.ToCurrency() / Mo
+                        </span>
+                        <span class="annually">
+                            @((pricePerYear / 12).ToCurrency()) / Mo
+                        </span>
+                    }
+                </h3>
+                <p>
+                    @if (!package.IsFree(BillingPeriodType.Month))
+                    {
+                        <span class="monthly hide">
+                            <span id="monthly-price-@package.Uid">
+                                @pricePerMonth.ToCurrency()
+                            </span> Billed Monthly
+                        </span>
+                        <span class="annually">
+                            <span id="annual-price-@package.Uid">
+                                @pricePerYear.ToCurrency()
+                            </span> Billed Annually
+                        </span>
+                    }
+                    else
+                    {
+                        <span>&nbsp;</span>
+                    }
+                </p>
+                <p class="package-description text-medium-small">
+                    @package.Description
+                </p>
+                <hr/>
+                <p class="padding-v-20">
+                    @foreach (var featureLine in package.FeatureDescription.Split('\n'))
+                    {
+                        <span>@featureLine</span><br/>
+                    }
+                </p>
+                <p class="text-center">
+                    <button type="button"
+                            class="btn @(package.IsFree(BillingPeriodType.Month) ? "btn-default" : "btn-primary") btn-lg btn-block"
+                            onclick="selectPackage('@package.Uid.ToString()', '@package.Name')">
+                                                
+                        @if (currentPackage.PackageId == package.ID)
+                        {
+                            <span>Continue with <strong>@package.Name</strong></span>
+                        }
+                        else if (package.Price > currentPackage.PackagePrice)
+                        {
+                            <span>Upgrade to <strong>@package.Name</strong></span>
+                        }
+                        else
+                        {
+                            <span>Downgrade to <strong>@package.Name</strong></span>
+                        }
+
+                    </button>
+                </p>
+            </div>
+    }
+}
 
 @section head
 {
