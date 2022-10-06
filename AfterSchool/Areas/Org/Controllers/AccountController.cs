@@ -1424,9 +1424,22 @@ namespace AfterSchool.Areas.Org.Controllers
             SetTempMessages(msgs);
             return RedirectToAction("SelectPlan");
         }
-        
+
         [HttpGet]
         public ActionResult ExtendTrialDone()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            HandleTempMessages(msgs);
+            
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ExtendTrial()
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -1440,19 +1453,24 @@ namespace AfterSchool.Areas.Org.Controllers
                     accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
                     accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
                 },
-                onSuccess: (SystemMessages smsgs) => {msgs.AddRange(smsgs); },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
-            );
-            
-            if(msgs.HasNoErrors())
-                msgs.AddRange(EmailHelper.SendEmailToSupportAndSale(
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs); 
+                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSale(
                     $"{currentAccount.Name} has requested to Extend their free trial",
                     $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
                 ));
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+            );
 
-            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
-            ViewBag.Messages = msgs;
-            return View(currentAccount);
+            if (msgs.HasErrors())
+            {
+                SetTempMessages(msgs);
+                return RedirectToAction("SelectPlan");
+            }
+
+            return RedirectToAction("ExtendTrial");
         }
         
         [HttpGet]

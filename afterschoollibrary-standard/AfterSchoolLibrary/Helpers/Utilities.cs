@@ -323,7 +323,7 @@ namespace AfterSchoolLibrary.Helpers
                 $"<p>Powered by <a href=\"{BaseUrl()}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
         }
         
-        public static EmailAddress SendGridSaleEmailAddress => new EmailAddress(AppSalesEmailAddress);
+        public static EmailAddress SendGridSalesEmailAddress => new EmailAddress(AppSalesEmailAddress);
     }
 
     public class KeyValuePair

@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Helpers
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(),
-                ccEmail:Email.SendGridSaleEmailAddress
+                ccEmail:Email.SendGridSalesEmailAddress
             );
 
             msgs.AddRange(mailMsgs);
