@@ -14,6 +14,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using ByteSizeLib;
+using SendGrid.Helpers.Mail;
 using Stripe;
 using AccountService = AfterSchoolLibrary.Services.AccountService;
 using Email = AfterSchoolLibrary.Helpers.Email;
@@ -1446,6 +1447,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
             var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+            
+            var emails =  String.Join(",", Email.AppSalesEmailAddress, Email.AppSalesEmailAddress);
+            
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -1455,13 +1459,21 @@ namespace AfterSchool.Areas.Org.Controllers
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
-                    msgs.AddRange(smsgs); 
-                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSales(
-                    $"{currentAccount.Name} has requested to Extend their free trial",
-                    $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
-                ));
+                    msgs.AddRange(smsgs);
+                    foreach (var email in emails.Split(','))
+                    {
+                        msgs.AddRange(
+                            EmailHelper.SendEmail(
+                                email,
+                                $"{currentAccount.Name} has requested to Extend their free trial",
+                                $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>",
+                                true
+                            )
+                            );
+                    }
                 },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
             );
 
             if (msgs.HasErrors())
@@ -1470,7 +1482,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("SelectPlan");
             }
 
-            return RedirectToAction("ExtendTrial");
+            return RedirectToAction("ExtendTrialDone");
         }
         
         [HttpGet]
