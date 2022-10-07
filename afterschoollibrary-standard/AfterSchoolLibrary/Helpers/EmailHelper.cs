@@ -45,24 +45,6 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }
-        
-        public static SystemMessages SendEmailToSupportAndSales(string subject, string body)
-        {
-            var msgs = new SystemMessages();
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(),
-                ccEmail:Email.SendGridSalesEmailAddress
-            );
-
-            msgs.AddRange(mailMsgs);
-
-            return msgs;
-        }
-
         public static SystemMessages SendPaymentReminder(RegistrantActivity ra)
         {
             var msgs = new SystemMessages();
