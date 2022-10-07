@@ -17,29 +17,34 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var account = SessionVariables.CurrentAccount;
+            var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
 
 
             // only redirect if onboarding steps haven't been acknowledged
-            if (account.CanReceivePaymentDeposits() &&
+            if (currentAccount.CanReceivePaymentDeposits() &&
                 (CookieVariables.OnboardingStepsAcknowledged.IsEmpty() || !CookieVariables.OnboardingStepsAcknowledged.ToBoolean()))
                 CookieVariables.OnboardingStepsAcknowledged = true.ToString();
 
-            if (account.OnboardingStepDone != OnboardingStepType.All)
+            if (currentAccount.OnboardingStepDone != OnboardingStepType.All)
                 return HandleOnboardingRedirect();
 
-            if (!account.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
+            // force to select a plan
+            if (accountPackage.IsTrialExpiredAndUnpaid(currentAccount))
+                return RedirectToAction("selectplan", "account");
+
+            if (!currentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (account.IsNewProviderForOtherAccounts())
+            if (currentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
-            if (account.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
-                (account.AccountTypeId != AccountType.School || account.GetExternalLeagueInviteCount() == 0))
+            if (currentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
+                (currentAccount.AccountTypeId != AccountType.School || currentAccount.GetExternalLeagueInviteCount() == 0))
                 return RedirectToAction("getstarted");
 
-            var activityCount = account.GetActivityCount(
+            var activityCount = currentAccount.GetActivityCount(
                 SessionVariables.AccountUserType,
                 currentUser,
                 null,
@@ -49,24 +54,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 null,
                 msgs);
 
-            var totalPaid = account.GetTotalAmountBilledOut(null, PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
-                            account.GetTotalAmountBilledOut(null, PaymentSourceType.ManualProvider, msgs: msgs);
+            var totalPaid = currentAccount.GetTotalAmountBilledOut(null, PaymentSourceType.AfterSchoolPlatform, msgs: msgs) +
+                            currentAccount.GetTotalAmountBilledOut(null, PaymentSourceType.ManualProvider, msgs: msgs);
 
             HandleTempMessages(msgs);
 
             ViewBag.Messages = msgs;
-            ViewBag.HasVisitorAccountsToApprove = account.GetRequestedVisitorAccountsCount(msgs) > 0;
-            ViewBag.HasOutstandingLeagueInvites = account.GetExternalLeagueInviteCount(msgs) > 0;
+            ViewBag.HasVisitorAccountsToApprove = currentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
+            ViewBag.HasOutstandingLeagueInvites = currentAccount.GetExternalLeagueInviteCount(msgs) > 0;
             ViewBag.TotalPaid = totalPaid;
             ViewBag.ActivityCount = activityCount;
-            ViewBag.CurrentRegistrations = account.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            ViewBag.RegistrationCount = account.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            ViewBag.TotalPresent = account.GetAttendancePresentCount(msgs);
-            ViewBag.TotalPossible = account.GetAttendancePossibleCount(msgs);
-            ViewBag.TotalCompleted = account.GetAttendanceCompletedCount(msgs);
-            ViewBag.ExternalLeagueCount = account.GetExternalLeagueCount(msgs);
+            ViewBag.CurrentRegistrations = currentAccount.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            ViewBag.RegistrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            ViewBag.TotalPresent = currentAccount.GetAttendancePresentCount(msgs);
+            ViewBag.TotalPossible = currentAccount.GetAttendancePossibleCount(msgs);
+            ViewBag.TotalCompleted = currentAccount.GetAttendanceCompletedCount(msgs);
+            ViewBag.ExternalLeagueCount = currentAccount.GetExternalLeagueCount(msgs);
 
-            return View(account);
+            return View(currentAccount);
         }
 
         [HttpGet]

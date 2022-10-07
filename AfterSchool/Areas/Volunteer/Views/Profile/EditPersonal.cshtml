@@ -1,0 +1,105 @@
+﻿@model Registrant
+@{
+    var msgs = (SystemMessages) ViewBag.msgs;
+    var personalQuestions = (List<FormQuestionViewModel>) ViewBag.personalQuestions;
+    var addressQuestions = (List<FormQuestionViewModel>) ViewBag.addressQuestions;
+    var emergencyQuestions = (List<FormQuestionViewModel>) ViewBag.emergencyQuestions;
+    
+    // Ids for Questions to disable
+    var emailQuestionId = personalQuestions.FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Id;
+    var phoneQuestionId = personalQuestions.FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)?.Id;
+}
+<style>
+.theme-text {
+    color: #00ae85;
+}
+</style>
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+
+        <div class="panel-body">
+
+            @if (Request["reg"].IsGuid() || Request["student"].IsGuid())
+            {
+                <div role="alert" class="alert alert-danger alert-icon">
+                    <div class="icon">
+                        <span class="s7-info"></span>
+                    </div>
+                    <div class="message">
+                        <p class="text-center text-medium">
+                            You must update/complete your profile in order to continue registration
+                        </p>
+                    </div>
+                </div>
+            }
+            <h3 class="col-md-9 col-md-offset-1 padding-v-20 theme-text">Personal Information</h3>
+            <p class="col-md-9 col-md-offset-3 padding-v-20">Updating your personal information will effect both your volunteer and parent accounts.</p>
+            <form class="form-horizontal"
+                  id="form-save-personal"
+                  method="post"
+                  action="@Url.Action("editpersonal", "profile", new {id = Model.Uid, reg = Request["reg"], student = Request["student"], returnUrl = Request["returnUrl"]})">
+
+                @foreach (var qvm in personalQuestions)
+                {
+                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                }
+
+                @foreach (var qvm in addressQuestions)
+                {
+                    Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                }
+                <h3 class="col-md-9 col-md-offset-1 padding-v-20 theme-text">Emergency Contact Details</h3>
+                <h4 class="col-md-9 col-md-offset-5 padding-v-20">First Emergency Contact</h4>
+                @foreach (var qvm in emergencyQuestions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact1))
+                {
+                    if (qvm.Question.QuestionDataTypeId != QuestionDataType.EmergencyContact1RelationshipToRegistrant)
+                    {
+                        Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                    }
+                }
+
+                <h4 class="col-md-9 col-md-offset-5 padding-v-20">Second Emergency Contact</h4>
+                @foreach (var qvm in emergencyQuestions.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.EmergencyContact2))
+                {
+                    if (qvm.Question.QuestionDataTypeId != QuestionDataType.EmergencyContact2RelationshipToRegistrant)
+                    {
+                        Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+                    }
+                }
+
+                <div class="margin-v-20">
+                    <div class="col-md-offset-3 col-md-6">
+                        <button type="submit" id="btn-save-personal" class="btn btn-primary">Save Changes</button>
+                        <button type="reset" class="btn btn-default">Discard Changes</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#form-save-personal').submit(function () {
+            $('#btn-save-personal').html('Saving...');
+            $('#btn-save-personal').prop('disabled', true);
+        });
+        
+        $("#@(emailQuestionId)").prop( "disabled", true );
+        $("#@(phoneQuestionId)").prop( "disabled", true );
+        
+        $('form').submit(function() {
+          $("@(emailQuestionId)").prop( "disabled", false );
+          $("@(phoneQuestionId)").prop( "disabled", false );
+        });  
+        
+    });
+    
+</script>

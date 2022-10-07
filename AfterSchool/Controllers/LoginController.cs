@@ -208,7 +208,7 @@ namespace AfterSchool.Controllers
 
             var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
             //We should not show deactivated accounts.
-            accounts = accounts.Where(x => x.IsActive == true).ToList();
+            accounts = accounts.Where(x => x.IsActive).ToList();
 
             if (invite.IsGuid())
                 accounts = accounts.Where(a => a.AccountTypeId.In(FormConstants.ProviderAccountTypes)).ToList();

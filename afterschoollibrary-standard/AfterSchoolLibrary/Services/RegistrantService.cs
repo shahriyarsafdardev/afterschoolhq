@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
-using System.Linq;
-using System.Collections.Generic;
-using System.Collections;
+using Stripe;
 using Twilio.Rest.Api.V2010.Account;
-using System.Net;
-using AfterSchoolLibrary.Billing;
-using Newtonsoft.Json.Linq;
-using AfterSchoolLibrary.Helpers;
+using Account = AfterSchoolLibrary.Models.Account;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantService
     {
-        public static WebUser MatchCreateOrUpdateUser(this Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, bool forceMatch = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static WebUser MatchCreateOrUpdateUser(this Registrant registrant, string firstname, string lastname, string email, string password = null,
+            bool isAfterSchool = false, bool forceMatch = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // connecting with an existing account that has a password
             // connecting with an existing account that doesn't have a password
@@ -50,7 +54,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         /// <summary>
-        /// TODO: Refactor and simplify
+        ///     TODO: Refactor and simplify
         /// </summary>
         /// <param name="registrant"></param>
         /// <param name="firstname"></param>
@@ -61,7 +65,8 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static WebUser CreateOrUpdateUser(Registrant registrant, string firstname, string lastname, string email, string password = null, bool isAfterSchool = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static WebUser CreateOrUpdateUser(Registrant registrant, string firstname, string lastname, string email, string password = null,
+            bool isAfterSchool = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             WebUser user = null;
@@ -81,7 +86,7 @@ namespace AfterSchoolLibrary.Services
                     if (amsgs.HasNoErrors())
                     {
                         if (user.IsEmpty())
-                        {                            
+                        {
                             user = new WebUser
                             {
                                 CreateDate = DateTime.UtcNow,
@@ -89,7 +94,7 @@ namespace AfterSchoolLibrary.Services
                                 Email = email.MaxChars(150),
                                 VerifiedAccount = false,
                                 IsActive = false,
-                                IsRegistered = false
+                                IsRegistered = false,
                             };
 
                             user.Username = WebUserService.GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
@@ -121,52 +126,54 @@ namespace AfterSchoolLibrary.Services
                     if (password.IsNotBlank() && user.Email.ToLower() != registrant.Email.ToLower())
                         user.SendVerificationEmail();
                 },
-                onFailure: (SystemMessages fmsgs) =>
-                {
-                    msgs.Add("Error creating account", MessageType.Error);
-                },
+                onFailure: (SystemMessages fmsgs) => { msgs.Add("Error creating account", MessageType.Error); },
                 dc: dc
             );
 
             return user;
         }
 
-        private static (Stripe.Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, SystemMessages msgs)
-        {           
+        private static (Customer customer, string sourceId) GetCustomerAndSourceForSubscription(CheckoutObject checkoutObject, SystemMessages msgs)
+        {
             if (checkoutObject.StripeSourceId.IsEmpty())
                 checkoutObject.LoadStripeSource(StripeAccountType.ConnectAccount, msgs);
 
             return (checkoutObject.PayingAccount.GetStripeCustomer(StripeAccountType.ConnectAccount, msgs), checkoutObject.StripeSourceId);
         }
 
-        public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, msgs, dc);
         }
 
-        public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
         }
 
-        public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var subCount = 0;
-            var plan = registrant.GetRegistrantSubscriptionPlans(msgs, dc).Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc));
+            var plan = registrant.GetRegistrantSubscriptionPlans(msgs, dc)
+                .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc));
             if (plan.IsNotEmpty())
             {
                 var planMain = plan.FirstOrDefault();
-                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc): null;
+                var payments = planMain.IsNotEmpty() ? planMain.GetPayments(msgs, dc) : null;
                 if (planMain.IsNotEmpty() && planMain.TotalPeriods.HasValue)
                     subCount = planMain.TotalPeriods.Value - payments.Count();
-                else if(payments.IsNotEmpty())
+                else if (payments.IsNotEmpty())
                     subCount = payments.Count();
             }
 
             return subCount;
         }
 
-        public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -198,9 +205,9 @@ namespace AfterSchoolLibrary.Services
                     stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
                 //.. charge parent if they tries to join mid-period
-                if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan && 
-                    participationObject.Schedule.IsNotEmpty() && 
-                    participationObject.StartDate.HasValue && 
+                if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+                    participationObject.Schedule.IsNotEmpty() &&
+                    participationObject.StartDate.HasValue &&
                     participationObject.StartDate.Value.IsBefore(DateTime.Now))
                 {
                     if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
@@ -211,7 +218,7 @@ namespace AfterSchoolLibrary.Services
 
                     // we will update starting of subscription for this registrant to next cycle
                     if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
-                        startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);                        
+                        startDateTime = DateTime.UtcNow.LastDateOfMonth().AddDays(1);
                     else if (plan.BillingPeriodTypeId == BillingPeriodType.Week)
                         startDateTime = DateTime.UtcNow.LastDateOfWeek().AddDays(1);
                 }
@@ -222,64 +229,64 @@ namespace AfterSchoolLibrary.Services
                 if (isSubscriptionRequired)
                 {
                     var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
-                                    customerId: customer.Id,
-                                    planId: plan.StripePlanId,
-                                    isProrated: billingCycleAnchor.HasValue,
-                                    sourceId: sourceId,
-                                    platformFeePercent: platformFeePercent,
-                                    stripeAccountId: stripeAccountId,
-                                    startDate: startDateTime,
-                                    endDate: endDateTime,
-                                    billingCycleAnchor: billingCycleAnchor,
-                                    stripeCouponId: stripeCouponId,
-                                    metaData: new Dictionary<string, string>()
-                                    {
-                                        { "BillingAccountUid", billingAccount.Uid.ToString() },
-                                        { "BillingAccountName", billingAccount.Name.ToString() },
-                                        { "PayingAccountUid", purchasingAccount.Uid.ToString() },
-                                        { "PayingAccountName", purchasingAccount.Name.ToString() },
-                                        { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
-                                        { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
-                                        { "SourceId", sourceId },
-                                        { "ApprovedBy", loggedInUser.Uid.ToString() },
-                                        { "DateRequested", DateTime.Now.ToShortDateTimeString() }
-                                    },
-                                    msgs: msgs);               
+                        customerId: customer.Id,
+                        planId: plan.StripePlanId,
+                        isProrated: billingCycleAnchor.HasValue,
+                        sourceId: sourceId,
+                        platformFeePercent: platformFeePercent,
+                        stripeAccountId: stripeAccountId,
+                        startDate: startDateTime,
+                        endDate: endDateTime,
+                        billingCycleAnchor: billingCycleAnchor,
+                        stripeCouponId: stripeCouponId,
+                        metaData: new Dictionary<string, string>()
+                        {
+                            {"BillingAccountUid", billingAccount.Uid.ToString()},
+                            {"BillingAccountName", billingAccount.Name.ToString()},
+                            {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                            {"PayingAccountName", purchasingAccount.Name.ToString()},
+                            {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+                            {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
+                            {"SourceId", sourceId},
+                            {"ApprovedBy", loggedInUser.Uid.ToString()},
+                            {"DateRequested", DateTime.Now.ToShortDateTimeString()},
+                        },
+                        msgs: msgs);
 
                     if (msgs.HasErrors())
                         return;
 
                     if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
-                        new Billing.StripeHelper().CreateCustomerBalanceTransaction(
+                        new StripeHelper().CreateCustomerBalanceTransaction(
                             subscription.CustomerId,
                             participationObject.GetCheckoutCostWithConvenienceFee() * -1,
                             "Credit for registration fee payment",
                             new Dictionary<string, string>()
                             {
-                            { "Subscription Id", subscription.Id },
-                            { "Plan Id", subscription.Items.First().Plan.Id },
-                            { "BillingAccountUid", billingAccount.Uid.ToString() },
-                            { "BillingAccountName", billingAccount.Name.ToString() },
-                            { "PayingAccountUid", purchasingAccount.Uid.ToString() },
-                            { "PayingAccountName", purchasingAccount.Name.ToString() },
-                            { "ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString() },
-                            { "ParticipationObjectName", checkoutObject.ParticipationObject.Name },
+                                {"Subscription Id", subscription.Id},
+                                {"Plan Id", subscription.Items.First().Plan.Id},
+                                {"BillingAccountUid", billingAccount.Uid.ToString()},
+                                {"BillingAccountName", billingAccount.Name.ToString()},
+                                {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                                {"PayingAccountName", purchasingAccount.Name.ToString()},
+                                {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+                                {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
                             },
                             msgs);
 
                     var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);                    
+                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
 
                     checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
-                                                                    submittedRecord,
-                                                                    startDateTime,
-                                                                    purchase,
-                                                                    subscription.Id,
-                                                                    feeObject,
-                                                                    loggedInUser,
-                                                                    msgs,
-                                                                    dc);
-                }                
+                        submittedRecord,
+                        startDateTime,
+                        purchase,
+                        subscription.Id,
+                        feeObject,
+                        loggedInUser,
+                        msgs,
+                        dc);
+                }
             }
             else
             {
@@ -288,7 +295,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+            bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -298,31 +306,34 @@ namespace AfterSchoolLibrary.Services
             var classesToCharge = GetClassesForCharge(checkoutObject, plan, msgs, dc);
             var classesInCurrentCycle = classesToCharge.Item1;
             var classesRemainingInCurrentCycle = classesToCharge.Item2;
-            
+
             if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
                 return;
 
-            var caclObj = GetAmountsRequiredToCharge(checkoutObject, plan, isSubscriptionRequired, classesRemainingInCurrentCycle, classesInCurrentCycle, msgs, dc);
+            var caclObj = GetAmountsRequiredToCharge(checkoutObject, plan, isSubscriptionRequired, classesRemainingInCurrentCycle, classesInCurrentCycle, msgs,
+                dc);
 
             BankAccountPurchaseObject bankAccountPurchaseObject = null;
-            CreditCardPurchaseObject creditCardPurchaseObject = null;            
+            CreditCardPurchaseObject creditCardPurchaseObject = null;
 
             if (checkoutObject.PaymentType == PaymentType.ACH)
             {
-                bankAccountPurchaseObject = new BankAccountPurchaseObject() {
-                    StripeSourceId = checkoutObject.StripeSourceId
+                bankAccountPurchaseObject = new BankAccountPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId,
                 };
             }
             else if (checkoutObject.PaymentType == PaymentType.CreditCard)
             {
-                creditCardPurchaseObject = new CreditCardPurchaseObject() {
-                    StripeSourceId = checkoutObject.StripeSourceId
+                creditCardPurchaseObject = new CreditCardPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId,
                 };
             }
 
             AccountService.ProcessPayment(
                 checkoutObject: new CheckoutObject()
-                {                    
+                {
                     OverrideAmount = caclObj.Item1,
                     AmountPaidByParent = caclObj.Item1,
                     AmountReceivedByProvider = caclObj.Item2,
@@ -341,26 +352,29 @@ namespace AfterSchoolLibrary.Services
                     Registration = checkoutObject.Registration,
                     ParticipationObject = participationObject,
                     MasterRegistrant = masterRegistrant,
-                    Description = "Pro-rating charge on joining mid-period",                        
-
+                    Description = "Pro-rating charge on joining mid-period",
                 },
                 loggedInUser: loggedInUser,
                 msgs: msgs,
                 dc: dc);
         }
 
-        public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             //get the total number of periods for current cycle x
             var classesInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
 
             //get the total remaining periods in current cycle y
-            var classesRemainingInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+            var classesRemainingInCurrentCycle =
+                checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
 
             return (classesInCurrentCycle, classesRemainingInCurrentCycle);
         }
 
-        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, bool isSubscriptionRequired, int classesRemainingInCurrentCycle, int classesInCurrentCycle, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, SubscriptionPlan plan,
+            bool isSubscriptionRequired, int classesRemainingInCurrentCycle, int classesInCurrentCycle, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var participationObject = checkoutObject.ParticipationObject;
 
@@ -428,9 +442,9 @@ namespace AfterSchoolLibrary.Services
             //        anyTransactionInLastWeek = true;
             //});
 
-            var activityPayments = ActivityPayment.LoadByParticipationObjectByRegistrant(ParticipationObjectId: activity.ID.Value, 
-                ParticipationObjectTypeId: ParticipationObjectType.Activity, 
-                RegistrantId: registrant.ID.Value, 
+            var activityPayments = ActivityPayment.LoadByParticipationObjectByRegistrant(ParticipationObjectId: activity.ID.Value,
+                ParticipationObjectTypeId: ParticipationObjectType.Activity,
+                RegistrantId: registrant.ID.Value,
                 IsDeleted: false,
                 msgs: msgs);
 
@@ -451,7 +465,8 @@ namespace AfterSchoolLibrary.Services
             return anyTransactionInCurrentWeek;
         }
 
-        private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs, DatabaseConnection dc = null)
+        private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             // what's the value of the subscription plan with convenience fees and credit card fees
 
@@ -463,21 +478,21 @@ namespace AfterSchoolLibrary.Services
                 individualCostWithFees += checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
 
             var couponValue = costWithAllFees - individualCostWithFees;
-            var coupon = new Billing.StripeHelper().CreateCoupon(
-                            couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
-                            discountValue: couponValue,
-                            couponDuration: Billing.StripeCouponDuration.Forever,
-                            durationInMonths: null,
-                            couponAmountType: CouponAmountType.FlatAmount,
-                            stripeAccountId: null,
-                            msgs: msgs);
+            var coupon = new StripeHelper().CreateCoupon(
+                couponName: $"{plan.StripePlanId}/{costWithAllFees.ToCurrency()}-{individualCostWithFees.ToCurrency()}/SplitFee",
+                discountValue: couponValue,
+                couponDuration: StripeCouponDuration.Forever,
+                durationInMonths: null,
+                couponAmountType: CouponAmountType.FlatAmount,
+                stripeAccountId: null,
+                msgs: msgs);
 
             return coupon.Id;
         }
 
         /// <summary>
-        /// Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
-        /// And ACH checkouts shouldn't charge the extra CC fee
+        ///     Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
+        ///     And ACH checkouts shouldn't charge the extra CC fee
         /// </summary>
         /// <param name="checkoutObject"></param>
         /// <param name="billingAccount"></param>
@@ -486,7 +501,8 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId, SystemMessages msgs, DatabaseConnection dc)
+        private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId,
+            SystemMessages msgs, DatabaseConnection dc)
         {
             if (checkoutObject.PaymentType == PaymentType.ACH)
             {
@@ -494,14 +510,14 @@ namespace AfterSchoolLibrary.Services
                 var totalCost = plan.GetTotalCostWithFees(billingAccount, msgs, dc);
 
                 //need to add a coupon to subtract the credit card amount that is stored in the payment plan
-                var coupon = new Billing.StripeHelper().CreateCoupon(
-                                couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH",
-                                discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
-                                couponDuration: Billing.StripeCouponDuration.Forever,
-                                durationInMonths: null,
-                                couponAmountType: CouponAmountType.FlatAmount,
-                                stripeAccountId: stripeAccountId,
-                                msgs: msgs);
+                var coupon = new StripeHelper().CreateCoupon(
+                    couponName: $"{plan.StripePlanId}/{totalCost.ToCurrency()}-{ccFee.ToCurrency()}/ACH",
+                    discountValue: plan.GetCreditCardFee(billingAccount, msgs, dc),
+                    couponDuration: StripeCouponDuration.Forever,
+                    durationInMonths: null,
+                    couponAmountType: CouponAmountType.FlatAmount,
+                    stripeAccountId: stripeAccountId,
+                    msgs: msgs);
 
                 return coupon.Id;
             }
@@ -509,73 +525,82 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static bool HasActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return registrant.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
         }
 
-        public static RegistrantSubscriptionPlan GetActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan GetActiveSubscription(this Registrant registrant, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrant
-                    .GetRegistrantSubscriptionPlans(msgs, dc)
-                    .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
-                    .ToList()
-                    .FirstOrDefault();
-        }
-        public static int GetAllActiveSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return registrant
-                    .GetRegistrantSubscriptionPlans(msgs, dc)
-                    .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
-                    .Count();
+                .GetRegistrantSubscriptionPlans(msgs, dc)
+                .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                .ToList()
+                .FirstOrDefault();
         }
 
-        public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetAllActiveSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return registrant
-                    .GetCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
-                    .Any();
+                .GetRegistrantSubscriptionPlans(msgs, dc)
+                .Where(rsp => !rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                .Count();
         }
 
-        public static List<RegistrantSubscriptionPlan> GetCancelledRegistrantSubscriptionPlans(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool HasCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return registrant
-                    .GetRegistrantSubscriptionPlans(msgs, dc)
-                    .Where(rsp => rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
-                    .ToList();
+                .GetCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                .Any();
         }
 
-        public static bool HasUnexpiredCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<RegistrantSubscriptionPlan> GetCancelledRegistrantSubscriptionPlans(this Registrant registrant,
+            ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return registrant
-                    .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
-                    .Any();
+                .GetRegistrantSubscriptionPlans(msgs, dc)
+                .Where(rsp => rsp.DateCancelled.HasValue && rsp.IsForParticipationObject(participationObject, msgs, dc))
+                .ToList();
         }
 
-        public static DateTime? GetUnexpiredCancelledSubscriptionExpireDate(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool HasUnexpiredCancelledSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return registrant
-                    .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
-                    .OrderByDescending(rsp => rsp.ValidUntil)
-                    .FirstOrDefault()?
-                    .ValidUntil.Value;
+                .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                .Any();
         }
 
-        public static List<RegistrantSubscriptionPlan> GetUnexpiredCancelledRegistrantSubscriptionPlans(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static DateTime? GetUnexpiredCancelledSubscriptionExpireDate(this Registrant registrant, ParticipationObject participationObject,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             return registrant
-                    .GetRegistrantSubscriptionPlans(msgs, dc)
-                    .Where(rsp => 
-                                rsp.DateCancelled.HasValue && 
-                                rsp.ValidUntil.HasValue && 
-                                rsp.ValidUntil.Value.IsOnOrAfter(DateTime.UtcNow) && 
-                                rsp.IsForParticipationObject(participationObject, msgs, dc))
-                    .OrderBy(rsp => rsp.ValidUntil)
-                    .ToList();
+                .GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc)
+                .OrderByDescending(rsp => rsp.ValidUntil)
+                .FirstOrDefault()?
+                .ValidUntil.Value;
         }
-        
+
+        public static List<RegistrantSubscriptionPlan> GetUnexpiredCancelledRegistrantSubscriptionPlans(this Registrant registrant,
+            ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return registrant
+                .GetRegistrantSubscriptionPlans(msgs, dc)
+                .Where(rsp =>
+                    rsp.DateCancelled.HasValue &&
+                    rsp.ValidUntil.HasValue &&
+                    rsp.ValidUntil.Value.IsOnOrAfter(DateTime.UtcNow) &&
+                    rsp.IsForParticipationObject(participationObject, msgs, dc))
+                .OrderBy(rsp => rsp.ValidUntil)
+                .ToList();
+        }
+
         /// <summary>
-        /// should be used for returns to stripe or other services that require UTC 
+        ///     should be used for returns to stripe or other services that require UTC
         /// </summary>
         /// <param name="registrant"></param>
         /// <param name="plan"></param>
@@ -583,57 +608,60 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var billingAccount = plan.GetAccount(msgs, dc);
             var planStartDate = registrant.GetPlanStartDate(plan, participationObject, msgs, dc);
             return billingAccount.ConvertFromAccountTimeZone(planStartDate);
         }
-        
-        public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+
+        public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var billingAccount = plan.GetAccount(msgs, dc);
+            var unexpiredCancelledRegistrantSubscriptionPlans = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
+            return GetPlanStartDate(plan, participationObject, billingAccount, unexpiredCancelledRegistrantSubscriptionPlans);
+        }
+
+        internal static DateTime GetPlanStartDate(SubscriptionPlan plan, ParticipationObject participationObject, Account billingAccount,
+            IReadOnlyCollection<RegistrantSubscriptionPlan> unexpiredCancelledRegistrantSubscriptionPlans)
         {
             // start dates are in the provider's timezone, so when comparing dates, we need to start there
-            var billingAccount = plan.GetAccount(msgs, dc);
             var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var startDate = today;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            switch (plan.PlanTypeId, plan.PaymentStartTypeId)
             {
-                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                {
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts):
                     // find existing canceled plans and make new plan start the day after it ends.
                     // for a person restarting a plan after cancellation
-                    var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
-
-                    if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                        startDate = rsps.Last().ValidUntil.Value.AddDays(1); // need to double check this
-                    else if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
-                        startDate = participationObject.StartDate.Value;
-                }
-                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
-                {
+                    if (unexpiredCancelledRegistrantSubscriptionPlans.Any(rsp => rsp.ValidUntil.HasValue))
+                        return unexpiredCancelledRegistrantSubscriptionPlans.Last(rsp => rsp.ValidUntil.HasValue).ValidUntil!.Value
+                            .AddDays(1); // need to double check this
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                        return participationObject.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):
                     // if on checkout, but activity has not started yet, then should only start subscription once activity starts.
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today))
-                        startDate = participationObject.StartDate.Value;
-                }
-                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
-                {
+                        return participationObject.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnPeriodStart):
                     if (plan.StartDate.HasValue && plan.StartDate.Value.Date.IsAfter(today))
-                        startDate = plan.StartDate.Value;
-                }
-
-            }
-            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-            {
-                if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
-                    startDate = participationObject.StartDate.Value;
+                        return plan.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.WhenActivityStarts):
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                        return participationObject.StartDate.Value;
+                    break;
             }
 
             // convert back to utc because dates may be transferred to other methods that expect utc, such as stripe, etc.
-            return startDate;
+            return today;
         }
 
-        private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs, DatabaseConnection dc = null)
+        private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             decimal? convenienceFee = 0;
             decimal? paymentTypeFee = 0;
@@ -651,7 +679,7 @@ namespace AfterSchoolLibrary.Services
             {
                 convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
-                amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc); ;
+                amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
 
                 var po = checkoutObject.ParticipationObject;
 
@@ -691,7 +719,7 @@ namespace AfterSchoolLibrary.Services
                 Amount = amount.Value,
                 TotalPeriods = totalPeriods,
                 PaymentType = checkoutObject.PaymentType,
-                BillingPeriodType = plan.BillingPeriodTypeId
+                BillingPeriodType = plan.BillingPeriodTypeId,
             };
         }
 
@@ -709,12 +737,13 @@ namespace AfterSchoolLibrary.Services
         public static bool HasReceivedTextMessages(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return TwilioSMS.GetCount(
-                criterias: new Hashtable() { { "RegistrantId", registrant.ID.Value } }, 
-                msgs: msgs, 
+                criterias: new Hashtable() {{"RegistrantId", registrant.ID.Value}},
+                msgs: msgs,
                 dc: dc) > 0;
         }
 
-        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName, string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
+        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
+            string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (!registrant.AllowTextMessages)
                 msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
@@ -728,7 +757,7 @@ namespace AfterSchoolLibrary.Services
                     msgs.Add("Account is not active and cannot send text messages", MessageType.UserError);
                     return;
                 }
-                
+
                 // if phone number is on the block list
                 if (TwilioBlockedPhone.ExistsByPhone(registrant.Phone, msgs, dc))
                     return;
@@ -741,19 +770,19 @@ namespace AfterSchoolLibrary.Services
                 if (!registrant.HasReceivedTextMessages(msgs, dc))
                     TwilioHelper.SendSMS(
                         registrant.Phone,
-                        $"Welcome to {Helpers.Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
+                        $"Welcome to {Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
                         null,
                         null,
                         msgs);
 
                 var resource = ActivityMessageService.SendTextMessage(
-                                    registrant.Phone, 
-                                    senderName, 
-                                    subject, 
-                                    activityName, 
-                                    message.Uid.ToString(), 
-                                    registrant.Uid.ToString(),
-                                    msgs);
+                    registrant.Phone,
+                    senderName,
+                    subject,
+                    activityName,
+                    message.Uid.ToString(),
+                    registrant.Uid.ToString(),
+                    msgs);
 
                 if (resource.IsEmpty())
                     return;
@@ -765,7 +794,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        private static void SaveTwilioSms(this Registrant registrant, MessageResource resource, ActivityMessage message, Account sendingAccount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SaveTwilioSms(this Registrant registrant, MessageResource resource, ActivityMessage message, Account sendingAccount,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var twilioSms = new TwilioSMS()
             {
@@ -783,7 +813,8 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(twilioSms.Save(dc));
         }
 
-        public static void AddPhoneToTwilioBlockedList(this Registrant registrant, MessageResource resource, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddPhoneToTwilioBlockedList(this Registrant registrant, MessageResource resource, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             // add to block list
             switch (resource.ErrorCode.Value)
@@ -801,7 +832,7 @@ namespace AfterSchoolLibrary.Services
                         ErrorCode = resource.ErrorCode,
                         ErrorMessage = resource.ErrorMessage.MaxChars(100),
                         CreateDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUser?.ID.IfEmpty(0)
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     };
                     msgs.AddRange(tbp.Save(dc));
 
@@ -809,7 +840,8 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        internal static void SendEmail(this Registrant registrant, Account account, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
+        internal static void SendEmail(this Registrant registrant, Account account, string activityName, string fromName, string replyToEmail,
+            string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -818,16 +850,16 @@ namespace AfterSchoolLibrary.Services
 
             if (registrant.Email.IsNotEmpty())
                 ActivityMessageService.SendEmailMessage(
-                    account, 
-                    activityName, 
-                    fromName, 
-                    registrant.Email, 
-                    registrant.DisplayName, 
-                    replyToEmail, 
-                    replyToName, 
-                    subject, 
-                    body, 
-                    utmCampaign, 
+                    account,
+                    activityName,
+                    fromName,
+                    registrant.Email,
+                    registrant.DisplayName,
+                    replyToEmail,
+                    replyToName,
+                    subject,
+                    body,
+                    utmCampaign,
                     msgs);
         }
 
@@ -838,12 +870,14 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static void AddUsersWithAccess(this Registrant registrant, List<WebUser> users, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void AddUsersWithAccess(this Registrant registrant, List<WebUser> users, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             users.ForEach(user => registrant.AddUserWithAccess(user, loggedInUser, msgs, dc));
         }
 
-        public static void AddUserWithAccess(this Registrant registrant, WebUser user, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void AddUserWithAccess(this Registrant registrant, WebUser user, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (user.IsNotEmpty())
             {
@@ -856,7 +890,7 @@ namespace AfterSchoolLibrary.Services
                         RegistrantId = registrant.ID.Value,
                         WebUserId = user.ID.Value,
                         CreateDate = DateTime.UtcNow,
-                        CreatedBy = loggedInUser?.ID.IfEmpty(0)
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     };
                     msgs.AddRange(registrantWebUser.Save(dc));
                 }
@@ -876,7 +910,8 @@ namespace AfterSchoolLibrary.Services
             registrant.UpdateProfileStatus(RegistrantProfileStatus.Completed, loggedInUser, msgs, dc);
         }
 
-        public static void UpdateProfileStatus(this Registrant registrant, RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdateProfileStatus(this Registrant registrant, RegistrantProfileStatus profileStatus, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             registrant.ProfileStatusId = profileStatus;
             registrant.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
@@ -884,10 +919,12 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        private static bool HasParticipationAssignment(this Registrant masterRegistrant, ParticipationObject participationObject, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private static bool HasParticipationAssignment(this Registrant masterRegistrant, ParticipationObject participationObject,
+            List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
-                return masterRegistrant.GetMasterRegistrant(msgs, dc).HasParticipationAssignment(participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+                return masterRegistrant.GetMasterRegistrant(msgs, dc)
+                    .HasParticipationAssignment(participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
 
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
@@ -901,23 +938,26 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).MasterRegistrantHasPlan(participationObject, msgs, dc);
 
             return masterRegistrant.MasterRegistrantHasPlan(
-                participationObject.OwnerAccount.ID.Value, 
-                participationObject.ObjectID.Value, 
-                participationObject.ObjectType, 
-                msgs, 
+                participationObject.OwnerAccount.ID.Value,
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
+                msgs,
                 dc);
         }
 
-        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, int billingAccountId, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool MasterRegistrantHasPlan(this Registrant masterRegistrant, int billingAccountId, int participationObjectId,
+            ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
-                return masterRegistrant.GetMasterRegistrant(msgs, dc).MasterRegistrantHasPlan(billingAccountId, participationObjectId, participationObjectType, msgs, dc);
+                return masterRegistrant.GetMasterRegistrant(msgs, dc)
+                    .MasterRegistrantHasPlan(billingAccountId, participationObjectId, participationObjectType, msgs, dc);
 
             var submittedRecords = masterRegistrant.GetSubmittedRecords(billingAccountId, msgs, dc);
 
@@ -929,7 +969,8 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        public static bool HasPlan(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasPlan(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (registrant.IsMaster)
                 return registrant.MasterRegistrantHasPlan(participationObject, msgs, dc);
@@ -937,32 +978,33 @@ namespace AfterSchoolLibrary.Services
             return registrant.HasPlan(participationObject.ObjectID.Value, participationObject.ObjectType, msgs, dc);
         }
 
-        public static bool HasPlan(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasPlan(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (registrant.IsMaster)
                 return registrant.MasterRegistrantHasPlan(new ParticipationObject(participationObjectId, participationObjectType, msgs, dc), msgs, dc);
 
             return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrants(
-                    participationObjectId: participationObjectId,
-                    participationObjectType: participationObjectType,
-                    registrantIds: registrant.ID.Value.AsList(),
-                    msgs: msgs,
-                    dc: dc);
+                participationObjectId: participationObjectId,
+                participationObjectType: participationObjectType,
+                registrantIds: registrant.ID.Value.AsList(),
+                msgs: msgs,
+                dc: dc);
         }
 
-        public static List<RegistrantSubscriptionPlan> GetMasterRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<RegistrantSubscriptionPlan> GetMasterRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
             var plans = new List<RegistrantSubscriptionPlan>();
 
-            submittedRecords.ForEach(submittedRecord => {
-                plans.AddRange(submittedRecord.GetRegistrantSubscriptionPlans(msgs, dc));
-            });
+            submittedRecords.ForEach(submittedRecord => { plans.AddRange(submittedRecord.GetRegistrantSubscriptionPlans(msgs, dc)); });
 
             return plans;
         }
 
-        public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static List<RegistrantSubscriptionPlan> GetRegistrantSubscriptionPlans(this Registrant registrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             if (registrant.IsMaster)
                 return registrant.GetMasterRegistrantSubscriptionPlans(msgs, dc);
@@ -970,7 +1012,8 @@ namespace AfterSchoolLibrary.Services
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
-        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Has to be a better way
             if (!registrant.HasPlan(participationObjectId, participationObjectType, msgs, dc))
@@ -989,7 +1032,8 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).IsAppliedFor(participationObject, hasParentalConsent, msgs, dc);
@@ -997,7 +1041,8 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Applied.AsList(), hasParentalConsent, msgs, dc);
         }
 
-        public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasConsentFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).HasConsentFor(participationObject, msgs, dc);
@@ -1005,59 +1050,62 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, null, true, msgs, dc);
         }
 
-        public static bool OnWaitingListFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool OnWaitingListFor(this Registrant masterRegistrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).OnWaitingListFor(participationObject, msgs, dc);
 
             return HasParticipationAssignment(
-                masterRegistrant, 
-                participationObject, 
-                RegistrationAssignmentType.WaitingList.AsList(), 
-                true, 
-                msgs, 
+                masterRegistrant,
+                participationObject,
+                RegistrationAssignmentType.WaitingList.AsList(),
+                true,
+                msgs,
                 dc);
         }
 
-        public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedFor(participationObject, hasParentalConsent, msgs, dc);
 
             var assignmentTypes = new List<RegistrationAssignmentType>()
-                {
-                    RegistrationAssignmentType.Reserved,
-                    RegistrationAssignmentType.ReservedPendingPayment,
-                    RegistrationAssignmentType.ReservedPendingParentalConsent,
-                };
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+            };
 
             return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
-        public static bool IsReservedForAllDates(this Registrant masterRegistrant, ParticipationObject participationObject, List<DateTime> dates, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedForAllDates(this Registrant masterRegistrant, ParticipationObject participationObject, List<DateTime> dates,
+            bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedForAllDates(participationObject, dates, hasParentalConsent, msgs, dc);
 
             var assignmentTypes = new List<RegistrationAssignmentType>()
-                {
-                    RegistrationAssignmentType.Reserved,
-                    RegistrationAssignmentType.ReservedPendingPayment,
-                    RegistrationAssignmentType.ReservedPendingParentalConsent,
-                };
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+            };
 
             var hasAssignment = HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
 
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
             var counter = 0;
 
-            submittedRecords.ForEach(submittedRecord => {
-
+            submittedRecords.ForEach(submittedRecord =>
+            {
                 var ra = submittedRecord.GetRegistrantActivity(participationObject, msgs, dc);
 
                 if (ra.IsNotEmpty())
-                    dates.ForEach(date => {
-
+                    dates.ForEach(date =>
+                    {
                         var instance = participationObject.Schedule.GetInSessionInstanceByDate(date, msgs, dc);
 
                         if (instance.IsNotEmpty())
@@ -1072,25 +1120,26 @@ namespace AfterSchoolLibrary.Services
             return hasAssignment && counter == dates.Count;
         }
 
-        public static bool IsReservedForDate(this Registrant masterRegistrant, ParticipationObject participationObject, DateTime date, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedForDate(this Registrant masterRegistrant, ParticipationObject participationObject, DateTime date, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedForDate(participationObject, date, hasParentalConsent, msgs, dc);
 
             var assignmentTypes = new List<RegistrationAssignmentType>()
-                {
-                    RegistrationAssignmentType.Reserved,
-                    RegistrationAssignmentType.ReservedPendingPayment,
-                    RegistrationAssignmentType.ReservedPendingParentalConsent,
-                };
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+            };
 
             var hasAssignment = HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
 
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
             var counter = 0;
 
-            submittedRecords.ForEach(submittedRecord => {
-
+            submittedRecords.ForEach(submittedRecord =>
+            {
                 var ra = submittedRecord.GetRegistrantActivity(participationObject, msgs, dc);
 
                 if (ra.IsNotEmpty())
@@ -1109,15 +1158,18 @@ namespace AfterSchoolLibrary.Services
             return hasAssignment && counter == 1;
         }
 
-        public static bool IsReservedAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsReservedAndPaidFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedAndPaidFor(participationObject, hasParentalConsent, msgs, dc);
 
-            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Reserved.AsList(), hasParentalConsent, msgs, dc);
+            return HasParticipationAssignment(masterRegistrant, participationObject, RegistrationAssignmentType.Reserved.AsList(), hasParentalConsent, msgs,
+                dc);
         }
 
-        public static bool HasWithdrawn(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasWithdrawn(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (registrant.IsMaster)
                 return HasParticipationAssignment(registrant, participationObject, RegistrationAssignmentType.Withdrawn.AsList(), null, msgs, dc);
@@ -1130,20 +1182,21 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasSubmittedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!masterRegistrant.IsMaster)
                 return masterRegistrant.GetMasterRegistrant(msgs, dc).HasSubmittedFor(participationObject, hasParentalConsent, msgs, dc);
 
-            var assignmentTypes= new List<RegistrationAssignmentType>()
-                {
-                    RegistrationAssignmentType.Reserved,
-                    RegistrationAssignmentType.ReservedPendingPayment,
-                    RegistrationAssignmentType.Applied,
-                    RegistrationAssignmentType.WaitingList,
-                    RegistrationAssignmentType.ReservedPendingParentalConsent,
-                    RegistrationAssignmentType.Withdrawn,
-                };
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.WaitingList,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.Withdrawn,
+            };
 
             return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
@@ -1168,7 +1221,8 @@ namespace AfterSchoolLibrary.Services
             return registrant.ParentRegistrantId.HasValue ? Registrant.Load(registrant.ParentRegistrantId.Value, msgs, dc) : null;
         }
 
-        public static Registrant SubmitRecordToAccount(this Registrant registrant, Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registrant SubmitRecordToAccount(this Registrant registrant, Account ownerAccount, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             Registrant copy = null;
 
@@ -1186,18 +1240,18 @@ namespace AfterSchoolLibrary.Services
 
                     // need to relate registrants within the same account, specifically provider or school accounts
                     amsgs.AddRange(copy.FindAndSetFirstRegistrant(loggedInUser, adc));
-
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 
             return copy;
         }
 
-        public static bool NeedsToRegister(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject, List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool NeedsToRegister(this Registrant submittedRecord, Registration registration, ParticipationObject participationObject,
+            List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (submittedRecord.IsEmpty())
                 return true;
@@ -1230,7 +1284,8 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByParentRegistrantIdByAccountId(registrant.ID.Value, accountId, msgs, dc);
         }
 
-        public static (Registrant, Registration) GetSubmittedRecord(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static (Registrant, Registration) GetSubmittedRecord(this Registrant registrant, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
 
@@ -1238,21 +1293,24 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var submittedRecordIds = submittedRecords.Select(child => child.ID.Value).ToList();
-            
+
             var ras = RegistrantActivity.LoadByRegistrantIds(submittedRecordIds, msgs, dc);
 
-            var submittedRecordRA = ras.FirstOrDefault(ra => ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
-            
+            var submittedRecordRA = ras.FirstOrDefault(ra =>
+                ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
+
             if (submittedRecordRA.IsNotEmpty() && submittedRecordRA.RegistrationId.IsNotEmpty())
                 return (
-                    submittedRecords.First(child => child.ID == submittedRecordRA.RegistrantId), 
+                    submittedRecords.First(child => child.ID == submittedRecordRA.RegistrantId),
                     Registration.Load(submittedRecordRA.RegistrationId.Value, msgs, dc)
                 );
 
             return (null, null);
         }
 
-        public static RegistrantActivity AddOrUpdateParticipationObject(this Registrant registrant, int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantActivity AddOrUpdateParticipationObject(this Registrant registrant, int registrationId, int participationObjectId,
+            ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int? registrationPeriodId, int? activityGroupId,
+            decimal? amountCharged, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return registrant.AddOrUpdateParticipationObject(
                 registrationId,
@@ -1268,16 +1326,18 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static RegistrantActivity AddOrUpdateParticipationObject(this Registrant registrant, int registrationId, int participationObjectId, ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId, int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantActivity AddOrUpdateParticipationObject(this Registrant registrant, int registrationId, int participationObjectId,
+            ParticipationObjectType participationObjectType, RegistrationAssignmentType assignmentType, int preferenceNumber, int? registrationPeriodId,
+            int? activityGroupId, decimal? amountCharged, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                        participationObjectId,
-                        participationObjectType,
-                        registrant.ID.Value,
-                        msgs,
-                        dc);
+                participationObjectId,
+                participationObjectType,
+                registrant.ID.Value,
+                msgs,
+                dc);
 
             if (ra.IsEmpty())
                 ra = new RegistrantActivity
@@ -1290,7 +1350,7 @@ namespace AfterSchoolLibrary.Services
                     RegistrationPeriodId = registrationPeriodId,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
-                    IsDeleted = false
+                    IsDeleted = false,
                 };
 
             ra.LastModifiedDate = DateTime.UtcNow;
@@ -1302,12 +1362,13 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(ra.Save(dc));
 
-            ra.ChangeSeatAssignment(assignmentType, new WebUser { ID = loggedInUserId }, msgs, dc);
+            ra.ChangeSeatAssignment(assignmentType, new WebUser {ID = loggedInUserId}, msgs, dc);
 
             return ra;
         }
 
-        public static FormQuestionAnswer MapAndAddAnswer(this Registrant registrant, List<FormQuestion> questions, Registrant fromRegistrant, QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static FormQuestionAnswer MapAndAddAnswer(this Registrant registrant, List<FormQuestion> questions, Registrant fromRegistrant,
+            QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
             var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
@@ -1317,14 +1378,15 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static string UploadFile(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, SystemMessages msgs, DatabaseConnection dc = null)
+        private static string UploadFile(this Registrant registrant, Stream file, string filename, FormQuestion question, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
-            var ah = Helpers.Utilities.GetNewAmazonHelper();
+            var ah = Utilities.GetNewAmazonHelper();
 
-            var regEx = new System.Text.RegularExpressions.Regex(
+            var regEx = new Regex(
                 BasicLibrary.Utilities.UrlFriendlyRegEx,
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline
-                );
+                RegexOptions.IgnoreCase | RegexOptions.Singleline
+            );
 
             var form = question.GetForm(msgs, dc);
             var account = registrant.GetAccount(msgs, dc);
@@ -1338,12 +1400,13 @@ namespace AfterSchoolLibrary.Services
             return amazonFilePath;
         }
 
-        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, System.IO.Stream file, string filename, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, Stream file, string filename, FormQuestion question, int? registrationId,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
             {
                 var amazonFilePath = registrant.UploadFile(file, filename, question, msgs, dc);
-                
+
                 if (msgs.HasNoErrors())
                     return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
             }
@@ -1351,7 +1414,8 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
                 return registrant.AddOrUpdateAnswer(answerText, question, null, loggedInUser, msgs, dc);
@@ -1359,7 +1423,8 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
             {
@@ -1367,20 +1432,21 @@ namespace AfterSchoolLibrary.Services
                     answerText = GetFormattedAnswerForCheckboxList(answerText);
 
                 return registrant.AddOrUpdateAnswer(
-                        answerText,
-                        question.ID,
-                        question.QuestionDataTypeId,
-                        question.Text,
-                        registrationId,
-                        loggedInUser,
-                        msgs,
-                        dc);
+                    answerText,
+                    question.ID,
+                    question.QuestionDataTypeId,
+                    question.Text,
+                    registrationId,
+                    loggedInUser,
+                    msgs,
+                    dc);
             }
 
             return null;
-        }        
+        }
 
-        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType, string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType,
+            string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1391,11 +1457,11 @@ namespace AfterSchoolLibrary.Services
             {
                 if (registrationId.HasValue && questionId.HasValue && registrant.ID.HasValue)
                     answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
-                                RegistrantId: registrant.ID.Value,
-                                FormQuestionId: questionId.Value,
-                                RegistrationId: registrationId.Value,
-                                msgs: msgs,
-                                dc: dc);
+                        RegistrantId: registrant.ID.Value,
+                        FormQuestionId: questionId.Value,
+                        RegistrationId: registrationId.Value,
+                        msgs: msgs,
+                        dc: dc);
             }
             else
                 answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(registrant.ID.Value, questionDataType, msgs, dc);
@@ -1408,7 +1474,7 @@ namespace AfterSchoolLibrary.Services
                     QuestionDataTypeId = questionDataType,
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
-                    CreatedBy = loggedInUser?.ID
+                    CreatedBy = loggedInUser?.ID,
                 };
 
             answer.RegistrationId = registrationId;
@@ -1422,7 +1488,8 @@ namespace AfterSchoolLibrary.Services
             return answer;
         }
 
-        public static RegistrantActivity AddInviteToActivity(this Registrant registrant, int activityId, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantActivity AddInviteToActivity(this Registrant registrant, int activityId, int loggedInUserId, int? activityGroupId,
+            int? registrationPeriodId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1441,7 +1508,7 @@ namespace AfterSchoolLibrary.Services
                     RegistrantId = registrant.ID,
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUserId,
-                    ActivityGroupId = activityGroupId
+                    ActivityGroupId = activityGroupId,
                 };
 
             ra.LastModifiedDate = DateTime.UtcNow;
@@ -1454,14 +1521,16 @@ namespace AfterSchoolLibrary.Services
             return ra;
         }
 
-        public static void AddInviteToActivities(this Registrant registrant, List<int> activityIds, int loggedInUserId, int? activityGroupId, int? registrationPeriodId, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void AddInviteToActivities(this Registrant registrant, List<int> activityIds, int loggedInUserId, int? activityGroupId,
+            int? registrationPeriodId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             activityIds.ForEach(activityId =>
                 registrant.AddInviteToActivity(activityId, loggedInUserId, activityGroupId, registrationPeriodId, msgs, dc)
             );
         }
 
-        public static Registrant CreateMasterCopy(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateMasterCopy(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var master = registrant.CopyWithAnswers(questions, loggedInUser, msgs, dc);
@@ -1476,7 +1545,8 @@ namespace AfterSchoolLibrary.Services
             return master;
         }
 
-        public static Registrant CopyWithAnswers(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CopyWithAnswers(this Registrant registrant, List<FormQuestion> questions, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1490,33 +1560,35 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        public static void CopyAnswersTo(this Registrant registrant, Registrant copyToRegistrant, Registration registration, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void CopyAnswersTo(this Registrant registrant, Registrant copyToRegistrant, Registration registration, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
-              (
-                  action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                  {
-                      // copy all answers
-                      var answers = registrant.GetAnswers(amsgs, adc);
-                      answers.ForEach(answer =>
-                      {
-                          copyToRegistrant.AddOrUpdateAnswer(
-                              answerText: answer.Text,
-                              question: answer.ToFormQuestion(true, amsgs, adc),
-                              registrationId: registration?.ID,
-                              loggedInUser: loggedInUser,
-                              msgs: amsgs,
-                              dc: adc);
-                      });
-                  },
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // copy all answers
+                    var answers = registrant.GetAnswers(amsgs, adc);
+                    answers.ForEach(answer =>
+                    {
+                        copyToRegistrant.AddOrUpdateAnswer(
+                            answerText: answer.Text,
+                            question: answer.ToFormQuestion(true, amsgs, adc),
+                            registrationId: registration?.ID,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+                    });
+                },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
 
-        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType, WebUser loggedInUser, Account account, bool isCancelPayment,  SystemMessages msgs, bool isParent = false, DatabaseConnection dc = null)
+        public static void WithdrawRegistration(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+            WebUser loggedInUser, Account account, bool isCancelPayment, SystemMessages msgs, bool isParent = false, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc);
@@ -1529,7 +1601,9 @@ namespace AfterSchoolLibrary.Services
             }
 
             var activity = ra.GetActivity(msgs, dc);
-            var hasAccessToActivity = activity.IsNotEmpty() ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty() : false;
+            var hasAccessToActivity = activity.IsNotEmpty()
+                ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty()
+                : false;
 
             if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc)
                 && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
@@ -1555,15 +1629,16 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Provider
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    Helpers.EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, isCancelPayment,  msgs);
+                    EmailHelper.SendRegistrationWithdrawal(registrant, participationObject, loggedInUser, isParent, isCancelPayment, msgs);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
 
-        public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId,
+            int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1579,7 +1654,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
                 LastModifiedBy = loggedInUserId,
-                LastUpdated = DateTime.UtcNow
+                LastUpdated = DateTime.UtcNow,
             };
             msgs.AddRange(reg.Save(dc));
 
@@ -1589,7 +1664,9 @@ namespace AfterSchoolLibrary.Services
             return reg.Reload(msgs, dc);
         }
 
-        public static Registration AddRegistrationWithESignature(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId, int? periodId, string esignature, string userAgent, string ipAddress, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registration AddRegistrationWithESignature(this Registrant registrant, int ownerAccountId, int? activityGroupId,
+            int? accountActivityGroupId, int? periodId, string esignature, string userAgent, string ipAddress, int loggedInUserId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1636,19 +1713,24 @@ namespace AfterSchoolLibrary.Services
             return Registration.LoadByRegistrantId(registrant.ID.Value, msgs, dc: dc);
         }
 
-        public static Registration GetRegistrationWithParticipationObject(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Registration GetRegistrationWithParticipationObject(this Registrant registrant, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var registrations = registrant.GetRegistrations(msgs, dc);
 
-            foreach(var registration in registrations.Where(registration => registration.AccountId == participationObject.OwnerAccount.ID)) {
+            foreach (var registration in registrations.Where(registration => registration.AccountId == participationObject.OwnerAccount.ID))
+            {
                 if (registration.GetParticipationObjects(msgs, dc).Any(po => po.IsMatch(participationObject)))
                     return registration;
-            };
+            }
+
+            ;
 
             return null;
         }
 
-        public static List<Registrant> FindRelatedRegistrants(this Registrant registrant, string firstName = null, string lastName = null, string email = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> FindRelatedRegistrants(this Registrant registrant, string firstName = null, string lastName = null, string email = null,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.FindRelatedRegistrants(
                 registrant.AccountId.Value,
@@ -1659,7 +1741,8 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static SystemMessages AddRelatedRegistrant(this Registrant registrant, Registrant otherRegistrant, int loggedInUserId, DatabaseConnection dc = null)
+        public static SystemMessages AddRelatedRegistrant(this Registrant registrant, Registrant otherRegistrant, int loggedInUserId,
+            DatabaseConnection dc = null)
         {
             otherRegistrant.FirstRegistrantId = registrant.ID.Value;
             otherRegistrant.LastModifiedBy = loggedInUserId;
@@ -1684,8 +1767,8 @@ namespace AfterSchoolLibrary.Services
         public static bool IsRelated(this Registrant registrant, Registrant otherRegistrant)
         {
             return registrant.FirstName.Trim().ToLower() == otherRegistrant.FirstName.Trim().ToLower() &&
-                    registrant.LastName.Trim().ToLower() == otherRegistrant.LastName.Trim().ToLower() &&
-                    registrant.Email.Trim().ToLower() == otherRegistrant.Email.Trim().ToLower();
+                   registrant.LastName.Trim().ToLower() == otherRegistrant.LastName.Trim().ToLower() &&
+                   registrant.Email.Trim().ToLower() == otherRegistrant.Email.Trim().ToLower();
         }
 
         public static void DeleteWithRelatedRecords(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1701,7 +1784,7 @@ namespace AfterSchoolLibrary.Services
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
         }
@@ -1718,7 +1801,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrationCount(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() { { "RegistrantId", registrant.ID.Value } }, msgs: msgs, dc: dc);
+            return Registration.GetCount(new Hashtable() {{"RegistrantId", registrant.ID.Value}}, msgs: msgs, dc: dc);
         }
 
         public static Registrant GetParentOrGuardian(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
@@ -1740,10 +1823,10 @@ namespace AfterSchoolLibrary.Services
         public static void DeleteRegistrantActivity(this Registrant registrant, int activityId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var registrantAcitivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                activityId, 
-                ParticipationObjectType.Activity, 
-                registrant.ID.Value, 
-                msgs, 
+                activityId,
+                ParticipationObjectType.Activity,
+                registrant.ID.Value,
+                msgs,
                 dc);
 
             msgs.AddRange(registrantAcitivity.Delete(dc));
@@ -1754,13 +1837,14 @@ namespace AfterSchoolLibrary.Services
             return ActivityPayment.LoadByRegistrantIdByIsDeleted(registrant.ID.Value, false, msgs, dc).Sum(payment => payment.Amount.Value);
         }
 
-        public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             return RegistrantActivity.LoadByParticipationObjectByRegistrant(
-                participationObject.ObjectID.Value, 
-                participationObject.ObjectType, 
-                registrant.ID.Value, 
-                msgs, 
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
+                registrant.ID.Value,
+                msgs,
                 dc);
         }
 
@@ -1772,20 +1856,22 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(registrant.Save(dc));
         }
 
-        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             return CreateNewContact(account, firstName, lastName, email, phone, false, loggedInUser, msgs, dc);
         }
 
-        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, bool allowDuplicates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Registrant CreateNewContact(Account account, string firstName, string lastName, string email, string phone, bool allowDuplicates,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Registrant contact = null;
             var doesContactExist = account.DoesContactExist(
-                                    firstName.IfEmpty("").Trim(),
-                                    lastName.IfEmpty("").Trim(),
-                                    email.IfEmpty("").Trim(),
-                                    msgs,
-                                    dc);
+                firstName.IfEmpty("").Trim(),
+                lastName.IfEmpty("").Trim(),
+                email.IfEmpty("").Trim(),
+                msgs,
+                dc);
 
             if (!doesContactExist || allowDuplicates)
             {
@@ -1801,7 +1887,7 @@ namespace AfterSchoolLibrary.Services
                     Email = email.IfEmpty("").Trim(),
                     FirstName = firstName.IfEmpty("").Trim(),
                     LastName = lastName.IfEmpty("").Trim(),
-                    Phone = phone.IfEmpty("").Trim()
+                    Phone = phone.IfEmpty("").Trim(),
                 };
 
                 msgs.AddRange(contact.Save(dc));
@@ -1810,7 +1896,8 @@ namespace AfterSchoolLibrary.Services
             return contact;
         }
 
-        public static void ProcessActivityPayment(this Registrant registrant, CheckoutObject checkoutObject, Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void ProcessActivityPayment(this Registrant registrant, CheckoutObject checkoutObject, Transaction transaction, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: this is problematic, but a little better now
             // you really don't know this is the amount paid, but it works for now
@@ -1867,14 +1954,17 @@ namespace AfterSchoolLibrary.Services
 
         private static string GetFormattedAnswerForCheckboxList(string s) => $"[" + s + "]";
 
-        public static RegistrantHelper PrepareRegistrantDetails(this List<Registrant> registrants, Registrant masterRegistrant, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantHelper PrepareRegistrantDetails(this List<Registrant> registrants, Registrant masterRegistrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
-            var activityInstances = new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>();
+            var activityInstances =
+                new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType
+                    )>();
             var providers = new List<Account>();
             var registrantActivities = new List<RegistrantActivity>();
 
-            registrants.ForEach(registrant => {
-
+            registrants.ForEach(registrant =>
+            {
                 if (registrant.SchoolLocationId.HasValue)
                 {
                     var account = registrant.GetSchoolLocation(msgs, dc)?.GetHostAccount(msgs, dc);
@@ -1882,12 +1972,13 @@ namespace AfterSchoolLibrary.Services
                         providers.Add(account);
                 }
 
-                registrant.GetSubmittedRecords(msgs, dc).ForEach(submittedRecord => {
-
+                registrant.GetSubmittedRecords(msgs, dc).ForEach(submittedRecord =>
+                {
                     var ras = submittedRecord.GetRegistrantActivities(Registration.ReservedStatuses, msgs, dc);
                     var account = submittedRecord.GetAccount(msgs, dc);
 
-                    ras.ForEach(ra => {
+                    ras.ForEach(ra =>
+                    {
                         var schedule = ra.GetSchedule(msgs, dc);
                         var instances = schedule?.GetInSessionInstances(msgs: msgs, dc: dc);
                         var participantObject = new ParticipationObject(ra.ParticipationObjectId.Value, ra.ParticipationObjectTypeId, msgs, dc);
@@ -1896,7 +1987,8 @@ namespace AfterSchoolLibrary.Services
                         {
                             var activityInstanceSeats = ActivityInstanceSeats.LoadByRegistrantActivityId(ra.ID.Value, msgs, dc);
                             if (participantObject.CanRegisterPerClass)
-                                instances.RemoveAll(instance => instance.ID.NotIn(activityInstanceSeats.Select(activityInstanceSeat => activityInstanceSeat.ActivityInstanceId)));
+                                instances.RemoveAll(instance =>
+                                    instance.ID.NotIn(activityInstanceSeats.Select(activityInstanceSeat => activityInstanceSeat.ActivityInstanceId)));
 
                             // remove out of session instances from in session
                             // this will required when there are dates for (Enter any dates that you will not meet), check schedule page of provider side
@@ -1920,15 +2012,16 @@ namespace AfterSchoolLibrary.Services
 
             var model = new RegistrantHelper();
             model.Providers = providers;
-            
+
             model.ActivityInstances = activityInstances.Where(item => item.ActivityInstance.StartDateTime.Value.Date >= DateTime.UtcNow.Date)
                 .OrderBy(item => item.ActivityInstance.StartDateTime.Value)
                 .Take(10)
                 .ToList();
 
             model.RegistrantActivities = registrantActivities.Where(ra =>
-                    (ra.AssignmentTypeId.In(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment }) ||
-                    (ra.AssignmentTypeId == RegistrationAssignmentType.Applied && ra.GetRegistration(msgs, dc).ESignature.IsEmpty())) &&
+                    (ra.AssignmentTypeId.In(new List<RegistrationAssignmentType>()
+                         {RegistrationAssignmentType.ReservedPendingParentalConsent, RegistrationAssignmentType.ReservedPendingPayment}) ||
+                     (ra.AssignmentTypeId == RegistrationAssignmentType.Applied && ra.GetRegistration(msgs, dc).ESignature.IsEmpty())) &&
                     !ra.HasPlan(msgs, dc))
                 .ToList();
 

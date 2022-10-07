@@ -32,10 +32,7 @@ namespace AfterSchool.Areas.Admin.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
-            var accountTypes = FormConstants.CustomerAccountTypes.ToList();
-
-            if (type != AccountType.NotSet)
-                accountTypes = type.AsList();
+            var accountTypes = type != AccountType.NotSet? type.AsList(): FormConstants.CustomerAccountTypes.ToList();
 
             var count = Account.GetSearchCount(search, accountTypes, false, msgs);
             var accounts = Account.Search(search, accountTypes, isDeleted: false, OrderByProperty: "CreateDate",

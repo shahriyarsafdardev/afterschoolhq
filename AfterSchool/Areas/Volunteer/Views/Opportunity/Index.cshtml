@@ -1,0 +1,34 @@
+﻿@model List<RegistrantActivityViewModel>
+@{ Html.RenderPartial("_VolunteerAccountHeader"); }
+
+<div class="main-content">
+
+    @foreach (var item in Model)
+    {
+        <div class="row">
+
+            @foreach (var regStatus in Enum.GetValues(typeof(RegistrationStatus)).Cast<RegistrationStatus>().Except(RegistrationStatus.NotSet.AsList()).OrderBy(x => x.ToString()))
+            {
+                <div class="row">
+                    @{
+                        Html.RenderPartial(
+                            "Opportunities/_BrowseGroupedOpportunities",
+                            item.Participations,
+                            new ViewDataDictionary
+                            {
+                                {"Status", (int) regStatus},
+                            }
+                            );
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@{ Html.RenderPartial("Modals/_Withdraw"); }
+
+@section header
+{
+    <link href="~/Assets/css/style-registration.css?v=1.01" type="text/css" rel="stylesheet"/>
+}

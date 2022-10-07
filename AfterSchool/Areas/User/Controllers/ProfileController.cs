@@ -1,19 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
-using BasicLibrary;
+using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using AfterSchool.Models;
-using System.Collections.Generic;
-using AfterSchoolLibrary;
+using BasicLibrary;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Areas.User.Controllers
 {
     public class ProfileController : BaseLoggedInController
     {
-        public ProfileController() : base(new List<AccountType> { AccountType.Registrant, AccountType.Volunteer })
+        public ProfileController() : base(new List<AccountType> {AccountType.Registrant})
         {
-
         }
 
         [HttpGet]
@@ -28,34 +28,15 @@ namespace AfterSchool.Areas.User.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (firstname.IsEmpty())
-            {
-                msgs.Add("First Name is required", MessageType.UserError);
-            }
-            if (lastname.IsEmpty())
-            {
-                msgs.Add("Last Name is required", MessageType.UserError);
-            }
+            if (firstname.IsEmpty()) msgs.Add("First Name is required", MessageType.UserError);
+            if (lastname.IsEmpty()) msgs.Add("Last Name is required", MessageType.UserError);
             if (email.IsEmpty())
-            {
                 msgs.Add("Email is required", MessageType.UserError);
-            }
-            else if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-            {
+            else if (!email.IsMatch(Utilities.EmailRegEx))
                 msgs.Add("Email must be valid", MessageType.UserError);
-            }
-            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs))
-            {
-                msgs.Add("Email is already in use by another user", MessageType.UserError);
-            }
-            if ((!password1.IsEmpty() || !password2.IsEmpty()) && password1 != password2)
-            {
-                msgs.Add("Passwords must match", MessageType.UserError);
-            }
-            if (password1.Length < 8)
-            {
-                msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
-            }
+            else if (!SessionVariables.CurrentUser.CanEmailBeUsed(email, msgs)) msgs.Add("Email is already in use by another user", MessageType.UserError);
+            if ((!password1.IsEmpty() || !password2.IsEmpty()) && password1 != password2) msgs.Add("Passwords must match", MessageType.UserError);
+            if (password1.Length < 8) msgs.Add("Password needs to have at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -66,10 +47,7 @@ namespace AfterSchool.Areas.User.Controllers
                 user.LastModifiedDate = DateTime.UtcNow;
                 user.LastModifiedBy = SessionVariables.CurrentUser.ID;
 
-                if (!password1.IsEmpty())
-                {
-                    user.Password = WebUserService.EncryptPassword(password1);
-                }
+                if (!password1.IsEmpty()) user.Password = WebUserService.EncryptPassword(password1);
 
                 msgs.AddRange(user.Save());
 

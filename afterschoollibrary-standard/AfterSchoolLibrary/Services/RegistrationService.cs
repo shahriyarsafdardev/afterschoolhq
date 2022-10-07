@@ -327,13 +327,12 @@ namespace AfterSchoolLibrary.Services
 
         #region CSVReport
 
-        public static SystemMessages EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
+        public static void EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
+            msgs ??= new SystemMessages();
 
             var account = Account.Load(accountId, msgs, dc);
 
@@ -342,8 +341,6 @@ namespace AfterSchoolLibrary.Services
                 getVolunteers, msgs, dc);
 
             EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
-
-            return msgs;
         }
 
         public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,

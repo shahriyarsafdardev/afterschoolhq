@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
         [SetUp]
         public void SetUp()
         {
-            credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             tokenQuery = new Mock<ISterlingBearerTokenQuery>();
             createCandidateQuery = new Mock<ISterlingCreateCandidateQuery>();
             createScreeningQuery = new Mock<ISterlingCreateScreeningQuery>();
@@ -67,6 +67,11 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.EqualTo(CandidateId));
             Assert.That(capturedBackgroundCheck.SterlingInviteUrl, Is.EqualTo(BackgroundCheckUrl));
+            Assert.That(capturedBackgroundCheck.ExpirationDate, Is.EqualTo(DateTime.UtcNow.AddYears(1)).Within(1).Seconds);
+            Assert.That(capturedBackgroundCheck.SterlingEmailSentDate, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
+            Assert.That(capturedBackgroundCheck.VolunteerCompletedDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.SterlingReviewCompleteDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.ManualReviewCompleteDate, Is.Null);
         }
 
         [Test]
@@ -95,6 +100,11 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.Null);
             Assert.That(capturedBackgroundCheck.SterlingInviteUrl, Is.Null);
+            Assert.That(capturedBackgroundCheck.ExpirationDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.SterlingEmailSentDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.VolunteerCompletedDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.SterlingReviewCompleteDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.ManualReviewCompleteDate, Is.Null);
         }
 
         [Test]
@@ -130,6 +140,11 @@ namespace AfterSchoolLibrary.Tests.Integrations
             Assert.That(capturedBackgroundCheck.BackgroundCheckSourceId, Is.EqualTo(BackgroundCheckSource.Sterling));
             Assert.That(capturedBackgroundCheck.SterlingCandidateId, Is.EqualTo(CandidateId));
             Assert.That(capturedBackgroundCheck.SterlingInviteUrl, Is.Null);
+            Assert.That(capturedBackgroundCheck.ExpirationDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.SterlingEmailSentDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.VolunteerCompletedDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.SterlingReviewCompleteDate, Is.Null);
+            Assert.That(capturedBackgroundCheck.ManualReviewCompleteDate, Is.Null);
         }
     }
 }

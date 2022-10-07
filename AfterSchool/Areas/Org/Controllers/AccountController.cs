@@ -1294,17 +1294,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var packages = currentAccount.GetAccountPackages(msgs);
-
-            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
-                return RedirectToAction("NewBilling");
-
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Messages = msgs;
-
+            ViewBag.Messages = new SystemMessages();
             return View(currentAccount);
         }
 
@@ -1376,6 +1366,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(currentAccount);
         }
+        
 
         [HttpGet]
         public ActionResult DowngradeToFree(string newPlan)
@@ -1404,6 +1395,84 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("SelectPlanDone");
         }
 
+        public ActionResult SelectPlanPurchaseAfterTrialEnd(Guid newplan, BillingPeriodType period)
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentAccountPackage = SessionVariables.AccountPackage;
+            var newPackage = Package.LoadByUid(newplan, msgs);
+
+            var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
+                currentAccount.StripeCustomerId,
+                newPackage.GetStripePriceId(period),
+                $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
+                $"?newplan={newplan}&period={(int)period}&returnurl={Url.Action("SelectPlanDone", "Account", new {Area = "org"})}",
+                $"{Utilities.BaseUrl()}/{Url.Action("SelectPlan", "Account", new {Area = "org"})}",
+                currentAccount.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
+                msgs);
+
+            // have to cancel the existing subscription in stripe or else it will auto charge on the existing trial
+            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+            if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+                StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(currentAccountPackage.StripeSubscriptionId, false, msgs);
+            
+            if (msgs.HasNoErrors() && session.IsNotEmpty())
+                return new RedirectResult(session.Url);
+
+            SetTempMessages(msgs);
+            return RedirectToAction("SelectPlan");
+        }
+
+        [HttpGet]
+        public ActionResult ExtendTrialDone()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            HandleTempMessages(msgs);
+            
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ExtendTrial()
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
+                    accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs); 
+                    msgs.AddRange(EmailHelper.SendEmailToSupportAndSales(
+                    $"{currentAccount.Name} has requested to Extend their free trial",
+                    $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>"
+                ));
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+            );
+
+            if (msgs.HasErrors())
+            {
+                SetTempMessages(msgs);
+                return RedirectToAction("SelectPlan");
+            }
+
+            return RedirectToAction("ExtendTrial");
+        }
+        
         [HttpGet]
         public ActionResult SelectPlanDone()
         {
@@ -1426,17 +1495,23 @@ namespace AfterSchool.Areas.Org.Controllers
                     // if coming from select plan, need to potentially change subscription if changed on select plan screen
                     var newPlanSelected = newPlan.IsGuid() && period.IsInteger();
                     var isPlanDifferent = newPlanSelected && (accountPackage.PackageUid != newPlan.ToGuid() || accountPackage.BillingPeriodTypeId != (BillingPeriodType) period.ToInteger());
-                    if (newPlanSelected && isPlanDifferent)
-                        currentAccount.SwitchPackagesWithStripe
-                        (
-                            Package.LoadByUid(newPlan.ToGuid(), amsgs, adc),
-                            (BillingPeriodType)period.ToInteger(),
-                            true,
-                            accountPackage.StripeSubscriptionId,
-                            currentUser,
-                            amsgs,
-                            adc
-                        );
+                    if (accountPackage.IsDuringTrial && newPlanSelected)
+                    {
+                        if (isPlanDifferent)
+                            currentAccount.SwitchPackagesWithStripe
+                            (
+                                Package.LoadByUid(newPlan.ToGuid(), amsgs, adc),
+                                (BillingPeriodType) period.ToInteger(),
+                                true,
+                                accountPackage.StripeSubscriptionId,
+                                currentUser,
+                                amsgs,
+                                adc
+                            );
+                        else if (currentAccount.ReferrerAccountId.HasValue)
+                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(accountPackage.StripeSubscriptionId, null,
+                                null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
+                    }
 
                     // check if finally added payment
                     currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);

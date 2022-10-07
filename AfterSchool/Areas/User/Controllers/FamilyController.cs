@@ -25,7 +25,7 @@ namespace AfterSchool.Areas.User.Controllers
             var msgs = new SystemMessages();
             var registrants = SessionVariables.CurrentUser.GetAllRegistrants(msgs);
 
-            return View(registrants);
+            return View(registrants.Where(x => !x.IsVolunteer).ToList());
         }
 
         #region StudentPersonal
@@ -320,7 +320,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         #region Personal
 
-        private List<FormQuestion> GetPeronalQuestions(SystemMessages msgs)
+        private List<FormQuestion> GetPersonalQuestions(SystemMessages msgs)
         {
             var form = FormService.GetAdministratorAccountStudentForm(msgs);
             var questionGroup = form.GetQuestionGroups(msgs)
@@ -358,7 +358,7 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetPeronalQuestions(msgs);
+                var questions = GetPersonalQuestions(msgs);
 
                 var values = new NameValueCollection();
                 questions.ForEach(question => {
@@ -386,7 +386,7 @@ namespace AfterSchool.Areas.User.Controllers
                 if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
                     return RedirectToAction("index");
 
-                var questions = GetPeronalQuestions(msgs);
+                var questions = GetPersonalQuestions(msgs);
 
                 // Validation
                 questions.ForEach(question =>

@@ -62,8 +62,6 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountProfile).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.GenderRestriction = GenderRestrictionType.None;
-			this.IsOpenDuringCovid = false;
-			this.IsELearningCenter = false;
 			this.IsAHQApproved = false;
 			this.IsVirtualProgram = false;
 			

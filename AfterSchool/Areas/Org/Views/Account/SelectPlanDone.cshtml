@@ -28,16 +28,24 @@
             <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center">
                 <img class="top-icon" src="~/Assets/img/celebration.svg" alt="Celebration"/>
                 <p class="text-medium">
-                    Great Job. You now are subscribed to the @currentPackage.PackageName Plan.
+                    Great Job!<br/> 
+                    You now are subscribed to the <b>@currentPackage.PackageName Plan</b>.
                 </p>
                 <p class="text-medium">
                     @if (currentPackage.IsDuringTrial)
                     {
-                        <span>Your card will be charged automatically when your trial ends on @currentPackage.TrialEndDate.ToLongDateString().</span>
+                        <span>
+                            When your trial ends on <b>@currentPackage.TrialEndDate.ToLongDateString()</b>,<br /> 
+                            your card will be charged automatically for the amount of <b>@currentPackage.Price.ToCurrency()</b>.
+                        </span>
                     }
                     else
                     {
-                        <span>Your subscription will automatically renew on <br/><b>@currentPackage.GetRenewalDate().ToLongDateString()</b> for <b>@currentPackage.Price.ToCurrency()</b>.</span>
+                        <span>
+                            Your subscription will automatically renew on <br/>
+                            <b>@currentPackage.GetFirstRenewalDate().ToLongDateString()</b> for 
+                            <b>@currentPackage.Price.ToCurrency()</b>.
+                        </span>
                     }
                 </p>
 

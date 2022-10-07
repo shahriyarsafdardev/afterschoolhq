@@ -1,17 +1,17 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
+using AfterSchool.Areas.User.Models;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using System.Collections.Generic;
-using System.Web.Mvc;
-using AfterSchool.Areas.User.Models;
-using System.Linq;
 
 namespace AfterSchool.Areas.User.Controllers
 {
     public class ActivityController : BaseLoggedInController
     {
-        public ActivityController() : base(new List<AccountType> {AccountType.Registrant, AccountType.Volunteer})
+        public ActivityController() : base(new List<AccountType> {AccountType.Registrant})
         {
         }
 
@@ -19,10 +19,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
-            var registrants = isVolunteer
-                ? new List<Registrant> {SessionVariables.CurrentUser.GetMasterVolunteerRegistrant(msgs)}
-                : SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
+            var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
             var registeredActivities = new List<RegistrantActivityViewModel>();
 
             registrants.ForEach(registrant =>
@@ -62,11 +59,11 @@ namespace AfterSchool.Areas.User.Controllers
             var registrant = Registrant.LoadByUid(id.ToGuid());
 
             registrant.WithdrawRegistration(
-                participationObjectId: po.ToInteger(),
-                participationObjectType: (ParticipationObjectType) type.ToInteger(),
-                loggedInUser: SessionVariables.CurrentUser,
-                account: SessionVariables.CurrentAccount,
-                isCancelPayment: true,
+                po.ToInteger(),
+                (ParticipationObjectType) type.ToInteger(),
+                SessionVariables.CurrentUser,
+                SessionVariables.CurrentAccount,
+                true,
                 isParent: true,
                 msgs: msgs);
 
