@@ -2,17 +2,14 @@
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using File = System.IO.File;
 
 namespace AfterSchoolAdHoc;
 
 public static class GenerateCsvReportForSession
 {
-    public static void Run(DatabaseConnection dc)
+    public static void Run(int accountId, RegistrationReportType reportType, string activityGroupUid, DatabaseConnection dc)
     {
-        const int accountId = 1;
-        const RegistrationReportType reportType = RegistrationReportType.Detailed;
-        const string commaSeparatedActivityGroupIds = "166,167,168";
+        var commaSeparatedActivityGroupIds = activityGroupUid;
         var msgs = new SystemMessages();
 
         var account = Account.Load(accountId, msgs, dc);
@@ -31,8 +28,6 @@ public static class GenerateCsvReportForSession
         var byteData = RegistrationService.GetCsvByteArray(account, null, null, activityIds, ParticipationObjectType.Activity, reportType, null,
             RegistrationStatus.NotSet, false, msgs, dc);
 
-        var filename = $"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv";
-        File.WriteAllBytes(filename, byteData);
-        Console.WriteLine($@"File {filename} successfully saved");
+        AdHocUtilities.SaveReport(byteData);
     }
 }

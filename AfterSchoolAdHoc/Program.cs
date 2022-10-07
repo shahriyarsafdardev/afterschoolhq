@@ -28,5 +28,7 @@ if (config is null)
 var credentials = new DatabaseCredentials(config.ServerName, config.DatabaseName, config.UserName, config.Password);
 var dc = new DatabaseConnection(credentials.ConnectionString);
 
-GenerateCsvReportForAllActivities.Run(dc);
-//GenerateCsvReportForSession.Run(dc);
+const int accountId = 0;
+
+GenerateCsvReportForAllActivities.Run(accountId, dc);
+// GenerateCsvReportForSession.Run(accountId, RegistrationReportType.Detailed, "00000000-0000-0000-0000-000000000000", dc);
