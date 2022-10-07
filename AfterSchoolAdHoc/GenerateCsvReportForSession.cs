@@ -10,7 +10,7 @@ public static class GenerateCsvReportForSession
 {
     public static void Run(DatabaseConnection dc)
     {
-        const int accountId = 1148;
+        const int accountId = 1;
         const RegistrationReportType reportType = RegistrationReportType.Detailed;
         const string commaSeparatedActivityGroupIds = "166,167,168";
         var msgs = new SystemMessages();
