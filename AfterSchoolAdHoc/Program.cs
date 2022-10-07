@@ -29,5 +29,7 @@ var credentials = new DatabaseCredentials(config.ServerName, config.DatabaseName
 var dc = new DatabaseConnection(credentials.ConnectionString);
 
 const int accountId = 0;
+const RegistrationReportType reportType = RegistrationReportType.DismissalForHostedActivities;
+const string? commaSeparatedActivityGroupIds = null;
 
-CsvReportGenerator.Run(accountId, null, null, dc);
+CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);
