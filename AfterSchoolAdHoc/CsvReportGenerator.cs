@@ -2,6 +2,7 @@
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using File = System.IO.File;
 
 namespace AfterSchoolAdHoc;
 
@@ -17,7 +18,9 @@ public static class CsvReportGenerator
             ? GetReportByteDataForSessionReport(account, reportType, commaSeparatedActivityGroupIds, msgs, dc)
             : GetReportByteDataForReport(account, reportType, msgs, dc);
 
-        AdHocUtilities.SaveReport(byteData);
+        var filename = $"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv";
+        File.WriteAllBytes(filename, byteData);
+        Console.WriteLine(@$"File {filename} successfully saved");
     }
 
     private static byte[] GetReportByteDataForSessionReport(Account account, RegistrationReportType reportType, string commaSeparatedActivityGroupIds,
