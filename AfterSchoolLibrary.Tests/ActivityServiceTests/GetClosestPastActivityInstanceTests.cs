@@ -4,9 +4,9 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using NUnit.Framework;
 
-namespace AfterSchoolLibrary.Tests
+namespace AfterSchoolLibrary.Tests.ActivityServiceTests
 {
-    public class ActivityServiceTests
+    public class GetClosestPastActivityInstanceTests
     {
         [Test]
         public void GetClosestPastActivityInstanceTest()

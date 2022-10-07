@@ -95,19 +95,19 @@ namespace AfterSchool.Models
 
                 foreach (SystemMessage msg in msgs)
                 {
-                    object message = new { text = msg.Text, type = msg.MessageType.ToString() };
+                    object message = new {text = msg.Text, type = msg.MessageType.ToString()};
                     switch (rt)
                     {
                         case ResponseType.JSON:
                             list.Add(message);
                             break;
                         case ResponseType.XML:
-                            list.Add(new { message });
+                            list.Add(new {message});
                             break;
                     }
                 }
 
-                object obj = new { status = "error", messages = list.ToArray() };
+                object obj = new {status = "error", messages = list.ToArray()};
                 switch (rt)
                 {
                     case ResponseType.JSON:
@@ -132,32 +132,35 @@ namespace AfterSchool.Models
 
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");
+            
             if (SessionVariables.CurrentUser.HasAccessTo(SessionVariables.CurrentAccount))
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new { area = "admin" });
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
 
                     case AccountType.SchoolDistrict:
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new { area = "district" });
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "district"});
 
                     case AccountType.Registrant:
                         if (SessionVariables.Cart.IsNotEmpty())
-                            return new UrlHelper(ControllerContext.RequestContext).Action("select", "account", new { area = "" });
+                            return new UrlHelper(ControllerContext.RequestContext).Action("select", "account", new {area = ""});
+                        
                         if (registrationAccount.IsNotEmpty())
                             return new UrlHelper(ControllerContext.RequestContext).Action(registrationAccount.HomePageUrl);
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new { area = "user" });
+                        
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "user"});
 
                     case AccountType.Volunteer:
                         if (registrationAccount.IsNotEmpty())
                             return new UrlHelper(ControllerContext.RequestContext).Action(registrationAccount.HomePageUrl);
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new { area = "user" });
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "volunteer"});
 
                     default:
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new { area = "org" });
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "org"});
                 }
 
-            return new UrlHelper(ControllerContext.RequestContext).Action("index", "login", new { area = "" });
+            return new UrlHelper(ControllerContext.RequestContext).Action("index", "login", new {area = ""});
         }
 
         protected void LoadSessionInfo(WebUser user, SystemMessages msgs = null)
@@ -271,7 +274,7 @@ namespace AfterSchool.Models
             if (returnUrl.IsNotEmpty() && !goToLoginScreenBeforeReturn)
                 return Redirect(returnUrl);
 
-            return RedirectToAction("index", "Login", new { returnurl = returnUrl, area = "" });
+            return RedirectToAction("index", "Login", new {returnurl = returnUrl, area = ""});
         }
 
         internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
@@ -308,7 +311,7 @@ namespace AfterSchool.Models
         internal void HandleTempMessages(SystemMessages msgs)
         {
             if (TempData.IsNotEmpty() && TempData["msgs"].IsNotEmpty())
-                msgs.AddRange((SystemMessages)TempData["msgs"]);
+                msgs.AddRange((SystemMessages) TempData["msgs"]);
         }
 
         internal void SetTempMessages(SystemMessages msgs)
@@ -339,14 +342,14 @@ namespace AfterSchool.Models
             switch (account.AccountTypeId)
             {
                 case AccountType.AfterSchool:
-                    return !requestedReturnUrl.ToLower().Contains(new[] { orgPath, registrantPath, districtPath });
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, registrantPath, districtPath});
                 case AccountType.Registrant:
-                    return !requestedReturnUrl.ToLower().Contains(new[] { orgPath, adminPath, districtPath });
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, adminPath, districtPath});
                 case AccountType.SchoolDistrict:
-                    return !requestedReturnUrl.ToLower().Contains(new[] { orgPath, adminPath, registrantPath });
+                    return !requestedReturnUrl.ToLower().Contains(new[] {orgPath, adminPath, registrantPath});
                 default:
                     return account.AccountTypeId.In(FormConstants.ProviderAccountTypes) &&
-                           !requestedReturnUrl.ToLower().Contains(new[] { adminPath, registrantPath, districtPath });
+                           !requestedReturnUrl.ToLower().Contains(new[] {adminPath, registrantPath, districtPath});
             }
         }
 

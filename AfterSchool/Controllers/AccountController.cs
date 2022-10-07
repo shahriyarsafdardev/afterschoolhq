@@ -170,7 +170,7 @@ namespace AfterSchool.Controllers
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
                         registrantAccount =
-                            currentUser.AddNewParentOrStudentRegistrantAccount(UserType.Owner, true, true, currentUser, msgs);
+                            currentUser.AddNewParentOrStudentRegistrantAccount(UserType.Owner, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
@@ -1222,7 +1222,6 @@ namespace AfterSchool.Controllers
                         password1,
                         location?.ID.Value, // probably should have a school location id
                         textnotifications.IfBlank("0").ToBoolean(),
-                        SessionVariables.IsAfterSchool.Value,
                         questionAnswerModel,
                         parentAccount,
                         msgs);
@@ -1763,7 +1762,7 @@ namespace AfterSchool.Controllers
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         SelectedDates = selectedDates,
                     },
-                    true, SessionVariables.CurrentUser, null, msgs);
+                    true, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new {id = registration.Uid});
@@ -1850,7 +1849,7 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select");
             }
 
-            return View();
+            return View("Payment");
         }
 
         [HttpGet]
@@ -2332,7 +2331,6 @@ namespace AfterSchool.Controllers
                             account = user.AddNewParentOrStudentRegistrantAccount(
                                 UserType.Student,
                                 true,
-                                SessionVariables.IsAfterSchool.Value,
                                 user,
                                 amsgs,
                                 adc);

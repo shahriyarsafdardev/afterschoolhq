@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 var localConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "afterschoolhq-overrides", "appsettings.json");
 
-var json = string.Empty;
+string json;
 try
 {
     using var streamReader = new StreamReader(localConfigFilePath);
@@ -17,7 +17,7 @@ catch (FileNotFoundException)
     return;
 }
 
-var config = JsonConvert.DeserializeObject<DatabaseConfig>(json).AdHocSqlServer;
+var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.AdHocSqlServer;
 if (config is null)
 {
     Console.WriteLine(
@@ -28,4 +28,5 @@ if (config is null)
 var credentials = new DatabaseCredentials(config.ServerName, config.DatabaseName, config.UserName, config.Password);
 var dc = new DatabaseConnection(credentials.ConnectionString);
 
-GenerateCsvReport.Run(dc);
+GenerateCsvReportForAllActivities.Run(dc);
+//GenerateCsvReportForSession.Run(dc);

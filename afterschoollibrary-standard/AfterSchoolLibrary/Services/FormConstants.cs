@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Services
         public static AccountType[] CustomerAccountTypes => new[]
         {
             AccountType.Teacher, AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.School, AccountType.Church,
-            AccountType.Registrant, AccountType.SchoolDistrict,
+            AccountType.Registrant, AccountType.SchoolDistrict,AccountType.Volunteer,
         };
 
         public static List<QuestionDataType> QuestionsToNotIncludeInParentPanel()

@@ -7,39 +7,60 @@ namespace AfterSchoolLibrary.Integrations
 {
     public interface IBackgroundCheckWorkflow
     {
-        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages);
+        Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
     {
+        private readonly IBackgroundCheckRepository backgroundCheckRepository;
         private readonly ISterlingCreateCandidateQuery createCandidateQuery;
         private readonly ISterlingCreateScreeningQuery createScreeningQuery;
         private readonly SterlingCredentials credentials;
         private readonly ISterlingBearerTokenQuery tokenQuery;
 
         public BackgroundCheckWorkflow(SterlingCredentials credentials, ISterlingBearerTokenQuery tokenQuery,
-            ISterlingCreateCandidateQuery createCandidateQuery, ISterlingCreateScreeningQuery createScreeningQuery)
+            ISterlingCreateCandidateQuery createCandidateQuery, ISterlingCreateScreeningQuery createScreeningQuery,
+            IBackgroundCheckRepository backgroundCheckRepository)
         {
             this.credentials = credentials;
             this.tokenQuery = tokenQuery;
             this.createCandidateQuery = createCandidateQuery;
             this.createScreeningQuery = createScreeningQuery;
+            this.backgroundCheckRepository = backgroundCheckRepository;
         }
 
-        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(Registrant registrant, SystemMessages messages)
+        public async Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages)
         {
+            string candidateId = null;
+            string backgroundCheckUrl = null;
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-                var candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, registrant);
-                var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
-                return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
+                candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
+                backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
             }
             catch (Exception ex)
             {
                 messages.Add(new SystemMessage(ex.Message, MessageType.ApiError));
-                return new BackgroundCheckRequestResult {BackgroundCheckUrl = null};
             }
+
+            var status = candidateId is null || backgroundCheckUrl is null
+                ? BackgroundCheckStatus.BackgroundCheckRequested
+                : BackgroundCheckStatus.EmailSentToVolunteer;
+
+            var backgroundCheck = new BackgroundCheck
+            {
+                WebUserId = webUser.ID!.Value,
+                RequestedForFiscalAccountId = accountId,
+                BackgroundCheckStatusId = status,
+                SterlingCandidateId = candidateId,
+                SterlingInviteUrl = backgroundCheckUrl,
+                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+            };
+            messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
+            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
         }
     }
 
@@ -50,17 +71,19 @@ namespace AfterSchoolLibrary.Integrations
 
     public class SterlingCredentials
     {
-        public SterlingCredentials(string endpoint, string clientId, string clientSecret, string packageId)
+        public SterlingCredentials(string endpoint, string clientId, string clientSecret, string packageId, string accountId)
         {
             Endpoint = endpoint;
             ClientId = clientId;
             ClientSecret = clientSecret;
             PackageId = packageId;
+            AccountId = accountId;
         }
 
         public string Endpoint { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
         public string PackageId { get; set; }
+        public string AccountId { get; set; }
     }
 }

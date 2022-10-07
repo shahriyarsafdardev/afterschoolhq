@@ -43,7 +43,6 @@ namespace AfterSchoolLibraryTests.Tests
                 null,
                 createWithStripe: true,
                 loggedInUser: loggedInUser,
-                isAfterSchool: true,
                 msgs: msgs,
                 dc: dc);
 
@@ -74,7 +73,6 @@ namespace AfterSchoolLibraryTests.Tests
                 null,
                 "12345678",
                 null,
-                true,
                 true,
                 questionAnswerModel,
                 parentAccount,

@@ -35,7 +35,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
 
             var query = new SterlingBearerTokenQuery(http.Object, json.Object);
 
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             var result = await query.GetAsync(credentials);
 
             Assert.That(request.Url, Is.EqualTo("endpoint/v2/oauth"));
@@ -59,7 +59,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
 
             var query = new SterlingBearerTokenQuery(http.Object, json.Object);
 
-            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId");
+            var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             Assert.ThrowsAsync<Exception>(async () => await query.GetAsync(credentials));
         }
 

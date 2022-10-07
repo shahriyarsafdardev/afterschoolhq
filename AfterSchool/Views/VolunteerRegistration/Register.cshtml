@@ -22,54 +22,18 @@
         new ViewDataDictionary {{"hidebuttons", true}});
 }
 
-<style>
-    h2 {
-        font-size: 20px;
-        font-weight: 700;
-    }
-
-    .register-instructions {
-        font-size: 16px;
-        margin: 0 auto 9px;
-        max-width: 800px;
-        text-align: center;
-    }
-</style>
-
 <div>
     <div class="col-md-12">
         <div class="panel">
             <div class="panel-body">
-                @if (Model.BackgroundCheckIsEnabled)
-                {
-                    <h2 class="text-center reg-instructions">
-                        Confirm Registration
-                    </h2>
-                    if (Model.UserHasHadApprovedBackgroundCheck)
-                    {
-                        <p class="register-instructions">
-                            You have already been approved to volunteer.<br/>
-                            Please e-sign below to complete registration.
-                        </p>
-                    }
-                    else
-                    {
-                        <p class="register-instructions">
-                            Once you complete registration, we will collect the information needed to complete your background check. You will receive an email letting you know the results of this review.
-                        </p>
-                    }
-                }
-                else
-                {
-                    <div class="text-center reg-instructions">
-                        <p>
-                            <strong>Step 3 of 3: Finalize Registration</strong>
-                        </p>
-                    </div>
-                    <h3 class="text-center reg-instructions">
-                        You must e-sign to finalize registration
-                    </h3>
-                }
+                <div class="text-center reg-instructions">
+                    <p>
+                        <strong>Step 3 of 3: Finalize Registration</strong>
+                    </p>
+                </div>
+                <h3 class="text-center reg-instructions">
+                    You must e-sign to finalize registration
+                </h3>
                 <form class="form-horizontal" id="register-form" method="post" action="@Url.Action("register", "VolunteerRegistration")" enctype="multipart/form-data">
                     @foreach (var group in groups)
                     {

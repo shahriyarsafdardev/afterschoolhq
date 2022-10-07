@@ -30,9 +30,37 @@
         onclick = $"onclick=\"{ViewData["onclick"].ToString()}\"";
     }
 
+    var customOptions = new List<string>();
+
+    if (ViewData["customoptions"].IsNotEmpty())
+    {
+        customOptions = (List<string>) ViewData["customoptions"];
+    }
+
+    var useCustomOptions = customOptions.Count == 2;
+
 }
 
-<div class="switch-button switch-button-yesno @hidden">
+@if (useCustomOptions)
+{
+    <style>
+        .switch-button.switch-button-custom label:before {
+            content: "@customOptions[0]";
+            padding-right: 10px;
+        }
+        
+        .switch-button.switch-button-custom input[type="checkbox"]:checked + span label:before {
+            content: "@customOptions[1]";
+            padding-left: 10px;
+        }
+        
+        .switch-button.switch-button-custom {
+            width:  100px;
+        }
+    </style>
+}
+
+<div class="switch-button @(useCustomOptions ? "switch-button-custom" : "switch-button-yesno") @hidden">
     <input type="checkbox" name="@ViewData["checkboxname"]" id="@ViewData["checkboxid"]" @Html.Raw(onclick) value="1" @(Model ? " checked=\"checked\" " : "") @disabled @required class="@className" />
     <span>
         <label for="@ViewData["checkboxid"]"></label>

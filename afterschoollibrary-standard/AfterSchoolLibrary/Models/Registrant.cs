@@ -1,365 +1,416 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Data;
-using System.Collections;
-using AfterSchoolLibrary.Enums;
-using static BasicLibrary.BaseWebUser;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
-	/// <summary>
-    /// A single registrant for an activity, this is the main person who registered
+    /// <summary>
+    ///     A single registrant for an activity, this is the main person who registered
     /// </summary>
-	[Serializable]
+    [Serializable]
     public class Registrant : BaseContact
     {
-		#region "ClassGenerator"
+        #region "ClassGenerator"
 
-		public int? AccountId { get { return (int?)MDV["AccountId"].Value; } set { MDV["AccountId"].Value = value; } }
-		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public RegistrantType RegistrantTypeId { get { return (RegistrantType)MDV["RegistrantTypeId"].Value; } set { MDV["RegistrantTypeId"].Value = value; } }
-		public int? ParentRegistrantId { get { return (int?)MDV["ParentRegistrantId"].Value; } set { MDV["ParentRegistrantId"].Value = value; } }
-		public bool IsMaster { get { return (bool)MDV["IsMaster"].Value; } set { MDV["IsMaster"].Value = value; } }
-		public bool IsContactOnly { get { return (bool)MDV["IsContactOnly"].Value; } set { MDV["IsContactOnly"].Value = value; } }
-		public int? FirstRegistrantId { get { return (int?)MDV["FirstRegistrantId"].Value; } set { MDV["FirstRegistrantId"].Value = value; } }
-		public bool IsParentOrGuardian { get { return (bool)MDV["IsParentOrGuardian"].Value; } set { MDV["IsParentOrGuardian"].Value = value; } }
-		public bool AllowTextMessages { get { return (bool)MDV["AllowTextMessages"].Value; } set { MDV["AllowTextMessages"].Value = value; } }
-		/// <summary>
-		/// The location id of the school the registrant is attending
-		/// </summary>
-		public int? SchoolLocationId { get { return (int?)MDV["SchoolLocationId"].Value; } set { MDV["SchoolLocationId"].Value = value; } }
-		/// <summary>
-		/// The status of the profile - completed
-		/// </summary>
-		public RegistrantProfileStatus ProfileStatusId { get { return (RegistrantProfileStatus)MDV["ProfileStatusId"].Value; } set { MDV["ProfileStatusId"].Value = value; } }
-        public RegistrantPersonType PersonTypeId { get { return (RegistrantPersonType)MDV["PersonTypeId"].Value; } set { MDV["PersonTypeId"].Value = value; } }
-		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
-		
+        public int? AccountId
+        {
+            get => (int?) MDV["AccountId"].Value;
+            set => MDV["AccountId"].Value = value;
+        }
+
+        public int? WebUserId
+        {
+            get => (int?) MDV["WebUserId"].Value;
+            set => MDV["WebUserId"].Value = value;
+        }
+
+        /// <summary>
+        ///     Required.
+        /// </summary>
+        public Guid Uid
+        {
+            get => (Guid) MDV["Uid"].Value;
+            set => MDV["Uid"].Value = value;
+        }
+
+        /// <summary>
+        ///     Required.
+        /// </summary>
+        public RegistrantType RegistrantTypeId
+        {
+            get => (RegistrantType) MDV["RegistrantTypeId"].Value;
+            set => MDV["RegistrantTypeId"].Value = value;
+        }
+
+        public int? ParentRegistrantId
+        {
+            get => (int?) MDV["ParentRegistrantId"].Value;
+            set => MDV["ParentRegistrantId"].Value = value;
+        }
+
+        public bool IsMaster
+        {
+            get => (bool) MDV["IsMaster"].Value;
+            set => MDV["IsMaster"].Value = value;
+        }
+
+        public bool IsContactOnly
+        {
+            get => (bool) MDV["IsContactOnly"].Value;
+            set => MDV["IsContactOnly"].Value = value;
+        }
+
+        public int? FirstRegistrantId
+        {
+            get => (int?) MDV["FirstRegistrantId"].Value;
+            set => MDV["FirstRegistrantId"].Value = value;
+        }
+
+        public bool IsParentOrGuardian
+        {
+            get => (bool) MDV["IsParentOrGuardian"].Value;
+            set => MDV["IsParentOrGuardian"].Value = value;
+        }
+
+        public bool AllowTextMessages
+        {
+            get => (bool) MDV["AllowTextMessages"].Value;
+            set => MDV["AllowTextMessages"].Value = value;
+        }
+
+        /// <summary>
+        ///     The location id of the school the registrant is attending
+        /// </summary>
+        public int? SchoolLocationId
+        {
+            get => (int?) MDV["SchoolLocationId"].Value;
+            set => MDV["SchoolLocationId"].Value = value;
+        }
+
+        /// <summary>
+        ///     The status of the profile - completed
+        /// </summary>
+        public RegistrantProfileStatus ProfileStatusId
+        {
+            get => (RegistrantProfileStatus) MDV["ProfileStatusId"].Value;
+            set => MDV["ProfileStatusId"].Value = value;
+        }
+
+        public RegistrantPersonType PersonTypeId
+        {
+            get => (RegistrantPersonType) MDV["PersonTypeId"].Value;
+            set => MDV["PersonTypeId"].Value = value;
+        }
+
+        public bool IsDeleted
+        {
+            get => (bool) MDV["IsDeleted"].Value;
+            set => MDV["IsDeleted"].Value = value;
+        }
+
 
         public Registrant()
         {
-            this.Config(ObjectMap, DatabaseQuery, typeof(Registrant).Name, "ID");
-            this.LoadObjectValues(ObjectMap);
-			this.Uid = Guid.NewGuid();
-			this.RegistrantTypeId = RegistrantType.NotSet;
-			this.IsMaster = false;
-			this.IsContactOnly = false;
-			this.IsParentOrGuardian = false;
-			this.AllowTextMessages = false;
-			this.ProfileStatusId = RegistrantProfileStatus.NotSet;
-			this.IsDeleted = false;
-            this.PersonTypeId = RegistrantPersonType.NotSet;
-
+            Config(ObjectMap, DatabaseQuery, typeof(Registrant).Name, "ID");
+            LoadObjectValues(ObjectMap);
+            Uid = Guid.NewGuid();
+            RegistrantTypeId = RegistrantType.NotSet;
+            IsMaster = false;
+            IsContactOnly = false;
+            IsParentOrGuardian = false;
+            AllowTextMessages = false;
+            ProfileStatusId = RegistrantProfileStatus.NotSet;
+            IsDeleted = false;
+            PersonTypeId = RegistrantPersonType.NotSet;
         }
 
-        public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
+        public static DatabaseParameters ObjectMap
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
-                string className = typeof(Registrant).Name;
-                _dp = BaseContact.get_BaseObjectMap(className);
-				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "RegistrantTypeId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "ParentRegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsMaster", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "IsContactOnly", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "FirstRegistrantId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsParentOrGuardian", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "AllowTextMessages", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "SchoolLocationId", System.Data.SqlDbType.Int);
-                _dp.Add(className, "ProfileStatusId", System.Data.SqlDbType.Int);
-				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
-                _dp.Add(className, "PersonTypeId", System.Data.SqlDbType.Int);
-				
+                var _dp = new DatabaseParameters();
+                var className = typeof(Registrant).Name;
+                _dp = get_BaseObjectMap(className);
+                _dp.Add(className, "AccountId", SqlDbType.Int);
+                _dp.Add(className, "WebUserId", SqlDbType.Int);
+                _dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
+                _dp.Add(className, "RegistrantTypeId", SqlDbType.Int);
+                _dp.Add(className, "ParentRegistrantId", SqlDbType.Int);
+                _dp.Add(className, "IsMaster", SqlDbType.Bit);
+                _dp.Add(className, "IsContactOnly", SqlDbType.Bit);
+                _dp.Add(className, "FirstRegistrantId", SqlDbType.Int);
+                _dp.Add(className, "IsParentOrGuardian", SqlDbType.Bit);
+                _dp.Add(className, "AllowTextMessages", SqlDbType.Bit);
+                _dp.Add(className, "SchoolLocationId", SqlDbType.Int);
+                _dp.Add(className, "ProfileStatusId", SqlDbType.Int);
+                _dp.Add(className, "IsDeleted", SqlDbType.Bit);
+                _dp.Add(className, "PersonTypeId", SqlDbType.Int);
+
                 return _dp;
             }
         }
 
-        public static Registrant LoadObject(System.Data.DataRow row)
+        public static Registrant LoadObject(DataRow row)
         {
-            Registrant obj = new Registrant();
+            var obj = new Registrant();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
 
-        protected static BasicLibrary.DataAccess.DatabaseQuery DatabaseQuery
+        protected static DatabaseQuery DatabaseQuery
         {
             get
             {
-                BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Registrant).Name);
-				
+                var dq = get_DatabaseQuery(ObjectMap, typeof(Registrant).Name);
+
                 return dq;
             }
         }
 
-        public static Registrant Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Registrant Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Registrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-			dq.UseParameterizedQuery = false;
-			dq.SelectRange.Start = start;
-			dq.SelectRange.Length = length;
-            return Registrant.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            dq.UseParameterizedQuery = false;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-            return Registrant.BaseGetCount(criterias, ObjectMap, dq, msgs);
+            return BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public SystemMessages Save(DatabaseConnection dc = null)
         {
-			var msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-			if (this.Uid.IsEmpty())
-				msgs.Add("Uid is required on Registrant object", MessageType.Error);
-			if (this.RegistrantTypeId.IsEmpty())
-				msgs.Add("RegistrantTypeId is required on Registrant object", MessageType.Error);
-			
-			if (msgs.HasNoErrors())
-				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name));
+            if (Uid.IsEmpty())
+                msgs.Add("Uid is required on Registrant object", MessageType.Error);
+            if (RegistrantTypeId.IsEmpty())
+                msgs.Add("RegistrantTypeId is required on Registrant object", MessageType.Error);
 
-			return msgs;
-        }
-
-        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name);
-        }
-
-        public static SystemMessages Create(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            return BaseObject._Create(DatabaseQuery, dc, ObjectMap);
-        }
-
-        public static SystemMessages Alter(BasicLibrary.DataAccess.DatabaseConnection dc = null)
-        {
-            SystemMessages msgs = new SystemMessages();
-            BasicLibrary.DataAccess.DatabaseParameters dps;
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AccountId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["WebUserId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Uid"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["RegistrantTypeId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ParentRegistrantId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsMaster"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsContactOnly"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["FirstRegistrantId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsParentOrGuardian"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["AllowTextMessages"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SchoolLocationId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["ProfileStatusId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-            dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["IsDeleted"]);
-            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-            dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["PersonTypeId"]);
-            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
-			
+            if (msgs.HasNoErrors())
+                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name));
 
             return msgs;
         }
 
-		public Registrant Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			return Registrant.Load(this.ID.Value, msgs, dc: dc);
-		}
-		
-		public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public SystemMessages Delete(DatabaseConnection dc = null)
+        {
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(Registrant).Name);
+        }
 
-		public static List<Registrant> LoadByParentRegistrantId(int ParentRegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParentRegistrantId"], ParentRegistrantId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public static SystemMessages Create(DatabaseConnection dc = null)
+        {
+            return _Create(DatabaseQuery, dc, ObjectMap);
+        }
 
-		public static List<Registrant> LoadByAccountIdByRegistrantTypeIdByIsDeleted(int AccountId, RegistrantType RegistrantTypeId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        public static SystemMessages Alter(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            DatabaseParameters dps;
 
-		public static List<Registrant> LoadByAccountIdByIsContactOnlyByIsDeleted(int AccountId, bool IsContactOnly, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			dq.Criterias.Add(ObjectMap["IsContactOnly"], IsContactOnly);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["AccountId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static Registrant LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["WebUserId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static Registrant LoadByUidByAccountId(Guid Uid, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["Uid"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static List<Registrant> LoadByWebUserIdByIsDeleted(int WebUserId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["RegistrantTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static List<Registrant> LoadByWebUserIdByIsMasterByIsDeleted(int WebUserId, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
-			dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
-			dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["ParentRegistrantId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static List<Registrant> LoadByFirstRegistrantId(int FirstRegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["FirstRegistrantId"], FirstRegistrantId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsMaster"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		public static List<Registrant> LoadByParentRegistrantIdByAccountId(int ParentRegistrantId, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["ParentRegistrantId"], ParentRegistrantId);
-			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsContactOnly"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-		
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FirstRegistrantId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsParentOrGuardian"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["AllowTextMessages"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["SchoolLocationId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["ProfileStatusId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["PersonTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+
+            return msgs;
+        }
+
+        public Registrant Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Load(ID.Value, msgs, dc);
+        }
+
+        public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByParentRegistrantId(int ParentRegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ParentRegistrantId"], ParentRegistrantId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByAccountIdByRegistrantTypeIdByIsDeleted(int AccountId, RegistrantType RegistrantTypeId, bool IsDeleted,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["RegistrantTypeId"], RegistrantTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByAccountIdByIsContactOnlyByIsDeleted(int AccountId, bool IsContactOnly, bool IsDeleted, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsContactOnly"], IsContactOnly);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static Registrant LoadByUid(Guid Uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static Registrant LoadByUidByAccountId(Guid Uid, int AccountId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static List<Registrant> LoadByWebUserIdByIsDeleted(int WebUserId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByWebUserIdByIsMasterByIsDeleted(int WebUserId, bool IsMaster, bool IsDeleted, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+            dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByFirstRegistrantId(int FirstRegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FirstRegistrantId"], FirstRegistrantId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByParentRegistrantIdByAccountId(int ParentRegistrantId, int AccountId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ParentRegistrantId"], ParentRegistrantId);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
 
-		#region "UserDefined"        
+        #region "UserDefined"
 
-        public bool IsProfileCompleted
-        {
-            get
-            {
-                return this.ProfileStatusId == RegistrantProfileStatus.Completed;
-            }
-        }
-        
-        public bool IsVolunteer
-        {
-            get
-            {
-                return this.PersonTypeId == RegistrantPersonType.Volunteer;
-            }
-        }
-        
-        public bool IsStudent
-        {
-            get
-            {
-                return this.PersonTypeId == RegistrantPersonType.Student;
-            }
-        }
+        public bool IsProfileCompleted => ProfileStatusId == RegistrantProfileStatus.Completed;
+
+        public bool IsVolunteer => PersonTypeId == RegistrantPersonType.Volunteer;
+
+
+        public bool IsStudent => PersonTypeId == RegistrantPersonType.Student;
 
         public string Name => BuildDisplayName(FirstName, LastName);
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(this.ID.Value, activityId, dc: dc)
+            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, dc: dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
 
         public List<FormQuestionAnswer> GetAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantId(this.ID.Value, msgs, dc)
+            return FormQuestionAnswer.LoadByRegistrantId(ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -367,37 +418,38 @@ namespace AfterSchoolLibrary.Models
         public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionAnswer.Load(
-                        criterias: new Hashtable() { { "QuestionDataTypeId", (int)questionDataType }, { "RegistrantId", this.ID.Value } }, 
-                        msgs: msgs,
-                        dc: dc)
-                    .FirstOrDefault();
+                    new Hashtable {{"QuestionDataTypeId", (int) questionDataType}, {"RegistrantId", ID.Value}},
+                    msgs: msgs,
+                    dc: dc)
+                .FirstOrDefault();
         }
 
         public string GetValue(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            string s = GetAnswer(questionDataType, msgs, dc)?.Text.IfEmpty("-");
-            if (s.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(s))
-                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(s).FirstOrDefault()?.value;
+            var s = GetAnswer(questionDataType, msgs, dc)?.Text.IfEmpty("-");
+            if (s.IsNotEmpty() && Utilities.IsAlreadyJsonString(s))
+                return Utilities.GetKeyValuePairs(s).FirstOrDefault()?.value;
 
             return s;
         }
 
         public static List<Registrant> LoadList(List<int> ids, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ID"], ids, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public List<RegistrantActivity> GetRegistrantActivities(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, msgs, dc).ToList();
+            return RegistrantActivity.LoadByRegistrantId(ID.Value, msgs, dc).ToList();
         }
 
-        public List<RegistrantActivity> GetRegistrantActivities(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public List<RegistrantActivity> GetRegistrantActivities(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            return RegistrantActivity.LoadByRegistrantId(this.ID.Value, assignmentTypes, msgs, dc).ToList();
+            return RegistrantActivity.LoadByRegistrantId(ID.Value, assignmentTypes, msgs, dc).ToList();
         }
 
         private static DatabaseQuery SearchRegistrantsQuery(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
@@ -408,13 +460,13 @@ namespace AfterSchoolLibrary.Models
 
             if (contactListId.HasValue)
             {
-                var contactListQuery = BaseObject.get_DatabaseQuery(ObjectMap, typeof(ContactListRegistrant).Name);
+                var contactListQuery = get_DatabaseQuery(ObjectMap, typeof(ContactListRegistrant).Name);
                 contactListQuery.UseParameterizedQuery = false;
                 contactListQuery.SelectParameters.Clear();
                 contactListQuery.SelectParameters.Add(ContactListRegistrant.ObjectMap["RegistrantId"]);
                 contactListQuery.Criterias.Add(ContactListRegistrant.ObjectMap["contactListId"], contactListId.Value);
 
-                dq.Criterias.Add(ObjectMap["Id"], contactListQuery, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+                dq.Criterias.Add(ObjectMap["Id"], contactListQuery, DatabaseCriteriaOperatorEnum.In);
             }
 
             if (searchText.IsNotEmpty())
@@ -429,9 +481,9 @@ namespace AfterSchoolLibrary.Models
                 foreach (var item in itemList)
                 {
                     var dcs = new DatabaseCriterias(LogicalOperatorType.Or);
-                    dcs.Add(ObjectMap["FirstName"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
-                    dcs.Add(ObjectMap["LastName"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
-                    dcs.Add(ObjectMap["Email"], item, BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.Like);
+                    dcs.Add(ObjectMap["FirstName"], item, DatabaseCriteriaOperatorEnum.Like);
+                    dcs.Add(ObjectMap["LastName"], item, DatabaseCriteriaOperatorEnum.Like);
+                    dcs.Add(ObjectMap["Email"], item, DatabaseCriteriaOperatorEnum.Like);
                     dcsAnd.Add(dcs);
                 }
 
@@ -446,19 +498,21 @@ namespace AfterSchoolLibrary.Models
 
         public static int SearchRegistrantCount(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
         {
-            return SearchRegistrantsQuery(searchText, contactListId, accountId, dc: dc).GetCount();
+            return SearchRegistrantsQuery(searchText, contactListId, accountId, dc).GetCount();
         }
-        public static List<Registrant> SearchRegistrants(string searchText, int? contactListId, int accountId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+
+        public static List<Registrant> SearchRegistrants(string searchText, int? contactListId, int accountId, int? start, int? length,
+            DatabaseConnection dc = null)
         {
-            var dq = SearchRegistrantsQuery(searchText, contactListId, accountId, dc: dc);
+            var dq = SearchRegistrantsQuery(searchText, contactListId, accountId, dc);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool isDeleted, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Registrant> LoadByAccountIdByIsDeleted(int AccountId, bool isDeleted, int? start, int? length, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
@@ -467,17 +521,17 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAccountId(int AccountId, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetCountByAccountId(int AccountId, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.GetCount();
-        }                       
+        }
 
         public static Registrant LoadByNameByEmail(int accountId, string firstName, string lastName, string email, DatabaseConnection dc = null)
         {
-            DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["accountId"], accountId);
             dq.Criterias.Add(ObjectMap["firstName"], firstName);
@@ -488,7 +542,7 @@ namespace AfterSchoolLibrary.Models
 
         public static Registrant LoadByEmailOnly(int accountId, string email, DatabaseConnection dc = null)
         {
-            DatabaseQuery dq = DatabaseQuery;
+            var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
@@ -507,7 +561,7 @@ namespace AfterSchoolLibrary.Models
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
-        
+
 
         public static List<Registrant> LoadFirstRegistrants(int accountId, int? start, int? length, DatabaseConnection dc = null)
         {
@@ -525,38 +579,39 @@ namespace AfterSchoolLibrary.Models
 
         public SystemMessages FindAndSetFirstRegistrant(WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            return FindAndSetFirstRegistrant(this.FirstName, this.LastName, this.Email, loggedInUser, dc);
+            return FindAndSetFirstRegistrant(FirstName, LastName, Email, loggedInUser, dc);
         }
 
         public SystemMessages FindAndSetFirstRegistrant(string firstName, string lastName, string email, WebUser loggedInUser, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            
+
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["AccountId"], this.AccountId);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["FirstRegistrantId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["FirstName"], firstName);
             dq.Criterias.Add(ObjectMap["LastName"], lastName);
             dq.Criterias.Add(ObjectMap["Email"], email);
-            dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            dq.Criterias.Add(ObjectMap["ID"], ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             dq.OrderBys.Add(ObjectMap["Id"], OrderByDirectionEnum.Ascending);
 
             var firstRegistrant = dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 
             if (firstRegistrant.IsNotEmpty())
             {
-                this.FirstRegistrantId = firstRegistrant.ID;
-                this.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                this.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(this.Save(dc));
+                FirstRegistrantId = firstRegistrant.ID;
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(Save(dc));
             }
 
             return msgs;
         }
 
-        public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> FindRelatedRegistrants(int AccountId, string firstName, string lastName, string email, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -582,43 +637,45 @@ namespace AfterSchoolLibrary.Models
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             var copy = new Registrant();
-            copy.CopyDataValues(this.OriginalDataValues, this.ModifiedDataValues);
+            copy.CopyDataValues(OriginalDataValues, ModifiedDataValues);
             copy.CreateDate = copy.LastModifiedDate = DateTime.UtcNow;
             copy.CreatedBy = copy.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             copy.Uid = Guid.NewGuid();
             copy.ResetID();
-            msgs.AddRange(copy.Save(dc: dc));
+            msgs.AddRange(copy.Save(dc));
 
             return copy;
         }
 
         public string GetFirstNameLastInitial()
         {
-            if (this.FirstName.Length < 3 )
-                return $"{this.FirstName} {this.LastName.MaskString(1)}.";
-            
-            return $"{this.FirstName.MaskString(Math.Max(this.FirstName.Length - 3, 3))} {this.LastName.MaskString(1)}.";
+            if (FirstName.Length < 3)
+                return $"{FirstName} {LastName.MaskString(1)}.";
+
+            return $"{FirstName.MaskString(Math.Max(FirstName.Length - 3, 3))} {LastName.MaskString(1)}.";
         }
-        
-        public static List<Registrant> LoadByWebUserId(int WebUserId, RegistrantPersonType personTypeId, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+
+        public static List<Registrant> LoadByWebUserId(int WebUserId, RegistrantPersonType personTypeId, bool IsMaster, bool IsDeleted,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
             dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
             dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-            dq.Criterias.Add(ObjectMap["PersonTypeId"], (int)personTypeId);
+            dq.Criterias.Add(ObjectMap["PersonTypeId"], (int) personTypeId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-        
-        public static List<Registrant> LoadByWebUserId(int WebUserId, List<RegistrantPersonType> personTypeIds, bool IsMaster, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+
+        public static List<Registrant> LoadByWebUserId(int WebUserId, List<RegistrantPersonType> personTypeIds, bool IsMaster, bool IsDeleted,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
             dq.Criterias.Add(ObjectMap["IsMaster"], IsMaster);
             dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
-            dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int)x).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int) x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 

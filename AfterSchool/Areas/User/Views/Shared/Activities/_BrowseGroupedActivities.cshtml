@@ -7,13 +7,11 @@
     {
         status = ((RegistrationStatus) ViewData["Status"].ToString().ToInteger()).AsList();
     }
-
-    var isVolunteer = SessionVariables.CurrentAccount.AccountTypeId == AccountType.Volunteer;
 }
 
 @if (Model.Any(participation => participation.RegistrationStatus.In(status)))
 {
-    <h4 class="text-center">@status.Select(x => x.ToString()).ToStringList() @UILabel.ActivityLabel(isVolunteer ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true)</h4>
+    <h4 class="text-center">@status.Select(x => x.ToString()).ToStringList() @UILabel.ActivityLabel(ActivityType.Activity, true)</h4>
 
     foreach (var participation in Model.Where(participation => participation.RegistrationStatus.In(status)))
     {

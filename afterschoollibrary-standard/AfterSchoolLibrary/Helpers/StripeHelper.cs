@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using System.Configuration;
 using Stripe.BillingPortal;
+using Stripe.Checkout;
 using Twilio.Types;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -43,6 +44,8 @@ namespace AfterSchoolLibrary.Billing
                 : (cost / (1 - StripeBankPercentFee)) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
+
+        public static string ReferralCouponId => Helpers.Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
 
         public static string SecretKey => Helpers.Utilities.IsLocalHost ? TestSecretKey : LiveSecretKey;
         public static string PublishableKey  => Helpers.Utilities.IsLocalHost ? TestPublishableKey : LivePublishableKey;
@@ -884,19 +887,15 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public Stripe.Customer GetCustomer(string customerId, string stripeAccountId, SystemMessages msgs)
+        public Stripe.Customer GetCustomer(string customerId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
 
             Stripe.Customer customer = null;
 
             try
             {
-                customer = GetCustomerService().Get(customerId, null, requestOptions);
+                customer = GetCustomerService().Get(customerId);
             }
             catch (StripeException)
             {
@@ -1211,7 +1210,8 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, 
+            string defaultPaymentMethod, Dictionary<string, string> metaData, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1224,6 +1224,9 @@ namespace AfterSchoolLibrary.Billing
                 Metadata = metaData,
                 ProrationBehavior = "none",
             };
+
+            if (defaultPaymentMethod.IsNotEmpty())
+                options.DefaultPaymentMethod = defaultPaymentMethod;
 
             if (sourceId.IsNotEmpty())
                 options.DefaultSource = sourceId;
@@ -1308,11 +1311,12 @@ namespace AfterSchoolLibrary.Billing
             return CreateRegistrantSubscription(customer.Id, plan.Id, isProrated, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
-        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, SystemMessages msgs)
+        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, string couponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
-
+            
             var options = new Stripe.SubscriptionUpdateOptions();
+            Stripe.Subscription subscription = null;
 
             if (priceId.IsNotBlank())
                 options.Items = new List<Stripe.SubscriptionItemOptions>()
@@ -1320,10 +1324,13 @@ namespace AfterSchoolLibrary.Billing
                     new Stripe.SubscriptionItemOptions()
                     {
                         Price = priceId,
-                        Quantity = 1
+                        Quantity = 1,
                     }
                 };
-
+            
+            if (couponId.IsNotEmpty())
+                options.Coupon = couponId;
+            
             if (billingCycleAnchorNow.HasValue)
                 options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
 
@@ -1336,14 +1343,9 @@ namespace AfterSchoolLibrary.Billing
             if (prorate.HasValue)
                 options.ProrationBehavior = prorate.Value ? "create_prorations" : "none";
 
-            Stripe.Subscription subscription = null;
-
             try
             {
-                var service = GetSubscriptionService();
-                if (service.IsNotEmpty())
-                    subscription = service.Update(subscriptionId, options);
-                
+                subscription = GetSubscriptionService().Update(subscriptionId, options);
             }
             catch (StripeException ex)
             {
@@ -1354,9 +1356,9 @@ namespace AfterSchoolLibrary.Billing
             return subscription;
         }
 
-        public SystemMessages CancelSubscription(string subscriptionId, string stripeAccountId, bool cancelAtPeriodEnd = true)
+        public void CancelSubscription(string subscriptionId, bool cancelAtPeriodEnd = true, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Stripe.SubscriptionUpdateOptions options;
 
@@ -1371,27 +1373,19 @@ namespace AfterSchoolLibrary.Billing
             {
                 options = new Stripe.SubscriptionUpdateOptions()
                 {
-                    CancelAt = DateTime.Now.AddSeconds(15),
-                    ProrationDate = DateTime.Now
+                    CancelAt = DateTime.UtcNow.AddSeconds(5),
                 };
             }
 
-
-            var requestOptions = new Stripe.RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
             try
             {
-                var subscription = GetSubscriptionService().Update(subscriptionId, options, requestOptions);
+                var subscription = GetSubscriptionService().Update(subscriptionId, options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Subscription ({subscriptionId}) was not canceled", MessageType.UserError);
             }
-
-            return msgs;
         }
 
         public Stripe.Subscription GetSubscription(string subscriptionId, SystemMessages msgs)
@@ -1410,7 +1404,61 @@ namespace AfterSchoolLibrary.Billing
 
             return subscription;
         }
+        
+        public List<Stripe.Subscription> GetSubscriptions(string customerId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var subscriptions = new List<Stripe.Subscription>();
 
+            var options = new SubscriptionListOptions()
+            {
+                Customer = customerId,
+            };
+
+            try
+            {
+                subscriptions = GetSubscriptionService().List(options).ToList();
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"No stripe subscriptions found with customer ID: {customerId}", MessageType.Notice, ex);
+            }
+
+            return subscriptions;
+        }
+
+        #endregion
+        
+        #region SetupIntent
+
+        private Stripe.SetupIntentService GetSetupIntentService()
+        {
+            return new Stripe.SetupIntentService(StripeClient);
+        }
+
+        public Stripe.SetupIntent CreateSetupIntent(string customerId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Stripe.SetupIntent setupIntent = null;
+
+            var options = new SetupIntentCreateOptions()
+            {
+                Customer = customerId,
+                PaymentMethodTypes = new List<string>() {"card"},
+            };
+
+            try
+            {
+                setupIntent = GetSetupIntentService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add($"Error creating setup intent", MessageType.Notice, ex);
+            }
+
+            return setupIntent;
+        }
+        
         #endregion
 
         #region StripeCard
@@ -2338,6 +2386,70 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return configuration;
+        }
+        
+        #endregion
+        
+        #region StripeCheckoutSession
+        
+        private Stripe.Checkout.SessionService GetCheckoutSessionService()
+        {
+            return new Stripe.Checkout.SessionService(StripeClient);
+        }
+
+        public Stripe.Checkout.Session GetCheckoutSession(string customerId, string priceId, string successUrl, string cancelUrl, string couponId, SystemMessages msgs)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Stripe.Checkout.Session session = null;
+            var options = new Stripe.Checkout.SessionCreateOptions()
+            {
+                Customer = customerId,
+                AutomaticTax = new SessionAutomaticTaxOptions()
+                {
+                    Enabled = true,
+                },
+                CancelUrl = cancelUrl,
+                SuccessUrl = successUrl,
+                Mode = "subscription",
+                BillingAddressCollection = "required",
+                LineItems = new List<SessionLineItemOptions>()
+                {
+                    new SessionLineItemOptions()
+                    {
+                        Price = priceId,
+                        Quantity = 1,
+                    },
+                },
+                CustomerUpdate = new SessionCustomerUpdateOptions()
+                {
+                    Address = "auto",
+                },
+                PaymentMethodTypes = new List<string>() {"card"},
+            };
+
+            if (couponId.IsNotEmpty())
+                options.Discounts = new List<SessionDiscountOptions>()
+                {
+                    new SessionDiscountOptions()
+                    {
+                        Coupon = couponId,
+                    },
+                };
+            else
+                options.AllowPromotionCodes = true;
+
+            try
+            {
+                session = GetCheckoutSessionService().Create(options);
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.Add($"Error creating session", MessageType.UserError);
+            }
+
+            return session;
         }
         
         #endregion

@@ -1,9 +1,9 @@
 ﻿@model List<RegistrantActivity>
 @{
-    var activity = (Activity)ViewData["Activity"];
+    var activity = (Activity) ViewData["Activity"];
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
-    var headerTitle = (RegistrationAssignmentType)ViewData["HeaderTitle"];
+    var headerTitle = (RegistrationAssignmentType) ViewData["HeaderTitle"];
     var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var assignmentTypesForActivity = activity.GetRegistrationAssignmentTypes();
 }
@@ -45,12 +45,17 @@
                             <td>
                                 @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
                                 {
-                                    <a href="@Url.Action(editaction, editcontroller, new { id = ra.Uid })" class="btn btn-default btn-sm">
+                                    <a href="@Url.Action(editaction, editcontroller, new {id = ra.Uid})" class="btn btn-default btn-sm">
                                         <i class="icon icon-left s7-user"></i> View Details
                                     </a>
                                 }
                             </td>
-                            <td>@(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail) : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))</td>
+                            <td>
+                                @(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail)
+                                    : ra.RegistrantEmail.Length < 3 ?
+                                        ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
+                                        : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
+                            </td>
                             <!--When Background check will complete then here we will need to do changes-->
                             <td>Pending Review</td>
                             <td>@ra.RegistrantPhone</td>
@@ -59,9 +64,8 @@
                                 {
                                     assignmentTypesForActivity.Add(RegistrationAssignmentType.Withdrawn);
                                     <select disabled id="assignmentType" class="form-control">
-                                        <option value="@((int)RegistrationAssignmentType.Withdrawn)" selected="selected">@RegistrationAssignmentType.Withdrawn.ToString().SplitByUpperCase()</option>
+                                        <option value="@((int) RegistrationAssignmentType.Withdrawn)" selected="selected">@RegistrationAssignmentType.Withdrawn.ToString().SplitByUpperCase()</option>
                                     </select>
-
                                 }
                                 else
                                 {
@@ -74,13 +78,13 @@
                                                 selected = "selected=\"selected\"";
                                             }
 
-                                            <option value="@((int)x)" @selected>@x.ToString().SplitByUpperCase()</option>
+                                            <option value="@((int) x)" @selected>@x.ToString().SplitByUpperCase()</option>
                                         }
                                     </select>
                                 }
                             </td>
                             <td>
-                                <a href=@(Url.Action("messageadd", "activity", new { id = ra.GetActivity().Uid, uid = ra.RegistrantUid })) new class="btn btn-primary local-btn">Message</a>
+                                <a href=@(Url.Action("messageadd", "activity", new {id = ra.GetActivity().Uid, toUid = ra.RegistrantUid, returnUrl = HttpContext.Current.Request.Url.AbsoluteUri})) new class="btn btn-primary local-btn">Message</a>
                             </td>
                             <td>
 

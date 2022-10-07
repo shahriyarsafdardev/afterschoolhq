@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using AfterSchool.Assemblers;
 using AfterSchool.Models;
-using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
-using Moq;
 using NUnit.Framework;
 
 namespace after_school_hq.Tests.Assemblers
@@ -14,8 +12,7 @@ namespace after_school_hq.Tests.Assemblers
         [Test]
         public void VolunteerRegisterAssemblerTest()
         {
-            var featureFlagRepository = new Mock<IFeatureFlagRepository>();
-            var assembler = new VolunteerRegisterAssembler(featureFlagRepository.Object);
+            var assembler = new VolunteerRegisterAssembler();
             var formQuestionViewModels = new List<FormQuestionViewModel>();
             var participationObject = new ParticipationObject(ActivityType.Activity);
             var registrationStartPageAccount = new Account();

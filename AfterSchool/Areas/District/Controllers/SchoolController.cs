@@ -124,8 +124,8 @@ namespace AfterSchool.Areas.District.Controllers
                             accountType: AccountType.School,
                             packageId: Package.Load().First().ID.Value,
                             packageBillingPeriod: BillingPeriodType.Month,
-                            timeZone: null,
-                            isAfterSchool: SessionVariables.IsAfterSchool.Value,
+                            timeZone: null, 
+                            SignUpType.NotSet,
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);

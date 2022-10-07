@@ -90,7 +90,7 @@ namespace AfterSchool.Models
         protected ActionResult HandleOnboardingRedirect()
         {
             var account = SessionVariables.CurrentAccount;
-
+            
             switch(account.OnboardingStepDone)
             {
                 case OnboardingStepType.AccountType:
@@ -108,7 +108,10 @@ namespace AfterSchool.Models
                 case OnboardingStepType.SocialLinks:
                     return RedirectToAction("done", "onboarding");
             }
-
+            
+            if (account.SignUpTypeId == SignUpType.DirectPurchase)
+                return RedirectToAction("StartSubscription", "onboarding");
+            
             return RedirectToAction("index", "onboarding");
         }
 

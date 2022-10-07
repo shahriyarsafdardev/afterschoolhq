@@ -6,11 +6,11 @@ using File = System.IO.File;
 
 namespace AfterSchoolAdHoc;
 
-public static class GenerateCsvReport
+public static class GenerateCsvReportForAllActivities
 {
     public static void Run(DatabaseConnection dc)
     {
-        const int accountId = 16;
+        const int accountId = 1;
 
         var msgs = new SystemMessages();
         var list = Activity.LoadByAccountId(accountId, null, null, null, false, false, null, null, null, null, msgs, dc);
