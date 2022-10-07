@@ -11,5 +11,7 @@ var items = JsonConvert.DeserializeObject<DatabaseConfig>(json)!.AdHocSqlServer;
 var databaseCredentials = new DatabaseCredentials(items.ServerName, items.DatabaseName, items.UserName, items.Password);
 var dc = new DatabaseConnection(databaseCredentials.ConnectionString);
 
-//GenerateCsvReport.Run(dc);
-GenerateCsvReportForSession.Run(dc);
+const int accountId = 0;
+
+GenerateCsvReportForAllActivities.Run(accountId, dc);
+// GenerateCsvReportForSession.Run(accountId, RegistrationReportType.Detailed, "00000000-0000-0000-0000-000000000000", dc);
