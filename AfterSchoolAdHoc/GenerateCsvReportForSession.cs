@@ -7,11 +7,9 @@ namespace AfterSchoolAdHoc;
 
 public static class GenerateCsvReportForSession
 {
-    public static void Run(int accountId, RegistrationReportType reportType, string activityGroupUid, DatabaseConnection dc)
+    public static void Run(int accountId, RegistrationReportType reportType, string commaSeparatedActivityGroupIds, DatabaseConnection dc)
     {
-        var commaSeparatedActivityGroupIds = activityGroupUid;
         var msgs = new SystemMessages();
-
         var account = Account.Load(accountId, msgs, dc);
         if (account is null)
             throw new Exception("Account not found");
