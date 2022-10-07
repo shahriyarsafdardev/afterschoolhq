@@ -1448,7 +1448,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
             var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
             
-            var Emails =  String.Join(",", Email.AppSalesEmailAddress, Email.AppSalesEmailAddress);
+            var emails =  String.Join(",", Email.AppSalesEmailAddress, Email.AppSalesEmailAddress);
             
 
             Database.ExecuteTransaction(
@@ -1460,7 +1460,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    foreach (var email in Emails.Split(','))
+                    foreach (var email in emails.Split(','))
                     {
                         msgs.AddRange(
                             EmailHelper.SendEmail(
@@ -1472,7 +1472,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             );
                     }
                 },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
             );
 
             if (msgs.HasErrors())
