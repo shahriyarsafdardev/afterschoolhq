@@ -524,7 +524,7 @@ namespace AfterSchoolLibrary.Services
                 var reportRegistration = new ReportRegistration(firstRegistration, allRegistrations, answers,
                     registrantActivities, activitySchedules);
 
-                table.Add(AddEachRegistrationToCsvReport2(
+                table.Add(AddEachRegistrationToCsvReport(
                     reportRegistration,
                     account,
                     reportType,

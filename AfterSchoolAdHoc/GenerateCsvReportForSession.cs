@@ -24,8 +24,7 @@ public static class GenerateCsvReportForSession
         var group = account.GetActivityGroup(activityGroupUid.ToGuid(), msgs, dc);
 
         var activityIds = group.GetActivities(null, false, false, null, null, false, msgs, dc).Select(x => x.ID.Value).ToList();
-        var byteData = RegistrationService.GetCsvByteArray(account, null, null, activityIds, ParticipationObjectType.Activity, reportType, null,
-            RegistrationStatus.NotSet, false, msgs, dc);
+        var byteData = RegistrationService.GetCsvByteArray(account, activityIds, reportType, msgs, dc);
 
         File.WriteAllBytes($"report-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.csv", byteData);
         Console.WriteLine(@"Report successfully saved");
