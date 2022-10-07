@@ -30,5 +30,4 @@ var dc = new DatabaseConnection(credentials.ConnectionString);
 
 const int accountId = 0;
 
-CsvReportGenerator.RunForAllActivities(accountId, dc);
-//CsvReportGenerator.RunForSessions(accountId, RegistrationReportType.Detailed, "166,167,168", dc);
+CsvReportGenerator.Run(accountId, null, null, dc);
