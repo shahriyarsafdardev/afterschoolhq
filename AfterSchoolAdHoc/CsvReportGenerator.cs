@@ -5,9 +5,9 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolAdHoc;
 
-public static class GenerateCsvReportForAllActivities
+public static partial class CsvReportGenerator
 {
-    public static void Run(int accountId, DatabaseConnection dc)
+    public static void RunForAllActivities(int accountId, DatabaseConnection dc)
     {
         var msgs = new SystemMessages();
         var list = Activity.LoadByAccountId(accountId, null, null, null, false, false, null, null, null, null, msgs, dc);
