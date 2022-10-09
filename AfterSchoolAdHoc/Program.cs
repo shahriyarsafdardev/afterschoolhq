@@ -5,13 +5,31 @@ using Newtonsoft.Json;
 
 var localConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "afterschoolhq-overrides", "appsettings.json");
 
-using var streamReader = new StreamReader(localConfigFilePath);
-var json = streamReader.ReadToEnd();
-var items = JsonConvert.DeserializeObject<DatabaseConfig>(json)!.AdHocSqlServer;
-var databaseCredentials = new DatabaseCredentials(items.ServerName, items.DatabaseName, items.UserName, items.Password);
-var dc = new DatabaseConnection(databaseCredentials.ConnectionString);
+string json;
+try
+{
+    using var streamReader = new StreamReader(localConfigFilePath);
+    json = streamReader.ReadToEnd();
+}
+catch (FileNotFoundException)
+{
+    Console.WriteLine(@"Local overrides config file not found; confirm file exists and is in the correct location and try again");
+    return;
+}
+
+var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.AdHocSqlServer;
+if (config is null)
+{
+    Console.WriteLine(
+        @"Ad hoc config section has not been added to the local overrides file file not found; confirm file exists and is in the correct location and try again");
+    return;
+}
+
+var credentials = new DatabaseCredentials(config.ServerName, config.DatabaseName, config.UserName, config.Password);
+var dc = new DatabaseConnection(credentials.ConnectionString);
 
 const int accountId = 0;
+const RegistrationReportType reportType = RegistrationReportType.DismissalForHostedActivities;
+const string? commaSeparatedActivityGroupIds = null;
 
-GenerateCsvReportForAllActivities.Run(accountId, dc);
-// GenerateCsvReportForSession.Run(accountId, RegistrationReportType.Detailed, "00000000-0000-0000-0000-000000000000", dc);
+CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);

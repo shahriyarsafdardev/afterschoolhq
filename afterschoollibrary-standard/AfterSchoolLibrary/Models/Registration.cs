@@ -21,19 +21,19 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         public int? RegistrantId
         {
-            get => (int?)MDV["RegistrantId"].Value;
+            get => (int?) MDV["RegistrantId"].Value;
             set => MDV["RegistrantId"].Value = value;
         }
 
         public int? RegistrationPeriodId
         {
-            get => (int?)MDV["RegistrationPeriodId"].Value;
+            get => (int?) MDV["RegistrationPeriodId"].Value;
             set => MDV["RegistrationPeriodId"].Value = value;
         }
 
         public int? AccountId
         {
-            get => (int?)MDV["AccountId"].Value;
+            get => (int?) MDV["AccountId"].Value;
             set => MDV["AccountId"].Value = value;
         }
 
@@ -42,115 +42,115 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         public Guid Uid
         {
-            get => (Guid)MDV["Uid"].Value;
+            get => (Guid) MDV["Uid"].Value;
             set => MDV["Uid"].Value = value;
         }
 
         public DateTime? DatePaid
         {
-            get => (DateTime?)MDV["DatePaid"].Value;
+            get => (DateTime?) MDV["DatePaid"].Value;
             set => MDV["DatePaid"].Value = value;
         }
 
         public string StripeChargeId
         {
-            get => (string)MDV["StripeChargeId"].Value;
+            get => (string) MDV["StripeChargeId"].Value;
             set => MDV["StripeChargeId"].Value = value;
         }
 
         public string PayPalTransactionId
         {
-            get => (string)MDV["PayPalTransactionId"].Value;
+            get => (string) MDV["PayPalTransactionId"].Value;
             set => MDV["PayPalTransactionId"].Value = value;
         }
 
         public decimal? AmountPaid
         {
-            get => (decimal?)MDV["AmountPaid"].Value;
+            get => (decimal?) MDV["AmountPaid"].Value;
             set => MDV["AmountPaid"].Value = value;
         }
 
         public decimal? ConvenienceFeePaid
         {
-            get => (decimal?)MDV["ConvenienceFeePaid"].Value;
+            get => (decimal?) MDV["ConvenienceFeePaid"].Value;
             set => MDV["ConvenienceFeePaid"].Value = value;
         }
 
         public decimal? PaymentTypeFeePaid
         {
-            get => (decimal?)MDV["PaymentTypeFeePaid"].Value;
+            get => (decimal?) MDV["PaymentTypeFeePaid"].Value;
             set => MDV["PaymentTypeFeePaid"].Value = value;
         }
 
         public PaymentType PaymentTypeId
         {
-            get => (PaymentType)MDV["PaymentTypeId"].Value;
+            get => (PaymentType) MDV["PaymentTypeId"].Value;
             set => MDV["PaymentTypeId"].Value = value;
         }
 
         public DateTime? LastUpdated
         {
-            get => (DateTime?)MDV["LastUpdated"].Value;
+            get => (DateTime?) MDV["LastUpdated"].Value;
             set => MDV["LastUpdated"].Value = value;
         }
 
         public int? ActivityGroupId
         {
-            get => (int?)MDV["ActivityGroupId"].Value;
+            get => (int?) MDV["ActivityGroupId"].Value;
             set => MDV["ActivityGroupId"].Value = value;
         }
 
         public int? AccountActivityGroupId
         {
-            get => (int?)MDV["AccountActivityGroupId"].Value;
+            get => (int?) MDV["AccountActivityGroupId"].Value;
             set => MDV["AccountActivityGroupId"].Value = value;
         }
 
         public int? FirstRegistrationId
         {
-            get => (int?)MDV["FirstRegistrationId"].Value;
+            get => (int?) MDV["FirstRegistrationId"].Value;
             set => MDV["FirstRegistrationId"].Value = value;
         }
 
         public string ESignature
         {
-            get => (string)MDV["ESignature"].Value;
+            get => (string) MDV["ESignature"].Value;
             set => MDV["ESignature"].Value = value;
         }
 
         public string ESignatureUserAgent
         {
-            get => (string)MDV["ESignatureUserAgent"].Value;
+            get => (string) MDV["ESignatureUserAgent"].Value;
             set => MDV["ESignatureUserAgent"].Value = value;
         }
 
         public string ESignatureIPAddress
         {
-            get => (string)MDV["ESignatureIPAddress"].Value;
+            get => (string) MDV["ESignatureIPAddress"].Value;
             set => MDV["ESignatureIPAddress"].Value = value;
         }
 
         public RegistrationCompletionStatus CompletionStatusId
         {
-            get => (RegistrationCompletionStatus)MDV["CompletionStatusId"].Value;
+            get => (RegistrationCompletionStatus) MDV["CompletionStatusId"].Value;
             set => MDV["CompletionStatusId"].Value = value;
         }
 
         public int? PurchaseId
         {
-            get => (int?)MDV["PurchaseId"].Value;
+            get => (int?) MDV["PurchaseId"].Value;
             set => MDV["PurchaseId"].Value = value;
         }
 
         public string StripeSourceId
         {
-            get => (string)MDV["StripeSourceId"].Value;
+            get => (string) MDV["StripeSourceId"].Value;
             set => MDV["StripeSourceId"].Value = value;
         }
 
         public decimal? CostPerClass
         {
-            get => (decimal?)MDV["CostPerClass"].Value;
+            get => (decimal?) MDV["CostPerClass"].Value;
             set => MDV["CostPerClass"].Value = value;
         }
 
@@ -159,7 +159,7 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         public int? PaymentTypeFeePayerAccountId
         {
-            get => (int?)MDV["PaymentTypeFeePayerAccountId"].Value;
+            get => (int?) MDV["PaymentTypeFeePayerAccountId"].Value;
             set => MDV["PaymentTypeFeePayerAccountId"].Value = value;
         }
 
@@ -168,35 +168,35 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         public int? ConvenienceFeePayerAccountId
         {
-            get => (int?)MDV["ConvenienceFeePayerAccountId"].Value;
+            get => (int?) MDV["ConvenienceFeePayerAccountId"].Value;
             set => MDV["ConvenienceFeePayerAccountId"].Value = value;
         }
 
         public int? CouponId
         {
-            get => (int?)MDV["CouponId"].Value;
+            get => (int?) MDV["CouponId"].Value;
             set => MDV["CouponId"].Value = value;
         }
 
         public decimal? CouponValue
         {
-            get => (decimal?)MDV["CouponValue"].Value;
+            get => (decimal?) MDV["CouponValue"].Value;
             set => MDV["CouponValue"].Value = value;
         }
 
         public bool? IsDeleted
         {
-            get => (bool?)MDV["IsDeleted"].Value;
+            get => (bool?) MDV["IsDeleted"].Value;
             set => MDV["IsDeleted"].Value = value;
         }
 
-        public string RegistrantEmail => (string)MDV["RegistrantEmail"].Value;
-        public string RegistrantFirstName => (string)MDV["RegistrantFirstName"].Value;
-        public string RegistrantLastName => (string)MDV["RegistrantLastName"].Value;
-        public Guid RegistrantUid => (Guid)MDV["RegistrantUid"].Value;
-        public string RegistrantPhone => (string)MDV["RegistrantPhone"].Value;
-        public string RegistrantCompany => (string)MDV["RegistrantCompany"].Value;
-        public RegistrantType RegistrantRegistrantTypeId => (RegistrantType)MDV["RegistrantRegistrantTypeId"].Value;
+        public string RegistrantEmail => (string) MDV["RegistrantEmail"].Value;
+        public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
+        public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
+        public Guid RegistrantUid => (Guid) MDV["RegistrantUid"].Value;
+        public string RegistrantPhone => (string) MDV["RegistrantPhone"].Value;
+        public string RegistrantCompany => (string) MDV["RegistrantCompany"].Value;
+        public RegistrantType RegistrantRegistrantTypeId => (RegistrantType) MDV["RegistrantRegistrantTypeId"].Value;
 
 
         public Registration()
@@ -591,7 +591,7 @@ namespace AfterSchoolLibrary.Models
                 DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate,
                 DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -606,7 +606,7 @@ namespace AfterSchoolLibrary.Models
                 DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate,
                 DatabaseCriteriaOperatorEnum.DBValueIsLessThanOrEqualToParameter);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             return dq.GetCount(msgs);
         }
@@ -639,15 +639,15 @@ namespace AfterSchoolLibrary.Models
         {
             var completionStatus = new List<int>
             {
-                (int)RegistrationCompletionStatus.Completed,
-                (int)RegistrationCompletionStatus.RequiresParentSignature,
+                (int) RegistrationCompletionStatus.Completed,
+                (int) RegistrationCompletionStatus.RequiresParentSignature,
             };
 
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
@@ -664,7 +664,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName.Trim());
@@ -682,7 +682,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(Save(dc));
         }
 
-        private static string GetSearchSQL(string searchText, int accountId, int? questionId,
+        private static string GetSearchSql(string searchText, int accountId, int? questionId,
             RegistrationStatus regStatus, bool getVolunteers, List<int> participationObjectIds = null,
             ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet,
             List<RegistrationAssignmentType> rats = null, bool getCount = false)
@@ -729,23 +729,24 @@ namespace AfterSchoolLibrary.Models
             var activityIdWhere = "";
 
 
-            activityJoin = $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int)participationObjectType}";
+            activityJoin =
+                $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int) participationObjectType}";
 
             if (hasAssignmentTypes)
                 assignmentTypeWhere =
-                    $"ra.AssignmentTypeId in ({rats.Select(x => (int)x).ToStrings().ToStringList()})";
+                    $"ra.AssignmentTypeId in ({rats.Select(x => (int) x).ToStrings().ToStringList()})";
 
             if (hasActivityIds)
                 activityIdWhere =
-                    $"ra.ParticipationObjectId in ({participationObjectIds.ToStrings().ToStringList()}) and ra.ParticipationObjectTypeId = {(int)participationObjectType}";
+                    $"ra.ParticipationObjectId in ({participationObjectIds.ToStrings().ToStringList()}) and ra.ParticipationObjectTypeId = {(int) participationObjectType}";
 
 
             var regStatusJoin = "";
             var regStatusWhere = "";
-            
+
             var activityTypeWhere = getVolunteers
-                ? $"a.ActivityTypeId = {(int)ActivityType.VolunteerOpportunity}"
-                : $"a.ActivityTypeId != {(int)ActivityType.VolunteerOpportunity}";
+                ? $"a.ActivityTypeId = {(int) ActivityType.VolunteerOpportunity}"
+                : $"a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}";
 
             if (hasRegStatus)
             {
@@ -779,7 +780,7 @@ namespace AfterSchoolLibrary.Models
             whereClause += (whereClause.IsNotEmpty() ? " and " : "") + activityTypeWhere;
             whereClause = $@"where 
                                 r2.AccountId = {accountId} and 
-                                r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()})" +
+                                r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList()})" +
                           (whereClause.IsNotEmpty() ? $" and {whereClause}" : "");
 
             var select = @"r.*,
@@ -824,6 +825,37 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
 
+        private static string GetSearchSqlByActivityIds(IReadOnlyCollection<int> activityIds)
+        {
+            if (activityIds.IsEmpty() || !activityIds.Any()) throw new Exception("No activity IDs were passed in for the search");
+
+            var validCompletionStatuses = ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList();
+            var activityIdList = activityIds.ToStrings().ToStringList();
+            const int activityParticipationType = (int) ParticipationObjectType.Activity;
+            var sql = $@"select r.*,
+                            reg.FirstName as RegistrantFirstName,
+                            reg.LastName as RegistrantLastName,
+                            reg.Email as RegistrantEmail,
+                            reg.RegistrantTypeId as RegistrantRegistrantTypeId,
+                            reg.Uid as RegistrantUid,
+                            reg.Phone as RegistrantPhone,
+                            reg.Company as RegistrantCompany
+                        from 
+	                        Registration r
+	                        inner join Registrant reg on r.RegistrantId = reg.ID
+                            inner join RegistrantActivity ra on r.ID = ra.RegistrationId
+	                        inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {activityParticipationType}
+                        where
+                            r.CompletionStatusId in ({validCompletionStatuses})
+                            and ra.ParticipationObjectId in ({activityIdList}) and ra.ParticipationObjectTypeId = {activityParticipationType}
+                            and a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}
+                        order by
+                            reg.FirstName,
+                            reg.LastName";
+
+            return sql;
+        }
+
         public static List<Registration> Search(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length,
@@ -832,10 +864,19 @@ namespace AfterSchoolLibrary.Models
             // var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
+            var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
                 participationObjectType, rats);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registration> LoadByActivityIds(IReadOnlyCollection<int> activityIds, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetSearchSqlByActivityIds(activityIds);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -847,7 +888,7 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetSearchSQL(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
+            var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
                 participationObjectType, rats, true);
             return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
         }
@@ -858,7 +899,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -873,7 +914,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -888,7 +929,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
-            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int)x).ToArray(),
+            dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
@@ -903,11 +944,11 @@ namespace AfterSchoolLibrary.Models
                         from Registration r
                         where 
                         accountId = {accountId} and
-                        completionStatusId in ({ValidCompletionStatus.Select(x => (int)x).ToStrings().ToStringList()}) and
+                        completionStatusId in ({ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList()}) and
                         (
                             select count(ra.id) 
                             from RegistrantActivity ra
-                                Inner Join Activity a on ra.ParticipationObjectId = a.ID and ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity}
+                                Inner Join Activity a on ra.ParticipationObjectId = a.ID and ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}
                                 Left Outer Join ActivityGroup ag on a.ActivityGroupid = ag.ID
                             where 
                                 ra.RegistrationId = r.ID and
@@ -955,7 +996,7 @@ namespace AfterSchoolLibrary.Models
 			                    from 
 				                    registration r3 inner join 
 				                    RegistrantActivity ra on r3.ID = ra.RegistrationId inner join 
-				                    Activity a on ra.ParticipationObjectId = a.id and ra.ParticipationObjectTypeId = {(int)ParticipationObjectType.Activity} left outer join
+				                    Activity a on ra.ParticipationObjectId = a.id and ra.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity} left outer join
 				                    ActivityGroup ag on ag.id = a.ActivityGroupId
 			                    where 
 				                    r3.AccountId = r.AccountId and
