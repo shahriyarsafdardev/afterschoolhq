@@ -343,43 +343,18 @@ namespace AfterSchoolLibrary.Services
             EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
         }
 
-        private static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
+        public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
         {
-            var registrations = account.SearchRegistrations(
-                searchText,
-                questionId,
-                participationObjectIds,
-                participationObjectType,
-                registrationStatus,
-                rats,
-                null,
-                null,
-                getVolunteers,
-                msgs,
+            var registrations = reportType == RegistrationReportType.DismissalForHostedActivities || reportType == RegistrationReportType.Detailed
+                ? AccountService.SearchRegistrationsByActivityIds(participationObjectIds, msgs, dc)
+                : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
+                    getVolunteers, msgs, dc);
+
+            var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, msgs,
                 dc);
 
-            var csvText = ExportCsvText(
-                registrations,
-                account,
-                reportType,
-                registrationStatus,
-                participationObjectIds,
-                participationObjectType,
-                rats,
-                msgs,
-                dc);
-            return Encoding.UTF8.GetBytes(csvText);
-        }
-
-        public static byte[] GetCsvByteArray(Account account, List<int> activityIds, RegistrationReportType reportType, SystemMessages msgs,
-            DatabaseConnection dc)
-        {
-            var registrations = AccountService.SearchRegistrationsByActivityIds(activityIds, msgs, dc);
-
-            var csvText = ExportCsvText(registrations, account, reportType, RegistrationStatus.NotSet, activityIds, ParticipationObjectType.Activity,
-                null, msgs, dc);
             return Encoding.UTF8.GetBytes(csvText);
         }
 
@@ -479,7 +454,7 @@ namespace AfterSchoolLibrary.Services
 
             var activitySchedules = new List<ActivitySchedules>();
 
-            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.NewDismissal)
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
                 registrantActivities.DistinctBy(ra => new {ra.ParticipationObjectId, ra.ParticipationObjectTypeId})
                     .ToList().ForEach(ra =>
                     {
@@ -553,7 +528,7 @@ namespace AfterSchoolLibrary.Services
                 row.Add("Activities");
             }
 
-            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.NewDismissal)
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
             {
                 Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList()
                     .ForEach(dayOfWeek => { row.Add(dayOfWeek.ToString()); });
@@ -706,7 +681,7 @@ namespace AfterSchoolLibrary.Services
                 AddActivitiesToRow(row, ras, RegistrationReportType.Basic, msgs, dc);
             }
 
-            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.NewDismissal)
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
             {
                 Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList()
                     .ForEach(dayOfWeek =>

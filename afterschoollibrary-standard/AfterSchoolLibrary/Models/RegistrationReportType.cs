@@ -5,5 +5,5 @@ public enum RegistrationReportType
     Detailed = 2,
     SingleActivity = 3,
     Dismissal = 4,
-    NewDismissal = 5,
+    DismissalForHostedActivities = 5,
 }
