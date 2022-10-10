@@ -225,6 +225,14 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
+            
+            if (model.Phone.IsEmpty())
+                msgs.Add("Phone is required", MessageType.UserError);
+            else if (!model.Phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+                msgs.Add("Please enter a valid phone number", MessageType.UserError);
+            else if (WebUser.ExistsByPhone(model.Phone, msgs))
+                msgs.Add("This phone has already been registered. Login if you already have an account.",
+                    MessageType.UserError);
 
 
             if (Utilities.IsProduction || Utilities.IsStaging)
