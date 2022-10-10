@@ -1863,7 +1863,7 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select");
             }
 
-            return View();
+            return View("Payment");
         }
 
         [HttpGet]

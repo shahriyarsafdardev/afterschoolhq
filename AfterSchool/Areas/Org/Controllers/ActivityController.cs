@@ -6,7 +6,6 @@ using System.Text;
 using System.Web.Mvc;
 using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -957,9 +956,8 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult MessageAdd(string id , string toUid = "", string returnUrl="")
+        public ActionResult MessageAdd(string id, string toUid = "", string returnUrl = "")
         {
-            
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -972,13 +970,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 RegistrationAssignmentType.Applied, RegistrationAssignmentType.WaitingList,
                 RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.Invited,
-                RegistrationAssignmentType.ReservedPendingBackgroundCheck
+                RegistrationAssignmentType.ReservedPendingBackgroundCheck,
             };
 
             if (toUid.IsGuid())
             {
                 assignmentTypes.Add(RegistrationAssignmentType.Withdrawn);
-                
+
                 ViewBag.Registrants = activity.GetRegistrantActivities(true, msgs)
                     .Where(ra => ra.AssignmentTypeId.In(assignmentTypes) && ra.RegistrantUid == toUid.ToGuid())
                     .Select(ra => ra.ToRegistrant())
@@ -1295,8 +1293,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
 
             var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
-            var dates = ActivityService.FinalizeStartAndEndDateForSubscription(activity,
-                (BillingPeriodType) billingPeriodType.ToInteger(),
+            var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType) billingPeriodType.ToInteger(),
                 dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday,
                 dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
@@ -1306,9 +1303,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     success = true,
                     startDate = dates.paymentStart.Value.ToString(),
-                    startDateFormated = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"),
+                    startDateFormatted = dates.paymentStart.Value.ToString("dddd, MMMM d, yyyy"),
                     endDate = dates.paymentEnd.Value.ToString(),
-                    endDateFormated = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
+                    endDateFormatted = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
                 }, JsonRequestBehavior.AllowGet);
 
             return Json(new {success = false}, JsonRequestBehavior.AllowGet);
@@ -2303,9 +2300,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (!isparentpricepostpay.IsNumber())
                     isparentpricepostpay = "0";
-
-                if (!cost.IsNumber())
-                    cost = "0";
 
                 var values = new Dictionary<string, object>
                 {

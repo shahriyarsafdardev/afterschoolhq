@@ -45,11 +45,11 @@
         <div class="panel-body padding-lr-zero-sm">
 
             <div class="col-md-10 col-lg-9">
-                <form id="form1" 
-                      method="post" 
+                <form id="form1"
+                      method="post"
                       action="@Url.Action("editcost", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})"
                       class="form-horizontal">
-                    
+
                     @if (Model.Activity.ActivityGroupId.HasValue)
                     {
                         @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "publish", true, true, Request))
@@ -68,16 +68,16 @@
                             <i class="s7-diskette"></i> Save
                         </button>
                     }
-                    
+
 
                     @{
                         Html.RenderPartial("~/Views/Shared/_ActivityFormPayment.cshtml", Model.Activity, new ViewDataDictionary
                         {
-                            { "SubscriptionPlan", Model.SubscriptionPlan },
-                            { "PaymentPlan", Model.PaymentPlan },
-                            { "PostPayPlan", Model.PostPayPlan },
-                            { "AccountPackage", Model.AccountPackage },
-                            { "hasSchedule", Model.Activity.HasSchedule },
+                            {"SubscriptionPlan", Model.SubscriptionPlan},
+                            {"PaymentPlan", Model.PaymentPlan},
+                            {"PostPayPlan", Model.PostPayPlan},
+                            {"AccountPackage", Model.AccountPackage},
+                            {"hasSchedule", Model.Activity.HasSchedule},
                         });
                     }
 
@@ -91,6 +91,7 @@
                             {
                                 <button type="button"
                                         class="btn btn-space btn-lg btn-block btn-default md-trigger"
+                                        @(Model.Activity.IsPublished ? "disabled=\"disabled\"" : "")
                                         onclick="loadFinalPricing('save')">
                                     Save
                                 </button>
@@ -103,16 +104,23 @@
                             }
                             else
                             {
-                                <button type="button"
-                                        class="btn btn-space btn-lg btn-block btn-primary md-trigger"
-                                        onclick="loadFinalPricing('save-next')">
-                                    Save &amp; Next
-                                </button>
+                                if (Model.Activity.IsPublished)
+                                {
+                                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-space btn-lg btn-block btn-primary md-trigger"
+                                            onclick="loadFinalPricing('save-next')">
+                                        Save &amp; Next
+                                    </button>   
+                                } 
                             }
                         </div>
 
                     </div>
-                    
+
                     <div>
                         <script>
                             function loadFinalPricing(cmd){
@@ -242,7 +250,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </form>
             </div>
 

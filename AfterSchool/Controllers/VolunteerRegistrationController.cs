@@ -18,11 +18,13 @@ namespace AfterSchool.Controllers
 {
     public class VolunteerRegistrationController : BaseController
     {
+        private readonly IBackgroundCheckWorkflow backgroundCheckWorkflow;
         private readonly IFeatureFlagRepository featureFlagRepository;
 
         public VolunteerRegistrationController(IFeatureFlagRepository featureFlagRepository, IBackgroundCheckWorkflow backgroundCheckWorkflow)
         {
             this.featureFlagRepository = featureFlagRepository;
+            this.backgroundCheckWorkflow = backgroundCheckWorkflow;
         }
 
         [HttpGet]
@@ -592,6 +594,64 @@ namespace AfterSchool.Controllers
             }
 
             return AssembleResultAndGoToRegisterView(participationObject, msgs, qvms, currentRegistrant);
+        }
+
+        /// <summary>
+        ///     Form to request a background check. To access this, you must have the "background-check" feature flag enabled and go through the registration process for a
+        ///     volunteer opportunity. When you get to the Register action, manually change the URL to take you to the BackgroundCheck action.
+        /// </summary>
+        [HttpGet]
+        public ActionResult BackgroundCheck()
+        {
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer) || !featureFlagRepository.IsEnabled("background-check"))
+                return Logout(Request.Url!.ToString(), true);
+
+            var results = CheckRedirect(true);
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
+            SessionVariables.CurrentRegistrant = currentRegistrant;
+
+            return AssembleResultAndGoToBackgroundCheckView(participationObject, msgs, currentUser.ID!.Value);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> BackgroundCheck(string signature)
+        {
+            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer) || !featureFlagRepository.IsEnabled("background-check"))
+                return Logout(Request.Url!.ToString(), true);
+
+            var results = CheckRedirect(true);
+            if (results.IsNotEmpty()) return results;
+
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            var currentUser = SessionVariables.CurrentUser;
+
+            var _ = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentUser, participationObject.OwnerAccount.ID!.Value);
+
+            return AssembleResultAndGoToBackgroundCheckView(participationObject, msgs, currentUser.ID!.Value);
+        }
+
+        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser, int accountId)
+        {
+            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
+            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, accountId, msgs);
+            return backgroundCheckResult.BackgroundCheckUrl;
+        }
+
+        private ActionResult AssembleResultAndGoToBackgroundCheckView(ParticipationObject participationObject, SystemMessages msgs, int webUserId)
+        {
+            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
+            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(webUserId, msgs).FirstOrDefault();
+            ViewBag.Messages = msgs;
+            ViewBag.ParticipationObject = participationObject;
+            ViewBag.RegistrationStartPageAccount = registrationStartPageAccount;
+            return View("BackgroundCheck", backgroundCheck);
         }
     }
 }

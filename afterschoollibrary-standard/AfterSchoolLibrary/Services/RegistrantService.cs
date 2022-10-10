@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Billing;
+using Newtonsoft.Json.Linq;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -275,7 +276,7 @@ namespace AfterSchoolLibrary.Services
                             msgs);
 
                     var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
+                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);                    
 
                     checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                         submittedRecord,
@@ -318,16 +319,14 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.PaymentType == PaymentType.ACH)
             {
-                bankAccountPurchaseObject = new BankAccountPurchaseObject()
-                {
-                    StripeSourceId = checkoutObject.StripeSourceId,
+                bankAccountPurchaseObject = new BankAccountPurchaseObject() {
+                    StripeSourceId = checkoutObject.StripeSourceId
                 };
             }
             else if (checkoutObject.PaymentType == PaymentType.CreditCard)
             {
-                creditCardPurchaseObject = new CreditCardPurchaseObject()
-                {
-                    StripeSourceId = checkoutObject.StripeSourceId,
+                creditCardPurchaseObject = new CreditCardPurchaseObject() {
+                    StripeSourceId = checkoutObject.StripeSourceId
                 };
             }
 
@@ -491,8 +490,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         /// <summary>
-        ///     Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
-        ///     And ACH checkouts shouldn't charge the extra CC fee
+        /// Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
+        /// And ACH checkouts shouldn't charge the extra CC fee
         /// </summary>
         /// <param name="checkoutObject"></param>
         /// <param name="billingAccount"></param>
@@ -608,8 +607,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var billingAccount = plan.GetAccount(msgs, dc);
             var planStartDate = registrant.GetPlanStartDate(plan, participationObject, msgs, dc);
@@ -619,44 +617,45 @@ namespace AfterSchoolLibrary.Services
         public static DateTime GetPlanStartDate(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // start dates are in the provider's timezone, so when comparing dates, we need to start there
             var billingAccount = plan.GetAccount(msgs, dc);
-            var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
-            var startDate = today;
+            var unexpiredCancelledRegistrantSubscriptionPlans = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
+            return GetPlanStartDate(plan, participationObject, billingAccount, unexpiredCancelledRegistrantSubscriptionPlans);
+        }
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+        internal static DateTime GetPlanStartDate(SubscriptionPlan plan, ParticipationObject participationObject, Account billingAccount,
+            IReadOnlyCollection<RegistrantSubscriptionPlan> unexpiredCancelledRegistrantSubscriptionPlans)
+        {
+            // start dates are in the provider's timezone, so when comparing dates, we need to start there
+            var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+
+            switch (plan.PlanTypeId, plan.PaymentStartTypeId)
             {
-                if (plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                {
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.WhenActivityStarts):
                     // find existing canceled plans and make new plan start the day after it ends.
                     // for a person restarting a plan after cancellation
-                    var rsps = registrant.GetUnexpiredCancelledRegistrantSubscriptionPlans(participationObject, msgs, dc);
-
-                    if (rsps.Any(rsp => rsp.ValidUntil.HasValue))
-                        startDate = rsps.Last().ValidUntil.Value.AddDays(1); // need to double check this
-                    else if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
-                        startDate = participationObject.StartDate.Value;
-                }
-                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
-                {
+                    if (unexpiredCancelledRegistrantSubscriptionPlans.Any(rsp => rsp.ValidUntil.HasValue))
+                        return unexpiredCancelledRegistrantSubscriptionPlans.Last(rsp => rsp.ValidUntil.HasValue).ValidUntil!.Value
+                            .AddDays(1); // need to double check this
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                        return participationObject.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):
                     // if on checkout, but activity has not started yet, then should only start subscription once activity starts.
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today))
-                        startDate = participationObject.StartDate.Value;
-                }
-                else if (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
-                {
+                        return participationObject.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnPeriodStart):
                     if (plan.StartDate.HasValue && plan.StartDate.Value.Date.IsAfter(today))
-                        startDate = plan.StartDate.Value;
-                }
-            }
-            else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan && plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-            {
-                if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
-                    startDate = participationObject.StartDate.Value;
+                        return plan.StartDate.Value;
+                    break;
+                case (SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.WhenActivityStarts):
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                        return participationObject.StartDate.Value;
+                    break;
             }
 
             // convert back to utc because dates may be transferred to other methods that expect utc, such as stripe, etc.
-            return startDate;
+            return today;
         }
 
         private static PlanFeeObject GetFeeObject(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, SystemMessages msgs,
@@ -679,7 +678,6 @@ namespace AfterSchoolLibrary.Services
                 convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
                 amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
-                ;
 
                 var po = checkoutObject.ParticipationObject;
 
@@ -1218,9 +1216,6 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant GetMasterRegistrant(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // Previously it would return null even if current registrant is the master one;
-            // Is this required here or not?
-
             if (registrant.IsMaster)
                 return registrant;
             return registrant.ParentRegistrantId.HasValue ? Registrant.Load(registrant.ParentRegistrantId.Value, msgs, dc) : null;
@@ -1728,9 +1723,7 @@ namespace AfterSchoolLibrary.Services
                 if (registration.GetParticipationObjects(msgs, dc).Any(po => po.IsMatch(participationObject)))
                     return registration;
             }
-
-            ;
-
+            
             return null;
         }
 
@@ -1963,8 +1956,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             var activityInstances =
-                new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType
-                    )>();
+                new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>();
             var providers = new List<Account>();
             var registrantActivities = new List<RegistrantActivity>();
 

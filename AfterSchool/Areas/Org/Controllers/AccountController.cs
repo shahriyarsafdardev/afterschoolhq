@@ -14,6 +14,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using ByteSizeLib;
+using SendGrid.Helpers.Mail;
 using Stripe;
 using AccountService = AfterSchoolLibrary.Services.AccountService;
 using Email = AfterSchoolLibrary.Helpers.Email;
@@ -1294,17 +1295,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Billing()
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var packages = currentAccount.GetAccountPackages(msgs);
-
-            if (packages.Count <= 0 || !packages.Any(m => !m.IsFree))
-                return RedirectToAction("NewBilling");
-
-            ViewBag.BillingHistory = currentAccount.GetStripeBillingHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.RefundHistory = currentAccount.GetStripeRefundHistory(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Cards = currentAccount.GetStripeCards(StripeAccountType.SubscriberAccount, msgs);
-            ViewBag.Messages = msgs;
-
+            ViewBag.Messages = new SystemMessages();
             return View(currentAccount);
         }
 
@@ -1376,6 +1367,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(currentAccount);
         }
+        
 
         [HttpGet]
         public ActionResult DowngradeToFree(string newPlan)
@@ -1434,6 +1426,65 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("SelectPlan");
         }
 
+        [HttpGet]
+        public ActionResult ExtendTrialDone()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            
+            HandleTempMessages(msgs);
+            
+            ViewBag.CurrentPackage = SessionVariables.AccountPackage;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpGet]
+        public ActionResult ExtendTrial()
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+            
+            var emails =  String.Join(",", Email.AppSalesEmailAddress, Email.AppSalesEmailAddress);
+            
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
+                    accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    foreach (var email in emails.Split(','))
+                    {
+                        msgs.AddRange(
+                            EmailHelper.SendEmail(
+                                email,
+                                $"{currentAccount.Name} has requested to Extend their free trial",
+                                $"<p>Account Name: {currentAccount.Name}<br/>Account Email: {currentAccount.Email}<br/>Login Username: {currentUser.Username}</p>",
+                                true
+                            )
+                            );
+                    }
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+            );
+
+            if (msgs.HasErrors())
+            {
+                SetTempMessages(msgs);
+                return RedirectToAction("SelectPlan");
+            }
+
+            return RedirectToAction("ExtendTrialDone");
+        }
+        
         [HttpGet]
         public ActionResult SelectPlanDone()
         {

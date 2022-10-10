@@ -83,7 +83,8 @@ namespace AfterSchool
                 configuration.GetValue<string>("Sterling:Endpoint"),
                 configuration.GetValue<string>("Sterling:ClientId"),
                 configuration.GetValue<string>("Sterling:ClientSecret"),
-                configuration.GetValue<string>("Sterling:PackageId")));
+                configuration.GetValue<string>("Sterling:PackageId"),
+                configuration.GetValue<string>("Sterling:AccountId")));
             services.AddTransient<IInfluxSettings>(provider => new InfluxSettings(
                 configuration.GetValue<string>("InfluxDB:Hostname"),
                 configuration.GetValue<string>("InfluxDB:OrgName"),
