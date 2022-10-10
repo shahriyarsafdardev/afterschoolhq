@@ -9,7 +9,7 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var anotherChild = ViewData["anotherChild"].IsNotEmpty();
-    var activity = Model.GetActivity();
+    var registrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId);
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -122,9 +122,10 @@ else if (!Model.OwnerAccount.CanProcessPayments() && !Model.IsFree)
         </button>
     }
 }
-else if (currentUser?.GetMasterParentOrStudentRegistrant()?.PersonTypeId == RegistrantPersonType.Student)
+else if (currentUser.IsNotEmpty() && Model.IsGenderEnforced && !Model.AcceptsGenderType(registrant?.GenderId)
+         && currentUser.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId).PersonTypeId != RegistrantPersonType.Parent)
 {
-    <button class="btn btn-register btn-block" disabled title="Activity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
+    <button class="btn btn-register btn-block" disabled title="The selected activity is for @(ParticipationObjectUI.PrintGenderRestrictions(Model).ToLower())">
         <span>Not Eligible </span>
     </button>
 }
@@ -192,12 +193,6 @@ else
                             <span>Select Dates &raquo;</span>
                         </button>
                     }
-                    else if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && (int) currentUser.GenderId != (int) activity.GenderRestriction)
-                    {
-                        <button class="btn btn-register btn-block" disabled title="Opportunity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
-                            <span>Not Eligible </span>
-                        </button>
-                    }
                     else
                     {
                         <a href="@Model.GetActivityDateSelectionUrl()" class="btn btn-register btn-block" True>
@@ -224,12 +219,7 @@ else
                             <span>@buttonText &raquo;</span>
                         </button>
                     }
-                    else if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && (currentAccount.AccountTypeId == AccountType.Volunteer || currentAccount.AccountTypeId == AccountType.Registrant) && (int) currentUser.GenderId != (int) activity.GenderRestriction && !alreadyRegistered)
-                    {
-                        <button class="btn btn-register btn-block" disabled title="Opportunity is @(activity.GenderRestriction.ToString().SplitByUpperCase())">
-                            <span>Not Eligible </span>
-                        </button>
-                    }
+                    
                     else
                     {
                         <a href="@Model.GetRegistrationPageUrl()" class="btn btn-register btn-block">

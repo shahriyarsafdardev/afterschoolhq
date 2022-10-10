@@ -845,7 +845,7 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, msgs);
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
-            var activity = RegistrationCommon.GetParticipationObjectFromCart().GetActivity();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             questions.ForEach(question =>
             {
@@ -868,11 +868,12 @@ namespace AfterSchool.Controllers
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
-            if (activity.IsGenderEnforced)
+            if (participationObject.IsGenderEnforced)
             {
                 var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
-                if ((int) activity.GenderRestriction != (int) gender)
-                    msgs.Add($"This activity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
+                if (!participationObject.AcceptsGenderType(gender))
+                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                        MessageType.UserError);
             }
 
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
@@ -1313,7 +1314,6 @@ namespace AfterSchool.Controllers
             questions.ForEach(question =>
             {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
-                var activity = participationObject.GetActivity();
 
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
@@ -1325,12 +1325,12 @@ namespace AfterSchool.Controllers
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() &&
                     !participationObject.IsGradeInRange(answer))
-                    msgs.Add(
-                        $"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
+                    msgs.Add($"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
                         MessageType.UserError);
-                if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && activity.IsGenderEnforced &&
-                    (int) activity.GenderRestriction != (int) FormService.GetGenderFromAnswer(answer))
-                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}", MessageType.UserError);
+                if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
+                    participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
+                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                        MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {

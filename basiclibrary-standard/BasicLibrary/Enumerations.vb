@@ -7,6 +7,7 @@ Public Enum GenderType
     NotSet = 0
     Male
     Female
+    Other
 End Enum
 
 Public Enum Month

@@ -98,7 +98,6 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
-            var activity = participationObject.GetActivity();
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -119,12 +118,10 @@ namespace AfterSchool.Controllers
                             msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                         break;
                     case QuestionDataType.RegistrantGender:
-                        if (activity.IsGenderEnforced)
-                        {
-                            var applicantGender = FormService.GetGenderFromAnswer(qvm.Value);
-                            if ((int) activity.GenderRestriction != (int) applicantGender)
-                                msgs.Add($"This opportunity is {activity.GenderRestriction.ToString().SplitByUpperCase()}", MessageType.UserError);
-                        }
+                        if (participationObject.IsGenderEnforced)
+                            if (!participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(qvm.Value)))
+                                msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                                    MessageType.UserError);
 
                         break;
                 }

@@ -31,8 +31,8 @@
 
     var isAgeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model);
     var isGradeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model);
-    var isGenderEnforced = participationObject.IsNotEmpty() && participationObject.GetActivity().IsGenderEnforced
-                           && (int) participationObject.GenderRestriction != (int) participationObject.StudentGender(Model);
+    var isGenderEnforced = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
+                           && participationObject.AcceptsGenderType(Model.GenderId);
 
 
     if (participationObject.CanRegisterPerClass)
@@ -47,7 +47,7 @@
         {
             if (participationObject.SubscriptionPlans.Any() && Model.HasCancelledSubscription(participationObject))
             {
-                btnText = "Re-Enroll" + " &raquo";
+                btnText = "Re-Enroll &raquo";
             }
             else
             {
@@ -78,13 +78,13 @@
             }
             else
             {
-                btnText = "Pay Now" + " &raquo";
+                btnText = "Pay Now &raquo";
                 btnUrl = Url.Action("makepayment", "account", new {id = Model.GetRegistrationWithParticipationObject(participationObject).Uid});
             }
         }
         else if (participationObject.IsSession()) //&& registered != "Applied" (NOTE: removed by Darye, not sure what this is doing, logic is not obvious - basing code on a text field doesn't seem right and needs more explanation if this is the right thing to do.
         {
-            btnText = "Add To Existing Registration" + " &raquo";
+            btnText = "Add To Existing Registration &raquo";
         }
         else
         {
@@ -100,7 +100,7 @@
 
         if (!Model.IsProfileCompleted)
         {
-            btnText = "Update Profile &amp; Enroll" + " &raquo";
+            btnText = "Update Profile &amp; Enroll &raquo";
             btnUrl = registerUrl;
         }
         else
@@ -110,22 +110,28 @@
                 case true when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student must be in " + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    ineligibleText = "This activity is for students who are " + participationObject.AgeStart + " - " 
+                                     + participationObject.AgeEnd + "years old and is " 
+                                     + ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower();
                     break;
                 case true when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " and a " + participationObject.GetActivity().GenderRestriction.ToString().Remove(participationObject.GetActivity().GenderRestriction.ToString().Length - 4, 4) + " to register for this activity";
+                    ineligibleText = "This activity is for students who are in " + participationObject.MinGradeId + " - " 
+                                     + participationObject.MaxGradeId + " grade and is " 
+                                     + ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower();
                     break;
                 case false when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student must be in " + participationObject.GetActivity().GradeLevelStart + " - " + participationObject.GetActivity().GradeLevelEnd + " to register for this activity";
+                    ineligibleText = "Student must be in " + participationObject.MinGradeId + " - " 
+                                     + participationObject.MaxGradeId + " to register for this activity";
                     break;
                 case false when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student must be in" + participationObject.GetActivity().AgeStart + " - " + participationObject.GetActivity().AgeEnd + " to register for this activity";
+                    ineligibleText = "Student must be in" + participationObject.AgeStart + " - " 
+                                     + participationObject.AgeEnd + " to register for this activity";
                     break;
                 case true:
                     btnText = "Ineligible";

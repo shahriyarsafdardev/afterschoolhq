@@ -1232,6 +1232,8 @@ namespace AfterSchoolLibrary.Services
                     return GenderType.Male;
                 case "female":
                     return GenderType.Female;
+                case "other":
+                    return GenderType.Other;
                 default:
                     return GenderType.NotSet;
             }
