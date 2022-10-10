@@ -339,8 +339,8 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account, msgs: msgs);
 
                         BackgroundJob.Enqueue(() => WebUserService.SendVerificationEmail(user, null, true));
-                        BackgroundJob.Enqueue(() =>
-                            WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
+                        // BackgroundJob.Enqueue(() =>
+                        //     WebUserService.SendWelcomePurchase(user.FirstName, user.Email, account.IsAfterSchool));
 
                         var invitingAccountName = invitingAccount?.Name ?? "";
 
