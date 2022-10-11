@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using BasicLibrary;
 using Stripe;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Configuration;
 using Stripe.BillingPortal;
 using Stripe.Checkout;
 using Configuration = Stripe.BillingPortal.Configuration;
@@ -39,8 +38,11 @@ namespace AfterSchoolLibrary.Billing
         private static string DevPlatformClientId => "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv";
         private static string LivePlatformClientId => ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"];
 
-        private static string DevSubscriptionsSecretKey => "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
-        private static string DevSubscriptionsPublishableKey => "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
+        private static string DevSubscriptionsSecretKey =>
+            "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
+
+        private static string DevSubscriptionsPublishableKey =>
+            "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
 
         public static string ReferralCouponId => Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
 
@@ -66,11 +68,12 @@ namespace AfterSchoolLibrary.Billing
                 : (cost + StripeFlatFee) / (1 - StripePercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
+
         public static decimal CalculateStripeAchFee(decimal cost, bool feeTakenOutOfCost)
         {
             var fee = feeTakenOutOfCost
                 ? cost * StripeBankPercentFee
-                : (cost / (1 - StripeBankPercentFee)) - cost;
+                : cost / (1 - StripeBankPercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
@@ -211,27 +214,22 @@ namespace AfterSchoolLibrary.Billing
         }
 
 
-        internal TransferReversal CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
+        internal void CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
         {
-
             var options = new TransferReversalCreateOptions
             {
-                Amount = (long)(amountToReverse * 100),
+                Amount = (long) (amountToReverse * 100),
             };
-
-            TransferReversal transferReversal = null;
 
             try
             {
-                transferReversal = GetTranferReversalService().Create(stripeTransferId, options);
+                GetTransferReversalService().Create(stripeTransferId, options);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Transfer Reversal was not created", MessageType.UserError);
+                msgs.Add("Transfer Reversal was not created", MessageType.UserError);
             }
-
-            return transferReversal;
         }
 
         #endregion
@@ -798,7 +796,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                card = GetCardService().Create(customerId, options, requestOptions);
+                GetCardService().Create(customerId, options, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -948,6 +946,9 @@ namespace AfterSchoolLibrary.Billing
                     Destination = stripeAccountId,
                     AmountPercent = 100 - platformFeePercent * 100,
                 };
+
+            if (backdateStartDate.HasValue)
+                options.BackdateStartDate = backdateStartDate;
 
             try
             {
@@ -1493,9 +1494,13 @@ namespace AfterSchoolLibrary.Billing
                 options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
             }
             else if (couponDuration == StripeCouponDuration.Once)
+            {
                 options.Duration = StripeCouponDuration.Once.ToString().ToLower();
+            }
             else
+            {
                 options.Duration = StripeCouponDuration.Forever.ToString().ToLower();
+            }
 
             var value = (discountValue * 100).ToInteger();
 
@@ -1505,7 +1510,9 @@ namespace AfterSchoolLibrary.Billing
                 options.Currency = "USD";
             }
             else
+            {
                 options.PercentOff = value;
+            }
 
             if (couponName.IsNotEmpty())
                 options.Name = couponName.MaxChars(40);
@@ -1547,6 +1554,8 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new UpcomingInvoiceOptions
             {
+                AutomaticTax = null,
+                Coupon = null,
                 Customer = customerId,
                 SubscriptionBillingCycleAnchor = billingCycleAnchor,
                 SubscriptionItems = new List<InvoiceSubscriptionItemOptions> {new InvoiceSubscriptionItemOptions {Plan = planId, Quantity = 1}},
@@ -1565,6 +1574,54 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return invoice;
+        }
+
+        public Subscription PreviewRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
+            decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
+            Dictionary<string, string> metaData, DateTime? backdateStartDate, SystemMessages msgs)
+        {
+            msgs ??= new SystemMessages();
+
+            var options = new SubscriptionCreateOptions
+            {
+                Customer = customerId,
+                CollectionMethod = CollectionMethodChargeAutomatically,
+                DefaultSource = sourceId,
+                Coupon = stripeCouponId,
+                Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
+                Metadata = metaData,
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone,
+                BillingCycleAnchor = billingCycleAnchor,
+            };
+
+            if (startDate.HasValue && startDate.Value.Date.IsAfter(DateTime.UtcNow.AddDays(1).Date))
+                options.TrialEnd = startDate.Value; // if start date is at least one day in the future, start on start date
+
+            // please make sure that billing ends when the program ends.
+            if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.AddDays(1).Date))
+                options.CancelAt = endDate.Value;
+
+            if (stripeAccountId.IsNotEmpty())
+                options.TransferData = new SubscriptionTransferDataOptions
+                {
+                    Destination = stripeAccountId,
+                    AmountPercent = 100 - platformFeePercent * 100,
+                };
+
+            if (backdateStartDate.HasValue)
+                options.BackdateStartDate = backdateStartDate;
+
+            try
+            {
+                var subscription = GetSubscriptionService().Create(options);
+                return subscription;
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Subscription was not created", MessageType.UserError);
+                return null;
+            }
         }
 
         #endregion
@@ -1693,9 +1750,9 @@ namespace AfterSchoolLibrary.Billing
 
             return session;
         }
-        
+
         #endregion
-        
+
         #region BillingPortalConfiguration
 
         private ConfigurationService GetBillingPortalConfigurationService()

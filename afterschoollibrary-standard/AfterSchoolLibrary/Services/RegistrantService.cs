@@ -182,7 +182,6 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
-            var isSubscriptionRequired = true; //.. in some case, we will only charge.
 
             var platformFeePercent = useStripeConnectedAccount
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
@@ -235,7 +234,6 @@ namespace AfterSchoolLibrary.Services
                 endDate: endDateTime,
                 billingCycleAnchor: proratingResult.BillingCycleAnchor,
                 stripeAccountId: stripeAccountId,
-                stripeCouponId: stripeCouponId,
                 metaData: new Dictionary<string, string>
                 {
                     {"BillingAccountUid", billingAccount.Uid.ToString()},
@@ -248,6 +246,7 @@ namespace AfterSchoolLibrary.Services
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
+                backdateStartDate: applesauce.BackdateStartDate,
                 msgs: msgs);
 
             if (msgs.HasErrors())
@@ -1642,7 +1641,7 @@ namespace AfterSchoolLibrary.Services
 
                     // cancel subscription if it has one
                     if (msgs.HasNoErrors() && isCancelPayment)
-                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
+                        registrant.CancelSubscriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
