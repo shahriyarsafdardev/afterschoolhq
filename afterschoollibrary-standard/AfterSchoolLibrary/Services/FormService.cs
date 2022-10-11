@@ -262,13 +262,14 @@ namespace AfterSchoolLibrary.Services
 
             return f;
         }
-
         public static List<QuestionType> GetTypesUserCannotAdd(this Form form)
         {
             var typesUserCannotAdd = new List<QuestionType> {QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix};
-
+            
             if (form.FormTypeId != FormType.Survey)
                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
+            
+            typesUserCannotAdd.Remove(QuestionType.FileUpload);
 
             return typesUserCannotAdd;
         }
