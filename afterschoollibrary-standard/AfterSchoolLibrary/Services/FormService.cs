@@ -13,8 +13,7 @@ namespace AfterSchoolLibrary.Services
         private static List<QuestionType> SurveyOnlyQuestionTypes =>
             new List<QuestionType>
             {
-                QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating,
-                QuestionType.FileUpload,
+                QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating 
             };
 
         public static string RegistrantGrade =>
@@ -268,8 +267,6 @@ namespace AfterSchoolLibrary.Services
             
             if (form.FormTypeId != FormType.Survey)
                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
-            
-            typesUserCannotAdd.Remove(QuestionType.FileUpload);
 
             return typesUserCannotAdd;
         }
