@@ -1328,7 +1328,7 @@ namespace AfterSchool.Controllers
                     msgs.Add($"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
                         MessageType.UserError);
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
-                    participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
+                    !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
                     msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
                         MessageType.UserError);
 

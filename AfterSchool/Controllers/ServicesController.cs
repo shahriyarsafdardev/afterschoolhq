@@ -323,7 +323,7 @@ namespace AfterSchool.Controllers
                         ineligibleActivities.Add(
                             $"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
                     
-                    if (participationObject.IsGenderEnforced && participationObject.AcceptsGenderType(registrant.GenderId))
+                    if (participationObject.IsGenderEnforced && !participationObject.AcceptsGenderType(registrant.GenderId))
                     {
                         ineligibleActivities.Add(
                             $"The activity {participationObject.Name} is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}");
