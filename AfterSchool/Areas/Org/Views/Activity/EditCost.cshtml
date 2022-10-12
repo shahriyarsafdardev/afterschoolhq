@@ -30,6 +30,15 @@
            CurrentUser = currentUser,
        }); }
 
+    <style>
+        #confirm-pricing-form > div > p
+        {
+            font-size: 18px;
+            font-weight: 300;
+            color: #282828;
+        }
+    </style>
+    
     <div class="panel panel-default margin-bottom-zero">
         <div class="panel-heading">
             @{ Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", activityTitle, new ViewDataDictionary
@@ -188,18 +197,18 @@
                                 </div>
                                 <div class="modal-body">
                                     <div id="confirm-pricing-form">
-                                        <div>
+                                        <div class="text-center">
                                             <p>
-                                                Please carefully review your pricing to ensure accuracy before you continue.
+                                                Please carefully review your pricing to ensure <br> accuracy before you continue.
                                             </p>
                                         </div>
-                                        <div class="padding-20">
+                                        <div>
                                             <table class="table">
                                                 <thead>
                                                 <tr>
                                                     <th></th>
                                                     <th class="text-center">Parents Pay</th>
-                                                    <th class="text-center">Fees</th>
+                                                    <th class="text-center">Fee *</th>
                                                     <th class="text-center">You Receive</th>
                                                 </tr>
                                                 </thead>
@@ -231,6 +240,9 @@
                                                 </tbody>
                                             </table>
                                         </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <p><a href="">Upgrade your plan</a> to learn more about how you can reduce fees. <br/> * Full fee schedule available <a>here</a>.</p>
                                     </div>
                                 </div>
                                 <div class="modal-footer" id="confirm-pricing-form-footer">
