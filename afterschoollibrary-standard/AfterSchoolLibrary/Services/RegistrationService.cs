@@ -347,7 +347,7 @@ namespace AfterSchoolLibrary.Services
             ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
         {
-            var registrations = reportType == RegistrationReportType.DismissalForHostedActivities || reportType == RegistrationReportType.Detailed
+            var registrations = reportType == RegistrationReportType.DismissalForHostedActivities
                 ? AccountService.SearchRegistrationsByActivityIds(participationObjectIds, msgs, dc)
                 : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
                     getVolunteers, msgs, dc);
