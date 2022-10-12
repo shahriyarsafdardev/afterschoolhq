@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary.Services
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-            var startOfPeriod = new DateTime(2022, 10, 1);
+            var startOfPeriod = plan.StartDate.Value;
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
             var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
@@ -228,7 +228,6 @@ namespace AfterSchoolLibrary.Services
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
-                backdateStartDate: proratingResult.BackdateStartDate,
                 msgs: msgs);
 
             if (msgs.HasErrors())

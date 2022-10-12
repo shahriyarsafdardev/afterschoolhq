@@ -1821,7 +1821,7 @@ namespace AfterSchool.Controllers
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
             var proratingResult = subscriptionPlan.FigureOutProrating(subscriptionPlan.StartDate.Value, DateTime.UtcNow.Date, stripeProratingService,
                 participationObject, startDateTime, currentAccount, msgs);
-            ViewBag.RealProrateMessage = currentAccount.GetStripeProratePreview(StripeAccountType.ConnectAccount, subscriptionPlan, msgs);
+            ViewBag.RealProrateMessage = proratingResult.ShouldWeBeProratingToday ? $"Prorated value is ${proratingResult.ProratingValue}" : "No proration needed";
 
             return registration;
         }
