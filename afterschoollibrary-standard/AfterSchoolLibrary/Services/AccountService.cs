@@ -1807,7 +1807,7 @@ namespace AfterSchoolLibrary.Services
         public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
             SystemMessages msgs = null)
         {
-            var result = account.GetStripeProratePreviewText(stripeAccountType, plan, msgs);
+            var result = account.GetStripeProratePreview(stripeAccountType, plan, msgs);
             return result is null ? null : "Amount due: $" + result;
         }
 
