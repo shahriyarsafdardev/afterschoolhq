@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
 
             var dayOfMonth = new DateTime(2022, 9, 1);
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, BillingPeriodType.Month,
-                DayOfWeek.Sunday, dayOfMonth.Day, schedule, null, DateTime.UtcNow);
+                DayOfWeek.Sunday, dayOfMonth.Day, schedule, null, new DateTime(2022, 9, 30));
 
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2022, 10, 1, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));

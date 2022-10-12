@@ -911,7 +911,7 @@ namespace AfterSchoolLibrary.Billing
 
         public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
             decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
-            Dictionary<string, string> metaData, SystemMessages msgs)
+            Dictionary<string, string> metaData, DateTime? backdateStartDate, SystemMessages msgs)
         {
             msgs ??= new SystemMessages();
 
@@ -923,14 +923,9 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
                 Metadata = metaData,
-                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
-                BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
-            };
-            var uIOptions = new UpcomingInvoiceOptions
-            {
-                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone,
+                BillingCycleAnchor = billingCycleAnchor,
+                BackdateStartDate = backdateStartDate,
             };
 
             if (startDate.HasValue && startDate.Value.Date.IsAfter(DateTime.UtcNow.AddDays(1).Date))
