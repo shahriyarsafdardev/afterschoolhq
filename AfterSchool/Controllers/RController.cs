@@ -486,14 +486,16 @@ namespace AfterSchool.Controllers
 
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
-                
+
+                var masterRegistrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount?.AccountTypeId);
+                masterRegistrant?.UpdateGenderFromFormQuestionAnswers(msgs);
 
                 var accountIsSomeoneWhoCanRegister =
                     currentAccount?.AccountTypeId == AccountType.Volunteer || currentAccount?.AccountTypeId == AccountType.Registrant;
                 var userIsStudent = currentUser?.GetMasterParentOrStudentRegistrant()?.PersonTypeId == RegistrantPersonType.Student;
                 var isOpportunity = activity.ActivityTypeId == ActivityType.VolunteerOpportunity;
-                if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && accountIsSomeoneWhoCanRegister && (isOpportunity ^ userIsStudent)
-                    && !participationObject.AcceptsGenderType(currentUser?.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId)?.GenderId))
+                if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && accountIsSomeoneWhoCanRegister && isOpportunity ^ userIsStudent
+                    && !participationObject.AcceptsGenderType(masterRegistrant.GenderId))
                     msgs.Add($"This {UILabel.ActivityLabel(activity.ActivityTypeId)} is {activity.GenderRestriction.ToString().SplitByUpperCase()}",
                         MessageType.UserError);
             }

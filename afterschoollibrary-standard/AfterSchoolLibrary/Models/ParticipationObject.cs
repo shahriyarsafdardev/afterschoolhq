@@ -289,9 +289,6 @@ namespace AfterSchoolLibrary.Models
 
         public bool AcceptsGenderType (GenderType? gender)
         {
-            if (gender.IsEmpty())
-                return false;
-            
             return gender switch
             {
                 GenderType.Male => GenderRestriction == GenderRestrictionType.MaleOnly,

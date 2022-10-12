@@ -1601,6 +1601,12 @@ namespace AfterSchool.Controllers
 
             var students = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
+            // Making if any student has GenderId as NOT SET so it gets updated from FQA
+            // This will get obsolete in future if GenderId in Master Registerant for PersonType Student
+            // is not null for every record in database.
+
+            students.ForEach( student => student.UpdateGenderFromFormQuestionAnswers(msgs));
+            
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();

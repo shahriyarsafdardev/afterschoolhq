@@ -391,7 +391,7 @@ namespace AfterSchoolLibrary.Models
                         registrant.Company = Text;
                         break;
                     case QuestionDataType.RegistrantGender:
-                        registrant.GenderId = FormService.GetGenderFromAnswer(Text); //Convert to GenderType here.
+                        registrant.GenderId = FormService.GetGenderFromAnswer(Text);
                         break;
                 }
 

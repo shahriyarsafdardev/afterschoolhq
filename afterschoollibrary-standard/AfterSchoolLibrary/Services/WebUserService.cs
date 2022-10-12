@@ -316,14 +316,15 @@ namespace AfterSchoolLibrary.Services
                 true, false, msgs, dc).FirstOrDefault();
         }
 
-        public static Registrant GetMasterRegistrantByAccountType(this WebUser user, AccountType accountType, SystemMessages msgs = null,
+        public static Registrant GetMasterRegistrantByAccountType(this WebUser user, AccountType? accountType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            if (accountType == AccountType.Volunteer)
-                return user.GetMasterVolunteerRegistrant(msgs, dc);
-            if (accountType == AccountType.Registrant)
-                return user.GetMasterParentOrStudentRegistrant(msgs, dc);
-            return null;
+            return accountType switch
+            {
+                AccountType.Volunteer => user.GetMasterVolunteerRegistrant(msgs, dc),
+                AccountType.Registrant => user.GetMasterParentOrStudentRegistrant(msgs, dc),
+                _ => null
+            };
         }
 
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -495,7 +496,6 @@ namespace AfterSchoolLibrary.Services
             bool isRegistered, bool isVerified, string howHearAboutUs, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             ValidateNameForNewUser(firstName, lastName, msgs);
-
             ValidateEmailForNewUser(email, msgs, dc);
 
             if (phone.IsNotEmpty())

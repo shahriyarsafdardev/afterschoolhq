@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Billing;
-using Newtonsoft.Json.Linq;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -276,7 +275,7 @@ namespace AfterSchoolLibrary.Services
                             msgs);
 
                     var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
-                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);                    
+                    var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
 
                     checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                         submittedRecord,
@@ -319,14 +318,16 @@ namespace AfterSchoolLibrary.Services
 
             if (checkoutObject.PaymentType == PaymentType.ACH)
             {
-                bankAccountPurchaseObject = new BankAccountPurchaseObject() {
-                    StripeSourceId = checkoutObject.StripeSourceId
+                bankAccountPurchaseObject = new BankAccountPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId,
                 };
             }
             else if (checkoutObject.PaymentType == PaymentType.CreditCard)
             {
-                creditCardPurchaseObject = new CreditCardPurchaseObject() {
-                    StripeSourceId = checkoutObject.StripeSourceId
+                creditCardPurchaseObject = new CreditCardPurchaseObject()
+                {
+                    StripeSourceId = checkoutObject.StripeSourceId,
                 };
             }
 
@@ -490,8 +491,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         /// <summary>
-        /// Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
-        /// And ACH checkouts shouldn't charge the extra CC fee
+        ///     Give the purchaser a discount off of the subscription if they are purchasing with ACH, since the subscription is stored with the CC fee
+        ///     And ACH checkouts shouldn't charge the extra CC fee
         /// </summary>
         /// <param name="checkoutObject"></param>
         /// <param name="billingAccount"></param>
@@ -607,7 +608,8 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var billingAccount = plan.GetAccount(msgs, dc);
             var planStartDate = registrant.GetPlanStartDate(plan, participationObject, msgs, dc);
@@ -1723,7 +1725,7 @@ namespace AfterSchoolLibrary.Services
                 if (registration.GetParticipationObjects(msgs, dc).Any(po => po.IsMatch(participationObject)))
                     return registration;
             }
-            
+
             return null;
         }
 
@@ -1956,7 +1958,8 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             var activityInstances =
-                new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>();
+                new List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType
+                    )>();
             var providers = new List<Account>();
             var registrantActivities = new List<RegistrantActivity>();
 
@@ -2023,6 +2026,19 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
 
             return model;
+        }
+
+        public static void UpdateGenderFromFormQuestionAnswers(this Registrant registrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            if (registrant.GenderId != GenderType.NotSet || registrant.ID == null) return;
+            var formQuestionAnswer =
+                FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId((int)registrant.ID , QuestionDataType.RegistrantGender, msgs , dc);
+            if (formQuestionAnswer.IsNotEmpty() && formQuestionAnswer.Text.IsNotEmpty())
+            {
+                registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
+                registrant.Save(dc);
+            }
         }
     }
 }

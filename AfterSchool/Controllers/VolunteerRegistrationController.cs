@@ -123,7 +123,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantGender:
                         if (participationObject.IsGenderEnforced)
                             if (!participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(qvm.Value)))
-                                msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                                msgs.Add($"The selected opportunity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
                                     MessageType.UserError);
 
                         break;

@@ -11,6 +11,12 @@
     var anotherChild = ViewData["anotherChild"].IsNotEmpty();
     var registrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId);
 
+    var studentAccountViewingActivity = registrant?.PersonTypeId == RegistrantPersonType.Student && Model.ActivityType == ActivityType.Activity;
+    var volunteerAccountViewingOpportunity = registrant?.PersonTypeId == RegistrantPersonType.Volunteer
+                                             && Model.ActivityType == ActivityType.VolunteerOpportunity;
+    var showIneligible = currentUser.IsNotEmpty() && Model.IsGenderEnforced && !Model.AcceptsGenderType(registrant?.GenderId)
+                         && (studentAccountViewingActivity || volunteerAccountViewingOpportunity);
+    
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
         condensed = true;
@@ -122,10 +128,9 @@ else if (!Model.OwnerAccount.CanProcessPayments() && !Model.IsFree)
         </button>
     }
 }
-else if (currentUser.IsNotEmpty() && Model.IsGenderEnforced && !Model.AcceptsGenderType(registrant?.GenderId)
-         && currentUser.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId).PersonTypeId != RegistrantPersonType.Parent)
+else if (showIneligible)
 {
-    <button class="btn btn-register btn-block" disabled title="The selected activity is for @(ParticipationObjectUI.PrintGenderRestrictions(Model).ToLower())">
+    <button class="btn btn-register btn-block" disabled title="The selected @UILabel.ActivityLabel((ActivityType) Model.ActivityType) is for @(ParticipationObjectUI.PrintGenderRestrictions(Model).ToLower())">
         <span>Not Eligible </span>
     </button>
 }
