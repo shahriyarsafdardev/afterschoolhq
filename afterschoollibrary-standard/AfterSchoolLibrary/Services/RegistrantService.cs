@@ -192,8 +192,7 @@ namespace AfterSchoolLibrary.Services
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-
-<<<<<<< HEAD
+            
             // Charge parent if they try to join mid-period. 
             // NOTE: This needs to be totally changed for pro-rating
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
@@ -220,12 +219,10 @@ namespace AfterSchoolLibrary.Services
 
             if (!isSubscriptionRequired)
                 return;
-=======
             var startOfPeriod = new DateTime(2022, 10, 1);
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var applesauce = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
->>>>>>> 1a5cfb7d8 (WIP)
+            var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
@@ -251,6 +248,7 @@ namespace AfterSchoolLibrary.Services
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
+                backdateStartDate: proratingResult.BackdateStartDate,
                 msgs: msgs);
 
             if (msgs.HasErrors())
@@ -1005,12 +1003,11 @@ namespace AfterSchoolLibrary.Services
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
-        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+        private static void CancelSubscriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Has to be a better way
-            if (!registrant.HasPlan(participationObjectId, participationObjectType, msgs, dc))
-                return false;
+            if (!registrant.HasPlan(participationObjectId, participationObjectType, msgs, dc)) return;
 
             var rsps = registrant.GetRegistrantSubscriptionPlans(msgs, dc);
             foreach (var rsp in rsps.Where(rsp => !rsp.DateCancelled.HasValue))
@@ -1018,11 +1015,12 @@ namespace AfterSchoolLibrary.Services
                 var plan = rsp.GetSubscriptionPlan(msgs, dc);
                 var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
 
-                if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
-                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), loggedInUser, msgs, dc);
-            }
+                if (plan.ParticipationObjectId != participationObjectId || plan.ParticipationObjectTypeId != participationObjectType || !isSubscription)
+                    continue;
 
-            return false;
+                plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), loggedInUser, msgs, dc);
+                return;
+            }
         }
 
         public static bool IsAppliedFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
