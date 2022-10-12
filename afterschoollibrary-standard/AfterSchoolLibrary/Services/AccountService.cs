@@ -1786,6 +1786,30 @@ namespace AfterSchoolLibrary.Services
             return new List<BankAccount>();
         }
 
+        public static decimal? GetStripeProratePreview(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
+            SystemMessages msgs = null)
+        {
+            if (plan.IsEmpty())
+                return null;
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var customer = account.GetStripeCustomer(stripeAccountType, msgs);
+            if (customer.IsEmpty())
+                return null;
+
+            var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
+            var stripeProratePreview = stripeHelper.PreviewSubscriptionProration(customer.Id, plan.StripePlanId, msgs);
+            return stripeProratePreview.AmountDue / 100m;
+        }
+
+        public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
+            SystemMessages msgs = null)
+        {
+            var result = account.GetStripeProratePreviewText(stripeAccountType, plan, msgs);
+            return result is null ? null : "Amount due: $" + result;
+        }
+
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -4482,11 +4506,10 @@ namespace AfterSchoolLibrary.Services
                 CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
         }
 
-        public static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
+            WebUser loggedInUser, Account currentAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            submittedRecord.StartSubscriptionPlan(checkoutObject: checkoutObject, loggedInUser: loggedInUser,
-                msgs: msgs, dc: dc);
+            submittedRecord.StartSubscriptionPlan(checkoutObject, loggedInUser, currentAccount, msgs, dc);
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
@@ -4496,8 +4519,8 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
         }
 
-        public static void ProcessPaymentPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void ProcessPaymentPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
+            WebUser loggedInUser, Account currentAccount, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // create a stripe coupon if needed
             var coupon = checkoutObject.Coupon;
@@ -4519,7 +4542,7 @@ namespace AfterSchoolLibrary.Services
                 );
             }
 
-            submittedRecord.StartPaymentPlan(checkoutObject, loggedInUser, msgs, dc);
+            submittedRecord.StartPaymentPlan(checkoutObject, loggedInUser, currentAccount, msgs, dc);
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
@@ -4602,7 +4625,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser,
+        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -4626,13 +4649,13 @@ namespace AfterSchoolLibrary.Services
                         ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     if (hasSubscription)
-                        ProcessSubscriptionPlan(checkoutObject, submittedRecord, loggedInUser, amsgs, adc);
+                        ProcessSubscriptionPlan(checkoutObject, submittedRecord, loggedInUser, currentAccount, amsgs, adc);
 
                     if (hasPostPayPlan)
                         ProcessPostPayPlan(checkoutObject, loggedInUser, amsgs, adc);
 
                     if (hasPaymentPlan)
-                        ProcessPaymentPlan(checkoutObject, submittedRecord, loggedInUser, amsgs, adc);
+                        ProcessPaymentPlan(checkoutObject, submittedRecord, loggedInUser, currentAccount, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

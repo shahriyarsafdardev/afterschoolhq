@@ -244,7 +244,7 @@ namespace AfterSchool.Controllers
                 .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                 .ToList();
         }
-        
+
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
@@ -281,7 +281,7 @@ namespace AfterSchool.Controllers
             var result = GatherAndAssembleDataForBrowseResult(accountname, account, false, msgs);
             return View(result);
         }
-        
+
         [HttpGet]
         public ActionResult BrowseVolunteerOpportunities(string accountname)
         {
@@ -319,7 +319,8 @@ namespace AfterSchool.Controllers
             return View(result);
         }
 
-        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, bool browseForVolunteerOpportunities, SystemMessages msgs)
+        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, bool browseForVolunteerOpportunities,
+            SystemMessages msgs)
         {
             List<ParticipationObject> participationObjects;
             var locations = new List<Location>();
@@ -432,6 +433,7 @@ namespace AfterSchool.Controllers
             }
 
             ViewBag.Sources = currentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
+            ViewBag.ProrateMessage = currentAccount.GetStripeProratePreviewText(StripeAccountType.ConnectAccount, null, msgs);
             ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;
@@ -574,7 +576,7 @@ namespace AfterSchool.Controllers
             if (selectedDates.Count == 0)
             {
                 msgs.Add("Please select at least one date to continue.", MessageType.UserError);
-                
+
                 ViewBag.Account = account;
                 ViewBag.CanPublishActivity = false;
                 ViewBag.CanRegisterFor = true;
@@ -800,7 +802,8 @@ namespace AfterSchool.Controllers
             return View("Browse", result);
         }
 
-        private BrowseResult GatherAndAssembleDataForBrowseSessionResult(ActivityGroup session, SystemMessages msgs, Account account, List<Account> featuredProviders)
+        private BrowseResult GatherAndAssembleDataForBrowseSessionResult(ActivityGroup session, SystemMessages msgs, Account account,
+            List<Account> featuredProviders)
         {
             var activities = session.IsInviteOnly
                 ? session.GetInvitedToActivities(SessionVariables.SessionInvite.ToGuid(), msgs)
@@ -892,7 +895,7 @@ namespace AfterSchool.Controllers
             {
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
-                
+
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
@@ -948,7 +951,7 @@ namespace AfterSchool.Controllers
         {
             if (!invite.IsGuid())
                 return;
-            
+
             SessionVariables.SessionInvite = invite;
 
             if (decline.IsBoolean() && decline.ToBoolean())

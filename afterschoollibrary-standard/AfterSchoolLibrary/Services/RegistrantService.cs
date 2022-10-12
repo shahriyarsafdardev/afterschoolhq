@@ -141,16 +141,16 @@ namespace AfterSchoolLibrary.Services
             return (checkoutObject.PayingAccount.GetStripeCustomer(StripeAccountType.ConnectAccount, msgs), checkoutObject.StripeSourceId);
         }
 
-        public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, msgs, dc);
-        }
-
-        public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser,
+        public static void StartPaymentPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, msgs, dc);
+            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.PaymentPlan, loggedInUser, currentAccount, msgs, dc);
+        }
+
+        public static void StartSubscriptionPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            submittedRecord.StartPlan(checkoutObject, SubscriptionPlanType.Subscription, loggedInUser, currentAccount, msgs, dc);
         }
 
         public static int GetSubscriptionCount(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
@@ -170,7 +170,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
-            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -202,7 +202,7 @@ namespace AfterSchoolLibrary.Services
             var startOfPeriod = new DateTime(2022, 10, 1);
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var applesauce = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime);
+            var applesauce = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
