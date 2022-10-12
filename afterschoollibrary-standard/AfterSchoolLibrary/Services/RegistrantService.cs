@@ -246,7 +246,6 @@ namespace AfterSchoolLibrary.Services
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
-                backdateStartDate: proratingResult.BackdateStartDate,
                 msgs: msgs);
 
             if (msgs.HasErrors())
