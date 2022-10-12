@@ -1805,6 +1805,13 @@ namespace AfterSchoolLibrary.Services
             return stripeProratePreview.AmountDue / 100m;
         }
 
+        public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
+            SystemMessages msgs = null)
+        {
+            var result = account.GetStripeProratePreviewText(stripeAccountType, plan, msgs);
+            return result is null ? null : "Amount due: $" + result;
+        }
+
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
