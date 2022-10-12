@@ -433,7 +433,6 @@ namespace AfterSchool.Controllers
             }
 
             ViewBag.Sources = currentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
-            ViewBag.ProrateMessage = currentAccount.GetStripeProratePreviewText(StripeAccountType.ConnectAccount, null, msgs);
             ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
             ViewBag.AccountProfile = account.GetAccountProfile(msgs);
             ViewBag.Messages = msgs;

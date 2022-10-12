@@ -1802,21 +1802,26 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
             var registrant = registration.GetRegistrant(msgs);
             var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
 
             if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue &&
                 participationObject.Cost > registrantActivity.AmountCharged)
                 participationObject.Cost = registrantActivity.AmountCharged;
 
             ViewBag.Registration = registration;
-            ViewBag.Sources = SessionVariables.CurrentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
-            ViewBag.BankAccounts = SessionVariables.CurrentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
+            ViewBag.Sources = currentAccount.GetStripeSources(StripeAccountType.ConnectAccount, msgs);
+            ViewBag.BankAccounts = currentAccount.GetStripeBankAccounts(StripeAccountType.ConnectAccount, msgs);
             ViewBag.Cart = SessionVariables.Cart;
             ViewBag.ParticipationObject = participationObject;
             ViewBag.Messages = msgs;
             ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
-            ViewBag.RealProrateMessage = SessionVariables.CurrentAccount.GetStripeProratePreview(StripeAccountType.ConnectAccount,
-                participationObject.SubscriptionPlans.FirstOrDefault(), msgs);
+            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+            var stripeProratingService = new StripeProratingService();
+            var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
+            var proratingResult = subscriptionPlan.FigureOutProrating(subscriptionPlan.StartDate.Value, DateTime.UtcNow.Date, stripeProratingService,
+                participationObject, startDateTime, currentAccount, msgs);
+            ViewBag.RealProrateMessage = currentAccount.GetStripeProratePreview(StripeAccountType.ConnectAccount, subscriptionPlan, msgs);
 
             return registration;
         }

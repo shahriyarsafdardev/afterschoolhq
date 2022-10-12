@@ -202,19 +202,19 @@ namespace AfterSchoolLibrary.Services
             var startOfPeriod = new DateTime(2022, 10, 1);
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var applesauce = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
+            var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: applesauce.BillingCycleAnchor.HasValue,
+                isProrated: proratingResult.BillingCycleAnchor.HasValue,
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
                 stripeAccountId: stripeAccountId,
                 startDate: startDateTime,
                 endDate: endDateTime,
-                billingCycleAnchor: applesauce.BillingCycleAnchor,
+                billingCycleAnchor: proratingResult.BillingCycleAnchor,
                 stripeCouponId: stripeCouponId,
                 metaData: new Dictionary<string, string>
                 {
@@ -228,7 +228,7 @@ namespace AfterSchoolLibrary.Services
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
-                backdateStartDate: applesauce.BackdateStartDate,
+                backdateStartDate: proratingResult.BackdateStartDate,
                 msgs: msgs);
 
             if (msgs.HasErrors())

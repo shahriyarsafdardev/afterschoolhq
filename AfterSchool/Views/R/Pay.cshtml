@@ -29,7 +29,7 @@
     Html.RenderPartial
         (
             "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-            new RegistrationHeaderViewModel(Model, (AccountProfile) ViewBag.AccountProfile),
+            new RegistrationHeaderViewModel(Model, accountProfile),
             new ViewDataDictionary
             {
                 {"hidebuttons", true},
@@ -47,8 +47,6 @@
                         <h3 class="text-center">
                             Make a Payment
                         </h3>
-                        <p>Hi there hello</p>
-                        <p>@(ViewBag.ProrateMessage)</p>
                     </div>
                 </div>
             </div>
