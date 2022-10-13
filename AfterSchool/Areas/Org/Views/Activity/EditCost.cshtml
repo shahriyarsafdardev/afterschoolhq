@@ -31,7 +31,7 @@
        }); }
 
     <style>
-    
+        
         #confirm-pricing-form > div > p
         {
             font-size: 18px;
@@ -51,6 +51,31 @@
             background-color: #f2f2f5;
         }
         
+        .table > thead > tr > th,
+        .table > tbody > tr > td
+         {
+            border-top: none;
+            border-bottom: none;
+        }
+        
+        #confirm-pricing-form + div > p ,#confirm-pricing-form + div > p >a
+        {
+            font-size: 14px;;
+            color: #b2b2b4;
+        }
+        
+        .pull-right > button , .pull-left > button
+        {
+            width: 175px;
+            color: #282828;
+        }
+        
+        #confirm-pricing-form-footer
+        {
+            border-top-style: none;
+            margin-bottom: 15px;
+            margin-top: -35px;
+        }
         
     </style>
     
@@ -164,10 +189,10 @@
                                 $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html());
                                 $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html());
                                 
-                                $('#amounttoprovider-confirm').html($('#amounttoprovider').html());
-                                $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html());
-                                $('#amounttoprovider-subscription-confirm').html($('#amounttoprovider-subscription').html());
-                                $('#amounttoprovider-postpay-confirm').html($('#amounttoprovider-postpay').html());
+                                $('#amounttoprovider-confirm').html($('#amounttoprovider').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-subscription-confirm').html($('#amounttoprovider-subscription').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-postpay-confirm').html($('#amounttoprovider-postpay').html()).wrapInner("<strong />");
                                 
                                 let feeConfirm = parseFloat($('#pricetoparent').html()) - parseFloat($('#amounttoprovider').html());
                                 let feePaymentPlanConfirm = parseFloat($('#pricetoparent-paymentplan').html()) - parseFloat($('#amounttoprovider-paymentplan').html());
@@ -181,7 +206,34 @@
                                 
                                 $('#confirm-save-button').addClass('hide');            
                                 $('#confirm-savenext-button').addClass('hide');
-                                    
+                                
+                                if (parseInt($('#pricetoparent-paymentplan-confirm').text()) <= 0 || !$('#haspaymentplan').is(':checked'))
+                                {
+                                    $('#pricetoparent-paymentplan-confirm').closest('tr').hide();   
+                                }
+                                else 
+                                {
+                                    $('#pricetoparent-paymentplan-confirm').closest('tr').show();   
+                                }
+                                
+                                if (parseInt($('#pricetoparent-subscription-confirm').text()) <= 0 || !$('#hassubscriptionplan').is(':checked'))
+                                {
+                                    $('#pricetoparent-subscription-confirm').parent().parent().hide();   
+                                }
+                                else 
+                                {
+                                    $('#pricetoparent-subscription-confirm').parent().parent().show();   
+                                }
+                                
+                                if (parseInt($('#pricetoparent-postpay-confirm').text()) <= 0 || !$('#haspostpayplan').is(':checked'))
+                                {
+                                    $('#pricetoparent-postpay-confirm').parent().parent().hide();   
+                                }
+                                else 
+                                {
+                                    $('#pricetoparent-postpay-confirm').parent().parent().show();   
+                                }
+                                
                                 if (cmd === "save") {
                                     $('#confirm-save-button').removeClass('hide');
                                 }
@@ -232,13 +284,13 @@
                                                     <td>Registration Fee</td>
                                                     <td class="text-center">$<span id="pricetoparent-confirm"></span></td>
                                                     <td class="text-center">$<span id="fee-confirm"></span></td>
-                                                    <td class="text-center">$<span id="amounttoprovider-confirm"></span></td>
+                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-confirm"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td>Payment Plan</td>
                                                     <td class="text-center">$<span id="pricetoparent-paymentplan-confirm"></span></td>
                                                     <td class="text-center">$<span id="fee-paymentplan-confirm"></span></td>
-                                                    <td class="text-center">$<span id="amounttoprovider-paymentplan-confirm"></span></td>
+                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-paymentplan-confirm"></span></td>
                                                 </tr>
                                                 <tr>
                                                     <td>Subscription Plan</td>
@@ -250,25 +302,29 @@
                                                     <td>Attendance Based Billing</td>
                                                     <td class="text-center">$<span id="pricetoparent-postpay-confirm"></span></td>
                                                     <td class="text-center">$<span id="fee-postpay-confirm"></span></td>
-                                                    <td class="text-center">$<span id="amounttoprovider-postpay-confirm"></span></td>
+                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-postpay-confirm"></span></td>
                                                 </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
                                     <div class="text-center">
-                                        <p><a href="">Upgrade your plan</a> to learn more about how you can reduce fees. <br/> * Full fee schedule available <a>here</a>.</p>
+                                        <p><a href="@Url.Action("SelectPlan", "Account")">Upgrade your plan</a> to learn more about how you can reduce fees. <br/> * Full fee schedule available <a href=" https://afterschoolhq.com/service-fee-schedule" target="_blank">here</a>.</p>
                                     </div>
                                 </div>
                                 <div class="modal-footer" id="confirm-pricing-form-footer">
-                                    <button type="button"
-                                            data-dismiss="modal"
-                                            class="btn btn-block btn-lg md-close btn-warning btn-space"
-                                            onclick="closeConfirmModal()">
-                                        Edit Prices
-                                    </button>
-                                    <div id="confirm-save-button">
-                                        @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                                    <div class="col-lg-9 col-lg-offset-2 col-lg-8 text-medium-small">
+                                        <div class="pull-left">
+                                            <button type="submit"
+                                                    data-dismiss="modal"
+                                                    class="btn btn-block btn-lg md-close btn-warning btn-space"
+                                                    onclick="closeConfirmModal()">
+                                                Edit Prices
+                                            </button>
+                                        </div>
+                                        <div class="pull-right" id="confirm-save-button">
+                                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                                        </div>
                                     </div>
                                     <div id="confirm-savenext-button">
                                         @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
