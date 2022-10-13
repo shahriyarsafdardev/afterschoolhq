@@ -1454,7 +1454,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    accountPackage.UpdateTrialDaysWithStripe(featureTrialDayMaxValue + 2, amsgs , adc);
+                    accountPackage.UpdateTrialDaysWithStripe(2, amsgs , adc);
                     accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
