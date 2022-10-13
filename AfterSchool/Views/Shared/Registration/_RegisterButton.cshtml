@@ -9,7 +9,7 @@
     var currentUser = SessionVariables.CurrentUser;
     var currentAccount = SessionVariables.CurrentAccount;
     var anotherChild = ViewData["anotherChild"].IsNotEmpty();
-    var registrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount.AccountTypeId);
+    var registrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount?.AccountTypeId);
 
     var studentAccountViewingActivity = registrant?.PersonTypeId == RegistrantPersonType.Student && Model.ActivityType == ActivityType.Activity;
     var volunteerAccountViewingOpportunity = registrant?.PersonTypeId == RegistrantPersonType.Volunteer
