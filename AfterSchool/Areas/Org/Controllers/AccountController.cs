@@ -1447,6 +1447,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
             var featureTrialDayMaxValue = accountPackage.GetFeature(FeatureType.TrialDays).Max.Value.ToInteger();
+            var trialEndDate = (accountPackage.TrialStartDate.Value - DateTime.UtcNow).Days + 3;
             
             var emails =  String.Join(",", Email.AppSalesEmailAddress, Email.AppSalesEmailAddress);
             
@@ -1454,7 +1455,7 @@ namespace AfterSchool.Areas.Org.Controllers
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    accountPackage.UpdateTrialDaysWithStripe(2, amsgs , adc);
+                    accountPackage.UpdateTrialDaysWithStripe(trialEndDate, amsgs , adc);
                     accountPackage.AddOrUpdatePackageFeature(FeatureType.TrialDays, featureTrialDayMaxValue + 2, currentUser.ID, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>

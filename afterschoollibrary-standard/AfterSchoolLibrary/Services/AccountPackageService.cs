@@ -74,7 +74,7 @@ namespace AfterSchoolLibrary.Services
                     priceId: null,
                     billingCycleAnchorNow: null,
                     billingCycleAnchorUnchanged: null,
-                    trialEndDate: DateTime.UtcNow.Date.AddDays(trialDays),
+                    trialEndDate: accountPackage.TrialStartDate.Value.AddDays(trialDays),
                     prorate: null,
                     couponId: null,
                     msgs: msgs);
@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Services
             if (!accountPackage.TrialStartDate.HasValue)
                 accountPackage.StartTrialNow(msgs, dc);
                 
-            accountPackage.TrialEndDate = DateTime.UtcNow.Date.AddDays(trialDays);
+            accountPackage.TrialEndDate = accountPackage.TrialStartDate.Value.AddDays(trialDays);
             msgs.AddRange(accountPackage.Save(dc));
         }
 
