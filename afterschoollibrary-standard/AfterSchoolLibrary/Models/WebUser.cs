@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Models
 		public string CleverUserId { get { return (string)MDV["CleverUserId"].Value; } set { MDV["CleverUserId"].Value = value; } }
 		public string CleverUserName { get { return (string)MDV["CleverUserName"].Value; } set { MDV["CleverUserName"].Value = value; } }
 		public string HowHearAboutUs { get { return (string)MDV["HowHearAboutUs"].Value; } set { MDV["HowHearAboutUs"].Value = value; } }
-		
+        public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 
         public WebUser()
         {
@@ -40,6 +40,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.IsActive = false;
+            this.IsDeleted = false;
 			this.VerifiedAccount = false;
 			this.IsRegistered = false;
 			this.AllowTextMessages = false;
@@ -64,6 +65,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "CleverUserId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "CleverUserName", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "HowHearAboutUs", System.Data.SqlDbType.NVarChar , "500");
+                _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -149,8 +151,12 @@ namespace AfterSchoolLibrary.Models
 
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsActive"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
-
+			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps)); 
+                
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["LastActivity"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
@@ -209,6 +215,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -217,6 +224,7 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -225,6 +233,7 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["FacebookId"], FacebookId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -234,6 +243,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["CleverUserId"], CleverUserId);
 			dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
@@ -253,6 +263,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 
             if (hasPassword.HasValue)
             {
@@ -274,6 +285,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 
             if (hasPassword.HasValue)
             {
@@ -295,6 +307,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["username"], username);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
 
             if (hasPassword.HasValue)
             {
@@ -311,6 +324,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["email"], email);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
             dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             return dq.GetCount() == 0;
         }
@@ -320,6 +334,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], 0);
             dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             return dq.GetCount() == 0;
         }
@@ -328,7 +343,8 @@ namespace AfterSchoolLibrary.Models
         {
             return GetCount(
                 criterias: new Hashtable(){
-                    {"email", email}
+                    {"email", email},
+                    {"IsDeleted", 0},
                 },
                 dc: dc
                 ) > 0;
@@ -338,7 +354,8 @@ namespace AfterSchoolLibrary.Models
         {
             return GetCount(
                 criterias: new Hashtable(){
-                    {"phone", phone}
+                    {"phone", phone},
+                    {"IsDeleted", 0},
                 },
                 dc: dc
                 ) > 0;
@@ -348,7 +365,8 @@ namespace AfterSchoolLibrary.Models
         {
             return GetCount(
                 criterias: new Hashtable(){
-                    {"uid", uid}
+                    {"uid", uid},
+                    {"IsDeleted", 0},
                 },
                 dc: dc
                 ) > 0;
