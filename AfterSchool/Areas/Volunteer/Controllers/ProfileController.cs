@@ -87,11 +87,8 @@ namespace AfterSchool.Areas.Volunteer.Controllers
                     switch (question.QuestionDataTypeId)
                     {
                         case QuestionDataType.RegistrantMobilePhone:
-                            FormService.PhoneValidation(answer, question, msgs);
-                            break;
                         case QuestionDataType.RegistrantDoctorPhone:
-                            if (answer.IsNotEmpty() && !answer.IsRegExMatch(Utilities.PhoneRegEx))
-                                msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
+                            FormService.PhoneValidation(answer, question, msgs);
                             break;
                     }
                 });
