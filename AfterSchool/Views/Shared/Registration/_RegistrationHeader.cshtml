@@ -114,9 +114,7 @@
             
             @if (session.IsNotEmpty() && session.Details.IsNotEmpty())
             {
-                <span class="text-white">
-                    @Html.Raw(session.Details)
-                </span>
+                @Html.Raw(session.Details)
             }
 
 
