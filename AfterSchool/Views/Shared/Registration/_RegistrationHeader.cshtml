@@ -112,10 +112,10 @@
                 }
             </h1>
             
-            @if (session.IsNotEmpty() && Model.Session.Details.IsNotEmpty())
+            @if (session.IsNotEmpty() && session.Details.IsNotEmpty())
             {
                 <span class="text-white">
-                    @Html.Raw(Model.Session.Details)
+                    @Html.Raw(session.Details)
                 </span>
             }
 
