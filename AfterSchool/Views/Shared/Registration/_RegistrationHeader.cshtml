@@ -111,6 +111,13 @@
                     <span class="badge badge-danger">DEMO</span>
                 }
             </h1>
+            
+            @if (session.IsNotEmpty() && Model.Session.Details.IsNotEmpty())
+            {
+                <span class="text-white">
+                    @Html.Raw(Model.Session.Details)
+                </span>
+            }
 
 
             <div class="reg-icon-container">
@@ -158,6 +165,7 @@
                         @Model.Headline
                     </p>
                 }
+                
             </div>
         </div>
 
