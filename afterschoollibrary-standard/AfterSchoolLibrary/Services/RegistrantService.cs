@@ -2037,7 +2037,7 @@ namespace AfterSchoolLibrary.Services
             if (formQuestionAnswer.IsNotEmpty() && formQuestionAnswer.Text.IsNotEmpty())
             {
                 registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
-                msgs.AddRange((registrant.Save(dc));
+                msgs.AddRange(registrant.Save(dc));
             }
         }
     }
