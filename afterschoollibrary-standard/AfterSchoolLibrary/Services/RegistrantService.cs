@@ -2031,13 +2031,13 @@ namespace AfterSchoolLibrary.Services
         public static void UpdateGenderFromFormQuestionAnswers(this Registrant registrant, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
-            if (registrant.GenderId != GenderType.NotSet || registrant.ID == null) return;
+            if (registrant.GenderId != GenderType.NotSet || !registrant.ID.HasValue) return;
             var formQuestionAnswer =
                 FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId((int)registrant.ID , QuestionDataType.RegistrantGender, msgs , dc);
             if (formQuestionAnswer.IsNotEmpty() && formQuestionAnswer.Text.IsNotEmpty())
             {
                 registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
-                registrant.Save(dc);
+                msgs.AddRange((registrant.Save(dc)));
             }
         }
     }

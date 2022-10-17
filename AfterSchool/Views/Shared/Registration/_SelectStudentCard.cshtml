@@ -31,7 +31,7 @@
 
     var isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(Model);
     var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model);
-    var isGenderEnforced = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
+    var isGenderRestrcited = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
                            && !participationObject.AcceptsGenderType(Model.GenderId);
 
 
@@ -105,7 +105,7 @@
         }
         else
         {
-            switch (isGenderEnforced)
+            switch (isGenderRestrcited)
             {
                 case true when isAgeRestricted:
                     btnText = "Ineligible";
