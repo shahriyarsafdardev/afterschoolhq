@@ -13,8 +13,7 @@ namespace AfterSchoolLibrary.Services
         private static List<QuestionType> SurveyOnlyQuestionTypes =>
             new List<QuestionType>
             {
-                QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating,
-                QuestionType.FileUpload,
+                QuestionType.Audio, QuestionType.Video, QuestionType.Photo, QuestionType.Emoji, QuestionType.Rating 
             };
 
         public static string RegistrantGrade =>
@@ -262,11 +261,10 @@ namespace AfterSchoolLibrary.Services
 
             return f;
         }
-
         public static List<QuestionType> GetTypesUserCannotAdd(this Form form)
         {
             var typesUserCannotAdd = new List<QuestionType> {QuestionType.TextBlock, QuestionType.NotSet, QuestionType.RadioMatrix};
-
+            
             if (form.FormTypeId != FormType.Survey)
                 typesUserCannotAdd.AddRange(SurveyOnlyQuestionTypes);
 
