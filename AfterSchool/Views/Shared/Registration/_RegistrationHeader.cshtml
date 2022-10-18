@@ -112,12 +112,8 @@
                 }
             </h1>
             
-            @if (session.IsNotEmpty() && session.Details.IsNotEmpty())
-            {
-                @Html.Raw(session.Details)
-            }
-
-
+            @(session?.Details.IsNotEmpty() == true ? Html.Raw(session.Details) : null)
+            
             <div class="reg-icon-container">
                 <div>
                     @if (Model.NumberOfHoursEnrolled > 0)
