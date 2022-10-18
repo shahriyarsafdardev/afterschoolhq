@@ -111,8 +111,9 @@
                     <span class="badge badge-danger">DEMO</span>
                 }
             </h1>
-
-
+            
+            @(session?.Details.IsNotEmpty() == true ? Html.Raw(session.Details) : null)
+            
             <div class="reg-icon-container">
                 <div>
                     @if (Model.NumberOfHoursEnrolled > 0)
@@ -158,6 +159,7 @@
                         @Model.Headline
                     </p>
                 }
+                
             </div>
         </div>
 
