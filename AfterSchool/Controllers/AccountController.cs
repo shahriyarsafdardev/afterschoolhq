@@ -13,7 +13,8 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Controllers
 {
@@ -116,7 +117,7 @@ namespace AfterSchool.Controllers
                         EmailHelper.SendContactFormConfirmation(registrationAccount, submittedContact, msgs);
                     },
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
             }
 
@@ -290,7 +291,7 @@ namespace AfterSchool.Controllers
                 switch (qvm.Question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantMobilePhone:
-                        if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                             msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                         break;
                 }
@@ -306,7 +307,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-                if (Utilities.IsProduction)
+                if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
 
@@ -376,7 +377,7 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account);
                     },
                     failureMessages => msgs.AddRange(failureMessages),
-                    exceptionMessages => Utilities.SystemErrorLog(exceptionMessages)
+                    exceptionMessages => LibraryUtilities.SystemErrorLog(exceptionMessages)
                 );
             }
 
@@ -508,7 +509,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -585,7 +586,7 @@ namespace AfterSchool.Controllers
                     case QuestionDataType.RegistrantHomePhone:
                     case QuestionDataType.RegistrantWorkPhone:
                     case QuestionDataType.RegistrantMobilePhone:
-                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                             msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
                         break;
                 }
@@ -656,7 +657,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
             }
 
@@ -733,7 +734,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -844,6 +845,7 @@ namespace AfterSchool.Controllers
             var questions = AddStudentViewBag(adminAccountForm, msgs);
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             questions.ForEach(question =>
             {
@@ -865,6 +867,15 @@ namespace AfterSchool.Controllers
             if (placeid.IsEmpty() && !schoolnotfound) msgs.Add("Location is required", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+
+            if (participationObject.IsGenderEnforced)
+            {
+                var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
+                if (!participationObject.AcceptsGenderType(gender))
+                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                        MessageType.UserError);
+            }
+
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
 
             if (createuseraccount.IsNumber() && !email.IsEmail())
@@ -901,7 +912,7 @@ namespace AfterSchool.Controllers
                                 lastName,
                                 email,
                                 null,
-                                $"Your parent/guardian ({currentUser.DisplayName}) has invited you to sign up for {Utilities.AppName()} to register for activities",
+                                $"Your parent/guardian ({currentUser.DisplayName}) has invited you to sign up for {LibraryUtilities.AppName()} to register for activities",
                                 UserType.Student,
                                 currentUser,
                                 amsgs,
@@ -1054,7 +1065,7 @@ namespace AfterSchool.Controllers
                         SessionVariables.CurrentRegistrant = student;
                     },
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
             }
 
@@ -1267,7 +1278,7 @@ namespace AfterSchool.Controllers
 
                             if (msgs.HasNoErrors())
                                 msgs.AddRange(EmailHelper.SendParentStudentAccountEmail(parentWebUser.FirstName,
-                                    studentUser.FirstName, Utilities.LoginUrl(), parentWebUser.Email,
+                                    studentUser.FirstName, LibraryUtilities.LoginUrl(), parentWebUser.Email,
                                     participationObject?.GetBrowseUrl()));
 
                             SessionVariables.CurrentUser = studentUser;
@@ -1314,13 +1325,16 @@ namespace AfterSchool.Controllers
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() &&
                     !participationObject.IsGradeInRange(answer))
-                    msgs.Add(
-                        $"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
+                    msgs.Add($"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
+                        MessageType.UserError);
+                if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
+                    !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
+                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
                         MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
-                    if (!answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                    if (!answer.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                         msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
                     if (WebUser.ExistsByPhone(answer, msgs))
@@ -1501,7 +1515,7 @@ namespace AfterSchool.Controllers
                 switch (question.QuestionDataTypeId)
                 {
                     case QuestionDataType.RegistrantDoctorPhone:
-                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                        if (answer.IsNotEmpty() && !answer.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                             msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
                         break;
                 }
@@ -1533,7 +1547,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -1587,6 +1601,12 @@ namespace AfterSchool.Controllers
 
             var students = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
+            // Making if any student has GenderId as NOT SET so it gets updated from FQA
+            // This will get obsolete in future if GenderId in Master Registerant for PersonType Student
+            // is not null for every record in database.
+
+            students.ForEach( student => student.UpdateGenderFromFormQuestionAnswers(msgs));
+            
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
@@ -2379,7 +2399,7 @@ namespace AfterSchool.Controllers
                         SessionVariables.CurrentRegistrant = registrant;
                     },
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
             }
 
@@ -2474,7 +2494,7 @@ namespace AfterSchool.Controllers
                             lastName.Value,
                             email.Value.Trim(),
                             phone.Value.Trim(),
-                            $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {Utilities.AppName()}{locationString}. Please create your parent {Utilities.AppName()} account to know and approve of activities your child requests to participate in.",
+                            $"{SessionVariables.CurrentUser.FirstName} has signed up for an account on {LibraryUtilities.AppName()}{locationString}. Please create your parent {LibraryUtilities.AppName()} account to know and approve of activities your child requests to participate in.",
                             UserType.Owner,
                             true,
                             SessionVariables.CurrentUser,
@@ -2513,7 +2533,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -2635,7 +2655,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -2758,7 +2778,7 @@ namespace AfterSchool.Controllers
             }
 
             if (SessionVariables.CurrentUser.IsEmpty())
-                return Utilities.LoginUrl();
+                return LibraryUtilities.LoginUrl();
 
             if (SessionVariables.CurrentAccount.IsEmpty())
                 return new UrlHelper(ControllerContext.RequestContext).Action("select", "login");

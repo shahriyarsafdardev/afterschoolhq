@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary.Models
         {
             return GetCount(
                 criterias: new Hashtable(){
-                    {"email", email}
+                    {"email", email},
                 },
                 dc: dc
                 ) > 0;

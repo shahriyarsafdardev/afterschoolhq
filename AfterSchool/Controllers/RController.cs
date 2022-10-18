@@ -7,6 +7,7 @@ using AfterSchool.Assemblers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -244,7 +245,7 @@ namespace AfterSchool.Controllers
                 .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                 .ToList();
         }
-        
+
         [HttpGet]
         public ActionResult Browse(string accountname)
         {
@@ -281,7 +282,7 @@ namespace AfterSchool.Controllers
             var result = GatherAndAssembleDataForBrowseResult(accountname, account, false, msgs);
             return View(result);
         }
-        
+
         [HttpGet]
         public ActionResult BrowseVolunteerOpportunities(string accountname)
         {
@@ -319,7 +320,8 @@ namespace AfterSchool.Controllers
             return View(result);
         }
 
-        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, bool browseForVolunteerOpportunities, SystemMessages msgs)
+        private BrowseResult GatherAndAssembleDataForBrowseResult(string accountName, Account account, bool browseForVolunteerOpportunities,
+            SystemMessages msgs)
         {
             List<ParticipationObject> participationObjects;
             var locations = new List<Location>();
@@ -484,6 +486,18 @@ namespace AfterSchool.Controllers
 
                 if (currentUser.IsNotEmpty() && currentAccount.IsNotEmpty())
                     canPublishActivity = currentUser.CanPublishActivity(currentAccount, activity, msgs);
+
+                var masterRegistrant = currentUser?.GetMasterRegistrantByAccountType(currentAccount?.AccountTypeId);
+                masterRegistrant?.UpdateGenderFromFormQuestionAnswers(msgs);
+
+                var accountIsSomeoneWhoCanRegister =
+                    currentAccount?.AccountTypeId == AccountType.Volunteer || currentAccount?.AccountTypeId == AccountType.Registrant;
+                var userIsStudent = currentUser?.GetMasterParentOrStudentRegistrant()?.PersonTypeId == RegistrantPersonType.Student;
+                var isOpportunity = activity.ActivityTypeId == ActivityType.VolunteerOpportunity;
+                if (activity.IsGenderEnforced && currentUser.IsNotEmpty() && accountIsSomeoneWhoCanRegister && isOpportunity ^ userIsStudent
+                    && !participationObject.AcceptsGenderType(masterRegistrant.GenderId))
+                    msgs.Add($"This {UILabel.ActivityLabel(activity.ActivityTypeId)} is {activity.GenderRestriction.ToString().SplitByUpperCase()}",
+                        MessageType.UserError);
             }
             else
             {
@@ -574,7 +588,7 @@ namespace AfterSchool.Controllers
             if (selectedDates.Count == 0)
             {
                 msgs.Add("Please select at least one date to continue.", MessageType.UserError);
-                
+
                 ViewBag.Account = account;
                 ViewBag.CanPublishActivity = false;
                 ViewBag.CanRegisterFor = true;
@@ -800,7 +814,8 @@ namespace AfterSchool.Controllers
             return View("Browse", result);
         }
 
-        private BrowseResult GatherAndAssembleDataForBrowseSessionResult(ActivityGroup session, SystemMessages msgs, Account account, List<Account> featuredProviders)
+        private BrowseResult GatherAndAssembleDataForBrowseSessionResult(ActivityGroup session, SystemMessages msgs, Account account,
+            List<Account> featuredProviders)
         {
             var activities = session.IsInviteOnly
                 ? session.GetInvitedToActivities(SessionVariables.SessionInvite.ToGuid(), msgs)
@@ -892,7 +907,7 @@ namespace AfterSchool.Controllers
             {
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
-                
+
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
@@ -948,7 +963,7 @@ namespace AfterSchool.Controllers
         {
             if (!invite.IsGuid())
                 return;
-            
+
             SessionVariables.SessionInvite = invite;
 
             if (decline.IsBoolean() && decline.ToBoolean())

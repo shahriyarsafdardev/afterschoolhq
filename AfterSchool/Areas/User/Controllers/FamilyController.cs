@@ -1,22 +1,21 @@
-﻿using AfterSchool.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Web.Mvc;
+using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.User.Controllers
 {
     public class FamilyController : BaseLoggedInController
     {
-        public FamilyController() : base(new List<AccountType>() { AccountType.Registrant })
+        public FamilyController() : base(new List<AccountType>() {AccountType.Registrant})
         {
-
         }
 
         // GET: User/Family
@@ -26,6 +25,52 @@ namespace AfterSchool.Areas.User.Controllers
             var registrants = SessionVariables.CurrentUser.GetAllRegistrants(msgs);
 
             return View(registrants.Where(x => !x.IsVolunteer).ToList());
+        }
+
+        [HttpGet]
+        public ActionResult EditProfileDone(string id)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            if (id.IsGuid())
+            {
+                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+
+                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
+                    return RedirectToAction("index");
+            }
+
+            ViewBag.Messages = msgs;
+
+            return View(registrant);
+        }
+
+        private void UpdateChildrenRegistrants(Registrant registrant, List<QuestionGroupDataType> questionGroupDataTypes, SystemMessages msgs,
+            DatabaseConnection dc)
+        {
+            // if this is the parent and owner of this account
+            if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc)?.ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
+            {
+                var students = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, dc);
+
+                // copy parent answers to students
+                registrant.GetAnswers(msgs, dc)
+                    .Where(answer => answer.FormQuestionGroupQuestionGroupDataTypeId.In(questionGroupDataTypes))
+                    .ToList()
+                    .ForEach(answer =>
+                    {
+                        students.ForEach(student =>
+                        {
+                            student.AddOrUpdateAnswer(
+                                answerText: answer.Text.IfEmpty("").Trim(),
+                                question: answer.ToFormQuestion(msgs: msgs, dc: dc),
+                                loggedInUser: SessionVariables.CurrentUser,
+                                msgs: msgs,
+                                dc: dc);
+                        });
+                    });
+            }
         }
 
         #region StudentPersonal
@@ -85,9 +130,7 @@ namespace AfterSchool.Areas.User.Controllers
                 var questions = GetStudentPersonalQuestions(msgs);
 
                 var values = new NameValueCollection();
-                questions.ForEach(question => {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
+                questions.ForEach(question => { values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text); });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
                 ViewBag.School = registrant.GetSchoolLocation(msgs);
@@ -146,7 +189,11 @@ namespace AfterSchool.Areas.User.Controllers
                             Location school = null;
 
                             if (formCollection["placeid"].IsNotEmpty())
-                                school = LocationService.CreateOrUpdateFromGoogle(formCollection["locationname"], formCollection["streetnumber"], formCollection["streetname"] , formCollection["address2"] , formCollection["neighborhood"] , formCollection["city"] , formCollection["county"], formCollection["state"], formCollection["postalcode"], formCollection["country"], formCollection["placeid"], Convert.ToDecimal( formCollection["latitude"]), Convert.ToDecimal(formCollection["longitude"]), SessionVariables.CurrentUser, amsgs, adc);
+                                school = LocationService.CreateOrUpdateFromGoogle(formCollection["locationname"], formCollection["streetnumber"],
+                                    formCollection["streetname"], formCollection["address2"], formCollection["neighborhood"], formCollection["city"],
+                                    formCollection["county"], formCollection["state"], formCollection["postalcode"], formCollection["country"],
+                                    formCollection["placeid"], Convert.ToDecimal(formCollection["latitude"]), Convert.ToDecimal(formCollection["longitude"]),
+                                    SessionVariables.CurrentUser, amsgs, adc);
 
                             registrant.SchoolLocationId = school.IsNotEmpty() ? school.ID : new int?();
                             registrant.LastModifiedBy = SessionVariables.CurrentUser.ID;
@@ -165,7 +212,7 @@ namespace AfterSchool.Areas.User.Controllers
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
                 }
 
@@ -174,7 +221,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHealth", new { id = registrant.Uid, reg, student, returnUrl });
+                return RedirectToAction("EditHealth", new {id = registrant.Uid, reg, student, returnUrl});
 
             ViewBag.Messages = msgs;
             ViewBag.ResetGrade = "false";
@@ -222,9 +269,7 @@ namespace AfterSchool.Areas.User.Controllers
                 var questions = GetHealthQuestions(msgs);
 
                 var values = new NameValueCollection();
-                questions.ForEach(question => {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
+                questions.ForEach(question => { values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text); });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
@@ -288,7 +333,7 @@ namespace AfterSchool.Areas.User.Controllers
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
                 }
 
@@ -309,7 +354,7 @@ namespace AfterSchool.Areas.User.Controllers
                 return Redirect(Registration.LoadByUid(reg.ToGuid()).GetParentalConsentUrl);
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditProfileDone", new { id = registrant.Uid, reg, student });
+                return RedirectToAction("EditProfileDone", new {id = registrant.Uid, reg, student});
 
             ViewBag.Messages = msgs;
 
@@ -361,9 +406,7 @@ namespace AfterSchool.Areas.User.Controllers
                 var questions = GetPersonalQuestions(msgs);
 
                 var values = new NameValueCollection();
-                questions.ForEach(question => {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
+                questions.ForEach(question => { values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text); });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
@@ -422,16 +465,16 @@ namespace AfterSchool.Areas.User.Controllers
                                     msgs: amsgs,
                                     dc: adc);
                             });
-                            
+
                             // copy parent 1 info over to the student
                             var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>()
                             {
-                                { QuestionDataType.RegistrantFirstName,  QuestionDataType.Parent1FirstName },
-                                { QuestionDataType.RegistrantLastName,  QuestionDataType.Parent1LastName },
-                                { QuestionDataType.RegistrantEmail,  QuestionDataType.Parent1Email },
-                                { QuestionDataType.RegistrantHomePhone,  QuestionDataType.Parent1HomePhone },
-                                { QuestionDataType.RegistrantMobilePhone,  QuestionDataType.Parent1MobilePhone },
-                                { QuestionDataType.RegistrantWorkPhone,  QuestionDataType.Parent1WorkPhone },
+                                {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent1FirstName},
+                                {QuestionDataType.RegistrantLastName, QuestionDataType.Parent1LastName},
+                                {QuestionDataType.RegistrantEmail, QuestionDataType.Parent1Email},
+                                {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent1HomePhone},
+                                {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
+                                {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
                             };
 
                             var children = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, adc);
@@ -441,20 +484,19 @@ namespace AfterSchool.Areas.User.Controllers
                                 foreach (var key in parent1Map.Keys)
                                 {
                                     child.MapAndAddAnswer(
-                                       questions,
-                                       registrant,
-                                       key,
-                                       parent1Map[key],
-                                       SessionVariables.CurrentUser,
-                                       amsgs,
-                                       adc);
+                                        questions,
+                                        registrant,
+                                        key,
+                                        parent1Map[key],
+                                        SessionVariables.CurrentUser,
+                                        amsgs,
+                                        adc);
                                 }
                             });
-
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
                 }
 
@@ -462,7 +504,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditHomeAddress", new { id = registrant.Uid, reg, student });
+                return RedirectToAction("EditHomeAddress", new {id = registrant.Uid, reg, student});
 
             ViewBag.Messages = msgs;
 
@@ -481,14 +523,16 @@ namespace AfterSchool.Areas.User.Controllers
             var questions = questionGroup.GetAllQuestions(msgs);
 
             var personalContactGroup = form.GetQuestionGroups(msgs)
-                  .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
+                .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
 
             var questionsWithPersonalInfo = personalContactGroup.GetAllQuestions(msgs);
-            var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>() {
-                QuestionDataType.RegistrantHomePhone,
-                QuestionDataType.RegistrantWorkPhone,
-                QuestionDataType.RegistrantParentRelationship,
-                QuestionDataType.RegistrantEmployer }))
+            var allQuestionsWithPersonalInfo = questionsWithPersonalInfo.Where(question => question.QuestionDataTypeId.In(new List<QuestionDataType>()
+                {
+                    QuestionDataType.RegistrantHomePhone,
+                    QuestionDataType.RegistrantWorkPhone,
+                    QuestionDataType.RegistrantParentRelationship,
+                    QuestionDataType.RegistrantEmployer,
+                }))
                 .ToList();
 
             questions.AddRange(allQuestionsWithPersonalInfo);
@@ -528,9 +572,7 @@ namespace AfterSchool.Areas.User.Controllers
                 var questions = GetHomeAddressQuestions(msgs);
 
                 var values = new NameValueCollection();
-                questions.ForEach(question => {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
+                questions.ForEach(question => { values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text); });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
@@ -594,7 +636,7 @@ namespace AfterSchool.Areas.User.Controllers
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
                 }
 
@@ -602,7 +644,7 @@ namespace AfterSchool.Areas.User.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditEmergencyContact", new { id = registrant.Uid, reg, student });
+                return RedirectToAction("EditEmergencyContact", new {id = registrant.Uid, reg, student});
 
             ViewBag.Messages = msgs;
 
@@ -611,7 +653,7 @@ namespace AfterSchool.Areas.User.Controllers
 
         #endregion
 
-        #region EmergencyContacts        
+        #region EmergencyContacts
 
         [HttpGet]
         public ActionResult EditEmergencyContact(string id)
@@ -632,9 +674,7 @@ namespace AfterSchool.Areas.User.Controllers
                 // Blocker: VM is in web and can't be accessible in service side
                 // Resolution: we should move VM to service layer, but this will affect lots of spaces including registration panel + form builder etc
                 var values = new NameValueCollection();
-                questions.ForEach(question => {
-                    values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text);
-                });
+                questions.ForEach(question => { values.Add(question.ToFormQuestionViewModel().Id, registrant.GetAnswer(question.QuestionDataTypeId)?.Text); });
 
                 ViewBag.QuestionViewModels = questions.Select(question => question.ToFormQuestionViewModel(values)).ToList();
             }
@@ -660,7 +700,8 @@ namespace AfterSchool.Areas.User.Controllers
                 var questions = FormQuestionService.GetEmergencyContactQuestions(msgs);
 
                 // validate emergency contact fields
-                FormQuestionService.ValidateFormQuestionForEmergencyContacts(questions: questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params)).ToList(), msgs: msgs);
+                FormQuestionService.ValidateFormQuestionForEmergencyContacts(
+                    questions: questions.Select(question => question.ToFormQuestionViewModelForService(Request.Params)).ToList(), msgs: msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
 
@@ -685,13 +726,13 @@ namespace AfterSchool.Areas.User.Controllers
 
                             UpdateChildrenRegistrants(
                                 registrant,
-                                FormQuestionService.GetEmergencyContactQuestionGroups(), 
-                                amsgs, 
+                                FormQuestionService.GetEmergencyContactQuestionGroups(),
+                                amsgs,
                                 adc);
                         },
                         onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
                 }
 
@@ -702,7 +743,7 @@ namespace AfterSchool.Areas.User.Controllers
             {
                 var regMasterRegistrant = Registrant.LoadByUid(student.ToGuid(), msgs);
                 if (!regMasterRegistrant.IsProfileCompleted)
-                    return RedirectToAction("EditStudentPersonal", new { id = regMasterRegistrant.Uid, reg, student });
+                    return RedirectToAction("EditStudentPersonal", new {id = regMasterRegistrant.Uid, reg, student});
 
                 return Redirect("/account/register");
             }
@@ -713,13 +754,13 @@ namespace AfterSchool.Areas.User.Controllers
                 var regMasterRegistrant = registration.GetRegistrant().GetMasterRegistrant();
 
                 if (!regMasterRegistrant.IsProfileCompleted)
-                    return RedirectToAction("EditStudentPersonal", new { id = regMasterRegistrant.Uid, reg = reg });
+                    return RedirectToAction("EditStudentPersonal", new {id = regMasterRegistrant.Uid, reg = reg});
 
                 return Redirect(registration.GetParentalConsentUrl);
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("EditProfileDone", new { id = registrant.Uid });
+                return RedirectToAction("EditProfileDone", new {id = registrant.Uid});
 
             ViewBag.Messages = msgs;
 
@@ -727,49 +768,5 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         #endregion
-
-        [HttpGet]
-        public ActionResult EditProfileDone(string id)
-        {
-            var msgs = new SystemMessages();
-            Registrant registrant = null;
-
-            if (id.IsGuid())
-            {
-                registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
-
-                if (!SessionVariables.CurrentUser.HasAccessToRegistrant(registrant))
-                    return RedirectToAction("index");
-            }
-
-            ViewBag.Messages = msgs;
-
-            return View(registrant);
-        }
-
-        private void UpdateChildrenRegistrants(Registrant registrant, List<QuestionGroupDataType> questionGroupDataTypes, SystemMessages msgs, DatabaseConnection dc)
-        {
-            // if this is the parent and owner of this account
-            if (registrant.IsParentOrGuardian && registrant.GetOwner(msgs, dc)?.ID == SessionVariables.CurrentAccount.GetAccountOwner(msgs, dc).ID)
-            {
-                var students = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, dc);
-
-                // copy parent answers to students
-                registrant.GetAnswers(msgs, dc)
-                    .Where(answer => answer.FormQuestionGroupQuestionGroupDataTypeId.In(questionGroupDataTypes))
-                    .ToList()
-                    .ForEach(answer =>
-                    {
-                        students.ForEach(student => {
-                            student.AddOrUpdateAnswer(
-                                answerText: answer.Text.IfEmpty("").Trim(),
-                                question: answer.ToFormQuestion(msgs: msgs, dc: dc),
-                                    loggedInUser: SessionVariables.CurrentUser,
-                                msgs: msgs,
-                                dc: dc);
-                        });
-                    });
-            }
-        }
     }
 }
