@@ -113,6 +113,7 @@ namespace AfterSchool.Controllers
 
                         account = user.AddNewAccountWithDefaultPackage(
                             orgName: model.OrgName,
+                            phone: model.Phone,
                             accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                             loggedInUser: user,
                             msgs: amsgs,
@@ -225,14 +226,11 @@ namespace AfterSchool.Controllers
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (model.Password1.Length < 8)
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
-            
+
             if (model.Phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
-            else if (!model.Phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
+            else if (!model.Phone.IsPhone())
                 msgs.Add("Please enter a valid phone number", MessageType.UserError);
-            else if (WebUser.ExistsByPhone(model.Phone, msgs))
-                msgs.Add("This phone has already been registered. Login if you already have an account.",
-                    MessageType.UserError);
 
 
             if (Utilities.IsProduction || Utilities.IsStaging)
@@ -267,11 +265,10 @@ namespace AfterSchool.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        user = WebUserService.CreateNewWithOptionalPhone(
+                        user = WebUserService.CreateNewWithNoPhone(
                             firstName: model.FirstName,
                             lastName: model.LastName,
                             email: model.Email,
-                            phone: model.Phone,
                             password: model.Password2,
                             isActive: true,
                             isRegistered: true,
@@ -309,6 +306,7 @@ namespace AfterSchool.Controllers
                                 if (package.IsNotEmpty())
                                     account = user.AddNewAccountWithPackageWithStripe(
                                         orgName: model.OrgName,
+                                        phone: model.Phone,
                                         accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                         package: package,
                                         signUpTypeId: model.SignupType,
@@ -321,6 +319,7 @@ namespace AfterSchool.Controllers
                             if (amsgs.HasNoErrors() && account.IsEmpty())
                                 account = user.AddNewAccountWithDefaultPackageWithStripe(
                                     orgName: model.OrgName,
+                                    phone: model.Phone,
                                     accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                     signUpTypeId: model.SignupType,
                                     loggedInUser: user,
@@ -358,6 +357,7 @@ namespace AfterSchool.Controllers
                                 $"<p>Organization: {account.Name}<br />" +
                                 $"Main Contact Name: {user.DisplayName}<br />" +
                                 $"Email: {user.Email}<br />" +
+                                $"Phone: {account.Phone}<br />" +
                                 $"How did you hear about us: {user.HowHearAboutUs} <br />" +
                                 $"Host Account(s): {invitingAccountName}" +
                                 $"</p>",
@@ -899,9 +899,6 @@ namespace AfterSchool.Controllers
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Please enter a valid phone number", MessageType.UserError);
-            else if (WebUser.ExistsByPhone(phone, msgs))
-                msgs.Add("This phone has already been registered. Login if you already have an account.",
-                    MessageType.UserError);
 
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
@@ -911,18 +908,18 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 // create a new user, then take then to create a real provider account
-                user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false,
+                user = WebUserService.CreateNew(firstname, lastname, email, null, password1, true, true, false, false,
                     null);
 
                 if (msgs.HasNoErrors() && !user.VerifiedAccount)
                     msgs.AddRange(user.SendVerificationEmail());
+
+                if (msgs.HasNoErrors())
+                    LoadSessionInfo(user, msgs: msgs);
+
+                if (msgs.HasNoErrors())
+                    return RedirectToAction("createaccount", new {invitecode = invitingAccount.InviteCodeToShare});
             }
-
-            if (msgs.HasNoErrors())
-                LoadSessionInfo(user, msgs: msgs);
-
-            if (msgs.HasNoErrors())
-                return RedirectToAction("createaccount", new {invitecode = invitingAccount.InviteCodeToShare});
 
             ViewBag.Messages = msgs;
             ViewBag.User = user;
@@ -1097,7 +1094,6 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 WebUser user = null;
-
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -1143,6 +1139,7 @@ namespace AfterSchool.Controllers
 
             return View(model);
         }
+
 
         /* APIS */
         [HttpPost]

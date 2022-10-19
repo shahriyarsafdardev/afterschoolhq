@@ -38,8 +38,6 @@ namespace AfterSchool.Areas.Volunteer.Controllers
 
             if (!phone.IsPhone())
                 msgs.Add("Phone Number is incorrect.", MessageType.UserError);
-            if (!currentUser.CanPhoneBeUsed(phone, msgs))
-                msgs.Add("Phone Number is already in use.", MessageType.UserError);
 
             if (!password1.IsEmpty() || !password2.IsEmpty())
             {
