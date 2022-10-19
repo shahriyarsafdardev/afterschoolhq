@@ -540,7 +540,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                user.CompleteSignUp(account, firstname, lastname, email, password1, phone, null, msgs);
+                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
 
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
             {
@@ -894,7 +894,6 @@ namespace AfterSchool.Controllers
             else if (WebUser.ExistsByEmail(email, msgs))
                 msgs.Add("This email has already been registered. Login if you already have an account.",
                     MessageType.UserError);
-
             if (phone.IsEmpty())
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
@@ -908,7 +907,7 @@ namespace AfterSchool.Controllers
             if (msgs.HasNoErrors())
             {
                 // create a new user, then take then to create a real provider account
-                user = WebUserService.CreateNew(firstname, lastname, email, null, password1, true, true, false, false,
+                user = WebUserService.CreateNew(firstname, lastname, email, phone, password1, true, true, false, false,
                     null);
 
                 if (msgs.HasNoErrors() && !user.VerifiedAccount)
