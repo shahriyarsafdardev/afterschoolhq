@@ -97,26 +97,28 @@
         </div>
     </div>
 
-    <div id="modal-payment-restriction" class="modal colored-header" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-                    <h4 class="modal-title">Payment method not found.</h4>
-                </div>
-                <div class="modal-body" style="overflow-y: auto;">
-                    Please setup payment method before you proceed futher. <br /><br />
-                    If you have any questions, please contact us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>.
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-primary" data-dismiss="modal" onclick="return location.href = '@Url.Action("paymentsoptions", "account", new { area = "org"})'">Proceed</a>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
+<div id="modal-payment-restriction" class="modal colored-header" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Payment method not found.</h4>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                Please setup payment method before you proceed futher. <br /><br />
+                If you have any questions, please contact us at <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>.
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" data-dismiss="modal" onclick="return location.href = '@Url.Action("paymentsoptions", "account", new { area = "org"})'">Proceed</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    @*<div id="modal-payment-notification" class="modal colored-header" tabindex="-1" role="dialog">
+@{ Html.RenderPartial("~/Views/Shared/JavascriptIncludes/_Beamer.cshtml"); }
+
+@*<div id="modal-payment-notification" class="modal colored-header" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
