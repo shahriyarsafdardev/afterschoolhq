@@ -166,6 +166,14 @@ namespace AfterSchool.Models
 
             return false;
         }
+        
+        public static bool IsBeemerProvider()
+        {
+            if (SessionVariables.CurrentUser.IsNotEmpty() && FeatureFlag.CheckFlagIsEnabled("beamer_provider"))
+                return true;
+        
+            return false;
+        }
 
         public static string GetCleverUserNameForCurrentUser()
         {

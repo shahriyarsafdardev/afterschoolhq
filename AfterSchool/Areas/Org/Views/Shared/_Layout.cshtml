@@ -116,7 +116,10 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/JavascriptIncludes/_Beamer.cshtml"); }
+@if (UILabel.IsBeemerProvider())
+{
+    Html.RenderPartial("~/Views/Shared/JavascriptIncludes/_Beamer.cshtml");
+}
 
 @*<div id="modal-payment-notification" class="modal colored-header" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
