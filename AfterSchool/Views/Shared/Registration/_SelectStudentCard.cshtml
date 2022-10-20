@@ -33,7 +33,27 @@
     var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(Model);
     var isGenderRestricted = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
                            && !participationObject.AcceptsGenderType(Model.GenderId);
-
+    
+    var startingGrade = "";
+    var endingGrade = "";
+    var minAge = "";
+    var maxAge = "";
+    var singleGrade = false;
+    var singleAge = false;
+    
+    if (isGradeRestricted)
+    {
+        startingGrade = participationObject.GetActivity().GetStartingGradeLevel().Name;
+        endingGrade = participationObject.GetActivity().GetEndingGradeLevel().Name;
+        singleGrade = startingGrade == endingGrade;
+    }
+    else if (isAgeRestricted)
+    {
+        minAge = participationObject.GetActivity().AgeStart.ToString();
+        maxAge = participationObject.GetActivity().AgeEnd.ToString();
+        singleGrade = minAge == maxAge;
+    }
+    
 
     if (participationObject.CanRegisterPerClass)
     {
@@ -110,33 +130,24 @@
                 case true when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = $"Student's age is not eligible and the selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}";
-
-                    /*ineligibleText = "This activity is for students who are " + participationObject.GetActivity().AgeStart + " - "
-                                     + participationObject.GetActivity().AgeEnd + " years old and is "
-                                     + ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower();*/
+                    ineligibleText = $"This activity is for students who are {minAge} years old" + (singleAge? "": $"- {maxAge}")+
+                    $" and {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}.";
                     break;
                 case true when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = $"Student's grade is not eligible and the selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}";
-                    /*ineligibleText = "This activity is for students who are in " + participationObject.GetActivity().GradeLevelStart + " - "
-                                     + participationObject.GetActivity().GradeLevelEnd + " grade and is "
-                                     + ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower();*/
+                    ineligibleText = $"This activity is for students who are in {startingGrade} grade" + (singleGrade? "": $"- {endingGrade}")+
+                                     $" and {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}.";
                     break;
                 case false when isGradeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student's grade is not eligible";
-                    /*ineligibleText = "Student must be in " + participationObject.GetActivity().GetStartingGradeLevel().Name + " - "
-                                     + participationObject.GetActivity().GetEndingGradeLevel().Name + " to register for this activity";*/
+                    ineligibleText = $"This activity is for students in grade {startingGrade}" + (singleGrade? "": $" - {endingGrade}") + ".";
                     break;
                 case false when isAgeRestricted:
                     btnText = "Ineligible";
                     disabledText = " disabled=\"disabled\" ";
-                    ineligibleText = "Student's age is not eligible";
-                    /*ineligibleText = "Student must be in " + participationObject.GetActivity().AgeStart + " - "
-                                     + participationObject.GetActivity().AgeEnd + " to register for this activity";*/
+                    ineligibleText = $"This activity is for students who are {startingGrade}" + (singleGrade? "": $" - {endingGrade}") + ".";
                     break;
                 case true:
                     btnText = "Ineligible";
