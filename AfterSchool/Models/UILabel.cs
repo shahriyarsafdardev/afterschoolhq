@@ -167,7 +167,7 @@ namespace AfterSchool.Models
             return false;
         }
         
-        public static bool IsBeemerProvider()
+        public static bool IsBeamerProvider()
         {
             if (SessionVariables.CurrentUser.IsNotEmpty() && FeatureFlag.CheckFlagIsEnabled("beamer_provider"))
                 return true;

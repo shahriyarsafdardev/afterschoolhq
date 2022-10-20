@@ -105,7 +105,6 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220323_2_LatitudeLongitudeRefetch.Do(amsgs, adc);
                     Migration_20220407_SetActivityRegistrantIsDeleted.Do(amsgs, adc);
                     Migration_20220411_AddFreeTrialFeatureFlag.Do(amsgs, adc);
-                    Migration_20221019_AddBeamerProviderFeatureFlag.Do(amsgs,adc);
                     Migration_20220412_IncreaseWebSessionActionActionStringColumnSize.Do(amsgs, adc);
                     Migration_20220420_AddFreeActivityLimitPackageFeature.Do(amsgs, adc);
                     Migration_20220601_AddStudentIdQuestionToAdminDefaultForm.Do(amsgs, adc);
@@ -120,6 +119,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220911_AddDefaultSignUpTypeValue.Do(amsgs, adc);
                     Migration_20220912_AlterAccountAddReferralCodeAndReferrerId.Do(amsgs, adc);
                     Migration_20221013_UpdateNullValuesIsGenderEnforced.Do(amsgs, adc);
+                    Migration_20221019_AddBeamerProviderFeatureFlag.Do(amsgs,adc);
                     
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
