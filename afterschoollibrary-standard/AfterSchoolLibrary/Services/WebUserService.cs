@@ -1130,6 +1130,16 @@ namespace AfterSchoolLibrary.Services
 
             return webUser;
         }
+        public static Registrant GetMasterRegistrantByAccountType(this WebUser user, AccountType? accountType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return accountType switch
+            {
+                AccountType.Volunteer => user.GetMasterVolunteerRegistrant(msgs, dc),
+                AccountType.Registrant => user.GetMasterParentOrStudentRegistrant(msgs, dc),
+                _ => null
+            };
+        }
 
         #region Clever Integration
 
