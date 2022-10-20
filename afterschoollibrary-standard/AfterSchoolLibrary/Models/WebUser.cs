@@ -362,7 +362,15 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["ID"], ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
             return dq.GetCount() == 0;
         }
-
+        public bool CanPhoneBeUsed(string phone, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["phone"], phone);
+            dq.Criterias.Add(ObjectMap["ID"], this.ID.Value, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            return dq.GetCount() == 0;
+        }
+        
         public static bool ExistsByEmail(string email, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return GetCount(

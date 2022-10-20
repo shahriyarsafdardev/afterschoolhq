@@ -540,7 +540,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password must be at least 8 characters", MessageType.UserError);
 
             if (msgs.HasNoErrors())
-                user.CompleteSignUp(account, firstname, lastname, email, password1, null, msgs);
+                user.CompleteSignUp(account, firstname, lastname, email, password1, phone,null, msgs);
 
             if (msgs.HasNoErrors() && !user.VerifiedAccount)
             {
@@ -898,7 +898,9 @@ namespace AfterSchool.Controllers
                 msgs.Add("Phone is required", MessageType.UserError);
             else if (!phone.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add("Please enter a valid phone number", MessageType.UserError);
-
+            else if (WebUser.ExistsByPhone(phone, msgs))
+                msgs.Add("This phone has already been registered. Login if you already have an account.",
+                    MessageType.UserError);
             if (password1.IsEmpty() || password2.IsEmpty() || (password1 != password2))
                 msgs.Add("Passwords are required and must match", MessageType.UserError);
             else if (password1.Length < 8)

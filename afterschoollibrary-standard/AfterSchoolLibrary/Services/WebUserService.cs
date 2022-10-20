@@ -848,7 +848,7 @@ namespace AfterSchoolLibrary.Services
             var account = AddNewAccount(
                 accountOwner,
                 orgName,
-                null,
+                phone,
                 true,
                 accountType,
                 null,
@@ -885,7 +885,7 @@ namespace AfterSchoolLibrary.Services
             Package package,
             BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null,
+            var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
@@ -992,7 +992,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="dc"></param>
         /// <returns></returns>
         public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
-            string email, string password, WebUser loggedInUser, SystemMessages msgs = null,
+            string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1009,6 +1009,7 @@ namespace AfterSchoolLibrary.Services
                     user.Password = EncryptPassword(password);
                     user.LastModifiedDate = DateTime.UtcNow;
                     user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
 
                     if (user.Email.IsSameAs(email))
                         user.VerifiedAccount = true;
