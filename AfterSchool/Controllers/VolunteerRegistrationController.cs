@@ -12,6 +12,7 @@ using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Controllers
@@ -119,6 +120,13 @@ namespace AfterSchool.Controllers
                         if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(Utilities.PhoneRegEx))
                             msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                         break;
+                    case QuestionDataType.RegistrantGender:
+                        if (participationObject.IsGenderEnforced)
+                            if (!participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(qvm.Value)))
+                                msgs.Add($"The selected opportunity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
+                                    MessageType.UserError);
+
+                        break;
                 }
             });
 
@@ -132,7 +140,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-                if (AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
 
@@ -203,7 +211,7 @@ namespace AfterSchool.Controllers
                         LoadSessionInfo(user, account);
                     },
                     failureMessages => msgs.AddRange(failureMessages),
-                    AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog
+                    LibraryUtilities.SystemErrorLog
                 );
             }
 
@@ -242,7 +250,7 @@ namespace AfterSchool.Controllers
             else
             {
                 if (SessionVariables.CurrentUser.IsEmpty())
-                    return Redirect(AfterSchoolLibrary.Helpers.Utilities.LoginUrl());
+                    return Redirect(LibraryUtilities.LoginUrl());
 
                 if (SessionVariables.CurrentAccount.IsEmpty())
                     return RedirectToAction("select", "login");
@@ -380,7 +388,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())
@@ -456,7 +464,7 @@ namespace AfterSchool.Controllers
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    emsgs => LibraryUtilities.SystemErrorLog(emsgs)
                 );
 
             if (msgs.HasNoErrors())

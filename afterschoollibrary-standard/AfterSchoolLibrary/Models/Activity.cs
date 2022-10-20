@@ -129,6 +129,7 @@ namespace AfterSchoolLibrary.Models
 		public bool? ActivityGroupIsArchived { get { return (bool?)MDV["ActivityGroupIsArchived"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
 		public Guid ActivityGroupUid { get { return (Guid)MDV["ActivityGroupUid"].Value; } }
+        public bool IsGenderEnforced { get { return (bool)MDV["IsGenderEnforced"].Value; } set { MDV["IsGenderEnforced"].Value = value; } }
 		
 
         public Activity()
@@ -153,7 +154,8 @@ namespace AfterSchoolLibrary.Models
 			this.RegistrationFinalized = false;
 			this.IsConvenienceFeeTakenOutOfCost = false;
 			this.CostFrequencyTypeId = ActivityCostFrequencyType.NotSet;
-			
+            this.IsGenderEnforced = false;
+
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -214,6 +216,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityGroupIsArchived", typeof(ActivityGroup).Name, "IsArchived", System.Data.SqlDbType.Bit, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "ActivityGroup");
+                _dp.Add(className, "IsGenderEnforced", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -480,6 +483,10 @@ namespace AfterSchoolLibrary.Models
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["RegistrationCutoffHours"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsGenderEnforced"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
 

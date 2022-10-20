@@ -322,6 +322,12 @@ namespace AfterSchool.Controllers
                         !participationObject.IsStudentAgeInRange(registrant, msgs))
                         ineligibleActivities.Add(
                             $"Ages {participationObject.Name}: {participationObject.AgeStart} - {participationObject.AgeEnd}");
+                    
+                    if (participationObject.IsGenderEnforced && !participationObject.AcceptsGenderType(registrant.GenderId))
+                    {
+                        ineligibleActivities.Add(
+                            $"The activity {participationObject.Name} is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}");
+                    }
                 });
 
                 if (msgs.HasNoErrors())
