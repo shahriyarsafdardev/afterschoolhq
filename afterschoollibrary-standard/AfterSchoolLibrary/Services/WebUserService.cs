@@ -316,17 +316,6 @@ namespace AfterSchoolLibrary.Services
                 true, false, msgs, dc).FirstOrDefault();
         }
 
-        public static Registrant GetMasterRegistrantByAccountType(this WebUser user, AccountType? accountType, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            return accountType switch
-            {
-                AccountType.Volunteer => user.GetMasterVolunteerRegistrant(msgs, dc),
-                AccountType.Registrant => user.GetMasterParentOrStudentRegistrant(msgs, dc),
-                _ => null
-            };
-        }
-
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
@@ -496,6 +485,7 @@ namespace AfterSchoolLibrary.Services
             bool isRegistered, bool isVerified, string howHearAboutUs, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             ValidateNameForNewUser(firstName, lastName, msgs);
+
             ValidateEmailForNewUser(email, msgs, dc);
 
             if (phone.IsNotEmpty())
@@ -852,13 +842,13 @@ namespace AfterSchoolLibrary.Services
             return AddNewParentOrStudentRegistrantAccount(accountOwner, userType, isActive, null, null, loggedInUser, msgs, dc);
         }
 
-        public static Account AddNewAccountWithDefaultPackage(this WebUser accountOwner, string orgName, AccountType accountType, WebUser loggedInUser,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Account AddNewAccountWithDefaultPackage(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(
                 accountOwner,
                 orgName,
-                null,
+                phone,
                 true,
                 accountType,
                 null,
@@ -875,11 +865,11 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType,
+        public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
             SignUpType signUpTypeId,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null,
+            var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
@@ -891,10 +881,11 @@ namespace AfterSchoolLibrary.Services
             return account;
         }
 
-        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, AccountType accountType, Package package,
+        public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
+            Package package,
             BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var account = AddNewAccount(accountOwner, orgName, null, true, accountType, null, null, null,
+            var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
 
             if (account.IsNotEmpty())
@@ -1001,7 +992,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="dc"></param>
         /// <returns></returns>
         public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
-            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
+            string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -1016,9 +1007,9 @@ namespace AfterSchoolLibrary.Services
                     user.IsRegistered = true;
                     user.IsActive = true;
                     user.Password = EncryptPassword(password);
-                    user.Phone = phone;
                     user.LastModifiedDate = DateTime.UtcNow;
                     user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
 
                     if (user.Email.IsSameAs(email))
                         user.VerifiedAccount = true;
@@ -1138,6 +1129,16 @@ namespace AfterSchoolLibrary.Services
                 webUser = WebUser.Load(criterias: new Hashtable() {{"IsActive", 1}}, msgs: msgs, dc: dc).FirstOrDefault();
 
             return webUser;
+        }
+        public static Registrant GetMasterRegistrantByAccountType(this WebUser user, AccountType? accountType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return accountType switch
+            {
+                AccountType.Volunteer => user.GetMasterVolunteerRegistrant(msgs, dc),
+                AccountType.Registrant => user.GetMasterParentOrStudentRegistrant(msgs, dc),
+                _ => null
+            };
         }
 
         #region Clever Integration
