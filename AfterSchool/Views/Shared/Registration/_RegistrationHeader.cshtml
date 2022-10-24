@@ -95,7 +95,7 @@
         <div class="col-lg-@midColumnSpan col-md-6 col-sm-12">
             @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
             {
-                <a href="@Model.Account.HomePageUrl" class="text-medium-small notranslate activity-account-name">
+                    <a href="@Model.Account.HomePageUrl" class="text-medium-small notranslate activity-account-name">
                     @Model.Account.Name
                 </a>
             }
@@ -134,11 +134,11 @@
                             @Model.NumberOfStudentsServedFormatted students served
                         </span>
                     }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram)
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram && Model.Account.Name == Model.Title)
                     {
                         <span class="icon-span icon-span-mobile" title="Virtual">
                             <icon class="s7-monitor registration-page-icon old-font-icons"></icon>
-                            Virtual
+                            Virtual Options
                         </span>
                     }
                     @if (Model.Followers > 0)
