@@ -352,7 +352,7 @@ namespace AfterSchoolLibrary.Services
                 : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
                     getVolunteers, msgs, dc);
 
-            var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, msgs,
+            var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, getVolunteers, msgs,
                 dc);
 
             return Encoding.UTF8.GetBytes(csvText);
@@ -413,7 +413,7 @@ namespace AfterSchoolLibrary.Services
 
         private static string ExportCsvText(List<Registration> registrations, Account account,
             RegistrationReportType reportType, RegistrationStatus registrationStatus, List<int> participationObjectIds,
-            ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes,
+            ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes,bool volunteerReport,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var allRegistrations = new List<Registration>();
@@ -490,7 +490,7 @@ namespace AfterSchoolLibrary.Services
 
             var table = new List<List<string>>
             {
-                AddHeadersToCsvReport(reportType, standardQuestions, customQuestions),
+                AddHeadersToCsvReport(reportType, standardQuestions, customQuestions, volunteerReport),
             };
 
             // print data for each registration
@@ -505,6 +505,7 @@ namespace AfterSchoolLibrary.Services
                     reportType,
                     standardQuestions,
                     customQuestions,
+                    volunteerReport,
                     msgs,
                     dc));
             });
@@ -513,7 +514,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static List<string> AddHeadersToCsvReport(RegistrationReportType reportType, List<FormQuestion> standardQuestions,
-            List<FormQuestion> customQuestions)
+            List<FormQuestion> customQuestions, bool volunteerReport)
         {
             var row = new List<string>
             {
@@ -525,7 +526,15 @@ namespace AfterSchoolLibrary.Services
 
             if (reportType != RegistrationReportType.Dismissal)
             {
-                row.Add("Activities");
+                if (volunteerReport)
+                {
+                    row.Add("Opportunities");
+                    row.Add("Registration Status");
+                }
+                else
+                {
+                    row.Add("Activities");    
+                }
             }
 
             if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
@@ -536,7 +545,8 @@ namespace AfterSchoolLibrary.Services
 
             if (reportType != RegistrationReportType.Basic)
             {
-                row.Add("Amount Paid");
+                if(!volunteerReport)
+                    row.Add("Amount Paid");
                 AddQuestionHeadersToCSVReport(row, standardQuestions, customQuestions);
             }
 
@@ -649,7 +659,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static List<string> AddEachRegistrationToCsvReport(ReportRegistration registration, Account account,
-            RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions,
+            RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions,bool volunteerReport,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             var row = new List<string>
@@ -662,11 +672,10 @@ namespace AfterSchoolLibrary.Services
 
             AddActivitiesToCsvReport(row, registration, reportType, msgs, dc);
 
-            if (reportType != RegistrationReportType.Basic)
-            {
-                row.Add(registration.GetAmountPaid(msgs, dc).ToCurrency());
-                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
-            }
+            if (reportType == RegistrationReportType.Basic)
+                return row;
+            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()!.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
+            AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
 
             return row;
         }
