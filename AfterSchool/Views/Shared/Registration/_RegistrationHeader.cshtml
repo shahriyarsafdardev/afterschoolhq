@@ -134,7 +134,7 @@
                             @Model.NumberOfStudentsServedFormatted students served
                         </span>
                     }
-                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram && (Model.Account.Name == Model.Title || Model.ParticipationObject?.ActivityLocationType == ActivityLocationType.Virtual))
+                    @if (Model.AccountProfile.IsNotEmpty() && Model.AccountProfile.IsVirtualProgram && (Model.ParticipationObject.IsEmpty() || Model.ParticipationObject?.ActivityLocationType == ActivityLocationType.Virtual))
                     {
                         <span class="icon-span icon-span-mobile" title="Virtual">
                             <icon class="s7-monitor registration-page-icon old-font-icons"></icon>
