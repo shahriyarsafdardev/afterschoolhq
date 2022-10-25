@@ -169,10 +169,7 @@ namespace AfterSchool.Models
         
         public static bool IsBeamerProvider()
         {
-            if (SessionVariables.CurrentUser.IsNotEmpty() && FeatureFlag.CheckFlagIsEnabled("beamer_provider"))
-                return true;
-        
-            return false;
+            return SessionVariables.CurrentUser.IsNotEmpty() && FeatureFlag.CheckFlagIsEnabled("beamer_provider");
         }
 
         public static string GetCleverUserNameForCurrentUser()
