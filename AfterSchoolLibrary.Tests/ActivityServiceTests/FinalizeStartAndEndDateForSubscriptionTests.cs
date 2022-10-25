@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             {
                 ID = 1,
                 IsOngoing = true,
-                StartDate = new DateTime(2022, 10, 6, 0, 0, 0),
+                StartDate = new DateTime(2032, 10, 6, 0, 0, 0),
                 EndDate = new DateTime(2032, 11, 21, 0, 0, 0),
             };
 
@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, BillingPeriodType.Month,
                 DayOfWeek.Sunday, dayOfMonth.Day, schedule, null, DateTime.UtcNow);
 
-            Assert.That(paymentStart, Is.EqualTo(new DateTime(2022, 10, 1, 0, 0, 0)));
+            Assert.That(paymentStart, Is.EqualTo(new DateTime(2032, 10, 1, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
         }
 
