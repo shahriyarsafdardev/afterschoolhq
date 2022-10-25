@@ -118,6 +118,8 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220911_AddDefaultSignUpTypeValue.Do(amsgs, adc);
                     Migration_20220912_AlterAccountAddReferralCodeAndReferrerId.Do(amsgs, adc);
                     Migration_20221013_UpdateNullValuesIsGenderEnforced.Do(amsgs, adc);
+                    Migration_20221019_AddBeamerProviderFeatureFlag.Do(amsgs,adc);
+                  
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
