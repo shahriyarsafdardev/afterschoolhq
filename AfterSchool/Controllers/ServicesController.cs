@@ -518,38 +518,6 @@ namespace AfterSchool.Controllers
 
         #region DemoOrgName
 
-        public ActionResult SetDemoOrgName(string orgname, string firstname, string email)
-        {
-            var msgs = new SystemMessages();
-
-            if (orgname.IsBlank())
-                msgs.Add("Organization / Program name is required", MessageType.UserError);
-
-            if (firstname.IsBlank())
-                msgs.Add("First Name is required", MessageType.UserError);
-
-            if (!email.IsEmail())
-                msgs.Add("Email is required", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
-            {
-                var uniqueName = AccountService.GenerateUniqueName(orgname, null, msgs);
-                CookieVariables.DemoOrgName = orgname;
-                CookieVariables.DemoUniqueOrgName = uniqueName;
-                CookieVariables.DemoFirstName = firstname;
-                CookieVariables.DemoEmailAddress = email;
-
-                SendGridHelper.AddContactFromDemo(
-                    orgname,
-                    firstname,
-                    email,
-                    msgs);
-
-                return Json(new {status = "ok", demoUrl = $"/{uniqueName}"}, JsonRequestBehavior.AllowGet);
-            }
-
-            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
-        }
 
         public ActionResult HasDemoOrgName()
         {
