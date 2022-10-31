@@ -864,17 +864,9 @@ namespace AfterSchool.Controllers
                 }
             });
 
-            if (placeid.IsEmpty() && !schoolnotfound) msgs.Add("Location is required", MessageType.UserError);
+            if (placeid.IsEmpty() && !schoolnotfound) msgs.Add("School Location is required", MessageType.UserError);
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
-
-            if (participationObject.IsGenderEnforced)
-            {
-                var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
-                if (!participationObject.AcceptsGenderType(gender))
-                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
-                        MessageType.UserError);
-            }
 
             var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
 
@@ -882,6 +874,8 @@ namespace AfterSchool.Controllers
                 msgs.Add("Email is required and must be valid in order to allow your child to login",
                     MessageType.UserError);
 
+            AddStudentRestrictionsMessages(msgs, participationObject, qvms);
+            
             if (msgs.HasNoErrors())
             {
                 Registrant student = null;
@@ -1077,6 +1071,42 @@ namespace AfterSchool.Controllers
             return View(qvms);
         }
 
+        private static void AddStudentRestrictionsMessages(SystemMessages msgs, ParticipationObject participationObject, 
+            List<FormQuestionViewModel> qvms)
+        {
+            if (participationObject.IsEmpty()) 
+                return;
+
+            var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
+            var dateOfBirth = qvms.Find(qvm => 
+                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value.ToDateTime();
+            var studentGrade = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).Value;
+            
+            var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced;
+            var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth);
+            var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade);
+            
+            switch (isGenderRestricted)
+            {
+                case true when isAgeRestricted:
+                    msgs.Add(ParticipationObjectUI.PrintAgeAndGenderIneligibilityMessageString(participationObject), MessageType.UserError);
+                    break;
+                case true when isGradeRestricted:
+                    msgs.Add(ParticipationObjectUI.PrintGradeAndGenderIneligibilityMessageString(participationObject), MessageType.UserError);
+                    break;
+                case false when isGradeRestricted:
+                    msgs.Add(ParticipationObjectUI.PrintGradeIneligibilityMessageString(participationObject), MessageType.UserError);
+                    break;
+                case false when isAgeRestricted:
+                    msgs.Add(ParticipationObjectUI.PrintAgeIneligibilityMessageString(participationObject), MessageType.UserError);
+                    break;
+                case true:
+                    msgs.Add(ParticipationObjectUI.PrintGenderIneligibilityMessageString(participationObject), MessageType.UserError);
+                    break;
+            }
+
+
+        }
         #endregion
 
         #region StudentRegistration
