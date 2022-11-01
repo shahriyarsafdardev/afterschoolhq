@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using Hangfire.Storage.Monitoring;
 using Twilio.AspNet.Common;
 
 namespace AfterSchool.Models
@@ -178,6 +179,19 @@ namespace AfterSchool.Models
             return "Registration is closed";
         }
 
+        public static string PrintIneligibilityMessageString(ParticipationObject participationObject, bool isGenderRestricted,
+            bool isAgeRestricted, bool isGradeRestricted)
+        {
+            return isGenderRestricted switch
+            {
+                true when isAgeRestricted => PrintAgeAndGenderIneligibilityMessageString(participationObject),
+                true when isGradeRestricted => PrintGradeAndGenderIneligibilityMessageString(participationObject),
+                false when isGradeRestricted => PrintGradeIneligibilityMessageString(participationObject),
+                false when isAgeRestricted => PrintAgeIneligibilityMessageString(participationObject),
+                true => PrintGenderIneligibilityMessageString(participationObject),
+                _ => null,
+            };
+        }
         public static string PrintGradeIneligibilityMessageString(ParticipationObject participationObject)
         {
             var  (startingGrade,endingGrade) = participationObject.GetMinAndMaxGradeLevels();

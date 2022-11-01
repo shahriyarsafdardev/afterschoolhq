@@ -1085,27 +1085,9 @@ namespace AfterSchool.Controllers
             var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced;
             var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth);
             var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade);
-            
-            switch (isGenderRestricted)
-            {
-                case true when isAgeRestricted:
-                    msgs.Add(ParticipationObjectUI.PrintAgeAndGenderIneligibilityMessageString(participationObject), MessageType.UserError);
-                    break;
-                case true when isGradeRestricted:
-                    msgs.Add(ParticipationObjectUI.PrintGradeAndGenderIneligibilityMessageString(participationObject), MessageType.UserError);
-                    break;
-                case false when isGradeRestricted:
-                    msgs.Add(ParticipationObjectUI.PrintGradeIneligibilityMessageString(participationObject), MessageType.UserError);
-                    break;
-                case false when isAgeRestricted:
-                    msgs.Add(ParticipationObjectUI.PrintAgeIneligibilityMessageString(participationObject), MessageType.UserError);
-                    break;
-                case true:
-                    msgs.Add(ParticipationObjectUI.PrintGenderIneligibilityMessageString(participationObject), MessageType.UserError);
-                    break;
-            }
 
-
+            msgs.Add(ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted),
+                MessageType.UserError);
         }
         #endregion
 
