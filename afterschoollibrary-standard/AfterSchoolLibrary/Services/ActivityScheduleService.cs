@@ -141,6 +141,7 @@ namespace AfterSchoolLibrary.Services
             Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dates = new List<DateTime>();
+            var outSessionDates = new List<DateTime>();
             var account = schedule.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
 
@@ -199,12 +200,12 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
+                outSessionDates.AddRange(schedule.GetOutSessionInstances(msgs, dc).Select(x => x.StartDateTime.Value));
                 dates.AddRange(schedule.GetInSessionInstances(msgs, dc)
-                    .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date))
+                    .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date) &&  x.StartDateTime.Value.Date.NotIn(outSessionDates))
                     .Take(numberOfInstances)
                     .Select(x => x.StartDateTime.Value));
             }
-
             return dates;
         }
 
