@@ -1077,7 +1077,8 @@ namespace AfterSchool.Controllers
             if (participationObject.IsEmpty()) 
                 return;
 
-            var gender = FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
+            var gender = 
+                FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
             var dateOfBirth = qvms.Find(qvm => 
                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value.ToDateTime();
             var studentGrade = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).Value;
@@ -1085,9 +1086,11 @@ namespace AfterSchool.Controllers
             var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced;
             var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth);
             var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade);
-
-            msgs.Add(ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted),
-                MessageType.UserError);
+            
+            var ineligibilityMessage = 
+                ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted);
+            if(ineligibilityMessage.IsNotEmpty())
+                msgs.Add(ineligibilityMessage, MessageType.UserError);
         }
         #endregion
 
