@@ -222,6 +222,7 @@ namespace AfterSchoolLibrary.Services
                     registrantActivity.AdjustPreferencesDuringRemoval(null, amsgs, adc);
                     registrantActivity.AdjustSeatIndexesDuringRemoval(amsgs, adc);
                     registrantActivity.IsDeleted = true;
+                    registrantActivity.AssignmentTypeId = RegistrationAssignmentType.Deleted;
                     amsgs.AddRange(registrantActivity.Save(adc));
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

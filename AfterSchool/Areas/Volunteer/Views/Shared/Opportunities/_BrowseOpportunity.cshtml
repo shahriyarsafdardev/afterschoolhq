@@ -7,6 +7,10 @@
     {
         statusClass = "success";
     }
+    else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Deleted)
+    {
+        statusClass = "danger";
+    }
     else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Declined)
     {
         statusClass = "danger";

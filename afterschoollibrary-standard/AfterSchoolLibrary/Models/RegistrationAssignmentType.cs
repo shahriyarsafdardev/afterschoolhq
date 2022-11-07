@@ -10,5 +10,6 @@ public enum RegistrationAssignmentType
     ReservedPendingParentalConsent = 7,
     Withdrawn = 8,
     ReservedPendingBackgroundCheck = 9,
+    Deleted = 10
 }
 
