@@ -14,7 +14,7 @@
 
 }
 
-<p>    
+<p>
     @if (!Model.ParticipationObject.IsRegistrationFree)
     {
         <span>Cost to register is @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost) plus</span>
@@ -26,15 +26,25 @@
             @{
                 var firstPostPayPlanHasNumberOfPrePaidPeriods = Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.HasValue;
                 var prePaymentAmount = (Model.ParticipationObject.GetPostPayCostWithConvenienceFee() * Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency();
+                var prePaymentProviderAmount = (Model.ParticipationObject.GetPostPayProviderAmount() * Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency();
+                var prepaymentText1 = "";
+                var prepaymentText2 = "";
+                if (firstPostPayPlanHasNumberOfPrePaidPeriods)
+                {
+                    prepaymentText1 = $"<span> with a pre-payment of <strong>{prePaymentAmount}</strong></span>";
+                    prepaymentText2 = $"<span><strong>{prePaymentProviderAmount}</strong> as pre-payment and then</span>"; //$57 as pre-payment and then 
+                }
+                // Parents will pay $10.00 with a pre-payment of $60.00. You will receive $57 as pre-payment and then $9.50 per week attended per student after 6 weeks 
+
             }
             @if (Model.IsCheckoutCost)
             {
-                <span>                        
+                <span>
                     <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
                     per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
                 </span>
                 if (firstPostPayPlanHasNumberOfPrePaidPeriods)
-                { 
+                {
                     <span>
                         with a pre-payment of <strong>@prePaymentAmount</strong>
                     </span>
@@ -43,18 +53,12 @@
             else
             {
                 <span>
-                    Parents will pay <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong> 
-                    @if (firstPostPayPlanHasNumberOfPrePaidPeriods)
-                    { 
-                        <span>
-                            with a pre-payment of <strong>@prePaymentAmount</strong>
-                        </span>
-                    }
-                    and @youOrProvider will receive
+                    Parents will pay <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
+                    @Html.Raw(prepaymentText1)
+                    and @youOrProvider will receive @Html.Raw(prepaymentText2)
                     <strong>@Model.ParticipationObject.GetPostPayProviderAmount().ToCurrency()</strong>
-                    per @billingPeriod attended per @UILabel.RegistrantLabel().ToLower()
+                    per @billingPeriod attended per @(UILabel.RegistrantLabel().ToLower()).
                 </span>
-                    
             }
         </span>
     }
