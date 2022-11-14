@@ -257,7 +257,7 @@ else
 
                     @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                     {
-                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
+                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date) </strong>.</p>
                     }
 
                     <hr/>
