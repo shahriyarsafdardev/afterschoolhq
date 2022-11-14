@@ -1,0 +1,121 @@
+﻿@model List<Account>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var inviteUrl = Url.Action("invite", "school");
+}
+
+<style>
+    a
+    {
+        width: auto;
+    }
+    
+    .panel > .row
+    {
+        padding-top: 20px;
+        padding-left: 50px;
+    }
+    
+    .panel-heading
+    {
+        border-style: hidden;
+    }
+    
+    .form-control
+    {
+        display: inline-block;
+        width: fit-content;
+    }
+    
+</style>
+
+@{Html.RenderPartial("DistrictHeader");}
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_VolunteerHeader");}
+    
+    <div class="panel panel-default">
+        
+        <div class="row">
+        
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">4</div>
+                        <div class="desc">New Volunteer Applicants</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">3</div>
+                        <div class="desc">Expiring Volunteers</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">4</div>
+                        <div class="desc">Background Check for Review</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="panel-heading">
+            <div class="pull-right">
+                <input type="text" id="search" class="form-control" placeholder="Filter Task"/>
+                <input type="text" id="search" class="form-control" placeholder="Filter Status"/>
+                <a class="btn btn-primary whitebgbtn">Send Background Check Email</a>
+                <a class="btn btn-primary">Approve All Selected</a>
+                <a class="btn btn-danger">Deny All Selected</a>
+            </div>
+            <h2>To do</h2>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <th>
+                            <input class="checkbox-override" type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                        </th>
+                        <th>Actions</th>
+                        <th>Task</th>
+                        <th>Application Name</th>
+                        <th>Application Status</th>
+                        <th>Date Submitted</th>
+                        <th>Phone Number</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                        </td>
+                        <td>
+                            <div>
+                                <span><img src="/Assets/img/email-bgcheck.svg"/></span>
+                                <span><img src="/Assets/img/approve.svg"/></span>
+                                <span><img src="/Assets/img/deny.svg"/></span>
+                            </div>
+                        </td>
+                        <td>Review Applicant</td>
+                        <td>Tom Mowrey</td>
+                        <td>New</td>
+                        <td>04/04/10</td>
+                        <td>321-654-9870</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

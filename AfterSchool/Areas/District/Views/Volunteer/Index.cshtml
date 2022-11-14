@@ -1,0 +1,74 @@
+﻿@model List<Account>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var inviteUrl = Url.Action("invite", "school");
+}
+
+<style>
+    a
+    {
+        width: auto;
+    }
+    .table
+    {
+        border-top-style: hidden;
+    }
+</style>
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_VolunteerHeader");}
+
+    <div class="panel panel-default">
+        
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a class="btn btn-primary">View Background Check Dashboard <i><img src="/Assets/img/expand 1.svg"/></i></a>
+            </div>
+            <h2><i class="s7-smile"></i> Volunteer</h2>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+
+            <div class="table-responsive">
+                
+                <div class="pull-right">
+                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]"/>
+                    <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
+                        Search
+                    </button>
+                </div>
+                
+                <table class="table">
+                    <tr>
+                        <th></th>
+                        <th>Registrant Name</th>
+                        <th>Volunteer Status</th>
+                        <th>Phone Number</th>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">Manage</a>
+                        </td>
+                        <td>Bilal Khan</td>
+                        <td>Approved</td>
+                        <td>0900-78601</td>
+                        <td>bilal@reborncode.com</td>
+                        <td>
+                            <div class="pull-right">
+                                <a class="btn btn-primary whitebgbtn">Message</a>
+                                <a class="btn btn-primary whitebgbtn">View Background Check</a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
