@@ -595,6 +595,7 @@
     <Compile Include="Areas\District\Controllers\ServicesController.cs" />
     <Compile Include="Areas\District\Controllers\TagController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
+    <Compile Include="Areas\District\Controllers\VolunteerController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditConfirmationAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditContactAssembler.cs" />
@@ -732,6 +733,10 @@
     <Content Include="Areas\District\Views\Tag\Activity.cshtml" />
     <Content Include="Areas\District\Views\Tag\Index.cshtml" />
     <Content Include="Areas\District\Views\Tag\School.cshtml" />
+    <Content Include="Areas\District\Views\Shared\_VolunteerHeader.cshtml" />
+    <Content Include="Areas\District\Views\Volunteer\BackgroundCheck.cshtml" />
+    <Content Include="Areas\District\Views\Volunteer\Index.cshtml" />
+    <Content Include="Areas\District\Views\Volunteer\Todo.cshtml" />
     <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
@@ -773,14 +778,18 @@
     <Content Include="Assets\img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="Assets\img\ahq-logo-2-1-1.png" />
     <Content Include="Assets\img\AHQ-logo.png" />
+    <Content Include="Assets\img\approve.svg" />
     <Content Include="Assets\img\arrow.png" />
     <Content Include="Assets\img\ashq-logo.png" />
     <Content Include="Assets\img\celebration.svg" />
     <Content Include="Assets\img\clever-login.png" />
     <Content Include="Assets\img\clever-signup.png" />
     <Content Include="Assets\img\client_success_manager_color.jpeg" />
+    <Content Include="Assets\img\deny.svg" />
+    <Content Include="Assets\img\email-bgcheck.svg" />
     <Content Include="Assets\img\email-symbol.png" />
     <Content Include="Assets\img\envelope.svg" />
+    <Content Include="Assets\img\expand 1.svg" />
     <Content Include="Assets\img\expand.svg" />
     <Content Include="Assets\img\filter.svg" />
     <Content Include="Assets\img\green-check-box.svg" />
@@ -803,6 +812,7 @@
     <Content Include="Assets\img\clock.svg" />
     <Content Include="Assets\img\graduation-cap.svg" />
     <Content Include="Assets\img\user.svg" />
+    <Content Include="Assets\img\view-bgcheck.svg" />
     <Content Include="Assets\img\warning.png" />
     <Content Include="Assets\img\welcome-back-arrow.png" />
     <Content Include="Assets\js\ahq-directory-map.js" />
@@ -2600,7 +2610,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>54849</DevelopmentServerPort>
+          <DevelopmentServerPort>54850</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:54849/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
