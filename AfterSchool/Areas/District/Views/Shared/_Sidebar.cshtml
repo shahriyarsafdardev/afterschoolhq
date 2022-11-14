@@ -1,7 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
 
-    string homeactive = "", leaguesactive = "", schoolsactive = "", providersactive = "", formactive = "", messagesactive = "", teamactive = "", profileactive = "";
+    string homeactive = "", leaguesactive = "", schoolsactive = "", providersactive = "", formactive = "", messagesactive = "", teamactive = "", profileactive = "", volunteer = "";
 
     switch (controller)
     {
@@ -28,6 +28,9 @@
             break;
         case "profileactive":
             profileactive = "active";
+            break;
+        case "volunteer":
+            volunteer = "active";
             break;
     }
 }
@@ -62,6 +65,9 @@
             </li>
             <li class="@profileactive">
                 <a href="@Url.Action("edit", "user")"><i class="icon s7-user"></i><span>Profile</span></a>
+            </li>
+            <li class="@volunteer">
+                <a href="@Url.Action("index", "volunteer")"><i class="icon s7-smile"></i><span>Volunteer</span></a>
             </li>
             <li>
                 <a href="@Url.Action("index", "logout", new { area = "" })"><i class="icon s7-power"></i><span>Logout</span></a>
