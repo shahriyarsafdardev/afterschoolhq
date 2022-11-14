@@ -3,13 +3,13 @@
 @{
     var statusClass = "warning";
 
-    if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Reserved)
-    {
-        statusClass = "success";
-    }
-    else if (Model.RegistrantActivity.IsDeleted == true)
+    if (Model.RegistrantActivity.IsDeleted == true)
     {
         statusClass = "danger";
+    }
+    else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Reserved)
+    {
+        statusClass = "success";
     }
     else if (Model.RegistrantActivity.AssignmentTypeId == RegistrationAssignmentType.Declined)
     {
@@ -54,7 +54,7 @@
                     <p class="pull-right badge badge-@statusClass">
                         <strong>
                             <em>
-                                @Model.RegistrantActivity.AssignmentTypeId.ToString().SplitByUpperCase()
+                                @(Model.RegistrantActivity.IsDeleted == true ? "Deleted" : Model.RegistrantActivity.AssignmentTypeId.ToString().SplitByUpperCase())
                             </em>
                         </strong>
                     </p>
