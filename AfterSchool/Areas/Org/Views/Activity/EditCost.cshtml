@@ -79,7 +79,19 @@
         
         #confirm-savenext-button > button
         {
-            width:45%;
+            width: 175px;
+        }
+        
+        @@media(max-width: 992px) {
+            .pull-right > button , .pull-left > button
+            {
+                width: 130px;
+                color: #282828;
+            }
+            #confirm-savenext-button > button
+            {
+                width: 130px;
+            }
         }
         
     </style>
