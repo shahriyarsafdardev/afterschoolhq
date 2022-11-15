@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             {
                 ID = 4,
                 StartDate = new DateTime(2022, 09, 27, 0, 0, 0),
-                EndDate = DateTime.UtcNow.AddDays(35),
+                EndDate = new DateTime(2022, 09, 27, 0, 0, 0).AddDays(35),
                 IsOngoing = false,
             };
 
