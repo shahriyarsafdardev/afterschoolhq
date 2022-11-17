@@ -100,6 +100,7 @@ namespace AfterSchoolLibrary.Models
             ProviderJotFormSubmission.Create(dc);
             AvailableTag.Create(dc);
             AssignedTag.Create(dc);
+            VolunteerApproval.Create(dc);
 
             return msgs;
         }
@@ -192,6 +193,7 @@ namespace AfterSchoolLibrary.Models
             ProviderJotFormSubmission.Alter(dc);
             AvailableTag.Alter(dc);
             AssignedTag.Alter(dc);
+            VolunteerApproval.Alter(dc);
 
             return msgs;
         }
