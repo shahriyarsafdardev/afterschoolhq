@@ -101,6 +101,8 @@ namespace AfterSchoolLibrary.Models
             AvailableTag.Create(dc);
             AssignedTag.Create(dc);
             VolunteerApproval.Create(dc);
+            VolunteerApproval.Create(dc);
+            VolunteerTask.Create(dc);
 
             return msgs;
         }
@@ -194,6 +196,7 @@ namespace AfterSchoolLibrary.Models
             AvailableTag.Alter(dc);
             AssignedTag.Alter(dc);
             VolunteerApproval.Alter(dc);
+            VolunteerTask.Alter(dc);
 
             return msgs;
         }
