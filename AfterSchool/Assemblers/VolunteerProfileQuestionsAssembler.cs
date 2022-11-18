@@ -57,7 +57,7 @@ namespace AfterSchool.Assemblers
                     .First(group => group.QuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation);
                 var questions = questionGroup.GetAllQuestions(msgs);
 
-                questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
+                questions = questions.Where(question => question.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInVolunteerPanel())).ToList();
 
                 questions.ForEach(question =>
                 {

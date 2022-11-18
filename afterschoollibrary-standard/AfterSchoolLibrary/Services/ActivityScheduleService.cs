@@ -143,12 +143,12 @@ namespace AfterSchoolLibrary.Services
             var dates = new List<DateTime>();
             var account = schedule.GetAccount(msgs, dc);
             var now = account.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var outSessionDates = schedule.GetOutSessionInstances(msgs, dc)
+                .Select(x => x.StartDateTime ?? default).Where( x => x.IsAfter(now)).ToList();
 
             if (schedule.IsOngoing && schedule.GetDaysOfTheWeek(msgs, dc).Any())
             {
                 var referenceDate = now;
-                var outOfSession = schedule.GetOutSessionInstances(msgs, dc)
-                    .Where(instance => instance.StartDateTime.Value.IsAfter(referenceDate));
                 var cutoffHours = 0;
 
                 if (activity.RegistrationCutoffHours.HasValue)
@@ -180,11 +180,8 @@ namespace AfterSchoolLibrary.Services
                     var daysToAdd = nextDayAsInt - (int) currentDayOfTheWeek;
 
                     var dateToAdd = referenceDate.AddDays(daysToAdd);
-
-                    if (!dateToAdd.Date.In(outOfSession.Select(x => x.StartDateTime.Value.Date)) &&
-                        dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
-                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}"
-                            .ToDateTime());
+                    if (dateToAdd.Date.NotIn(outSessionDates) && dateToAdd.AddHours(cutoffHours * -1).IsAfter(now))
+                        dates.Add($"{dateToAdd.ToShortDateString()} {schedule.DailyStartTime.ToShortTimeString()}".ToDateTime());
                     else
                         i--; // don't increment
 
@@ -200,11 +197,11 @@ namespace AfterSchoolLibrary.Services
             else
             {
                 dates.AddRange(schedule.GetInSessionInstances(msgs, dc)
-                    .Where(x => x.StartDateTime.Value.Date.IsOnOrAfter(now.Date))
+                    .Where(x => x.StartDateTime != null && x.StartDateTime.Value.Date.IsOnOrAfter(now.Date) 
+                                                        && x.StartDateTime.Value.Date.NotIn(outSessionDates))
                     .Take(numberOfInstances)
-                    .Select(x => x.StartDateTime.Value));
+                    .Select(x => x.StartDateTime ?? default));
             }
-
             return dates;
         }
 
