@@ -1129,6 +1129,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
+                        //  here is why
                         cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
                         additionalDetails = "registration fee";
 
