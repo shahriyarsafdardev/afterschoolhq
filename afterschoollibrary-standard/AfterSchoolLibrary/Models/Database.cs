@@ -97,6 +97,7 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Create(dc);
             BackgroundCheck.Create(dc);
             VolunteerApproval.Create(dc);
+            VolunteerTask.Create(dc);
 
             return msgs;
         }
@@ -187,6 +188,7 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Alter(dc);
             BackgroundCheck.Alter(dc);
             VolunteerApproval.Alter(dc);
+            VolunteerTask.Alter(dc);
 
             return msgs;
         }
