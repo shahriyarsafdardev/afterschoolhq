@@ -196,7 +196,7 @@ namespace AfterSchool.Models
         {
             var  (startingGrade,endingGrade) = participationObject.GetMinAndMaxGradeLevels();
             var singleGrade = startingGrade.Name == endingGrade.Name;
-            return $"This activity is for students in grade {startingGrade.Name}" + (singleGrade? "": $" - {endingGrade.Name}") + ".";
+            return $"This activity is for students in {startingGrade.Name}" + (singleGrade? "": $" - {endingGrade.Name}") + " grade.";
 
         }
         public static string PrintAgeIneligibilityMessageString(ParticipationObject participationObject)
@@ -204,7 +204,7 @@ namespace AfterSchool.Models
             var minAge = participationObject.AgeStart.ToString();
             var maxAge = participationObject.AgeEnd.ToString();
             var singleAge = minAge == maxAge;
-            return $"This activity is for students who are {minAge}" + (singleAge? "": $" - {maxAge}") + ".";
+            return $"This activity is for students who are {minAge}" + (singleAge? "": $" - {maxAge}") + " years old.";
         }
         public static string PrintGenderIneligibilityMessageString(ParticipationObject participationObject)
         {
@@ -216,7 +216,7 @@ namespace AfterSchool.Models
             var  startingGrade = participationObject.GetActivity().GetStartingGradeLevel().Name;
             var endingGrade = participationObject.GetActivity().GetEndingGradeLevel().Name;
             var singleGrade = startingGrade == endingGrade;
-            return $"This activity is for students who are in {startingGrade} grade" + (singleGrade? "": $"- {endingGrade}")+
+            return $"This activity is for students who are in {startingGrade}" + (singleGrade? "": $"- {endingGrade}") +" grade" +
                    $" and {PrintGenderRestrictions(participationObject).ToLower()}.";
         }
         public static string PrintAgeAndGenderIneligibilityMessageString(ParticipationObject participationObject)
@@ -224,8 +224,8 @@ namespace AfterSchool.Models
             var minAge = participationObject.AgeStart.ToString();
             var maxAge = participationObject.AgeEnd.ToString();
             var singleAge = minAge == maxAge;
-            return $"This activity is for students who are {minAge} years old" + (singleAge? "": $"- {maxAge}")+
-                   $" and {PrintGenderRestrictions(participationObject).ToLower()}.";
+            return $"This activity is for students who are {minAge}" + (singleAge? "": $" - {maxAge}")+
+                   $" years old and {PrintGenderRestrictions(participationObject).ToLower()}.";
         }
     }
 }

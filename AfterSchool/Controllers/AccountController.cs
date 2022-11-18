@@ -1071,27 +1071,28 @@ namespace AfterSchool.Controllers
             return View(qvms);
         }
 
-        private static void AddStudentRestrictionsMessages(SystemMessages msgs, ParticipationObject participationObject, 
+        private static void AddStudentRestrictionsMessages(SystemMessages msgs, ParticipationObject participationObject,
             List<FormQuestionViewModel> qvms)
         {
-            if (participationObject.IsEmpty()) 
+            if (participationObject.IsEmpty())
                 return;
 
-            var gender = 
+            var gender =
                 FormService.GetGenderFromAnswer(qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGender).Value);
-            var dateOfBirth = qvms.Find(qvm => 
+            var dateOfBirth = qvms.Find(qvm =>
                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value.ToDateTime();
             var studentGrade = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).Value;
-            
+
             var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced;
             var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth);
             var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade);
-            
-            var ineligibilityMessage = 
+
+            var ineligibilityMessage =
                 ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted);
-            if(ineligibilityMessage.IsNotEmpty())
+            if (ineligibilityMessage.IsNotEmpty())
                 msgs.Add(ineligibilityMessage, MessageType.UserError);
         }
+
         #endregion
 
         #region StudentRegistration
@@ -1326,26 +1327,16 @@ namespace AfterSchool.Controllers
         private void ValidateStudentRegistrationQuestions(List<FormQuestion> questions,
             ParticipationObject participationObject, SystemMessages msgs)
         {
+            var isGenderRestricted = false;
+            var isAgeRestricted = false;
+            var isGradeRestricted = false;
+
             questions.ForEach(question =>
             {
                 var answer = Request[question.ToFormQuestionViewModel().Name];
 
                 if (question.IsRequired && answer.IsEmpty())
                     msgs.Add($"{question.Text} is required", MessageType.UserError);
-
-                if (question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth && answer.IsNotEmpty() &&
-                    !participationObject.IsAgeInRange(answer.ToDateTime()))
-                    msgs.Add($"Age must be between {participationObject.AgeStart} and {participationObject.AgeEnd}.",
-                        MessageType.UserError);
-
-                if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() &&
-                    !participationObject.IsGradeInRange(answer))
-                    msgs.Add($"Grade must be between {participationObject.GetMinGradeLevel(msgs)} and {participationObject.GetMaxGradeLevel(msgs)}.",
-                        MessageType.UserError);
-                if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
-                    !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
-                    msgs.Add($"The selected activity is for {ParticipationObjectUI.PrintGenderRestrictions(participationObject).ToLower()}",
-                        MessageType.UserError);
 
                 if (question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && answer.IsNotEmpty())
                 {
@@ -1355,7 +1346,29 @@ namespace AfterSchool.Controllers
                     if (WebUser.ExistsByPhone(answer, msgs))
                         msgs.Add("Phone is already in use, do you already have an account?", MessageType.UserError);
                 }
+
+                else if (question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth && answer.IsNotEmpty() &&
+                         !participationObject.IsAgeInRange(answer.ToDateTime()))
+                {
+                    isAgeRestricted = true;
+                }
+
+                else if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() &&
+                         !participationObject.IsGradeInRange(answer))
+                {
+                    isGradeRestricted = true;
+                }
+                else if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
+                         !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
+                {
+                    isGenderRestricted = true;
+                }
             });
+
+            var errorMessageString =
+                ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted);
+            if (errorMessageString.IsNotEmpty())
+                msgs.Add(errorMessageString, MessageType.UserError);
         }
 
         private void ValidateStudentRegistrationPasswords(string password, string confirmPassword, SystemMessages msgs)
@@ -1620,8 +1633,8 @@ namespace AfterSchool.Controllers
             // This will get obsolete in future if GenderId in Master Registerant for PersonType Student
             // is not null for every record in database.
 
-            students.ForEach( student => student.UpdateGenderFromFormQuestionAnswers(msgs));
-            
+            students.ForEach(student => student.UpdateGenderFromFormQuestionAnswers(msgs));
+
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
