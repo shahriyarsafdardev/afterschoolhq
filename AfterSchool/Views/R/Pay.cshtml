@@ -1,12 +1,13 @@
-﻿@model Account
+﻿@using Stripe
+@model AfterSchoolLibrary.Models.Account
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Name;
 
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var accountProfile = (AccountProfile)ViewBag.AccountProfile;
-    var sources = (List<Stripe.Source>)ViewBag.Sources;
-    var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var accountProfile = (AccountProfile) ViewBag.AccountProfile;
+    var sources = (List<Source>) ViewBag.Sources;
+    var bankAccounts = (List<BankAccount>) ViewBag.BankAccounts;
 
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
@@ -15,25 +16,25 @@
     Html.RenderPartial(
         "~/Views/Shared/Registration/_AccountTopBar.cshtml",
         Model,
-        new ViewDataDictionary()
+        new ViewDataDictionary
         {
-            { "LoginReturnUrl", Model.HomePageUrl },
-            { "CleverSsoEnabled", cleverSsoEnabled }
+            {"LoginReturnUrl", Model.HomePageUrl},
+            {"CleverSsoEnabled", cleverSsoEnabled},
         });
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
-@{ 
+@{
     Html.RenderPartial
-    (
-        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(Model, (AccountProfile)ViewBag.AccountProfile),
-        new ViewDataDictionary()
-        {
-            { "hidebuttons", true }
-        }
-    );
+        (
+            "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+            new RegistrationHeaderViewModel(Model, (AccountProfile) ViewBag.AccountProfile),
+            new ViewDataDictionary
+            {
+                {"hidebuttons", true},
+            }
+        );
 }
 
 <div>
@@ -57,7 +58,7 @@
                             <label for="amount" class="text-medium">Enter amount you want to pay</label>
                             <div class="input-group input-group-prepend">
                                 <span class="input-group-addon">$</span>
-                                <input type="number" name="amount" id="amount" value="" class="form-control text-medium" style="padding-right: 5px;" min="5.00" step=".01" />
+                                <input type="number" name="amount" id="amount" value="" class="form-control text-medium" style="padding-right: 5px;" min="5.00" step=".01"/>
                             </div>
                             <p class="text-muted text-small" id="amount-error">Please enter an amount greater than or equal to $5</p>
                         </div>
@@ -89,17 +90,17 @@
                     </div>
 
                     <div>
-                        @{ 
+                        @{
                             Html.RenderPartial(
                                 "~/Views/Shared/Registration/_PayButtons.cshtml",
-                                new ViewDataDictionary()
+                                new ViewDataDictionary
                                 {
-                                    { "sources", sources },
-                                    { "bankAccounts", bankAccounts },
-                                    { "formActionUrl", Url.Action("pay", "account", new { id = Model.Uid }) },
-                                    { "acceptACH", true }
+                                    {"sources", sources},
+                                    {"bankAccounts", bankAccounts},
+                                    {"formActionUrl", Url.Action("pay", "account", new {id = Model.Uid})},
+                                    {"acceptACH", true},
                                 }
-                            );
+                                );
                         }
                     </div>
                 </div>
@@ -108,7 +109,7 @@
             <div class="panel-footer">
                 <div class="col-md-12 text-center">
                     <p class="padding-v-20 padding-h-30">
-                        
+
                     </p>
                 </div>
             </div>
@@ -135,7 +136,7 @@
 
         $.get('@Url.Action("getcreditcardfees", "services")/@Model.Uid?amount=' + amount, function (data) {
 
-            if (data && data.status == 'ok') {
+            if (data && data.status === 'ok') {
 
                 const ccFees = data.creditCardFee;
                 const achAmount = parseFloat(amount);

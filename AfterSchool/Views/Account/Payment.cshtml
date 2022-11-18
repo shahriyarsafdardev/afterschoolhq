@@ -1,15 +1,16 @@
-﻿@{
+﻿@using Stripe
+@{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Payment";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    var cart = (Cart)ViewBag.Cart;
-    var sources = (List<Stripe.Source>)ViewBag.Sources;
-    var bankAccounts = (List<Stripe.BankAccount>)ViewBag.BankAccounts;
-    var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
-    var selectedDates = (List<DateTime>)ViewBag.SelectedDates;
-    var registration = (Registration)ViewBag.Registration;
-    var checkoutObject = (CheckoutObject)ViewBag.CheckoutObject;
-    var accountCanAcceptPayments = (bool)ViewBag.AccountCanAcceptPayments;
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var cart = (Cart) ViewBag.Cart;
+    var sources = (List<Source>) ViewBag.Sources;
+    var bankAccounts = (List<BankAccount>) ViewBag.BankAccounts;
+    var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
+    var selectedDates = (List<DateTime>) ViewBag.SelectedDates;
+    var registration = (Registration) ViewBag.Registration;
+    var checkoutObject = (CheckoutObject) ViewBag.CheckoutObject;
+    var accountCanAcceptPayments = (bool) ViewBag.AccountCanAcceptPayments;
     var paymentAccount = participationObject.PaymentAccount;
     var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
     var postPayPlan = participationObject.PostPayPlans?.FirstOrDefault();
@@ -48,12 +49,10 @@
         if (!plan.SplitCostEvenly || participationObject.RegistrationFinalized)
         {
             var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
-            var startDateText = "today";
 
-            if (participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate.Date) != DateTime.UtcNow.Date)
-            {
-                startDateText = planStartDate.ToLongDateString();
-            }
+            var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
+                ? "today"
+                : planStartDate.ToLongDateString();
 
             <span>
                 @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
@@ -68,338 +67,344 @@
 
 @{
     Html.RenderPartial
-    (
-        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
-        new RegistrationHeaderViewModel(participationObject, $"{participationObject.Name} Payment", "Please submit payment to finalize your registration"),
-        new ViewDataDictionary()
-        {
-            { "hidebuttons", true }
-                }
-    );
+        (
+            "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+            new RegistrationHeaderViewModel(participationObject, $"{participationObject.Name} Payment", "Please submit payment to finalize your registration"),
+            new ViewDataDictionary
+            {
+                {"hidebuttons", true},
+            }
+        );
 }
 
 <div>
-    <div class="col-md-12">
-        <div class="panel">
-            <div class="panel-body">
+<div class="col-md-12">
+<div class="panel">
+<div class="panel-body">
 
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 col-sm-12 ">
-                        <h4 class="text-center reg-instructions"><strong>Checkout</strong></h4>
-                        <hr />
-                    </div>
-                </div>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3 col-sm-12 ">
+        <h4 class="text-center reg-instructions">
+            <strong>Checkout</strong>
+        </h4>
+        <hr/>
+    </div>
+</div>
 
-                @if (!readyToAcceptPayment)
-                {
-                    <p class="text-medium text-center">
-                        Registration payment is not ready to be accepted at the moment. If you have questions please contact <a href="mailto:@participationObject.ContactEmail">@participationObject.ContactName</a>.
-                    </p>
-                }
-                else
-                {
-                    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost(quantity)</span>
-                    <span id="payment-plan-asf-0" class="hide">0</span>
-                    if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
+@if (!readyToAcceptPayment)
+{
+    <p class="text-medium text-center">
+        Registration payment is not ready to be accepted at the moment. If you have questions please contact <a href="mailto:@participationObject.ContactEmail">@participationObject.ContactName</a>.
+    </p>
+}
+else
+{
+    <span id="payment-plan-cost-0" class="hide">@participationObject.GetCheckoutTotalCost(quantity)</span>
+    <span id="payment-plan-asf-0" class="hide">0</span>
+    if (subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || !participationObject.RegistrationFinalized)
+    {
+        if (postPayPlan.IsNotEmpty())
+        {
+            if (postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
+            {
+                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCheckoutPostPayCreditCardFee()</span>
+            }
+            else
+            {
+                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetPostPayCreditCardFee()</span>
+            }
+        }
+        else
+        {
+            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(quantity)</span>
+        }
+    }
+    else
+    {
+        <span id="payment-plan-ccf-0" class="hide">0.00</span>
+    }
+
+    <div class="">
+
+        @if (participationObject.CanRegisterPerClass)
+        {
+            <div class="col-md-6 col-md-offset-3 col-sm-12 margin-b-20">
+                <table class="table table-responsive text-medium-small">
+                    <thead>
+                    <tr>
+                        <td>Date</td>
+                        <td>Cost</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var date in selectedDates)
                     {
-                        if (postPayPlan.IsNotEmpty())
-                        {
-                            if (postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
-                            {
-                                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCheckoutPostPayCreditCardFee()</span>
+                        <tr>
+                            <td>@date.ToLongDateTimeString()</td>
+                            <td>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</td>
+                        </tr>
+                    }
+
+                    @foreach (var date in datesToRemove)
+                    {
+                        <tr>
+                            <td>
+                                <span style="text-decoration: line-through">@date.ToLongDateTimeString()</span>
+                            </td>
+                            <td>Already registered</td>
+                        </tr>
+                    }
+                    </tbody>
+
+                    <tr>
+                        <td>
+                            <strong>Total</strong>
+                        </td>
+                        <td>
+                            <strong>@((participationObject.GetCheckoutCostWithConvenienceFee() * selectedDates.Count()).ToCurrency())</strong>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        }
+        else if (paymentPlans.Any())
+        {
+            <div class="row margin-t-20">
+                <div class="col-md-6 col-md-offset-3 col-sm-12 ">
+                    <p class="text-medium">
+                        Choose a payment option:
+                    </p>
+
+                    <div class="am-radio">
+                        <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" onclick="return loadCouponContainers()"/>
+                        <label for="paymentoption-0">
+                            @{
+                                var registrationFee = participationObject.GetCheckoutCostWithConvenienceFee();
                             }
-                            else
-                            {
-                                <span id="payment-plan-ccf-0" class="hide">@participationObject.GetPostPayCreditCardFee()</span>
-                            }
-                        }
-                        else
+                            Pay <strong id="registration-fee" value="@registrationFee">@registrationFee.ToCurrency()</strong> today
+                            @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                        </label>
+                    </div>
+
+                    @foreach (var plan in paymentPlans)
+                    {
+                        var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
+                        var planStartDate = today;
+                        var poStartDate = participationObject.StartDate;
+
+                        if (poStartDate.HasValue && poStartDate.Value.Date.IsOnOrAfter(today))
                         {
-                            <span id="payment-plan-ccf-0" class="hide">@participationObject.GetCreditCardFee(quantity)</span>
+                            planStartDate = poStartDate.Value.Date;
                         }
+
+                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
+
+                        <div class="am-radio">
+                            <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" onclick="return loadCouponContainers()"/>
+                            <label for="paymentoption-@plan.ID">
+                                Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
+
+                                @Html.Raw(startToday ? "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>")
+
+                                @if (plan.TotalPeriods > 1)
+                                {
+                                    <span>
+                                        and
+                                        <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
+                                        <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
+                                        @if (plan.TotalPeriods > 2)
+                                        {
+                                            <span>
+                                                each following
+                                                <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>
+                                                one @plan.BillingPeriodTypeId.ToString().ToLower() later
+                                            </span>
+                                        }
+                                    </span>
+                                }
+
+                                @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                            </label>
+                            <span id="payment-plan-cost-@plan.ID" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
+                            <span id="payment-plan-asf-@plan.ID" class="hide">0</span>
+                            <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
+                        </div>
+                    }
+
+                    <hr/>
+                </div>
+            </div>
+        }
+        else if (subscriptionPlan.IsNotEmpty())
+        {
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
+                    @if (!participationObject.IsRegistrationFree && (!subscriptionPlan.SplitCostEvenly || registrant.GetAmountPaid() == 0))
+                    {
+                        <p>
+                            Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                        </p>
                     }
                     else
                     {
-                        <span id="payment-plan-ccf-0" class="hide">0.00</span>
+                        <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                     }
 
-                    <div class="">
+                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                    {
+                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date) </strong>.</p>
+                    }
 
-                        @if (participationObject.CanRegisterPerClass)
+                    <hr/>
+                </div>
+            </div>
+        }
+        else if (postPayPlan.IsNotEmpty())
+        {
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
+                    <p>
+                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per @postPayPlan.BillingPeriodTypeId.ToString().ToLower() attended per student
+                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0 && postPayPlan.NumberOfPeriodsPrePaid > 0)
                         {
-                            <div class="col-md-6 col-md-offset-3 col-sm-12 margin-b-20">
-                                <table class="table table-responsive text-medium-small">
-                                    <thead>
-                                        <tr>
-                                            <td>Date</td>
-                                            <td>Cost</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var date in selectedDates)
-                                        {
-                                            <tr>
-                                                <td>@date.ToLongDateTimeString()</td>
-                                                <td>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</td>
-                                            </tr>
-                                        }
-
-                                        @foreach (var date in datesToRemove)
-                                        {
-                                            <tr>
-                                                <td><span style="text-decoration: line-through">@date.ToLongDateTimeString()</span></td>
-                                                <td>Already registered</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-
-                                    <tr>
-                                        <td><strong>Total</strong></td>
-                                        <td><strong>@((participationObject.GetCheckoutCostWithConvenienceFee() * selectedDates.Count()).ToCurrency())</strong></td>
-                                    </tr>
-                                </table>
-                            </div>
-
+                            <br/>
+                            <span>
+                                with a pre-payment of
+                                <strong>@participationObject.GetPostPayCheckoutCostWithConvenienceFee().ToCurrency()</strong> to cover the first
+                                <strong>@postPayPlan.NumberOfPeriodsPrePaid @(postPayPlan.BillingPeriodTypeId.ToString().ToLower())(s)</strong> due today.
+                            </span>
                         }
-                        else if (paymentPlans.Any())
-                        {
-                            <div class="row margin-t-20">
-                                <div class="col-md-6 col-md-offset-3 col-sm-12 ">
-                                    <p class="text-medium">
-                                        Choose a payment option:
-                                    </p>
-
-                                    <div class="am-radio">
-                                        <input type="radio" name="paymentoption" id="paymentoption-0" class="payment-option-radio" value="" checked="checked" onclick="return loadCouponContainers()" />
-                                        <label for="paymentoption-0">
-                                            @{ 
-                                                var registrationFee = participationObject.GetCheckoutCostWithConvenienceFee();
-                                            } 
-                                            Pay <strong id="registration-fee" value="@registrationFee">@registrationFee.ToCurrency()</strong> today
-                                            @PrintSubscriptionCost(subscriptionPlan, participationObject)
-                                        </label>
-                                    </div>
-
-                                    @foreach (var plan in paymentPlans)
-                                    {
-                                        var today = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
-                                        DateTime planStartDate = today;
-                                        var poStartDate = participationObject.StartDate;
-
-                                        if (poStartDate.HasValue && poStartDate.Value.Date.IsOnOrAfter(today))
-                                        {
-                                            planStartDate = poStartDate.Value.Date;
-                                        }
-
-                                        var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
-
-                                        <div class="am-radio">
-                                            <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" onclick="return loadCouponContainers()" />
-                                            <label for="paymentoption-@plan.ID">
-                                                Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
-
-                                                @Html.Raw(startToday ? "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>")
-
-                                                @if (plan.TotalPeriods > 1)
-                                                {
-                                                    <span>
-                                                        and
-                                                        <strong>@(plan.TotalPeriods - 1)</strong> more payment@(plan.TotalPeriods > 2 ? "s" : "") of
-                                                        <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
-                                                        @if (plan.TotalPeriods > 2)
-                                                        {
-                                                            <span>
-                                                                each following
-                                                                <strong>@plan.BillingPeriodTypeId.ToString().ToLower()</strong>
-                                                            </span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>
-                                                                one @plan.BillingPeriodTypeId.ToString().ToLower() later
-                                                            </span>
-                                                        }
-                                                    </span>
-                                                }
-
-                                                @PrintSubscriptionCost(subscriptionPlan, participationObject)
-                                            </label>
-                                            <span id="payment-plan-cost-@plan.ID" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
-                                            <span id="payment-plan-asf-@plan.ID" class="hide">0</span>
-                                            <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
-                                        </div>
-                                    }
-
-                                    <hr />
-                                </div>
-                            </div>
-                        }
-                        else if (subscriptionPlan.IsNotEmpty())
-                        {
-                            <div class="row">
-                                <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
-                                    @if (!participationObject.IsRegistrationFree && (!subscriptionPlan.SplitCostEvenly || registrant.GetAmountPaid() == 0))
-                                    {
-                                        <p>
-                                            Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject)
-                                        </p>
-                                    }
-                                    else
-                                    {
-                                        <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
-                                    }
-
-                                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
-                                    {
-                                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
-                                    }
-
-                                    <hr />
-                                </div>
-                            </div>
-                        }
-                        else if (postPayPlan.IsNotEmpty())
-                        {
-                            <div class="row">
-                                <div class="col-md-6 col-md-offset-3 col-sm-12 text-center text-medium-small">
-                                    <p>
-                                        The cost will be <span class="text-bold">@participationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</span> per @postPayPlan.BillingPeriodTypeId.ToString().ToLower() attended per student
-                                        @if (participationObject.GetPostPayCheckoutCostWithConvenienceFee() > 0 && postPayPlan.NumberOfPeriodsPrePaid > 0)
-                                        {
-                                            <br />
-                                            <span>
-                                                with a pre-payment of
-                                                <strong>@participationObject.GetPostPayCheckoutCostWithConvenienceFee().ToCurrency()</strong> to cover the first
-                                                <strong>@postPayPlan.NumberOfPeriodsPrePaid @(postPayPlan.BillingPeriodTypeId.ToString().ToLower())(s)</strong> due today.
-                                            </span>
-                                        }
-                                    </p>
-                                    <p>
-                                        Your payment information will be stored on file.
-                                    </p>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                    <div class="clearfix"></div>
+                    </p>
+                    <p>
+                        Your payment information will be stored on file.
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="clearfix"></div>
 
                     @* Cost Table *@
-                    <div class="row padding-30 hide">
+    <div class="row padding-30 hide">
 
-                        @if (!participationObject.IsRegistrationFree)
-                        {
-                            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee(quantity).ToString("0.00");
+        @if (!participationObject.IsRegistrationFree)
+        {
+            var regFeeToday = participationObject.GetCheckoutCostWithConvenienceFee(quantity).ToString("0.00");
 
-                            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
-                            {
-                                regFeeToday = "0.00";
-                            }
+            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && participationObject.RegistrationFinalized)
+            {
+                regFeeToday = "0.00";
+            }
 
-                            <span id="fee-total-value" class="hide">@regFeeToday</span>
-                        }
+            <span id="fee-total-value" class="hide">@regFeeToday</span>
+        }
 
-                        @if (postPayPlan.IsNotEmpty())
-                        {
-                            <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
-                        }
+        @if (postPayPlan.IsNotEmpty())
+        {
+            <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
+        }
 
-                        @if (participationObject.SubscriptionPlans.Any())
-                        {
-                            var accountDate = participationObject.OwnerAccount.ConvertToAccountTimeZone(System.DateTime.UtcNow);
-                            var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
-                            var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
-                            var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
-                            var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
-                                                          participationObject.StartDate.HasValue &&
-                                                          participationObject.StartDate.Value.Date.IsAfter(accountDate.Date);
+        @if (participationObject.SubscriptionPlans.Any())
+        {
+            var accountDate = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
+            var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
+            var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
+            var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
+                                          participationObject.StartDate.HasValue &&
+                                          participationObject.StartDate.Value.Date.IsAfter(accountDate.Date);
 
-                            if (learningPodSplitEvenly || activityStartIsInFuture)
-                            {
-                                subpricetoday = 0;
-                                subtransfeetoday = 0;
-                            }
+            if (learningPodSplitEvenly || activityStartIsInFuture)
+            {
+                subpricetoday = 0;
+                subtransfeetoday = 0;
+            }
 
-                            <span id="subscription-total-value" class="hide">@subpricetoday</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
-                        }
-                        else
-                        {
-                            <span id="subscription-total-value" class="hide">0</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">0</span>
-                        }
+            <span id="subscription-total-value" class="hide">@subpricetoday</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
+        }
+        else
+        {
+            <span id="subscription-total-value" class="hide">0</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">0</span>
+        }
 
-                        <span id="fee-ccf" class="hide">0</span>
-                        <span id="fee-asf" class="hide">0</span>
-                        <span class="total-due-today"></span>
-                    </div>
+        <span id="fee-ccf" class="hide">0</span>
+        <span id="fee-asf" class="hide">0</span>
+        <span class="total-due-today"></span>
+    </div>
 
-                    if (participationObject.Cost > 0 || paymentPlans.Any())
-                    {
-                        if ((participationObject.Cost > 0 || postPayPlan.IsNotEmpty()) ||
-                            participationObject.SubscriptionPlans.Any() ||
-                            participationObject.PaymentPlans.Any())
-                        {
-                            <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">
-                            <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
-                                <input type="text" class="form-control" disabled="disabled" placeholder="COUPON CODE" aria-describedby="coupon-code">
-                                <span class="input-group-addon btn btn-primary disabled">Apply</span>
-                            </div>
-                            <div class="clearfix"></div>
-                            <p class="text-small text-danger" style="">Coupons currently not valid for payment plans</p>
-                        </div>
+    if (participationObject.Cost > 0 || paymentPlans.Any())
+    {
+        if (participationObject.Cost > 0 || postPayPlan.IsNotEmpty() ||
+            participationObject.SubscriptionPlans.Any() ||
+            participationObject.PaymentPlans.Any())
+        {
+            <div id="disabled-coupon-container" class="row text-center padding-v-20 hide">
+                <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
+                    <input type="text" class="form-control" disabled="disabled" placeholder="COUPON CODE" aria-describedby="coupon-code">
+                    <span class="input-group-addon btn btn-primary disabled">Apply</span>
+                </div>
+                <div class="clearfix"></div>
+                <p class="text-small text-danger" style="">Coupons currently not valid for payment plans</p>
+            </div>
 
-                        <div id="enabled-coupon-container" class="row text-center padding-v-20 hide">
-                            <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
-                                <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
-                                <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>
-                            </div>
-                            <div class="clearfix"></div>
-                            <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
-                        </div>
-                        }
-                    }
+            <div id="enabled-coupon-container" class="row text-center padding-v-20 hide">
+                <div class="input-group col-md-4 col-md-offset-4 col-sm-12">
+                    <input id="txt-coupon-code" type="text" class="form-control" placeholder="COUPON CODE" aria-describedby="coupon-code">
+                    <span class="input-group-addon btn btn-primary" id="coupon-code" onclick="applyCoupon()">Apply</span>
+                </div>
+                <div class="clearfix"></div>
+                <p id="txt-coupon-applied" class="text-small" style="display: none;"></p>
+            </div>
+        }
+    }
 
-                    <div class="clearfix"></div>
-                    <hr />
+    <div class="clearfix"></div>
+    <hr/>
 
-                    Html.RenderPartial(
-                        "~/Views/Shared/Registration/_PayButtons.cshtml",
-                        new ViewDataDictionary()
-                        {
-                            { "sources", sources },
-                            { "bankAccounts", bankAccounts },
-                            { "formActionUrl", Url.Action("payment", "account", new { id = registration.Uid }) },
-                            { "acceptACH", true },
-                            { "participationObject", participationObject },
-                            { "quantity", quantity }
-                        }
-                    );
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_PayButtons.cshtml",
+        new ViewDataDictionary
+        {
+            {"sources", sources},
+            {"bankAccounts", bankAccounts},
+            {"formActionUrl", Url.Action("payment", "account", new {id = registration.Uid})},
+            {"acceptACH", true},
+            {"participationObject", participationObject},
+            {"quantity", quantity},
+        }
+        );
 
                     @* ALLOW TO PAY LATER *@
-                    <div>
-                        <div class="row">
-                            <div class="padding-v-30 text-center">
+    <div>
+        <div class="row">
+            <div class="padding-v-30 text-center">
 
-                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
 
-                                @if (participationObject.AllowToPayLater)
-                                {
-                                    @:&bull;
-                                    <a href="@Url.Action("finalizeregistration", new { id = registration.Uid })" class="text-muted">
-                                        Request to Pay Later
-                                    </a>
-                                }
-
-                            </div>
-                        </div>
-                    </div>
-
+                @if (participationObject.AllowToPayLater)
+                {
+                    @:&bull;
+                    <a href="@Url.Action("finalizeregistration", new {id = registration.Uid})" class="text-muted">
+                        Request to Pay Later
+                    </a>
                 }
+
             </div>
         </div>
     </div>
+}
+</div>
+</div>
+</div>
 </div>
 
 @section scripts

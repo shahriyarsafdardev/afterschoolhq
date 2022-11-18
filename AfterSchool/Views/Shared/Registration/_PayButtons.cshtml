@@ -1,180 +1,79 @@
-﻿@{
-    var sources = (List<Stripe.Source>)ViewData["Sources"];
-    var bankAccounts = (List<Stripe.BankAccount>)ViewData["BankAccounts"];
-    var acceptACH = (bool)ViewData["acceptACH"];
-    var formActionUrl = (string)ViewData["formActionUrl"];
-    var participationObject = (ParticipationObject)ViewData["participationObject"];
+﻿@using AfterSchoolLibrary.Billing
+@using AfterSchoolLibrary.Helpers
+@using Stripe
+@{
+    var sources = (List<Source>) ViewData["Sources"];
+    var bankAccounts = (List<BankAccount>) ViewData["BankAccounts"];
+    var acceptAch = (bool) ViewData["acceptACH"];
+    var formActionUrl = (string) ViewData["formActionUrl"];
+    var participationObject = (ParticipationObject) ViewData["participationObject"];
     var postPayPlan = participationObject?.GetPostPayPlan();
     var subscriptionPlan = participationObject?.GetSubscriptionPlan();
-    var savePaymentInfoOnly = false;
 
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
-    if (postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive())
-    {
-        savePaymentInfoOnly = true;
-    }
+    var savePaymentInfoOnly = postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive();
 
-    var ccClassAttendedLable = "";
-    if (postPayPlan.IsNotEmpty() && savePaymentInfoOnly)
-    {
-        ccClassAttendedLable = $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
-    }
-    else if (postPayPlan.IsEmpty() && savePaymentInfoOnly)
-    {
-        ccClassAttendedLable = "per class attended";
-    }
+    var ccClassAttendedLabel = savePaymentInfoOnly
+        ? postPayPlan.IsNotEmpty()
+            ? $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})"
+            : "per class attended"
+        : "";
+
+    var startsToday = subscriptionPlan.IsEmpty()? false 
+        : participationObject.OwnerAccount.ConvertFromAccountTimeZone(SessionVariables.CurrentRegistrant
+            .GetPlanStartDate(subscriptionPlan, participationObject)).Date == DateTime.UtcNow.Date;
 }
 
-<div class="margin-t-20 padding-v-20">    
+<div class="margin-t-20 padding-v-20">
 
-    @if (acceptACH)
-    {
-        <div id="payment-info-ach">
+@if (acceptAch)
+{
+    <div id="payment-info-ach">
 
-            <div class="text-center">
-                <p class="text-large">@(savePaymentInfoOnly ? "Save Bank Account Info" : "Pay using a Bank Account")</p>
-                <p class="text-medium-small"><strong>No Transaction Fees</strong></p>
-            </div>
-
-            @* PAY VIA Existing ACH Sources *@
-            @if (bankAccounts.Any())
-            {
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
-
-                        <form class="form-horizontal existing-payment-form" action="@formActionUrl" method="post" id="existing-payment-form-ach">
-
-                            <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
-                            <input type="hidden" name="coupon" class="coupon" value="" />
-                            <textarea name="paymentdescription" id="payment-description-existing-ach" class="hide payment-description"></textarea>
-
-                            <div class="form-group">
-                                <label class="col-md-3 control-label">
-                                    Select Account
-                                </label>
-                                <div class="col-md-9">
-                                    <select name="banksource" id="banksource" class="form-control">
-                                        @foreach (var bankAccount in bankAccounts)
-                                        {
-                                            <option value="@bankAccount.Id">
-                                                * * * * * * @bankAccount.Last4 - @bankAccount.BankName
-                                            </option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
-                                    @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
-                                    <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
-                                        -
-                                        <span class="total-due-today-ach"></span>*
-                                    </span>
-                                    &raquo;
-                                </button>
-                            </div>
-                            <div class="row">
-                                <p>&nbsp;</p>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
-
-            @* PAY VIA ACH *@
-            <div class="row">
-                <div class="col-md-6 col-md-offset-3 col-sm-12">
-
-                    <div class="form-group">
-                        <p class="text-medium text-center">
-                            @(savePaymentInfoOnly ? "Save Bank Info" : "Pay using a new Bank Account")
-                        </p>
-                        <p class="text-muted">
-                            Clicking @(savePaymentInfoOnly ? "'Save Bank Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(savePaymentInfoOnly ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
-                        </p>
-                        <button type="button" id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
-                            @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
-                            <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
-                                -
-                                $<span class="total-due-today-ach"></span>*
-                            </span>
-                            &raquo;
-                        </button>
-
-                        <form action="@formActionUrl" method="post" id="payment-form-ach">
-
-                            <textarea name="paymentdescription" id="payment-description-new-ach" class="hide payment-description"></textarea>
-
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-
-            <hr />
-        </div>        
-    }
-
-    <div id="payment-info" style="position:relative;">
-
-        <div class="row">
-            <div class="col-md-6 col-md-offset-3 col-sm-12">
-                <div class="text-center">
-                    <p class="text-large">@(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay using a credit card")</p>
-                    <p class="text-medium-small margin-t-20">
-                        @(Html.Raw(savePaymentInfoOnly ? "" : "Credit card transactions will be charged <br />an additional"))
-                        <strong>
-                            $<span class="total-fee-ccf">0</span>
-                            Transaction Fee
-                            @*NOTE: for payment plans and subscriptions should add the text "Per Payment"*@
-                        </strong>
-
-                        @ccClassAttendedLable
-
-                    </p>
-                    <p class="text-muted text-center">Credit card transaction fees are 2.9% + $0.30 and are non-refundable</p>
-                </div>
-            </div>
+        <div class="text-center">
+            <p class="text-large">@(savePaymentInfoOnly ? "Save Bank Account Info" : "Pay using a Bank Account")</p>
+            <p class="text-medium-small">
+                <strong>No Transaction Fees</strong>
+            </p>
         </div>
 
-        @* PAY VIA Existing Sources *@
-        @if (sources.Any(source => source.Card.IsNotEmpty()))
+        @* PAY VIA Existing ACH Sources *@
+        @if (bankAccounts.Any())
         {
             <div class="row">
-                <div class="col-md-6 col-md-offset-3 col-sm-12">
-                    <form class="form-horizontal existing-payment-form" action="@formActionUrl" method="post" id="existing-payment-form-cc">
-                        <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0" />
-                        <input type="hidden" name="coupon" class="coupon" value="" />
-                        <textarea name="paymentdescription" id="payment-description-existing-cc" class="hide payment-description"></textarea>
+                <div class="col-md-6 col-md-offset-3 col-sm-12 padding-30">
+
+                    <form class="form-horizontal existing-payment-form" action="@formActionUrl" method="post" id="existing-payment-form-ach">
+
+                        <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0"/>
+                        <input type="hidden" name="coupon" class="coupon" value=""/>
+                        <textarea name="paymentdescription" id="payment-description-existing-ach" class="hide payment-description"></textarea>
 
                         <div class="form-group">
                             <label class="col-md-3 control-label">
-                                Select Card
+                                Select Account
                             </label>
                             <div class="col-md-9">
-                                <select name="ccsource" id="ccsource" class="form-control">
-                                    @foreach (var source in sources.Where(source => source.Card.IsNotEmpty()))
+                                <select name="banksource" id="banksource" class="form-control">
+                                    @foreach (var bankAccount in bankAccounts)
                                     {
-                                        <option value="@source.Id">
-                                            **** **** **** @source.Card.Last4
-                                            -
-                                            @source.Card.ExpMonth / @source.Card.ExpYear
+                                        <option value="@bankAccount.Id">
+                                            * * * * * * @bankAccount.Last4 - @bankAccount.BankName
                                         </option>
                                     }
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
-                                @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
+                            <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
+                                @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
                                 <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
                                     -
-                                    $<span class="total-due-today-cc"></span>*
+                                    <span class="total-due-today-ach"></span>*
                                 </span>
                                 &raquo;
                             </button>
                         </div>
-
                         <div class="row">
                             <p>&nbsp;</p>
                         </div>
@@ -183,47 +82,91 @@
             </div>
         }
 
-        @* PAY VIA NEW CC *@
+        @* PAY VIA ACH *@
         <div class="row">
             <div class="col-md-6 col-md-offset-3 col-sm-12">
 
-                <form action="@formActionUrl" method="post" id="payment-form" class="form-horizontal">
+                <div class="form-group">
+                    <p class="text-medium text-center">
+                        @(savePaymentInfoOnly ? "Save Bank Info" : "Pay using a new Bank Account")
+                    </p>
+                    <p class="text-muted">
+                        Clicking @(savePaymentInfoOnly ? "'Save Bank Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(savePaymentInfoOnly ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
+                    </p>
+                    <button type="button" id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
+                        @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
+                        <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                            -
+                            $<span class="total-due-today-ach"></span>*
+                        </span>
+                        &raquo;
+                    </button>
 
-                    <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0" />
-                    <textarea name="paymentdescription" id="payment-description-new-cc" class="hide payment-description"></textarea>
-                    <input type="hidden" name="coupon" class="coupon" value="" />
+                    <form action="@formActionUrl" method="post" id="payment-form-ach">
+
+                        <textarea name="paymentdescription" id="payment-description-new-ach" class="hide payment-description"></textarea>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <hr/>
+    </div>
+}
+
+<div id="payment-info" style="position:relative;">
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 col-sm-12">
+            <div class="text-center">
+                <p class="text-large">@(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay using a credit card")</p>
+                <p class="text-medium-small margin-t-20">
+                    @(Html.Raw(savePaymentInfoOnly ? "" : "Credit card transactions will be charged <br />an additional"))
+                    <strong>
+                        $<span class="total-fee-ccf">0</span>
+                        Transaction Fee
+                        @*NOTE: for payment plans and subscriptions should add the text "Per Payment"*@
+                    </strong>
+
+                    @ccClassAttendedLabel
+
+                </p>
+                <p class="text-muted text-center">Credit card transaction fees are 2.9% + $0.30 and are non-refundable</p>
+            </div>
+        </div>
+    </div>
+
+    @* PAY VIA Existing Sources *@
+    @if (sources.Any(source => source.Card.IsNotEmpty()))
+    {
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-sm-12">
+                <form class="form-horizontal existing-payment-form" action="@formActionUrl" method="post" id="existing-payment-form-cc">
+                    <input type="hidden" name="paymentoption" id="paymentoption-existing" class="payment-option" value="0"/>
+                    <input type="hidden" name="coupon" class="coupon" value=""/>
+                    <textarea name="paymentdescription" id="payment-description-existing-cc" class="hide payment-description"></textarea>
 
                     <div class="form-group">
-                        <label for="card-element">
-                            <p>Enter new credit or debit card</p>
+                        <label class="col-md-3 control-label">
+                            Select Card
                         </label>
-                        <div id="card-number"></div>
-                        <div id="card-cvc"></div>
-                        <div id="card-expiry"></div>
-
-                        <!-- Used to display Element errors. -->
-                        <div id="card-errors" role="alert"></div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-10 col-md-offset-1">
-                            <div class="am-checkbox text-center">
-                                <input type="checkbox"
-                                       id="savepaymentinfo"
-                                       name="savepaymentinfo"
-                                       value="1"
-                                       @(Request["savepaymentinfo"] == "1" || hasPlans ? " checked=\"checked\"" : "")
-                                       @(hasPlans ? "disabled" : "") />
-
-                                <label for="savepaymentinfo">
-                                    Save my card for convenient checkout
-                                </label>
-                            </div>
+                        <div class="col-md-9">
+                            <select name="ccsource" id="ccsource" class="form-control">
+                                @foreach (var source in sources.Where(source => source.Card.IsNotEmpty()))
+                                {
+                                    <option value="@source.Id">
+                                        **** **** **** @source.Card.Last4
+                                        -
+                                        @source.Card.ExpMonth / @source.Card.ExpYear
+                                    </option>
+                                }
+                            </select>
                         </div>
                     </div>
-
-                    <div class="form-group padding-v-20">
-                        <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg btn-pay">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
                             @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
                             <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
                                 -
@@ -233,43 +176,101 @@
                         </button>
                     </div>
 
+                    <div class="row">
+                        <p>&nbsp;</p>
+                    </div>
                 </form>
-
             </div>
         </div>
+    }
 
-        <div class="clearfix"></div>
+    @* PAY VIA NEW CC *@
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 col-sm-12">
 
-        <hr />
-    </div>   
+            <form action="@formActionUrl" method="post" id="payment-form" class="form-horizontal">
 
-    <div id="payment-for-zero-checkout" style="display: none;">
-        <div class="row">
-            <div class="col-md-6 col-md-offset-3 col-sm-12">
+                <input type="hidden" name="paymentoption" id="paymentoption-new" class="payment-option" value="0"/>
+                <textarea name="paymentdescription" id="payment-description-new-cc" class="hide payment-description"></textarea>
+                <input type="hidden" name="coupon" class="coupon" value=""/>
 
-                <form id="payment-form-zero-checkout" class="form-horizontal existing-payment-form" action="@formActionUrl" method="post">
-                    <input type="hidden" name="paymentoption" value="-1" />
-                    <input type="hidden" name="coupon" class="coupon" value="" />
+                <div class="form-group">
+                    <label for="card-element">
+                        <p>Enter new credit or debit card</p>
+                    </label>
+                    <div id="card-number"></div>
+                    <div id="card-cvc"></div>
+                    <div id="card-expiry"></div>
 
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-register-primary btn-lg btn-pay">
-                            Checkout
-                            <span class="pay-button-amount">
-                                - $<span>0.00</span>*
-                            </span>
-                            &raquo;
-                        </button>
+                    <!-- Used to display Element errors. -->
+                    <div id="card-errors" role="alert"></div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-10 col-md-offset-1">
+                        <div class="am-checkbox text-center">
+                            <input type="checkbox"
+                                   id="savepaymentinfo"
+                                   name="savepaymentinfo"
+                                   value="1"
+                                   @(Request["savepaymentinfo"] == "1" || hasPlans ? " checked=\"checked\"" : "")
+                                   @(hasPlans ? "disabled" : "")/>
+
+                            <label for="savepaymentinfo">
+                                Save my card for convenient checkout
+                            </label>
+                        </div>
                     </div>
+                </div>
 
-                </form>
+                <div class="form-group padding-v-20">
+                    <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg btn-pay">
+                        @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
+                        <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                            -
+                            $<span class="total-due-today-cc"></span>*
+                        </span>
+                        &raquo;
+                    </button>
+                </div>
 
-            </div>
+            </form>
+
         </div>
     </div>
 
-    <p class="text-center text-small text-muted hide">
-        * Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name
-    </p>
+    <div class="clearfix"></div>
+
+    <hr/>
+</div>
+
+<div id="payment-for-zero-checkout" style="display: none;">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 col-sm-12">
+
+            <form id="payment-form-zero-checkout" class="form-horizontal existing-payment-form" action="@formActionUrl" method="post">
+                <input type="hidden" name="paymentoption" value="-1"/>
+                <input type="hidden" name="coupon" class="coupon" value=""/>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-register-primary btn-lg btn-pay">
+                        Checkout
+                        <span class="pay-button-amount">
+                            - $<span>0.00</span>*
+                        </span>
+                        &raquo;
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<p class="text-center text-small text-muted hide">
+    * Cost includes fees supporting afterschool programs for @SessionVariables.RegistrationStartPageAccount.Name
+</p>
 
 </div>
 
@@ -278,15 +279,15 @@
 
 <script>
     function allowContinue() {
-        if ($('#payinperson').is(':checked')) {
-            $('#btn-continue').prop('disabled', false);
-        } else {
-            $('#btn-continue').prop('disabled', true);
-        }
+        let isPayInPersonIsChecked = $('#payinperson').is(':checked');
+        $('#btn-continue').prop('disabled', !isPayInPersonIsChecked);
     }
 
     function updateTotals(regFee, regTotalToday) {
-        let total = regFee + regTotalToday + getSubscriptionTotalValue();
+        let total = regFee + regTotalToday;
+        if (@Json.Encode(startsToday)) {
+            total += getSubscriptionTotalValue();
+        }
         $('.total-due-today').html(total.toFixed(2));
     }
 
@@ -295,34 +296,33 @@
     }
 
     function updateTotalsCC(regFee, regTotalToday) {
-        let total = regFee + regTotalToday + getSubscriptionTotalValueCC();
+        let total = regFee + regTotalToday;
+        if (@Json.Encode(startsToday)) {
+            total += getSubscriptionTotalValueCC();
+        }
         $('.total-due-today-cc').html(total.toFixed(2));
     }
 
     function updateTotalsACH(regFee, regTotalToday) {
-        let total = regFee + regTotalToday + getSubscriptionTotalValueACH();
+        let total = regFee + regTotalToday;
+        if (@Json.Encode(startsToday)) {
+            total += getSubscriptionTotalValue();
+        }
         $('.total-due-today-ach').html(total.toFixed(2));
     }
 
     function getSubscriptionTotalValue() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html());
-        }
-        return 0;
+        let subscriptionTotalValue = $('#subscription-total-value').html();
+        return !isNaN(subscriptionTotalValue)
+            ? parseFloat(subscriptionTotalValue)
+            : 0;
     }
 
     function getSubscriptionTotalValueCC() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html()) + parseFloat($('#subscription-ccf-value').html());
-        }
-        return 0;
-    }
-
-    function getSubscriptionTotalValueACH() {
-        if (!isNaN($('#subscription-total-value').html())) {
-            return parseFloat($('#subscription-total-value').html());
-        }
-        return 0;
+        let subscriptionTotalValue = $('#subscription-total-value').html();
+        return !isNaN(subscriptionTotalValue)
+            ? parseFloat(subscriptionTotalValue) + parseFloat($('#subscription-ccf-value').html())
+            : 0;
     }
 
     function updatePaymentOptionCost(paymentPlanId) {
@@ -333,10 +333,10 @@
         $('#registration-fee-row').addClass('hide');
         $('.paymentplan-fee-row').addClass('hide');
 
-        if (paymentPlanId == 0) {
+        if (paymentPlanId === 0) {
             updateTotals(getRegFee(), 0);
             updateTotalsCC(getRegFeeCC(), 0);
-            updateTotalsACH(getRegFeeACH(), 0);
+            updateTotalsACH(getRegFee(), 0);
             $('#registration-fee-row').removeClass('hide');
         } else {
             updateTotals(0, regTotalToday);
@@ -348,31 +348,26 @@
     }
 
     function getRegFee() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html());
-        }
-
-        return 0;
+        let feeTotalValue = $('#fee-total-value').html();
+        return !isNaN(feeTotalValue)
+            ? parseFloat(feeTotalValue)
+            : 0;
     }
 
     function getTotalCCFee(paymentPlanId) {
-        return parseFloat($('#payment-plan-ccf-' + paymentPlanId).html()) + parseFloat($('#subscription-ccf-value').html());
+        let paymentPlanCreditCardFee = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
+        
+        if (@Json.Encode(startsToday)) {
+            paymentPlanCreditCardFee += parseFloat($('#subscription-ccf-value').html());
+        }
+        return paymentPlanCreditCardFee;
     }
 
     function getRegFeeCC() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html()) + parseFloat($('#fee-ccf').html());
-        }
-
-        return 0;
-    }
-
-    function getRegFeeACH() {
-        if (!isNaN($('#fee-total-value').html())) {
-            return parseFloat($('#fee-total-value').html());
-        }
-
-        return 0;
+        let feeTotalValue = $('#fee-total-value').html();
+        return !isNaN(feeTotalValue)
+            ? parseFloat(feeTotalValue) + parseFloat($('#fee-ccf').html())
+            : 0;
     }
 
     function sizePaymentBlock() {
@@ -387,22 +382,16 @@
     }
 
     function updatePaymentFees(paymentPlanId) {
-        var newccf = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
-        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
+        let newCreditCardFee = parseFloat($('#payment-plan-ccf-' + paymentPlanId).html());
+        let newAchFee = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
 
-        $('#fee-ccf').html(newccf);
-        $('#fee-asf').html(newasf);
-        $('#fee-ccf-text').html('$' + newccf.toFixed(2));
-        $('#fee-asf-text').html('$' + newasf.toFixed(2));
+        $('#fee-ccf').html(newCreditCardFee);
+        $('#fee-asf').html(newAchFee);
+        $('#fee-ccf-text').html('$' + newCreditCardFee.toFixed(2));
+        $('#fee-asf-text').html('$' + newAchFee.toFixed(2));
     }
 
-    function updatePaymentFeesACH(paymentPlanId) {
-        var newasf = parseFloat($('#payment-plan-asf-' + paymentPlanId).html());
-
-        if (!isNaN($('#subscription-total-value').html())) {
-            newasf += parseFloat($('#subscription-asf-value').html());
-        }
-
+    function updatePaymentFeesAch() {
         $('#fee-asf').html(0);
         $('#fee-asf-text').html('$0');
     }
@@ -417,16 +406,16 @@
             let paymentPlanId = $(this).attr('id').split('-')[1];
 
             updatePaymentFees(paymentPlanId);
-            updatePaymentFeesACH(paymentPlanId);
+            updatePaymentFeesAch();
             updatePaymentOptionCost(paymentPlanId);
             unapplyCoupon();
 
         });
 
         updatePaymentFees(0);
-        updatePaymentFeesACH(0);
+        updatePaymentFeesAch();
 
-        @if ( (participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
+        @if ((participationObject.IsNotEmpty() && participationObject.PaymentPlans.Any()) || postPayPlan.IsNotEmpty())
         {
             @: updatePaymentOptionCost(0);
         }
@@ -434,7 +423,7 @@
         {
             @: updateTotals(getRegFee(), 0);
             @: updateTotalsCC(getRegFeeCC(), 0);
-            @: updateTotalsACH(getRegFeeACH(), 0);
+            @: updateTotalsACH(getRegFee(), 0);
             @: updateCC(getTotalCCFee(0), 0);
         }
 
@@ -482,7 +471,7 @@
             });
         });
 
-        var stripe = Stripe('@AfterSchoolLibrary.Billing.StripeHelper.PublishableKey');
+        var stripe = Stripe('@StripeHelper.PublishableKey');
         var elements = stripe.elements();
 
         // Custom styling can be passed to options when creating an Element.
@@ -523,15 +512,15 @@
 </script>
 
 
-@if (acceptACH)
+@if (acceptAch)
 {
     <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 
     <script>
         var linkHandler = Plaid.create({
-            env: '@AfterSchoolLibrary.Helpers.PlaidHelper.PlaidEnvironment',
+            env: '@PlaidHelper.PlaidEnvironment',
             clientName: 'AfterSchool HQ',
-            key: '@AfterSchoolLibrary.Helpers.PlaidHelper.PublicKey',
+            key: '@PlaidHelper.PublicKey',
             product: ['auth'],
             selectAccount: true,
             onSuccess: function (public_token, metadata) {
@@ -570,8 +559,6 @@
             linkHandler.open();
         };
     </script>
-
-
 }
 
 <script>

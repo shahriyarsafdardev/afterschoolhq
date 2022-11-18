@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Billing;
+using Stripe;
+using Account = AfterSchoolLibrary.Models.Account;
+using Coupon = AfterSchoolLibrary.Models.Coupon;
+using Payout = AfterSchoolLibrary.Models.Payout;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Services
 {
     public static class TransactionService
     {
-
         public static decimal GetFeesChargedToBiller(this Transaction transaction)
         {
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
@@ -50,7 +55,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static decimal GetPaymentTypeFeesChargedToPayer(this Transaction transaction)
-        {            
+        {
             if (transaction.PaymentTypeFeePayerAccountId == transaction.PayerAccountId && transaction.PaymentTypeFeeCharged.HasValue)
                 return transaction.PaymentTypeFeeCharged.Value;
 
@@ -75,7 +80,7 @@ namespace AfterSchoolLibrary.Services
                     return originalBillerAmount;
 
                 return transaction.Amount.Value;
-            };
+            }
 
             return Math.Max(transaction.Amount.Value - transaction.GetFees() - transaction.GetRefundedAmountAHQ(msgs, dc), 0);
         }
@@ -93,22 +98,22 @@ namespace AfterSchoolLibrary.Services
             if (transaction.IsCredit())
             {
                 var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
-                                            transaction.BillerAccountId.Value,
-                                            null,
-                                            null,
-                                            transaction.CreateDate.Value.AddSeconds(1),
-                                            false,
-                                            msgs,
-                                            dc);
+                    transaction.BillerAccountId.Value,
+                    null,
+                    null,
+                    transaction.CreateDate.Value.AddSeconds(1),
+                    false,
+                    msgs,
+                    dc);
 
                 var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
-                                    transaction.BillerAccountId.Value,
-                                    null,
-                                    null,
-                                    transaction.CreateDate.Value,
-                                    false,
-                                    msgs,
-                                    dc);
+                    transaction.BillerAccountId.Value,
+                    null,
+                    null,
+                    transaction.CreateDate.Value,
+                    false,
+                    msgs,
+                    dc);
 
                 return totalCredited - totalDebited;
             }
@@ -168,13 +173,16 @@ namespace AfterSchoolLibrary.Services
         {
             return Account.Load(transaction.BillerAccountId.Value, msgs, dc);
         }
+
         public static Account GetPayerAccount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(transaction.PayerAccountId.Value, msgs, dc);
         }
 
-        public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
+            var amount = checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostWithoutSubscriptionToPurchaseTodayWithFees(msgs, dc);
             var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
 
@@ -183,13 +191,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.BillingAccount,
                 checkoutObject.ConvenienceFeePayer,
                 checkoutObject.CreditCardFeePayer,
-                checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc),
+                amount,
                 checkoutObject.ParticipationObject?.Name,
                 checkoutObject.Purchase?.ID,
                 transactionType,
                 checkoutObject.PaymentType,
                 checkoutObject.PaymentSourceType,
-                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(), 
+                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(),
                 usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) : new decimal?(),
                 checkoutObject.ConvenienceFeeOverrideAmount ?? checkoutObject.GetTotalConvenienceFeesToday(msgs, dc),
                 checkoutObject.PaymentTypeFeeOverrideAmount ?? checkoutObject.GetTotalCreditCardFeesToday(msgs, dc),
@@ -204,7 +212,11 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer, decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee, string stripeChargeOrRefundId, string description, DateTime createDate, bool usedStripeConnect, WebUser loggedInUser, decimal? couponValue, Coupon coupon = null,  SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, Account ConvenienceFeePayer, Account PaymentTypeFeePayer,
+            decimal? amount, string participationObjectName, int? purchaseId, TransactionType transactionType, PaymentType paymentType,
+            PaymentSourceType paymentSourceType, decimal? platformFee, decimal? platformPercentFee, decimal convenienceFee, decimal paymentTypeFee,
+            string stripeChargeOrRefundId, string description, DateTime createDate, bool usedStripeConnect, WebUser loggedInUser, decimal? couponValue,
+            Coupon coupon = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -231,14 +243,17 @@ namespace AfterSchoolLibrary.Services
                 PaymentTypeFeeCharged = paymentTypeFee,
                 UsedStripeConnect = usedStripeConnect,
                 CouponId = coupon?.ID,
-                CouponValue = couponValue
+                CouponValue = couponValue,
             };
             msgs.AddRange(transaction.Save(dc));
 
             return transaction;
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount, int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription, TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType, PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, decimal? convenienceFeeAmount,
+            int? convenienceFeePayerId, decimal? paymentTypeFeeAmount, int? paymentTypeFeePayerId, Purchase purchase, string refundDescription,
+            TransactionType transactionType, string stripeChargeOrRefundId, Transaction originalTransaction, PaymentType paymentType,
+            PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -269,7 +284,8 @@ namespace AfterSchoolLibrary.Services
             return transaction;
         }
 
-        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, string description, TransactionType transactionType, PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNew(Account payingAccount, Account billingAccount, decimal amount, string description, TransactionType transactionType,
+            PaymentSourceType paymentSourceType, bool usedStripeConnect, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -296,19 +312,19 @@ namespace AfterSchoolLibrary.Services
         public static bool HasUnfulfilledRefundRequests(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.GetCountByTransactionId(
-                        transaction.ID.Value,
-                        RefundRequest.InProcessStatuses,
-                        msgs,
-                        dc) > 0;
+                transaction.ID.Value,
+                RefundRequest.InProcessStatuses,
+                msgs,
+                dc) > 0;
         }
 
         public static bool HasManuallyApprovedRefundRequest(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RefundRequest.GetCountByTransactionId(
-                        transaction.ID.Value,
-                        RefundRequestStatus.ApprovedManualRefund.AsList(),
-                        msgs,
-                        dc) > 0;
+                transaction.ID.Value,
+                RefundRequestStatus.ApprovedManualRefund.AsList(),
+                msgs,
+                dc) > 0;
         }
 
         public static bool IsTotallyRefunded(this Transaction transaction, bool includeFees, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -326,12 +342,14 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return amount >= 1 && amount <= transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc);
         }
 
-        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
             {
@@ -344,12 +362,14 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
-        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool IsAmountRefundable(this Transaction transaction, decimal amount, bool allowFullAmountRefund = false,
+            bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return amount >= 1 && amount <= transaction.GetRefundableAmount(allowFullAmountRefund, isPartialRefundWithConvenienceFee, msgs, dc);
         }
 
-        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static decimal GetRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false,
+            bool isPartialRefundWithConvenienceFee = false, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (transaction.IsCharge())
             {
@@ -365,7 +385,8 @@ namespace AfterSchoolLibrary.Services
             return 0;
         }
 
-        public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasRefundableAmount(this Transaction transaction, bool allowFullAmountRefund = false, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return transaction.GetRefundableAmount(allowFullAmountRefund, msgs, dc) > 0;
         }
@@ -411,37 +432,37 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetRefundedAmountAHQ(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalRefundByOriginalTransaction(
-                        transaction.ID.Value, 
-                        PaymentSourceType.AfterSchoolPlatform, 
-                        false, 
-                        msgs, 
-                        dc) 
-                    + 
-                    Transaction.GetTotalRefundByOriginalTransaction(
-                        transaction.ID.Value,
-                        PaymentSourceType.ManualAfterSchoolHQ,
-                        false,
-                        msgs,
-                        dc);
+                       transaction.ID.Value,
+                       PaymentSourceType.AfterSchoolPlatform,
+                       false,
+                       msgs,
+                       dc)
+                   +
+                   Transaction.GetTotalRefundByOriginalTransaction(
+                       transaction.ID.Value,
+                       PaymentSourceType.ManualAfterSchoolHQ,
+                       false,
+                       msgs,
+                       dc);
         }
 
         public static decimal GetRefundedAHQFees(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.GetTotalRefundFeesByOriginalTransaction(
-                        transaction.ID.Value,
-                        null,
-                        PaymentSourceType.AfterSchoolPlatform,
-                        false,
-                        msgs,
-                        dc)
-                    +
-                    Transaction.GetTotalRefundFeesByOriginalTransaction(
-                        transaction.ID.Value,
-                        null,
-                        PaymentSourceType.ManualAfterSchoolHQ,
-                        false,
-                        msgs,
-                        dc);
+                       transaction.ID.Value,
+                       null,
+                       PaymentSourceType.AfterSchoolPlatform,
+                       false,
+                       msgs,
+                       dc)
+                   +
+                   Transaction.GetTotalRefundFeesByOriginalTransaction(
+                       transaction.ID.Value,
+                       null,
+                       PaymentSourceType.ManualAfterSchoolHQ,
+                       false,
+                       msgs,
+                       dc);
         }
 
         public static decimal GetRefundedAmountAHQWithoutFees(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -493,7 +514,7 @@ namespace AfterSchoolLibrary.Services
                     default:
                         return currentPayout.PayoutStatusId.ToString();
                 }
-            
+
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
@@ -524,22 +545,22 @@ namespace AfterSchoolLibrary.Services
                 if ((transaction.PaymentSourceTypeId == PaymentSourceType.ManualAfterSchoolHQ && transaction.IsCredit()))
                 {
                     var totalCredited = Transaction.GetTotalAmountCreditedToAccount(
-                                            transaction.BillerAccountId.Value,
-                                            null,
-                                            null,
-                                            transaction.CreateDate.Value.AddSeconds(1),
-                                            false,
-                                            msgs,
-                                            dc);
+                        transaction.BillerAccountId.Value,
+                        null,
+                        null,
+                        transaction.CreateDate.Value.AddSeconds(1),
+                        false,
+                        msgs,
+                        dc);
 
                     var totalDebited = Transaction.GetTotalAmountDebitedFromAccount(
-                                        transaction.BillerAccountId.Value,
-                                        null,
-                                        null,
-                                        transaction.CreateDate.Value,
-                                        false,
-                                        msgs,
-                                        dc);
+                        transaction.BillerAccountId.Value,
+                        null,
+                        null,
+                        transaction.CreateDate.Value,
+                        false,
+                        msgs,
+                        dc);
 
                     return totalCredited - totalDebited > 0;
                 }
@@ -548,7 +569,8 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Payout CreatePayout(this Transaction transaction, PayoutStatus payoutStatus, PaymentType paymentType, WebUser loggedInUser,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!transaction.PayoutId.HasValue)
                 return PayoutService.CreateNew(
@@ -568,9 +590,7 @@ namespace AfterSchoolLibrary.Services
         {
             var payments = transaction.GetPayments(msgs, dc);
 
-            payments.ForEach(payment => {
-                payment.MarkAsDeleted(loggedInUser, msgs, dc);
-            });
+            payments.ForEach(payment => { payment.MarkAsDeleted(loggedInUser, msgs, dc); });
 
             transaction.IsDeleted = true;
             transaction.LastModifiedDate = DateTime.UtcNow;
@@ -591,7 +611,8 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
-        public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, RefundRequestStatus refundRequestStatus, string reason, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RefundRequest RequestRefund(this Transaction transaction, decimal refundAmount, RefundRequestStatus refundRequestStatus, string reason,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             RefundRequest request = null;
 
@@ -602,25 +623,27 @@ namespace AfterSchoolLibrary.Services
                 request = RefundRequestService.CreateNew(transaction, refundAmount, refundRequestStatus, reason, loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
-                Helpers.EmailHelper.SendRefundRequestToProvider(request, loggedInUser, msgs, dc);
+                EmailHelper.SendRefundRequestToProvider(request, loggedInUser, msgs, dc);
 
             return request;
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
+            decimal? paymentTypeFeeAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return transaction.Refund(
-                        refundAmount, 
-                        allowFullAmountRefund, 
-                        convenienceFeeAmount, 
-                        paymentTypeFeeAmount, 
-                        PaymentSourceType.AfterSchoolPlatform, 
-                        loggedInUser, 
-                        msgs, 
-                        dc);
+                refundAmount,
+                allowFullAmountRefund,
+                convenienceFeeAmount,
+                paymentTypeFeeAmount,
+                PaymentSourceType.AfterSchoolPlatform,
+                loggedInUser,
+                msgs,
+                dc);
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
+            decimal? paymentTypeFeeAmount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Transaction refund = null;
 
@@ -632,7 +655,7 @@ namespace AfterSchoolLibrary.Services
                 string stripeRefundId = null;
 
                 if (paymentSourceType == PaymentSourceType.AfterSchoolPlatform)
-                {                    
+                {
                     //.. when refunding, platform will pay all the amount to parent first
                     //.. then based on that and after deducting fee, we will charge remaining amount to provider
                     //.. lets say activity charge is 100$, and convenience charge is 6$, then parent pays 110$ (106$ + 4$ cc fee).
@@ -640,11 +663,11 @@ namespace AfterSchoolLibrary.Services
 
                     var stripeHelper = StripeHelper.GetStripeHelperConnectAccount();
                     var stripeRefund = stripeHelper.CreateRefund(
-                                    chargeId: transaction.StripeChargeOrRefundId,
-                                    totalAmount: refundAmount,
-                                    reason: Billing.StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
-                                    reverseTransfer: false,
-                                    msgs: msgs);
+                        chargeId: transaction.StripeChargeOrRefundId,
+                        totalAmount: refundAmount,
+                        reason: StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
+                        reverseTransfer: false,
+                        msgs: msgs);
 
                     if (stripeRefund.IsNotEmpty())
                     {
@@ -662,7 +685,7 @@ namespace AfterSchoolLibrary.Services
                         var amountToReverse = Math.Min(billerPayout, refundAmount);
 
                         if (stripeTransferId.IsNotEmpty() && amountToReverse > 0)
-                           stripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
+                            stripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
                     }
                     else
                         msgs.Add("Error creating refund", MessageType.UserError);
@@ -699,29 +722,33 @@ namespace AfterSchoolLibrary.Services
             return refund;
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction Refund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             return transaction.Refund(refundAmount, false, null, null, loggedInUser, msgs, dc);
         }
 
-        public static Transaction ManualRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction ManualRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
             return transaction.Refund(refundAmount, false, null, null, PaymentSourceType.ManualProvider, loggedInUser, msgs, dc);
         }
 
         public static Transaction RefundPayerFullAmount(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        {            
+        {
             return transaction.Refund(
-                    transaction.GetPayerAmount(), 
-                    true, 
-                    transaction.GetConvenienceFeesChargedToPayer(),
-                    transaction.GetPaymentTypeFeesChargedToPayer(),
-                    loggedInUser, 
-                    msgs, 
-                    dc);
+                transaction.GetPayerAmount(),
+                true,
+                transaction.GetConvenienceFeesChargedToPayer(),
+                transaction.GetPaymentTypeFeesChargedToPayer(),
+                loggedInUser,
+                msgs,
+                dc);
         }
 
-        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount,
+            decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return originalTransaction.CreateNewRefund(
                 fullAmount,
@@ -738,7 +765,9 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount, decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType, Account refundingAccount, Account refundedAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static Transaction CreateNewRefund(this Transaction originalTransaction, decimal fullAmount, decimal? convenienceFeeAmount,
+            decimal? paymentTypeFeeAmount, string refundId, TransactionType transactionType, PaymentType paymentType, PaymentSourceType paymentSourceType,
+            Account refundingAccount, Account refundedAccount, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var refundDescription = "Payment refund";
             var participationObjects = originalTransaction.GetParticipationObjects(msgs, dc);
@@ -781,7 +810,7 @@ namespace AfterSchoolLibrary.Services
         public static bool HasRefundsManual(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Transaction.LoadByOriginalTransactionIdByIsDeleted(transaction.ID.Value, PaymentSourceType.ManualProvider, false, msgs, dc).Any();
-        }   
+        }
 
         public static bool CanParentRequestRefund(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -797,7 +826,7 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Stripe.Charge GetStripeCharge(this Transaction transaction, SystemMessages msgs)
+        public static Charge GetStripeCharge(this Transaction transaction, SystemMessages msgs)
         {
             if (transaction.TransactionTypeId == TransactionType.Charge)
                 return StripeHelper.GetStripeHelperConnectAccount().GetCharge(transaction.StripeChargeOrRefundId, msgs);
@@ -815,7 +844,7 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static Stripe.Transfer CreateStripeTransfer(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transfer CreateStripeTransfer(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var billerAccount = transaction.GetBillerAccount(msgs, dc);
             var canCreateStripeTransfer = billerAccount.HasStripeConnectedAccount && billerAccount.StripePayoutsEnabled;
@@ -836,18 +865,18 @@ namespace AfterSchoolLibrary.Services
             if (hasStripeUserId && !transaction.PayoutId.HasValue)
             {
                 var transfer = StripeHelper.GetStripeHelperConnectAccount().CreateTransfer(
-                                billerAmount,
-                                transaction.Description,
-                                transaction.Uid.ToString(),
-                                billerAccount.StripeUserId,
-                                transaction.StripeChargeOrRefundId,
-                                new Dictionary<string, string>()
-                                {
-                                    { "TransactionUid", transaction.Uid.ToString() },
-                                    { "StripeCharge", transaction.StripeChargeOrRefundId },
-                                    { "LoggedInUser", loggedInUser.Uid.ToString() },
-                                },
-                                msgs);
+                    billerAmount,
+                    transaction.Description,
+                    transaction.Uid.ToString(),
+                    billerAccount.StripeUserId,
+                    transaction.StripeChargeOrRefundId,
+                    new Dictionary<string, string>()
+                    {
+                        {"TransactionUid", transaction.Uid.ToString()},
+                        {"StripeCharge", transaction.StripeChargeOrRefundId},
+                        {"LoggedInUser", loggedInUser.Uid.ToString()},
+                    },
+                    msgs);
 
                 if (transfer.IsEmpty())
                     msgs.Add("Error creating transfer", MessageType.UserError);
@@ -858,13 +887,13 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static decimal GetStripeFee(this Transaction transaction) 
+        public static decimal GetStripeFee(this Transaction transaction)
         {
             if (transaction.IsCharge() && transaction.PaymentSourceTypeId == PaymentSourceType.AfterSchoolPlatform)
             {
                 if (transaction.PaymentTypeId == PaymentType.CreditCard)
                     return StripeHelper.CalculateStripeFee(transaction.GetPayerAmount(), true);
-                
+
                 if (transaction.PaymentTypeId == PaymentType.ACH)
                     return StripeHelper.CalculateStripeAchFee(transaction.GetPayerAmount(), true);
             }
@@ -917,10 +946,9 @@ namespace AfterSchoolLibrary.Services
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
-
         }
     }
 }

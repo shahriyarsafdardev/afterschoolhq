@@ -191,7 +191,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
-        
+
         #region ActivitySchedule
 
         public static ActivitySchedule GetActivitySchedule(this Account account, int Id, SystemMessages msgs = null,
@@ -1670,7 +1670,8 @@ namespace AfterSchoolLibrary.Services
                     var stripeSubscription = currentAccountPackage.GetStripeSubscription(amsgs);
 
                     if (stripeSubscription.IsEmpty() || stripeSubscription.CanceledAt.HasValue)
-                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs).FirstOrDefault(x => !x.CanceledAt.HasValue);
+                        stripeSubscription = StripeHelper.GetStripeHelperSubscriberAccount().GetSubscriptions(account.StripeCustomerId, amsgs)
+                            .FirstOrDefault(x => !x.CanceledAt.HasValue);
 
                     if (stripeSubscription.IsEmpty())
                         return;
@@ -1709,7 +1710,7 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     var stripePlanAmountInDollars = stripePlan.AmountDecimal / 100;
-                    
+
                     // check and update price changes
                     if (stripeSubscription.Discount?.Coupon?.PercentOff > 0)
                     {
@@ -1728,7 +1729,6 @@ namespace AfterSchoolLibrary.Services
                         currentAccountPackage.BillingPeriodTypeId = stripePlan.Interval.ToEnum<BillingPeriodType>();
                         amsgs.AddRange(currentAccountPackage.Save(adc));
                     }
-
                 },
                 onSuccess: (smsgs) => msgs.AddRange(smsgs),
                 onFailure: (fmsgs) => msgs.AddRange(fmsgs),
@@ -2450,12 +2450,13 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, bool keepTrialDays,
+        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
+            bool keepTrialDays,
             string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             AccountPackage newAccountPackage = null;
-            
+
             Database.ExecuteTransaction(
                 action: (amsgs, adc) =>
                 {
@@ -2474,10 +2475,10 @@ namespace AfterSchoolLibrary.Services
 
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
-                    
+
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
                     var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
-                    
+
                     stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
 
                     var defaultPaymentMethod = "";
@@ -2485,7 +2486,7 @@ namespace AfterSchoolLibrary.Services
                     if (!accountPackageToRemove.IsDuringTrial)
                         defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
-                    
+
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
                         account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
@@ -2497,7 +2498,7 @@ namespace AfterSchoolLibrary.Services
                         amsgs);
 
                     newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
-                    
+
                     StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(newAccountPackage.StripeSubscriptionId, null,
                         null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
                 },
@@ -2506,7 +2507,7 @@ namespace AfterSchoolLibrary.Services
                 onException: emsgs => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
-            
+
             return newAccountPackage;
         }
 
@@ -2583,25 +2584,24 @@ namespace AfterSchoolLibrary.Services
             BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
-            
             Package package = null;
             AccountPackage currentPackage = null;
             var newap = new AccountPackage();
             var loggedInUserId = loggedInUser.IsNotEmpty() ? loggedInUser.ID.Value : 0;
-            
+
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     package = Package.Load(packageId, amsgs, adc);
                     var trialDayCount = package.GetFeature(FeatureType.TrialDays, amsgs, adc).GetMaxValue().ToInteger();
-                    
+
                     var priceId = billingPeriodType == BillingPeriodType.Month
                         ? package.StripePricePerMonthId
                         : package.StripePricePerYearId;
                     var price = billingPeriodType == BillingPeriodType.Month
                         ? package.Price
                         : package.PricePerYear;
-                    
+
                     newap.AccountId = account.ID;
                     newap.PackageId = packageId;
                     newap.BillingPeriodTypeId = billingPeriodType;
@@ -2626,7 +2626,7 @@ namespace AfterSchoolLibrary.Services
                         amsgs.AddRange(newap.Save(adc));
                     }
 
-                    
+
                     if (amsgs.HasNoErrors() && newap.ID.HasValue)
                         package.CopyFeaturesToAccountPackage(newap, loggedInUser, amsgs, adc);
 
@@ -2643,7 +2643,6 @@ namespace AfterSchoolLibrary.Services
             );
 
             return newap;
-            
         }
 
         public static AccountPackage AddPackage(this Account account, int packageId,
@@ -2884,14 +2883,14 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void UpdateOnboardingStep(this Account account, OnboardingStepType onboardingStep, SystemMessages msgs, DatabaseConnection dc = null)
-        {            
+        {
             account.OnboardingStepDone = onboardingStep;
             msgs.AddRange(account.Save(dc));
         }
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, null, null, false, accountType, null, null, null, null, 
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, null,
                 loggedInUser, false, msgs, dc);
         }
 
@@ -2910,7 +2909,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
+                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
                 SignUpType.NotSet, loggedInUser, msgs, dc);
         }
 
@@ -2920,7 +2919,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
+                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
                 signUpTypeId, loggedInUser, msgs, dc);
         }
 
@@ -3601,7 +3600,7 @@ namespace AfterSchoolLibrary.Services
                 accountType: AccountType.AfterSchool,
                 packageId: null,
                 packageBillingPeriod: null,
-                timeZone: null, 
+                timeZone: null,
                 SignUpType.NotSet,
                 loggedInUser: user,
                 msgs: msgs,
@@ -4442,14 +4441,14 @@ namespace AfterSchoolLibrary.Services
 
             checkoutObject.Transaction = transaction;
 
-            if (registrant.IsNotEmpty())
-            {
-                registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
+            if (registrant.IsEmpty())
+                return;
 
-                // Ensure the seat is reserved
-                if (msgs.HasNoErrors())
-                    checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
-            }
+            registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
+
+            // Ensure the seat is reserved
+            if (msgs.HasNoErrors())
+                checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
         }
 
         public static void ProcessPrePayFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs,

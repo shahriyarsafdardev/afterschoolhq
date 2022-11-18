@@ -16,8 +16,8 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             var schedule = new ActivitySchedule
             {
                 ID = 4,
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddDays(35),
+                StartDate = new DateTime(2022, 09, 27, 0, 0, 0),
+                EndDate = new DateTime(2022, 09, 27, 0, 0, 0).AddDays(35),
                 IsOngoing = false,
             };
 
@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             var upcomingInstance = new ActivityInstance {StartDateTime = dayOfMonth};
 
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, DayOfWeek.Monday,
-                dayOfMonth.Day, schedule, upcomingInstance, DateTime.UtcNow);
+                dayOfMonth.Day, schedule, upcomingInstance, new DateTime(2022, 09, 27, 0, 0, 0));
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2022, 11, expectedPaymentStartDayOfMonth, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
         }

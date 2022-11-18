@@ -1904,11 +1904,11 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
-            var coupon = new Coupon();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if (couponCode.IsNotEmpty())
-                coupon = SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs);
+            var coupon = couponCode.IsNotEmpty()
+                ? SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs)
+                : new Coupon();
 
             if (ccSourceId.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && bankSourceId.IsEmpty() &&
                 paymentoption.IsNotEmpty() && paymentoption.ToInteger() >= 0)
@@ -1920,131 +1920,119 @@ namespace AfterSchool.Controllers
             if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
                 return RedirectToAction("thankyou", new {id = registration.Uid});
 
-            if (msgs.HasNoErrors())
-            {
-                SubscriptionPlan paymentPlan = null;
+            if (msgs.HasErrors())
+                return View("Payment");
 
-                var billingAccount = participationObject.PaymentAccount;
-                var payingAccount = SessionVariables.CurrentAccount;
-                var convenienceFeePayer =
-                    billingAccount.IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount;
-                var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
+            var billingAccount = participationObject.PaymentAccount;
+            var payingAccount = SessionVariables.CurrentAccount;
+            var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
 
-                if (participationObject.PostPayPlans.Any())
-                    convenienceFeePayer = participationObject.PostPayPlans.First().IsConvenienceFeeTakenOutOfCost
-                        ? billingAccount
-                        : payingAccount;
+            var convenienceFeePayer = participationObject.PostPayPlans.Any()
+                ? participationObject.PostPayPlans.First().IsConvenienceFeeTakenOutOfCost ? billingAccount : payingAccount
+                : billingAccount.IsConvenienceFeeTakenOutOfCost
+                    ? billingAccount
+                    : payingAccount;
 
-                // get original cost
-                var submittedRecord = registration.GetRegistrant(msgs);
-                var registrantActivity = submittedRecord.GetRegistrantActivity(participationObject, msgs);
-                if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue &&
-                    participationObject.Cost > registrantActivity.AmountCharged)
-                    participationObject.Cost = registrantActivity.AmountCharged;
+            // get original cost
+            var submittedRecord = registration.GetRegistrant(msgs);
+            var registrantActivity = submittedRecord.GetRegistrantActivity(participationObject, msgs);
+            if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
+                participationObject.Cost = registrantActivity.AmountCharged;
 
-                BankAccountPurchaseObject bankAccountPurchaseObject = null;
-                CreditCardPurchaseObject creditCardPurchaseObject = null;
-
-                if (plaidtoken.IsNotEmpty() || bankSourceId.IsNotEmpty())
-                    bankAccountPurchaseObject = new BankAccountPurchaseObject
-                    {
-                        PlaidPublicToken = plaidtoken,
-                        PlaidAccountId = plaidaccountid,
-                        StripeSourceId = bankSourceId,
-                    };
-                else if (ccSourceId.IsNotEmpty() || stripetoken.IsNotEmpty())
-                    creditCardPurchaseObject = new CreditCardPurchaseObject
-                    {
-                        StripeToken = stripetoken,
-                        StripeSourceId = ccSourceId,
-                    };
-
-                if (paymentoption.IsNotEmpty() && paymentoption.IsNumber())
-                    paymentPlan = SubscriptionPlan.Load(paymentoption.ToInteger(), msgs);
-
-                var paymentType = PaymentType.NotSet;
-                if (bankAccountPurchaseObject.IsNotEmpty())
-                    paymentType = PaymentType.ACH;
-                else if (creditCardPurchaseObject.IsNotEmpty())
-                    paymentType = PaymentType.CreditCard;
-
-                var datesToRemove = new List<DateTime>();
-
-                selectedDates?.ForEach(date =>
+            var bankAccountPurchaseObject = plaidtoken.IsNotEmpty() || bankSourceId.IsNotEmpty()
+                ? new BankAccountPurchaseObject
                 {
-                    if (currentRegistrant.IsReservedForDate(participationObject, date, null))
-                        datesToRemove.Add(date);
-                });
-
-                datesToRemove.ForEach(date => selectedDates.Remove(date));
-
-                var checkoutObject = AccountService.ProcessRegistrationWithPayment(
-                    new CheckoutObject
-                    {
-                        Coupon = coupon,
-                        NumberOfSeats = 1,
-                        ParticipationObject = participationObject,
-                        PaymentPlan = paymentPlan,
-                        SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
-                        PostPayPlan = participationObject.PostPayPlans.FirstOrDefault(),
-                        Products = new List<Product>(),
-                        PayingAccount = payingAccount,
-                        BillingAccount = billingAccount,
-                        Registration = registration,
-                        CreditCardPurchaseObject = creditCardPurchaseObject,
-                        BankAccountPurchaseObject = bankAccountPurchaseObject,
-                        SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
-                        MasterRegistrant = currentRegistrant,
-                        PaymentType = paymentType,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        ConvenienceFeePayer = convenienceFeePayer,
-                        CreditCardFeePayer = creditCardFeePayer,
-                        SelectedDates = selectedDates,
-                    },
-                    currentUser,
-                    msgs);
-
-                if (msgs.HasNoErrors())
-                {
-                    var activity = participationObject.GetActivity();
-                    string phrase;
-
-                    if (participationObject.SubscriptionPlans.IsNotEmpty() &&
-                        participationObject.SubscriptionPlans.Count > 0)
-                    {
-                        var plan = participationObject.SubscriptionPlans.FirstOrDefault();
-                        var amount = paymentType == PaymentType.ACH
-                            ? plan?.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency()
-                            : plan?.GetTotalCostWithFees(billingAccount).ToCurrency();
-                        phrase =
-                            $@"{amount}/{plan.BillingPeriodTypeId} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
-                    }
-                    else
-                    {
-                        phrase =
-                            $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {(paymentType == PaymentType.ACH ? "Bank Account" : "Credit Card")}";
-                    }
-
-                    // LOG: Someone Paid amount/billing period via paymentType for participationObjectType participationObjectName
-                    // or
-                    // LOG: Someone Paid amount via PaymentType for participationObjectType participationObjectName
-                    SessionVariables.WebSession.LogActivity(
-                        currentAccount,
-                        currentUser,
-                        WebSessionActionType.Paid,
-                        ObjectType.Transaction,
-                        objectId: checkoutObject.Transaction?.ID.Value,
-                        objectText: phrase,
-                        indirectObjectType: participationObject.GetWebSessionObjectType(),
-                        indirectObjectId: participationObject.ObjectID.Value,
-                        indirectObjectText: activity.Name
-                    );
-
-                    return RedirectToAction("thankyou", new {id = registration.Uid});
+                    PlaidPublicToken = plaidtoken,
+                    PlaidAccountId = plaidaccountid,
+                    StripeSourceId = bankSourceId,
                 }
+                : null;
+
+            var creditCardPurchaseObject = bankAccountPurchaseObject.IsEmpty() && (ccSourceId.IsNotEmpty() || stripetoken.IsNotEmpty())
+                ? new CreditCardPurchaseObject
+                {
+                    StripeToken = stripetoken,
+                    StripeSourceId = ccSourceId,
+                }
+                : null;
+
+            var paymentPlan = paymentoption.IsNotEmpty() && paymentoption.IsNumber() ? SubscriptionPlan.Load(paymentoption.ToInteger(), msgs) : null;
+
+            PaymentType paymentType;
+            if (bankAccountPurchaseObject.IsNotEmpty())
+                paymentType = PaymentType.ACH;
+            else if (creditCardPurchaseObject.IsNotEmpty())
+                paymentType = PaymentType.CreditCard;
+            else
+                paymentType = PaymentType.NotSet;
+
+            if (selectedDates.IsNotEmpty())
+            {
+                var datesToRemove = selectedDates.Where(date => currentRegistrant.IsReservedForDate(participationObject, date, null)).ToList();
+                datesToRemove.ForEach(date => selectedDates.Remove(date));
             }
 
-            return View();
+            var inputCheckoutObject = new CheckoutObject
+            {
+                Coupon = coupon,
+                NumberOfSeats = 1,
+                ParticipationObject = participationObject,
+                PaymentPlan = paymentPlan,
+                SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                PostPayPlan = participationObject.PostPayPlans.FirstOrDefault(),
+                Products = new List<Product>(),
+                PayingAccount = payingAccount,
+                BillingAccount = billingAccount,
+                Registration = registration,
+                CreditCardPurchaseObject = creditCardPurchaseObject,
+                BankAccountPurchaseObject = bankAccountPurchaseObject,
+                SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
+                MasterRegistrant = currentRegistrant,
+                PaymentType = paymentType,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                ConvenienceFeePayer = convenienceFeePayer,
+                CreditCardFeePayer = creditCardFeePayer,
+                SelectedDates = selectedDates,
+            };
+            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, msgs);
+
+            if (msgs.HasErrors())
+                return View("Payment");
+
+            var activity = participationObject.GetActivity();
+
+            var phrase = GetActivityLogPhraseForPaidTransaction(participationObject, paymentType, billingAccount);
+
+            // LOG: Someone Paid amount/billing period via paymentType for participationObjectType participationObjectName
+            // or
+            // LOG: Someone Paid amount via PaymentType for participationObjectType participationObjectName
+            SessionVariables.WebSession.LogActivity(
+                currentAccount,
+                currentUser,
+                WebSessionActionType.Paid,
+                ObjectType.Transaction,
+                objectId: resultCheckoutObject.Transaction?.ID.Value,
+                objectText: phrase,
+                indirectObjectType: participationObject.GetWebSessionObjectType(),
+                indirectObjectId: participationObject.ObjectID.Value,
+                indirectObjectText: activity.Name
+            );
+
+            return RedirectToAction("thankyou", new {id = registration.Uid});
+        }
+
+        private static string GetActivityLogPhraseForPaidTransaction(ParticipationObject participationObject, PaymentType paymentType, Account billingAccount)
+        {
+            var paidViaAch = paymentType == PaymentType.ACH;
+            var paymentMethodDescription = paidViaAch ? "Bank Account" : "Credit Card";
+            if (participationObject.SubscriptionPlans.IsEmpty() || participationObject.SubscriptionPlans.Count == 0)
+                return $@"{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()} via {paymentMethodDescription}";
+
+            var plan = participationObject.SubscriptionPlans.First();
+            var amountPerPaymentPeriod = paidViaAch
+                ? plan.GetTotalCostWithConvenienceFee(billingAccount).ToCurrency()
+                : plan.GetTotalCostWithFees(billingAccount).ToCurrency();
+            return $@"{amountPerPaymentPeriod}/{plan.BillingPeriodTypeId} via {paymentMethodDescription}";
         }
 
         [HttpPost]
@@ -2101,9 +2089,8 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Pay(string id, string ccsource, string banksource, string stripetoken, string plaidtoken,
-            string plaidaccountid, string savepaymentinfo, string paymentoption, string amount,
-            string paymentdescription)
+        public ActionResult Pay(string id, string ccsource, string banksource, string stripetoken, string plaidtoken, string plaidaccountid,
+            string savepaymentinfo, string paymentoption, string amount, string paymentdescription)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -2114,90 +2101,79 @@ namespace AfterSchool.Controllers
 
             var billingAccount = Account.LoadByUid(id.ToGuid(), msgs);
 
-            if (msgs.HasNoErrors())
-            {
-                var payingAccount = SessionVariables.CurrentAccount;
-                var convenienceFeePayer = billingAccount;
-                var creditCardFeePayer = payingAccount;
-                var cost = amount.ToDecimal();
-                var calcObj = new FeeCalculationObject(cost, billingAccount, msgs);
-                var convenienceFee = calcObj.GetConvenienceFee();
-                var ccFee = 0M;
-                var overrideAmount = cost;
-                var description = paymentdescription.IsNotBlank()
-                    ? paymentdescription
-                    : $"{billingAccount.Name} Payment";
+            if (msgs.HasErrors())
+                return View();
 
-                BankAccountPurchaseObject bankAccountPurchaseObject = null;
-                CreditCardPurchaseObject creditCardPurchaseObject = null;
-                CheckoutObject checkoutObject = null;
+            var payingAccount = SessionVariables.CurrentAccount;
+            var cost = amount.ToDecimal();
+            var feeCalculationObject = new FeeCalculationObject(cost, billingAccount, msgs);
+            var convenienceFee = feeCalculationObject.GetConvenienceFee();
+            var description = paymentdescription.IsNotBlank()
+                ? paymentdescription
+                : $"{billingAccount.Name} Payment";
 
-                if (plaidtoken.IsNotEmpty() || banksource.IsNotEmpty())
+            var bankAccountPurchaseObject = plaidtoken.IsNotEmpty() || banksource.IsNotEmpty()
+                ? new BankAccountPurchaseObject
                 {
-                    bankAccountPurchaseObject = new BankAccountPurchaseObject
-                    {
-                        PlaidPublicToken = plaidtoken,
-                        PlaidAccountId = plaidaccountid,
-                        StripeSourceId = banksource,
-                    };
+                    PlaidPublicToken = plaidtoken,
+                    PlaidAccountId = plaidaccountid,
+                    StripeSourceId = banksource,
                 }
-                else if (ccsource.IsNotEmpty() || stripetoken.IsNotEmpty())
+                : null;
+
+            var creditCardPurchaseObject = bankAccountPurchaseObject.IsEmpty() && (ccsource.IsNotEmpty() || stripetoken.IsNotEmpty())
+                ? new CreditCardPurchaseObject
                 {
-                    creditCardPurchaseObject = new CreditCardPurchaseObject
-                    {
-                        StripeToken = stripetoken,
-                        StripeSourceId = ccsource,
-                    };
-
-                    ccFee = calcObj.GetCreditCardFee();
-                    overrideAmount += ccFee;
+                    StripeToken = stripetoken,
+                    StripeSourceId = ccsource,
                 }
+                : null;
 
-                var masterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
-                checkoutObject = AccountService.ProcessPayment(
-                    new CheckoutObject
-                    {
-                        OverrideAmount = overrideAmount,
-                        ConvenienceFeeOverrideAmount = convenienceFee,
-                        PaymentTypeFeeOverrideAmount = ccFee,
-                        PayingAccount = payingAccount,
-                        BillingAccount = billingAccount,
-                        CreditCardPurchaseObject = creditCardPurchaseObject,
-                        BankAccountPurchaseObject = bankAccountPurchaseObject,
-                        SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
-                        PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
-                        PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                        ConvenienceFeePayer = convenienceFeePayer,
-                        CreditCardFeePayer = creditCardFeePayer,
-                        MasterRegistrant = masterRegistrant,
-                        Description = description,
-                    },
-                    currentUser,
-                    msgs: msgs);
+            var ccFee = creditCardPurchaseObject.IsNotEmpty() ? feeCalculationObject.GetCreditCardFee() : 0M;
+            var overrideAmount = cost + ccFee;
 
-                if (msgs.HasNoErrors())
+            var masterRegistrant = SessionVariables.CurrentAccount.GetFirstParentOrGuardianRegistrant(msgs);
+            var checkoutObject = AccountService.ProcessPayment(
+                new CheckoutObject
                 {
-                    var phrase =
-                        $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
+                    OverrideAmount = overrideAmount,
+                    ConvenienceFeeOverrideAmount = convenienceFee,
+                    PaymentTypeFeeOverrideAmount = ccFee,
+                    PayingAccount = payingAccount,
+                    BillingAccount = billingAccount,
+                    CreditCardPurchaseObject = creditCardPurchaseObject,
+                    BankAccountPurchaseObject = bankAccountPurchaseObject,
+                    SavePaymentInfo = savepaymentinfo.IfEmpty("0").ToBoolean(),
+                    PaymentType = bankAccountPurchaseObject.IsNotEmpty() ? PaymentType.ACH : PaymentType.CreditCard,
+                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                    ConvenienceFeePayer = billingAccount,
+                    CreditCardFeePayer = payingAccount,
+                    MasterRegistrant = masterRegistrant,
+                    Description = description,
+                },
+                currentUser,
+                msgs: msgs);
 
-                    // LOG: Someone Paid amount via PaymentType to participationObjectType participationObjectName
-                    SessionVariables.WebSession.LogActivity(
-                        currentAccount,
-                        currentUser,
-                        WebSessionActionType.Paid,
-                        ObjectType.Transaction,
-                        objectId: checkoutObject.Transaction.ID.Value,
-                        objectText: phrase,
-                        indirectObjectType: ObjectType.Account,
-                        indirectObjectId: billingAccount.ID.Value,
-                        indirectObjectText: billingAccount.Name
-                    );
+            if (msgs.HasErrors())
+                return View();
 
-                    return RedirectToAction("paymentthankyou", new {id = billingAccount.Uid});
-                }
-            }
+            var phrase =
+                $@"{overrideAmount.ToCurrency()} via {(bankAccountPurchaseObject.IsNotEmpty() ? "Bank Account" : "Credit Card")}";
 
-            return View();
+            // LOG: Someone Paid amount via PaymentType to participationObjectType participationObjectName
+            SessionVariables.WebSession.LogActivity(
+                currentAccount,
+                currentUser,
+                WebSessionActionType.Paid,
+                ObjectType.Transaction,
+                objectId: checkoutObject.Transaction.ID.Value,
+                objectText: phrase,
+                indirectObjectType: ObjectType.Account,
+                indirectObjectId: billingAccount.ID.Value,
+                indirectObjectText: billingAccount.Name
+            );
+
+            return RedirectToAction("paymentthankyou", new {id = billingAccount.Uid});
         }
 
         #endregion
