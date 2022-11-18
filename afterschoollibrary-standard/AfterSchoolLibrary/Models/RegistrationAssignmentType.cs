@@ -9,6 +9,6 @@ public enum RegistrationAssignmentType
     ReservedPendingPayment = 6,
     ReservedPendingParentalConsent = 7,
     Withdrawn = 8,
-    ReservedPendingBackgroundCheck = 9,
+    ReservedPendingBackgroundCheck = 9
 }
 
