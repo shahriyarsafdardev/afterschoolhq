@@ -196,7 +196,7 @@ namespace AfterSchool.Models
         {
             var  (startingGrade,endingGrade) = participationObject.GetMinAndMaxGradeLevels();
             var singleGrade = startingGrade.Name == endingGrade.Name;
-            return "This activity is for students in grade" + (singleGrade? $" {startingGrade.Name}": $"s  {startingGrade.Name} - {endingGrade.Name}") + ".";
+            return $"This activity is for students in {startingGrade.Name}" + (singleGrade? "": $" - {endingGrade.Name}") + " grade.";
 
         }
         public static string PrintAgeIneligibilityMessageString(ParticipationObject participationObject)
@@ -216,7 +216,7 @@ namespace AfterSchool.Models
             var  startingGrade = participationObject.GetActivity().GetStartingGradeLevel().Name;
             var endingGrade = participationObject.GetActivity().GetEndingGradeLevel().Name;
             var singleGrade = startingGrade == endingGrade;
-            return $"This activity is for students who are in grade {startingGrade}" + (singleGrade? "": $"- {endingGrade}")+
+            return $"This activity is for students who are in {startingGrade}" + (singleGrade? "": $"- {endingGrade}") +" grade" +
                    $" and {PrintGenderRestrictions(participationObject).ToLower()}.";
         }
         public static string PrintAgeAndGenderIneligibilityMessageString(ParticipationObject participationObject)
