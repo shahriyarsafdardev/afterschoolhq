@@ -77,6 +77,23 @@
             margin-top: -35px;
         }
         
+        #confirm-savenext-button > button
+        {
+            width: 175px;
+        }
+        
+        @@media(max-width: 992px) {
+            .pull-right > button , .pull-left > button
+            {
+                width: 130px;
+                color: #282828;
+            }
+            #confirm-savenext-button > button
+            {
+                width: 130px;
+            }
+        }
+        
     </style>
     
     <div class="panel panel-default margin-bottom-zero">
@@ -325,9 +342,9 @@
                                         <div class="pull-right" id="confirm-save-button">
                                             @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
                                         </div>
-                                    </div>
-                                    <div id="confirm-savenext-button">
-                                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                        <div id="confirm-savenext-button">
+                                            @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                        </div>
                                     </div>
                                 </div>
                             </div>
