@@ -62,13 +62,14 @@
                     <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Opportunity</label>
                 </div>
 
+                
                 <div class="am-radio inline">
-                    <input @(Model.HasPostPayPlan() ? "disabled" : "") type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)"/>
+                    <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)"/>
                     <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Dates</label>
                 </div>
 
                 <p class="text-muted">
-                    @(Model.HasPostPayPlan() ? "Individual classes are disabled because attendance-based billing is in use as a payment plan." : "This is used if you allow volunteers to be registered for all dates in the activity or for each individual date.")
+                    This is used if you allow volunteers to be registered for all dates in the activity or for each individual date.
                 </p>
 
             </div>
