@@ -1210,6 +1210,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Registrant GetMasterRegistrant(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (registrant.IsMaster)
+                return registrant;
             return registrant.ParentRegistrantId.HasValue ? Registrant.Load(registrant.ParentRegistrantId.Value, msgs, dc) : null;
         }
 
@@ -1716,8 +1718,6 @@ namespace AfterSchoolLibrary.Services
                     return registration;
             }
 
-            ;
-
             return null;
         }
 
@@ -1991,6 +1991,19 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
 
             return model;
+        }
+
+        public static void UpdateGenderFromFormQuestionAnswers(this Registrant registrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            if (registrant.GenderId != GenderType.NotSet || !registrant.ID.HasValue) return;
+            var formQuestionAnswer =
+                FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId((int)registrant.ID , QuestionDataType.RegistrantGender, msgs , dc);
+            if (formQuestionAnswer.IsNotEmpty() && formQuestionAnswer.Text.IsNotEmpty())
+            {
+                registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
+                msgs.AddRange(registrant.Save(dc));
+            }
         }
     }
 }

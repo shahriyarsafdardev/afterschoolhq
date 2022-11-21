@@ -117,40 +117,5 @@ namespace AfterSchoolLibrary
 
             return msgs;
         }
-
-        public static void AddContactFromDemo(string orgname, string firstName, string email, SystemMessages msgs)
-        {
-            var sg = new SendGridClient(SendGridApiKey);
-
-            var contact = new List<object>
-            {
-                new
-                {
-                    first_name = firstName,
-                    email,
-                    custom_fields = new List<object>
-                    {
-                        new
-                        {
-                            org_name = orgname,
-                            web_demo = 1,
-                        },
-                    },
-                },
-            };
-
-            var task = Task.Run(async () =>
-            {
-                return await sg.RequestAsync(
-                    BaseClient.Method.PUT,
-                    urlPath: MarketingUrlPath,
-                    requestBody: contact.ToJSON());
-            });
-            task.Wait();
-
-            dynamic response = task.Result;
-            if (response.StatusCode != HttpStatusCode.Accepted)
-                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-        }
     }
 }

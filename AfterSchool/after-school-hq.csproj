@@ -725,6 +725,7 @@
     <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
+    <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
     <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
@@ -1389,7 +1390,6 @@
     <Content Include="fonts\ionicons.svg" />
     <Content Include="Frame 8(6).png" />
     <Content Include="img\092515-SeattleHigh5-Globalist-JT006.jpg" />
-    <Content Include="img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="img\a-bekele.png" />
     <Content Include="img\adam-winger-jemgmDw4LJ4-unsplash.jpg" />
     <Content Include="img\ahq-activity-page.png" />

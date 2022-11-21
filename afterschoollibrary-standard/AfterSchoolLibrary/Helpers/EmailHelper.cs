@@ -45,7 +45,6 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }
-
         public static SystemMessages SendPaymentReminder(RegistrantActivity ra)
         {
             var msgs = new SystemMessages();
@@ -2742,5 +2741,6 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
             return msgs;
         }
+
     }
 }

@@ -62,6 +62,7 @@
                     <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerActivity)">The Entire Opportunity</label>
                 </div>
 
+                
                 <div class="am-radio inline">
                     <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int)ActivityCostFrequencyType.PerClass)"/>
                     <label for="costfrequencytype-@((int)ActivityCostFrequencyType.PerClass)">Individual Dates</label>

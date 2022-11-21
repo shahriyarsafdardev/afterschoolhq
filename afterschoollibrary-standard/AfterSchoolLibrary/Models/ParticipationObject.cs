@@ -1,15 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
     public class ParticipationObject
     {
+        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            RequiresParentalConsent = true;
+            IsInviteOnly = false;
+            InitObject(participationObjectId, participationObjectType, true, msgs, dc);
+        }
+
+        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            RequiresParentalConsent = true;
+            IsInviteOnly = false;
+            InitObject(participationObjectId, participationObjectType, loadAllDetails, msgs, dc);
+        }
+
+        public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitActivity(activity, true, msgs, dc);
+        }
+
+        public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitActivityGroup(activityGroup, true, msgs, dc);
+        }
+
+        public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            InitAccountActivityGroup(aag, true, msgs, dc);
+        }
+
+        public ParticipationObject(ActivityType activityType)
+        {
+            ActivityType = activityType;
+        }
+
         public object Object { get; set; }
         public int? ObjectID { get; set; }
         public ParticipationObjectType ObjectType { get; set; }
@@ -62,26 +99,14 @@ namespace AfterSchoolLibrary.Models
         public bool IsPublished { get; set; }
         public int? RegistrationCutoffHours { get; set; }
         public bool IsContinuousEnrollmentEnabled { get; set; }
+        public bool IsGenderEnforced { get; set; }
 
-        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            RequiresParentalConsent = true;
-            IsInviteOnly = false;
-            InitObject(participationObjectId, participationObjectType, true, msgs, dc);
-        }
-
-        public ParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            RequiresParentalConsent = true;
-            IsInviteOnly = false;
-            InitObject(participationObjectId, participationObjectType, loadAllDetails, msgs, dc);
-        }
-
-        private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            this.SubscriptionPlans = new List<SubscriptionPlan>();
-            this.PostPayPlans = new List<SubscriptionPlan>();
-            this.PaymentPlans = new List<SubscriptionPlan>();
+            SubscriptionPlans = new List<SubscriptionPlan>();
+            PostPayPlans = new List<SubscriptionPlan>();
+            PaymentPlans = new List<SubscriptionPlan>();
             switch (participationObjectType)
             {
                 case ParticipationObjectType.AccountActivityGroup:
@@ -119,7 +144,7 @@ namespace AfterSchoolLibrary.Models
             Cost = activity.CostPerRegistrant;
             CostUnitType = global::CostUnitType.PerRegistrant;
             AllowToPayLater = activity.AllowToPayLater;
-            IsRegistrationFree = (!activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal());
+            IsRegistrationFree = !activity.CostPerRegistrant.HasValue || activity.CostPerRegistrant.Value == 0.ToDecimal();
             RequiresParentalConsent = activity.RequiresParentalConsent;
             IsInviteOnly = activity.IsInviteOnly;
             ActivityLocationType = activity.ActivityLocationTypeId;
@@ -134,6 +159,7 @@ namespace AfterSchoolLibrary.Models
             IsPublished = activity.IsPublished;
             RegistrationCutoffHours = activity.RegistrationCutoffHours;
             IsContinuousEnrollmentEnabled = activity.IsContinuousEnrollment;
+            IsGenderEnforced = activity.IsGenderEnforced;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -156,7 +182,7 @@ namespace AfterSchoolLibrary.Models
                     SeatsRemaining = activity.GetSeatsRemainingForNextDate(msgs, dc);
                 else
                     SeatsRemaining = activity.GetSeatsRemaining(msgs, dc);
-                
+
                 RegistrationPeriod = activity.GetActiveRegistrationPeriod(msgs, dc);
                 Form = activity.GetActiveActivityForm(msgs, dc)?.GetForm(msgs, dc);
                 OwnerAccount = activity.GetAccount(msgs, dc);
@@ -192,7 +218,7 @@ namespace AfterSchoolLibrary.Models
             ContactEmail = activityGroup.ContactEmail;
             ContactName = activityGroup.ContactName;
             ContactPhone = activityGroup.ContactPhone;
-            IsRegistrationFree = (!activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal());
+            IsRegistrationFree = !activityGroup.Cost.HasValue || activityGroup.Cost.Value == 0.ToDecimal();
             IsInviteOnly = activityGroup.IsInviteOnly;
             AllowToPayLater = activityGroup.AllowToPayLater;
             RequiresParentalConsent = activityGroup.RequiresParentalConsent;
@@ -200,6 +226,7 @@ namespace AfterSchoolLibrary.Models
             EndDate = activityGroup.EndDate;
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = activityGroup.IsPublished;
+            IsGenderEnforced = false;
 
             if (loadAllDetails)
             {
@@ -241,9 +268,10 @@ namespace AfterSchoolLibrary.Models
             ContactEmail = aag.ContactEmail;
             ContactPhone = aag.ContactPhone;
             RegistrationMode = RegistrationMode.Apply; // aag.RegistrationModeId;
-            IsRegistrationFree = (!aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal());
+            IsRegistrationFree = !aag.Cost.HasValue || aag.Cost.Value == 0.ToDecimal();
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = aag.IsPublished;
+            IsGenderEnforced = false;
 
             if (loadAllDetails)
             {
@@ -259,67 +287,39 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public ParticipationObject(Activity activity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public bool AcceptsGenderType (GenderType? gender)
         {
-            InitActivity(activity, true, msgs, dc);
-        }
-
-        public ParticipationObject(ActivityGroup activityGroup, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            InitActivityGroup(activityGroup, true, msgs, dc);
-        }
-
-        public ParticipationObject(AccountActivityGroup aag, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            InitAccountActivityGroup(aag, true, msgs, dc);
-        }
-
-        public ParticipationObject(ActivityType activityType)
-        {
-            this.ActivityType = activityType;
+            return gender switch
+            {
+                GenderType.Male => GenderRestriction == GenderRestrictionType.MaleOnly,
+                GenderType.Female => GenderRestriction == GenderRestrictionType.FemaleOnly,
+                _ => false,
+            };
         }
 
         #region QueryObjects
 
         public bool IsMatch(ParticipationObject participationObject)
         {
-            return participationObject.ObjectID == this.ObjectID && participationObject.ObjectType == this.ObjectType;
+            return participationObject.ObjectID == ObjectID && participationObject.ObjectType == ObjectType;
         }
 
-        public bool IsNotFreeAndCanAcceptPayments
-        {
-            get
-            {
-                return !IsFree && PaymentAccount.CanProcessPayments();
-            } 
-        }
+        public bool IsNotFreeAndCanAcceptPayments => !IsFree && PaymentAccount.CanProcessPayments();
 
-        public Account PaymentAccount
-        {
-            get
-            {
-                return Provider ?? OwnerAccount;
-            }            
-        }
+        public Account PaymentAccount => Provider ?? OwnerAccount;
 
-        public bool CanRegisterPerClass
-        {
-            get
-            {
-                return this.IsActivity() && this.GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass;
-            }
-        }
+        public bool CanRegisterPerClass => IsActivity() && GetActivity().CostFrequencyTypeId == ActivityCostFrequencyType.PerClass;
 
         public string GetHomePageUrl(bool isAfterSchool = true)
         {
-            switch (this.ObjectType)
+            switch (ObjectType)
             {
                 case ParticipationObjectType.Activity:
                     return ActivityService.BuildHomePageUrl(OwnerAccount.UniqueName, ActivityType.Value, UniqueName);
                 case ParticipationObjectType.ActivityGroup:
-                    return ((ActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
+                    return ((ActivityGroup) Object).GetHomePageUrl(isAfterSchool);
                 case ParticipationObjectType.AccountActivityGroup:
-                    return ((AccountActivityGroup)this.Object).GetHomePageUrl(isAfterSchool);
+                    return ((AccountActivityGroup) Object).GetHomePageUrl(isAfterSchool);
             }
 
             return "";
@@ -327,12 +327,12 @@ namespace AfterSchoolLibrary.Models
 
         public string GetBrowseUrl(bool isAfterSchool = true)
         {
-            switch (this.ObjectType)
+            switch (ObjectType)
             {
                 case ParticipationObjectType.Activity:
                     return GetHomePageUrl(isAfterSchool);
                 case ParticipationObjectType.ActivityGroup:
-                    return ((ActivityGroup)this.Object).BrowseUrl;
+                    return ((ActivityGroup) Object).BrowseUrl;
                 case ParticipationObjectType.AccountActivityGroup:
                     return GetHomePageUrl(isAfterSchool);
             }
@@ -352,10 +352,10 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsSport()
         {
-            if (this.ObjectType == ParticipationObjectType.Activity)
-                return this.ActivityType.Value == global::ActivityType.Team;
+            if (ObjectType == ParticipationObjectType.Activity)
+                return ActivityType.Value == global::ActivityType.Team;
 
-            return this.ActivityGroupType == global::ActivityGroupType.League;
+            return ActivityGroupType == global::ActivityGroupType.League;
         }
 
         public (GradeLevel minGradeLevel, GradeLevel maxGradeLevel) GetMinAndMaxGradeLevels(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -364,7 +364,7 @@ namespace AfterSchoolLibrary.Models
                 return (GetMinGradeLevel(msgs, dc), GetMaxGradeLevel(msgs, dc));
 
             return (null, null);
-        }            
+        }
 
         public GradeLevel GetMinGradeLevel(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -383,8 +383,8 @@ namespace AfterSchoolLibrary.Models
         }
 
         /// <summary>
-        /// if seats remaining is null meaning no seats are set (could be a league or unlimited access) 
-        /// or seats remaining > 0
+        ///     if seats remaining is null meaning no seats are set (could be a league or unlimited access)
+        ///     or seats remaining > 0
         /// </summary>
         /// <returns></returns>
         public bool HasSeatsAvailable()
@@ -397,11 +397,11 @@ namespace AfterSchoolLibrary.Models
             if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Applied)
             {
                 if (IsActivity())
-                    return this.GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
-                else if (IsActivityGroup())
-                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
-                else if (IsAccountActivityGroup())
-                    return this.GetAccountActivityGroup()
+                    return GetActivity().GetActivityProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
+                if (IsActivityGroup())
+                    return GetActivityGroup().GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?.Value;
+                if (IsAccountActivityGroup())
+                    return GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
                         .GetGroupProperty(AccountPropertyType.ApplicationThankYouEmail, msgs, dc)?
                         .Value;
@@ -409,11 +409,11 @@ namespace AfterSchoolLibrary.Models
             else
             {
                 if (ObjectType == ParticipationObjectType.Activity)
-                    return this.GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
-                else if (IsActivityGroup())
-                    return this.GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
-                else if (IsAccountActivityGroup())                
-                    return this.GetAccountActivityGroup()
+                    return GetActivity().GetActivityProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
+                if (IsActivityGroup())
+                    return GetActivityGroup().GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?.Value;
+                if (IsAccountActivityGroup())
+                    return GetAccountActivityGroup()
                         .GetActivityGroup(msgs, dc)
                         .GetGroupProperty(AccountPropertyType.RegistrationThankYouEmail, msgs, dc)?
                         .Value;
@@ -425,19 +425,20 @@ namespace AfterSchoolLibrary.Models
         public int GetRegistrantCountByAssignmentType(RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetSeatCountByAssignmentType(
-                assignmentType: assignmentType,
-                participationObjectId: this.ObjectID,
-                participationObjectType: this.ObjectType,
+                assignmentType,
+                participationObjectId: ObjectID,
+                participationObjectType: ObjectType,
                 msgs: msgs,
                 dc: dc);
         }
 
-        public int GetRegistrantCountByAssignmentTypes(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public int GetRegistrantCountByAssignmentTypes(List<RegistrationAssignmentType> assignmentTypes, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             return RegistrantActivity.GetSeatCountByAssignmentTypes(
-                assignmentTypes: assignmentTypes,
-                participationObjectId: this.ObjectID,
-                participationObjectType: this.ObjectType,
+                assignmentTypes,
+                participationObjectId: ObjectID,
+                participationObjectType: ObjectType,
                 msgs: msgs,
                 dc: dc);
         }
@@ -541,16 +542,16 @@ namespace AfterSchoolLibrary.Models
         {
             var registrantGradeLevelAnswer = registrant.GetAnswer(QuestionDataType.RegistrantGrade, msgs, dc);
             if (registrantGradeLevelAnswer.Text.IsNotEmpty())
-                return IsGradeInRange(registrantGradeLevelAnswer.Text,msgs,dc);
+                return IsGradeInRange(registrantGradeLevelAnswer.Text, msgs, dc);
             return false;
         }
-
+        
         public bool IsGradeInRange(string answer, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
                 return true;
 
-            var gradeLevels = GradeLevel.Load(null, null, null, msgs: msgs, dc: dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
+            var gradeLevels = GradeLevel.Load(null, null, null, msgs, dc).OrderBy(gradeLevel => gradeLevel.ID).ToList();
             if (!MinGradeId.HasValue)
                 MinGradeId = gradeLevels.First().ID;
 
@@ -559,11 +560,12 @@ namespace AfterSchoolLibrary.Models
 
             var registrantGradeLevel = gradeLevels.FirstOrDefault(gradeLevel => gradeLevel.VerifyGradeLevel(answer));
 
-            if (registrantGradeLevel.IsNotEmpty() && registrantGradeLevel.ID.IsNotEmpty() && registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
+            if (registrantGradeLevel.IsNotEmpty() && registrantGradeLevel.ID.IsNotEmpty() &&
+                registrantGradeLevel.ID.Value.IsInRange(MinGradeId.Value, MaxGradeId.Value))
                 return true;
 
             return false;
-        }      
+        }
 
         public bool IsStudentAgeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -592,7 +594,7 @@ namespace AfterSchoolLibrary.Models
                 return false;
 
             return true;
-        }       
+        }
 
         public bool RestrictByGrade()
         {
@@ -621,7 +623,6 @@ namespace AfterSchoolLibrary.Models
                 default:
                     return global::ObjectType.NotSet;
             }
-                
         }
 
         #endregion
@@ -651,7 +652,7 @@ namespace AfterSchoolLibrary.Models
         public ActivityGroup GetActivityGroup()
         {
             if (IsActivityGroup())
-                return (ActivityGroup)this.Object;
+                return (ActivityGroup) Object;
 
             return null;
         }
@@ -659,7 +660,7 @@ namespace AfterSchoolLibrary.Models
         public AccountActivityGroup GetAccountActivityGroup()
         {
             if (IsAccountActivityGroup())
-                return (AccountActivityGroup)this.Object;
+                return (AccountActivityGroup) Object;
 
             return null;
         }
@@ -667,7 +668,7 @@ namespace AfterSchoolLibrary.Models
         public Activity GetActivity()
         {
             if (IsActivity())
-                return (Activity)this.Object;
+                return (Activity) Object;
 
             return null;
         }
@@ -681,9 +682,9 @@ namespace AfterSchoolLibrary.Models
         {
             if (IsAccountActivityGroup())
                 return GetAccountActivityGroup().ActivityGroupId;
-            else if (IsActivityGroup())
+            if (IsActivityGroup())
                 return GetActivityGroupId();
-            else if (IsActivity())
+            if (IsActivity())
                 return GetActivity().ActivityGroupId;
 
             return new int?();
@@ -698,7 +699,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (IsAccountActivityGroup())
                 return GetAccountActivityGroupId();
-            else if (IsActivity())
+            if (IsActivity())
                 return GetActivity().AccountActivityGroupId;
 
             return new int?();
@@ -717,11 +718,11 @@ namespace AfterSchoolLibrary.Models
         public Subscriber AddOrUpdateSubscriber(WebUser user, SubscriberStatus status, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var subscriber = Subscriber.LoadByObjectIdByObjectTypeIdByWebUserId(
-                                this.ObjectID.Value,
-                                this.ObjectType.ToAHQObjectType(),
-                                user.ID.Value, 
-                                msgs, 
-                                dc);
+                ObjectID.Value,
+                ObjectType.ToAHQObjectType(),
+                user.ID.Value,
+                msgs,
+                dc);
 
             if (subscriber.IsEmpty())
                 return SubscriberService.CreateNew(this, user, status, loggedInUser, msgs, dc);
@@ -733,7 +734,7 @@ namespace AfterSchoolLibrary.Models
 
         public bool HasSubscriptionPlans()
         {
-            return this.SubscriptionPlans.IsNotEmpty();
+            return SubscriptionPlans.IsNotEmpty();
         }
 
         public SubscriptionPlan GetSubscriptionPlan()
@@ -746,7 +747,7 @@ namespace AfterSchoolLibrary.Models
 
         public bool HasPostPayPlan()
         {
-            return this.PostPayPlans.IsNotEmpty();
+            return PostPayPlans.IsNotEmpty();
         }
 
         public SubscriptionPlan GetPostPayPlan()
@@ -787,40 +788,41 @@ namespace AfterSchoolLibrary.Models
 
         public bool ShouldParentPay()
         {
-            var subscriptionCheck = (!this.SubscriptionPlans.Any() || !this.SubscriptionPlans.First().SplitCostEvenly || !this.IsRegistrationFree);
+            var subscriptionCheck = !SubscriptionPlans.Any() || !SubscriptionPlans.First().SplitCostEvenly || !IsRegistrationFree;
 
-            return !this.IsFree && 
-                this.RegistrationMode == RegistrationMode.Register && 
-                this.SeatsRemaining > 0 &&
-                subscriptionCheck;
+            return !IsFree &&
+                   RegistrationMode == RegistrationMode.Register &&
+                   SeatsRemaining > 0 &&
+                   subscriptionCheck;
         }
 
         public decimal GetAmountPaidByRegistrant(int registrantId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return ActivityPayment.GetTotalPaidByParticipationObjectByRegistrant(
-                this.ObjectID.Value, 
-                this.ObjectType,
-                registrantId, 
+                ObjectID.Value,
+                ObjectType,
+                registrantId,
                 false,
-                msgs, 
+                msgs,
                 dc);
         }
 
-        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityPayment AddPayment(decimal amount, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan,
+            DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var payment = new ActivityPayment()
+            var payment = new ActivityPayment
             {
-                ParticipationObjectId = this.ObjectID,
-                ParticipationObjectTypeId = this.ObjectType,
+                ParticipationObjectId = ObjectID,
+                ParticipationObjectTypeId = ObjectType,
                 Amount = amount,
                 RegistrantId = registrant?.ID,
-                AccountId = this.PaymentAccount?.ID,
+                AccountId = PaymentAccount?.ID,
                 TransactionId = transaction?.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = createDate,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
             };
 
             msgs.AddRange(payment.Save(dc));
@@ -828,23 +830,25 @@ namespace AfterSchoolLibrary.Models
             return payment;
         }
 
-        public ActivityPayment AddPayment(decimal amountReceivedByProvider, decimal amountPaidByParent, bool isAmountProRated, Registrant registrant, Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public ActivityPayment AddPayment(decimal amountReceivedByProvider, decimal amountPaidByParent, bool isAmountProRated, Registrant registrant,
+            Transaction transaction, RegistrantSubscriptionPlan registrantSubscriptionPlan, DateTime createDate, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
         {
-            var payment = new ActivityPayment()
+            var payment = new ActivityPayment
             {
-                ParticipationObjectId = this.ObjectID,
-                ParticipationObjectTypeId = this.ObjectType,
+                ParticipationObjectId = ObjectID,
+                ParticipationObjectTypeId = ObjectType,
                 Amount = amountReceivedByProvider,
                 AmountPaidByParent = amountPaidByParent,
                 IsProRated = isAmountProRated,
                 RegistrantId = registrant?.ID,
-                AccountId = this.PaymentAccount?.ID,
+                AccountId = PaymentAccount?.ID,
                 TransactionId = transaction?.ID,
                 RegistrantSubscriptionPlanId = registrantSubscriptionPlan?.ID,
                 CreateDate = createDate,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = createDate,
-                LastModifiedBy = loggedInUser?.ID.IfEmpty(0)
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
             };
 
             msgs.AddRange(payment.Save(dc));
@@ -853,17 +857,18 @@ namespace AfterSchoolLibrary.Models
         }
 
         #region "PostPayPlan"
+
         public decimal GetPostPayCost()
         {
-            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any() && this.PostPayPlans.First().CostPerPeriod.HasValue)
-                return this.PostPayPlans.First().CostPerPeriod.Value;
+            if (PostPayPlans.IsNotEmpty() && PostPayPlans.Any() && PostPayPlans.First().CostPerPeriod.HasValue)
+                return PostPayPlans.First().CostPerPeriod.Value;
 
             return 0;
         }
 
         public decimal GetPostPayCostWithConvenienceFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return GetPostPayCost() + (plan.IsConvenienceFeeTakenOutOfCost ? 0 : GetPostPayConvenienceFee());
@@ -873,46 +878,45 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayProviderAmount()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty() && plan.IsConvenienceFeeTakenOutOfCost)
                 return GetPostPayCost() - GetPostPayConvenienceFee();
 
             return GetPostPayCost();
-
         }
 
         public decimal GetPostPayConvenienceFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
-                                GetPostPayCost(),
-                                OwnerAccount,
-                                plan.IsConvenienceFeeTakenOutOfCost)
-                            .GetConvenienceFee();
+                        GetPostPayCost(),
+                        OwnerAccount,
+                        plan.IsConvenienceFeeTakenOutOfCost)
+                    .GetConvenienceFee();
 
             return 0;
         }
 
         public decimal GetPostPayCreditCardFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if (plan.IsNotEmpty())
                 return new FeeCalculationObject(
-                                GetPostPayCost(),
-                                PaymentAccount,
-                                plan.IsConvenienceFeeTakenOutOfCost)
-                            .GetCreditCardFee();
+                        GetPostPayCost(),
+                        PaymentAccount,
+                        plan.IsConvenienceFeeTakenOutOfCost)
+                    .GetCreditCardFee();
 
             return 0;
         }
 
         public decimal GetCheckoutPostPayCreditCardFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayCreditCardFee() * plan.NumberOfPeriodsPrePaid.Value;
@@ -922,7 +926,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutPostPayConvenienceFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return GetPostPayConvenienceFee() * plan.NumberOfPeriodsPrePaid.Value;
@@ -932,7 +936,7 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCheckoutCostWithConvenienceFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCostWithConvenienceFee();
@@ -942,11 +946,11 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetPostPayCheckoutCostWithoutConvenienceFee()
         {
-            var plan = this.PostPayPlans?.FirstOrDefault();
+            var plan = PostPayPlans?.FirstOrDefault();
 
             if ((plan?.NumberOfPeriodsPrePaid).IsPositive())
                 return plan.NumberOfPeriodsPrePaid.Value * GetPostPayCost();
-            
+
             return GetPostPayCost();
         }
 
@@ -954,19 +958,20 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutCostWithConvenienceFee(int quantity = 1)
         {
-            if (this.PostPayPlans.IsNotEmpty() && this.PostPayPlans.Any())
+            if (PostPayPlans.IsNotEmpty() && PostPayPlans.Any())
                 return GetPostPayCheckoutCostWithConvenienceFee();
 
-            if (this.Cost.HasValue)
+            if (Cost.HasValue)
             {
-                if (this.IsActivity())
+                if (IsActivity())
                 {
-                    var activity = this.GetActivity();
-                
+                    var activity = GetActivity();
+
                     if (activity.IsNotEmpty())
                         return (Cost.Value
-                            + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee())) * quantity;
+                                + (activity.IsConvenienceFeeTakenOutOfCost ? 0 : GetConvenienceFee())) * quantity;
                 }
+
                 return (Cost.Value + GetConvenienceFee()) * quantity;
             }
 
@@ -975,8 +980,8 @@ namespace AfterSchoolLibrary.Models
 
         public decimal GetCheckoutTotalCost(int quantity = 1)
         {
-            if (this.Cost.HasValue)
-                return this.GetCheckoutCostWithConvenienceFee(quantity) + GetCreditCardFee(quantity);
+            if (Cost.HasValue)
+                return GetCheckoutCostWithConvenienceFee(quantity) + GetCreditCardFee(quantity);
 
             return 0;
         }
@@ -985,10 +990,10 @@ namespace AfterSchoolLibrary.Models
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
-                                Cost.Value,
-                                PaymentAccount,
-                                this)
-                            .GetCreditCardFee() * quantity;
+                        Cost.Value,
+                        PaymentAccount,
+                        this)
+                    .GetCreditCardFee() * quantity;
 
             return 0;
         }
@@ -997,17 +1002,17 @@ namespace AfterSchoolLibrary.Models
         {
             if (Cost.HasValue)
                 return new FeeCalculationObject(
-                                Cost.Value,
-                                OwnerAccount,
-                                this)
-                            .GetConvenienceFee() * quantity;
+                        Cost.Value,
+                        OwnerAccount,
+                        this)
+                    .GetConvenienceFee() * quantity;
 
             return 0;
         }
 
         /// <summary>
-        /// use-case: simple scenario is classes are from Oct 1 - Dec 31, and someone signs up Nov 1, they should only have to pay for Nov 1 - Dec 31st.
-        /// We'd have to calculate the # of payments based on total periods and total activity instances 
+        ///     use-case: simple scenario is classes are from Oct 1 - Dec 31, and someone signs up Nov 1, they should only have to pay for Nov 1 - Dec 31st.
+        ///     We'd have to calculate the # of payments based on total periods and total activity instances
         /// </summary>
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
@@ -1018,10 +1023,10 @@ namespace AfterSchoolLibrary.Models
 
             if (totalPeriods > 0 && Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
-                var activityInstances =  ActivityInstance.LoadByActivityScheduleId(Schedule.ID.Value, msgs);
+                var activityInstances = ActivityInstance.LoadByActivityScheduleId(Schedule.ID.Value, msgs);
                 var upcomingInstances = Schedule.GetUpcomingInstance(msgs);
 
-                var numberofPeriodsToBePaid = (upcomingInstances.Count * totalPeriods) / activityInstances.Count;
+                var numberofPeriodsToBePaid = upcomingInstances.Count * totalPeriods / activityInstances.Count;
                 return Convert.ToInt32(Math.Ceiling(numberofPeriodsToBePaid.ToDecimal()));
             }
 
@@ -1034,9 +1039,12 @@ namespace AfterSchoolLibrary.Models
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs,dc).Count;
-                else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs,dc).Count;
+                    return ActivityInstance
+                        .LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfMonth(), DateTime.Now.LastDateOfMonth(), msgs, dc)
+                        .Count;
+                if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance
+                        .LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.FirstDateOfWeek(), DateTime.Now.LastDateOfWeek(), msgs, dc).Count;
             }
 
             return classes;
@@ -1049,10 +1057,12 @@ namespace AfterSchoolLibrary.Models
             {
                 // Add one day because last day return datetime at beginning of day (12:00 am) 
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfMonth().AddDays(1), msgs,dc).Count;
-                else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfWeek().AddDays(1), msgs,dc).Count;
-            }                
+                    return ActivityInstance
+                        .LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfMonth().AddDays(1), msgs, dc).Count;
+                if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance
+                        .LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.UtcNow, DateTime.UtcNow.LastDateOfWeek().AddDays(1), msgs, dc).Count;
+            }
 
             return classes;
         }
@@ -1062,9 +1072,11 @@ namespace AfterSchoolLibrary.Models
             if (Schedule.IsNotEmpty() && Schedule.ID.HasValue)
             {
                 if (billingPeriodTypeId == BillingPeriodType.Month)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(), DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs,dc).Count;
-                else if (billingPeriodTypeId == BillingPeriodType.Week)
-                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(), DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs,dc).Count;
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddMonths(1).FirstDateOfMonth(),
+                        DateTime.Now.AddMonths(1).LastDateOfMonth(), msgs, dc).Count;
+                if (billingPeriodTypeId == BillingPeriodType.Week)
+                    return ActivityInstance.LoadByActivityScheduleIdByDateRange(Schedule.ID.Value, DateTime.Now.AddWeeks(1).FirstDateOfWeek(),
+                        DateTime.Now.AddWeeks(1).LastDateOfWeek(), msgs, dc).Count;
             }
 
             return 0;
@@ -1078,48 +1090,133 @@ namespace AfterSchoolLibrary.Models
         {
             var activities = new List<ParticipationObject>();
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Chess Club", Details = "<p>Chess is a fun game that incorporates many aspects of the IB learner profile: knowledgeable, inquirers, thinkers, communicators, principled, open-minded, caring, risk-takers, balanced, and reflective. The chess club is meant to foster scholar’s intellectual growth while having fun.</p>", ContactName = "Mrs Fisher", Cost = 25, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[0].ID, MaxGradeId = grades[4].ID, SeatsRemaining = 15, LocationDetails = "Room 110" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Chess Club",
+                Details =
+                    "<p>Chess is a fun game that incorporates many aspects of the IB learner profile: knowledgeable, inquirers, thinkers, communicators, principled, open-minded, caring, risk-takers, balanced, and reflective. The chess club is meant to foster scholar’s intellectual growth while having fun.</p>",
+                ContactName = "Mrs Fisher", Cost = 25, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[0].ID, MaxGradeId = grades[4].ID,
+                SeatsRemaining = 15, LocationDetails = "Room 110",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Robotics", Details = "<p>Spend the semester learning about robots while we experiment and play with them.  We will we discuss what makes robots different from humans while exploring circuits and conductivity as well as simple machines.  Over the course of the semester each participant will build one of these robots.  Every semester we build a differnet robotics kit than the last semester.  Unlike other robotic clubs, each child will get to keep their completed robot at the end of the semester to show off to their friends!</p>", ContactName = "Mr Johnson", Cost = 150, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[7].ID, MaxGradeId = grades[9].ID, SeatsRemaining = 3, LocationDetails = "Cafeteria" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Robotics",
+                Details =
+                    "<p>Spend the semester learning about robots while we experiment and play with them.  We will we discuss what makes robots different from humans while exploring circuits and conductivity as well as simple machines.  Over the course of the semester each participant will build one of these robots.  Every semester we build a differnet robotics kit than the last semester.  Unlike other robotic clubs, each child will get to keep their completed robot at the end of the semester to show off to their friends!</p>",
+                ContactName = "Mr Johnson", Cost = 150, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[7].ID, MaxGradeId = grades[9].ID,
+                SeatsRemaining = 3, LocationDetails = "Cafeteria",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Theater Club", Details = "<p>Theater Club is an ongoing workshop program that runs throughout the school year. Participants learn and practice skills related to Musical Theatre (acting, singing, light choreography, and staging) through instruction, theatre games, exercises and activities designed to teach while having fun.</p>", ContactName = "Mrs Campbell", Cost = 65, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[7].ID, MaxGradeId = grades[9].ID, SeatsRemaining = 11, LocationDetails = "Auditorium" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Theater Club",
+                Details =
+                    "<p>Theater Club is an ongoing workshop program that runs throughout the school year. Participants learn and practice skills related to Musical Theatre (acting, singing, light choreography, and staging) through instruction, theatre games, exercises and activities designed to teach while having fun.</p>",
+                ContactName = "Mrs Campbell", Cost = 65, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[7].ID, MaxGradeId = grades[9].ID,
+                SeatsRemaining = 11, LocationDetails = "Auditorium",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Ham Radio Club", Details = "<p>The Amateur Radio Club helps students, faculty, and staff prepare for Federal Communications Commission license exams. We learn Morse code, basic electronics, and rules and regulations governing ham radio. We operate various 2-way radios to talk to people both locally and globally, and train to be emergency and disaster communications volunteers. Anyone interested in ham radio is welcome to attend.</p>", ContactName = "Mr Jackson", Cost = 10, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID, SeatsRemaining = 20, LocationDetails = "Communication Room" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Ham Radio Club",
+                Details =
+                    "<p>The Amateur Radio Club helps students, faculty, and staff prepare for Federal Communications Commission license exams. We learn Morse code, basic electronics, and rules and regulations governing ham radio. We operate various 2-way radios to talk to people both locally and globally, and train to be emergency and disaster communications volunteers. Anyone interested in ham radio is welcome to attend.</p>",
+                ContactName = "Mr Jackson", Cost = 10, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID,
+                SeatsRemaining = 20, LocationDetails = "Communication Room",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "SADD", Details = "<p>SADD's mission is to provide students with the best prevention and intervention tools possible to deal with the issues of underage drinking, drunk driving, drug abuse, and other destructive decisions.</p>", ContactName = "Mrs Wellington", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID, SeatsRemaining = 34, LocationDetails = "Room 202" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "SADD",
+                Details =
+                    "<p>SADD's mission is to provide students with the best prevention and intervention tools possible to deal with the issues of underage drinking, drunk driving, drug abuse, and other destructive decisions.</p>",
+                ContactName = "Mrs Wellington", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID,
+                MaxGradeId = grades[13].ID, SeatsRemaining = 34, LocationDetails = "Room 202",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Backpacking Club", Details = "<p>Backpacking club is an informal group of students and teachers who enjoy hiking and camping. Trips are overnight, usually leaving Saturday about 9 A.M. and returning Sunday about 1 P.M. Equipment can be borrowed or rented. No experience is necessary.</p>", ContactName = "Mrs Flanagan", Cost = 110, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID, SeatsRemaining = 12, LocationDetails = "Football Field" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Backpacking Club",
+                Details =
+                    "<p>Backpacking club is an informal group of students and teachers who enjoy hiking and camping. Trips are overnight, usually leaving Saturday about 9 A.M. and returning Sunday about 1 P.M. Equipment can be borrowed or rented. No experience is necessary.</p>",
+                ContactName = "Mrs Flanagan", Cost = 110, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID,
+                MaxGradeId = grades[13].ID, SeatsRemaining = 12, LocationDetails = "Football Field",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Investment Club", Details = "<p>Students will examine the core aspects of the stock market and how it functions.  Various websites (yahoo finance, smartmoney, bloomberg, etc.) will be utilized to assist students in gathering key information that will be helpful in making investment decisions.  Students will participate in the a stock market game that is sponsored by the New York Times.  The stock market game will provide students with an imaginary $100,000 that will be invested and monitored throughout an eight month period.  Continuously updated standings will provide students with their investment ranking, and the highest earning teams will be awarded prizes at the conclusion.</p>", ContactName = "Mrs Wilson", Cost = 25, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID, SeatsRemaining = 7, LocationDetails = "Room 105" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Investment Club",
+                Details =
+                    "<p>Students will examine the core aspects of the stock market and how it functions.  Various websites (yahoo finance, smartmoney, bloomberg, etc.) will be utilized to assist students in gathering key information that will be helpful in making investment decisions.  Students will participate in the a stock market game that is sponsored by the New York Times.  The stock market game will provide students with an imaginary $100,000 that will be invested and monitored throughout an eight month period.  Continuously updated standings will provide students with their investment ranking, and the highest earning teams will be awarded prizes at the conclusion.</p>",
+                ContactName = "Mrs Wilson", Cost = 25, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[10].ID, MaxGradeId = grades[13].ID,
+                SeatsRemaining = 7, LocationDetails = "Room 105",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Boys Vocal Music Club", Details = "<p>Vocal Music Club is an after-school club for all students that enjoy singing.  Whether you sign up for Chorus, Band, Orchestra or Exploring Music, being in this club will give you the opportunity to sing many different styles of music, either alone or as part of an ensemble, on a weekly basis.</p>", ContactName = "Mr Temple", Cost = 0, GenderRestriction = GenderRestrictionType.MaleOnly, MinGradeId = grades[4].ID, MaxGradeId = grades[7].ID, SeatsRemaining = 2, LocationDetails = "Music Room 1" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Boys Vocal Music Club",
+                Details =
+                    "<p>Vocal Music Club is an after-school club for all students that enjoy singing.  Whether you sign up for Chorus, Band, Orchestra or Exploring Music, being in this club will give you the opportunity to sing many different styles of music, either alone or as part of an ensemble, on a weekly basis.</p>",
+                ContactName = "Mr Temple", Cost = 0, GenderRestriction = GenderRestrictionType.MaleOnly, MinGradeId = grades[4].ID, MaxGradeId = grades[7].ID,
+                SeatsRemaining = 2, LocationDetails = "Music Room 1",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Garden Club", Details = "<p>Students participate in garden projects on a drop-in basis.  Projects include: preparing garden beds for planting, planting seeds and seedlings, watering, maintaining the compost pile, weeding and harvesting.</p>", ContactName = "Mr Wendell", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[0].ID, MaxGradeId = grades[3].ID, SeatsRemaining = 0, LocationDetails = "Garden Center" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Garden Club",
+                Details =
+                    "<p>Students participate in garden projects on a drop-in basis.  Projects include: preparing garden beds for planting, planting seeds and seedlings, watering, maintaining the compost pile, weeding and harvesting.</p>",
+                ContactName = "Mr Wendell", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[0].ID, MaxGradeId = grades[3].ID,
+                SeatsRemaining = 0, LocationDetails = "Garden Center",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Art Club", Details = "<p>In Art Club we make bowls, mugs, plaques, and other sculptures all of which are glazed and fired in the kiln.  All grades are welcome.  You do not have to be in art to join the art club.  Come down and see what it is all about! </p>", ContactName = "Mrs Apple", Cost = 5, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[2].ID, MaxGradeId = grades[5].ID, SeatsRemaining = 13, LocationDetails = "Room 285" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Art Club",
+                Details =
+                    "<p>In Art Club we make bowls, mugs, plaques, and other sculptures all of which are glazed and fired in the kiln.  All grades are welcome.  You do not have to be in art to join the art club.  Come down and see what it is all about! </p>",
+                ContactName = "Mrs Apple", Cost = 5, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[2].ID, MaxGradeId = grades[5].ID,
+                SeatsRemaining = 13, LocationDetails = "Room 285",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Girls Spikeball Club", Details = "<p>Students in this club love the game of Spikeball.  Spikeball is a modified version of 2v2 volleyball. Like volleyball, the net and ball is replaced with a small trampoline-like object with string netting and a small bouncing ball (usually yellow) with a 12-inch circumference.  Games are played to 11, 15 or 21. Spikeball is also great for any age group and very easy to learn!  There will be pickup games and tournaments when the club meets.  Basic rules and strategies will be taught to all beginners that join the club.</p>", ContactName = "Mr Ganderson", Cost = 45, GenderRestriction = GenderRestrictionType.FemaleOnly, MinGradeId = grades[10].ID, MaxGradeId = grades[11].ID, SeatsRemaining = 17, LocationDetails = "Gym" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Girls Spikeball Club",
+                Details =
+                    "<p>Students in this club love the game of Spikeball.  Spikeball is a modified version of 2v2 volleyball. Like volleyball, the net and ball is replaced with a small trampoline-like object with string netting and a small bouncing ball (usually yellow) with a 12-inch circumference.  Games are played to 11, 15 or 21. Spikeball is also great for any age group and very easy to learn!  There will be pickup games and tournaments when the club meets.  Basic rules and strategies will be taught to all beginners that join the club.</p>",
+                ContactName = "Mr Ganderson", Cost = 45, GenderRestriction = GenderRestrictionType.FemaleOnly, MinGradeId = grades[10].ID,
+                MaxGradeId = grades[11].ID, SeatsRemaining = 17, LocationDetails = "Gym",
+            });
 
-            activities.Add(new ParticipationObject(global::ActivityType.Activity) { Name = "Career Club", Details = "<p>Members explore their interests to discover careers that may match them. Students research the academic, technical, and experiential requirements for those careers, so they can prepare for life after school. The club provides many resources to help students become career ready.</p>", ContactName = "Mrs Bethel", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[12].ID, MaxGradeId = grades[13].ID, SeatsRemaining = 6, LocationDetails = "Room 150" });
+            activities.Add(new ParticipationObject(global::ActivityType.Activity)
+            {
+                Name = "Career Club",
+                Details =
+                    "<p>Members explore their interests to discover careers that may match them. Students research the academic, technical, and experiential requirements for those careers, so they can prepare for life after school. The club provides many resources to help students become career ready.</p>",
+                ContactName = "Mrs Bethel", Cost = 0, GenderRestriction = GenderRestrictionType.None, MinGradeId = grades[12].ID, MaxGradeId = grades[13].ID,
+                SeatsRemaining = 6, LocationDetails = "Room 150",
+            });
 
             return activities;
         }
 
-        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations, string accountName, string accountUniqueName, List<GradeLevel> grades)
+        public static void GenerateDemoObjects(ref Account account, List<ParticipationObject> participationObjects, List<Location> locations,
+            string accountName, string accountUniqueName, List<GradeLevel> grades)
         {
-            account = new Account()
+            account = new Account
             {
                 Name = accountName,
                 UniqueName = accountUniqueName,
                 IsActive = true,
-                Uid = Guid.NewGuid()
+                Uid = Guid.NewGuid(),
             };
 
             var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 
-            locations.Add(new Location()
+            locations.Add(new Location
             {
                 Name = "Launch Fishers",
                 Address1 = "12175 Visionary Way",
@@ -1127,13 +1224,13 @@ namespace AfterSchoolLibrary.Models
                 City = "Fishers",
                 State = "IN",
                 PostalCode = "46038",
-                Country = "US"
+                Country = "US",
             });
 
-            var registrationPeriod = new RegistrationPeriod()
+            var registrationPeriod = new RegistrationPeriod
             {
                 StartDateTime = DateTime.UtcNow.Date,
-                EndDateTime = DateTime.UtcNow.Date.AddDays(2).AddMinutes(-1)
+                EndDateTime = DateTime.UtcNow.Date.AddDays(2).AddMinutes(-1),
             };
 
             // load demo account
@@ -1147,7 +1244,7 @@ namespace AfterSchoolLibrary.Models
                 participationObject.Description = "";
                 participationObject.UniqueName = uniqueName;
                 participationObject.AllowToPayLater = true;
-                participationObject.ContactEmail = $"hello@afterschoolhq.com";
+                participationObject.ContactEmail = "hello@afterschoolhq.com";
                 participationObject.ContactPhone = "1-888-231-1724";
                 participationObject.CostUnitType = global::CostUnitType.PerRegistrant;
                 participationObject.Location = locations.First();

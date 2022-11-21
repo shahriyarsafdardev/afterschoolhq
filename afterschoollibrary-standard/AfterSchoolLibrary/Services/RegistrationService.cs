@@ -347,29 +347,14 @@ namespace AfterSchoolLibrary.Services
             ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
         {
-            var registrations = account.SearchRegistrations(
-                searchText,
-                questionId,
-                participationObjectIds,
-                participationObjectType,
-                registrationStatus,
-                rats,
-                null,
-                null,
-                getVolunteers,
-                msgs,
+            var registrations = reportType == RegistrationReportType.DismissalForHostedActivities
+                ? AccountService.SearchRegistrationsByActivityIds(participationObjectIds, msgs, dc)
+                : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
+                    getVolunteers, msgs, dc);
+
+            var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, getVolunteers, msgs,
                 dc);
 
-            var csvText = ExportCsvText(
-                registrations,
-                account,
-                reportType,
-                registrationStatus,
-                participationObjectIds,
-                participationObjectType,
-                rats,
-                msgs,
-                dc);
             return Encoding.UTF8.GetBytes(csvText);
         }
 
@@ -428,7 +413,7 @@ namespace AfterSchoolLibrary.Services
 
         private static string ExportCsvText(List<Registration> registrations, Account account,
             RegistrationReportType reportType, RegistrationStatus registrationStatus, List<int> participationObjectIds,
-            ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes,
+            ParticipationObjectType participationObjectType, List<RegistrationAssignmentType> assignmentTypes,bool volunteerReport,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var allRegistrations = new List<Registration>();
@@ -469,7 +454,7 @@ namespace AfterSchoolLibrary.Services
 
             var activitySchedules = new List<ActivitySchedules>();
 
-            if (reportType == RegistrationReportType.Dismissal)
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
                 registrantActivities.DistinctBy(ra => new {ra.ParticipationObjectId, ra.ParticipationObjectTypeId})
                     .ToList().ForEach(ra =>
                     {
@@ -503,13 +488,10 @@ namespace AfterSchoolLibrary.Services
                 .DistinctBy(x => x.Text)
                 .ToList();
 
-            var table = new List<List<string>>();
-
-            table.Add(AddHeadersToCSVReport(
-                reportType,
-                standardQuestions,
-                customQuestions
-            ));
+            var table = new List<List<string>>
+            {
+                AddHeadersToCsvReport(reportType, standardQuestions, customQuestions, volunteerReport),
+            };
 
             // print data for each registration
             registrations.ForEach(firstRegistration =>
@@ -517,12 +499,13 @@ namespace AfterSchoolLibrary.Services
                 var reportRegistration = new ReportRegistration(firstRegistration, allRegistrations, answers,
                     registrantActivities, activitySchedules);
 
-                table.Add(AddEachRegistrationToCSVReport(
+                table.Add(AddEachRegistrationToCsvReport(
                     reportRegistration,
                     account,
                     reportType,
                     standardQuestions,
                     customQuestions,
+                    volunteerReport,
                     msgs,
                     dc));
             });
@@ -530,28 +513,40 @@ namespace AfterSchoolLibrary.Services
             return CsvFile.Create(table);
         }
 
-        private static List<string> AddHeadersToCSVReport(RegistrationReportType reportType,
-            List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions)
+        private static List<string> AddHeadersToCsvReport(RegistrationReportType reportType, List<FormQuestion> standardQuestions,
+            List<FormQuestion> customQuestions, bool volunteerReport)
         {
-            var row = new List<string>();
+            var row = new List<string>
+            {
+                "Date Registered",
+                "First Name",
+                "Last Name",
+                "Email",
+            };
 
-            row.Add($"Date Registered");
+            if (reportType != RegistrationReportType.Dismissal)
+            {
+                if (volunteerReport)
+                {
+                    row.Add("Opportunities");
+                    row.Add("Registration Status");
+                }
+                else
+                {
+                    row.Add("Activities");    
+                }
+            }
 
-            row.Add("First Name");
-            row.Add("Last Name");
-            row.Add("Email");
-
-            if (reportType == RegistrationReportType.Dismissal)
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
             {
                 Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList()
                     .ForEach(dayOfWeek => { row.Add(dayOfWeek.ToString()); });
             }
-            else
-                row.Add("Activities");
 
             if (reportType != RegistrationReportType.Basic)
             {
-                row.Add("Amount Paid");
+                if(!volunteerReport)
+                    row.Add("Amount Paid");
                 AddQuestionHeadersToCSVReport(row, standardQuestions, customQuestions);
             }
 
@@ -663,36 +658,39 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        private static List<string> AddEachRegistrationToCSVReport(ReportRegistration registration, Account account,
-            RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions,
+        private static List<string> AddEachRegistrationToCsvReport(ReportRegistration registration, Account account,
+            RegistrationReportType reportType, List<FormQuestion> standardQuestions, List<FormQuestion> customQuestions,bool volunteerReport,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var row = new List<string>();
-
-            row.Add(account.ConvertToAccountTimeZone(registration.FirstRegistration.CreateDate.Value)
-                .ToShortDateTimeString());
-
-            row.Add(registration.FirstRegistration.RegistrantFirstName);
-            row.Add(registration.FirstRegistration.RegistrantLastName);
-            row.Add(registration.FirstRegistration.RegistrantEmail);
-
-            AddActivitiesToCSVReport(row, registration, reportType, msgs, dc);
-
-            if (reportType != RegistrationReportType.Basic)
+            var row = new List<string>
             {
-                row.Add(registration.GetAmountPaid(msgs, dc).ToCurrency());
-                AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
-            }
+                account.ConvertToAccountTimeZone(registration.FirstRegistration.CreateDate.Value).ToShortDateTimeString(),
+                registration.FirstRegistration.RegistrantFirstName,
+                registration.FirstRegistration.RegistrantLastName,
+                registration.FirstRegistration.RegistrantEmail,
+            };
+
+            AddActivitiesToCsvReport(row, registration, reportType, msgs, dc);
+
+            if (reportType == RegistrationReportType.Basic)
+                return row;
+            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()!.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
+            AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
 
             return row;
         }
 
-        private static void AddActivitiesToCSVReport(List<string> row, ReportRegistration registration,
+        private static void AddActivitiesToCsvReport(List<string> row, ReportRegistration registration,
             RegistrationReportType reportType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var ras = registration.RegistrantActivities;
 
-            if (reportType == RegistrationReportType.Dismissal)
+            if (reportType != RegistrationReportType.Dismissal)
+            {
+                AddActivitiesToRow(row, ras, RegistrationReportType.Basic, msgs, dc);
+            }
+
+            if (reportType == RegistrationReportType.Dismissal || reportType == RegistrationReportType.DismissalForHostedActivities)
             {
                 Enum.GetValues(typeof(DayOfWeekASL)).Cast<DayOfWeekASL>().Except(DayOfWeekASL.NotSet.AsList()).ToList()
                     .ForEach(dayOfWeek =>
@@ -702,8 +700,6 @@ namespace AfterSchoolLibrary.Services
                         AddActivitiesToRow(row, dayActivities, reportType, msgs, dc);
                     });
             }
-            else
-                AddActivitiesToRow(row, ras, reportType, msgs, dc);
         }
 
         private static void AddActivitiesToRow(List<string> row, List<RegistrantActivity> ras,

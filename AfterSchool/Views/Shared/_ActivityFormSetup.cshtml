@@ -11,7 +11,7 @@
     var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
     var canAddNewForm = forms.Count < maximumFormCount;
     var allowApplicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
-
+    
 }
 
 <input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
@@ -124,12 +124,12 @@
                     </div>
 
                     <div class="am-radio inline">
-                        <input type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerClass)"/>
+                        <input @(Model.ID.HasValue && Model.HasPostPayPlan() ? "disabled" : "") type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerClass)"/>
                         <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)">Individual Classes</label>
                     </div>
 
                     <p class="text-muted">
-                        This is used if you allow students to be registered for all classes in the activity or for each individual class.
+                        @(Model.ID.HasValue && Model.HasPostPayPlan() ? "Individual classes are disabled because attendance-based billing is in use as a payment plan." : "This is used if you allow students to be registered for all classes in the activity or for each individual class.")
                     </p>
 
                 </div>
