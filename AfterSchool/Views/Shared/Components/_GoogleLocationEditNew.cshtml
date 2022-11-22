@@ -96,13 +96,13 @@
 
                 $('#latitude').val(latitude);
                 $('#longitude').val(longitude);
-
+                let city = '';
                 for (component of components) {
 
                     const type = component.types[0];
                     const longName = component.long_name;
                     const shortName = component.short_name;
-
+            
                     switch (type) {
                         case 'street_number':
                             $('#streetnumber').val(longName);
@@ -123,7 +123,7 @@
                             $('#postalcode').val(longName);
                             break;
                         case 'locality':
-                            $('#city').val(longName);
+                            city = longName;
                             break;
                         case 'administrative_area_level_2':
                             $('#county').val(longName);
@@ -134,8 +134,13 @@
                         case 'country':
                             $('#country').val(shortName);
                             break;
+                        case 'sublocality_level_1':
+                            if (city.length === 0)
+                                city = longName;
+                            break;
                     }
                 }
+                $('#city').val(city);
             }
 
             if ($("#schoolnotfound").length)
