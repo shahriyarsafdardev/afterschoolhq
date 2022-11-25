@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary.Models
             return GetTotalCost() + GetRegistrationConvenienceFee(msgs, dc);
         }
 
-        private decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        internal decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetRegistrationCostWithFeeAndCoupon(IsCouponApplied, msgs, dc);
         }

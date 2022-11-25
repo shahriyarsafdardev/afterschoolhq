@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (code.IsNotEmpty())
             {
-                model.Add(new NameValueCollection { { "InviteCode", code } });
+                model.Add(new NameValueCollection {{"InviteCode", code}});
                 model.Add(new NameValueCollection
                     {{"AutoSignUpLink", Utilities.SurveyBaseUrl + "/onboarding/signup/" + codeId}});
             }
@@ -1129,8 +1129,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
                     else
                     {
-                        //  here is why
-                        cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                        cost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
                         additionalDetails = "Registration Fee";
 
                         // add registration fee row
@@ -1157,36 +1156,47 @@ namespace AfterSchoolLibrary.Helpers
             // if has subscription
             // and is not finalized if it is split evenly
 
-            // add subscription row
+            // add subscription block 
             if (hasSubscriptionPlan && (!splitCostEvenly || regFinalized))
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
+                var subscriptionStartsToday =
+                    participationObject.OwnerAccount.ConvertFromAccountTimeZone(masterRegistrant.GetPlanStartDate(subscription, participationObject)).Date ==
+                    DateTime.UtcNow.Date;
                 description =
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                subscriptionDetails = $"<p><span style='float:left;padding-bottom:13px;'>Your next subscription payment will be automatically deducted on January 1, 2023 from the payment method you provided. Credit card fee not included below.</span><br/><span>{description}</span><span style='float:right;margin-right:48px;'>{cost}</span><br/><span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p><br/>";
+                subscriptionDetails =
+                    $"<p><span style='float:left;padding-bottom:13px;'>Your next subscription payment will be automatically deducted on " +
+                    $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee not included below.</span><br/>" +
+                    $"<span>{description}</span>" +
+                    $"<span style='float:right;margin-right:48px;'>{subscription.CostPerPeriod.Value.ToCurrency()}</span><br/>" +
+                    $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p><br/>";
 
                 if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
                 else
                     ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
 
-                // add registration fee row
-                var subscriptionFeeModel = new NameValueCollection
+                if (subscriptionStartsToday)
                 {
-                    {"Description", description},
-                    {"Quantity", "1"},
-                    {"Cost", cost},
-                    {"AdditionalDetails", additionalDetails},
-                };
+                    // add registration fee row
+                    var subscriptionFeeModel = new NameValueCollection
+                    {
+                        {"Description", description},
+                        {"Quantity", "1"},
+                        {"Cost", cost},
+                        {"AdditionalDetails", additionalDetails},
+                    };
 
-                receiptRows += ProcessTemplate(
-                    EmailTemplates.Registration_Confirmation_Rows,
-                    subscriptionFeeModel,
-                    "Registration_Confirmation_Rows",
-                    msgs);
-
+                    receiptRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        subscriptionFeeModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+                }
+                
                 if (subscription.RegFeeAsDownPayment)
                 {
                     var credit = participationObject.GetCheckoutCostWithConvenienceFee() * -1;
@@ -1245,9 +1255,7 @@ namespace AfterSchoolLibrary.Helpers
                     customMessage += ".";
 
                 if (customMessage.Contains("<p>Thank you for registering.</p>"))
-                {
                     customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
-                }
 
                 if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
                 {
@@ -1300,7 +1308,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", loginLink},
-                {"ActivityName",  participationObject.Name},
+                {"ActivityName", participationObject.Name},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
                 {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
@@ -1313,6 +1321,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
                 {"RegistrationTable", registrationTable},
+                {"YourRecepitText", isRegFree ? "" : "Your payment receipt is below."},
             };
 
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
@@ -1582,7 +1591,7 @@ namespace AfterSchoolLibrary.Helpers
             // send bcc to activity contact
             if (sendBcc)
             {
-                var emails = new List<string> { billingAccount.Email };
+                var emails = new List<string> {billingAccount.Email};
 
                 emails.ForEach(email =>
                     SendGridHelper.SendMail(
@@ -2749,6 +2758,5 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
             return msgs;
         }
-
     }
 }
