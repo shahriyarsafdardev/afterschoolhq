@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Web;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using SendGrid.Helpers.Mail;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Web;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -120,7 +120,7 @@ namespace AfterSchoolLibrary.Helpers
 
             if (code.IsNotEmpty())
             {
-                model.Add(new NameValueCollection {{"InviteCode", code}});
+                model.Add(new NameValueCollection { { "InviteCode", code } });
                 model.Add(new NameValueCollection
                     {{"AutoSignUpLink", Utilities.SurveyBaseUrl + "/onboarding/signup/" + codeId}});
             }
@@ -1000,6 +1000,7 @@ namespace AfterSchoolLibrary.Helpers
             var cost = "";
             var ccFee = "";
             var additionalDetails = "";
+            var subscriptionDetails = "";
 
             switch (mainRA.AssignmentTypeId)
             {
@@ -1030,7 +1031,7 @@ namespace AfterSchoolLibrary.Helpers
                      mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
                 amountDueOrPaid = "Amount Due";
             else
-                amountDueOrPaid = "Amount Paid";
+                amountDueOrPaid = "Total Paid Today";
 
             var description = $"{participationObject.Name} - {regStatus}";
 
@@ -1094,7 +1095,7 @@ namespace AfterSchoolLibrary.Helpers
                         var couponValueCC = checkoutObject.CouponValue(msgs, dc);
 
                         cost = amountCC.ToCurrency();
-                        additionalDetails = "registration fee";
+                        additionalDetails = "Registration Fee";
 
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection
@@ -1130,7 +1131,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         //  here is why
                         cost = checkoutObject.GetTotalCostToPurchaseTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                        additionalDetails = "registration fee";
+                        additionalDetails = "Registration Fee";
 
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection
@@ -1161,10 +1162,10 @@ namespace AfterSchoolLibrary.Helpers
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
                 description =
-                    $"Subscription for {participationObject.Name} - Starting on {startDate.ToShortDateString()}";
-                additionalDetails = $"every {subscription.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()}";
-
+                    $"{participationObject.Name} - Subscription";
+                additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                subscriptionDetails = $"<p><span style='float:left;padding-bottom:13px;'>Your next subscription payment will be automatically deducted on January 1, 2023 from the payment method you provided. Credit card fee not included below.</span><br/><span>{description}</span><span style='float:right;margin-right:48px;'>{cost}</span><br/><span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p><br/>";
 
                 if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
@@ -1241,7 +1242,12 @@ namespace AfterSchoolLibrary.Helpers
                 customMessage = registrationThankYou;
 
                 if (customMessage == "Thank you for registering")
-                    customMessage += ". ";
+                    customMessage += ".";
+
+                if (customMessage.Contains("<p>Thank you for registering.</p>"))
+                {
+                    customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
+                }
 
                 if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
                 {
@@ -1294,6 +1300,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", loginLink},
+                {"ActivityName",  participationObject.Name},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
                 {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
@@ -1301,6 +1308,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"BillerAccountLink", billingAccount.HomePageUrl},
                 {"CustomMessage", customMessage},
                 {"RegistrationDetails", registrationDetails},
+                {"SubscriptionDetails", subscriptionDetails},
                 {"VirtualInfo", virtualInfo},
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
@@ -1574,7 +1582,7 @@ namespace AfterSchoolLibrary.Helpers
             // send bcc to activity contact
             if (sendBcc)
             {
-                var emails = new List<string> {billingAccount.Email};
+                var emails = new List<string> { billingAccount.Email };
 
                 emails.ForEach(email =>
                     SendGridHelper.SendMail(

@@ -1,14 +1,18 @@
-﻿<div>
-  <p>Hello @Model.FirstName,</p>  
-  
-  <p>@Model.CustomMessage</p>
+<div>
+  <p>Hello @Model.FirstName,</p>
+    <br/>
+  <p>
+      @Model.CustomMessage for <u>@Model.ActivityName</u>, provided by <u>@Model.ActivityContactName</u>. Your payment receipt is below.
+  </p>
 
   @Model.RegistrationTable
 
   @Model.VirtualInfo
 
   @Model.SplitPaymentSubscriptionInfo
-
+  
+  @Model.SubscriptionDetails
+  
   <p>
     <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
   </p>
