@@ -48,7 +48,7 @@ namespace AfterSchool.Controllers
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser, msgs);
+                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser,participationObject, msgs);
                 }
 
                 var masterRegistrant = currentUser.GetMasterVolunteerRegistrant(msgs);
@@ -176,8 +176,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
-
+                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, participationObject ,amsgs, adc);
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
                                 account,

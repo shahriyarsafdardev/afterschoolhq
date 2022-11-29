@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Helpers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     amsgs.AddRange(AdditionalData(adc));
-
+                    
                     UpdateRegistrantSubscriptionPlans_20190821.Do(amsgs, adc);
                     InvalidateRegistrantAccounts_20190721.Do(amsgs, adc);
                     UpdateRegistrantAccess_20190721.Do(amsgs, adc);
@@ -119,6 +119,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20220912_AlterAccountAddReferralCodeAndReferrerId.Do(amsgs, adc);
                     Migration_20221013_UpdateNullValuesIsGenderEnforced.Do(amsgs, adc);
                     Migration_20221019_AddBeamerProviderFeatureFlag.Do(amsgs,adc);
+                    Migration_20221119_VolunteerTaskTable.Do(amsgs,adc);
                   
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),

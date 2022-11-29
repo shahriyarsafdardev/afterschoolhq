@@ -194,6 +194,14 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
+        
+        public static AccountRelationship LoadAccountByVisitorAccountId(int VisitorAccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["VisitorAccountId"], VisitorAccountId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
 		public static List<AccountRelationship> LoadByVisitorAccountIdByApprovalStatusId(int VisitorAccountId, ApprovalStatus ApprovalStatusId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{

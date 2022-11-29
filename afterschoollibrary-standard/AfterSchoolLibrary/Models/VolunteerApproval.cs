@@ -3,8 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -80,12 +83,11 @@ namespace AfterSchoolLibrary.Models
             return obj;
         }
         
-        public static VolunteerApproval Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<VolunteerApproval> Load(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ID"], id);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
         }
         
         public SystemMessages Save(DatabaseConnection dc = null)
@@ -107,12 +109,12 @@ namespace AfterSchoolLibrary.Models
             return _Create(DatabaseQuery, dc, ObjectMap);
         }
         
-        public static List<VolunteerApproval> LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static VolunteerApproval LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
         public static SystemMessages Alter(DatabaseConnection dc = null)

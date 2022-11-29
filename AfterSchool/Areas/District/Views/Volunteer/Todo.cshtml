@@ -1,7 +1,8 @@
-﻿@model List<Account>
+﻿@model List<TodoViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var inviteUrl = Url.Action("invite", "school");
+    var selectedTaskType = (TaskStatus) ViewBag.SelectedTaskType;
+    var selectedApplicationStatus = (ApplicationStatus) ViewBag.SelectedApplicationStatus;
 }
 
 <style>
@@ -27,7 +28,39 @@
         width: fit-content;
     }
     
+    .input-group
+    {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        align-items: flex-start;
+    }
+    
+    label
+    {
+        color: #00b492;
+        font-size: 12px;
+    }
+    
+    small
+    {
+        font-size: 76%;
+        color: grey;
+    }
+    
+    .pull-left , .pull-right > button
+    {
+        width: 100px;
+    }
+    
+    .date
+    {
+        display: table;
+    }
+    
 </style>
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{Html.RenderPartial("DistrictHeader");}
 <div class="main-content">
@@ -72,50 +105,184 @@
         
         <div class="panel-heading">
             <div class="pull-right">
-                <input type="text" id="search" class="form-control" placeholder="Filter Task"/>
-                <input type="text" id="search" class="form-control" placeholder="Filter Status"/>
+                <select name="taskType" id="taskType" class="form-control">
+                    @foreach (var taskType in Enum.GetValues(typeof(TaskStatus)).Cast<TaskStatus>().Except(TaskStatus.NotSet.AsList()))
+                    {
+                        <option @(taskType == selectedTaskType ? "selected" : "") value="@((int)taskType)">
+                            @taskType
+                        </option>
+                    }
+                </select>
+                <select name="applicationStatus" id="applicationStatus" class="form-control">
+                    @foreach (var applicationStatus in Enum.GetValues(typeof(ApplicationStatus)).Cast<ApplicationStatus>().Except(ApplicationStatus.NotSet.AsList()))
+                    {
+                        <option @(applicationStatus == selectedApplicationStatus ? "selected" : "") value="@((int)applicationStatus)">
+                            @applicationStatus
+                        </option>
+                    }
+                </select>
                 <a class="btn btn-primary whitebgbtn">Send Background Check Email</a>
-                <a class="btn btn-primary">Approve All Selected</a>
-                <a class="btn btn-danger">Deny All Selected</a>
+                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  >Approve All Selected</a>
+                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  >Deny All Selected</a>
             </div>
             <h2>To do</h2>
         </div>
 
         <div class="panel-body">
-
-            <div class="table-responsive">
-                <table class="table">
-                    <tr>
-                        <th>
-                            <input class="checkbox-override" type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
-                        </th>
-                        <th>Actions</th>
-                        <th>Task</th>
-                        <th>Application Name</th>
-                        <th>Application Status</th>
-                        <th>Date Submitted</th>
-                        <th>Phone Number</th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
-                        </td>
-                        <td>
-                            <div>
-                                <span><img src="/Assets/img/email-bgcheck.svg"/></span>
-                                <span><img src="/Assets/img/approve.svg"/></span>
-                                <span><img src="/Assets/img/deny.svg"/></span>
-                            </div>
-                        </td>
-                        <td>Review Applicant</td>
-                        <td>Tom Mowrey</td>
-                        <td>New</td>
-                        <td>04/04/10</td>
-                        <td>321-654-9870</td>
-                    </tr>
-                </table>
-            </div>
+            
+            @if (Model.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>
+                                <input class="checkbox-override" type="checkbox" name="parentCheckBox" />
+                            </th>
+                            <th>Actions</th>
+                            <th>Task</th>
+                            <th>Application Name</th>
+                            <th>Application Status</th>
+                            <th>Date Submitted</th>
+                            <th>Phone Number</th>
+                        </tr>
+                        @foreach (var taskViewModel in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="childCheckBox" value="@taskViewModel.WebUserId"/>
+                                </td>
+                                <td>
+                                    <div>
+                                        <span><img src="/Assets/img/email-bgcheck.svg"/></span>
+                                        <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
+                                        <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
+                                    </div>
+                                </td>
+                                <td>@taskViewModel.TaskStatus</td>
+                                <td>@(taskViewModel.FirstName + ' ' + taskViewModel.LastName)</td>
+                                <td>@taskViewModel.ApplicationStatus</td>
+                                <td>@taskViewModel.DateSubmitted.Date</td>
+                                <td>@taskViewModel.Phone</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p>No volunteer available</p>
+            }
+            
         </div>
     </div>
 </div>
 
+<div id="modal-confirm" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Approve Applicant Without Background Check
+            </h3>
+        </div>
+        <div class="modal-body text-center">
+            <p>Approving this applicant will allow them to bypass the background check process.
+                <br/><i>Please select the reason for approving this applicant.</i><br/>
+            </p>
+            
+            <div class="modal-form">
+                <form action="@Url.Action("AddRemoveApproval" , "Volunteer")" method="post">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label>Approval Reason</label>
+                            <input id="name" name="reason" type="text" class="form-control" required>
+                            <input type="hidden" id="webUserIDs" name="webUserIDs"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label>Background Check Expiration Date</label>
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input type="text" class="form-control" onfocus="this.select()" required data-type="date" name="expirationDate" />
+                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                            </div>
+                            <input type="hidden" id="operation" name="operation"/>
+                            <small>Standard background check are available for one year. Please set an expiratrion date.</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right confirm">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Approve
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        
+        $('input[name="parentCheckBox"]').bind('click', function () {
+                $('input:checkbox').not(this).prop('checked', this.checked);
+        });
+        
+        $('#taskType').on('change', function() {
+           location.href = '@Url.Action("Todo","Volunteer")?taskType=' + this.value + '&applicationStatus=' + $('#applicationStatus').find(":selected").val(); 
+        });
+        
+        $('#applicationStatus').on('change', function() {
+          location.href = '@Url.Action("Todo","Volunteer")?applicationStatus=' + this.value + '&taskType=' + $('#taskType').find(":selected").val();
+        });
+        
+    });
+    
+    function addRemoveApproval(operation , type , webUserId)
+    {
+        var webUserIDs = '';
+        
+        if (type === 'multiple')
+        {
+            $("input:checkbox[name=childCheckBox]:checked").each(function(){
+                webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+            });
+        }
+        
+        if(type === 'single')
+            webUserIDs = webUserId;
+        
+        if (operation === 'approve')
+            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve')
+        
+        if (operation === 'reject')
+            $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny')
+        
+        $('#webUserIDs').val(webUserIDs);
+        $('#operation').val(operation);
+        
+        $('#modal-confirm').addClass('md-show');  
+    }
+    
+    function closeModal()
+    {
+        $('#modal-confirm').removeClass('md-show');
+        $(':input','.modal-form').val('');
+    }
+    
+    
+</script>

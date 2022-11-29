@@ -1,0 +1,344 @@
+﻿@model Registration
+@{
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var registrant = (Registrant) ViewBag.Registrant;
+    var account = (Account) ViewBag.Account;
+    var answers = (List<FormQuestionAnswer>) ViewBag.Answers;
+    var registrantActivities = (List<RegistrantActivity>) ViewBag.RegistrantActivities;
+    var listUrl = ViewBag.ListUrl;
+    var selectedRegistration = (Registration) ViewBag.SelectedRegistration;
+    var isVolunteerRegistration = registrantActivities.Any() && registrantActivities.First().IsForActivity() &&
+                                  registrantActivities.First().GetParticipationObject().ActivityType == ActivityType.VolunteerOpportunity;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("_VolunteerHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-id"></i>
+            @if (isVolunteerRegistration)
+            {
+                <span>@UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity) Detail</span>
+            }
+            else
+            {
+                <span>@UILabel.RegistrantLabel(ActivityType.Activity) Detail</span>
+            }
+        </div>
+        <div class="panel-body no-padding">
+
+            <div class="col-md-10 col-md-offset-1 no-padding">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @registrant.Name
+                    </div>
+                    <div class="panel-body no-padding">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Registration Data
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tr>
+                                            <td class="text-right" width="33%">Registration Date/Time</td>
+                                            <td>@account.ConvertToAccountTimeZone(selectedRegistration.CreateDate.Value).ToLongDateTimeString()</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="33%" class="text-right">E-Signature</td>
+                                            <td>@selectedRegistration.ESignature</td>
+                                        </tr>
+                                        @if (selectedRegistration.ESignatureIPAddress.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">IP Address</td>
+                                                <td>@selectedRegistration.ESignatureIPAddress</td>
+                                            </tr>
+                                        }
+                                        @if (selectedRegistration.ESignatureUserAgent.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">Browser Info</td>
+                                                <td>@selectedRegistration.ESignatureUserAgent</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+
+                                @{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers); }
+
+                            </div>
+                        </div>
+
+                        @foreach (var ra in registrantActivities)
+                        {
+                            var participationObject = ra.GetParticipationObject();
+                            var dayText = "";
+                            var schedule = ra.GetSchedule();
+
+                            if (schedule.IsNotEmpty())
+                            {
+                                dayText = schedule.GetDaysOfTheWeek().Select(x => x.ToString()).ToStringList(", ", ", and ");
+                            }
+
+                            var poController = "";
+
+                            if (participationObject.IsActivity())
+                            {
+                                var activity = participationObject.GetActivity();
+                                if (activity.ActivityTypeId == ActivityType.Team)
+                                {
+                                    poController = "leagueactivity";
+                                }
+                                else
+                                {
+                                    poController = "activity";
+                                }
+                            }
+                            else if (participationObject.IsAccountActivityGroup())
+                            {
+                                poController = "league";
+                            }
+                            else if (participationObject.IsActivityGroup())
+                            {
+                                poController = "group";
+                            }
+
+                            var poLink = Url.Action("summary", poController, new {id = participationObject.Uid});
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    @*<div class="btn-group pull-right">
+                                        
+                                        <button class="btn btn-default md-trigger" 
+                                                data-modal="modal-move-seat" 
+                                                onclick="moveSeat(@ra.ID, @((int)ra.AssignmentTypeId), @isVolunteerRegistration.ToString().ToLower())">
+                                            <i class="s7-gleam"></i> <span>Change Seat Assignment Type</span>
+                                        </button>
+                                        
+                                        @if (participationObject.IsActivity() && participationObject.ActivityType == ActivityType.Activity)
+                                        {
+                                            <button class="btn btn-default md-trigger" data-modal="modal-confirmation-activity" onclick="deleteActivity(@ra.ID, '@UI.JavascriptSafeString(participationObject.Name)')">
+                                                <i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span>
+                                            </button>
+                                        }
+                                        
+                                    </div>*@
+                                    <a href="@poLink">
+                                        @participationObject.Name
+                                    </a>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            @if (dayText.IsNotEmpty())
+                                            {
+                                                <tr>
+                                                    <td width="33%" class="text-right">Day</td>
+                                                    <td>@dayText</td>
+                                                </tr>
+                                            }
+                                            @if (account.HasFeature(FeatureType.ManageActivityGroups) && ra.PreferenceNumber.HasValue && false)
+                                            {
+                                                <tr>
+                                                    <td class="text-right">Choice Number</td>
+                                                    <td>@ra.PreferenceNumber.Value.ToOrdinal() Choice</td>
+                                                </tr>
+                                            }
+                                            <tr>
+                                                <td width="33%" class="text-right">Status</td>
+                                                <td>@ra.AssignmentTypeId.ToString().SplitByUpperCase()</td>
+                                            </tr>
+                                            @if (ra.SeatIndex.HasValue)
+                                            {
+                                                <tr>
+                                                    <td width="33%" class="text-right">Seat</td>
+                                                    <td>@ra.SeatIndex</td>
+                                                </tr>
+                                            }
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-confirmation-activity" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-offer" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
+                <h3 class="modal-title"><i class="s7-attention"></i> Confirmation</h3>
+            </div>
+            <div class="modal-body form">
+
+                <p>Are you sure you want to <span id="confirmation-activity-action"></span>?</p>
+                <p id="confirmation-activity-additional-text"></p>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">No</button>
+                <a href="#" class="btn btn-primary" id="btnconfirm-activity">Yes</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="modal-move-seat" class="md-modal colored-header custom-width md-effect-9">
+    <form id="form-move-seat" action="" method="post">
+        <div class="md-content">
+            <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                    <i class="icon s7-close"></i>
+                </button>
+                <h3 class="modal-title"><i class="s7-gleam"></i> Move Seat</h3>
+            </div>
+            <div class="modal-body form">
+
+                <div class="form-group">
+                    <label>Move to </label>
+                    <select name="to" id="move-to" class="form-control" required>
+                    </select>
+                </div>
+
+                <input type="hidden" name="ra" id="activity-ra" value=""/>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btnconfirm-moveseat">Move @UILabel.RegistrantLabel() &raquo;</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    function registrationChange(id){
+        let link = '@Url.Action("edit", "registration", new {id = "ID"})?r=' + id + '&returnUrl=@Request["returnurl"]';
+        link = link.replace("ID", id);
+        location.href = link;
+    }
+    function moveSeat(ra, rat, isVolunteerRegistration) {
+        
+        $('#form-move-seat').attr('action', '@Url.Action("moveseat", "registration", new {id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString()})&returnurl=@listUrl');
+        $('#activity-ra').val(ra);
+        $('#move-to').html('');
+        
+        let registrationAssignmentTypes = getEnumValues(isVolunteerRegistration);
+        
+        for (let item of registrationAssignmentTypes)
+        {
+            if(item.id !== rat)
+            {
+                $('#move-to').append(`<option value="${item.id}">${item.name}</option>`);            
+            }
+        }
+    }
+    function getEnumValues(isVolunteerOpportunity) {
+        if (isVolunteerOpportunity) {
+            return @Html.Raw(Json.Encode(Enum.GetValues(typeof(RegistrationAssignmentType))
+                       .Cast<RegistrationAssignmentType>()
+                       .Where(x => x.NotIn(new[]
+                       {
+                           RegistrationAssignmentType.NotSet,
+                           RegistrationAssignmentType.Applied,
+                           RegistrationAssignmentType.ReservedPendingPayment,
+                           RegistrationAssignmentType.ReservedPendingParentalConsent,
+                           RegistrationAssignmentType.Invited,
+                           RegistrationAssignmentType.Declined,
+                       }))
+                       .Select(x => new {id = (int) x, name = x.ToString().SplitByUpperCase()})
+                       .ToArray()));
+        } else {
+           return @Html.Raw(Json.Encode(Enum.GetValues(typeof(RegistrationAssignmentType))
+                      .Cast<RegistrationAssignmentType>()
+                      .Where(x => x != RegistrationAssignmentType.NotSet && x != RegistrationAssignmentType.ReservedPendingBackgroundCheck)
+                      .Select(x => new {id = (int) x, name = x.ToString().SplitByUpperCase()})
+                      .ToArray()));
+        }
+    }
+
+    function deleteActivity(ra, name) {
+        $('#confirmation-activity-action').html('<strong>remove "' + name + '"</strong> from <strong>@selectedRegistration.ToRegistrant().Name</strong>');
+        $('#confirmation-activity-additional-text').html('This cannot be undone');
+        $('#btnconfirm-activity').attr('href', '@Url.Action("RemoveActivity", "registration", new {id = Model.Uid.ToString(), r = selectedRegistration.Uid.ToString()})&returnurl=@listUrl&ra=' + ra);
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#activity').change(function () {
+            // loadActivityDays();
+        });
+
+        $('#activityday').click(function () {
+            //loadChoiceNumbers($(this).val());
+        });
+    });
+
+    function loadChoiceNumbers(day) {
+        $.get(
+            '/org/services/GetRegistrationMaxChoiceNumbersForDay/@selectedRegistration.ID?day=' + day,
+            function (data) {
+                if (data && data.status == 'ok') {
+                    if (data.MaxChoices > 1) {
+                        $('#choicenumber-container').removeClass('hide');
+
+                        $('#choicenumber').html('');
+
+                        for (var i = 1; i <= data.MaxChoices + 1; i++) {
+                            $('#choicenumber').append('<option value="' + i + '">' + i + '</option>');
+                        }
+
+                    } else {
+                        $('#activity-days-container').addClass('hide');
+                    }
+                } else {
+                    alert('Error getting choice numbers')
+                }
+            }
+        );
+    }
+
+    function loadActivityDays() {
+        $.get(
+            '/org/services/getactivitydays/' + $('#activity').val(),
+            function (data) {
+                if (data && data.status == 'ok') {
+                    if (data.days.length > 0) {
+                        // $('#activity-days-container').removeClass('hide');
+
+                        $('#activity-days').html('');
+
+                        for (var i = 0; i < data.days.length; i++) {
+                            var day = data.days[i];
+                            $('#activity-days').append('<div class="am-radio inline"><input type="radio" id="activity-day-' + day.Value + '" name="activityday" class="form-control" value="' + day.Value + '" required /><label for="activity-day-' + day.Value + '">' + day.Text + '</label></div>');
+                        }
+
+                    } else {
+                        $('#activity-days-container').addClass('hide');
+                    }
+                } else {
+                    alert('Error getting activity days')
+                }
+            }
+        );
+    }
+
+</script>
