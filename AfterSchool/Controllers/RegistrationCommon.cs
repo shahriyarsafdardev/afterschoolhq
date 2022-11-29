@@ -126,7 +126,7 @@ namespace AfterSchool.Controllers
             return account;
         }
 
-        public static Account GetOrCreateVolunteerAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetOrCreateVolunteerAccount(WebUser user, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetVolunteerAccount(msgs, dc);
 
@@ -136,6 +136,7 @@ namespace AfterSchool.Controllers
                     UserType.Owner,
                     true,
                     user,
+                    participationObject,
                     msgs,
                     dc);
 
@@ -328,6 +329,16 @@ namespace AfterSchool.Controllers
                                 period,
                                 request,
                                 amsgs, adc);
+
+                        if (currentUser.IsNotEmpty())
+                        {
+                            VolunteerTaskService.AddTask(currentUser.ID, 
+                                TaskStatus.ReviewApplicant, 
+                                ApplicationStatus.New, 
+                                AccountRelationship.LoadAccountByVisitorAccountId((int)participationObject.OwnerAccount.ID)?.HostAccountId , 
+                                null,
+                                amsgs , adc);
+                        }
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),

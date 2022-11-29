@@ -988,6 +988,7 @@ namespace AfterSchool.Controllers
                             timeZone: null,
                             loggedInUser: SessionVariables.CurrentUser,
                             createWithStripe: true,
+                            participationObject:null,
                             msgs: amsgs,
                             dc: adc);
 

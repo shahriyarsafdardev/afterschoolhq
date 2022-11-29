@@ -1,7 +1,8 @@
-﻿@model List<Account>
+﻿@using AfterSchoolLibrary.Enums
+@model List<VolunteerViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var inviteUrl = Url.Action("invite", "school");
+    var returnUrl = Request.Url;
 }
 
 <style>
@@ -35,38 +36,52 @@
 
             <div class="table-responsive">
                 
-                <div class="pull-right">
-                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]"/>
-                    <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
-                        Search
-                    </button>
-                </div>
-                
-                <table class="table">
-                    <tr>
-                        <th></th>
-                        <th>Registrant Name</th>
-                        <th>Volunteer Status</th>
-                        <th>Phone Number</th>
-                        <th>Email</th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">Manage</a>
-                        </td>
-                        <td>Bilal Khan</td>
-                        <td>Approved</td>
-                        <td>0900-78601</td>
-                        <td>bilal@reborncode.com</td>
-                        <td>
-                            <div class="pull-right">
-                                <a class="btn btn-primary whitebgbtn">Message</a>
-                                <a class="btn btn-primary whitebgbtn">View Background Check</a>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
+                @if (Model.Count > 0)
+                {
+                    <div class="pull-right">
+                        <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;"/>
+                        <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
+                            Search
+                        </button>
+                    </div>
+                    
+                    <table class="table">
+                        <tr>
+                            <th></th>
+                            <th>Registrant Name</th>
+                            <th>Volunteer Status</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th></th>
+                        </tr>
+                        @foreach (var volunteerViewModel in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">Manage</a>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)volunteerViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
+                                        @(volunteerViewModel.FirstName + ' ' + @volunteerViewModel.LastName)
+                                    </a>
+                                </td>
+                                <td>@volunteerViewModel.ApprovalStatus</td>
+                                <td>@volunteerViewModel.Phone</td>
+                                <td>@volunteerViewModel.Email</td>
+                                <td>
+                                    <div class="pull-right">
+                                        <a class="btn btn-primary whitebgbtn">Message</a>
+                                        <a class="btn btn-primary whitebgbtn">View Background Check</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                }
+                else
+                {
+                    <p>No Volunteer</p>
+                }
             </div>
         </div>
     </div>

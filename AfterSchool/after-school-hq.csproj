@@ -597,6 +597,8 @@
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\Controllers\VolunteerController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
+    <Compile Include="Areas\District\Models\TodoViewModel.cs" />
+    <Compile Include="Areas\District\Models\VolunteerViewModel.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditConfirmationAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditContactAssembler.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditCostAssembler.cs" />
@@ -735,6 +737,7 @@
     <Content Include="Areas\District\Views\Tag\School.cshtml" />
     <Content Include="Areas\District\Views\Shared\_VolunteerHeader.cshtml" />
     <Content Include="Areas\District\Views\Volunteer\BackgroundCheck.cshtml" />
+    <Content Include="Areas\District\Views\Volunteer\Details.cshtml" />
     <Content Include="Areas\District\Views\Volunteer\Index.cshtml" />
     <Content Include="Areas\District\Views\Volunteer\Todo.cshtml" />
     <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />

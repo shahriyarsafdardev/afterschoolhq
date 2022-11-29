@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -2904,8 +2904,9 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, null, null, false, accountType, null, null, null, null,
-                loggedInUser, false, msgs, dc);
+
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, null, 
+                loggedInUser, false,null, msgs, dc);
         }
 
         public static Account CreateNewUnclaimedAccount(string orgName, string email, string claimemaildomain,
@@ -2919,12 +2920,12 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
             AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
-            string timeZone, WebUser loggedInUser, bool createWithStripe, SystemMessages msgs,
+            string timeZone, WebUser loggedInUser, bool createWithStripe,ParticipationObject participationObject, SystemMessages msgs,
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
-                SignUpType.NotSet, loggedInUser, msgs, dc);
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
+                SignUpType.NotSet, loggedInUser,participationObject, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
@@ -2933,8 +2934,8 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
-                signUpTypeId, loggedInUser, msgs, dc);
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
+                signUpTypeId, loggedInUser,null, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
@@ -2943,13 +2944,13 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, stripeAccountType, true, SignUpType.NotSet, loggedInUser, msgs, dc);
+                packageBillingPeriod, timeZone, createWithStripe, stripeAccountType, true, SignUpType.NotSet, loggedInUser,null, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
             AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
             string timeZone, bool createWithStripe, StripeAccountType stripeAccountType, bool isClaimed, SignUpType signupTypeId, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc)
+            ParticipationObject participationObject,SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = GenerateUniqueName(orgName, null, msgs, dc);
@@ -2958,6 +2959,8 @@ namespace AfterSchoolLibrary.Services
 
             if (accountType != AccountType.NotSet && signupTypeId != SignUpType.DirectPurchase)
                 onboardingStepDone = OnboardingStepType.AccountType;
+            
+            
 
             var account = new Account
             {
@@ -2980,6 +2983,7 @@ namespace AfterSchoolLibrary.Services
                 IsClaimed = isClaimed,
                 OnboardingStepDone = onboardingStepDone,
                 SignUpTypeId = signupTypeId,
+                FiscalAccountId = accountType == AccountType.Volunteer && participationObject.IsNotEmpty() ? AccountRelationship.LoadAccountByVisitorAccountId((int)participationObject.OwnerAccount.ID)?.HostAccountId : null 
             };
 
             if (createWithStripe)

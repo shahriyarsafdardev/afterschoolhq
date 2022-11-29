@@ -245,7 +245,18 @@ namespace AfterSchoolLibrary.Models
            
             return BaseLoad(criterias, orderBys, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
+        
+        
+        public static List<Registrant> LoadMasterVolunteersRegistrantsbyHostAccountId(List<Registrant> volunteerRegistrants,int id ,SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            
+            
+            
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
+        }
+        
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -751,7 +762,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int) x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
+        
         public static List<Registrant> LoadByAnsweredFormId(int formId, int accountId, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -912,7 +923,33 @@ namespace AfterSchoolLibrary.Models
 
             return sql;
         }
+        public static List<Registrant> LoadMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetSearchedRegistrant(AccountHostId, registrantPersonType);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        private static string GetSearchedRegistrant(int Id , RegistrantPersonType personType)
+        {
+            var persontTypeId = (int) personType;
+            var sql = $@"select masterReg.*
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
 
+            return sql;
+        }
+        
         #endregion
     }
 }
