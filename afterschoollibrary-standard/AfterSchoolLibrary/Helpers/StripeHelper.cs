@@ -14,8 +14,8 @@ namespace AfterSchoolLibrary.Billing
 {
     public class StripeHelper
     {
-        private static string TestSecretKey => "sk_test_gfeMjl5rgl16L1HHITh3YT5s";
-        private static string TestPublishableKey => "pk_test_wuL50O8i1mAzrmV2xDAXuClJ";
+        private static string TestSecretKey => "sk_test_517VG1oCEgXQRZLhk2178KIZ4q6KFHMrjhlF3UX5bJ60zJcq9R9RKw85ua0ycmzTaeQkxew6VXSEunXRU7ffhqnIF00KMbqHheO";
+        private static string TestPublishableKey => "pk_test_517VG1oCEgXQRZLhkAI207PAZC7tECHQteJ5pCE2tVZUXwj396PAyJuMxWjPjPfSVmGgj2evpPLBGZPWRkC9T6C7h00K9a3RwWP";
 
         private static string LiveSecretKey => ConfigurationManager.AppSettings["Stripe.LiveSecretKey"];
         private static string LivePublishableKey => ConfigurationManager.AppSettings["Stripe.LivePublishableKey"];
