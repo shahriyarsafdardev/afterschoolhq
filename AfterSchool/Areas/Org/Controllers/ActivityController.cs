@@ -2292,6 +2292,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            if (activity.IsPublished)
+                msgs.Add("Unpublish your activity before making any payment changes.", MessageType.UserError);
+
 
             if (id.IsGuid())
             {

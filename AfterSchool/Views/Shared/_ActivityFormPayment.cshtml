@@ -223,7 +223,7 @@
             <div class="col-sm-6 col-md-9">
                 <div class="input-group input-group-lg xs-mb-15">
                     <span class="input-group-addon">Every</span>
-                    <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required>
+                    <select name="paymentplanperiod" id="paymentplanperiod" class="form-control" required @(Model.IsPublished ? "disabled" : "")>
                         @BillingPeriodOptions(paymentPlan, SubscriptionPlanType.PaymentPlan)
                     </select>
                 </div>
@@ -242,7 +242,7 @@
             <div class="row">
                 <label class="col-sm-3 control-label">When should payments start?</label>
                 <div class="col-sm-9">
-                    <select name="paymentplanpaymentstarttype" id="paymentplanpaymentstarttype" class="form-control" required="required">
+                    <select name="paymentplanpaymentstarttype" id="paymentplanpaymentstarttype" class="form-control" required="required" @(Model.IsPublished ? "disabled" : "")>
                         @if (hasSchedule)
                         {
                             foreach (var item in Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType> {PlanPaymentStartType.NotSet, PlanPaymentStartType.OnPeriodStart}))
@@ -380,7 +380,7 @@
             <div class="col-sm-6 col-md-9">
                 <div class="input-group input-group-lg xs-mb-15">
                     <span class="input-group-addon">Every</span>
-                    <select name="postpayplanperiod" id="postpayplanperiod" class="form-control">
+                    <select name="postpayplanperiod" id="postpayplanperiod" class="form-control" @(Model.IsPublished ? "disabled" : "")>
                         @BillingPeriodOptions(postPayPlan, SubscriptionPlanType.PostPayPlan)
                     </select>
                 </div>
