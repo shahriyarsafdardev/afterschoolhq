@@ -1,4 +1,4 @@
-﻿@model PagingModel
+@model PagingModel
 
 @if (Model.IsNotEmpty())
 {
@@ -6,19 +6,19 @@
     var action = (string)ViewData["action"];
     var controller = (string)ViewData["controller"];
     var queryString = ViewData["querystring"];
-
-    var pageUrl = $"{Url.Action(action, controller, new { id = id })}?{queryString}";
+    var querySearchTxt = (ViewData["QuerySearchText"] != null ? "&q="+ViewData["QuerySearchText"].ToString() : "");
+    var pageUrl = $"{Url.Action(action, controller, new { id = id })}?{queryString}{querySearchTxt}";
 
     var previousLink = "#";
     var nextLink = "#";
 
     if (Model.PageNumber > 1)
     {
-        previousLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 })}&{queryString}";
+        previousLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber - 1 })}&{queryString}{querySearchTxt}";
     }
     if (Model.PageNumber < Model.TotalPages)
     {
-        nextLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 })}&{queryString}";
+        nextLink = $"{Url.Action(action, controller, new { id = id, rpp = Request["rpp"], pn = Model.PageNumber + 1 })}&{queryString}{querySearchTxt}";
     }
 
     var iStart = 2;

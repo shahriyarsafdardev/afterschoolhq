@@ -1,4 +1,4 @@
-﻿@model List<Activity>
+@model List<Activity>
 @{
     var account = (Account) ViewData["Account"];
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
@@ -423,6 +423,7 @@ else
         {
             {"id", id},
             {"querystring", $"archive={newArchiveValue}&type={(int) activityType}"},
+            {"QuerySearchText", ViewBag.QuerySearchText},
             {"action", pagingAction},
             {"controller", pagingController},
         }

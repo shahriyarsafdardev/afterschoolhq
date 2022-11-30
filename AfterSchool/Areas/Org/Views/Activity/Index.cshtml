@@ -1,4 +1,4 @@
-﻿@model List<Activity>
+@model List<Activity>
 @{
     var currentAccount = SessionVariables.CurrentAccount;
     ViewBag.Title = currentAccount.Name;
@@ -57,10 +57,10 @@
         </div>
         <div class="panel-body">
             @{ Html.RenderPartial(
-                 "~/Views/Shared/_Activities.cshtml",
-                 Model,
-                 new ViewDataDictionary
-                 {
+                  "~/Views/Shared/_Activities.cshtml",
+                  Model,
+                  new ViewDataDictionary
+                  {
                     { "Account", currentAccount },
                     { "AccountPackage", accountPackage },
                     { "PagingModel", ViewBag.PagingModel },
@@ -69,8 +69,9 @@
                     { "Group", ViewBag.Group },
                     { "NeedToUpgrade", false },
                     { "HasArchivedActivities", hasArchivedActivities },
-                    { "ActivityType", (int)activityType }
-                }); }
+                    { "ActivityType", (int)activityType },
+                     {"QuerySearchText", ViewBag.QuerySearchText }
+                 }); }
         </div>
     </div>
 </div>
