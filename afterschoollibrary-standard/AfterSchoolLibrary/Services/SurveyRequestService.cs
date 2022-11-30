@@ -133,39 +133,46 @@ namespace AfterSchoolLibrary.Services
             formQuestionAnswers.OrderBy(a => a.FormQuestionGroupDisplayOrder).ThenBy(a => a.FormQuestionDisplayOrder)
                 .ToList().ForEach(formQuestionAnswer =>
                 {
-                    if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                    if (formQuestionAnswer.Text.IsNotBlank())
                     {
-                        dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                        row.Add(Convert.ToString(json.blocks[0].text));
-                    }
-                    else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
-                    {
-                        row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
-                    }
-                    else if (FormQuestionAnswerService.IsMultiOptionOrEmoji(formQuestionAnswer
-                                 .FormQuestionQuestionTypeId))
-                    {
-                        dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                        if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating)
-                            row.Add(Convert.ToString(json[0].key));
-                        else
-                            row.Add(Convert.ToString(json[0].value));
-                    }
-                    else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
-                    {
-                        var str = "";
-                        dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                        foreach (var item in json)
-                            if (str.IsNotEmpty())
-                                str = str + ", " + item.value;
+                        if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
+                        {
+                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                            row.Add(Convert.ToString(json.blocks[0].text));
+                        }
+                        else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                        {
+                            row.Add(formQuestionAnswer.Text == "1" ? "True" : "False");
+                        }
+                        else if (FormQuestionAnswerService.IsMultiOptionOrEmoji(formQuestionAnswer
+                                    .FormQuestionQuestionTypeId))
+                        {
+                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                            if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating)
+                                row.Add(Convert.ToString(json[0].key));
                             else
-                                str = item.value;
+                                row.Add(Convert.ToString(json[0].value));
+                        }
+                        else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
+                        {
+                            var str = "";
+                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                            foreach (var item in json)
+                                if (str.IsNotEmpty())
+                                    str = str + ", " + item.value;
+                                else
+                                    str = item.value;
 
-                        row.Add(Convert.ToString(str));
-                    }
-                    else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBlock)
+                            row.Add(Convert.ToString(str));
+                        }
+                        else if (formQuestionAnswer.FormQuestionQuestionTypeId != QuestionType.TextBlock)
+                        {
+                            row.Add(formQuestionAnswer.Text);
+                        }
+                    } 
+                    else 
                     {
-                        row.Add(formQuestionAnswer.Text);
+                        row.Add("");
                     }
                 });
 
