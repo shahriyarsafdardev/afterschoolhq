@@ -628,7 +628,8 @@ namespace AfterSchoolLibrary.Services
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
                         return participationObject.StartDate.Value;
                     break;
-                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
+                    // if on checkout, start on checkout
                     return today;
                     break;
                 case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnPeriodStart):
