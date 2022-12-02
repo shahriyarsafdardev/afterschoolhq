@@ -46,22 +46,15 @@
 {
     if (plan.IsNotEmpty())
     {
-        if (!plan.SplitCostEvenly || participationObject.RegistrationFinalized)
-        {
-            var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
+        var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
 
-            var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
-                ? "today"
-                : planStartDate.ToLongDateString();
+        var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
+            ? "today"
+            : planStartDate.ToLongDateString();
 
-            <span>
-                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
-            </span>
-        }
-        else if (plan.RegFeeAsDownPayment)
-        {
-            <span>which will count towards your first subscription payment</span>
-        }
+        <span>
+            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+        </span>
     }
 }
 
