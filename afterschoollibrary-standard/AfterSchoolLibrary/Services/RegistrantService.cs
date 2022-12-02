@@ -176,13 +176,6 @@ namespace AfterSchoolLibrary.Services
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
-            if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
-            {
-                var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
-                ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
-                return;
-            }
-
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
@@ -200,11 +193,12 @@ namespace AfterSchoolLibrary.Services
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
-            // Charge parent if they try to join mid-period.
+            // Charge parent if they try to join mid-period. 
+            // NOTE: This needs to be totally changed for pro-rating
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
                 participationObject.Schedule.IsNotEmpty() &&
                 participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.Now))
+                participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
             {
                 if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
                     isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
@@ -404,6 +398,7 @@ namespace AfterSchoolLibrary.Services
 
             // ongoing activity
             //.. If first day of month, don't set anchor so no pro rate
+            // if there is no schedule you need a billing anchor set potentially
             if (DoesSubscriptionNeedBillingAnchorSet(participationObject, plan))
             {
                 if (plan.BillingPeriodTypeId == BillingPeriodType.Month)
@@ -418,7 +413,7 @@ namespace AfterSchoolLibrary.Services
         private static bool DoesSubscriptionNeedBillingAnchorSet(ParticipationObject participationObject, SubscriptionPlan plan)
         {
             return plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() &&
-                   DateTime.UtcNow.Date != DateTime.Now.FirstDateOfMonth().Date;
+                   DateTime.UtcNow.Date != DateTime.UtcNow.FirstDateOfMonth().Date;
         }
 
         public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
@@ -633,7 +628,8 @@ namespace AfterSchoolLibrary.Services
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
                         return participationObject.StartDate.Value;
                     break;
-                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
+                    // if on checkout, start on checkout
                     return today;
                     break;
                 case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnPeriodStart):
