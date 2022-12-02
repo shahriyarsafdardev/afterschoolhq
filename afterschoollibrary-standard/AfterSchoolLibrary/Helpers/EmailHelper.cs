@@ -1001,6 +1001,7 @@ namespace AfterSchoolLibrary.Helpers
             var ccFee = "";
             var additionalDetails = "";
             var subscriptionDetails = "";
+            var stripeNote = "";
 
             switch (mainRA.AssignmentTypeId)
             {
@@ -1163,16 +1164,23 @@ namespace AfterSchoolLibrary.Helpers
                 var subscriptionStartsToday =
                     participationObject.OwnerAccount.ConvertFromAccountTimeZone(masterRegistrant.GetPlanStartDate(subscription, participationObject)).Date ==
                     DateTime.UtcNow.Date;
+                var ccSubscriptionFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);//Credit Card Fee for Subscription
+                var totalSubscriptionCost = ccSubscriptionFee + subscription.CostPerPeriod.Value;
+                var ccSubscriptionTitle = "Credit Card Fee";
                 description =
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 subscriptionDetails =
-                    $"<p><span style='float:left;padding-bottom:13px;'>Your next subscription payment will be automatically deducted on " +
-                    $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee not included below.</span><br/>" +
+                    $"<p style='foat:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first subscription payment will be automatically deducted on " +
+                    $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee does not apply to ACH payments.</span>" +
                     $"<span>{description}</span>" +
                     $"<span style='float:right;margin-right:48px;'>{subscription.CostPerPeriod.Value.ToCurrency()}</span><br/>" +
-                    $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p><br/>";
+                    $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p>" +
+                    $"<p style='foat:left;padding-bottom:15px;'><span>{ccSubscriptionTitle}</span>" +
+                    $"<span style='float:right;margin-right:48px;'>{ccSubscriptionFee.ToCurrency()}</span></p>" +
+                    $"<p style='foat:left;padding-bottom:15px;'><span><b>Total Paid on {startDate.ToLongDateString()}</b></span>" +
+                    $"<span style='float:right;margin-right:48px;'><b>{totalSubscriptionCost.ToCurrency()}</b></span></p>";
 
                 if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
@@ -1189,14 +1197,14 @@ namespace AfterSchoolLibrary.Helpers
                         {"Cost", cost},
                         {"AdditionalDetails", additionalDetails},
                     };
-
-                    receiptRows += ProcessTemplate(
-                        EmailTemplates.Registration_Confirmation_Rows,
-                        subscriptionFeeModel,
-                        "Registration_Confirmation_Rows",
-                        msgs);
+                    // Comment this because no need to add subscription row in table
+                    //receiptRows += ProcessTemplate(
+                    //    EmailTemplates.Registration_Confirmation_Rows,
+                    //    subscriptionFeeModel,
+                    //    "Registration_Confirmation_Rows",
+                    //    msgs);
                 }
-                
+
                 if (subscription.RegFeeAsDownPayment)
                 {
                     var credit = participationObject.GetCheckoutCostWithConvenienceFee() * -1;
@@ -1302,7 +1310,7 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
                 splitPaymentSubscriptionInfo =
                     $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
-
+            stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges subscription fees as a separate transaction.</p>";
             var model = new NameValueCollection
             {
                 {"FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName},
@@ -1317,6 +1325,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"CustomMessage", customMessage},
                 {"RegistrationDetails", registrationDetails},
                 {"SubscriptionDetails", subscriptionDetails},
+                {"StripeNote", stripeNote},
                 {"VirtualInfo", virtualInfo},
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
