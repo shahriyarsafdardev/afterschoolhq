@@ -415,7 +415,7 @@ namespace AfterSchool.Areas.District.Controllers
             };
 
             var filteredParams = Request.Params.Filter("schedulerepeat-");
-            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+            var days = AfterSchool.Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
             if (!isongoing.IsBoolean())
                 inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
