@@ -1,4 +1,4 @@
-﻿using AfterSchoolAdHoc;
+using AfterSchoolAdHoc;
 using AfterSchoolLibrary.Models;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
@@ -32,4 +32,8 @@ const int accountId = 0;
 const RegistrationReportType reportType = RegistrationReportType.DismissalForHostedActivities;
 const string? commaSeparatedActivityGroupIds = null;
 
-CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);
+string IPSCsvFilePath = Path.Combine(Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName,
+    "IPS Volunteer List (2021-2023).xlsx - Current Volunteers.csv");
+
+//CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);
+//ImportVolunteer.Run(IPSCsvFilePath, dc);
