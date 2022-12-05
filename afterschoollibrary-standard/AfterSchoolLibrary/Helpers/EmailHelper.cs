@@ -1156,7 +1156,7 @@ namespace AfterSchoolLibrary.Helpers
             }
 
             var ccSubscriptionFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
-            var totalSubscriptionCost = ccSubscriptionFee + (subscription != null ? subscription.CostPerPeriod.Value : 0);
+            var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
 
             // if has subscription
@@ -1248,7 +1248,7 @@ namespace AfterSchoolLibrary.Helpers
                     $"<span style='text-align:left;font-size:12px;'>{paymentAdditionalDetails}</span></p>";
                 if (ccPaymentPlanFee > 0)
                 {
-                    paymentPlanDetails += $"<p style='foat:left;padding-bottom:15px;'><span>{ccPaymentPlanTitle}</span>" +
+                    paymentPlanDetails += $"<p style='float:left;padding-bottom:15px;'><span>{ccPaymentPlanTitle}</span>" +
                                                                 $"<span style='float:right;margin-right:48px;'>{ccPaymentPlanFee.ToCurrency()}</span></p>";
                 }
             }
