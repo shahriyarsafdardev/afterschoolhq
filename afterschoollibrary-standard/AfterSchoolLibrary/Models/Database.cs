@@ -96,6 +96,7 @@ namespace AfterSchoolLibrary.Models
             RefreshToken.Create(dc);
             BillingPortalConfiguration.Create(dc);
             BackgroundCheck.Create(dc);
+            ProviderJotFormSubmission.Create(dc);
 
             return msgs;
         }
@@ -185,6 +186,7 @@ namespace AfterSchoolLibrary.Models
             RefreshToken.Alter(dc);
             BillingPortalConfiguration.Alter(dc);
             BackgroundCheck.Alter(dc);
+            ProviderJotFormSubmission.Alter(dc);
 
             return msgs;
         }

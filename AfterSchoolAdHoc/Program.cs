@@ -1,7 +1,19 @@
-﻿using AfterSchoolAdHoc;
+using AfterSchoolAdHoc;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
+using System.Drawing.Text;
+
+void doCSVReportGenerator(DatabaseConnection dc)
+{
+    const int accountId = 0;
+    const RegistrationReportType reportType = RegistrationReportType.DismissalForHostedActivities;
+    const string? commaSeparatedActivityGroupIds = null;
+
+    CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);
+}
 
 var localConfigFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "afterschoolhq-overrides", "appsettings.json");
 
@@ -27,9 +39,8 @@ if (config is null)
 
 var credentials = new DatabaseCredentials(config.ServerName, config.DatabaseName, config.UserName, config.Password);
 var dc = new DatabaseConnection(credentials.ConnectionString);
+var msgs = new SystemMessages();
 
-const int accountId = 0;
-const RegistrationReportType reportType = RegistrationReportType.DismissalForHostedActivities;
-const string? commaSeparatedActivityGroupIds = null;
+// doCSVReportGenerator(dc);
 
-CsvReportGenerator.Run(accountId, reportType, commaSeparatedActivityGroupIds, dc);
+JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
