@@ -19,6 +19,9 @@ namespace AfterSchoolAdHoc
                 {
                     ProviderJotFormSubmission.Create(adc);
                     ProviderJotFormSubmission.Alter(adc);
+                    var dq = new DatabaseQuery();
+                    dq.Connection = dc;
+                    dq.ExecuteSql("CREATE INDEX IX_ProviderJotFormSubmission_SubmissionId ON [ProviderJotFormSubmission] (SubmissionId)");
 
                     using (var reader = new StreamReader(filePath))
                     using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))

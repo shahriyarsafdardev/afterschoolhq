@@ -1199,6 +1199,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProviderJotFormSubmission_SubmissionId ON [ProviderJotFormSubmission] (SubmissionId)"));
 
 
             return msgs;
