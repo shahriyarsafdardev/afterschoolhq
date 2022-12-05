@@ -1155,6 +1155,8 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
+            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
+            var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
             var totalSubscriptionCost = ccSubscriptionFee + (subscription != null ? subscription.CostPerPeriod.Value : 0);
             var ccSubscriptionTitle = "Credit Card Fee";
