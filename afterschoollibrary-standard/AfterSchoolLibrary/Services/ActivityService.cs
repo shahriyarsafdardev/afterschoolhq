@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -1146,7 +1146,7 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc));
 
-                        if (amsgs.HasNoErrors() && instructor.IsNotEmpty())
+                        if (amsgs.HasNoErrors())
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
@@ -1334,9 +1334,13 @@ namespace AfterSchoolLibrary.Services
                 {
                     activity.InstructorId = instructor.ToInteger();
                 }
-
-                msgs.AddRange(activity.Save(dc));
             }
+            else
+            {
+                activity.InstructorId = null;
+            }
+
+            msgs.AddRange(activity.Save(dc));
 
             return msgs;
         }
