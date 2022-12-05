@@ -36,6 +36,7 @@ public class ImportVolunteer
             
             foreach (var volunteer in volunteers)
             {
+                volunteer.Result.email = volunteer.Result.email + "@reborncode.com";
                 if(volunteer.Result.status.Contains("Approved") && volunteer.Result.email.IsEmail() && !WebUser.ExistsByEmail(volunteer.Result.email,msgs,dc) )
                 {
                     
