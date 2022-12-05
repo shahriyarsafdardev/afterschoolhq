@@ -1155,10 +1155,8 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
-            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
-            var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
-            var totalSubscriptionCost = ccSubscriptionFee + (subscription != null ? subscription.CostPerPeriod.Value : 0);
+            var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
 
             // if has subscription
@@ -1232,7 +1230,7 @@ namespace AfterSchoolLibrary.Helpers
             }
             var ccPaymentPlanFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Payment Plan
             var ccPaymentPlanTitle = "Credit Card Fee";
-            // add paymentplan block 
+            // add payment-plan block 
             if (hasPaymentPlan)
             {
                 var startDate = submittedRecord.GetPlanStartDate(paymentPlan, participationObject, msgs, dc);
@@ -1251,7 +1249,6 @@ namespace AfterSchoolLibrary.Helpers
                                                                 $"<span style='float:right;margin-right:48px;'>{ccPaymentPlanFee.ToCurrency()}</span></p>";
                 }
             }
-            ;
 
             if (showTable)
                 registrationTable = ProcessTemplate(
