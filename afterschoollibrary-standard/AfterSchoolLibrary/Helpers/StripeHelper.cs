@@ -1181,9 +1181,8 @@ namespace AfterSchoolLibrary.Billing
                 BillingCycleAnchor = billingCycleAnchor
             };
 
-            // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
-            if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
-                options.TrialEnd = startDate.Value; 
+            if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date.AddDays(1)))
+                options.TrialEnd = startDate.Value; // if start date is at least one day in the future, start on start date
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.Date.AddDays(1)))
