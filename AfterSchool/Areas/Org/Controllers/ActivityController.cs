@@ -1660,7 +1660,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activity.IsNotEmpty())
             {
                 if (!accountPackage.HasFeature(FeatureType.AllowStudentRegistration) &&
-                    requiresparentalconsent.IsBlank())
+                    requiresparentalconsent.IsBlank() && activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                     requiresparentalconsent = "1";
 
                 if (restrictbygrade.IsNotEmpty() && restrictbygrade.IsBoolean())
