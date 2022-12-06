@@ -1,4 +1,4 @@
-﻿@using AfterSchool.Helpers
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditCostResult
 @{
     var msgs = Model.Messages;
@@ -201,25 +201,25 @@
                                     }
                                 }
                                 
-                                $('#pricetoparent-confirm').html($('#pricetoparent').html());
-                                $('#pricetoparent-paymentplan-confirm').html($('#pricetoparent-paymentplan').html());
-                                $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html());
-                                $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html());
+                                $('#pricetoparent-confirm').html($('#pricetoparent').html()).wrapInner("<strong />");
+                                $('#pricetoparent-paymentplan-confirm').html($('#pricetoparent-paymentplan').html()).wrapInner("<strong />");
+                                $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html()).wrapInner("<strong />");
+                                $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html()).wrapInner("<strong />");
                                 
-                                $('#amounttoprovider-confirm').html($('#amounttoprovider').html());
-                                $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html());
-                                $('#amounttoprovider-subscription-confirm').html($('#amounttoprovider-subscription').html());
-                                $('#amounttoprovider-postpay-confirm').html($('#amounttoprovider-postpay').html());
+                                $('#amounttoprovider-confirm').html($('#amounttoprovider').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-subscription-confirm').html($('#amounttoprovider-subscription').html()).wrapInner("<strong />");
+                                $('#amounttoprovider-postpay-confirm').html($('#amounttoprovider-postpay').html()).wrapInner("<strong />");
                                 
                                 let feeConfirm = parseFloat($('#pricetoparent').html()) - parseFloat($('#amounttoprovider').html());
                                 let feePaymentPlanConfirm = parseFloat($('#pricetoparent-paymentplan').html()) - parseFloat($('#amounttoprovider-paymentplan').html());
                                 let feeSubscriptionConfirm = parseFloat($('#pricetoparent-subscription').html()) - parseFloat($('#amounttoprovider-subscription').html());
                                 let feePostPayConfirm = parseFloat($('#pricetoparent-postpay').html()) - parseFloat($('#amounttoprovider-postpay').html());
                                 
-                                $('#fee-confirm').html(feeConfirm.toFixed(2));
-                                $('#fee-paymentplan-confirm').html(feePaymentPlanConfirm.toFixed(2));
-                                $('#fee-subscription-confirm').html(feeSubscriptionConfirm.toFixed(2));
-                                $('#fee-postpay-confirm').html(feePostPayConfirm.toFixed(2));
+                                $('#fee-confirm').html(feeConfirm.toFixed(2)).wrapInner("<strong />");
+                                $('#fee-paymentplan-confirm').html(feePaymentPlanConfirm.toFixed(2)).wrapInner("<strong />");
+                                $('#fee-subscription-confirm').html(feeSubscriptionConfirm.toFixed(2)).wrapInner("<strong />");
+                                $('#fee-postpay-confirm').html(feePostPayConfirm.toFixed(2)).wrapInner("<strong />");
                                 
                                 $('#confirm-save-button').addClass('hide');            
                                 $('#confirm-savenext-button').addClass('hide');
