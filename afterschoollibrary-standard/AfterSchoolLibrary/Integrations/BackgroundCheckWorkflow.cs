@@ -13,18 +13,18 @@ namespace AfterSchoolLibrary.Integrations
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
     {
         private readonly IBackgroundCheckRepository backgroundCheckRepository;
-        private readonly ISterlingCreateCandidateQuery createCandidateQuery;
+        private readonly ISterlingCandidateQuery candidateQuery;
         private readonly ISterlingCreateScreeningQuery createScreeningQuery;
         private readonly SterlingCredentials credentials;
         private readonly ISterlingBearerTokenQuery tokenQuery;
 
         public BackgroundCheckWorkflow(SterlingCredentials credentials, ISterlingBearerTokenQuery tokenQuery,
-            ISterlingCreateCandidateQuery createCandidateQuery, ISterlingCreateScreeningQuery createScreeningQuery,
+            ISterlingCandidateQuery candidateQuery, ISterlingCreateScreeningQuery createScreeningQuery,
             IBackgroundCheckRepository backgroundCheckRepository)
         {
             this.credentials = credentials;
             this.tokenQuery = tokenQuery;
-            this.createCandidateQuery = createCandidateQuery;
+            this.candidateQuery = candidateQuery;
             this.createScreeningQuery = createScreeningQuery;
             this.backgroundCheckRepository = backgroundCheckRepository;
         }
@@ -36,7 +36,11 @@ namespace AfterSchoolLibrary.Integrations
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-                candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
+                candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+                
+                if(candidateId.IsEmpty())
+                    candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
+                
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
             }
             catch (Exception ex)
@@ -59,7 +63,10 @@ namespace AfterSchoolLibrary.Integrations
                 SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
                 ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
             };
-            messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
+            
+            if(messages.HasNoErrors())
+                messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
+            
             return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
         }
     }

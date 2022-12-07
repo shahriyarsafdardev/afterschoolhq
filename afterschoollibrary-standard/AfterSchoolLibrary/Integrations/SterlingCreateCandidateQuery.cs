@@ -6,17 +6,18 @@ using Newtonsoft.Json;
 
 namespace AfterSchoolLibrary.Integrations
 {
-    public interface ISterlingCreateCandidateQuery
+    public interface ISterlingCandidateQuery
     {
         Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
+        Task<string> GetByEmaileAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
     }
 
-    public class SterlingCreateCandidateQuery : ISterlingCreateCandidateQuery
+    public class SterlingCandidateQuery : ISterlingCandidateQuery
     {
         private readonly IHttpClient httpClient;
         private readonly IJsonSerializer jsonSerializer;
 
-        public SterlingCreateCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer)
+        public SterlingCandidateQuery(IHttpClient httpClient, IJsonSerializer jsonSerializer)
         {
             this.httpClient = httpClient;
             this.jsonSerializer = jsonSerializer;
@@ -49,6 +50,26 @@ namespace AfterSchoolLibrary.Integrations
             var responseBody = jsonSerializer.Deserialize<SterlingCandidateResponse>(response.Body);
             return responseBody.Id;
         }
+        
+        public async Task<string> GetByEmaileAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser)
+        {
+            var request = new HttpRequest
+            {
+                Url = $"{credentials.Endpoint}/v2/candidates?email={webUser.Email}",
+                Method = HttpMethod.GET,
+                Headers = new HttpHeaders()
+                    .Add("Authorization", $"Bearer {bearerToken}")
+                    .Add("Content-Type", "application/json"),
+            };
+        
+            var response = await httpClient.ExecuteAsync(request);
+
+            if (response.StatusCode == 200)
+                return jsonSerializer.Deserialize<SterlingCandidateResponse>(response.Body).Id;
+            
+            return null;
+        }
+        
     }
 
     public class SterlingCandidateRequest

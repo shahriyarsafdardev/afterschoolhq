@@ -98,7 +98,7 @@ namespace AfterSchool
             services.AddTransient<IBackgroundCheckWorkflow, BackgroundCheckWorkflow>();
             services.AddTransient<IJsonSerializer, JsonSerializer>();
             services.AddTransient<ISterlingBearerTokenQuery, SterlingBearerTokenQuery>();
-            services.AddTransient<ISterlingCreateCandidateQuery, SterlingCreateCandidateQuery>();
+            services.AddTransient<ISterlingCandidateQuery, SterlingCandidateQuery>();
             services.AddTransient<ISterlingCreateScreeningQuery, SterlingCreateScreeningQuery>();
             services.AddTransient<IInfluxLogger, InfluxLogger>();
             services.AddTransient<IBackgroundCheckRepository, BackgroundCheckRepository>();

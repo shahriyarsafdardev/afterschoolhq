@@ -3,23 +3,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.District.Models;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Hangfire;
+using Email = BasicLibrary.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.District.Controllers
 {
     public class VolunteerController : BaseLoggedInController
     {
-        public VolunteerController() : base(new List<AccountType> { AccountType.SchoolDistrict })
+        private readonly IBackgroundCheckWorkflow backgroundCheckWorkflow;
+        private readonly IFeatureFlagRepository featureFlagRepository;
+        public VolunteerController(IFeatureFlagRepository featureFlagRepository, IBackgroundCheckWorkflow backgroundCheckWorkflow) : base(new List<AccountType> { AccountType.SchoolDistrict })
         {
-
+            this.featureFlagRepository = featureFlagRepository;
+            this.backgroundCheckWorkflow = backgroundCheckWorkflow;
         }
 
         // GET: District/Profile
@@ -52,6 +61,19 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             ViewBag.Messages = msgs;
             return View(account);
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult> InitiateBackgroundCheck(int webUserId)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var webUser = WebUser.LoadbyId(webUserId, msgs);
+            var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
+            SendLinkToVolunteer(link, webUser);
+            ViewBag.Messages = msgs;
+
+            return RedirectToAction("Todo");
         }
         
         public ActionResult Details(int id, string r, string returnUrl)
@@ -221,6 +243,37 @@ namespace AfterSchool.Areas.District.Controllers
             else
                 ViewBag.ListUrl = Url.Action("index", "registration");
         }
+        
+        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser, int accountId)
+        {
+            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
+            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, accountId, msgs);
+            return backgroundCheckResult.BackgroundCheckUrl;
+        }
 
+        private void SendLinkToVolunteer(string link, WebUser webUser)
+        {
+            BackgroundJob.Enqueue(() =>
+                EmailHelper.SendEmail(
+                    webUser.Email,
+                    $"ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]",
+                    $"<p>Hello {webUser.FirstName},<br />" +
+                    "Thank you for taking the first step in becoming a volunteer for [ INSERT PROGRAM ? ]! " +
+                    "We are working with <a href='https://www.sterlingcheck.com/services/candidate-hub/' target=_blank >Sterling</a> " +
+                    "to conduct a background check as part of the onboarding process.<br />" +
+                    "The link below will take you to Sterling's secure portal where you can begin the background check process." +
+                    "We encourage you to read the information provided regarding privacy and security.<br/><br/>" +
+                    "Once the background check is complete, you will receive an email letting you know the results.<br/><br/>" +
+                    $"<a href='{link}' target=_blank >Link</a><br/><br/>" +
+                    "If the link above doesn't work, please copy and paste it into your browser.<br/><br/>" +
+                    "If you have any questions about the background check process, please visit Sterling's <a href='https://mybackgroundcheck.sterlingcheck.com/' target=_blank >candidate information page</a>" +
+                    " or contact Sterling Support at 888-889-5248 or <a href='mailto:candidate.support@sterlingcheck.com.'>candidate.support@sterlingcheck.com.</a><br/><br/>" +
+                    "Thank you,<br/><br/>" +
+                    "AfterSchool HQ" +
+                    $"</p>",
+                    true)
+            );
+        }
+        
     }
 }

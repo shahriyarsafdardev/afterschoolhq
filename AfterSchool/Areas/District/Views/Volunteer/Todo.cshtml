@@ -153,7 +153,9 @@
                                 </td>
                                 <td>
                                     <div>
-                                        <span><img src="/Assets/img/email-bgcheck.svg"/></span>
+                                        <span>
+                                            <a href="@Url.Action("InitiateBackgroundCheck","Volunteer",new{webUserId = @taskViewModel.WebUserId})" ><img src="/Assets/img/email-bgcheck.svg"/></a>
+                                        </span>
                                         <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
                                         <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
                                     </div>
