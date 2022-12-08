@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -114,7 +114,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string isinviteonly, string genderrestrictions, string mingrade, string maxgrade, string schedule,
             string scheduledetails, string requiresalldays, string repeatsweekly, string startdate, string enddate,
             string dailystarttime, string dailyendtime, string isongoing, string contactname, string contactemail,
-            string contactphone, string seatsavailable, string waitinglistseats)
+            string contactphone, string seatsavailable, string waitinglistseats, string details)
         {
             var msgs = new SystemMessages();
             var currentWebUser = SessionVariables.CurrentUser;
@@ -123,7 +123,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var values = new Dictionary<string, object>
             {
                 {"name", name},
-                {"description", description},
+                {"details", details},
                 {"regmode", regmode.IsNotEmpty() ? regmode : ((int) RegistrationMode.Register).ToString()},
                 {"form", form},
                 {"isinviteonly", isinviteonly.IsBoolean()},

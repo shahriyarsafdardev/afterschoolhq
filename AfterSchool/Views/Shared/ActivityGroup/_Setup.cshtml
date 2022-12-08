@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
@@ -23,8 +23,8 @@
             Model.Description,
             new ViewDataDictionary() {
                 { "required", true },
-                { "name", "description" },
-                { "id", "description" }
+                { "name", "details" },
+                { "id", "details" }
             }
             ); }
         <p class="text-muted">
