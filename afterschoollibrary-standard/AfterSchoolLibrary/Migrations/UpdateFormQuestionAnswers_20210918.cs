@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
