@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Migrations
                     amsgs.AddRange(ActivityMessage.Update(
                         new Hashtable() { { "ParentsOnly", 0 } },
                         new Hashtable() { { "ParentsOnly", DBNull.Value } },
-                        Registrant.ObjectMap,
+                        ActivityMessage.ObjectMap,
                         adc
                     ));
                 },
