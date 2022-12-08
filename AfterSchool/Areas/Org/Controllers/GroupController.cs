@@ -101,6 +101,10 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 group = currentAccount.GetActivityGroup(id.ToGuid(), msgs);
 
+            // adding because we were initially using the description field, but migrating over to details field
+            if (group.Description.IsNotBlank() && group.Details.IsBlank())
+                group.Details = group.Description;
+
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Forms = currentAccount.GetForms(FormType.StudentForm, msgs);
             ViewBag.Messages = msgs;
