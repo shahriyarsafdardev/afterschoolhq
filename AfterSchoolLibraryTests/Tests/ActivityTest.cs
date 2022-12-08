@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Models;
@@ -790,7 +790,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             var registrantIds = new List<int> { registrant.ID.Value };
 
-            Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, false, accountOwner.ID.Value, msgs, dc));
+            Assert.NotNull(activity.AddMessage("subj", "Hello Class", registrantIds, false, false, accountOwner.ID.Value, msgs, dc));
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -37,7 +37,7 @@
                         <div class="col-sm-6">
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
-                                @foreach(var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
+                                @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
                                 {
                                     <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
                                 }
@@ -64,6 +64,16 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-3">
+                            <div class="am-checkbox">
+                                <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
+                                <label for="parentsonly">Send to Parents Only</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label class="col-sm-3 control-label">
                             Select @UILabel.RegistrantLabel(true)<br />
                             <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
@@ -74,15 +84,15 @@
                                 <div class="col-md-4">
                                     @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox registrant" 
-                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" 
+                                        <div class="am-checkbox registrant"
+                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()"
                                              data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
 
-                                            <input type="checkbox" 
-                                                   class="chk-registrant" 
-                                                   id="registrant-@registrant.ID" 
-                                                   name="registrant-@registrant.ID" 
-                                                   value="1" 
+                                            <input type="checkbox"
+                                                   class="chk-registrant"
+                                                   id="registrant-@registrant.ID"
+                                                   name="registrant-@registrant.ID"
+                                                   value="1"
                                                    checked="checked" />
 
                                             <label for="registrant-@registrant.ID">

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -565,7 +565,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [ValidateInput(false)]
         [HttpPost]
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body,
-            string sendtostaff)
+            string sendtostaff, string parentsonly)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -602,6 +602,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             body,
                             registrantIds,
                             sendtostaff.IsBoolean() && sendtostaff.ToBoolean(),
+                            parentsonly.IsBoolean() && parentsonly.ToBoolean(),
                             currentUser.ID.Value,
                             msgs);
 

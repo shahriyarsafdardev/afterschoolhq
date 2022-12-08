@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using BasicLibrary;
@@ -802,7 +802,7 @@ namespace AfterSchoolLibrary.Services
             return true;
         }
 
-        public static ActivityMessage AddMessage(this ActivityGroup group, string subject, string body, List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static ActivityMessage AddMessage(this ActivityGroup group, string subject, string body, List<int> registrantIds, bool sendToStaff, bool parentsOnly, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             ActivityMessage am = null;
@@ -818,6 +818,7 @@ namespace AfterSchoolLibrary.Services
                         Subject = subject.MaxChars(150),
                         Body = body,
                         SendToStaff = sendToStaff,
+                        ParentsOnly = parentsOnly,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = loggedInUserId
                     };

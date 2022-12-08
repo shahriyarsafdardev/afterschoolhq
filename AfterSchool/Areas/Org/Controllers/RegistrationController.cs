@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -826,7 +826,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [ValidateInput(false)]
         [HttpPost]
         public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff, string activity,
-            string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at, string volunteers)
+            string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at, string volunteers, string parentsonly)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -856,6 +856,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     body,
                     registrantIds,
                     sendtostaff.IsBoolean(),
+                    parentsonly.IsBoolean(),
                     currentUser.ID.Value,
                     msgs);
 
