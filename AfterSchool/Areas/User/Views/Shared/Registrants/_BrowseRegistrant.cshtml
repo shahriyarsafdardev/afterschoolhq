@@ -1,4 +1,4 @@
-﻿@model Registrant
+@model Registrant
 
 @{ 
     var grade = Model.GetAnswer(QuestionDataType.RegistrantGrade)?.Text;
@@ -9,6 +9,24 @@
 <div class="col-sm-12 col-md-6 col-lg-4">
     <div class="panel" style="overflow: hidden;">
         <div class="heading panel-h3" style="background-color: #2f3c40; height: 80px;">
+
+            <div class="pull-right">
+                <div class="btn-group btn-hspace">
+                    <button class="btn btn-alt5 dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">                        
+
+                        <a class="padding-10"
+                           style="display:block"
+                           href="">
+                            Delete Profile
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
             <h3 style="vertical-align: middle; display: table-cell; width: 100%; height: 80px; padding-right: 20px;" class="text-white notranslate">
                 <strong title="@regName">@regName @(grade.IsNotBlank() ? "(" + @UILabel.GetGradeDescription(grade) +")" : "")</strong>
             </h3>
