@@ -3,6 +3,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var selectedTaskType = (TaskStatus) ViewBag.SelectedTaskType;
     var selectedApplicationStatus = (ApplicationStatus) ViewBag.SelectedApplicationStatus;
+    var paging = (PagingModel)ViewBag.PagingModel;
 }
 
 <style>
@@ -130,8 +131,7 @@
 
         <div class="panel-body">
             
-            @if (Model.Count > 0)
-            {
+            
                 <div class="table-responsive">
                     <table class="table">
                         <tr>
@@ -145,7 +145,9 @@
                             <th>Date Submitted</th>
                             <th>Phone Number</th>
                         </tr>
-                        @foreach (var taskViewModel in Model)
+                        @if (Model.Count > 0)
+                        {
+                        foreach (var taskViewModel in Model)
                         {
                             <tr>
                                 <td>
@@ -167,15 +169,29 @@
                                 <td>@taskViewModel.Phone</td>
                             </tr>
                         }
+                        }
+                        else
+                        {
+                            <p>No volunteer available</p>
+                        }
                     </table>
                 </div>
-            }
-            else
-            {
-                <p>No volunteer available</p>
-            }
-            
+                
+                @{Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                        { "id", "" },
+                        { "action", "todo" },
+                        { "controller", "volunteer" },
+                        { "querystring", $"taskType={Request["taskType"]}&applicationStatus={Request["applicationStatus"]}" }
+                    }
+                    );
+                }
+                
         </div>
+        
     </div>
 </div>
 
@@ -251,7 +267,6 @@
         $('#applicationStatus').on('change', function() {
           location.href = '@Url.Action("Todo","Volunteer")?applicationStatus=' + this.value + '&taskType=' + $('#taskType').find(":selected").val();
         });
-        
     });
     
     function addRemoveApproval(operation , type , webUserId)

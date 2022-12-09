@@ -1,7 +1,8 @@
-﻿@model List<Account>
+﻿@model List<BackgroundViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var inviteUrl = Url.Action("invite", "school");
+    var paging = (PagingModel)ViewBag.PagingModel;
 }
 
 <style>
@@ -15,6 +16,8 @@
         border-top-style: hidden;
     }
 </style>
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{Html.RenderPartial("DistrictHeader");}
 
@@ -37,11 +40,12 @@
             <div class="table-responsive">
                 
                 <div class="pull-right">
-                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]"/>
+                    <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["search"]"/>
                     <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
                         Search
                     </button>
                 </div>
+                
                 
                 <table class="table">
                     <tr>
@@ -51,23 +55,61 @@
                         <th>Background Check Status</th>
                         <th></th>
                     </tr>
-                    <tr>
-                        <td>
-                            <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
-                        </td>
-                        <td>Bilal Khan</td>
-                        <td>Approved</td>
-                        <td>0900-78601</td>
-                        <td>
-                            <div class="pull-right">
-                                <a class="btn btn-primary whitebgbtn">Change Status</a>
-                                <a class="btn btn-primary whitebgbtn">View Volunteer Info</a>
-                            </div>
-                        </td>
-                    </tr>
+                    @if (Model.Count > 0)
+                    {
+                        foreach (var backgroundViewModel in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
+                                </td>
+                                <td>@(backgroundViewModel.FirstName + ' ' + backgroundViewModel.LastName)</td>
+                                <td>@backgroundViewModel.DateSubmitted.ToShortDateString()</td>
+                                <td>@backgroundViewModel.BackgroundCheckStatus</td>
+                                <td>
+                                    <div class="pull-right">
+                                        <a class="btn btn-primary whitebgbtn">View Volunteer Info</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <p>No Background available</p>
+                    }
+                        
                 </table>
+                @{Html.RenderPartial(
+                      "~/Views/Shared/_Paging.cshtml",
+                      paging,
+                      new ViewDataDictionary()
+                      {
+                          { "id", "" },
+                          { "action", "BackgroundCheck" },
+                          { "controller", "volunteer" },
+                          { "querystring", $"search={Request["search"]}" }
+                      }
+                      );
+                }
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function doSearch() 
+    {
+        location.href = `@Url.Action("backgroundcheck", "volunteer")?search=${$('#search').val()}`;
+    }
+        
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $('#search').keypress(function (e) {
+            if (e.keyCode == 13 || e.keyCode == 10) {
+                doSearch();
+            }
+        });
+    });
+</script>
 

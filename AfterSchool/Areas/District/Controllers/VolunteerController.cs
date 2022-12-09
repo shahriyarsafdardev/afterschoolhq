@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using AfterSchool.Areas.District.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
@@ -18,6 +19,7 @@ using BasicLibrary.DataAccess;
 using Hangfire;
 using Email = BasicLibrary.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+using Model = AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.District.Controllers
 {
@@ -32,12 +34,26 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         // GET: District/Profile
-        public ActionResult Index()
+        public ActionResult Index(string pn, string rpp, string search)
         {
+            
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            
             var volunteerViewModel = new List<VolunteerViewModel>();
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var registeredVolunteerRegistrants = Registrant.LoadMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer , msgs);
+            var count = Registrant.GetCountApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, msgs);
+            var registeredVolunteerRegistrants = Registrant.LoadApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, start, length, msgs);
             
             if (registeredVolunteerRegistrants.IsNotEmpty())
             {
@@ -51,16 +67,64 @@ namespace AfterSchool.Areas.District.Controllers
                 }                
             }
             
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+            
             ViewBag.Messages = msgs;
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
             return View(volunteerViewModel);
         }
         
-        public ActionResult BackgroundCheck()
+        public ActionResult BackgroundCheck(string pn, string rpp, string search)
         {
-            List<Account> account = new List<Account>();
+            
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            
+            var backgroundViewModel = new List<BackgroundViewModel>();
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var count = Registrant.GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, msgs);
+            var registeredVolunteerRegistrants = Registrant.LoadABackgroundMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, start, length, msgs);
+
+            if (registeredVolunteerRegistrants.IsNotEmpty())
+            {
+                foreach (var registrant in registeredVolunteerRegistrants)
+                {
+                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId((int)registrant.WebUserId).FirstOrDefault();
+                    
+                    if(backgroundCheck.IsNotEmpty())
+                        backgroundViewModel.Add(BackgroundAssembler.BackgroundAssemblerResult(registrant, backgroundCheck));
+                        
+                }
+            }
+
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+            
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
+            
             ViewBag.Messages = msgs;
-            return View(account);
+            return View(backgroundViewModel);
         }
         
         [HttpGet]
@@ -91,14 +155,28 @@ namespace AfterSchool.Areas.District.Controllers
             return View(registration);
         }
         
-        public ActionResult Todo(int taskType = (int)TaskStatus.ReviewApplicant , int applicationStatus = (int)ApplicationStatus.New)
+        public ActionResult Todo(string pn, string rpp, int taskType = (int)TaskStatus.ReviewApplicant , int applicationStatus = (int)ApplicationStatus.New)
         {
+            
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+            
             var TodoViewModelList = new List<TodoViewModel>();
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
-            var volunteerApprovals = VolunteerApproval.Load();
-            var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus((TaskStatus) taskType, (ApplicationStatus) applicationStatus, volunteerApprovals, currentAccount, msgs);
-            
+            //var volunteerApprovals = VolunteerApproval.Load();
+            var count = VolunteerTask.GetCountTypeAndAppStatus((TaskStatus) taskType, (ApplicationStatus) applicationStatus, currentAccount, msgs);
+            var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus((TaskStatus) taskType, (ApplicationStatus) applicationStatus, currentAccount, start, length, msgs);
+
             if (volunteerTasks.IsNotEmpty())
             {
                 volunteerTasks.ForEach(task =>
@@ -109,7 +187,17 @@ namespace AfterSchool.Areas.District.Controllers
                 });
 
             }
-
+            
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+            
+            ViewBag.PagingModel = new PagingModel()
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
+            
             ViewBag.SelectedTaskType = (TaskStatus) taskType;
             ViewBag.SelectedApplicationStatus = (ApplicationStatus)applicationStatus;
             ViewBag.Messages = msgs;
