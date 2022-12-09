@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Xunit.Abstractions;
 using AfterSchoolLibraryTests;
 using Newtonsoft.Json;
