@@ -1,0 +1,167 @@
+@model AfterSchool.Areas.Org.Controllers.ActivityController.AttendanceReportResults
+@{
+    ViewBag.Title = Model.Activity.Name;
+    var attendanceRegistrants = Model.AttendanceRegistrants;
+    var students = Model.AttendanceRegistrants.Select(x => new Registrant { ID = x.RegistrantId, FirstName = x.RegistrantFirstName, LastName = x.RegistrantLastName }).DistinctBy(x => x.ID).ToList();
+    var dates = Model.AttendanceRegistrants.Select(x => x.AttendanceDate).DistinctBy(x => x).ToList();
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+
+    var groupBy = Request["groupby"];
+
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row margin-b-20">
+                <button class="btn btn-primary btn-space hidden-print" onclick="location.href='@Url.Action("downloadattendancereport", "activity", new { id = Model.Activity.Uid.ToString() })'">
+                    <i class="s7-download"></i> Download
+                </button>
+                <button onclick="window.print()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-print"></i> Print
+                </button>
+                <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-close-circle"></i> Close
+                </button>
+
+                <div class="pull-right hidden-print">
+                    <select class="form-control" onchange="location.href = '@Url.Action("attendancereport", "activity", new {id = Model.Activity.Uid})?groupby=' + this.value;">
+                        <option value="">Group by: None</option>
+                        <option value="student" @(groupBy == "student" ? "selected=\"selected\"" : "")>Group by: Student</option>
+                        <option value="date" @(groupBy == "date" ? "selected=\"selected\"" : "")>Group by: Date</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (groupBy == "date")
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @foreach (var date in dates.OrderBy(x => x))
+                        {
+                            <h4>
+                                <strong>@date.ToLongDateTimeString()</strong>
+                            </h4>
+                            <h5>
+                                <strong>Present:</strong> @attendanceRegistrants.Where(x => x.AttendanceDate == date).Count(x => x.NumberPresent.HasValue && x.NumberPresent.Value > 0)
+                                |
+                                <strong>Absent:</strong> @attendanceRegistrants.Where(x => x.AttendanceDate == date).Count(x => !x.NumberPresent.HasValue || x.NumberPresent.Value == 0)
+                            </h5>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendanceRegistrant in attendanceRegistrants.Where(x => x.AttendanceDate == date))
+                                    {
+                                        <tr>
+                                            <td>@attendanceRegistrant.RegistrantName</td>
+                                            <td>
+                                                @if (!attendanceRegistrant.NumberPresent.HasValue)
+                                                {
+                                                    @:N/A
+                                                }
+                                                else if (attendanceRegistrant.NumberPresent.Value > 0)
+                                                {
+                                                    @:Present
+                                                }
+                                                else
+                                                {
+                                                    @:Absent
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                </div>
+            }
+            else if (groupBy == "student")
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @foreach (var student in students)
+                        {
+                            <h4>
+                                <strong>@student.Name</strong>
+                            </h4>
+                            <h5>
+                                <strong>Present:</strong> @attendanceRegistrants.Where(x => x.RegistrantId == student.ID).Count(x => x.NumberPresent.HasValue && x.NumberPresent.Value > 0)
+                                |
+                                <strong>Absent:</strong> @attendanceRegistrants.Where(x => x.RegistrantId == student.ID).Count(x => !x.NumberPresent.HasValue || x.NumberPresent.Value == 0) 
+                            </h5>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var attendanceRegistrant in attendanceRegistrants.Where(x => x.RegistrantId == student.ID))
+                                    {
+                                        <tr>
+                                            <td>@attendanceRegistrant.AttendanceDate.ToShortDateTimeString()</td>
+                                            <td>
+                                                @if (!attendanceRegistrant.NumberPresent.HasValue)
+                                                {
+                                                    @:N/A
+                                                }
+                                                else if (attendanceRegistrant.NumberPresent.Value > 0)
+                                                {
+                                                    @:Present
+                                                }
+                                                else
+                                                {
+                                                    @:Absent
+                                                }                                                
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.OrderBy(x => x.AttendanceDate))
+                        {
+                            <tr>
+                                <td>@attendanceRegistrant.AttendanceDate.ToShortDateTimeString()</td>
+                                <td>@attendanceRegistrant.RegistrantName</td>
+                                <td>
+                                    @(attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent > 0 ? "Present" : "Absent")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
