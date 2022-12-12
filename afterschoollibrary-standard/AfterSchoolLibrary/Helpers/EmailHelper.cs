@@ -1155,7 +1155,7 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
-            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); //Credit Card Fee for Subscription
+            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); 
             var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
 
@@ -1185,7 +1185,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
                 else
-                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) - checkoutObject.GetSubscriptionCostTodayCreditCardFee()).ToCurrency();  // ccFee of subcription from table Credit Card Fee
+                    ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) - checkoutObject.GetSubscriptionCostTodayCreditCardFee()).ToCurrency();  // ccFee of subscription from table Credit Card Fee
 
                 if (subscriptionStartsToday)
                 {
@@ -1197,12 +1197,6 @@ namespace AfterSchoolLibrary.Helpers
                         {"Cost", cost},
                         {"AdditionalDetails", additionalDetails},
                     };
-                    // Comment this because no need to add subscription row in table
-                    //receiptRows += ProcessTemplate(
-                    //    EmailTemplates.Registration_Confirmation_Rows,
-                    //    subscriptionFeeModel,
-                    //    "Registration_Confirmation_Rows",
-                    //    msgs);
                 }
 
                 if (subscription.RegFeeAsDownPayment)
@@ -1223,10 +1217,6 @@ namespace AfterSchoolLibrary.Helpers
                         "Registration_Confirmation_Rows",
                         msgs);
                 }
-                //if (!isRegFree)
-                //{
-                //showTable = true;
-                //}
             }
             var ccPaymentPlanFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Payment Plan
             var ccPaymentPlanTitle = "Credit Card Fee";
