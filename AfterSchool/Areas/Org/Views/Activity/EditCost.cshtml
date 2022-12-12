@@ -201,10 +201,10 @@
                                     }
                                 }
                                 
-                                $('#pricetoparent-confirm').html($('#pricetoparent').html()).wrapInner("<strong />");
-                                $('#pricetoparent-paymentplan-confirm').html($('#pricetoparent-paymentplan').html()).wrapInner("<strong />");
-                                $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html()).wrapInner("<strong />");
-                                $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html()).wrapInner("<strong />");
+                                $('#pricetoparent-confirm').html($('#pricetoparent').html());
+                                $('#pricetoparent-paymentplan-confirm').html($('#pricetoparent-paymentplan').html());
+                                $('#pricetoparent-subscription-confirm').html($('#pricetoparent-subscription').html());
+                                $('#pricetoparent-postpay-confirm').html($('#pricetoparent-postpay').html());
                                 
                                 $('#amounttoprovider-confirm').html($('#amounttoprovider').html()).wrapInner("<strong />");
                                 $('#amounttoprovider-paymentplan-confirm').html($('#amounttoprovider-paymentplan').html()).wrapInner("<strong />");
@@ -216,10 +216,10 @@
                                 let feeSubscriptionConfirm = parseFloat($('#pricetoparent-subscription').html()) - parseFloat($('#amounttoprovider-subscription').html());
                                 let feePostPayConfirm = parseFloat($('#pricetoparent-postpay').html()) - parseFloat($('#amounttoprovider-postpay').html());
                                 
-                                $('#fee-confirm').html(feeConfirm.toFixed(2)).wrapInner("<strong />");
-                                $('#fee-paymentplan-confirm').html(feePaymentPlanConfirm.toFixed(2)).wrapInner("<strong />");
-                                $('#fee-subscription-confirm').html(feeSubscriptionConfirm.toFixed(2)).wrapInner("<strong />");
-                                $('#fee-postpay-confirm').html(feePostPayConfirm.toFixed(2)).wrapInner("<strong />");
+                                $('#fee-confirm').html(feeConfirm.toFixed(2));
+                                $('#fee-paymentplan-confirm').html(feePaymentPlanConfirm.toFixed(2));
+                                $('#fee-subscription-confirm').html(feeSubscriptionConfirm.toFixed(2));
+                                $('#fee-postpay-confirm').html(feePostPayConfirm.toFixed(2));
                                 
                                 $('#confirm-save-button').addClass('hide');            
                                 $('#confirm-savenext-button').addClass('hide');
@@ -299,26 +299,26 @@
                                                 <tbody>
                                                     <tr>
                                                         <td>Registration Fee</td>
-                                                        <td class="text-center"><strong>$</strong><span id="pricetoparent-confirm"></span></td>
-                                                        <td class="text-center"><strong>$</strong><span id="fee-confirm"></span></td>
+                                                        <td class="text-center">$<span id="pricetoparent-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-confirm"></span></td>
                                                         <td class="text-center"><strong>$</strong><span id="amounttoprovider-confirm"></span></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Payment Plan</td>
-                                                        <td class="text-center"><strong>$</strong><span id="pricetoparent-paymentplan-confirm"></span></td>
-                                                        <td class="text-center"><strong>$</strong><span id="fee-paymentplan-confirm"></span></td>
+                                                        <td class="text-center">$<span id="pricetoparent-paymentplan-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-paymentplan-confirm"></span></td>
                                                         <td class="text-center"><strong>$</strong><span id="amounttoprovider-paymentplan-confirm"></span></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Subscription Plan</td>
-                                                        <td class="text-center"><strong>$</strong><span id="pricetoparent-subscription-confirm"></span></td>
-                                                        <td class="text-center"><strong>$</strong><span id="fee-subscription-confirm"></span></td>
+                                                        <td class="text-center">$<span id="pricetoparent-subscription-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-subscription-confirm"></span></td>
                                                         <td class="text-center"><strong>$</strong><span id="amounttoprovider-subscription-confirm"></span></td>
                                                     </tr>
                                                     <tr>
                                                         <td>Attendance Based Billing</td>
-                                                        <td class="text-center"><strong>$</strong><span id="pricetoparent-postpay-confirm"></span></td>
-                                                        <td class="text-center"><strong>$</strong><span id="fee-postpay-confirm"></span></td>
+                                                        <td class="text-center">$<span id="pricetoparent-postpay-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-postpay-confirm"></span></td>
                                                         <td class="text-center"><strong>$</strong><span id="amounttoprovider-postpay-confirm"></span></td>
                                                     </tr>
                                                 </tbody>
