@@ -96,6 +96,7 @@ namespace AfterSchoolLibrary.Models
             RefreshToken.Create(dc);
             BillingPortalConfiguration.Create(dc);
             BackgroundCheck.Create(dc);
+            ProviderJotFormSubmission.Create(dc);
 
             return msgs;
         }
@@ -185,6 +186,7 @@ namespace AfterSchoolLibrary.Models
             RefreshToken.Alter(dc);
             BillingPortalConfiguration.Alter(dc);
             BackgroundCheck.Alter(dc);
+            ProviderJotFormSubmission.Alter(dc);
 
             return msgs;
         }
@@ -1197,6 +1199,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProviderJotFormSubmission_SubmissionId ON [ProviderJotFormSubmission] (SubmissionId)"));
 
 
             return msgs;
