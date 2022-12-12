@@ -1,4 +1,4 @@
-﻿<div style="margin: 20px">
+<div style="margin: 20px">
   <table style="border: 2px solid #f7f7f7; width: 600px;" border="0">
     <thead>
       <tr>
@@ -11,7 +11,6 @@
         <th style="padding: 10px; text-align:center;">
           Cost
         </th>
-        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -19,7 +18,7 @@
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="2" style="text-align: right; padding: 10px;">
+        <td colspan="2" style="text-align: left; padding: 10px;">
           Credit Card Fee
         </td>
         <td style="padding: 10px; text-align: right">
@@ -28,8 +27,8 @@
         <td></td>
       </tr>
       <tr>
-        <td colspan="2" style="font-weight: bold; text-align: right; padding: 10px;">
-          @Model.AmountDueOrPaid:
+        <td colspan="2" style="font-weight: bold; text-align: left; padding: 10px;">
+          @Model.AmountDueOrPaid
         </td>
         <td style="font-weight: bold; padding: 10px; text-align: right">
           @Model.TotalCost

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -248,7 +248,7 @@ namespace AfterSchoolLibrary.Models
             return GetTotalCost() + GetRegistrationConvenienceFee(msgs, dc);
         }
 
-        private decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        internal decimal GetRegistrationCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return GetRegistrationCostWithFeeAndCoupon(IsCouponApplied, msgs, dc);
         }
@@ -310,6 +310,15 @@ namespace AfterSchoolLibrary.Models
             return costPerPeriodPerPerson * NumberOfSeats;
         }
 
+        public decimal GetSubscriptionCostNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (SubscriptionPlan.IsEmpty() || (SubscriptionPlan.SplitCostEvenly && !ParticipationObject.RegistrationFinalized))
+                return 0;
+
+            var costPerPeriodPerPerson = SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
+            return costPerPeriodPerPerson * NumberOfSeats;
+        }
+
         public decimal GetSubscriptionCostTodayWithFees(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var subscriptionCostTodayWithConvenienceFee = GetSubscriptionCostTodayWithConvenienceFee(msgs, dc);
@@ -329,6 +338,13 @@ namespace AfterSchoolLibrary.Models
         {
             return CreditCardPurchaseObject.IsNotEmpty()
                 ? new FeeCalculationObject(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount, msgs, dc).GetCreditCardFee()
+                : 0;
+        }
+
+        public decimal GetSubscriptionCostCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return CreditCardPurchaseObject.IsNotEmpty()
+                ? new FeeCalculationObject(GetSubscriptionCostNoFees(msgs, dc), BillingAccount, msgs, dc).GetCreditCardFee()
                 : 0;
         }
 
