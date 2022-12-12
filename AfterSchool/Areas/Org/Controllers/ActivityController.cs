@@ -378,7 +378,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrant.WithdrawRegistration(
                     participationObjectId: participationObjectId.ToInteger(),
                     participationObjectType:
-                    (ParticipationObjectType) Enum.Parse(typeof(ParticipationObjectType), type),
+                    (ParticipationObjectType)Enum.Parse(typeof(ParticipationObjectType), type),
                     loggedInUser: SessionVariables.CurrentUser,
                     isCancelPayment: isCancelPayment,
                     isParent: false,
@@ -390,12 +390,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var registrantName = registrant.Name;
                 var successMessage = new SystemMessage($"{registrantName} Withdrawn successfully.", MessageType.Success);
-                SetTempMessages(new SystemMessages {successMessage});
-                return Json(new {success = true, status = "ok"}, JsonRequestBehavior.AllowGet);
+                SetTempMessages(new SystemMessages { successMessage });
+                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
             // something went wrong, error occured
-            return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) },
                 JsonRequestBehavior.AllowGet);
         }
 
@@ -491,7 +491,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ParticipationObject = registrantActivity.GetParticipationObject(msgs),
                         Registration = registrantActivity.GetRegistration(msgs),
                         MasterRegistrant = masterRegistrant,
-                        PaymentType = (PaymentType) paymenttype.ToInteger(),
+                        PaymentType = (PaymentType)paymenttype.ToInteger(),
                         PaymentSourceType = PaymentSourceType.ManualProvider,
                         OverrideAmount = amountpaid.ToDecimal(),
                         PaymentTypeFeeOverrideAmount = 0,
@@ -1246,7 +1246,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     objectId: activity.ID.Value,
                     objectText: "Student for activity " + activity.Name
                 );
-                return RedirectToAction("registrants", new {id = activity.Uid});
+                return RedirectToAction("registrants", new { id = activity.Uid });
             }
 
             return View(activity);
@@ -1290,10 +1290,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
-                return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
 
             var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
-            var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType) billingPeriodType.ToInteger(),
+            var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType)billingPeriodType.ToInteger(),
                 dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday,
                 dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
@@ -1308,7 +1308,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     endDateFormatted = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
                 }, JsonRequestBehavior.AllowGet);
 
-            return Json(new {success = false}, JsonRequestBehavior.AllowGet);
+            return Json(new { success = false }, JsonRequestBehavior.AllowGet);
         }
 
         public class PrintRegistrantsResults
@@ -1408,7 +1408,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return View(result);
             }
 
-            var activityLocationTypeId = (int) (activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
+            var activityLocationTypeId = (int)(activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
             var values = new Dictionary<string, object>
             {
                 {"name", name.MaxChars(75)},
@@ -1444,7 +1444,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var isNew = Request[IsNewRequest] == "1";
 
-            if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
+            if (isNew && activityLocationTypeId == (int)ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();
 
@@ -1619,7 +1619,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public string GetFullScreenExitUrl(Activity activity, string groupUid = "")
         {
             if (groupUid.IsNotEmpty())
-                return Url.Action("Activities", "Group", new {id = groupUid});
+                return Url.Action("Activities", "Group", new { id = groupUid });
 
             if (activity.ActivityGroupId.HasValue)
             {
@@ -1627,10 +1627,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (activity.ActivityGroupUid.IsEmpty())
                     activity = activity.Reload();
 
-                return Url.Action("Activities", "Group", new {id = activity.ActivityGroupUid});
+                return Url.Action("Activities", "Group", new { id = activity.ActivityGroupUid });
             }
 
-            return Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
+            return Url.Action("index", "activity", new { type = (int)activity.ActivityTypeId });
         }
 
         [HttpGet]
@@ -1647,7 +1647,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         public ActionResult EditRestrictions(string id, string alloworganization, string restrictbygrade,
-            string agestart, string ageend, string graderestrictions, string strictgenderrestrictions , string mingrade, string maxgrade,
+            string agestart, string ageend, string graderestrictions, string strictgenderrestrictions, string mingrade, string maxgrade,
             string genderrestrictions, string requiresparentalconsent, string isStudentAllowed, string cmd)
         {
             var msgs = new SystemMessages();
@@ -1681,7 +1681,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     strictgenderrestrictions = "0";
                 }
-                
+
                 var values = new Dictionary<string, object>
                 {
                     {"alloworganization", alloworganization.IfBlank("0")},
@@ -2292,9 +2292,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            if (activity.IsPublished)
-                msgs.Add("Unpublish your activity before making any payment changes.", MessageType.UserError);
-
 
             if (id.IsGuid())
             {
@@ -2335,14 +2332,16 @@ namespace AfterSchool.Areas.Org.Controllers
                     {"prepaidperiodspostpay", prepaidperiodspostpay},
                     {"postpayplanperiod", postpayplanperiod},
                 };
-
-                activity = ActivityService.EditExisting(
+                if (!activity.IsPublished)
+                {
+                    activity = ActivityService.EditExisting(
                     loggedInUserId: currentUser.ID.Value,
                     account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
                     msgs: msgs
                 );
+                }
             }
 
             // Show Success Message
@@ -2383,7 +2382,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
                         ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
                         ViewBag.Messages = msgs;
-                        return RedirectToAction("activities", "group", new {id = activity.ActivityGroupUid});
+                        return RedirectToAction("activities", "group", new { id = activity.ActivityGroupUid });
                     case "publish":
                         ViewBag.Account = currentAccount;
                         ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -2391,7 +2390,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
                         ViewBag.Messages = msgs;
                         return RedirectToAction("publish", "activity",
-                            new {id = activity.Uid, isnew = isNew, source = Request["source"]});
+                            new { id = activity.Uid, isnew = isNew, source = Request["source"] });
                 }
             }
 
@@ -2477,7 +2476,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (msgs.HasErrors())
                         {
                             ViewBag.Messages = msgs;
-                            return RedirectToAction("PublishDetail", new {id = activity.Uid.ToString()});
+                            return RedirectToAction("PublishDetail", new { id = activity.Uid.ToString() });
                         }
 
                         ViewBag.Messages = msgs;
@@ -2489,7 +2488,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     default:
                         ViewBag.Messages = msgs;
                         return RedirectToAction("requesttopublish",
-                            new {id = activity.Uid, isnew = isNew, source = Request["source"]});
+                            new { id = activity.Uid, isnew = isNew, source = Request["source"] });
                 }
             }
 
@@ -2541,11 +2540,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 ViewBag.Messages = msgs;
-                return RedirectToAction("editsetup", new {id = activity.Uid, isnew = 1, source = Request["source"]});
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
             }
 
             ViewBag.Messages = msgs;
-            return RedirectToAction("index", "activity", new {copyerror = true, type});
+            return RedirectToAction("index", "activity", new { copyerror = true, type });
         }
 
         [HttpGet]
@@ -2691,7 +2690,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (orderby.IsNotBlank())
                 orderByParam = orderby;
             if (direction.IsNotBlank())
-                orderbyDirection = (OrderByDirectionEnum) Enum.Parse(typeof(OrderByDirectionEnum), direction);
+                orderbyDirection = (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction);
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -2736,7 +2735,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
             if (attendance.IsEmpty())
-                return RedirectToAction("Attendance", new {id, msg = "Error: No classes have taken place yet"});
+                return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
             var activitySchedule = activity.GetSchedule(msgs);
             var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
@@ -3038,10 +3037,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (registration.PaymentTypeId == PaymentType.ACH)
                                 bankAccountPurchaseObject = new BankAccountPurchaseObject
-                                    {StripeSourceId = registration.StripeSourceId};
+                                { StripeSourceId = registration.StripeSourceId };
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject
-                                    {StripeSourceId = registration.StripeSourceId};
+                                { StripeSourceId = registration.StripeSourceId };
 
                             var overrideAmount = costPerAttendance * attendanceDaysToCharge;
 
@@ -3154,7 +3153,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            return RedirectToAction("attendance", new {id = activityId, msg = msg});
+            return RedirectToAction("attendance", new { id = activityId, msg = msg });
         }
 
         #endregion
@@ -3165,7 +3164,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Surveys(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -3183,7 +3182,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult NewSurvey(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -3273,24 +3272,24 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
 
                     TempData["msgs"] = msgs;
-                    return RedirectToAction("Surveys", new {id, msgs});
+                    return RedirectToAction("Surveys", new { id, msgs });
                 }
                 else
                 {
                     TempData["msgs"] = msgs;
-                    return RedirectToAction("NewSurvey", new {id, msgs});
+                    return RedirectToAction("NewSurvey", new { id, msgs });
                 }
             }
             else
             {
                 TempData["msgs"] = msgs;
-                return RedirectToAction("NewSurvey", new {id, msgs});
+                return RedirectToAction("NewSurvey", new { id, msgs });
             }
         }
 
         private static IDictionary<string, string> ToDictionary(NameValueCollection source)
         {
-            return source.Cast<string>().Select(s => new {Key = s, Value = source[s]})
+            return source.Cast<string>().Select(s => new { Key = s, Value = source[s] })
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 
@@ -3301,7 +3300,8 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 studentsList.Add(new SelectListItem
                 {
-                    Text = students.ElementAt(i + 2).Value, Value = students.ElementAt(i + 1).Value,
+                    Text = students.ElementAt(i + 2).Value,
+                    Value = students.ElementAt(i + 1).Value,
                     Selected = students.ElementAt(i).Value.Contains("true"),
                 });
                 i = i + 3;
@@ -3353,7 +3353,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
             }
 
-            return Json(new {msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
+            return Json(new { msg = "Reminder sent", success = true }, JsonRequestBehavior.AllowGet);
         }
 
         private void CheckRegistrantInviteCodeAndSendEmail(SurveyResponse surveyResponse)
