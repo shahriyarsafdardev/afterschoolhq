@@ -4462,7 +4462,7 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
         }
 
-        public static void CreatePurchaseTransactionPaymentDuringCheckout(CheckoutObject checkoutObject, WebUser loggedInUser,
+        internal static void CreatePurchaseTransactionPaymentDuringCheckout(CheckoutObject checkoutObject, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             var registrant = CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
@@ -4522,7 +4522,7 @@ namespace AfterSchoolLibrary.Services
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
-                CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                CreatePurchaseTransactionPaymentDuringCheckout(checkoutObject, loggedInUser, msgs, dc);
         }
 
         public static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
