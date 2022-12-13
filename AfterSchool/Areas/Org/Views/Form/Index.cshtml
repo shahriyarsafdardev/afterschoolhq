@@ -1,7 +1,13 @@
-﻿@model List<Form>
+@model List<Form>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var currentFormCount = Model.Count;
+    var showFormFields = currentFormCount >= maxFormCount ? false : true;
+    var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
 }
+<input type="hidden" id="isSurveyForm" name="isSurveyForm" value="@ViewBag.FromSurvey" />
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -12,17 +18,56 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <div class="pull-right">
-                <button class="btn btn-primary btn-space md-trigger" data-modal="modal-newform">
-                    <i class="icon icon-left s7-plus"></i>
-                    Add Form
-                </button>
+            <div class="row">
+                <div class="col-md-4 col-sm-12">
+                    <i class="s7-note2"></i> Forms
+                    <div class="clearfix"></div>
+                </div>
             </div>
-            <i class="s7-note2"></i> Forms
-            <div class="clearfix"></div>
+            <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-3">
+                    <select class="form-control" id="formtypefilter">
+                        <option value="">All Form Types</option>
+                        @foreach (var formType in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(x => x != FormType.NotSet))
+                        {
+                            <option value="@((int)@formType)" @(Request["type"] == ((int)formType).ToString() ? "selected=\"selected\"" : "")>@formType.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="pull-right">
+                        <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" value="@Request["q"]" />
+                        <button class="btn btn-primary searchFormBtn" id="searchBtn">
+                            Search
+                        </button>
+                        @if (showFormFields)
+                        {
+                            <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="panel-body">            
+        <div class="panel-body">
+            @if (maxFormCount > 0)
+            {
+                <p class="pull-right text-bold formCount">
+                    <span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
+                </p>
+                <div class="clearfix"></div>
+            }
 
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -30,23 +75,50 @@
                         <tr>
                             <th></th>
                             <th>Form</th>
+                            <th>Type</th>
                             <th>Created On</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.Count > 0)
+                        @if (maxFormCount == 0)
+                        {
+                            <tr>
+                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">upgrade your plan.</a></td>
+                            </tr>
+                        }
+                        else if (Model.Count > 0)
                         {
                             foreach (var form in Model)
                             {
                                 <tr>
-                                    <td><a href="@Url.Action("edit", "form", new {id = form.ID})" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a></td>
+                                    <td>
+                                        @if (maxFormCount > 0)
+                                        {
+                                            <a href="@Url.Action("edit", "form", new {id = form.ID})" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+
+                                    </td>
                                     <td><a href="@Url.Action("edit", "form", new {id = form.ID})">@form.Name</a></td>
+                                    <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
                                     <td>
-                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
-                                            <i class="icon icon-left s7-copy-file"></i> Copy
-                                        </button>
+                                        @if (showFormFields)
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -59,7 +131,22 @@
                         }
                     </tbody>
                 </table>
+
             </div>
+
+            @{
+                Html.RenderPartial(
+                   "~/Views/Shared/_Paging.cshtml",
+                   (PagingModel)ViewBag.PagingModel,
+                   new ViewDataDictionary
+                   {
+                       { "querystring", $"q={Request["q"]}&type={Request["type"]}" },
+                       { "action", "index" },
+                       { "controller", "form" }
+               }
+                   );
+            }
+
         </div>
     </div>
 </div>
@@ -70,16 +157,41 @@
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">New Registration Form</h3>
+                <h3 class="modal-title">New Form</h3>
             </div>
             <div class="modal-body form">
 
                 <p>This is used to create a registration form that can be used for your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
 
                 <div class="form-group">
-                    <label>Registration Form Name</label>
-                    <input type="text" placeholder="" class="form-control" id="name" name="name" onfocus="this.select()">
+                    <label>Form Name</label>
+                    <input type="text" placeholder="" class="form-control" id="name" name="name" onfocus="this.select()" required="">
                 </div>
+                @if (accountPackage.HasAnyFeature(new FeatureType[] { FeatureType.Survey, FeatureType.ManageVolunteerOpportunities }))
+                {
+                    <div class="form-group formTypeRow">
+                        <label>Form Type</label>
+                        <select class="form-control formtype-select" id="formtype" name="formtype" required>
+                            <option value="" selected>-- Select Form Type --</option>
+                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
+                            {
+                                <option value="@((int)type)">
+                                    @type.ToString().SplitByUpperCase()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group hidden">
+                        <label>Form Type</label>
+                        <select class="form-control formtype-select" id="formtype" name="formtype">
+                            <option value="@((int)FormType.StudentForm)" selected="selected"></option>
+                        </select>
+                    </div>
+                }
+
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -89,11 +201,49 @@
     </form>
 </div>
 
-<script>
-    function copy(id, name) {
-        $('.modal-title').html('Copy Registration Form');
-        $('#form-new').attr('action', '/org/form/edit/0?copyfrom=' + id);
-        $('#name').val(name + ' Copy');
-        $('#name').focus();
-    }
-</script>
+
+@section scripts{
+    <script>
+        function copy(id, name, formtype) {
+            $('.modal-title').html('Copy Registration Form');
+            $('#form-new').attr('action', '/org/form/edit/0?copyfrom=' + id);
+            $('#name').val(name + ' Copy');
+            if (formtype == "Survey")
+                $('#formtype').val('2');
+            else
+                $('#formtype').val('1');
+
+            $('.formTypeRow').addClass("hide");
+            $('#name').focus();
+        }
+
+        function showFormType() {
+            $('.formTypeRow').removeClass("hide");
+        }
+
+        $(document).ready(function () {
+            if ($("#isSurveyForm").val() == "true") {
+                $("#formtype").val("2");
+                $(".mdpopup").trigger('click');
+            }
+
+            $('#formtypefilter').on('change', function (){
+                search();
+            });
+
+            $("#searchBtn").on("click", function () {
+                search();
+            });
+
+            $("#search").keypress(function (event) {
+                if (event.which == 13) {
+                    search();
+                }
+            });
+        });
+
+        function search(){
+            location.href='@Url.Action("index", "form")?q=' + $('#search').val() + '&type='+$('#formtypefilter').val();
+        }
+    </script>
+}
