@@ -210,6 +210,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static BackgroundCheck LoadByCandidateId(string candidateId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SterlingCandidateId"], candidateId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
         public static List<BackgroundCheck> LoadByRequestedForFiscalAccountId(int requestedForFiscalAccountId, SystemMessages msgs = null,
             DatabaseConnection dc = null)

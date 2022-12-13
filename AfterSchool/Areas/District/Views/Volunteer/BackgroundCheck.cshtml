@@ -1,8 +1,10 @@
-﻿@model List<BackgroundViewModel>
+﻿@using AfterSchoolLibrary.Enums
+@model List<BackgroundViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var inviteUrl = Url.Action("invite", "school");
     var paging = (PagingModel)ViewBag.PagingModel;
+    var returnUrl = Request.Url;
 }
 
 <style>
@@ -68,7 +70,10 @@
                                 <td>@backgroundViewModel.BackgroundCheckStatus</td>
                                 <td>
                                     <div class="pull-right">
-                                        <a class="btn btn-primary whitebgbtn">View Volunteer Info</a>
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int) backgroundViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID, returnUrl = returnUrl})"
+                                           class="btn btn-primary whitebgbtn">
+                                            View Volunteer Info
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

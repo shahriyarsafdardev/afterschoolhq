@@ -21,7 +21,7 @@ namespace AfterSchool.Areas.District.Models
             {
                 Id = (int)background.ID,
                 BackgroundCheckStatus = background.BackgroundCheckStatusId,
-                WebUserId = (int)registrant.ID,
+                WebUserId = (int)registrant.WebUserId,
                 FirstName = registrant.FirstName,
                 LastName = registrant.LastName,
                 DateSubmitted = (DateTime)background.SterlingEmailSentDate

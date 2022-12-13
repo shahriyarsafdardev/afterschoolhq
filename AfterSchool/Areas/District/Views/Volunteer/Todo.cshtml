@@ -1,9 +1,11 @@
-﻿@model List<TodoViewModel>
+﻿@using AfterSchoolLibrary.Enums
+@model List<TodoViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var selectedTaskType = (TaskStatus) ViewBag.SelectedTaskType;
     var selectedApplicationStatus = (ApplicationStatus) ViewBag.SelectedApplicationStatus;
     var paging = (PagingModel)ViewBag.PagingModel;
+    var returnUrl = Request.Url;
 }
 
 <style>
@@ -122,7 +124,7 @@
                         </option>
                     }
                 </select>
-                <a class="btn btn-primary whitebgbtn">Send Background Check Email</a>
+                <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')">Send Background Check Email</a>
                 <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  >Approve All Selected</a>
                 <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  >Deny All Selected</a>
             </div>
@@ -147,34 +149,38 @@
                         </tr>
                         @if (Model.Count > 0)
                         {
-                        foreach (var taskViewModel in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <input type="checkbox" name="childCheckBox" value="@taskViewModel.WebUserId"/>
-                                </td>
-                                <td>
-                                    <div>
-                                        <span>
-                                            <a href="@Url.Action("InitiateBackgroundCheck","Volunteer",new{webUserId = @taskViewModel.WebUserId})" ><img src="/Assets/img/email-bgcheck.svg"/></a>
-                                        </span>
-                                        <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
-                                        <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
-                                    </div>
-                                </td>
-                                <td>@taskViewModel.TaskStatus</td>
-                                <td>@(taskViewModel.FirstName + ' ' + taskViewModel.LastName)</td>
-                                <td>@taskViewModel.ApplicationStatus</td>
-                                <td>@taskViewModel.DateSubmitted.Date</td>
-                                <td>@taskViewModel.Phone</td>
-                            </tr>
-                        }
-                        }
-                        else
-                        {
-                            <p>No volunteer available</p>
+                            foreach (var taskViewModel in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="childCheckBox" value="@taskViewModel.WebUserId"/>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span>
+                                                <span onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/email-bgcheck.svg"/></span>
+                                            </span>
+                                            <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
+                                            <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
+                                        </div>
+                                    </td>
+                                    <td>@taskViewModel.TaskStatus</td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
+                                            @(taskViewModel.FirstName + ' ' + @taskViewModel.LastName)
+                                        </a>
+                                    </td>
+                                    <td>@taskViewModel.ApplicationStatus</td>
+                                    <td>@taskViewModel.DateSubmitted.Date</td>
+                                    <td>@taskViewModel.Phone</td>
+                                </tr>
+                            }
                         }
                     </table>
+                    @if (Model.Count == 0)
+                    {
+                        <p>No Task</p>
+                    }
                 </div>
                 
                 @{Html.RenderPartial(
@@ -213,7 +219,7 @@
                         <div class="input-group">
                             <label>Approval Reason</label>
                             <input id="name" name="reason" type="text" class="form-control" required>
-                            <input type="hidden" id="webUserIDs" name="webUserIDs"/>
+                            <input type="hidden" class="webUserIDs" name="webUserIDs"/>
                         </div>
                     </div>
                     <div class="form-group">
@@ -243,6 +249,46 @@
                                         class="btn btn-primary btn-md">
                                     Approve
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<div id="modal-send-mail" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Send Background Check Email to Applicant
+            </h3>
+        </div>
+        <div class="modal-body text-center">
+            <p>Do you want to send an email to this applicant prompting them
+                <br/>to submit a background check via sterling<br/>
+            </p>
+            
+            <div class="modal-form">
+                <form action="@Url.Action("InitiateBackgroundCheck" , "Volunteer")" method="post">
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right confirm">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Send Email
+                                </button>
+                                <input type="hidden" class  ="webUserIDs" name="webUserIDs"/>
                             </div>
                         </div>
                     </div>
@@ -289,15 +335,34 @@
         if (operation === 'reject')
             $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny')
         
-        $('#webUserIDs').val(webUserIDs);
+        $('.webUserIDs').val(webUserIDs);
         $('#operation').val(operation);
         
         $('#modal-confirm').addClass('md-show');  
     }
     
+    function sendEmail(type , webUserId)
+    {
+        var webUserIDs = '';
+                
+        if (type === 'multiple')
+        {
+            $("input:checkbox[name=childCheckBox]:checked").each(function(){
+                webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+            });
+        }
+        
+        if(type === 'single')
+            webUserIDs = webUserId;
+       
+       $('.webUserIDs').val(webUserIDs);
+       $('#modal-send-mail').addClass('md-show'); 
+    }
+    
     function closeModal()
     {
         $('#modal-confirm').removeClass('md-show');
+        $('#modal-send-mail').removeClass('md-show');
         $(':input','.modal-form').val('');
     }
     

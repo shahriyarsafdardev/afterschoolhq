@@ -34,7 +34,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         // GET: District/Profile
-        public ActionResult Index(string pn, string rpp, string search)
+        public ActionResult Index(string pn, string rpp, string search, int type = (int)ApprovalStatus.Approved)
         {
             
             var pageNumber = 1;
@@ -52,8 +52,8 @@ namespace AfterSchool.Areas.District.Controllers
             var volunteerViewModel = new List<VolunteerViewModel>();
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var count = Registrant.GetCountApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, msgs);
-            var registeredVolunteerRegistrants = Registrant.LoadApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, start, length, msgs);
+            var count = Registrant.GetCountApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, type, msgs);
+            var registeredVolunteerRegistrants = Registrant.LoadApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search,type, start, length, msgs);
             
             if (registeredVolunteerRegistrants.IsNotEmpty())
             {
@@ -70,6 +70,7 @@ namespace AfterSchool.Areas.District.Controllers
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
             
             ViewBag.Messages = msgs;
+            ViewBag.SelectedType = (ApprovalStatus) type;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = count,
@@ -127,15 +128,34 @@ namespace AfterSchool.Areas.District.Controllers
             return View(backgroundViewModel);
         }
         
-        [HttpGet]
-        public async Task<ActionResult> InitiateBackgroundCheck(int webUserId)
+        [HttpPost]
+        public async Task<ActionResult> InitiateBackgroundCheck(string webUserIDs)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var webUser = WebUser.LoadbyId(webUserId, msgs);
-            var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
-            SendLinkToVolunteer(link, webUser);
-            ViewBag.Messages = msgs;
+            
+            if(webUserIDs.IsEmpty())
+                msgs.Add("No volunteer was selected",MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                foreach (var webUserID in webUserIDs.Split(','))
+                {
+                    var webUser = WebUser.LoadbyId(webUserID.ToInteger(), msgs);
+                    var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(),msgs);
+
+                    var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
+
+                    if (msgs.HasNoErrors())
+                    {
+                        VolunteerTaskService.EditTask(volunteerTask, msgs);
+                            
+                        SendLinkToVolunteer(link, webUser);
+                    }
+                }
+            }
+            
+            TempData["msgs"] = msgs;
 
             return RedirectToAction("Todo");
         }

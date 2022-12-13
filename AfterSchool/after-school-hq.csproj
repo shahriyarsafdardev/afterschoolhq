@@ -597,6 +597,7 @@
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\Controllers\VolunteerController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
+    <Compile Include="Areas\District\Models\BackgroundViewModel.cs" />
     <Compile Include="Areas\District\Models\TodoViewModel.cs" />
     <Compile Include="Areas\District\Models\VolunteerViewModel.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditConfirmationAssembler.cs" />
@@ -639,6 +640,7 @@
     <Compile Include="Areas\Volunteer\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Volunteer\Controllers\SettingController.cs" />
     <Compile Include="Areas\Volunteer\VolunteerAreaRegistration.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\SterlingController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />

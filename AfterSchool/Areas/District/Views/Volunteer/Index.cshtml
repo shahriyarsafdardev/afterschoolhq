@@ -4,6 +4,7 @@
     var msgs = (SystemMessages)ViewBag.Messages;
     var returnUrl = Request.Url;
     var paging = (PagingModel)ViewBag.PagingModel;
+    var type = (ApprovalStatus)ViewBag.SelectedType;
 }
 
 <style>
@@ -38,13 +39,24 @@
         <div class="panel-body">
 
             <div class="table-responsive">
-                
-                
-                    <div class="pull-right">
+
+                <div class="row">
+                    <div class="col-lg-2">
+                        <select name="type" id="type" class="form-control">
+                            @foreach (var status in Enum.GetValues(typeof(ApprovalStatus)).Cast<ApprovalStatus>().Except(ApprovalStatus.NotSet.AsList()).Except(ApprovalStatus.Requested.AsList()))
+                            {
+                                <option @(status == type ? "selected" : "") value="@((int)status)">
+                                    @status
+                                </option>
+                            }
+                        </select>   
+                    </div>
+                    <div class="col-lg-5">
                         <input type="text" id="search" class="form-control searchFormInput" value="@Request["search"]" placeholder="Search for volunteer" style="float: left;width: 300px;height: 38px;margin-right: 10px;"/>
-                        <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
-                            Search
-                        </button>
+                            <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
+                                Search
+                            </button>
+                    </div>
                     </div>
                     
                     <table class="table">
@@ -62,7 +74,10 @@
                         {
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">Manage</a>
+                                    <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int) volunteerViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID, returnUrl = returnUrl})"
+                                       class="btn btn-primary btn-md">
+                                        Manage
+                                    </a>
                                 </td>
                                 <td>
                                     <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)volunteerViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
@@ -81,13 +96,14 @@
                             </tr>
                         }
                         }
-                        else
-                        {
-                            <p>No Volunteer</p>
-                        }
                     </table>
-                    
-                    @{Html.RenderPartial(
+                
+                @if (Model.Count == 0)
+                {
+                    <p>No Volunteer</p>
+                }
+                
+                @{Html.RenderPartial(
                         "~/Views/Shared/_Paging.cshtml",
                         paging,
                         new ViewDataDictionary()
@@ -95,7 +111,7 @@
                             { "id", "" },
                             { "action", "index" },
                             { "controller", "volunteer" },
-                            { "querystring", $"search={Request["search"]}" }
+                            { "querystring", $"search={Request["search"]}&type={Request["type"]}" }
                         }
                         );
                     }
@@ -108,7 +124,7 @@
 <script>
     function doSearch() 
     {
-        location.href = `@Url.Action("index", "volunteer")?search=${$('#search').val()}`;
+        location.href = `@Url.Action("index", "volunteer")?search=${$('#search').val()}&type=` + $('#type').find(":selected").val();
     }
         
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -117,6 +133,10 @@
             if (e.keyCode == 13 || e.keyCode == 10) {
                 doSearch();
             }
+        });
+        
+        $('#type').on('change', function() {
+           location.href = '@Url.Action("index","Volunteer")?type=' + this.value; 
         });
     });
     

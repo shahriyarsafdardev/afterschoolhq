@@ -17,7 +17,7 @@ namespace AfterSchoolLibrary.Models
     /// </summary>
     [Serializable]
     public class Registrant : BaseContact
-    {4
+    {
         #region "ClassGenerator"
 
         public int? AccountId
@@ -924,21 +924,21 @@ namespace AfterSchoolLibrary.Models
 
             return sql;
         }
-
-        public static List<Registrant> LoadApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
+        
+        public static List<Registrant> LoadApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetApprovedSearchedRegistrant(AccountHostId, registrantPersonType, search, start, length);
+            var sql = GetApprovedSearchedRegistrant(AccountHostId, registrantPersonType, search, type, start, length);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static int GetCountApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, SystemMessages msgs= null, DatabaseConnection dc = null)
+        public static int GetCountApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, SystemMessages msgs= null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetApprovedSearchedRegistrantCount(AccountHostId, registrantPersonType, search);
+            var sql = GetApprovedSearchedRegistrantCount(AccountHostId, registrantPersonType, search, type);
 
             return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
@@ -961,9 +961,14 @@ namespace AfterSchoolLibrary.Models
             return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
         
-        private static string GetApprovedSearchedRegistrant(int Id, RegistrantPersonType personType, string search, int? start, int? length)
+        private static string GetApprovedSearchedRegistrant(int Id, RegistrantPersonType personType, string search, int type, int? start, int? length)
         {
             var persontTypeId = (int) personType;
+            var typeQuery = "";
+
+            if (type != 4)
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
+            
             var sql = $@"select masterReg.*
             from
                 Registrant submittedReg inner join
@@ -978,6 +983,7 @@ namespace AfterSchoolLibrary.Models
                 ) and
                 submittedReg.PersonTypeId = {persontTypeId} and
                 (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
+                {typeQuery}
                 order by submittedReg.ID
                 offset {start} rows
                 fetch next {length} rows only";
@@ -985,7 +991,7 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
 
-        private static string GetApprovedSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search)
+        private static string GetApprovedSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search, int type)
         {
             var persontTypeId = (int) personType;
             var sql = $@"select count(masterReg.ID)
@@ -1002,6 +1008,9 @@ namespace AfterSchoolLibrary.Models
                 ) and
                 submittedReg.PersonTypeId = {persontTypeId} and
                 (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')";
+
+            if (type != 4)
+                sql = sql + $@"and volunteer.approvalstatusid = {type}";
 
             return sql;
         }
