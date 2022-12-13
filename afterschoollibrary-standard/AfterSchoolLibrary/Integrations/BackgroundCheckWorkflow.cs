@@ -67,13 +67,14 @@ namespace AfterSchoolLibrary.Integrations
             if(messages.HasNoErrors())
                 messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
             
-            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
+            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl , msg = messages};
         }
     }
 
     public class BackgroundCheckRequestResult
     {
         public string BackgroundCheckUrl { get; set; }
+        public SystemMessages msg { get; set; }
     }
 
     public class SterlingCredentials

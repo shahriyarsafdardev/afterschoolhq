@@ -132,6 +132,7 @@ namespace AfterSchool.Areas.District.Controllers
         public async Task<ActionResult> InitiateBackgroundCheck(string webUserIDs)
         {
             var msgs = new SystemMessages();
+            BackgroundCheckRequestResult backgroundCheckRequestResult = new BackgroundCheckRequestResult();
 
             try
             {
@@ -147,13 +148,13 @@ namespace AfterSchool.Areas.District.Controllers
                         var webUser = WebUser.LoadbyId(webUserID.ToInteger(), msgs);
                         var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(),msgs);
 
-                        var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
+                        backgroundCheckRequestResult = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
 
                         if (msgs.HasNoErrors())
                         {
                             VolunteerTaskService.EditTask(volunteerTask, msgs);
                             
-                            SendLinkToVolunteer(link, webUser);
+                            SendLinkToVolunteer(backgroundCheckRequestResult.BackgroundCheckUrl, webUser);
                         }
                     }
                 }
@@ -162,6 +163,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.Error, ex);
+                msgs.AddRange(backgroundCheckRequestResult.msg);
             }
             
             TempData["msgs"] = msgs;
@@ -361,11 +363,11 @@ namespace AfterSchool.Areas.District.Controllers
                 ViewBag.ListUrl = Url.Action("index", "registration");
         }
         
-        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser, int accountId)
+        private async Task<BackgroundCheckRequestResult> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser, int accountId)
         {
             if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
             var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, accountId, msgs);
-            return backgroundCheckResult.BackgroundCheckUrl;
+            return backgroundCheckResult;
         }
 
         private void SendLinkToVolunteer(string link, WebUser webUser)
