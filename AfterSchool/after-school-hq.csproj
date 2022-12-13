@@ -783,6 +783,7 @@
     <Content Include="Assets\img\4k-wallpaper-adorable-blur-boy-1148998-small.jpg" />
     <Content Include="Assets\img\ahq-logo-2-1-1.png" />
     <Content Include="Assets\img\AHQ-logo.png" />
+    <Content Include="Assets\img\approve-white.svg" />
     <Content Include="Assets\img\approve.svg" />
     <Content Include="Assets\img\arrow.png" />
     <Content Include="Assets\img\ashq-logo.png" />
@@ -790,6 +791,7 @@
     <Content Include="Assets\img\clever-login.png" />
     <Content Include="Assets\img\clever-signup.png" />
     <Content Include="Assets\img\client_success_manager_color.jpeg" />
+    <Content Include="Assets\img\deny-white.svg" />
     <Content Include="Assets\img\deny.svg" />
     <Content Include="Assets\img\email-bgcheck.svg" />
     <Content Include="Assets\img\email-symbol.png" />
@@ -802,6 +804,7 @@
     <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\footer-icon.png" />
     <Content Include="Assets\img\form-sample.png" />
+    <Content Include="Assets\img\paper-plane 8.svg" />
     <Content Include="Assets\img\paper-plane.svg" />
     <Content Include="Assets\img\red-map-icon-large.png" />
     <Content Include="Assets\img\red-map-icon.png" />

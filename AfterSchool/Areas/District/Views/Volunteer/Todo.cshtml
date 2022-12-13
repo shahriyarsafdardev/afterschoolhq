@@ -66,6 +66,11 @@
         height: 100px;
     }
     
+    .paper-plan
+    {
+        height: 20px;
+    }
+    
 </style>
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -129,9 +134,9 @@
                         </option>
                     }
                 </select>
-                <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')">Initiate Background Check</a>
-                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  >Approve All Selected</a>
-                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  >Deny All Selected</a>
+                <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')"><img class="paper-plan" src="/Assets/img/paper-plane 8.svg"/>Initiate Background Check</a>
+                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  ><img class="paper-plan" src="/Assets/img/approve-white.svg"/> Approve All Selected</a>
+                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  ><img class="paper-plan" src="/Assets/img/deny-white.svg"/> Deny All Selected</a>
             </div>
             <h2>To do</h2>
         </div>
@@ -163,7 +168,7 @@
                                     <td>
                                         <div>
                                             <span>
-                                                <span onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/email-bgcheck.svg"/></span>
+                                                <span class="btn btn-default btn-sm" onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img class="paper-plan" src="/Assets/img/paper-plane.svg"/> Initiate </span>
                                             </span>
                                             <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
                                             <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
