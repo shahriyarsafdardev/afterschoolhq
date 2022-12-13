@@ -132,27 +132,36 @@ namespace AfterSchool.Areas.District.Controllers
         public async Task<ActionResult> InitiateBackgroundCheck(string webUserIDs)
         {
             var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-            
-            if(webUserIDs.IsEmpty())
-                msgs.Add("No volunteer was selected",MessageType.UserError);
 
-            if (msgs.HasNoErrors())
+            try
             {
-                foreach (var webUserID in webUserIDs.Split(','))
+                var currentAccount = SessionVariables.CurrentAccount;
+            
+                if(webUserIDs.IsEmpty())
+                    msgs.Add("No volunteer was selected",MessageType.UserError);
+
+                if (msgs.HasNoErrors())
                 {
-                    var webUser = WebUser.LoadbyId(webUserID.ToInteger(), msgs);
-                    var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(),msgs);
-
-                    var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
-
-                    if (msgs.HasNoErrors())
+                    foreach (var webUserID in webUserIDs.Split(','))
                     {
-                        VolunteerTaskService.EditTask(volunteerTask, msgs);
+                        var webUser = WebUser.LoadbyId(webUserID.ToInteger(), msgs);
+                        var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(),msgs);
+
+                        var link = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
+
+                        if (msgs.HasNoErrors())
+                        {
+                            VolunteerTaskService.EditTask(volunteerTask, msgs);
                             
-                        SendLinkToVolunteer(link, webUser);
+                            SendLinkToVolunteer(link, webUser);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
+                msgs.Add(ex.Message, MessageType.Error, ex);
             }
             
             TempData["msgs"] = msgs;
