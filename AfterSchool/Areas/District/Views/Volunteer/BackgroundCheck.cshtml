@@ -79,12 +79,14 @@
                             </tr>
                         }
                     }
-                    else
-                    {
-                        <p>No Background available</p>
-                    }
-                        
+
                 </table>
+                
+                @if (Model.Count == 0)
+                {
+                    <p>No Background available</p>
+                }
+                
                 @{Html.RenderPartial(
                       "~/Views/Shared/_Paging.cshtml",
                       paging,
