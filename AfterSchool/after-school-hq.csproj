@@ -802,6 +802,7 @@
     <Content Include="Assets\img\loading-spinner.gif" />
     <Content Include="Assets\img\footer-icon.png" />
     <Content Include="Assets\img\form-sample.png" />
+    <Content Include="Assets\img\paper-plane.svg" />
     <Content Include="Assets\img\red-map-icon-large.png" />
     <Content Include="Assets\img\red-map-icon.png" />
     <Content Include="Assets\img\reg-header.jpg" />
