@@ -245,7 +245,7 @@
 
             @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount))
             {
-                <li class="@formactive hide">
+                <li class="@formactive">
                     <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a>
                 </li>
             }

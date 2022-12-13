@@ -26,7 +26,10 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <a href="@Url.Action("index", "form")" class="btn btn-default pull-right">&laquo; All Forms</a>
+            <div class="pull-right">
+                <a href="@Url.Action("report", "form", new { id = Model.ID })" class="btn btn-default" target="_blank">View Data</a>
+                <a href="@Url.Action("index", "form")" class="btn btn-default">&laquo; All Forms</a>
+            </div>
             <i class="s7-note2"></i> Form - @Model.Name
         </div>
         <div class="panel-body">
@@ -261,7 +264,8 @@
                                                     </td>
 
                                                     <td>
-                                                        @{Html.RenderPartial(
+                                                        @{
+                                                            Html.RenderPartial(
                                                                 "~/Views/Shared/_SwitchButton.cshtml",
                                                                 question.IsActive,
                                                                 new ViewDataDictionary
@@ -270,7 +274,8 @@
                                                                     { "checkboxid", "active-" + question.ID },
                                                                     { "disabled", question.IsLocked },
                                                                     { "classname", "question-isactive" }
-                                                                );}
+                                                                });
+                                                         }
                                                     </td>
                                                     <td>
                                                         @if (question.QuestionTypeId != QuestionType.TextBlock)
