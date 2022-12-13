@@ -43,6 +43,7 @@ namespace AfterSchoolLibraryTests.Tests
                 null,
                 createWithStripe: true,
                 loggedInUser: loggedInUser,
+                participationObject:null,
                 msgs: msgs,
                 dc: dc);
 

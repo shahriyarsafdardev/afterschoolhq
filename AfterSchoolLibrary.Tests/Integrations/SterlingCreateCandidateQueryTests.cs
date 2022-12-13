@@ -32,7 +32,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
                 Id = candidateId,
             });
 
-            var query = new SterlingCreateCandidateQuery(http.Object, json.Object);
+            var query = new SterlingCandidateQuery(http.Object, json.Object);
 
             var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             const string token = "my-token";
@@ -70,7 +70,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
             var credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             var json = new Mock<IJsonSerializer>();
 
-            var query = new SterlingCreateCandidateQuery(http.Object, json.Object);
+            var query = new SterlingCandidateQuery(http.Object, json.Object);
             var webUser = new WebUser
             {
                 FirstName = "first-name",
