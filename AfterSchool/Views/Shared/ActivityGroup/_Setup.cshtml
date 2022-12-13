@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var forms = (List<Form>)ViewBag.Forms;
@@ -20,11 +20,11 @@
     <div class="col-md-9">
         @{ Html.RenderPartial(
             "~/Views/Shared/_TextEditor.cshtml",
-            Model.Description,
+            Model.Details,
             new ViewDataDictionary() {
                 { "required", true },
-                { "name", "description" },
-                { "id", "description" }
+                { "name", "details" },
+                { "id", "details" }
             }
             ); }
         <p class="text-muted">
