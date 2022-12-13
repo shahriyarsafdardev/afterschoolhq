@@ -67,7 +67,7 @@
                                 </td>
                                 <td>@(backgroundViewModel.FirstName + ' ' + backgroundViewModel.LastName)</td>
                                 <td>@backgroundViewModel.DateSubmitted.ToShortDateString()</td>
-                                <td>@backgroundViewModel.BackgroundCheckStatus</td>
+                                <td>@backgroundViewModel.BackgroundCheckStatus.ToString().SplitByUpperCase()</td>
                                 <td>
                                     <div class="pull-right">
                                         <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int) backgroundViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID, returnUrl = returnUrl})"

@@ -76,7 +76,7 @@
                                 <td>
                                     <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int) volunteerViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID, returnUrl = returnUrl})"
                                        class="btn btn-primary btn-md">
-                                        Manage
+                                        View Volunteer Info
                                     </a>
                                 </td>
                                 <td>
@@ -84,7 +84,7 @@
                                         @(volunteerViewModel.FirstName + ' ' + @volunteerViewModel.LastName)
                                     </a>
                                 </td>
-                                <td>@volunteerViewModel.ApprovalStatus</td>
+                                <td>@volunteerViewModel.ApprovalStatus.ToString().SplitByUpperCase()</td>
                                 <td>@volunteerViewModel.Phone</td>
                                 <td>@volunteerViewModel.Email</td>
                                 <td>

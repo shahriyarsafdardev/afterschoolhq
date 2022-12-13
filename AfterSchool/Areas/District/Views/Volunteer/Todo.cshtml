@@ -61,6 +61,11 @@
         display: table;
     }
     
+    .no-task > p > img
+    {
+        height: 100px;
+    }
+    
 </style>
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -112,7 +117,7 @@
                     @foreach (var taskType in Enum.GetValues(typeof(TaskStatus)).Cast<TaskStatus>().Except(TaskStatus.NotSet.AsList()))
                     {
                         <option @(taskType == selectedTaskType ? "selected" : "") value="@((int)taskType)">
-                            @taskType
+                            @taskType.ToString().SplitByUpperCase()
                         </option>
                     }
                 </select>
@@ -120,11 +125,11 @@
                     @foreach (var applicationStatus in Enum.GetValues(typeof(ApplicationStatus)).Cast<ApplicationStatus>().Except(ApplicationStatus.NotSet.AsList()))
                     {
                         <option @(applicationStatus == selectedApplicationStatus ? "selected" : "") value="@((int)applicationStatus)">
-                            @applicationStatus
+                            @applicationStatus.ToString().SplitByUpperCase()
                         </option>
                     }
                 </select>
-                <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')">Send Background Check Email</a>
+                <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')">Initiate Background Check</a>
                 <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  >Approve All Selected</a>
                 <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  >Deny All Selected</a>
             </div>
@@ -142,7 +147,7 @@
                             </th>
                             <th>Actions</th>
                             <th>Task</th>
-                            <th>Application Name</th>
+                            <th>Applicant Name</th>
                             <th>Application Status</th>
                             <th>Date Submitted</th>
                             <th>Phone Number</th>
@@ -164,13 +169,13 @@
                                             <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
                                         </div>
                                     </td>
-                                    <td>@taskViewModel.TaskStatus</td>
+                                    <td>@taskViewModel.TaskStatus.ToString().SplitByUpperCase()</td>
                                     <td>
                                         <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
                                             @(taskViewModel.FirstName + ' ' + @taskViewModel.LastName)
                                         </a>
                                     </td>
-                                    <td>@taskViewModel.ApplicationStatus</td>
+                                    <td>@taskViewModel.ApplicationStatus.ToString().SplitByUpperCase()</td>
                                     <td>@taskViewModel.DateSubmitted.Date</td>
                                     <td>@taskViewModel.Phone</td>
                                 </tr>
@@ -179,7 +184,10 @@
                     </table>
                     @if (Model.Count == 0)
                     {
-                        <p>No Task</p>
+                        <div class="no-task text-center">
+                            <p><img src="/Assets/img/celebration.svg"/></p>
+                            <p>You have completed all open tasks!</p>
+                        </div>
                     }
                 </div>
                 
@@ -267,7 +275,7 @@
         </div>
         <div class="modal-body text-center">
             <p>Do you want to send an email to this applicant prompting them
-                <br/>to submit a background check via sterling<br/>
+                <br/>to submit a background check via STERLING<br/>
             </p>
             
             <div class="modal-form">

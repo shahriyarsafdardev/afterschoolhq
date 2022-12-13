@@ -15,14 +15,14 @@
 
     <div class="btn-toolbar">
         <div class="btn-group hidden-xs">
-            <a href="@Url.Action("Index", "volunteer")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
-                <i class="s7-graph2"></i> Volunteers
+            <a href="@Url.Action("todo", "volunteer")" class="btn btn-alt6@(actionName == "todo" ? "-active" : "")">
+                <i class="s7-study"></i> To do
             </a>
             <a href="@Url.Action("backgroundcheck", "volunteer")" class="btn btn-alt6@(actionName == "backgroundcheck" ? "-active" : "")">
                 <i class="s7-edit"></i> Background Check
             </a>
-            <a href="@Url.Action("todo", "volunteer")" class="btn btn-alt6@(actionName == "todo" ? "-active" : "")">
-                <i class="s7-study"></i> To do
+            <a href="@Url.Action("Index", "volunteer")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
+                <i class="s7-graph2"></i> Volunteers
             </a>
         </div>
     </div>
