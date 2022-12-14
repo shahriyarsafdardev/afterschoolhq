@@ -66,11 +66,7 @@
                                         <tr>
                                             <td>@attendanceRegistrant.RegistrantName</td>
                                             <td>
-                                                @if (!attendanceRegistrant.NumberPresent.HasValue)
-                                                {
-                                                    @:N/A
-                                                }
-                                                else if (attendanceRegistrant.NumberPresent.Value > 0)
+                                                @if (attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent.Value > 0)
                                                 {
                                                     @:Present
                                                 }
@@ -116,11 +112,7 @@
                                         <tr>
                                             <td>@attendanceRegistrant.AttendanceDate.ToShortDateTimeString()</td>
                                             <td>
-                                                @if (!attendanceRegistrant.NumberPresent.HasValue)
-                                                {
-                                                    @:N/A
-                                                }
-                                                else if (attendanceRegistrant.NumberPresent.Value > 0)
+                                                @if (attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent.Value > 0)
                                                 {
                                                     @:Present
                                                 }
