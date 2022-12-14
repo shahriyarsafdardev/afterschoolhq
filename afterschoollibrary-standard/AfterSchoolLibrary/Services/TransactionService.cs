@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Billing;
@@ -177,6 +177,54 @@ namespace AfterSchoolLibrary.Services
         public static Account GetPayerAccount(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Account.Load(transaction.PayerAccountId.Value, msgs, dc);
+        }
+
+        public static Transaction CreateNewDuringCheckout(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var amount = checkoutObject.OverrideAmount ?? checkoutObject.GetTotalCostWithoutSubscriptionToPurchaseTodayWithFees(msgs, dc);
+            var useConnectedAccount = checkoutObject.BillingAccount.UseStripeConnectDuringCheckout(msgs, dc);
+            var usePlatformFees = useConnectedAccount && !checkoutObject.OverrideAmount.HasValue;
+
+            var convenienceFee = 0M;
+            var paymentTypeFee = 0M;
+
+            if (checkoutObject.PostPayPlan.IsNotEmpty())
+            {
+                convenienceFee = checkoutObject.GetPostPayPlanCostTodayConvenienceFee();
+                paymentTypeFee = checkoutObject.GetPostPayPlanCostTodayCreditCardFee();
+            }
+            else
+            {
+                convenienceFee = checkoutObject.GetRegistrationConvenienceFee(msgs, dc);
+                paymentTypeFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc);
+            }
+
+
+            return CreateNew(
+                checkoutObject.PayingAccount,
+                checkoutObject.BillingAccount,
+                checkoutObject.ConvenienceFeePayer,
+                checkoutObject.CreditCardFeePayer,
+                amount,
+                checkoutObject.ParticipationObject?.Name,
+                checkoutObject.Purchase?.ID,
+                transactionType,
+                checkoutObject.PaymentType,
+                checkoutObject.PaymentSourceType,
+                usePlatformFees ? checkoutObject.GetPlatformFlatFeeWithCoupon(msgs, dc) : new decimal?(),
+                usePlatformFees ? checkoutObject.GetPlatformPercentFeeWithCoupon(msgs, dc) : new decimal?(),
+                checkoutObject.ConvenienceFeeOverrideAmount ?? convenienceFee,
+                checkoutObject.PaymentTypeFeeOverrideAmount ?? paymentTypeFee,
+                checkoutObject.StripeChargeId,
+                checkoutObject.Description,
+                checkoutObject.Date,
+                useConnectedAccount,
+                loggedInUser,
+                checkoutObject.CouponValue(msgs, dc),
+                checkoutObject.Coupon,
+                msgs,
+                dc);
         }
 
         public static Transaction CreateNew(CheckoutObject checkoutObject, TransactionType transactionType, WebUser loggedInUser, SystemMessages msgs = null,

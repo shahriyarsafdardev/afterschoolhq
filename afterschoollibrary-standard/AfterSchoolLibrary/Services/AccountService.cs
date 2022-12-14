@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -4275,7 +4275,7 @@ namespace AfterSchoolLibrary.Services
 
             // if can charge fees we bill it directly from our AHQ account
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmount(msgs, dc);
+            var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc);
             var amount = checkoutObject.GetStripeAmount(msgs, dc);
 
             // only charge tuition during checkout, because subscriptions are billed through stripe
@@ -4318,6 +4318,17 @@ namespace AfterSchoolLibrary.Services
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return TransactionService.CreateNew(
+                checkoutObject,
+                transactionType,
+                loggedInUser,
+                msgs,
+                dc);
+        }
+
+        internal static Transaction AddTransactionDuringCheckout(CheckoutObject checkoutObject, TransactionType transactionType,
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            return TransactionService.CreateNewDuringCheckout(
                 checkoutObject,
                 transactionType,
                 loggedInUser,
@@ -4451,6 +4462,31 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
         }
 
+        internal static void CreatePurchaseTransactionPaymentDuringCheckout(CheckoutObject checkoutObject, WebUser loggedInUser,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrant = CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
+
+            // charge successful so I need to create a transaction
+            var transaction = AddTransactionDuringCheckout(
+                checkoutObject,
+                TransactionType.Charge,
+                loggedInUser,
+                msgs,
+                dc);
+
+            checkoutObject.Transaction = transaction;
+
+            if (registrant.IsEmpty())
+                return;
+
+            registrant.ProcessActivityPayment(checkoutObject, transaction, loggedInUser, msgs, dc);
+
+            // Ensure the seat is reserved
+            if (msgs.HasNoErrors())
+                checkoutObject.EnsureSeat(RegistrationAssignmentType.Reserved, loggedInUser, msgs, dc);
+        }
+
         public static void ProcessPrePayFee(CheckoutObject checkoutObject, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
@@ -4486,7 +4522,7 @@ namespace AfterSchoolLibrary.Services
             // must wait until after charges happen to know what card id is charged for sure
             // add purchase
             if (msgs.HasNoErrors())
-                CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, msgs, dc);
+                CreatePurchaseTransactionPaymentDuringCheckout(checkoutObject, loggedInUser, msgs, dc);
         }
 
         public static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
