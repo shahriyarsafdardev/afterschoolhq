@@ -1,5 +1,5 @@
-﻿@model Activity
-@{ 
+@model Activity
+@{
     var list = (List<Attendance>)ViewData["attendances"];
     var totalPresent = Model.GetAttendancePresentCount();
     var totalSeats = Model.GetAttendancePossibleCount();
@@ -51,7 +51,7 @@
 
     if (Model.HasSchedule)
     {
-        <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a> 
+        <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
     }
     else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
     {
@@ -62,6 +62,11 @@
     {
         <a id="charge-attendance" onclick="chargeAttendanceFee()" disabled="disabled" class="btn btn-default btn-space">Charge Attendance Fee</a>
     }
+
+
+    <a href="@Url.Action("attendancereport", "activity", new {id = Model.Uid})" class="btn btn-default btn-space" target="_blank">
+        View Attendance Report
+    </a>
 }
 
 
@@ -70,7 +75,7 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                @{ 
+                @{
                     if (postPayPlan)
                     {
                         <th>
@@ -95,7 +100,7 @@
                 {
                     var seatsPossible = attendance.GetAttendanceRegistrantCount();
                     var presentCount = attendance.GetPresentCount();
-                    var disableCheck = attendance.IsCharged ? "disabled" : ""; 
+                    var disableCheck = attendance.IsCharged ? "disabled" : "";
                     <tr>
                         @if (postPayPlan)
                         {
@@ -103,7 +108,7 @@
                                 <span class="am-checkbox">
                                     <input type="checkbox"
                                            id="selectAttendance-@attendance.ID"
-                                           @disableCheck 
+                                           @disableCheck
                                            class="chkAttendance"
                                            onchange="selectAttendance(@attendance.ID,this)" />
                                     <label for="selectAttendance-@attendance.ID"></label>
@@ -135,7 +140,7 @@
     </table>
 </div>
 
-@{ 
+@{
 
     Html.RenderPartial(
        "~/Views/Shared/_Paging.cshtml",
@@ -146,7 +151,7 @@
             { "querystring", "" },
             { "action", "attendance" },
             { "controller", "activity" }
-       }
+               }
    );
 }
 

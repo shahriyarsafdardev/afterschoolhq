@@ -3154,6 +3154,88 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("attendance", new {id = activityId, msg = msg});
         }
 
+        [HttpGet]
+        public ActionResult AttendanceReport(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
+
+            var model = new AttendanceReportResults()
+            {
+                AttendanceRegistrants = attendanceRegistrants,
+                Messages = msgs,
+                Activity = activity,
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public ActionResult DownloadAttendanceReport(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
+
+            var table = new List<List<string>>();
+            var row = new List<string>
+            {
+                "Date",
+                "Student First Name",
+                "Student Last Name",
+                "Status"
+            };
+
+            table.Add(row);
+
+            foreach (var attendanceRegistrant in attendanceRegistrants)
+            {
+                row = new List<string>
+                {
+                    attendanceRegistrant.AttendanceDate.ToShortDateTimeString(),
+                    attendanceRegistrant.RegistrantFirstName,
+                    attendanceRegistrant.RegistrantLastName,
+                    attendanceRegistrant.NumberPresent.HasValue ? attendanceRegistrant.NumberPresent.Value > 0 ? "Present" : "Absent" : "N/A",
+                };
+                table.Add(row);
+            }
+
+            var csv = CsvFile.Create(table);
+
+            Response.Clear();
+            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
+            Response.AddHeader("Content-Disposition", $"attachment; filename={activity.UniqueName}-attendance.csv");
+
+            var fileBytes = Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", fileBytes.Length.ToString());
+            Response.BinaryWrite(fileBytes);
+            Response.End();
+
+            var model = new AttendanceReportResults()
+            {
+                AttendanceRegistrants = attendanceRegistrants,
+                Messages = msgs,
+                Activity = activity,
+            };
+
+            return View("AttendanceReport", model);
+
+        }
+
+        public class AttendanceReportResults
+        {
+            public AttendanceReportResults() { }
+
+            public List<AttendanceRegistrant> AttendanceRegistrants { get; set; }
+            public SystemMessages Messages { get; set; }
+            public Activity Activity { get; set; }
+        }
+
         #endregion
 
         #region Surveys
