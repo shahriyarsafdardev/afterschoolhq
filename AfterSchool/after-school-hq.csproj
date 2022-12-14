@@ -2029,6 +2029,7 @@
     <Content Include="Areas\Admin\Views\ScheduleTasks\Index.cshtml" />
     <Content Include="Areas\Volunteer\Views\Web.config" />
     <Content Include="Areas\Org\Views\Activity\AttendanceReport.cshtml" />
+    <Content Include="Areas\Org\Views\Form\Report.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />

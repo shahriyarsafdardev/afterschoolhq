@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +39,11 @@ namespace AfterSchoolLibrary.Services
         //Created separate list from Emergency Contact, as later they can differ at any stage
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
+        public static List<FormQuestionAnswer> GetAllAnswers(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.LoadByFormId(form.ID.Value, msgs, dc);
+        }
 
         public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

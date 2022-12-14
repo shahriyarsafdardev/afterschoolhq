@@ -1,0 +1,62 @@
+@model AfterSchool.Areas.Org.Controllers.FormController.ReportResults
+@{
+    ViewBag.Title = Model.Form.Name;
+    var questions = Model.Questions;
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <button onclick="window.print()" class="btn btn-primary btn-space hidden-print">
+                    <i class="s7-print"></i> Print Registrations
+                </button>
+                <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-close-circle"></i> Close
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Student - First Name</th>
+                                    <th>Student - Last Name</th>
+                                    <th>Student - Email</th>
+                                    @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
+                                    {
+                                        <th>@question.FormQuestionGroupName - @question.Text</th>
+                                    }
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var registrant in Model.Registrants)
+                                {
+                                    <tr>
+                                        <td>@registrant.FirstName</td>
+                                        <td>@registrant.LastName</td>
+                                        <td>@registrant.Email</td>
+
+                                        @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
+                                        {
+                                            var answer = Model.Answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
+
+                                            <td>@(answer?.Text)</td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

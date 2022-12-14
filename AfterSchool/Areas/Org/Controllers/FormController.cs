@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using Amazon.DynamoDBv2;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -263,6 +264,39 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(form);
         }
 
+        public ActionResult Report(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            if (id.IsEmpty())
+                return HttpNotFound();
+
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+            var questions = form.GetAllQuestions(msgs);
+            var answers = form.GetAllAnswers(msgs);
+
+            var reportResults = new ReportResults()
+            {
+                Questions = questions,
+                Messages = msgs,
+                Form = form,
+                Answers = answers,
+            };
+
+            return View(reportResults);
+        }
+
+        public class ReportResults
+        {
+            public Form Form { get; set; }
+            public List<FormQuestion> Questions { get; set; }
+            public SystemMessages Messages { get; set; }
+            public List<FormQuestionAnswer> Answers { get; set; }
+
+            public List<Registrant> Registrants { get => Answers.Select(x => new Registrant() { ID = x.RegistrantId, FirstName = x.RegistrantFirstName, LastName = x.RegistrantLastName, Email = x.RegistrantEmail }).DistinctBy(x => x.ID).ToList(); }  
+        }
 
 
         private void SaveNewQuestions(int? formId, int? currentUserId, int? formQuestionGroupId, SystemMessages msgs, DatabaseConnection dc)

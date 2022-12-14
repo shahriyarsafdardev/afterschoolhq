@@ -93,6 +93,9 @@ namespace AfterSchoolLibrary.Models
         public int? FormQuestionGroupDisplayOrder => (int?) MDV["FormQuestionGroupDisplayOrder"].Value;
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId => (QuestionGroupDataType) MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value;
         public int? RegistrationAccountId => (int?) MDV["RegistrationAccountId"].Value;
+        public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
+        public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
+        public string RegistrantEmail => (string) MDV["RegistrantEmail"].Value;
 
 
         public FormQuestionAnswer()
@@ -130,6 +133,9 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
                     "FormQuestionGroup");
                 _dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", SqlDbType.Int, "Registration");
+                _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.Int, "Registrant");
+                _dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", SqlDbType.Int, "Registrant");
+                _dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", SqlDbType.Int, "Registrant");
 
                 return _dp;
             }
@@ -149,6 +155,7 @@ namespace AfterSchoolLibrary.Models
                 var dq = get_DatabaseQuery(ObjectMap, typeof(FormQuestionAnswer).Name);
                 dq.Joins.Add(FormQuestion.ObjectMap["ID"], ObjectMap["FormQuestionId"], DatabaseJoinTypeEnum.LeftOuterJoin, "FormQuestion");
                 dq.Joins.Add(Registration.ObjectMap["ID"], ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.LeftOuterJoin, "Registration");
+                dq.Joins.Add(Registrant.ObjectMap["ID"], ObjectMap["RegistrantId"], DatabaseJoinTypeEnum.LeftOuterJoin, "Registrant");
                 dq.Joins.Add(SurveyResponse.ObjectMap["ID"], ObjectMap["SurveyResponseId"], DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyResponse");
                 dq.Joins.Add(FormQuestionGroup.ObjectMap["ID"], FormQuestion.ObjectMap["FormQuestionGroupId"], DatabaseJoinTypeEnum.LeftOuterJoin,
                     "FormQuestionGroup");
@@ -265,6 +272,14 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<FormQuestionAnswer> LoadByFormId(int FormId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormQuestionFormId"], FormId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
