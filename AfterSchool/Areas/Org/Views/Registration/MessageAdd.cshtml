@@ -9,7 +9,7 @@
     var queryString = ViewContext.RequestContext.HttpContext.Request.QueryString;
     var isVolunteers = queryString.HasKeys() && queryString["volunteers"] == "true";
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
-    var sendButtonText = $"Send Message to {recipients}";
+    var sendButtonText = $"Send Messages";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
     var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
 }
@@ -128,7 +128,7 @@
                     <div class="col-sm-6">
                         <div class="am-checkbox">
                             <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
-                            <label for="parentsonly">Send To Parents Only</label>
+                            <label for="parentsonly">Send only to parents of selected students</label>
                         </div>
                     </div>
                 </div>
