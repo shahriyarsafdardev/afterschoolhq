@@ -663,7 +663,7 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                convenienceFee = checkoutObject.GetSubscriptionCostWithConvenienceFee(msgs, dc);
+                convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
                 paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
                 amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
 
