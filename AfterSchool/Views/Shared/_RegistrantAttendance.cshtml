@@ -1,4 +1,4 @@
-﻿@model Attendance
+@model Attendance
 @{
     var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
     var account = SessionVariables.CurrentAccount;
@@ -63,7 +63,7 @@
                             <th>Present? (<a href="javascript:checkAll()">All</a> / <a href="javascript:uncheckAll()">None</a>)</th>
                         </tr>
 
-                        @foreach (var attendanceRegistrant in attendanceRegistrants)
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.OrderBy(x => x.RegistrantName))
                         {
                             if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId && registrantActivity.IsReservedRegistrationAssignmentType()))
                             { 
