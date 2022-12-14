@@ -2369,6 +2369,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (cmd)
                 {
                     case "next":
+                    case "onlynext":
                         var fullScreenExitUrl = GetFullScreenExitUrl(activity);
                         var accountUserType = SessionVariables.AccountUserType;
                         var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
