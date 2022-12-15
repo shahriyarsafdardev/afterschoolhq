@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class ActivityMessageRegistrantService
     {
-        public static List<Registrant> GetChildAndParentRegistrants(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> GetChildAndOrParentRegistrants(this ActivityMessageRegistrant activityMessageRegistrant, bool parentsOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var registrants = new List<Registrant>();
             var childRegistrant = activityMessageRegistrant.GetRegistrant(msgs, dc);
@@ -17,6 +17,9 @@ namespace AfterSchoolLibrary.Services
 
             if (parentOrGuardian.IsNotEmpty())
                 registrants.Add(parentOrGuardian);
+
+            if (parentsOnly)
+                return registrants;
 
             if (childRegistrant.Email.IsNotEmpty() && (parentOrGuardian.IsEmpty() || !childRegistrant.Email.IsSameAs(parentOrGuardian.Email)))
                 registrants.Add(childRegistrant);
@@ -28,7 +31,7 @@ namespace AfterSchoolLibrary.Services
         {
             var allResults = new SystemMessages();
 
-            activityMessageRegistrant.GetChildAndParentRegistrants(allResults, dc)
+            activityMessageRegistrant.GetChildAndOrParentRegistrants(message.ParentsOnly, allResults, dc)
                 .ForEach(registrant =>
                 {
                     registrant.SendEmail(account, activityName, fromName, replyToEmail, replyToName, subject, body, "activity_message", msgs);

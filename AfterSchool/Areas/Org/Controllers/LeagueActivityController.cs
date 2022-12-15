@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1474,7 +1474,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff)
+        public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff, string parentsonly)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -1494,7 +1494,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
-                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), currentUser.ID.Value, msgs);
+                am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), parentsonly.IsBoolean(), currentUser.ID.Value, msgs);
 
                 BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
             }

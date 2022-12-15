@@ -32,7 +32,8 @@ namespace AfterSchoolLibrary.Models
 		public string ActivityName { get { return (string)MDV["ActivityName"].Value; } }
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
-		
+        public bool ParentsOnly { get { return (bool) MDV["ParentsOnly"].Value; } set { MDV["ParentsOnly"].Value = value; } }
+
 
         public ActivityMessage()
         {
@@ -40,6 +41,7 @@ namespace AfterSchoolLibrary.Models
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
 			this.SendToStaff = false;
+            this.ParentsOnly = false;
 			
         }
 
@@ -57,8 +59,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "Subject", System.Data.SqlDbType.NVarChar , "150");
 				_dp.Add(className, "Body", System.Data.SqlDbType.Text);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "SendToStaff", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
+                _dp.Add(className, "SendToStaff", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "ParentsOnly", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "ActivityName", typeof(Activity).Name, "Name", System.Data.SqlDbType.NVarChar, "Activity");
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
@@ -167,11 +170,15 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["SendToStaff"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["SendToStaff"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["ParentsOnly"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+
 
             return msgs;
         }

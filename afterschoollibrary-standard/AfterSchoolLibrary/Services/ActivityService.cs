@@ -2109,7 +2109,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static ActivityMessage AddMessage(this Activity activity, string subject, string body,
-            List<int> registrantIds, bool sendToStaff, int loggedInUserId, SystemMessages msgs = null,
+            List<int> registrantIds, bool sendToStaff, bool parentsOnly, int loggedInUserId, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2125,6 +2125,7 @@ namespace AfterSchoolLibrary.Services
                         Subject = subject.MaxChars(150),
                         Body = body,
                         SendToStaff = sendToStaff,
+                        ParentsOnly = parentsOnly,
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = loggedInUserId,
                     };
