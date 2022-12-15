@@ -1,4 +1,4 @@
-﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model Activity
 
 @{
@@ -84,7 +84,7 @@
             <div class="">
                 <label class="col-sm-3 control-label">When should payments start?</label>
                 <div class="col-sm-9">
-                    <select name="subscriptionPaymentStartType" id="subscriptionPaymentStartType" class="form-control" required="required">
+                    <select name="subscriptionPaymentStartType" id="subscriptionPaymentStartType" class="form-control" required="required" @(Model.IsPublished ? "disabled" : "")>
 
                         @foreach (var item in lstPlanPaymentStartType)
                         {
@@ -108,7 +108,7 @@
             <div class="col-sm-6 col-md-9">
                 <div class="input-group input-group-lg xs-mb-15">
                     <span class="input-group-addon">Every</span>
-                    <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required>
+                    <select name="subscriptionplanperiod" id="subscriptionplanperiod" class="form-control" required @(Model.IsPublished ? "disabled" : "")>
                         @BillingPeriodOptions(subscriptionPlan)
                     </select>
                 </div>
@@ -124,7 +124,7 @@
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
-                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control">
+                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
                             @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
                             {
                                 <option value="@item.ToString()">
@@ -136,7 +136,7 @@
 
                     <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Day of month for period start</span>
-                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control">
+                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
                             @foreach (var item in days)
                             {
                                 if (item.IsOnOrBefore(DateTime.UtcNow))
@@ -157,7 +157,7 @@
                         </span>
                     </p>
                     <p class="text-muted text-medium-small">
-                        In case if registrant joins mid-class or mid of activity, AHQ will do pro-rate and will deduct charge from parent/registrant instantly.
+                        If a registrant joins in the middle of an activity, AfterSchool HQ will pro-rate the cost at the time of registration.
                     </p>
 
                     <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden"/>

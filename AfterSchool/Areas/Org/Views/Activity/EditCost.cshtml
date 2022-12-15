@@ -1,4 +1,4 @@
-﻿@using AfterSchool.Helpers
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditCostResult
 @{
     var msgs = Model.Messages;
@@ -172,7 +172,7 @@
                             {
                                 if (Model.Activity.IsPublished)
                                 {
-                                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "next", false, true, Request))
+                                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editcost", "onlynext", false, true, Request))
                                 }
                                 else
                                 {
@@ -297,30 +297,30 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <tr>
-                                                    <td>Registration Fee</td>
-                                                    <td class="text-center">$<span id="pricetoparent-confirm"></span></td>
-                                                    <td class="text-center">$<span id="fee-confirm"></span></td>
-                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-confirm"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Payment Plan</td>
-                                                    <td class="text-center">$<span id="pricetoparent-paymentplan-confirm"></span></td>
-                                                    <td class="text-center">$<span id="fee-paymentplan-confirm"></span></td>
-                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-paymentplan-confirm"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Subscription Plan</td>
-                                                    <td class="text-center">$<span id="pricetoparent-subscription-confirm"></span></td>
-                                                    <td class="text-center">$<span id="fee-subscription-confirm"></span></td>
-                                                    <td class="text-center">$<span id="amounttoprovider-subscription-confirm"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Attendance Based Billing</td>
-                                                    <td class="text-center">$<span id="pricetoparent-postpay-confirm"></span></td>
-                                                    <td class="text-center">$<span id="fee-postpay-confirm"></span></td>
-                                                    <td class="text-center"><strong>$</strong><span id="amounttoprovider-postpay-confirm"></span></td>
-                                                </tr>
+                                                    <tr>
+                                                        <td>Registration Fee</td>
+                                                        <td class="text-center">$<span id="pricetoparent-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-confirm"></span></td>
+                                                        <td class="text-center"><strong>$</strong><span id="amounttoprovider-confirm"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Payment Plan</td>
+                                                        <td class="text-center">$<span id="pricetoparent-paymentplan-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-paymentplan-confirm"></span></td>
+                                                        <td class="text-center"><strong>$</strong><span id="amounttoprovider-paymentplan-confirm"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Subscription Plan</td>
+                                                        <td class="text-center">$<span id="pricetoparent-subscription-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-subscription-confirm"></span></td>
+                                                        <td class="text-center"><strong>$</strong><span id="amounttoprovider-subscription-confirm"></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Attendance Based Billing</td>
+                                                        <td class="text-center">$<span id="pricetoparent-postpay-confirm"></span></td>
+                                                        <td class="text-center">$<span id="fee-postpay-confirm"></span></td>
+                                                        <td class="text-center"><strong>$</strong><span id="amounttoprovider-postpay-confirm"></span></td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
