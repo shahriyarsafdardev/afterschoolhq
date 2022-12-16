@@ -26,9 +26,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Student - First Name</th>
-                                    <th>Student - Last Name</th>
-                                    <th>Student - Email</th>
+                                    <th>ID</th>
                                     @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
                                     {
                                         <th>@question.FormQuestionGroupName - @question.Text</th>
@@ -37,13 +35,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var registrant in Model.Registrants)
+                                @foreach (var registrant in Model.Registrants.Take(100))
                                 {
                                     <tr>
-                                        <td>@registrant.FirstName</td>
-                                        <td>@registrant.LastName</td>
-                                        <td>@registrant.Email</td>
-
+                                        <td>@registrant.ID</td>
                                         @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
                                         {
                                             var answer = Model.Answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();

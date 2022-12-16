@@ -29,7 +29,7 @@ catch (FileNotFoundException)
     return;
 }
 
-var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.AdHocSqlServer;
+var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.ProdBackupServer;
 if (config is null)
 {
     Console.WriteLine(
@@ -43,4 +43,6 @@ var msgs = new SystemMessages();
 
 // doCSVReportGenerator(dc);
 
-JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
+// JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
+
+FormDataFix.Run(msgs, dc);

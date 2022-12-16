@@ -3,6 +3,7 @@ namespace AfterSchoolAdHoc;
 public class DatabaseConfig
 {
     public SqlServerConnectionParameters? AdHocSqlServer { get; init; }
+    public SqlServerConnectionParameters? ProdBackupServer { get; init; }
 }
 
 public class SqlServerConnectionParameters
