@@ -26,6 +26,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["FormQuestionId"].Value = value;
         }
 
+        public int? OldFormQuestionId
+        {
+            get => (int?) MDV["OldFormQuestionId"].Value;
+            set => MDV["OldFormQuestionId"].Value = value;
+        }
+
         public int? RegistrantId
         {
             get => (int?) MDV["RegistrantId"].Value;
@@ -113,6 +119,7 @@ namespace AfterSchoolLibrary.Models
                 var className = typeof(FormQuestionAnswer).Name;
                 _dp = get_BaseObjectMap(className);
                 _dp.Add(className, "FormQuestionId", SqlDbType.Int);
+                _dp.Add(className, "OldFormQuestionId", SqlDbType.Int);
                 _dp.Add(className, "RegistrantId", SqlDbType.Int);
                 _dp.Add(className, "ActivityId", SqlDbType.Int);
                 _dp.Add(className, "SurveyResponseId", SqlDbType.Int);
@@ -220,6 +227,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["FormQuestionId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["OldFormQuestionId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters();

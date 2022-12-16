@@ -28,9 +28,9 @@ namespace AfterSchoolAdHoc
                         (
                             criterias: new System.Collections.Hashtable()
                             {
-                            { "IsMaster", 0 },
-                            { "PersonTypeId", $"{(int)RegistrantPersonType.Student}" },
-                            { "AccountId", 7 },
+                                { "IsMaster", 0 },
+                                { "PersonTypeId", $"{(int)RegistrantPersonType.Student}" },
+                                { "AccountId", 7 },
                             },
                             start: pageSize * count,
                             length: pageSize,
@@ -50,6 +50,10 @@ namespace AfterSchoolAdHoc
                             foreach (var registrationId in registrationIds)
                             {
                                 var registrationAnswers = answers.Where(x => x.RegistrationId == registrationId).ToList();
+
+                                if (registrationAnswers.Any(x => x.OldFormQuestionId.HasValue))
+                                    continue;
+
                                 var formIds = registrationAnswers.Select(x => x.FormQuestionFormId!.Value).Distinct().ToList();
                                 
                                 if (formIds.Count == 1)
@@ -170,6 +174,7 @@ namespace AfterSchoolAdHoc
 
                         if (correctFormQuestion.IsNotEmpty())
                         {
+                            answer.OldFormQuestionId = answer.FormQuestionId;
                             answer.FormQuestionId = correctFormQuestion.ID.Value;
                             amsgs.AddRange(answer.Save(adc));
                         }
