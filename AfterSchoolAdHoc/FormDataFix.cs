@@ -16,7 +16,7 @@ namespace AfterSchoolAdHoc
         {
             var loop = true;
             var count = 0;
-            var pageSize = 20;
+            var pageSize = 10;
 
             while (loop)
             {
