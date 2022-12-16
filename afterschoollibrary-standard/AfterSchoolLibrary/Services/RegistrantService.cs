@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -1548,7 +1548,7 @@ namespace AfterSchoolLibrary.Services
             return copy;
         }
 
-        public static void CopyAnswersTo(this Registrant registrant, Registrant copyToRegistrant, Registration registration, WebUser loggedInUser,
+        public static void CopyAnswersTo(this Registrant registrant, Registrant copyToRegistrant, Registration registration, Form copyToForm, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -1559,9 +1559,18 @@ namespace AfterSchoolLibrary.Services
                     var answers = registrant.GetAnswers(amsgs, adc);
                     answers.ForEach(answer =>
                     {
+                        FormQuestion question = null;
+
+                        if (answer.QuestionDataTypeId == QuestionDataType.NotSet || copyToForm.IsEmpty())
+                            question = answer.ToFormQuestion(true, amsgs, adc);
+                        else
+                            // need to load the question from the provider account form
+                            // to ensure data is stored with the form on provider account and not generic form
+                            question = copyToForm.GetQuestion(answer.QuestionDataTypeId, msgs, dc);
+
                         copyToRegistrant.AddOrUpdateAnswer(
                             answerText: answer.Text,
-                            question: answer.ToFormQuestion(true, amsgs, adc),
+                            question: question,
                             registrationId: registration?.ID,
                             loggedInUser: loggedInUser,
                             msgs: amsgs,

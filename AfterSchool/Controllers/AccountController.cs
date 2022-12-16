@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -2721,6 +2721,7 @@ namespace AfterSchool.Controllers
             currentRegistrant.CopyAnswersTo(
                 submittedRecord,
                 registration,
+                participationObject.Form,
                 currentUser,
                 msgs,
                 dc);
