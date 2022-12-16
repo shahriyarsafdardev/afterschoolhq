@@ -113,16 +113,16 @@ namespace AfterSchoolAdHoc
                                                 }
                                                 else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
                                                 {
-
+                                                    var x = 1;
                                                 }
                                                 else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
                                                 {
-
+                                                    var x = 1;
                                                 }
                                             }
                                             else if (registrantActivities.Count > 1)
                                             {
-
+                                                var x = 1;
                                             }
                                         }
                                     }
