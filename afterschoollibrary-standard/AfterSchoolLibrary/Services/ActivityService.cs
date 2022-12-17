@@ -2310,7 +2310,12 @@ namespace AfterSchoolLibrary.Services
         public static List<Form> GetForms(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByActivityId(activity.ID.Value, dc: dc).Select(x => x.GetForm()).ToList();
+            var activityForms = ActivityForm.LoadByActivityId(activity.ID.Value, msgs, dc);
+
+            if (activityForms.Count > 0)
+                return activityForms.Select(x => x.GetForm(msgs, dc)).ToList();
+
+            return new List<Form>();
         }
 
         public static Form GetActiveForm(this Activity activity, SystemMessages msgs = null,

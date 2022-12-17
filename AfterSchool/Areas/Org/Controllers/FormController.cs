@@ -295,7 +295,13 @@ namespace AfterSchool.Areas.Org.Controllers
             public SystemMessages Messages { get; set; }
             public List<FormQuestionAnswer> Answers { get; set; }
 
-            public List<Registrant> Registrants { get => Answers.Select(x => new Registrant() { ID = x.RegistrantId, FirstName = x.RegistrantFirstName, LastName = x.RegistrantLastName, Email = x.RegistrantEmail }).DistinctBy(x => x.ID).ToList(); }  
+            public List<Registrant> Registrants
+            {
+                get
+                {
+                    return Answers.Select(x => new Registrant() { ID = x.RegistrantId, FirstName = x.RegistrantFirstName, LastName = x.RegistrantLastName, Email = x.RegistrantEmail, CreateDate = x.CreateDate }).DistinctBy(x => x.ID).ToList();
+                }
+            }
         }
 
 

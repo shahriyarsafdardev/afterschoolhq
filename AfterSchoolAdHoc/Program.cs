@@ -29,7 +29,7 @@ catch (FileNotFoundException)
     return;
 }
 
-var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.ProdBackupServer;
+var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.AdHocSqlServer;
 if (config is null)
 {
     Console.WriteLine(

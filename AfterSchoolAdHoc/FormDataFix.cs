@@ -16,7 +16,7 @@ namespace AfterSchoolAdHoc
         {
             var loop = true;
             var count = 0;
-            var pageSize = 10;
+            var pageSize = 1;
 
             while (loop)
             {
@@ -24,13 +24,15 @@ namespace AfterSchoolAdHoc
                 (
                     action: (amsgs, adc) =>
                     {
+                        amsgs.Add(count.ToString(), MessageType.Notice);
+
                         var registrants = Registrant.Load
                         (
                             criterias: new System.Collections.Hashtable()
                             {
                                 { "IsMaster", 0 },
                                 { "PersonTypeId", $"{(int)RegistrantPersonType.Student}" },
-                                { "AccountId", 7 },
+                                // { "AccountId", 7 },
                             },
                             start: pageSize * count,
                             length: pageSize,
@@ -45,7 +47,7 @@ namespace AfterSchoolAdHoc
                         {
                             i++;
                             var answers = registrant.GetAnswers(amsgs, adc);
-                            var registrationIds = answers.Select(x => x.RegistrationId!.Value).Distinct().ToList();
+                            var registrationIds = answers.Where(x => x.RegistrationId.HasValue).Select(x => x.RegistrationId!.Value).Distinct().ToList();
 
                             foreach (var registrationId in registrationIds)
                             {
@@ -151,8 +153,14 @@ namespace AfterSchoolAdHoc
 
                     },
                     onSuccess: (smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                    onFailure: (fmsgs) =>
+                    {
+                        msgs.AddRange(fmsgs);
+                    },
+                    onException: (emsgs) => 
+                    {
+                        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs);
+                    },
                     dc: dc
                 );
 

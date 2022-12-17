@@ -27,6 +27,7 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
+                                    <th>Date</th>
                                     @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
                                     {
                                         <th>@question.FormQuestionGroupName - @question.Text</th>
@@ -39,6 +40,7 @@
                                 {
                                     <tr>
                                         <td>@registrant.ID</td>
+                                        <td>@registrant.CreateDate.ToShortDateTimeString()</td>
                                         @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
                                         {
                                             var answer = Model.Answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
