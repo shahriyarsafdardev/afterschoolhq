@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -12,6 +12,14 @@ namespace AfterSchoolLibrary.Services
                 return true;
             else
                 return false;
+        }
+
+        public static string GetAnswerText(this FormQuestionAnswer answer)
+        {
+            if (answer.Text.IsJson())
+                return Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.value;
+
+            return answer.Text;
         }
     }
 }
