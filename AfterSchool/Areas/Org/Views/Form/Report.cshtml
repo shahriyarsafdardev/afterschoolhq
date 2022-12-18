@@ -1,7 +1,7 @@
 @model AfterSchool.Areas.Org.Controllers.FormController.ReportResults
 @{
     ViewBag.Title = Model.Form.Name;
-    var questions = Model.Questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder);
+    var questions = Model.Questions;
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
 }
@@ -47,7 +47,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary " onclick="">Export To CSV</button>
+                    <button type="button" class="btn btn-primary" onclick="download()">Export To CSV</button>
                     <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
                         <i class="s7-close-circle"></i> Close
                     </button>
@@ -60,8 +60,8 @@
                         <table class="table" id="answers-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Date</th>
+                                    <th>Submission ID</th>
+                                    <th>Submission Date</th>
                                     @foreach (var question in questions)
                                     {
                                         <th>@question.FormQuestionGroupName - @question.Text</th>
@@ -70,19 +70,6 @@
                                 </tr>
                             </thead>
                             <tbody id="answer-tbody">
-                               
-                                    @*
-                                    <tr>
-                                        <td>@registrant.ID</td>
-                                        <td>@registrant.CreateDate.ToShortDateTimeString()</td>
-                                        @foreach (var question in questions)
-                                        {
-                                            var answer = Model.Answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
-
-                                            <td>@(answer?.GetAnswerText())</td>
-                                        }
-                                    </tr>
-                                    *@
                             </tbody>
                         </table>
                     </div>
@@ -122,6 +109,15 @@
     function search() {
         resetScreen();
         loadRegistrants(pageStart, pageSize);
+    }
+
+    function download() {
+
+        let search = encodeURIComponent($('#search').val());
+        let sdate = encodeURIComponent($('#startdate').val());
+        let edate = encodeURIComponent($('#enddate').val());
+
+        location.href = `@Url.Action("DownloadReport", "Form", new { id = Model.Form.ID.Value})?search=${search}&sdate=${sdate}&edate=${edate}`;
     }
 
     function loadRegistrants(start, length) {

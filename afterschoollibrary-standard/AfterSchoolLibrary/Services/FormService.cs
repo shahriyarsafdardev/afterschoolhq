@@ -2,10 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+using Email = AfterSchoolLibrary.Helpers.Email;
 
 
 namespace AfterSchoolLibrary.Services
@@ -57,6 +61,62 @@ namespace AfterSchoolLibrary.Services
         public static List<Registrant> GetRegistrants(this Form form, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registrant.LoadByAnsweredFormId(form.ID.Value, search, startDate, endDate, start, length, msgs, dc);
+        }
+
+        public static void EmailDataReport(int formId, string search, DateTime? startDate, DateTime? endDate, int currentAccountId, int loggedInUserId)
+        {
+            var msgs = new SystemMessages();
+            var form = Form.Load(formId, msgs);
+            var currentAccount = Account.Load(currentAccountId, msgs);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs);
+            var questions = form.GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            var registrants = form.GetRegistrants(search, startDate, endDate, null, null, msgs);
+            var answers = new List<FormQuestionAnswer>();
+
+            if (registrants.Any())
+                answers = form.GetAnswersByRegistrants(registrants.Select(x => x.ID.Value), msgs);
+
+            var table = new List<List<string>>();
+            var row = new List<string>();
+
+            row.Add("Submission Id");
+            row.Add("Submission Date");
+
+            foreach (var question in questions)
+                row.Add($"{question.FormQuestionGroupName} - {question.Text}");
+
+            table.Add(row);
+
+            foreach (var registrant in registrants)
+            {
+                row = new List<string>();
+
+                row.Add(registrant.ID.ToString());
+                row.Add(registrant.CreateDate.ToShortTimeString());
+
+                foreach (var question in questions)
+                    row.Add(answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault()?.GetAnswerText());
+
+                table.Add(row);
+            }
+
+            var csv = CsvFile.Create(table);
+            var csvByteData = Encoding.UTF8.GetBytes(csv);
+            var subject = $"{form.Name} Report";            
+            var body =
+                $"<p>Your {form.Name} report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "form_report")}";
+
+            msgs.AddRange(SendGridHelper.SendMailWithAttachments(
+                fromEmail: new EmailAddress(
+                    Email.AppNoReplyEmailAddress
+                ),
+                toEmail: new EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
+                attachmentByteData: csvByteData,
+                attachmentFilename: $"{form.Name.Replace(" ", "-")}-Report.csv"
+            ));
         }
 
         public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -1235,7 +1295,7 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages PhoneValidation(string answer, FormQuestion question, SystemMessages msgs)
         {
-            if (answer.IsNotEmpty() && !answer.IsRegExMatch(Utilities.PhoneRegEx))
+            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
             return msgs;
@@ -1275,7 +1335,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrantTypeId = RegistrantType.Individual;
             }
 
-            public static string StateList => Utilities.GetStateList();
+            public static string StateList => BasicLibrary.Utilities.GetStateList();
         }
     }
 }

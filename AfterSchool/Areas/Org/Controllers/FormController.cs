@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
@@ -10,6 +11,7 @@ using Amazon.DynamoDBv2;
 using Amazon.Runtime.Internal;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Hangfire;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -276,7 +278,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questions = form.GetAllQuestions(msgs);
+            var questions = form.GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
 
             var reportResults = new ReportResults()
             {
@@ -328,6 +330,37 @@ namespace AfterSchool.Areas.Org.Controllers
                 status = "error",
                 messages = msgs
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult DownloadReport(int id, string sdate, string edate, string search)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            if (id.IsEmpty())
+                return HttpNotFound();
+
+            var form = currentAccount.GetForm(id, msgs);
+            var startDate = new DateTime?();
+            var endDate = new DateTime?();
+
+            if (sdate.IsDateTime())
+                startDate = sdate.ToDateTime();
+
+            if (edate.IsDateTime())
+                endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
+
+            BackgroundJob.Enqueue(() =>
+                FormService.EmailDataReport(form.ID.Value, search, startDate, endDate, currentAccount.ID.Value, currentUser.ID.Value)
+            );
+
+            Response.End();
+
+            return View();
+
         }
 
         public class ReportResults
