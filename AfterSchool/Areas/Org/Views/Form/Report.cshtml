@@ -59,7 +59,12 @@
                 </div>
             </div>
             <div class="row">
-                @{ 
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()">Show/Hide Columns</button>
+                </div>
+            </div>
+            <div class="row hide" id="column-selection">
+                @{
                     var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
                 }
                 @foreach (var group in groups)
@@ -121,11 +126,19 @@
                         <table class="table table-bordered table-condensed" id="answers-table">
                             <thead>
                                 <tr>
+                                    <th></th>
+                                    <th></th>
+                                    @foreach (var question in questions)
+                                    {
+                                        <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
+                                    }
+                                </tr>
+                                <tr>
                                     <th>Submission ID</th>
                                     <th>Submission Date</th>
                                     @foreach (var question in questions)
                                     {
-                                        <th class="col-question-@question.ID">@question.FormQuestionGroupName - @question.Text</th>
+                                        <th class="col-question-@question.ID">@question.Text</th>
                                     }
 
                                 </tr>
@@ -204,6 +217,14 @@
         );
     }
 
+    function toggleColumnSelection() {
+        if ($('#column-selection').hasClass('hide')) {
+            $('#column-selection').removeClass('hide');
+        } else {
+            $('#column-selection').addClass('hide');
+        }
+    }
+
     function toggleGroup(groupId) {
         if ($(`#group-${groupId}`).is(':checked')) {
             $(`.question-group-${groupId}`).prop('checked', true);
@@ -267,7 +288,7 @@
                     pageStart += pageSize;
 
                     $('#starting-record').html(1);
-                    $('#total-records-loaded').html(pageStart);
+                    $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
                     $('#total-records').html(data.registrantCount);
 
                 } else {

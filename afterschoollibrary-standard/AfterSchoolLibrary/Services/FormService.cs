@@ -83,11 +83,20 @@ namespace AfterSchoolLibrary.Services
             var table = new List<List<string>>();
             var row = new List<string>();
 
+            row.Add("");
+            row.Add("");
+
+            foreach (var question in questions)
+                row.Add(question.FormQuestionGroupName);
+
+            table.Add(row);
+
+            row = new List<string>();
             row.Add("Submission Id");
             row.Add("Submission Date");
 
             foreach (var question in questions)
-                row.Add($"{question.FormQuestionGroupName} - {question.Text}");
+                row.Add(question.Text);
 
             table.Add(row);
 
