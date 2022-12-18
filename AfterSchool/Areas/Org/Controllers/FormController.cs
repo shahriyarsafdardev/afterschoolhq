@@ -357,9 +357,18 @@ namespace AfterSchool.Areas.Org.Controllers
                 FormService.EmailDataReport(form.ID.Value, search, startDate, endDate, currentAccount.ID.Value, currentUser.ID.Value)
             );
 
-            Response.End();
+            if (msgs.HasNoErrors())
+                return Json(new
+                {
+                    status = "ok",
+                    messages = msgs,
+                }, JsonRequestBehavior.AllowGet);
 
-            return View();
+            return Json(new
+            {
+                status = "error",
+                messages = msgs
+            }, JsonRequestBehavior.AllowGet);
 
         }
 

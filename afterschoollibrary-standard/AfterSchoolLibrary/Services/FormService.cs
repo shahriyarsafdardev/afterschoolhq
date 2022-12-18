@@ -92,7 +92,7 @@ namespace AfterSchoolLibrary.Services
                 row = new List<string>();
 
                 row.Add(registrant.ID.ToString());
-                row.Add(registrant.CreateDate.ToShortTimeString());
+                row.Add(registrant.CreateDate.ToShortDateTimeString());
 
                 foreach (var question in questions)
                     row.Add(answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault()?.GetAnswerText());

@@ -47,7 +47,7 @@
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary" onclick="search()">Search</button>
-                    <button type="button" class="btn btn-primary" onclick="download()">Export To CSV</button>
+                    <button type="button" class="btn btn-primary" onclick="emailReport()">Email CSV Report</button>
                     <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
                         <i class="s7-close-circle"></i> Close
                     </button>
@@ -111,13 +111,26 @@
         loadRegistrants(pageStart, pageSize);
     }
 
-    function download() {
+    function emailReport() {
 
         let search = encodeURIComponent($('#search').val());
         let sdate = encodeURIComponent($('#startdate').val());
         let edate = encodeURIComponent($('#enddate').val());
 
-        location.href = `@Url.Action("DownloadReport", "Form", new { id = Model.Form.ID.Value})?search=${search}&sdate=${sdate}&edate=${edate}`;
+        $.get(
+            `@Url.Action("DownloadReport", "Form", new { id = Model.Form.ID.Value})?search=${search}&sdate=${sdate}&edate=${edate}`,
+            function (data) {
+                if (data && data.status === 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: 'Your report will be emailed shortly',
+                        success: true
+                    });
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
     }
 
     function loadRegistrants(start, length) {
@@ -156,7 +169,7 @@
                     pageStart += pageSize;
 
                 } else {
-
+                    Notifications.showErrors(data.messages);
                 }
             }
         );
