@@ -59,7 +59,52 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12 ">
+                @{ 
+                    var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                }
+                @foreach (var group in groups)
+                {
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
+                            <label for="group-@group.ID" class="text-medium-small text-bold">
+                                @group.Name
+                            </label>
+                        </div>
+                    </div>
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var take = (int)Math.Ceiling(questions.Where(x => x.FormQuestionGroupId == group.ID).Count() / 4M);
+                        var skip = i * take;
+
+                        <div class="col-md-3">
+
+                            @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID).Skip(skip).Take(take))
+                            {
+                                <div>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
+                                        <label for="question-@question.ID">
+                                            @question.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
+                }
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
                     <span id="starting-record"></span> -
                     <span id="total-records-loaded"></span> of
                     <span id="total-records"></span> Submissions
@@ -80,7 +125,7 @@
                                     <th>Submission Date</th>
                                     @foreach (var question in questions)
                                     {
-                                        <th>@question.FormQuestionGroupName - @question.Text</th>
+                                        <th class="col-question-@question.ID">@question.FormQuestionGroupName - @question.Text</th>
                                     }
 
                                 </tr>
@@ -132,9 +177,19 @@
         let search = encodeURIComponent($('#search').val());
         let sdate = encodeURIComponent($('#startdate').val());
         let edate = encodeURIComponent($('#enddate').val());
+        var hiddenQuestions = "";
+
+        for (let question of questions) {
+            if (!$(`#question-${question.ID}`).is(':checked')) {
+                if (hiddenQuestions.length > 0)
+                    hiddenQuestions += ',';
+
+                hiddenQuestions += question.ID;
+            }
+        }
 
         $.get(
-            `@Url.Action("DownloadReport", "Form", new { id = Model.Form.ID.Value})?search=${search}&sdate=${sdate}&edate=${edate}`,
+            `@Url.Action("DownloadReport", "Form", new { id = Model.Form.ID.Value})?search=${search}&sdate=${sdate}&edate=${edate}&hidden=${hiddenQuestions}`,
             function (data) {
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
@@ -147,6 +202,27 @@
                 }
             }
         );
+    }
+
+    function toggleGroup(groupId) {
+        if ($(`#group-${groupId}`).is(':checked')) {
+            $(`.question-group-${groupId}`).prop('checked', true);
+        } else {
+            $(`.question-group-${groupId}`).prop('checked', false);
+        }
+
+        $(`.question-group-${groupId}`).each(function () {
+            let questionId = $(this).attr('id').split('-')[1];
+            toggleColumn(questionId);
+        });
+    }
+
+    function toggleColumn(questionId) {
+        if ($(`#question-${questionId}`).is(':checked')) {
+            $(`.col-question-${questionId}`).removeClass('hide');
+        } else {
+            $(`.col-question-${questionId}`).addClass('hide');
+        }
     }
 
     function loadRegistrants(start, length) {
@@ -171,7 +247,13 @@
 
                             answer = getAnswerForQuestion(question.ID, registrant, data.answers);
 
-                            tableRow += `<td>`;
+                            var hide = "";
+
+                            if (!$(`#question-${question.ID}`).is(':checked')) {
+                                hide = "hide";
+                            }
+
+                            tableRow += `<td class="col-question-${question.ID} ${hide}">`;
                             if (answer) {
                                 tableRow += answer.Text;
                             }

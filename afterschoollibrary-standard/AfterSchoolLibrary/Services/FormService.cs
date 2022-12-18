@@ -68,13 +68,16 @@ namespace AfterSchoolLibrary.Services
             return Registrant.GetCountByAnsweredFormId(form.ID.Value, form.AccountId.Value, search, startDate, endDate, msgs, dc);
         }
 
-        public static void EmailDataReport(int formId, string search, DateTime? startDate, DateTime? endDate, int currentAccountId, int loggedInUserId)
+        public static void EmailDataReport(int formId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int currentAccountId, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var form = Form.Load(formId, msgs);
             var currentAccount = Account.Load(currentAccountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
-            var questions = form.GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            var questions = form.GetAllQuestions(msgs)
+                .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                .ThenBy(x => x.DisplayOrder).ToList();
             var registrants = form.GetRegistrants(search, startDate, endDate, null, null, msgs);
 
             var table = new List<List<string>>();

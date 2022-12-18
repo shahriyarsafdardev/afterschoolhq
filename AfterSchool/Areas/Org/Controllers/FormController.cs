@@ -278,7 +278,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questions = form.GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            var questions = form.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
 
             var reportResults = new ReportResults()
             {
@@ -335,7 +335,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult DownloadReport(int id, string sdate, string edate, string search)
+        public ActionResult DownloadReport(int id, string sdate, string edate, string search, string hidden)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -356,7 +356,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
             BackgroundJob.Enqueue(() =>
-                FormService.EmailDataReport(form.ID.Value, search, startDate, endDate, currentAccount.ID.Value, currentUser.ID.Value)
+                FormService.EmailDataReport(
+                    form.ID.Value, 
+                    search, 
+                    startDate, 
+                    endDate, 
+                    hidden.Split(',').Select(x => x.ToInteger()).ToArray(), 
+                    currentAccount.ID.Value, 
+                    currentUser.ID.Value)
             );
 
             if (msgs.HasNoErrors())
