@@ -55,12 +55,17 @@ namespace AfterSchoolLibrary.Services
 
         public static List<Registrant> GetAllRegistrants(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAnsweredFormId(form.ID.Value, null, null, msgs, dc);
+            return Registrant.LoadByAnsweredFormId(form.ID.Value, form.AccountId.Value, null, null, msgs, dc);
         }
 
         public static List<Registrant> GetRegistrants(this Form form, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByAnsweredFormId(form.ID.Value, search, startDate, endDate, start, length, msgs, dc);
+            return Registrant.LoadByAnsweredFormId(form.ID.Value, form.AccountId.Value, search, startDate, endDate, start, length, msgs, dc);
+        }
+
+        public static int GetRegistrantCount(this Form form, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.GetCountByAnsweredFormId(form.ID.Value, form.AccountId.Value, search, startDate, endDate, msgs, dc);
         }
 
         public static void EmailDataReport(int formId, string search, DateTime? startDate, DateTime? endDate, int currentAccountId, int loggedInUserId)
@@ -71,10 +76,6 @@ namespace AfterSchoolLibrary.Services
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
             var questions = form.GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
             var registrants = form.GetRegistrants(search, startDate, endDate, null, null, msgs);
-            var answers = new List<FormQuestionAnswer>();
-
-            if (registrants.Any())
-                answers = form.GetAnswersByRegistrants(registrants.Select(x => x.ID.Value), msgs);
 
             var table = new List<List<string>>();
             var row = new List<string>();
@@ -94,8 +95,13 @@ namespace AfterSchoolLibrary.Services
                 row.Add(registrant.ID.ToString());
                 row.Add(registrant.CreateDate.ToShortDateTimeString());
 
+                var answers = registrant.GetAnswers(msgs);
+
                 foreach (var question in questions)
-                    row.Add(answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault()?.GetAnswerText());
+                {
+                    var answer = answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
+                    row.Add(answer?.GetAnswerText().IfEmpty(""));
+                }
 
                 table.Add(row);
             }

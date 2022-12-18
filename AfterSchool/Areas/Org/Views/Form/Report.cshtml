@@ -53,11 +53,27 @@
                     </button>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-md-12">
-                    <div class="table-responsive">
-                        <table class="table" id="answers-table">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 ">
+                    <span id="starting-record"></span> -
+                    <span id="total-records-loaded"></span> of
+                    <span id="total-records"></span> Submissions
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive ">
+                        <table class="table table-bordered table-condensed" id="answers-table">
                             <thead>
                                 <tr>
                                     <th>Submission ID</th>
@@ -167,6 +183,10 @@
                     }
 
                     pageStart += pageSize;
+
+                    $('#starting-record').html(1);
+                    $('#total-records-loaded').html(pageStart);
+                    $('#total-records').html(data.registrantCount);
 
                 } else {
                     Notifications.showErrors(data.messages);

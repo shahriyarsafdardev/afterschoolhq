@@ -311,6 +311,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
             var registrants = form.GetRegistrants(search, startDate, endDate, start, length, msgs);
+            var totalRegistrantCount = form.GetRegistrantCount(search, startDate, endDate, msgs);
             var answers = new List<FormQuestionAnswer>();
 
             if (registrants.Any())
@@ -321,7 +322,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     status = "ok",
                     registrants = registrants.Select(x => new { ID = x.ID.Value, CreateDate = x.CreateDate.ToShortDateTimeString() }),
-                    answers = answers.Select(x => new { ID = x.ID.Value, Text = x.GetAnswerText(), QuestionId = x.FormQuestionId.Value, RegistrantId = x.RegistrantId.Value }),
+                    answers = answers.Select(x => new { ID = x.ID.Value, Text = x.GetAnswerText().IfEmpty(""), QuestionId = x.FormQuestionId.Value, RegistrantId = x.RegistrantId.Value }),
+                    registrantCount = totalRegistrantCount,
                     messages = msgs,
                 }, JsonRequestBehavior.AllowGet);
 
