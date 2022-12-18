@@ -44,6 +44,20 @@ namespace AfterSchoolLibrary.Services
         {
             return FormQuestionAnswer.LoadByFormId(form.ID.Value, msgs, dc);
         }
+        public static List<FormQuestionAnswer> GetAnswersByRegistrants(this Form form, IEnumerable<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.LoadByRegistrantIds(registrantIds, msgs, dc);
+        }
+
+        public static List<Registrant> GetAllRegistrants(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAnsweredFormId(form.ID.Value, null, null, msgs, dc);
+        }
+
+        public static List<Registrant> GetRegistrants(this Form form, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAnsweredFormId(form.ID.Value, search, startDate, endDate, start, length, msgs, dc);
+        }
 
         public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

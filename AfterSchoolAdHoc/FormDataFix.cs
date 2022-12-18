@@ -61,7 +61,7 @@ namespace AfterSchoolAdHoc
                                 if (formIds.Count == 1)
                                 {
                                     var form = Form.Load(formIds[0], amsgs, adc);
-                                    var isIncorrectForm = form.AccountId != registrant.AccountId;
+                                    var isIncorrectForm = form?.AccountId != registrant.AccountId;
 
                                     if (isIncorrectForm)
                                     {
@@ -83,53 +83,24 @@ namespace AfterSchoolAdHoc
                                             // they also could've registered for an activity group?
 
                                             var registrantActivities = registrant.GetRegistrantActivities(amsgs, adc);
+                                            RegistrantActivity selectedRegistrantActivity = null;
 
                                             if (registrantActivities.Count == 1)
-                                            {
-                                                var registrantActivity = registrantActivities[0];
-
-                                                if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                                                {
-                                                    var activity = registrantActivity.GetActivity(amsgs, adc);
-
-                                                    if (activity.IsNotEmpty())
-                                                    {
-                                                        var forms = activity.GetForms(amsgs, adc);
-
-                                                        if (forms.Count == 1)
-                                                        {
-                                                            var correctForm = forms[0];
-
-                                                            UpdateAnswers(correctForm, registrationAnswers, ref correctQuestionsCollection, amsgs, adc); 
-                                                        }
-                                                        else if (forms.Count > 1)
-                                                        {
-                                                            var activityForms = activity.GetActivityForms(amsgs, adc);
-                                                            var correctActivityForm = activityForms.Where(x => x.CreateDate.Value.IsBefore(registrant.CreateDate.Value)).OrderByDescending(x => x.CreateDate.Value).FirstOrDefault();
-
-                                                            if (correctActivityForm.IsNotEmpty())
-                                                            {
-                                                                var correctForm = forms.Where(x => x.ID == correctActivityForm.FormId).FirstOrDefault();
-
-                                                                UpdateAnswers(correctForm, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
-                                                            }
-
-                                                        }
-                                                    }
-                                                }
-                                                else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                                                {
-                                                    var x = 1;
-                                                }
-                                                else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
-                                                {
-                                                    var x = 1;
-                                                }
-                                            }
+                                                selectedRegistrantActivity = registrantActivities[0];
                                             else if (registrantActivities.Count > 1)
-                                            {
-                                                var x = 1;
-                                            }
+                                                // get from first registration because that is what the user initially registered for
+                                                selectedRegistrantActivity = registrantActivities.OrderBy(x => x.CreateDate!.Value).First();
+
+                                            if (selectedRegistrantActivity.IsNotEmpty())
+                                                GetFormFromRegistrantActivity
+                                                (
+                                                    registrant,
+                                                    selectedRegistrantActivity!,
+                                                    registrationAnswers,
+                                                    ref correctQuestionsCollection,
+                                                    amsgs,
+                                                    adc
+                                                );
                                         }
                                     }
                                 }
@@ -168,6 +139,57 @@ namespace AfterSchoolAdHoc
             }
         }
 
+        private static void GetFormFromRegistrantActivity(Registrant registrant, RegistrantActivity registrantActivity, List<FormQuestionAnswer> registrationAnswers, 
+            ref Dictionary<int, List<FormQuestion>> correctQuestionsCollection, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.Activity)
+            {
+                var activity = registrantActivity.GetActivity(amsgs, adc);
+
+                if (activity.IsNotEmpty())
+                {
+                    var forms = activity.GetForms(amsgs, adc);
+
+                    if (forms.Count == 1)
+                    {
+                        var correctForm = forms[0];
+                        UpdateAnswers(correctForm, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
+                    }
+                    else if (forms.Count > 1)
+                    {
+                        var activityForms = activity.GetActivityForms(amsgs, adc);
+                        var correctActivityForm = activityForms.Where(x => x.CreateDate!.Value.IsBefore(registrant.CreateDate!.Value)).OrderByDescending(x => x.CreateDate!.Value).FirstOrDefault();
+
+                        if (correctActivityForm.IsNotEmpty())
+                        {
+                            var correctForm = forms.Where(x => x.ID == correctActivityForm!.FormId).FirstOrDefault();
+                            UpdateAnswers(correctForm!, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
+                        }
+                    }
+                }
+            }
+            else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
+            {
+                var activityGroup = registrantActivity.GetActivityGroup(amsgs, adc);
+
+                if (activityGroup.IsNotEmpty())
+                {
+                    var correctForm = activityGroup.GetForm(amsgs, adc);
+                    UpdateAnswers(correctForm, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
+                }
+            }
+            else if (registrantActivity.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
+            {
+                var accountActivityGroup = registrantActivity.GetAccountActivityGroup(amsgs, adc);
+
+                if (accountActivityGroup.IsNotEmpty())
+                {
+                    var correctForm = accountActivityGroup.GetForm(amsgs, adc);
+                    UpdateAnswers(correctForm, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
+                }
+            }
+        }
+
         private static void UpdateAnswers(Form correctForm, List<FormQuestionAnswer> answers, ref Dictionary<int, List<FormQuestion>> correctQuestionsCollection, SystemMessages amsgs, DatabaseConnection adc)
         {
             if (correctForm.IsNotEmpty())
@@ -183,7 +205,7 @@ namespace AfterSchoolAdHoc
                         if (correctFormQuestion.IsNotEmpty())
                         {
                             answer.OldFormQuestionId = answer.FormQuestionId;
-                            answer.FormQuestionId = correctFormQuestion.ID.Value;
+                            answer.FormQuestionId = correctFormQuestion!.ID;
                             amsgs.AddRange(answer.Save(adc));
                         }
                     }

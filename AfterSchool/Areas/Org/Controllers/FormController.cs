@@ -7,6 +7,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using Amazon.DynamoDBv2;
+using Amazon.Runtime.Internal;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -264,6 +265,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(form);
         }
 
+        [HttpGet]
         public ActionResult Report(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -275,17 +277,57 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var questions = form.GetAllQuestions(msgs);
-            var answers = form.GetAllAnswers(msgs);
 
             var reportResults = new ReportResults()
             {
                 Questions = questions,
                 Messages = msgs,
                 Form = form,
-                Answers = answers,
             };
 
             return View(reportResults);
+        }
+
+        [HttpGet]
+        public ActionResult GetReportPage(int id, int start, int length, string sdate, string edate, string search)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+
+            if (id.IsEmpty())
+                return HttpNotFound();
+
+            var form = currentAccount.GetForm(id, msgs);
+            var startDate = new DateTime?();
+            var endDate = new DateTime?();
+
+            if (sdate.IsDateTime())
+                startDate = sdate.ToDateTime();
+
+            if (edate.IsDateTime())
+                endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
+
+            var registrants = form.GetRegistrants(search, startDate, endDate, start, length, msgs);
+            var answers = new List<FormQuestionAnswer>();
+
+            if (registrants.Any())
+                answers = form.GetAnswersByRegistrants(registrants.Select(x => x.ID.Value), msgs);
+
+            if (msgs.HasNoErrors())
+                return Json(new
+                {
+                    status = "ok",
+                    registrants = registrants.Select(x => new { ID = x.ID.Value, CreateDate = x.CreateDate.ToShortDateTimeString() }),
+                    answers = answers.Select(x => new { ID = x.ID.Value, Text = x.GetAnswerText(), QuestionId = x.FormQuestionId.Value, RegistrantId = x.RegistrantId.Value }),
+                    messages = msgs,
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new
+            {
+                status = "error",
+                messages = msgs
+            }, JsonRequestBehavior.AllowGet);
         }
 
         public class ReportResults
@@ -293,15 +335,6 @@ namespace AfterSchool.Areas.Org.Controllers
             public Form Form { get; set; }
             public List<FormQuestion> Questions { get; set; }
             public SystemMessages Messages { get; set; }
-            public List<FormQuestionAnswer> Answers { get; set; }
-
-            public List<Registrant> Registrants
-            {
-                get
-                {
-                    return Answers.Select(x => new Registrant() { ID = x.RegistrantId, FirstName = x.RegistrantFirstName, LastName = x.RegistrantLastName, Email = x.RegistrantEmail, CreateDate = x.CreateDate }).DistinctBy(x => x.ID).ToList();
-                }
-            }
         }
 
 

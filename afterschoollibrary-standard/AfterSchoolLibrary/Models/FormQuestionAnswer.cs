@@ -286,6 +286,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<FormQuestionAnswer> LoadByRegistrantIds(IEnumerable<int> RegistrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<FormQuestionAnswer> LoadByFormId(int FormId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

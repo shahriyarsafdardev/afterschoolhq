@@ -1,7 +1,7 @@
 @model AfterSchool.Areas.Org.Controllers.FormController.ReportResults
 @{
     ViewBag.Title = Model.Form.Name;
-    var questions = Model.Questions;
+    var questions = Model.Questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder);
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
 }
@@ -12,43 +12,77 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
+
             <div class="row">
-                <button onclick="window.print()" class="btn btn-primary btn-space hidden-print">
-                    <i class="s7-print"></i> Print Registrations
-                </button>
-                <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
-                    <i class="s7-close-circle"></i> Close
-                </button>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    <input type="text" id="search" placeholder="Search" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="search()">Search</button>
+                    <button type="button" class="btn btn-primary " onclick="">Export To CSV</button>
+                    <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
+                        <i class="s7-close-circle"></i> Close
+                    </button>
+                </div>
             </div>
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" id="answers-table">
                             <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Date</th>
-                                    @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
+                                    @foreach (var question in questions)
                                     {
                                         <th>@question.FormQuestionGroupName - @question.Text</th>
                                     }
 
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach (var registrant in Model.Registrants.Take(100))
-                                {
+                            <tbody id="answer-tbody">
+                               
+                                    @*
                                     <tr>
                                         <td>@registrant.ID</td>
                                         <td>@registrant.CreateDate.ToShortDateTimeString()</td>
-                                        @foreach (var question in questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder))
+                                        @foreach (var question in questions)
                                         {
                                             var answer = Model.Answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
 
                                             <td>@(answer?.GetAnswerText())</td>
                                         }
                                     </tr>
-                                }
+                                    *@
                             </tbody>
                         </table>
                     </div>
@@ -57,3 +91,89 @@
         </div>
     </div>
 </div>
+
+
+<script>
+
+    var questions = @Html.Raw(questions.Select(x => new { x.ID, x.FormQuestionGroupName, x.Text }).ToJSON());
+    var pageStart = 0;
+    let pageSize = 25;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $(window).on('scroll', function () {
+
+            if ((window.innerHeight + window.scrollY) >= $(document).height() - 10) {
+                loadRegistrants(pageStart, pageSize);
+            } else {
+                // console.log('end not reached');
+            }
+        });
+
+        loadRegistrants(pageStart, pageSize);
+
+    });
+
+    function resetScreen() {
+        pageStart = 0;
+        $('#answer-tbody').html('');
+    }
+
+    function search() {
+        resetScreen();
+        loadRegistrants(pageStart, pageSize);
+    }
+
+    function loadRegistrants(start, length) {
+
+        let search = encodeURIComponent($('#search').val());
+        let sdate = encodeURIComponent($('#startdate').val());
+        let edate = encodeURIComponent($('#enddate').val());
+
+        $.get(
+            `@Url.Action("GetReportPage", "Form", new { id = Model.Form.ID.Value})?start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
+            function (data) {
+                if (data && data.status === 'ok') {
+
+                    for (let registrant of data.registrants) {
+
+                        var tableRow = `<tr>`;
+
+                        tableRow += `<td>${registrant.ID}</td>`;
+                        tableRow += `<td>${registrant.CreateDate}</td>`;
+
+                        for (let question of questions) {
+
+                            answer = getAnswerForQuestion(question.ID, registrant, data.answers);
+
+                            tableRow += `<td>`;
+                            if (answer) {
+                                tableRow += answer.Text;
+                            }
+                            tableRow += `</td>`;
+                        }
+
+                        tableRow += `</tr>`;
+                        $('#answer-tbody').append(tableRow);
+                    }
+
+                    pageStart += pageSize;
+
+                } else {
+
+                }
+            }
+        );
+    }
+
+    function getAnswerForQuestion(questionId, registrant, answers) {
+
+        for (let answer of answers) {
+            if (answer.QuestionId == questionId && answer.RegistrantId == registrant.ID)
+                return answer;
+        }
+
+        return null;
+    }
+
+</script>

@@ -679,6 +679,63 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Registrant> LoadByAnsweredFormId(int formId, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            string sql = @$"
+                select distinct Registrant.* 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
+                where 
+                    FormQuestion.FormId = {formId} 
+                order by Registrant.CreateDate";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByAnsweredFormId(int formId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            string sql = @$"
+                select distinct Registrant.* 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
+                where 
+                    FormQuestion.FormId = {formId} ";
+
+            if (search.IsNotEmpty())
+                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
+
+            if (startDate.HasValue)
+                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
+
+            if (endDate.HasValue)
+                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
+
+            sql += @"
+                order by Registrant.CreateDate";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            var dt = dq.ExecuteSelect(sql, msgs);
+
+            return dt.AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
