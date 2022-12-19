@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -694,6 +695,44 @@ namespace AfterSchoolLibrary.Models
             LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(Save(dc));
         }
+        
+        private static string GetSearchSqlDistrict(int Id, string search, int type)
+        {
+            var typeQuery = "";
+            var typecondition = "";
+
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+            var sql = $@"select reg.*,
+                        masterReg.FirstName as RegistrantFirstName,
+                        masterReg.LastName as RegistrantLastName,
+                        masterReg.Email as RegistrantEmail,
+                        masterReg.RegistrantTypeId as RegistrantRegistrantTypeId,
+                        reg.Uid as RegistrantUid,
+                        masterReg.Phone as RegistrantPhone,
+                        masterReg.Company as RegistrantCompany
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                {typecondition}
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {(int)RegistrantPersonType.Volunteer} and
+                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
+                {typeQuery}
+                order by submittedReg.ID";
+
+            return sql;
+        }
 
         private static string GetSearchSql(string searchText, int accountId, int? questionId,
             RegistrationStatus regStatus, bool getVolunteers, List<int> participationObjectIds = null,
@@ -837,6 +876,8 @@ namespace AfterSchoolLibrary.Models
 
             return sql;
         }
+        
+        
 
         private static string GetSearchSqlByActivityIds(IReadOnlyCollection<int> activityIds)
         {
@@ -884,7 +925,16 @@ namespace AfterSchoolLibrary.Models
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static List<Registration> SearchDistrict(int accountId, string searchText, int type, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetSearchSqlDistrict(accountId, searchText, type);
 
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
         public static List<Registration> LoadByActivityIds(IReadOnlyCollection<int> activityIds, SystemMessages msgs, DatabaseConnection dc)
         {
             var dq = DatabaseQuery;

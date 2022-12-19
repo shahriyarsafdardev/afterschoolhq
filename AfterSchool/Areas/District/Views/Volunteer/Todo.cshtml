@@ -2,8 +2,8 @@
 @model List<TodoViewModel>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
-    var selectedTaskType = (TaskStatus) ViewBag.SelectedTaskType;
-    var selectedApplicationStatus = (ApplicationStatus) ViewBag.SelectedApplicationStatus;
+    var selectedTaskType = ViewBag.SelectedTaskType;
+    var selectedApplicationStatus = ViewBag.SelectedApplicationStatus;
     var paging = (PagingModel)ViewBag.PagingModel;
     var returnUrl = Request.Url;
 }
@@ -71,6 +71,11 @@
         height: 20px;
     }
     
+    #search
+    {
+        width:30%;
+    }
+    
 </style>
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -119,26 +124,33 @@
         <div class="panel-heading">
             <div class="pull-right">
                 <select name="taskType" id="taskType" class="form-control">
+                    <option value="">All Task</option>
                     @foreach (var taskType in Enum.GetValues(typeof(TaskStatus)).Cast<TaskStatus>().Except(TaskStatus.NotSet.AsList()))
                     {
-                        <option @(taskType == selectedTaskType ? "selected" : "") value="@((int)taskType)">
+                        <option value="@((int)taskType)" @(Request["taskType"] == ((int)taskType).ToString() ? "selected=\"selected\"" : "")>
                             @taskType.ToString().SplitByUpperCase()
                         </option>
                     }
                 </select>
                 <select name="applicationStatus" id="applicationStatus" class="form-control">
+                    <option value="">All Statuses</option>
                     @foreach (var applicationStatus in Enum.GetValues(typeof(ApplicationStatus)).Cast<ApplicationStatus>().Except(ApplicationStatus.NotSet.AsList()))
                     {
-                        <option @(applicationStatus == selectedApplicationStatus ? "selected" : "") value="@((int)applicationStatus)">
+                        <option value="@((int)applicationStatus)" @(Request["applicationStatus"] == ((int)applicationStatus).ToString() ? "selected=\"selected\"" : "")>
                             @applicationStatus.ToString().SplitByUpperCase()
                         </option>
                     }
                 </select>
                 <a class="btn btn-primary whitebgbtn" onclick="sendEmail('multiple')"><img class="paper-plan" src="/Assets/img/paper-plane 8.svg"/>Initiate Background Check</a>
-                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation  ><img class="paper-plan" src="/Assets/img/approve-white.svg"/> Approve All Selected</a>
-                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"  ><img class="paper-plan" src="/Assets/img/deny-white.svg"/> Deny All Selected</a>
+                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation><img class="paper-plan" src="/Assets/img/approve-white.svg"/> Approve All Selected</a>
+                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"><img class="paper-plan" src="/Assets/img/deny-white.svg"/> Deny All Selected</a>
             </div>
-            <h2>To do</h2>
+            <div>
+                <input type="text" id="search" name="search" value="@Request["search"]" class="form-control" placeholder="Enter Search Term..." />
+            </div>
+            <div>
+                <h2>To do</h2>
+            </div>
         </div>
 
         <div class="panel-body">
@@ -152,7 +164,8 @@
                             </th>
                             <th>Actions</th>
                             <th>Task</th>
-                            <th>Applicant Name</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
                             <th>Application Status</th>
                             <th>Date Submitted</th>
                             <th>Phone Number</th>
@@ -177,11 +190,16 @@
                                     <td>@taskViewModel.TaskStatus.ToString().SplitByUpperCase()</td>
                                     <td>
                                         <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
-                                            @(taskViewModel.FirstName + ' ' + @taskViewModel.LastName)
+                                            @(taskViewModel.FirstName)
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
+                                            @(taskViewModel.LastName)
                                         </a>
                                     </td>
                                     <td>@taskViewModel.ApplicationStatus.ToString().SplitByUpperCase()</td>
-                                    <td>@taskViewModel.DateSubmitted.Date</td>
+                                    <td>@taskViewModel.DateSubmitted.Date.ToShortDateString()</td>
                                     <td>@taskViewModel.Phone</td>
                                 </tr>
                             }
@@ -204,7 +222,7 @@
                         { "id", "" },
                         { "action", "todo" },
                         { "controller", "volunteer" },
-                        { "querystring", $"taskType={Request["taskType"]}&applicationStatus={Request["applicationStatus"]}" }
+                        { "querystring", $"taskType={Request["taskType"]}&applicationStatus={Request["applicationStatus"]}&search={Request["search"]}" }
                     }
                     );
                 }
@@ -326,6 +344,12 @@
         $('#applicationStatus').on('change', function() {
           location.href = '@Url.Action("Todo","Volunteer")?applicationStatus=' + this.value + '&taskType=' + $('#taskType').find(":selected").val();
         });
+        
+        $('#search').keypress(function (e) {
+            if (e.keyCode == 13 || e.keyCode == 10) {
+                doSearch();
+            }
+        });
     });
     
     function addRemoveApproval(operation , type , webUserId)
@@ -379,5 +403,9 @@
         $(':input','.modal-form').val('');
     }
     
+    function doSearch() 
+    {
+        location.href = `@Url.Action("Todo", "volunteer")?applicationStatus=${$('#applicationStatus').find(":selected").val()}&taskType=` + $('#taskType').find(":selected").val() + `&search=${$('#search').val()}`;
+    }
     
 </script>

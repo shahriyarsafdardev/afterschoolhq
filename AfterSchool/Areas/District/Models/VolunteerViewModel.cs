@@ -1,5 +1,6 @@
 ﻿using System;
 using AfterSchoolLibrary.Models;
+using BasicLibrary;
 
 namespace AfterSchool.Areas.District.Models
 {
@@ -11,25 +12,25 @@ namespace AfterSchool.Areas.District.Models
         public string Email { get; set; }
         public int WebUserId { get; set; }
         public int AccountId { get; set; }
-        public int VolunteerApprovalId { get; set; }
+        public int? VolunteerApprovalId { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; }
-        public DateTime ExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
     }
     public class VolunteerAssembler
     {
-        public static VolunteerViewModel VolunteerAssemblerResult(Registrant registrant, VolunteerApproval volunteerApproval)
+        public static VolunteerViewModel VolunteerAssemblerResult(Registrant registrant, VolunteerApproval volunteerApproval = null)
         {
             return new VolunteerViewModel()
             {
                 WebUserId = (int)registrant.WebUserId,
                 AccountId = (int)registrant.AccountId,
-                VolunteerApprovalId = (int)volunteerApproval.ID,
+                VolunteerApprovalId = volunteerApproval?.ID,
                 FirstName = registrant.FirstName,
                 LastName = registrant.LastName,
                 Phone = registrant.Phone,
                 Email = registrant.Email,
-                ApprovalStatus = volunteerApproval.ApprovalStatusId,
-                ExpirationDate = (DateTime)volunteerApproval.ExpirationDate
+                ApprovalStatus = volunteerApproval.IsNotEmpty() ? volunteerApproval.ApprovalStatusId : ApprovalStatus.NotSet,
+                ExpirationDate = volunteerApproval?.ExpirationDate
             };
         }
     }

@@ -4656,6 +4656,7 @@ namespace AfterSchoolLibrary.Services
 
                     if (sendConfirmationEmail)
                         checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -5102,7 +5103,7 @@ namespace AfterSchoolLibrary.Services
                         msgs: msgs, dc: dc);
             }
         }
-
+        
         #endregion
 
         #region Coupons

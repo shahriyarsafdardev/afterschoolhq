@@ -8,12 +8,15 @@ using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using Hangfire;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
+using LibraryModels = AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Controllers
 {
@@ -559,7 +562,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(string signature)
+        public async Task<ActionResult> Register(string signature)
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer))
                 return Logout(Request.Url.ToString(), true);
@@ -580,6 +583,7 @@ namespace AfterSchool.Controllers
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, signature, Request, msgs);
             var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var currentUser = SessionVariables.CurrentUser;
 
             if (msgs.HasNoErrors() && registration != null)
             {
@@ -587,7 +591,14 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("Select");
 
                 if (msgs.HasNoErrors())
+                {
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
+                }
+
+                if (msgs.HasNoErrors())
+                {
+                    await InitateBackgroundCheck(currentUser, participationObject, msgs);
+                }
 
                 if (msgs.HasNoErrors())
                     return RedirectToAction("ThankYou", new {id = registration.Uid});
@@ -600,7 +611,7 @@ namespace AfterSchool.Controllers
         ///     Form to request a background check. To access this, you must have the "background-check" feature flag enabled and go through the registration process for a
         ///     volunteer opportunity. When you get to the Register action, manually change the URL to take you to the BackgroundCheck action.
         /// </summary>
-        [HttpGet]
+        /*[HttpGet]
         public ActionResult BackgroundCheck()
         {
             if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer) || !featureFlagRepository.IsEnabled("background-check"))
@@ -652,6 +663,50 @@ namespace AfterSchool.Controllers
             ViewBag.ParticipationObject = participationObject;
             ViewBag.RegistrationStartPageAccount = registrationStartPageAccount;
             return View("BackgroundCheck", backgroundCheck);
+        }*/
+
+        private async Task<SystemMessages> InitateBackgroundCheck(WebUser webUser,ParticipationObject participationObject,SystemMessages msgs)
+        {
+            var backgroundCheck = LibraryModels.BackgroundCheck.LoadByWebUserId((int) webUser.ID, msgs).FirstOrDefault();
+            var fiscalAccountId = AccountRelationship.LoadAccountByVisitorAccountId((int) participationObject.OwnerAccount.ID)?.HostAccountId;
+            var accountId = fiscalAccountId.IsNotEmpty() ? fiscalAccountId : SessionVariables.CurrentAccount.ID;
+            if (backgroundCheck.IsEmpty())
+            {
+                if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
+                var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, (int)accountId, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser);
+                }
+            }
+
+            return msgs;
         }
+        
+        private void SendLinkToVolunteer(string link, WebUser webUser)
+        {
+            BackgroundJob.Enqueue(() =>
+                EmailHelper.SendEmail(
+                    webUser.Email,
+                    $"ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]",
+                    $"<p>Hello {webUser.FirstName},<br />" +
+                    "Thank you for taking the first step in becoming a volunteer for [ INSERT PROGRAM ? ]! " +
+                    "We are working with <a href='https://www.sterlingcheck.com/services/candidate-hub/' target=_blank >Sterling</a> " +
+                    "to conduct a background check as part of the onboarding process.<br />" +
+                    "The link below will take you to Sterling's secure portal where you can begin the background check process." +
+                    "We encourage you to read the information provided regarding privacy and security.<br/><br/>" +
+                    "Once the background check is complete, you will receive an email letting you know the results.<br/><br/>" +
+                    $"<a href='{link}' target=_blank >Link</a><br/><br/>" +
+                    "If the link above doesn't work, please copy and paste it into your browser.<br/><br/>" +
+                    "If you have any questions about the background check process, please visit Sterling's <a href='https://mybackgroundcheck.sterlingcheck.com/' target=_blank >candidate information page</a>" +
+                    " or contact Sterling Support at 888-889-5248 or <a href='mailto:candidate.support@sterlingcheck.com.'>candidate.support@sterlingcheck.com.</a><br/><br/>" +
+                    "Thank you,<br/><br/>" +
+                    "AfterSchool HQ" +
+                    $"</p>",
+                    true)
+            );
+        }
+        
     }
 }

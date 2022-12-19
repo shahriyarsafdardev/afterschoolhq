@@ -4,5 +4,5 @@
     New,
     PreviouslyApproved,
     FailedBackgroundCheck,
-    ManuallyRejected
+    ManuallyRejected,
 }

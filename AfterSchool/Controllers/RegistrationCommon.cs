@@ -329,16 +329,6 @@ namespace AfterSchool.Controllers
                                 period,
                                 request,
                                 amsgs, adc);
-
-                        if (currentUser.IsNotEmpty())
-                        {
-                            VolunteerTaskService.AddTask(currentUser.ID, 
-                                TaskStatus.ReviewApplicant, 
-                                ApplicationStatus.New, 
-                                AccountRelationship.LoadAccountByVisitorAccountId((int)participationObject.OwnerAccount.ID)?.HostAccountId , 
-                                null,
-                                amsgs , adc);
-                        }
                     },
                     smsgs => msgs.AddRange(smsgs),
                     fmsgs => msgs.AddRange(fmsgs),

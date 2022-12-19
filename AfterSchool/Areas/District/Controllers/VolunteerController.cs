@@ -61,8 +61,7 @@ namespace AfterSchool.Areas.District.Controllers
                 {
                     var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs);
                     
-                    if(volunteerApproval.IsNotEmpty())
-                        volunteerViewModel.Add(VolunteerAssembler.VolunteerAssemblerResult(registrant, volunteerApproval));
+                    volunteerViewModel.Add(VolunteerAssembler.VolunteerAssemblerResult(registrant, volunteerApproval));
                     
                 }                
             }
@@ -186,7 +185,7 @@ namespace AfterSchool.Areas.District.Controllers
             return View(registration);
         }
         
-        public ActionResult Todo(string pn, string rpp, int taskType = (int)TaskStatus.ReviewApplicant , int applicationStatus = (int)ApplicationStatus.New)
+        public ActionResult Todo(string pn, string rpp, int? taskType, int? applicationStatus, string search = "")
         {
             
             var pageNumber = 1;
@@ -205,8 +204,8 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
             //var volunteerApprovals = VolunteerApproval.Load();
-            var count = VolunteerTask.GetCountTypeAndAppStatus((TaskStatus) taskType, (ApplicationStatus) applicationStatus, currentAccount, msgs);
-            var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus((TaskStatus) taskType, (ApplicationStatus) applicationStatus, currentAccount, start, length, msgs);
+            var count = VolunteerTask.GetCountTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, msgs);
+            var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, start, length, msgs);
 
             if (volunteerTasks.IsNotEmpty())
             {
@@ -229,8 +228,8 @@ namespace AfterSchool.Areas.District.Controllers
                 TotalPages = totalPages,
             };
             
-            ViewBag.SelectedTaskType = (TaskStatus) taskType;
-            ViewBag.SelectedApplicationStatus = (ApplicationStatus)applicationStatus;
+            ViewBag.SelectedTaskType = taskType;
+            ViewBag.SelectedApplicationStatus = applicationStatus;
             ViewBag.Messages = msgs;
             return View(TodoViewModelList);
         }
@@ -287,6 +286,32 @@ namespace AfterSchool.Areas.District.Controllers
             TempData["msgs"] = msgs;
             
             return RedirectToAction("Todo");
+        }
+
+        public ActionResult ExportVolunteer(string search, int type = (int)ApprovalStatus.Approved)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+
+            RegistrationService.EmailCsvReportDistrict(
+                currentAccount.ID.Value,
+                search,
+                UILabel.ActivityLabel(ActivityType.Activity, false),
+                currentAccount.Email,
+                null,
+                null,
+                type,
+                msgs,
+                null);
+
+            if (msgs.HasErrors())
+            {
+                msgs.Add("Email will be sent shortly",MessageType.Success);
+            }
+            
+            TempData["msgs"] = msgs;
+            
+            return RedirectToAction("Index" , new {search,type});
         }
         
         private void LoadRegistrationViewBag(Registration registration, string selectedRegistration = null,

@@ -117,33 +117,52 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
-        public static List<VolunteerTask> LoadByTaskTypeAndAppStatus(TaskStatus taskStatus, ApplicationStatus applicationStatus, Account currentAccount,int? start, int? length, SystemMessages msgs = null,
+        public static List<VolunteerTask> LoadByTaskTypeAndAppStatus(int? taskStatus, int? applicationStatus, string search, Account currentAccount,int? start, int? length, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Joins.Add(WebUser.ObjectMap["Id"], ObjectMap["WebUserId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "WebUser");
-            dq.Criterias.Add(ObjectMap["Task"], (int)taskStatus);
-            dq.Criterias.Add(ObjectMap["ApplicationStatus"], (int)applicationStatus);
+            if(taskStatus.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["Task"], (int)taskStatus);
+            if(applicationStatus.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["ApplicationStatus"], (int)applicationStatus);
             dq.Criterias.Add(ObjectMap["AccountId"], currentAccount.ID);
             dq.Criterias.Add(ObjectMap["DateCompleted"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+            if (search.IsNotEmpty())
+            {
+                var searchDcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                searchDcs.Add(WebUser.ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
+                searchDcs.Add(WebUser.ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchDcs);
+            }
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
         }
         
-        public static int GetCountTypeAndAppStatus(TaskStatus taskStatus, ApplicationStatus applicationStatus, Account currentAccount, SystemMessages msgs = null,
+        public static int GetCountTypeAndAppStatus(int? taskStatus, int? applicationStatus, string search, Account currentAccount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Joins.Add(WebUser.ObjectMap["Id"], ObjectMap["WebUserId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "WebUser");
-            dq.Criterias.Add(ObjectMap["Task"], (int)taskStatus);
-            dq.Criterias.Add(ObjectMap["ApplicationStatus"], (int)applicationStatus);
+            if(taskStatus.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["Task"], (int)taskStatus);
+            if(applicationStatus.IsNotEmpty())
+                dq.Criterias.Add(ObjectMap["ApplicationStatus"], (int)applicationStatus);
             dq.Criterias.Add(ObjectMap["AccountId"], currentAccount.ID);
             dq.Criterias.Add(ObjectMap["DateCompleted"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
+
+            if (search.IsNotEmpty())
+            {
+                var searchDcs = new DatabaseCriterias(LogicalOperatorType.Or);
+                searchDcs.Add(WebUser.ObjectMap["FirstName"], search, DatabaseCriteriaOperatorEnum.Like);
+                searchDcs.Add(WebUser.ObjectMap["LastName"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchDcs);
+            }
             
             return dq.GetCount(msgs);
         }

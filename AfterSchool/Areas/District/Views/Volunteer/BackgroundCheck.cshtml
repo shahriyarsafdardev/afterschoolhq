@@ -52,7 +52,8 @@
                 <table class="table">
                     <tr>
                         <th></th>
-                        <th>Registrant Name</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
                         <th>Date Submitted</th>
                         <th>Background Check Status</th>
                         <th></th>
@@ -65,7 +66,8 @@
                                 <td>
                                     <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
                                 </td>
-                                <td>@(backgroundViewModel.FirstName + ' ' + backgroundViewModel.LastName)</td>
+                                <td>@(backgroundViewModel.FirstName)</td>
+                                <td>@(backgroundViewModel.LastName)</td>
                                 <td>@backgroundViewModel.DateSubmitted.ToShortDateString()</td>
                                 <td>@backgroundViewModel.BackgroundCheckStatus.ToString().SplitByUpperCase()</td>
                                 <td>

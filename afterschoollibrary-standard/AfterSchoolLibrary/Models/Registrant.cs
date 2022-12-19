@@ -965,16 +965,20 @@ namespace AfterSchoolLibrary.Models
         {
             var persontTypeId = (int) personType;
             var typeQuery = "";
+            var typecondition = "";
 
             if (type != 4)
+            {
                 typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
-            
-            var sql = $@"select masterReg.*
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+                var sql = $@"select masterReg.*
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
-                VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId 
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                {typecondition}
             WHERE
                 reg.accountid in (
                     select visitoraccountid
@@ -994,12 +998,22 @@ namespace AfterSchoolLibrary.Models
         private static string GetApprovedSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search, int type)
         {
             var persontTypeId = (int) personType;
+            
+            var typeQuery = "";
+            var typecondition = "";
+            
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+            
             var sql = $@"select count(masterReg.ID)
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
-                VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId    
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+                {typecondition}   
             WHERE
                 reg.accountid in (
                     select visitoraccountid
@@ -1007,11 +1021,9 @@ namespace AfterSchoolLibrary.Models
                     where hostaccountid = {Id}
                 ) and
                 submittedReg.PersonTypeId = {persontTypeId} and
-                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')";
-
-            if (type != 4)
-                sql = sql + $@"and volunteer.approvalstatusid = {type}";
-
+                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%') 
+                {typeQuery}";
+            
             return sql;
         }
         
