@@ -3,7 +3,7 @@
 @{
     var billingPeriod = Model.ParticipationObject.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
 
-    var youOrProvider = "you";
+    var youOrProvider = "You";
     var currentAccount = SessionVariables.CurrentAccount;
 
     if (Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().ProviderAccountId.HasValue &&
@@ -29,10 +29,17 @@
                 var prePaymentProviderAmount = (Model.ParticipationObject.GetPostPayProviderAmount() * Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value).ToCurrency();
                 var prepaymentText1 = "";
                 var prepaymentText2 = "";
+                var prepaymentText3 = "";
                 if (firstPostPayPlanHasNumberOfPrePaidPeriods)
                 {
+                    var noOfPeriodsPrepaid = Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value;
                     prepaymentText1 = $"<span> with a pre-payment of <strong>{prePaymentAmount}</strong></span>";
                     prepaymentText2 = $"<span><strong>{prePaymentProviderAmount}</strong> as pre-payment and then</span>"; //$57 as pre-payment and then 
+                    prepaymentText3 = $"after {noOfPeriodsPrepaid} {billingPeriod}";
+                    if (noOfPeriodsPrepaid > 1)
+                    {
+                        prepaymentText3 += "s";
+                    }
                 }
 
             }
@@ -53,10 +60,9 @@
             {
                 <span>
                     Parents will pay <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
-                    @Html.Raw(prepaymentText1)
-                    and @youOrProvider will receive @Html.Raw(prepaymentText2)
+                    @Html.Raw(prepaymentText1). @youOrProvider will receive @Html.Raw(prepaymentText2)
                     <strong>@Model.ParticipationObject.GetPostPayProviderAmount().ToCurrency()</strong>
-                    per @billingPeriod attended per @(UILabel.RegistrantLabel().ToLower()).
+                    per @billingPeriod attended per @(UILabel.RegistrantLabel().ToLower()) @prepaymentText3.
                 </span>
             }
         </span>
