@@ -1,6 +1,7 @@
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Helpers;
 using System.Linq;
+using BasicLibrary;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -17,7 +18,10 @@ namespace AfterSchoolLibrary.Services
         public static string GetAnswerText(this FormQuestionAnswer answer)
         {
             if (answer.Text.IsJson())
-                return Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.value;
+                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.value;
+
+            if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
+                return answer.Text.IsBoolean() ? answer.Text.ToBoolean().ToYesNo() : "";
 
             return answer.Text;
         }
