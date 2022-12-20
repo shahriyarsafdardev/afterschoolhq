@@ -255,7 +255,7 @@
         console.log('loadRegistrations');
 
         $.get(
-            `@Url.Action("GetReportPage", "Form", new { form = Model.FormId})&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
+            `@Url.Action("GetReportPage", "Form", new { form = Model.FormId, activity = Model.ActivityUid })&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
             function (data) {
                 if (data && data.status === 'ok') {
 

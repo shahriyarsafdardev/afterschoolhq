@@ -760,7 +760,7 @@ namespace AfterSchoolLibrary.Models
 
             if (activityId.HasValue)
                 sql += @$"
-                    and RegistrancActivity.ParticipationObjectId = {activityId.Value}
+                    and RegistrantActivity.ParticipationObjectId = {activityId.Value}
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
 
             if (!getCountOnly)
