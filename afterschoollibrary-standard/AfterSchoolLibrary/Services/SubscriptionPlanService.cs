@@ -556,7 +556,7 @@ namespace AfterSchoolLibrary.Services
                            || (plan.BillingPeriodTypeId == BillingPeriodType.Week && dateSpan.Days <= 7);
             return !tooShort;
         }
-
+        
         public static DateTime? GetPlanEndDateForRegistrantSubscriptionUtc(this SubscriptionPlan plan, DateTime startDateTime,
             ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -580,7 +580,7 @@ namespace AfterSchoolLibrary.Services
 
                 // no need for UTC since it just calculates based on the passed in start date time
                 else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -610,7 +610,7 @@ namespace AfterSchoolLibrary.Services
                     endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
 
                 if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -619,7 +619,7 @@ namespace AfterSchoolLibrary.Services
 
             return endDate;
         }
-
+        
         private static DateTime? GetSubscriptionEndDateUtc(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -640,7 +640,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
+        public static DateTime? GetPaymentPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
         {
             if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
                 return null;

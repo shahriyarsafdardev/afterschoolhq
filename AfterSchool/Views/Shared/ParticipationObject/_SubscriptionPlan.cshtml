@@ -1,7 +1,7 @@
 ﻿@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
-    var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.First();
+    var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.FirstOrDefault();
     <span>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
@@ -20,11 +20,24 @@
                 <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
                 every
                 <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
-
+                
                 @if (subscriptionPlan.StartDate.HasValue)
                 {
-                    <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
+                    // Ensure to compare on UTC Start Date -- Pending
+                    if (subscriptionPlan.StartDate == DateTime.UtcNow) 
+                    {
+                        <span>starting <strong>today</strong></span>
+                    }
+                    else
+                    {
+                        <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
+                    }
                 }
+                else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    <span>starting <strong>today</strong></span>
+                }
+                
 
                 @if (subscriptionPlan.EndDate.HasValue)
                 {
