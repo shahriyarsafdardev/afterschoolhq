@@ -703,66 +703,71 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAnsweredFormId(int formId, int accountId, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            string sql = @$"
-                select count(distinct Registrant.ID)
-                from 
-                    FormQuestionAnswer inner join 
-                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
-                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
-                where 
-                    FormQuestion.FormId = {formId} and
-                    Registrant.AccountId = {accountId}";
-
-            if (search.IsNotEmpty())
-                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
-
-            if (startDate.HasValue)
-                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
-
-            if (endDate.HasValue)
-                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
+            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, true);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
 
-        public static List<Registrant> LoadByAnsweredFormId(int formId, int accountId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> LoadByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            string sql = @$"
-                select distinct Registrant.* 
-                from 
-                    FormQuestionAnswer inner join 
-                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
-                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
-                where 
-                    FormQuestion.FormId = {formId} and
-                    Registrant.AccountId = {accountId}";
-
-            if (search.IsNotEmpty())
-                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
-
-            if (startDate.HasValue)
-                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
-
-            if (endDate.HasValue)
-                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
-
-            sql += @"
-                order by Registrant.CreateDate";
+            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, false);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        private static string LoadByAnsweredQuery(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, bool getCountOnly)
+        {
+            string sql = @$"
+                select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
+
+            if (activityId.HasValue)
+                sql += @"
+                    inner join 
+                    RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
+
+            sql += @$"
+                where 
+                    Registrant.AccountId = {accountId}";
+            
+            if (formId.HasValue) 
+                sql += $" and FormQuestion.FormId = {formId.Value}";
+
+            if (search.IsNotEmpty())
+                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
+
+            if (startDate.HasValue)
+                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
+
+            if (endDate.HasValue)
+                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
+
+            if (activityId.HasValue)
+                sql += @$"
+                    and RegistrancActivity.ParticipationObjectId = {activityId.Value}
+                    and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
+
+            if (!getCountOnly)
+                sql += @"
+                    order by Registrant.CreateDate";
+
+            return sql;
         }
 
         #endregion

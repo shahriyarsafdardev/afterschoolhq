@@ -44,41 +44,17 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
-        public static List<FormQuestionAnswer> GetAllAnswers(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionAnswer.LoadByFormId(form.ID.Value, msgs, dc);
-        }
-        public static List<FormQuestionAnswer> GetAnswersByRegistrants(this Form form, IEnumerable<int> registrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionAnswer.LoadByRegistrantIds(registrantIds, msgs, dc);
-        }
-
-        public static List<Registrant> GetAllRegistrants(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByAnsweredFormId(form.ID.Value, form.AccountId.Value, null, null, msgs, dc);
-        }
-
-        public static List<Registrant> GetRegistrants(this Form form, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.LoadByAnsweredFormId(form.ID.Value, form.AccountId.Value, search, startDate, endDate, start, length, msgs, dc);
-        }
-
-        public static int GetRegistrantCount(this Form form, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return Registrant.GetCountByAnsweredFormId(form.ID.Value, form.AccountId.Value, search, startDate, endDate, msgs, dc);
-        }
-
-        public static void EmailDataReport(int formId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int currentAccountId, int loggedInUserId)
+        public static void EmailDataReport(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
         {
             var msgs = new SystemMessages();
-            var form = Form.Load(formId, msgs);
-            var currentAccount = Account.Load(currentAccountId, msgs);
+            var form = Form.Load(formId.Value, msgs);
+            var currentAccount = Account.Load(accountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
             var questions = form.GetAllQuestions(msgs)
                 .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
                 .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                 .ThenBy(x => x.DisplayOrder).ToList();
-            var registrants = form.GetRegistrants(search, startDate, endDate, null, null, msgs);
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, msgs);
 
             var table = new List<List<string>>();
             var row = new List<string>();
@@ -126,7 +102,8 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(SendGridHelper.SendMailWithAttachments(
                 fromEmail: new EmailAddress(
-                    Email.AppNoReplyEmailAddress
+                    Email.AppNoReplyEmailAddress,
+                    "AfterSchool HQ"
                 ),
                 toEmail: new EmailAddress(loggedInUser.Email),
                 subject: subject,

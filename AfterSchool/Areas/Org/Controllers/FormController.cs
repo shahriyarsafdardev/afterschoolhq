@@ -268,41 +268,61 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Report(string id)
+        public ActionResult Report(int? form, string activity)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
 
-            if (id.IsEmpty())
-                return HttpNotFound();
+            Form formObj = null;
+            Activity activityObj = null;
+            var questions = new List<FormQuestion>();
 
-            var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            var questions = form.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            if (form.HasValue)
+            {
+                formObj = currentAccount.GetForm(form.Value, msgs);
+                questions = formObj.GetAllQuestions(msgs)
+                    .Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                    .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                    .ThenBy(x => x.DisplayOrder)
+                    .ToList();
+            }
+
+            if (activity.IsGuid())
+            {
+                activityObj = currentAccount.GetActivity(activity.ToGuid(), msgs);
+                formObj = activityObj.GetActiveForm(msgs);
+                questions = formObj.GetAllQuestions(msgs)
+                    .Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                    .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                    .ThenBy(x => x.DisplayOrder)
+                    .ToList();
+            }
+
 
             var reportResults = new ReportResults()
             {
                 Questions = questions,
                 Messages = msgs,
-                Form = form,
+                Form = formObj,
+                FormId = form,
+                Activity = activityObj,
+                ActivityUid = activity,
             };
 
             return View(reportResults);
         }
 
         [HttpGet]
-        public ActionResult GetReportPage(int id, int start, int length, string sdate, string edate, string search)
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activity)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            HandleTempMessages(msgs);
 
-            if (id.IsEmpty())
-                return HttpNotFound();
-
-            var form = currentAccount.GetForm(id, msgs);
+            var formId = new int?();
             var startDate = new DateTime?();
             var endDate = new DateTime?();
+            var activityId = new int?();
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -310,12 +330,18 @@ namespace AfterSchool.Areas.Org.Controllers
             if (edate.IsDateTime())
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
-            var registrants = form.GetRegistrants(search, startDate, endDate, start, length, msgs);
-            var totalRegistrantCount = form.GetRegistrantCount(search, startDate, endDate, msgs);
+            if (activity.IsGuid())
+                activityId = currentAccount.GetActivity(activity.ToGuid(), msgs)?.ID;
+
+            if (form.HasValue)
+                formId = currentAccount.GetForm(form.Value, msgs)?.ID;
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, start, length, msgs);
+            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, msgs);
             var answers = new List<FormQuestionAnswer>();
 
             if (registrants.Any())
-                answers = form.GetAnswersByRegistrants(registrants.Select(x => x.ID.Value), msgs);
+                answers = FormQuestionAnswer.LoadByRegistrantIds(registrants.Select(x => x.ID.Value), msgs);
 
             if (msgs.HasNoErrors())
                 return Json(new
@@ -335,17 +361,15 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult DownloadReport(int id, string sdate, string edate, string search, string hidden)
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activity)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
 
-            if (id.IsEmpty())
-                return HttpNotFound();
-
-            var form = currentAccount.GetForm(id, msgs);
+            var formId = new int?();
+            var activityId = new int?();
             var startDate = new DateTime?();
             var endDate = new DateTime?();
 
@@ -355,14 +379,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (edate.IsDateTime())
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
+            if (form.HasValue)
+                formId = currentAccount.GetForm(form.Value, msgs)?.ID;
+
+            if (activity.IsGuid())
+                activityId = currentAccount.GetActivity(activity.ToGuid(), msgs)?.ID;
+
             BackgroundJob.Enqueue(() =>
                 FormService.EmailDataReport(
-                    form.ID.Value, 
+                    currentAccount.ID.Value,
+                    formId,
+                    activityId,
                     search, 
                     startDate, 
                     endDate, 
-                    hidden.Split(',').Select(x => x.ToInteger()).ToArray(), 
-                    currentAccount.ID.Value, 
+                    hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { }, 
                     currentUser.ID.Value)
             );
 
@@ -371,6 +402,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     status = "ok",
                     messages = msgs,
+                    email = currentUser.Email,
                 }, JsonRequestBehavior.AllowGet);
 
             return Json(new
@@ -384,6 +416,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public class ReportResults
         {
             public Form Form { get; set; }
+            public int? FormId { get; set; }
+            public Activity Activity { get; set; }
+            public string ActivityUid { get; set; }
             public List<FormQuestion> Questions { get; set; }
             public SystemMessages Messages { get; set; }
         }
