@@ -47,13 +47,19 @@ namespace AfterSchoolLibrary.Services
         public static void EmailDataReport(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
         {
             var msgs = new SystemMessages();
-            var form = Form.Load(formId.Value, msgs);
             var currentAccount = Account.Load(accountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
-            var questions = form.GetAllQuestions(msgs)
-                .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
-                .OrderBy(x => x.FormQuestionGroupDisplayOrder)
-                .ThenBy(x => x.DisplayOrder).ToList();
+            var questions = new List<FormQuestion>();
+
+            if (!formId.HasValue && activityId.HasValue)
+                formId = currentAccount.GetActivity(activityId.Value, msgs)?.GetActiveForm(msgs)?.ID;
+
+            if (formId.HasValue)
+                questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
+                        .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                        .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                        .ThenBy(x => x.DisplayOrder).ToList();
+
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, msgs);
 
             var table = new List<List<string>>();
@@ -96,9 +102,9 @@ namespace AfterSchoolLibrary.Services
 
             var csv = CsvFile.Create(table);
             var csvByteData = Encoding.UTF8.GetBytes(csv);
-            var subject = $"{form.Name} Report";            
+            var subject = $"Submission Data Report";            
             var body =
-                $"<p>Your {form.Name} report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "form_report")}";
+                $"<p>Your Submission Data report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
 
             msgs.AddRange(SendGridHelper.SendMailWithAttachments(
                 fromEmail: new EmailAddress(
@@ -110,7 +116,7 @@ namespace AfterSchoolLibrary.Services
                 body: body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
                 attachmentByteData: csvByteData,
-                attachmentFilename: $"{form.Name.Replace(" ", "-")}-Report.csv"
+                attachmentFilename: $"Submission-Data-Report.csv"
             ));
         }
 
