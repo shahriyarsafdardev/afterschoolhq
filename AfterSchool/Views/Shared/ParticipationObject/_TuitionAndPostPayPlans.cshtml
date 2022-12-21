@@ -1,4 +1,4 @@
-﻿@model ParticipationObjectViewModel
+@model ParticipationObjectViewModel
 
 @{
     var billingPeriod = Model.ParticipationObject.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
@@ -35,7 +35,7 @@
                     var noOfPeriodsPrepaid = Model.ParticipationObject.PostPayPlans.First().NumberOfPeriodsPrePaid.Value;
                     prepaymentText1 = $"<span> with a pre-payment of <strong>{prePaymentAmount}</strong></span>";
                     prepaymentText2 = $"<span><strong>{prePaymentProviderAmount}</strong> as pre-payment and then</span>"; //$57 as pre-payment and then 
-                    prepaymentText3 = $"after {noOfPeriodsPrepaid} {billingPeriod}";
+                    prepaymentText3 = (noOfPeriodsPrepaid > 0) ? $" after {noOfPeriodsPrepaid} {billingPeriod}" : "";
                     if (noOfPeriodsPrepaid > 1)
                     {
                         prepaymentText3 += "s";
@@ -62,7 +62,7 @@
                     Parents will pay <strong>@Model.ParticipationObject.GetPostPayCostWithConvenienceFee().ToCurrency()</strong>
                     @Html.Raw(prepaymentText1). @youOrProvider will receive @Html.Raw(prepaymentText2)
                     <strong>@Model.ParticipationObject.GetPostPayProviderAmount().ToCurrency()</strong>
-                    per @billingPeriod attended per @(UILabel.RegistrantLabel().ToLower()) @prepaymentText3.
+                    per @billingPeriod attended per @(UILabel.RegistrantLabel().ToLower())@prepaymentText3.
                 </span>
             }
         </span>
