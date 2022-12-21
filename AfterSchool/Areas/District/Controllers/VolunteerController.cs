@@ -59,7 +59,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs);
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault();
                     
                     volunteerViewModel.Add(VolunteerAssembler.VolunteerAssemblerResult(registrant, volunteerApproval));
                     
@@ -235,7 +235,7 @@ namespace AfterSchool.Areas.District.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddRemoveApproval(string webUserIDs , string operation , string reason , DateTime expirationDate)
+        public ActionResult AddRemoveApproval(string webUserIDs , string operation , string reason , DateTime expirationDate,string returnUrl = null)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -258,9 +258,12 @@ namespace AfterSchool.Areas.District.Controllers
                         foreach (var webUserID in webUserIDs.Split(','))
                         {
                             var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger());
-                            
-                            VolunteerTaskService.EditTask(volunteerTask,
-                                amsgs, adc);
+
+                            if (volunteerTask.IsNotEmpty())
+                            {
+                                VolunteerTaskService.EditTask(volunteerTask,
+                                    amsgs, adc);
+                            }
 
                             VolunteerApprovalService.AddApproval(Convert.ToInt32(webUserID),
                                 currentAccount.ID,
@@ -284,6 +287,9 @@ namespace AfterSchool.Areas.District.Controllers
             }
 
             TempData["msgs"] = msgs;
+            
+            if(returnUrl.IsNotEmpty())
+                return new RedirectResult(returnUrl);
             
             return RedirectToAction("Todo");
         }
@@ -340,12 +346,14 @@ namespace AfterSchool.Areas.District.Controllers
 
             var ras = registration.GetRegistrantActivities(msgs);
             var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+            var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
             ViewBag.Answers = registration.GetAnswers(msgs);
             ViewBag.RegistrantActivities = ras;
             ViewBag.Registrations = allRegistrations;
             ViewBag.SelectedRegistration = registration;
+            ViewBag.SelectedType = volunteerApprovalStatus.IsNotEmpty() ? volunteerApprovalStatus :  ApprovalStatus.NotSet;
 
             if (registration.IsNotEmpty())
                 ViewBag.CanMergeWith = allRegistrations.Where(x =>

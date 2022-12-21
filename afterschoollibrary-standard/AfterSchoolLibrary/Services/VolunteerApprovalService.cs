@@ -10,6 +10,18 @@ namespace AfterSchoolLibrary.Services
         public static VolunteerApproval AddApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate ,WebUser loggedInUser ,SystemMessages msgs,
             DatabaseConnection dc = null)
         {
+
+            var previousApproval = VolunteerApproval.LoadByWebUserId((int) webUserId, msgs, dc);
+
+            if (previousApproval.IsNotEmpty())
+            {
+                foreach (var approval in previousApproval)
+                {
+                    approval.IsActive = false;
+                    msgs.AddRange(approval.Save(dc:dc));
+                }
+            }
+            
             var volunteerApproval = new VolunteerApproval();
 
             volunteerApproval.WebUserId = webUserId;
@@ -21,6 +33,7 @@ namespace AfterSchoolLibrary.Services
             volunteerApproval.CreatedBy = loggedInUser?.ID;
             volunteerApproval.LastModifiedBy = loggedInUser?.ID;
             volunteerApproval.LastModifiedDate = DateTime.UtcNow;
+            volunteerApproval.IsActive = true;
 
             msgs.AddRange(volunteerApproval.Save(dc: dc));
             return volunteerApproval;

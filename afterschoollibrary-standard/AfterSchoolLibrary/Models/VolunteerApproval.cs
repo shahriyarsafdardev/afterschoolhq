@@ -51,6 +51,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["ExpirationDate"].Value = value;
         }
         
+        public bool? IsActive
+        {
+            get => (bool?) MDV["IsActive"].Value;
+            set => MDV["IsActive"].Value = value;
+        }
+        
         public static DatabaseParameters ObjectMap
         {
             get
@@ -62,7 +68,7 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "ApprovalStatusId", SqlDbType.Int);
                 dp.Add(className, "Reason", SqlDbType.NVarChar, "100");
                 dp.Add(className, "ExpirationDate", SqlDbType.DateTime);
-
+                dp.Add(className, "IsActive", SqlDbType.Bit);
                 return dp;
             }
         }
@@ -109,12 +115,13 @@ namespace AfterSchoolLibrary.Models
             return _Create(DatabaseQuery, dc, ObjectMap);
         }
         
-        public static VolunteerApproval LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<VolunteerApproval> LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            dq.Criterias.Add(ObjectMap["IsActive"], true.ToInteger());
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
         }
         
         public static SystemMessages Alter(DatabaseConnection dc = null)
@@ -126,6 +133,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ApprovalStatusId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["Reason"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ExpirationDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["IsActive"]}));
 
             return msgs;
         }

@@ -39,10 +39,16 @@
         align-items: flex-start;
     }
     
+    @*
     label
     {
         color: #00b492;
         font-size: 12px;
+    }*@
+    
+    .searchActivitiesBtn
+    {
+        color: black;
     }
     
     small
@@ -239,29 +245,29 @@
                 Approve Applicant Without Background Check
             </h3>
         </div>
-        <div class="modal-body text-center">
-            <p>Approving this applicant will allow them to bypass the background check process.
-                <br/><i>Please select the reason for approving this applicant.</i><br/>
-            </p>
+        <div class="modal-body ">
+            <div class="modal-text">
+                
+            </div>
             
             <div class="modal-form">
                 <form action="@Url.Action("AddRemoveApproval" , "Volunteer")" method="post">
                     <div class="form-group">
                         <div class="input-group">
-                            <label>Approval Reason</label>
-                            <input id="name" name="reason" type="text" class="form-control" required>
+                            <label class="reason">Approval Reason</label>
+                            <input id="name" name="reason" type="text" class="form-control" placeholder="Reason" required>
                             <input type="hidden" class="webUserIDs" name="webUserIDs"/>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="input-group">
-                            <label>Background Check Expiration Date</label>
+                            <label class="expiration-date">Background Check Expiration Date</label>
                             <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                <input type="text" class="form-control" onfocus="this.select()" required data-type="date" name="expirationDate" />
-                                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                                <input type="text" class="form-control" onfocus="this.select()" placeholder="Expiration Date" required data-type="date" name="expirationDate" />
+                                <span class="input-group-addon btn btn-default"><i class="icon-th s7-date"></i></span>
                             </div>
                             <input type="hidden" id="operation" name="operation"/>
-                            <small>Standard background check are available for one year. Please set an expiratrion date.</small>
+                            <small class="note"></small>
                         </div>
                     </div>
                     <div class="row">
@@ -269,7 +275,7 @@
                             <div class="pull-left">
                                 <button type="button"
                                         data-dismiss="modal"
-                                        class="btn btn-primary searchActivitiesBtn btn-md"
+                                        class="btn btn-default searchActivitiesBtn btn-md"
                                         onclick="closeModal()">
                                     Cancel
                                 </button>
@@ -356,21 +362,70 @@
     {
         var webUserIDs = '';
         
-        if (type === 'multiple')
+        if (operation === 'approve' && type === 'single')
+        {
+            webUserIDs = webUserId;
+            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve');
+            $('.modal-text').html("<p class='text-center' ><strong>Approving this applicatant will allow them to bypass backgroundcheck process.<br>Please select the reason for approving this applicant</strong></p>");
+            $('.reason').text('Approval Reason').css('color', '#00c5a3');
+            $('.expiration-date').text('Background Check Expiration Date').css('color', '#00c5a3');
+            $('.modal-confirm').children('.modal-header').css('color','#00c5a3');
+            $('#modal-confirm').children().children().first().text('Approve Volunteer Without Background Check');
+            $('#modal-confirm').children().children().first().css("background-color", "#00c5a3'");
+            $('#modal-confirm').children().children().first().css("font-size", "20px");
+            $('.note').text('Standard background check are available for one year. Please set an expiratrion date.');
+        }
+        
+        if (operation === 'reject' && type === 'single')
+        {
+           webUserIDs = webUserId;
+           $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+           $('.modal-text').html("<p class='text-center'><strong>Please select the reason for denying this applicant</strong></p>");
+           $('.reason').text('Denial Reason').css('color', '#ed4b4b'); 
+           $('.expiration-date').text('Denial Expiration Date').css('color', '#ed4b4b');
+           $('#modal-confirm').children().children().first().text('Deny Volunteer Without Background Check');
+           $('#modal-confirm').children().children().first().css("background-color", "#ed4b4b");
+           $('#modal-confirm').children().children().first().css("font-size", "20px");
+           $('.note').text('Select the date when this applicant is elegible to re-ply');
+        }
+        
+        if (operation === 'approve' && type === 'multiple')
         {
             $("input:checkbox[name=childCheckBox]:checked").each(function(){
                 webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
             });
+            
+            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve');
+            $('.modal-text').html("<p class='text-center'><strong>Approving these applicants will allow them to bypass the Background check the process.<br>Please Select the reason for approving these applicants.<br>Approval Reason and Expiration Date will be applied to all selected volunteer.</p></strong>");
+            $('.reason').text('Approval Reason').css('color', '#00c5a3');
+            $('.expiration-date').text('Background Check Expiration Date').css('color', '#00c5a3');
+            $('.modal-confirm').children('.modal-header').css('color','#00c5a3');
+            $('#modal-confirm').children().children().first().text('Approve Volunteer Without Background Check');
+            $('#modal-confirm').children().children().first().css("background-color", "#00c5a3'");
+            $('#modal-confirm').children().children().first().css("font-size", "20px");
+            $('.note').text('Standard background check are available for one year. Please set an expiratrion date.');
         }
         
-        if(type === 'single')
-            webUserIDs = webUserId;
+        if (operation === 'reject' && type === 'multiple')
+        {
+           $("input:checkbox[name=childCheckBox]:checked").each(function(){
+               webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+           });
+           
+           $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+           $('.modal-text').html("<p class='text-center'><strong>Please select the reason for denying this applicant without a background check.<br>Denial Reason and Expiration Date will be applied to all selected volunteers.</p></strong>");
+           $('.reason').text('Denial Reason').css('color', '#ed4b4b'); 
+           $('.expiration-date').text('Denial Expiration Date').css('color', '#ed4b4b');
+           $('#modal-confirm').children().children().first().text('Deny Volunteer Without Background Check');
+           $('#modal-confirm').children().children().first().css("background-color", "#ed4b4b");
+           $('#modal-confirm').children().children().first().css("font-size", "20px");
+           $('.note').text('Select the date when this applicant is elegible to re-ply');
+        }
         
-        if (operation === 'approve')
-            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve')
-        
-        if (operation === 'reject')
-            $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny')
+        @*if (operation === 'reject')
+        {
+            $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+        }*@
         
         $('.webUserIDs').val(webUserIDs);
         $('#operation').val(operation);

@@ -969,7 +969,8 @@ namespace AfterSchoolLibrary.Models
 
             if (type != 4)
             {
-                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
                 typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
             }
 
@@ -1004,7 +1005,8 @@ namespace AfterSchoolLibrary.Models
             
             if (type != 4)
             {
-                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
                 typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
             }
             
