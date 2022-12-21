@@ -1561,13 +1561,15 @@ namespace AfterSchoolLibrary.Services
                     {
                         FormQuestion question = null;
 
-                        if (answer.QuestionDataTypeId == QuestionDataType.NotSet || copyToForm.IsEmpty())
-                            question = answer.ToFormQuestion(true, amsgs, adc);
-                        else
+                        if (answer.QuestionDataTypeId != QuestionDataType.NotSet && copyToForm.IsNotEmpty())
                             // need to load the question from the provider account form
                             // to ensure data is stored with the form on provider account and not generic form
                             question = copyToForm.GetQuestion(answer.QuestionDataTypeId, msgs, dc);
 
+                        // not doing an else if just in case the question comes back null
+                        if (question.IsEmpty())
+                            question = answer.ToFormQuestion(true, amsgs, adc);
+                            
                         copyToRegistrant.AddOrUpdateAnswer(
                             answerText: answer.Text,
                             question: question,
