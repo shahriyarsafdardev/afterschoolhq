@@ -89,13 +89,29 @@
                         @foreach (var item in lstPlanPaymentStartType)
                         {
                             var selected = PlanPaymentStartType.WhenActivityStarts == item ? "selected=\"selected\"" : "";
-
                             if (subscriptionPlan.IsNotEmpty())
                             {
                                 selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
                             }
-
-                            <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                            if (item == PlanPaymentStartType.OnCheckout || item == PlanPaymentStartType.WhenActivityStarts)
+                            {
+                                if (Model.HasSchedule && Model.GetSchedule().IsOngoing && item == PlanPaymentStartType.OnCheckout)
+                                {
+                                    <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                }
+                                else if (Model.HasSchedule && !Model.GetSchedule().IsOngoing && item == PlanPaymentStartType.WhenActivityStarts)
+                                {
+                                    <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
+                            }
                         }
 
                     </select>
