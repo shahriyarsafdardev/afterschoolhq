@@ -1,4 +1,4 @@
-﻿@model ParticipationObjectViewModel
+@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.FirstOrDefault();
@@ -16,40 +16,50 @@
         }
         else
         {
-            <span>
-                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
-                every
-                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
-                
-                @if (subscriptionPlan.StartDate.HasValue)
-                {
-                    // Ensure to compare on UTC Start Date -- Pending
-                    if (subscriptionPlan.StartDate == DateTime.UtcNow) 
-                    {
-                        <span>starting <strong>today</strong></span>
-                    }
-                    else
-                    {
-                        <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
-                    }
-                }
-                else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
-                {
-                    <span>starting <strong>today</strong></span>
-                }
-                
+    <span>
+        <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
+        every
+        <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
-                @if (subscriptionPlan.EndDate.HasValue)
-                {
-                    if (subscriptionPlan.StartDate.HasValue)
-                    {
-                        <span> and </span>
-                    }
+        @if (subscriptionPlan.StartDate.HasValue)
+        {
+            if (subscriptionPlan.StartDate == DateTime.UtcNow)
+            {
+                <span>starting <strong>today</strong></span>
+            }
+            else
+            {
+                <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
+            }
+        }
+        else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+        {
+            <span>starting <strong>today</strong></span>
+        }
+        else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && !subscriptionPlan.StartDate.HasValue)
+        {
+            var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            if (Model.ParticipationObject.StartDate.HasValue && Model.ParticipationObject.StartDate.Value.Date.IsAfter(accountTodayDate.Date))
+            {
+                <span>starting on <strong>@Model.ParticipationObject.StartDate.ToShortDateString()</strong></span>
+            }
+            else
+            {
+                <span>starting <strong>today</strong></span>
+            }
+        }
 
-                    <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
-                }
 
-            </span>
+        @if (subscriptionPlan.EndDate.HasValue)
+        {
+            if (subscriptionPlan.StartDate.HasValue)
+            {
+                <span> and </span>
+            }
+
+            <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
+        }
+    </span>
         }
 
         @if (subscriptionPlan.RegFeeAsDownPayment && !Model.ParticipationObject.IsRegistrationFree)
