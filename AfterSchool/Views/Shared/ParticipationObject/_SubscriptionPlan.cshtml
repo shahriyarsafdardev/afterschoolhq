@@ -36,7 +36,7 @@
         {
             <span>starting <strong>today</strong></span>
         }
-        else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && !subscriptionPlan.StartDate.HasValue)
+        else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
         {
             var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
             if (Model.ParticipationObject.StartDate.HasValue && Model.ParticipationObject.StartDate.Value.Date.IsAfter(accountTodayDate.Date))
