@@ -5813,6 +5813,111 @@ namespace AfterSchoolLibrary.Services
             return (parentUser, parentRegistrant);
         }
 
+        public static (Registration, Registrant) ProcessRegisterStudent(Account ownerAccount, Registrant registrant,
+            List<KeyValuePair<FormQuestion, string>> questionAnswerModel, int? activityGroupId,
+            int? accountActivityGroupId, int? periodId, List<FilesCollection> files,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Registration registration = null;
+            Registrant submittedRecord = null;
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    // account gets copy / snapshot of master registrant record
+                    // required in order to make sure registration data doesn't change as registrant changes information in master record.
+                    submittedRecord = registrant.SubmitRecordToAccount(
+                        ownerAccount: ownerAccount,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // Create Registration
+                    registration = submittedRecord.AddRegistration(
+                        ownerAccountId: ownerAccount.ID.Value,
+                        activityGroupId: activityGroupId,
+                        accountActivityGroupId: accountActivityGroupId,
+                        periodId: periodId,
+                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                        loggedInUserId: loggedInUser.ID.Value,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    if (questionAnswerModel.IsEmpty() || questionAnswerModel.Count == 0) return;
+
+                    questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId != QuestionDataType.NotSet).ToList()
+                        .ForEach(qvm =>
+                        {
+                            registrant.AddOrUpdateAnswer(
+                                answerText: qvm.Value,
+                                question: qvm.Key,
+                                loggedInUser: loggedInUser,
+                                msgs: amsgs,
+                                dc: adc);
+                        });
+
+                    AddCustomQuestions(questionAnswerModel: questionAnswerModel, submittedRecord: submittedRecord,
+                        registration: registration, files: files, currentUser: loggedInUser, msgs: amsgs, dc: adc);
+
+                    registrant.CopyAnswersTo(
+                        submittedRecord,
+                        registration,
+                        loggedInUser,
+                        amsgs,
+                        adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc);
+
+            return (registration, submittedRecord);
+        }
+
+        private static void AddCustomQuestions(List<KeyValuePair<FormQuestion, string>> questionAnswerModel,
+            Registrant submittedRecord, Registration registration, List<FilesCollection> files,
+            WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            questionAnswerModel.Where(qvm => qvm.Key.QuestionDataTypeId == QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    if (qvm.Key.QuestionTypeId == QuestionType.FileUpload)
+                    {
+                        var name = $"question-{(int) qvm.Key.ID}";
+                        if (files.IsNotEmpty() && files.Any(m => m.FileName == name) &&
+                            files.FirstOrDefault(m => m.FileName == name).ContentLength > 0)
+                        {
+                            var file = files.FirstOrDefault(m => m.FileName == name);
+                            //5 MB = 5242880 Bytes
+                            //File uploaded here should be less than of 5MB
+                            if (file.ContentLength <= 5242880)
+                                submittedRecord.AddOrUpdateAnswer(
+                                    file: file.InputStream,
+                                    filename: file.FileName,
+                                    question: qvm.Key,
+                                    registrationId: registration.ID,
+                                    loggedInUser: currentUser,
+                                    msgs: msgs,
+                                    dc: dc);
+                            else
+                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                    }
+                    else
+                        submittedRecord.AddOrUpdateAnswer(
+                            answerText: qvm.Value,
+                            question: qvm.Key,
+                            registrationId: registration?.ID,
+                            loggedInUser: currentUser,
+                            msgs: msgs,
+                            dc: dc);
+                });
+        }
+
         #endregion
     }
 }

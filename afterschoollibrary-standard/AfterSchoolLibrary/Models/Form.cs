@@ -226,11 +226,6 @@ namespace AfterSchoolLibrary.Models
             return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, msgs, dc);
         }
 
-        public FormQuestion GetQuestion(QuestionDataType questionDataTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestion.LoadByFormIdByQuestionDataTypeIds(this.ID.Value, questionDataTypeId.AsList(), msgs, dc).FirstOrDefault();
-        }
-
         public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return FormQuestionGroup.LoadByFormIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
