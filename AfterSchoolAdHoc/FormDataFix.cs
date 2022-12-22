@@ -2,10 +2,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using File = System.IO.File;
-using System.Text;
-using CsvHelper;
-using System.Globalization;
+using System.Collections;
 using AfterSchoolLibrary.Enums;
 
 namespace AfterSchoolAdHoc
@@ -14,7 +11,10 @@ namespace AfterSchoolAdHoc
     {
         public static void Run(SystemMessages msgs, DatabaseConnection dc)
         {
+            msgs.AddRange(Registrant.Alter(dc));
             msgs.AddRange(FormQuestionAnswer.Alter(dc));
+
+            Registrant.Update(new Hashtable() { { "FormDataFixProcessed", 0 } }, new Hashtable() { { "FormDataFixProcessed", DBNull.Value } }, Registrant.ObjectMap);
 
             var loop = true;
             var count = 0;
@@ -34,6 +34,7 @@ namespace AfterSchoolAdHoc
                             {
                                 { "IsMaster", 0 },
                                 { "PersonTypeId", $"{(int)RegistrantPersonType.Student}" },
+                                { "FormDataFixProcessed", 0 },
                                 // { "AccountId", 7 },
                             },
                             start: pageSize * count,

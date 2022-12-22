@@ -115,6 +115,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["IsDeleted"].Value = value;
         }
 
+        public bool FormDataFixProcessed
+        {
+            get => (bool) MDV["FormDataFixProcessed"].Value;
+            set => MDV["FormDataFixProcessed"].Value = value;
+        }
+
 
         public Registrant()
         {
@@ -129,6 +135,7 @@ namespace AfterSchoolLibrary.Models
             ProfileStatusId = RegistrantProfileStatus.NotSet;
             IsDeleted = false;
             PersonTypeId = RegistrantPersonType.NotSet;
+            FormDataFixProcessed = false;
         }
 
         public static DatabaseParameters ObjectMap
@@ -152,6 +159,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ProfileStatusId", SqlDbType.Int);
                 _dp.Add(className, "IsDeleted", SqlDbType.Bit);
                 _dp.Add(className, "PersonTypeId", SqlDbType.Int);
+                _dp.Add(className, "FormDataFixProcessed", SqlDbType.Bit);
 
                 return _dp;
             }
@@ -284,6 +292,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["PersonTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FormDataFixProcessed"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 
