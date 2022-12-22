@@ -14,6 +14,8 @@ namespace AfterSchoolAdHoc
     {
         public static void Run(SystemMessages msgs, DatabaseConnection dc)
         {
+            msgs.AddRange(FormQuestionAnswer.Alter(dc));
+
             var loop = true;
             var count = 0;
             var pageSize = 1;
