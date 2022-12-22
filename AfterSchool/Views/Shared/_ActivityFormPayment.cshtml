@@ -436,10 +436,12 @@
         });
 
         $('#hassubscriptionplan').change(function (cb) {
+            disableSubscriptionOrPaymentPlan($('#hassubscriptionplan'), $('#haspaymentplan'));
             setSubscriptionPlanSection();
         });
 
         $('#haspaymentplan').change(function (cb) {
+            disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
             setPaymentPlanSection();
         });
 
@@ -542,6 +544,10 @@
             @:disableAll();
         }
     });
+
+    function disableSubscriptionOrPaymentPlan(plan1, plan2) {
+        plan1.is(':checked') ? plan2.attr('disabled', true) : plan2.attr('disabled', false);
+    }
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
