@@ -120,10 +120,13 @@ namespace AfterSchoolAdHoc
                                         UpdateAnswers(correctForm!, registrationAnswers, ref correctQuestionsCollection, amsgs, adc);
                                 }
                             }
+
+                            registrant.FormDataFixProcessed = true;
+                            amsgs.AddRange(registrant.Save(adc));
                         }
 
                         if (registrants.Count == 0)
-                            loop = false;
+                            loop = false;                        
 
                     },
                     onSuccess: (smsgs) => msgs.AddRange(smsgs),
