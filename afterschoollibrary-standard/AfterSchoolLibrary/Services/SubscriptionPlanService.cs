@@ -500,15 +500,16 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static FigureOutProratingResult FigureOutProrating(this SubscriptionPlan plan, DateTime todayUtc, IStripeProratingService stripeProratingService,
-            ParticipationObject participationObject, DateTime startDateTime, Account currentAccount, SystemMessages msgs)
+        public static FigureOutProratingResult FigureOutProrating(this SubscriptionPlan plan, DateTime startOfPeriod, DateTime todayUtc,
+            IStripeProratingService stripeProratingService, ParticipationObject participationObject, DateTime startDateTime, Account currentAccount,
+            SystemMessages msgs)
         {
             var result = new FigureOutProratingResult
             {
                 ShouldWeBeProratingToday = false,
                 ProratingValue = null,
                 BackdateStartDate = null,
-                BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc),
+                BillingCycleAnchor = null,
             };
 
             if (plan.PlanTypeId != SubscriptionPlanType.Subscription ||
@@ -519,10 +520,10 @@ namespace AfterSchoolLibrary.Services
                  plan.PaymentStartTypeId != PlanPaymentStartType.WhenActivityStarts))
                 return result;
 
-            var startOfPeriod = plan.StartDate.Value;
             result.ShouldWeBeProratingToday = true;
-            result.BackdateStartDate = todayUtc;
-            result.BillingCycleAnchor = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
+            result.BackdateStartDate = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
+            result.BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc);
+
             result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
             return result;
         }
