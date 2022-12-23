@@ -176,6 +176,13 @@ namespace AfterSchoolLibrary.Services
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
+            if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+            {
+                var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
+                ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
+                return;
+            }
+
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
@@ -221,20 +228,20 @@ namespace AfterSchoolLibrary.Services
             var startOfPeriod = plan.StartDate.Value;
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
-                msgs);
+            var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: proratingResult.ShouldWeBeProratingToday,
+                isProrated: proratingResult.BillingCycleAnchor.HasValue,
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
+                stripeAccountId: stripeAccountId,
                 startDate: startDateTime,
                 endDate: endDateTime,
                 billingCycleAnchor: proratingResult.BillingCycleAnchor,
-                stripeAccountId: stripeAccountId,
+                stripeCouponId: stripeCouponId,
                 metaData: new Dictionary<string, string>
                 {
                     {"BillingAccountUid", billingAccount.Uid.ToString()},
@@ -246,7 +253,8 @@ namespace AfterSchoolLibrary.Services
                     {"SourceId", sourceId},
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
-                }, backdateStartDate: proratingResult.BackdateStartDate, msgs: msgs);
+                },
+                msgs: msgs);
 
             if (msgs.HasErrors())
                 return;
