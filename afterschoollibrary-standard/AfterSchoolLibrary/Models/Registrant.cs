@@ -6,6 +6,7 @@ using System.Linq;
 using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Microsoft.Identity.Client;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
@@ -114,6 +115,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["IsDeleted"].Value = value;
         }
 
+        public bool FormDataFixProcessed
+        {
+            get => (bool) MDV["FormDataFixProcessed"].Value;
+            set => MDV["FormDataFixProcessed"].Value = value;
+        }
+
 
         public Registrant()
         {
@@ -128,6 +135,7 @@ namespace AfterSchoolLibrary.Models
             ProfileStatusId = RegistrantProfileStatus.NotSet;
             IsDeleted = false;
             PersonTypeId = RegistrantPersonType.NotSet;
+            FormDataFixProcessed = false;
         }
 
         public static DatabaseParameters ObjectMap
@@ -151,6 +159,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ProfileStatusId", SqlDbType.Int);
                 _dp.Add(className, "IsDeleted", SqlDbType.Bit);
                 _dp.Add(className, "PersonTypeId", SqlDbType.Int);
+                _dp.Add(className, "FormDataFixProcessed", SqlDbType.Bit);
 
                 return _dp;
             }
@@ -181,7 +190,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Registrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null,
+        public static List<Registrant> Load(Hashtable criterias = null, List<string> orderBys = null, int? start = null, int? length = null, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -189,7 +198,8 @@ namespace AfterSchoolLibrary.Models
             dq.UseParameterizedQuery = false;
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+           
+            return BaseLoad(criterias, orderBys, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -283,6 +293,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["PersonTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FormDataFixProcessed"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 
@@ -677,6 +691,96 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
             dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int) x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Registrant> LoadByAnsweredFormId(int formId, int accountId, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            string sql = @$"
+                select distinct Registrant.* 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
+                where 
+                    FormQuestion.FormId = {formId} and
+                    Registrant.AccountId = {accountId}
+                order by Registrant.CreateDate";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, true);
+
+            return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
+        }
+
+        public static List<Registrant> LoadByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, false);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        private static string LoadByAnsweredQuery(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, bool getCountOnly)
+        {
+            string sql = @$"
+                select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
+
+            if (activityId.HasValue)
+                sql += @"
+                    inner join 
+                    RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
+
+            sql += @$"
+                where 
+                    Registrant.AccountId = {accountId}";
+            
+            if (formId.HasValue) 
+                sql += $" and FormQuestion.FormId = {formId.Value}";
+
+            if (search.IsNotEmpty())
+                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
+
+            if (startDate.HasValue)
+                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
+
+            if (endDate.HasValue)
+                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
+
+            if (activityId.HasValue)
+                sql += @$"
+                    and RegistrantActivity.ParticipationObjectId = {activityId.Value}
+                    and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
+
+            if (!getCountOnly)
+                sql += @"
+                    order by Registrant.CreateDate";
+
+            return sql;
         }
 
         #endregion

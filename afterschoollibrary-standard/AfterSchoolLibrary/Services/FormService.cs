@@ -1,11 +1,15 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+using Email = AfterSchoolLibrary.Helpers.Email;
 
 
 namespace AfterSchoolLibrary.Services
@@ -39,6 +43,82 @@ namespace AfterSchoolLibrary.Services
         //Created separate list from Emergency Contact, as later they can differ at any stage
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
+        public static void EmailDataReport(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = Account.Load(accountId, msgs);
+            var loggedInUser = WebUser.Load(loggedInUserId, msgs);
+            var questions = new List<FormQuestion>();
+
+            if (!formId.HasValue && activityId.HasValue)
+                formId = currentAccount.GetActivity(activityId.Value, msgs)?.GetActiveForm(msgs)?.ID;
+
+            if (formId.HasValue)
+                questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
+                        .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                        .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                        .ThenBy(x => x.DisplayOrder).ToList();
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, msgs);
+
+            var table = new List<List<string>>();
+            var row = new List<string>();
+
+            row.Add("");
+            row.Add("");
+
+            foreach (var question in questions)
+                row.Add(question.FormQuestionGroupName);
+
+            table.Add(row);
+
+            row = new List<string>();
+            row.Add("Submission Id");
+            row.Add("Submission Date");
+
+            foreach (var question in questions)
+                row.Add(question.Text);
+
+            table.Add(row);
+
+            foreach (var registrant in registrants)
+            {
+                row = new List<string>();
+
+                row.Add(registrant.ID.ToString());
+                row.Add(registrant.CreateDate.ToShortDateTimeString());
+
+                var answers = registrant.GetAnswers(msgs);
+
+                foreach (var question in questions)
+                {
+                    var answer = answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
+                    row.Add(answer?.GetAnswerText().IfEmpty(""));
+                }
+
+                table.Add(row);
+            }
+
+            var csv = CsvFile.Create(table);
+            var csvByteData = Encoding.UTF8.GetBytes(csv);
+            var subject = $"Submission Data Report";            
+            var body =
+                $"<p>Your Submission Data report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
+
+            msgs.AddRange(SendGridHelper.SendMailWithAttachments(
+                fromEmail: new EmailAddress(
+                    Email.AppNoReplyEmailAddress,
+                    "AfterSchool HQ"
+                ),
+                toEmail: new EmailAddress(loggedInUser.Email),
+                subject: subject,
+                body: body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
+                attachmentByteData: csvByteData,
+                attachmentFilename: $"Submission-Data-Report.csv"
+            ));
+        }
 
         public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1216,7 +1296,7 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages PhoneValidation(string answer, FormQuestion question, SystemMessages msgs)
         {
-            if (answer.IsNotEmpty() && !answer.IsRegExMatch(Utilities.PhoneRegEx))
+            if (answer.IsNotEmpty() && !answer.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                 msgs.Add($"{question.Text} must be a valid phone number", MessageType.UserError);
 
             return msgs;
@@ -1256,7 +1336,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrantTypeId = RegistrantType.Individual;
             }
 
-            public static string StateList => Utilities.GetStateList();
+            public static string StateList => BasicLibrary.Utilities.GetStateList();
         }
     }
 }

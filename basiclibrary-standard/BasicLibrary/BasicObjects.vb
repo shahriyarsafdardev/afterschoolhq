@@ -347,6 +347,45 @@ Public Class BaseObject
 
         Return DatabaseQuery.Select(msgs)
     End Function
+    Protected Shared Function BaseLoad(criterias As Hashtable, orderBys As List(Of String), ObjectMap As DatabaseParameters,
+                                       DatabaseQuery As DatabaseQuery, msgs As SystemMessages) As DataTable
+
+        If msgs Is Nothing Then
+            msgs = New SystemMessages()
+        End If
+
+        If criterias IsNot Nothing Then
+            Dim criterias2 As New DatabaseCriterias
+            For i = 0 To criterias.Count - 1
+                If criterias.Values(i) Is DBNull.Value Then
+                    criterias2.Add(New DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i),
+                                                        DatabaseCriteriaOperatorEnum.Is))
+                    DatabaseQuery.UseParameterizedQuery = False
+                ElseIf _
+                    criterias.Values(i).GetType IsNot GetType(String) AndAlso
+                    TryCast(criterias.Values(i), IEnumerable) IsNot Nothing Then
+                    criterias2.Add(New DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i),
+                                                        DatabaseCriteriaOperatorEnum.In))
+                Else
+                    criterias2.Add(New DatabaseCriteria(ObjectMap(criterias.Keys(i)), criterias.Values(i)))
+                End If
+            Next
+
+            DatabaseQuery.Criterias.Clear()
+            DatabaseQuery.Criterias.AddRange(criterias2)
+        End If
+
+        If orderBys IsNot Nothing Then
+            Dim orderBys2 As New DatabaseOrderBys
+            For i = 0 To orderBys.Count - 1
+
+                orderBys2.Add(New DatabaseOrderBy(orderBys(i)))
+
+            Next
+        End If
+
+        Return DatabaseQuery.Select(msgs)
+    End Function
 
     Protected Shared Function BaseGetCount(criterias As Hashtable, ObjectMap As DatabaseParameters,
                                            DatabaseQuery As DatabaseQuery) As Integer

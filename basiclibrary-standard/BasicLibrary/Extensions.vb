@@ -1,4 +1,4 @@
-﻿Imports System.ComponentModel
+Imports System.ComponentModel
 Imports System.Runtime.CompilerServices
 Imports System.Reflection
 Imports System.Web

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -580,6 +580,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type)
         {
+            if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("index", "form", new { fromSurvey, pn, rpp, q, type });
+
             var msgs = new SystemMessages();
             
             var pageNumber = 1;
@@ -618,6 +621,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult FormEdit(string id, string qg)
         {
+            if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("edit", "form", new { id, qg });
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);

@@ -1,0 +1,313 @@
+@model AfterSchool.Models.ReportResults
+@{
+    ViewBag.Title = Model.Form.Name;
+    var questions = Model.Questions;
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    <input type="text" id="search" placeholder="Search" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="search()">Search</button>
+                    <button type="button" class="btn btn-primary" onclick="emailReport()">Email Report</button>
+                    <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
+                        <i class="s7-close-circle"></i> Close
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Manage Columns</button>
+                </div>
+            </div>
+            <div class="row hide" id="column-selection">
+                @{
+                    var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                }
+                @foreach (var group in groups)
+                {
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
+                            <label for="group-@group.ID" class="text-medium-small text-bold">
+                                @group.Name
+                            </label>
+                        </div>
+                    </div>
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var take = (int)Math.Ceiling(questions.Where(x => x.FormQuestionGroupId == group.ID).Count() / 4M);
+                        var skip = i * take;
+
+                        <div class="col-md-3">
+
+                            @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID).Skip(skip).Take(take))
+                            {
+                                <div>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
+                                        <label for="question-@question.ID">                                            
+                                            @question.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
+                }
+
+
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <span id="starting-record"></span> -
+                    <span id="total-records-loaded"></span> of
+                    <span id="total-records"></span> Submissions
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive ">
+                        <table class="table table-striped table-condensed" id="answers-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    @foreach (var question in questions)
+                                    {
+                                        <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
+                                    }
+                                </tr>
+                                <tr>
+                                    <th>Submission ID</th>
+                                    <th>Submission Date</th>
+                                    @foreach (var question in questions)
+                                    {
+                                        <th class="col-question-@question.ID">@question.Text</th>
+                                    }
+
+                                </tr>
+                            </thead>
+                            <tbody id="answer-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    var questions = @Html.Raw(questions.Select(x => new { x.ID, x.FormQuestionGroupName, x.Text }).ToJSON());
+    var pageStart = 0;
+    let pageSize = 25;
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $(window).on('scroll', function () {
+
+            if ((window.innerHeight + window.scrollY) >= $(document).height() - 10) {
+                loadRegistrants(pageStart, pageSize);
+            } else {
+                // console.log('end not reached');
+            }
+        });
+
+        loadRegistrants(pageStart, pageSize);
+
+    });
+
+    function resetScreen() {
+        pageStart = 0;
+        $('#answer-tbody').html('');
+    }
+
+    function search() {
+        resetScreen();
+        loadRegistrants(pageStart, pageSize);
+    }
+
+    function emailReport() {
+
+        let search = encodeURIComponent($('#search').val());
+        let sdate = encodeURIComponent($('#startdate').val());
+        let edate = encodeURIComponent($('#enddate').val());
+        var hiddenQuestions = "";
+
+        for (let question of questions) {
+            if (!$(`#question-${question.ID}`).is(':checked')) {
+                if (hiddenQuestions.length > 0)
+                    hiddenQuestions += ',';
+
+                hiddenQuestions += question.ID;
+            }
+        }
+
+        $.get(
+            `@Url.Action("EmailReport", "Form", new { form = Model.FormId, activity = Model.ActivityUid })&search=${search}&sdate=${sdate}&edate=${edate}&hidden=${hiddenQuestions}`,
+            function (data) {
+                if (data && data.status === 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `Your report will be emailed shortly to ${data.email}`,
+                        success: true
+                    });
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
+    function toggleColumnSelection() {
+        if ($('#column-selection').hasClass('hide')) {
+            $('#column-selection').removeClass('hide');
+        } else {
+            $('#column-selection').addClass('hide');
+        }
+    }
+
+    function toggleGroup(groupId) {
+        if ($(`#group-${groupId}`).is(':checked')) {
+            $(`.question-group-${groupId}`).prop('checked', true);
+        } else {
+            $(`.question-group-${groupId}`).prop('checked', false);
+        }
+
+        $(`.question-group-${groupId}`).each(function () {
+            let questionId = $(this).attr('id').split('-')[1];
+            toggleColumn(questionId);
+        });
+    }
+
+    function toggleColumn(questionId) {
+        if ($(`#question-${questionId}`).is(':checked')) {
+            $(`.col-question-${questionId}`).removeClass('hide');
+        } else {
+            $(`.col-question-${questionId}`).addClass('hide');
+        }
+    }
+
+    function loadRegistrants(start, length) {
+
+        let search = encodeURIComponent($('#search').val());
+        let sdate = encodeURIComponent($('#startdate').val());
+        let edate = encodeURIComponent($('#enddate').val());
+
+        console.log('loadRegistrations');
+
+        $.get(
+            `@Url.Action("GetReportPage", "Form", new { form = Model.FormId, activity = Model.ActivityUid })&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
+            function (data) {
+                if (data && data.status === 'ok') {
+
+                    for (let registrant of data.registrants) {
+
+                        var tableRow = `<tr>`;
+
+                        tableRow += `<td>${registrant.ID}</td>`;
+                        tableRow += `<td>${registrant.CreateDate}</td>`;
+
+                        for (let question of questions) {
+
+                            answer = getAnswerForQuestion(question.ID, registrant, data.answers);
+
+                            var hide = "";
+
+                            if (!$(`#question-${question.ID}`).is(':checked')) {
+                                hide = "hide";
+                            }
+
+                            tableRow += `<td class="col-question-${question.ID} ${hide}">`;
+                            if (answer) {
+                                tableRow += answer.Text;
+                            }
+                            tableRow += `</td>`;
+                        }
+
+                        tableRow += `</tr>`;
+                        $('#answer-tbody').append(tableRow);
+                    }
+
+                    pageStart += pageSize;
+
+                    $('#starting-record').html(1);
+                    $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
+                    $('#total-records').html(data.registrantCount);
+
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
+    function getAnswerForQuestion(questionId, registrant, answers) {
+
+        for (let answer of answers) {
+            if (answer.QuestionId == questionId && answer.RegistrantId == registrant.ID)
+                return answer;
+        }
+
+        return null;
+    }
+
+</script>

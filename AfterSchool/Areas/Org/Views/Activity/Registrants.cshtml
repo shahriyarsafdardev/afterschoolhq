@@ -177,7 +177,7 @@
                         Finalize Registration
                     </button>
 
-                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration"});
+                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel { ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration" });
 
                     <script>
                                     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -185,7 +185,7 @@
                                             location.href = '@Url.Action("finalizeregistration", "activity", new {id = Model.Activity.Uid})';
                                         });
                                     });
-                                </script>
+                    </script>
                 }
 
                 if (showStudentCRM)
@@ -204,6 +204,10 @@
 
             <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
                 Send Registration Report
+            </a>
+
+            <a href="@Url.Action("Report", "Form", new {activity = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
+                View Submissions
             </a>
 
             <a href="@Url.Action("printregistrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -118,6 +118,11 @@ namespace AfterSchoolLibrary
             };
 
             return objectType;
+        }
+
+        public static bool IsJson(this string text)
+        {
+            return Helpers.Utilities.IsAlreadyJsonString(text);
         }
 
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
