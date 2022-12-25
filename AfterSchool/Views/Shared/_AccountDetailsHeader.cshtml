@@ -17,7 +17,7 @@
         <div class="btn-group hidden-xs">
             <a href="@Url.Action("edit", "account")" class="btn btn-alt6@(actionName == "edit" ? "-active" : "")">Details</a>
             <a href="@Url.Action("location", "account")" class="btn btn-alt6@(actionName == "location" ? "-active" : "") hide">Location</a>
-            <a href="@Url.Action("forms", "account")" class="btn btn-alt6@(actionName == "forms" ? "-active" : "") hide">Forms</a>
+            <a href="@Url.Action("forms", "account")" class="btn btn-alt6@(actionName == "forms" ? "-active" : "") @(FeatureFlag.CheckFlagIsEnabled("forms-reporting") ? "hide" : "")">Forms</a>
 
             <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Profile Setup</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>

@@ -23,15 +23,52 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Form
         [HttpGet]
-        public ActionResult Index()
+        public ActionResult Index(string fromSurvey, string pn, string rpp, string q, string type)
         {
-            ViewBag.Messages = new SystemMessages();
-            return View(SessionVariables.CurrentAccount.GetForms());
+            if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("forms", "account", new { fromSurvey, pn, rpp, q, type });
+
+            var msgs = new SystemMessages();
+
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var formType = FormType.NotSet;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            if (type.IsNotEmpty() && type.IsNumber())
+                formType = type.ToInteger().ToEnum<FormType>();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
+            var forms = currentAccount.GetForms(formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(formType, q, msgs);
+            var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
+
+            ViewBag.PagingModel = new PagingModel
+            {
+                TotalCount = formCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
+            ViewBag.Messages = msgs;
+            ViewBag.FromSurvey = fromSurvey;
+            return View(forms);
         }
 
         [HttpGet]
         public ActionResult Edit(string id, string qg)
         {
+            if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("formedit", "account", new { id, qg });
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);

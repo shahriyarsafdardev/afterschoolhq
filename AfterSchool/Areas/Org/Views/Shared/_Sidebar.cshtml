@@ -243,7 +243,7 @@
                 </ul>
             </li>
 
-            @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount))
+            @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount) && FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
             {
                 <li class="@formactive">
                     <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a>
