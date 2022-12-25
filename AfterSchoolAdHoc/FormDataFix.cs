@@ -4,6 +4,8 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Collections;
 using AfterSchoolLibrary.Enums;
+using System.Linq;
+using Stripe;
 
 namespace AfterSchoolAdHoc
 {
@@ -11,14 +13,13 @@ namespace AfterSchoolAdHoc
     {
         public static void Run(SystemMessages msgs, DatabaseConnection dc)
         {
-            msgs.AddRange(Registrant.Alter(dc));
-            msgs.AddRange(FormQuestionAnswer.Alter(dc));
-
-            Registrant.Update(new Hashtable() { { "FormDataFixProcessed", 0 } }, new Hashtable() { { "FormDataFixProcessed", DBNull.Value } }, Registrant.ObjectMap);
+            Registrant.Alter(dc);
+            FormQuestionAnswer.Alter(dc);
+            Registrant.Update(new Hashtable() { { "FormDataFixProcessed", 0 } }, new Hashtable() { { "FormDataFixProcessed", DBNull.Value } }, Registrant.ObjectMap, dc);
 
             var loop = true;
             var count = 0;
-            var pageSize = 1;
+            var accountId = 0;
 
             while (loop)
             {
@@ -26,8 +27,6 @@ namespace AfterSchoolAdHoc
                 (
                     action: (amsgs, adc) =>
                     {
-                        amsgs.Add(count.ToString(), MessageType.Notice);
-
                         var registrants = Registrant.Load
                         (
                             criterias: new System.Collections.Hashtable()
@@ -35,10 +34,10 @@ namespace AfterSchoolAdHoc
                                 { "IsMaster", 0 },
                                 { "PersonTypeId", $"{(int)RegistrantPersonType.Student}" },
                                 { "FormDataFixProcessed", 0 },
-                                // { "AccountId", 7 },
                             },
-                            start: pageSize * count,
-                            length: pageSize,
+                            orderBys: new List<string>() { "AccountId" },
+                            start: 0,
+                            length: 1,
                             msgs: amsgs,
                             dc: adc
                         );
@@ -49,6 +48,15 @@ namespace AfterSchoolAdHoc
                         foreach (var registrant in registrants)
                         {
                             i++;
+
+                            // clear question cache for new accounts, save ram
+                            if (accountId != registrant.AccountId!.Value)
+                            {
+                                correctQuestionsCollection = new Dictionary<int, List<FormQuestion>>();
+                                accountId = registrant.AccountId.Value;
+                            }
+
+                            accountId = registrant.AccountId.Value;
                             var answers = registrant.GetAnswers(amsgs, adc);
                             var registrationIds = answers.Where(x => x.RegistrationId.HasValue).Select(x => x.RegistrationId!.Value).Distinct().ToList();
 

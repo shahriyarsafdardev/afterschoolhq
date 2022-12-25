@@ -190,7 +190,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Registrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null,
+        public static List<Registrant> Load(Hashtable criterias = null, List<string> orderBys = null, int? start = null, int? length = null, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -198,7 +198,8 @@ namespace AfterSchoolLibrary.Models
             dq.UseParameterizedQuery = false;
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+           
+            return BaseLoad(criterias, orderBys, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
