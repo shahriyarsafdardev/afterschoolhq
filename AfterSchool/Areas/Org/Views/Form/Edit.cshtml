@@ -27,7 +27,10 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-right">
-                <a href="@Url.Action("report", "form", new { form = Model.ID })" class="btn btn-default" target="_blank">View Submissions</a>
+                @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                {
+                    <a href="@Url.Action("report", "form", new { form = Model.ID })" class="btn btn-default" target="_blank">View Submissions</a>
+                }
                 <a href="@Url.Action("index", "form")" class="btn btn-default">&laquo; All Forms</a>
             </div>
             <i class="s7-note2"></i> Form - @Model.Name
