@@ -411,18 +411,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 messages = msgs
             }, JsonRequestBehavior.AllowGet);
 
-        }
-
-        public class ReportResults
-        {
-            public Form Form { get; set; }
-            public int? FormId { get; set; }
-            public Activity Activity { get; set; }
-            public string ActivityUid { get; set; }
-            public List<FormQuestion> Questions { get; set; }
-            public SystemMessages Messages { get; set; }
-        }
-
+        }        
 
         private void SaveNewQuestions(int? formId, int? currentUserId, int? formQuestionGroupId, SystemMessages msgs, DatabaseConnection dc)
         {
