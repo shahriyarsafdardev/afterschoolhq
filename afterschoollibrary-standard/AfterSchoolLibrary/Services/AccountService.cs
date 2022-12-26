@@ -1592,7 +1592,7 @@ namespace AfterSchoolLibrary.Services
         public static Customer GetStripeCustomer(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs)
         {
             if (account.StripeCustomerId.IsNotEmpty())
-                return StripeHelper.GetStripeHelper(stripeAccountType).GetCustomer(account.StripeCustomerId, msgs);
+                return StripeHelper.GetStripeHelper(stripeAccountType).GetCustomer(account.StripeCustomerId);
 
             return null;
         }
@@ -1632,7 +1632,6 @@ namespace AfterSchoolLibrary.Services
                 account.Email ?? accountOwner?.Email,
                 account.Phone ?? accountOwner?.Phone,
                 account.AccountTypeId.ToString().SplitByUpperCase(),
-                null,
                 metadata,
                 msgs);
             account.SetStripeCustomer(customer, msgs, dc);
@@ -4253,8 +4252,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        internal static Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs,
-            DatabaseConnection dc = null)
+        private static Charge CreateStripeChargeDuringCheckout(CheckoutObject checkoutObject, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // if stripe token then don't send customer id
             string customerId = null;
@@ -4371,7 +4369,7 @@ namespace AfterSchoolLibrary.Services
 
             if (msgs.HasNoErrors())
             {
-                StripeHelper.GetStripeHelper(stripeAccountType).UpdateCustomerDefaultCard(customer.Id, null, cardId);
+                msgs.AddRange(StripeHelper.GetStripeHelper(stripeAccountType).UpdateCustomerDefaultCard(customer.Id, null, cardId));
 
                 //set this card id to account, which will work as a default card                
                 fromAccount.StripeDefaultCardId = cardId;
@@ -4740,7 +4738,7 @@ namespace AfterSchoolLibrary.Services
         {
             Database.ExecuteTransaction
             (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                action: (amsgs, adc) =>
                 {
                     ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
 
@@ -4748,14 +4746,13 @@ namespace AfterSchoolLibrary.Services
                     if (amsgs.HasNoErrors())
                         CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, amsgs, adc);
                 },
-                onSuccess: (SystemMessages smsgs) =>
+                onSuccess: smsgs =>
                 {
                     msgs.AddRange(smsgs);
-                    EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs,
-                        isAttendanceCharge, dc);
+                    EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, isAttendanceCharge, dc);
                 },
-                onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
-                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                onFailure: amsgs => msgs.AddRange(amsgs),
+                onException: emsgs => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 

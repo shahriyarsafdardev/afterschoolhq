@@ -1,11 +1,10 @@
-﻿using BasicLibrary;
-using AfterSchoolLibrary;
+﻿using System;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Services;
+using AfterSchoolLibraryTests.Factories;
+using Stripe;
 using Xunit;
 using Xunit.Abstractions;
-using AfterSchoolLibraryTests.Factories;
-using System;
-using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolLibraryTests.Tests
 {
@@ -15,12 +14,12 @@ namespace AfterSchoolLibraryTests.Tests
         {
         }
 
-        private Stripe.Product CreateStripeProduct(string id)
+        private Product CreateStripeProduct(string id)
         {
             return StripeHelper.GetStripeHelperConnectAccount().CreateProduct(id, "my product name", "this is the best product ever", true, null, null, msgs);
         }
 
-        private Stripe.Plan CreateStripePlan(Stripe.Product product, string id)
+        private Plan CreateStripePlan(Product product, string id)
         {
             return StripeHelper.GetStripeHelperConnectAccount().CreatePlan(product, id, 35, BillingPeriodType.Month, "my plan nickname", null, null, msgs);
         }
@@ -56,7 +55,8 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var newName = "my product name 2";
-            var product2 = StripeHelper.GetStripeHelperConnectAccount().UpdateProduct(product.Id, newName, "this is the 2nd best product ever", false, null, msgs);
+            var product2 = StripeHelper.GetStripeHelperConnectAccount()
+                .UpdateProduct(product.Id, newName, "this is the 2nd best product ever", false, null, msgs);
 
             Assert.Equal(newName, product2.Name);
 
@@ -69,7 +69,7 @@ namespace AfterSchoolLibraryTests.Tests
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
             Assert.NotNull(plan);
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id));
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteProduct(product.Id));
         }
 
@@ -78,8 +78,8 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, Guid.NewGuid().ToString());
-            Assert.NotNull(StripeHelper.GetStripeHelperConnectAccount().GetPlan(plan.Id, null, msgs));
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id, null));
+            Assert.NotNull(StripeHelper.GetStripeHelperConnectAccount().GetPlan(plan.Id, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id));
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteProduct(product.Id));
         }
 
@@ -94,7 +94,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             Assert.Equal(updatedNickname, plan2.Nickname);
 
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(plan.Id));
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteProduct(product.Id));
         }
 
@@ -105,9 +105,9 @@ namespace AfterSchoolLibraryTests.Tests
             var product = CreateStripeProduct(Guid.NewGuid().ToString());
             var plan = CreateStripePlan(product, planId);
 
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(planId, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeletePlan(planId));
 
-            Assert.Null(StripeHelper.GetStripeHelperConnectAccount().GetPlan(planId, null, msgs));
+            Assert.Null(StripeHelper.GetStripeHelperConnectAccount().GetPlan(planId, null));
 
             msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteProduct(product.Id));
         }
@@ -115,21 +115,21 @@ namespace AfterSchoolLibraryTests.Tests
         [Fact]
         public void CreateCustomerTest()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, msgs);
             Assert.NotNull(customer);
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id));
         }
 
         [Fact]
         public void UpdateCustomerTest()
         {
-            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, null, msgs);
+            var customer = StripeHelper.GetStripeHelperConnectAccount().CreateCustomer("This is my customer", "test@test.com", null, "", null, msgs);
             var newDescription = "this is my new customer";
             var customer2 = StripeHelper.GetStripeHelperConnectAccount().UpdateCustomer(customer.Id, newDescription, "test@test.com", null, msgs);
 
             Assert.Equal(newDescription, customer2.Description);
 
-            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id, null));
+            msgs.AddRange(StripeHelper.GetStripeHelperConnectAccount().DeleteCustomer(customer.Id));
         }
 
         [Fact(Skip = "Need to fix")]
@@ -174,9 +174,7 @@ namespace AfterSchoolLibraryTests.Tests
             var accountOwner = WebUserFactory.Create(msgs, dc);
             var account = AccountFactory.Create(accountOwner, msgs, dc);
 
-            msgs.AddRange(account.SaveWithStripe(StripeAccountType.ConnectAccount, dc));            
-            
+            msgs.AddRange(account.SaveWithStripe(StripeAccountType.ConnectAccount, dc));
         }
-
     }
 }
