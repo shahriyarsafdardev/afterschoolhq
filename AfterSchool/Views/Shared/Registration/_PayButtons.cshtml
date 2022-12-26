@@ -297,18 +297,28 @@
 
     function updateTotalsCC(regFee, regTotalToday) {
         let total = regFee + regTotalToday;
-        if (@Json.Encode(startsToday)) {
+        if (@Json.Encode(startsToday) && $("#prorated-amount").is(':empty')) {
             total += getSubscriptionTotalValueCC();
+        }
+        else {
+            total += getProrationAmount();
         }
         $('.total-due-today-cc').html(total.toFixed(2));
     }
 
     function updateTotalsACH(regFee, regTotalToday) {
         let total = regFee + regTotalToday;
-        if (@Json.Encode(startsToday)) {
+        if (@Json.Encode(startsToday) && $("#prorated-amount").is(':empty')) {
             total += getSubscriptionTotalValue();
         }
+        else {
+            total += getProrationAmount();
+        }
         $('.total-due-today-ach').html(total.toFixed(2));
+    }
+
+    function getProrationAmount() {
+        return parseFloat($("#prorated-amount").html().split('$').length > 1 ? $("#prorated-amount").html().split('$')[1] : 0);
     }
 
     function getSubscriptionTotalValue() {
