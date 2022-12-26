@@ -219,7 +219,7 @@ namespace AfterSchoolLibrary.Services
 
             if (!isSubscriptionRequired)
                 return;
-            var startOfPeriod = new DateTime(2022, 10, 1);
+            var startOfPeriod = plan.StartDate.Value;
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
             var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
