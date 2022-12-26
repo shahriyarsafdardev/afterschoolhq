@@ -1800,15 +1800,9 @@ namespace AfterSchoolLibrary.Services
                 return null;
 
             var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
-            var stripeProratePreview = stripeHelper.PreviewSubscriptionProration(customer.Id, plan.StripePlanId, msgs);
+            var billingCycleAnchor = plan.StartDate.Value.AddMonths(1);
+            var stripeProratePreview = stripeHelper.PreviewSubscriptionProration(customer.Id, plan.StripePlanId, msgs, billingCycleAnchor);
             return stripeProratePreview.AmountDue / 100m;
-        }
-
-        public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
-            SystemMessages msgs = null)
-        {
-            var result = account.GetStripeProratePreview(stripeAccountType, plan, msgs);
-            return result is null ? null : "Amount due: $" + result;
         }
 
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
