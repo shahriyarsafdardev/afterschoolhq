@@ -36,13 +36,14 @@
 
         quantity = selectedDates.Count;
     }
+    var subscriptionProration = (decimal?) ViewBag.SubscriptionProration;
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
 
-@helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, bool includePlus = true)
+@helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, decimal? subscriptionProration, bool includePlus = true)
 {
     if (plan.IsNotEmpty())
     {
@@ -55,6 +56,19 @@
         <span>
             @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
         </span>
+            <span>
+                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+            </span>
+
+            if (subscriptionProration.HasValue)
+            {
+                <p>Pay @(subscriptionProration.Value.ToCurrency()) today</p>
+            }
+        }
+        else if (plan.RegFeeAsDownPayment)
+        {
+            <span>which will count towards your first subscription payment</span>
+        }
     }
 }
 
@@ -80,7 +94,6 @@
         <h4 class="text-center reg-instructions">
             <strong>Checkout</strong>
         </h4>
-        <p>@(ViewBag.RealProrateMessage)</p>
         <hr/>
     </div>
 </div>
@@ -176,7 +189,7 @@ else
                                 var registrationFee = participationObject.GetCheckoutCostWithConvenienceFee();
                             }
                             Pay <strong id="registration-fee" value="@registrationFee">@registrationFee.ToCurrency()</strong> today
-                            @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                            @PrintSubscriptionCost(subscriptionPlan, participationObject, subscriptionProration)
                         </label>
                     </div>
 
@@ -222,7 +235,7 @@ else
                                     </span>
                                 }
 
-                                @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                                @PrintSubscriptionCost(subscriptionPlan, participationObject, subscriptionProration)
                             </label>
                             <span id="payment-plan-cost-@plan.ID" class="hide">@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount)</span>
                             <span id="payment-plan-asf-@plan.ID" class="hide">0</span>
@@ -241,17 +254,17 @@ else
                     @if (!participationObject.IsRegistrationFree && (!subscriptionPlan.SplitCostEvenly || registrant.GetAmountPaid() == 0))
                     {
                         <p>
-                            Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject)
+                            Pay <strong>@participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()</strong> today @PrintSubscriptionCost(subscriptionPlan, participationObject, subscriptionProration)
                         </p>
                     }
                     else
                     {
-                        <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
+                        <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, subscriptionProration, false)</p>
                     }
 
                     @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
                     {
-                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date) </strong>.</p>
+                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToShortDateString() (Activity End Date) </strong>.</p>
                     }
 
                     <hr/>
