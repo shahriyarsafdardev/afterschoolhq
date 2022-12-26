@@ -1039,6 +1039,66 @@ namespace AfterSchoolLibrary.Billing
             return new SubscriptionService(StripeClient);
         }
 
+        public Subscription CreateRegistrantSubscriptionTest(DateTime endDate, SystemMessages msgs)
+        {
+            msgs ??= new SystemMessages();
+
+            var (customer, defaultSource, planId) = GetParametersForThing("Other", 2);
+
+            var options = new SubscriptionCreateOptions
+            {
+                Customer = customer,
+                CollectionMethod = CollectionMethodChargeAutomatically,
+                DefaultSource = defaultSource,
+                Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
+                ProrationBehavior = ProrationBehaviorNone,
+                CancelAt = endDate,
+                TransferData = new SubscriptionTransferDataOptions
+                {
+                    Destination = "acct_1Lm5tWFoypO0jMGn",
+                    AmountPercent = 100 - 0.0510m * 100,
+                },
+            };
+
+            try
+            {
+                var subscription = GetSubscriptionService().Create(options);
+                return subscription;
+            }
+            catch (StripeException ex)
+            {
+                msgs.Add(ex.Message, MessageType.UserError, ex);
+                msgs.Add("Subscription was not created", MessageType.UserError);
+                return null;
+            }
+        }
+
+        private (string customer, string defaultSource, string plan) GetParametersForThing(string activity, int attempt)
+        {
+            var plan = activity switch
+            {
+                "Other" => "plan_MVk1eIqxIAkIVY",
+                "Robotics" => "plan_MVjeJdV0IbAzel",
+                _ => "",
+            };
+            var (customer, defaultSource) = attempt switch
+            {
+                0 => ("cus_MbAA4Y4di6BTab", "src_1LrxrVCEgXQRZLhkBvtKsJs5"),
+                1 => ("cus_MbAX2Re3wsgdMq", "src_1LryFYCEgXQRZLhk81W1AoJf"),
+                2 => ("cus_MbAlaSh5lQU3cm", "src_1LryQkCEgXQRZLhksW5nccYb"),
+                _ => ("", ""),
+            };
+            // return (activity, i) switch
+            // {
+            //     ("Other", 0) => ("cus_MbAA4Y4di6BTab", "src_1LrxrVCEgXQRZLhkBvtKsJs5", "plan_MVk1eIqxIAkIVY", "acct_1Lm5tWFoypO0jMGn"),
+            //     ("Robotics", 1) => ("cus_MbAX2Re3wsgdMq", "src_1LryFYCEgXQRZLhk81W1AoJf", "plan_MVjeJdV0IbAzel", "acct_1Lm5tWFoypO0jMGn"),
+            //     ("Other", 1) => ("cus_MbAX2Re3wsgdMq", "src_1LryFYCEgXQRZLhk81W1AoJf", "plan_MVk1eIqxIAkIVY", "acct_1Lm5tWFoypO0jMGn"),
+            //     ("Other", 2) => ("cus_MbAlaSh5lQU3cm", "src_1LryQkCEgXQRZLhksW5nccYb", "plan_MVk1eIqxIAkIVY", "acct_1Lm5tWFoypO0jMGn"),
+            //     _ => ("", "", "", ""),
+            // };
+            return (customer, defaultSource, plan);
+        }
+
         public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
             decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
             Dictionary<string, string> metaData, DateTime? backdateStartDate, SystemMessages msgs)
@@ -1053,8 +1113,19 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
+<<<<<<< HEAD
                 ProrationBehavior = isProrated ? "create_prorations" : "none",
                 BillingCycleAnchor = billingCycleAnchor
+=======
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
+                BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
+            };
+            var uIOptions = new UpcomingInvoiceOptions
+            {
+                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
+                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
+                SubscriptionStartDate = DateTime.UtcNow.Date,
+>>>>>>> 1a5cfb7d8 (WIP)
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
@@ -1665,26 +1736,7 @@ namespace AfterSchoolLibrary.Billing
             return new InvoiceService(StripeClient);
         }
 
-        public Invoice GetInvoice(string invoiceId, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            Invoice invoice = null;
-
-            try
-            {
-                invoice = GetInvoiceService().Get(invoiceId);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Invoice doesn't exist", MessageType.UserError);
-            }
-
-            return invoice;
-        }
-
-        public Invoice GetUpcomingInvoice(string customerId, SystemMessages msgs)
+        public Invoice PreviewSubscriptionProration(string customerId, string planId, SystemMessages msgs)
         {
             msgs ??= new SystemMessages();
 
@@ -1692,27 +1744,11 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new UpcomingInvoiceOptions
             {
-                AutomaticTax = null,
-                Coupon = null,
                 Customer = customerId,
-                CustomerDetails = null,
-                Discounts = null,
-                Expand = null,
-                ExtraParams = null,
-                InvoiceItems = null,
-                Schedule = null,
-                Subscription = null,
-                SubscriptionBillingCycleAnchor = null,
-                SubscriptionCancelAt = null,
-                SubscriptionCancelAtPeriodEnd = null,
-                SubscriptionCancelNow = null,
-                SubscriptionDefaultTaxRates = null,
-                SubscriptionItems = new List<InvoiceSubscriptionItemOptions>(),
-                SubscriptionProrationBehavior = null,
-                SubscriptionProrationDate = null,
-                SubscriptionStartDate = null,
-                SubscriptionTrialEnd = null,
-                SubscriptionTrialFromPlan = null,
+                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
+                SubscriptionItems = new List<InvoiceSubscriptionItemOptions> {new InvoiceSubscriptionItemOptions {Plan = planId, Quantity = 1}},
+                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
+                SubscriptionStartDate = DateTime.UtcNow.Date,
             };
 
             try
@@ -1726,54 +1762,6 @@ namespace AfterSchoolLibrary.Billing
             }
 
             return invoice;
-        }
-
-        public Subscription PreviewRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
-            decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
-            Dictionary<string, string> metaData, DateTime? backdateStartDate, SystemMessages msgs)
-        {
-            msgs ??= new SystemMessages();
-
-            var options = new SubscriptionCreateOptions
-            {
-                Customer = customerId,
-                CollectionMethod = CollectionMethodChargeAutomatically,
-                DefaultSource = sourceId,
-                Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
-                Metadata = metaData,
-                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone,
-                BillingCycleAnchor = billingCycleAnchor,
-            };
-
-            if (startDate.HasValue && startDate.Value.Date.IsAfter(DateTime.UtcNow.AddDays(1).Date))
-                options.TrialEnd = startDate.Value; // if start date is at least one day in the future, start on start date
-
-            // please make sure that billing ends when the program ends.
-            if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.AddDays(1).Date))
-                options.CancelAt = endDate.Value;
-
-            if (stripeAccountId.IsNotEmpty())
-                options.TransferData = new SubscriptionTransferDataOptions
-                {
-                    Destination = stripeAccountId,
-                    AmountPercent = 100 - platformFeePercent * 100,
-                };
-
-            if (backdateStartDate.HasValue)
-                options.BackdateStartDate = backdateStartDate;
-
-            try
-            {
-                var subscription = GetSubscriptionService().Create(options);
-                return subscription;
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add("Subscription was not created", MessageType.UserError);
-                return null;
-            }
         }
 
         #endregion
