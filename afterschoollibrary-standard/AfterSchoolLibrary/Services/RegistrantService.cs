@@ -222,19 +222,20 @@ namespace AfterSchoolLibrary.Services
             var startOfPeriod = plan.StartDate.Value;
             var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
+            var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
+                msgs);
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: billingCycleAnchor.HasValue,
+                isProrated: proratingResult.ShouldWeBeProratingToday,
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
-                stripeAccountId: stripeAccountId,
                 startDate: startDateTime,
                 endDate: endDateTime,
-                billingCycleAnchor: billingCycleAnchor,
+                billingCycleAnchor: proratingResult.BillingCycleAnchor,
+                stripeAccountId: stripeAccountId,
                 stripeCouponId: stripeCouponId,
                 metaData: new Dictionary<string, string>
                 {
@@ -247,9 +248,7 @@ namespace AfterSchoolLibrary.Services
                     {"SourceId", sourceId},
                     {"ApprovedBy", loggedInUser.Uid.ToString()},
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
-                },
-                backdateStartDate: proratingResult.BackdateStartDate,
-                msgs: msgs);
+                }, backdateStartDate: proratingResult.BackdateStartDate, msgs: msgs);
 
             if (msgs.HasErrors())
                 return;

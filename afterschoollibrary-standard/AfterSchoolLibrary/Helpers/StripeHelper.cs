@@ -272,29 +272,7 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Payout was not created", MessageType.UserError);
-            }
-
-            return stripePayout;
-        }
-
-        public Stripe.Payout GetPayout(string payoutId, string stripeAccountId, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var requestOptions = new RequestOptions();
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
-            Payout stripePayout = null;
-
-            try
-            {
-                stripePayout = GetPayoutService().Get(payoutId, null, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add($"No Stripe Payout found with ID: {payoutId}", MessageType.Notice, ex);
+                msgs.Add("Payout was not created", MessageType.UserError);
             }
 
             return stripePayout;
@@ -486,54 +464,6 @@ namespace AfterSchoolLibrary.Billing
             return price;
         }
 
-        public StripeList<Price> GetProductPrices(string productId, SystemMessages msgs = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            var priceListOptions = new PriceListOptions()
-            {
-                Product = productId
-            };
-
-            var requestOptions = new RequestOptions();
-
-            StripeList<Price> prices = null;
-
-            try
-            {
-                prices = GetPriceService().List(priceListOptions, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add($"No stripe product price found with product ID: {productId}", MessageType.Notice, ex);
-            }
-
-            return prices;
-        }   
-
-        public SystemMessages DeletePrice(string priceId, SystemMessages msgs)
-        {
-            if (msgs.IsEmpty())
-                msgs = new SystemMessages();
-
-            var options = new PriceUpdateOptions
-            {
-                   Active = false,
-            };
-
-            try
-            {
-                GetPriceService().Update(priceId, options);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Unable to delete price", MessageType.ApiError);
-            }
-
-            return msgs;
-        }
-
         #endregion
 
         #region StripePlans
@@ -655,10 +585,9 @@ namespace AfterSchoolLibrary.Billing
             return msgs;
         }
 
-        public Stripe.Plan GetPlan(string planId, string stripeAccountId, SystemMessages msgs)
+        public Plan GetPlan(string planId, string stripeAccountId)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var requestOptions = new Stripe.RequestOptions();
+            var requestOptions = new RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
@@ -737,12 +666,12 @@ namespace AfterSchoolLibrary.Billing
         public SystemMessages UpdateCustomerDefaultCard(string customerId, string stripeAccountId, string cardId)
         {
             var msgs = new SystemMessages();
-            var options = new Stripe.CustomerUpdateOptions
+            var options = new CustomerUpdateOptions
             {
-                DefaultSource = cardId
+                DefaultSource = cardId,
             };
 
-            var requestOptions = new Stripe.RequestOptions();
+            var requestOptions = new RequestOptions();
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
 
@@ -825,11 +754,11 @@ namespace AfterSchoolLibrary.Billing
             return customer;
         }
 
-        public Stripe.Customer AddDefaultSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
+        public Source AttachSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
         {
-            var options = new Stripe.CustomerUpdateOptions
+            var options = new SourceAttachOptions
             {
-                Source = sourceToken
+                Source = sourceToken,
             };
 
             var requestOptions = new RequestOptions();
@@ -837,34 +766,7 @@ namespace AfterSchoolLibrary.Billing
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
 
-            Stripe.Customer customer = null;
-
-            try
-            {
-                customer = GetCustomerService().Update(customerId, options, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
-            }
-
-            return customer;
-        }
-
-        public Stripe.Source AttachSourceToCustomer(string customerId, string sourceToken, string stripeAccountId, SystemMessages msgs)
-        {
-            var options = new Stripe.SourceAttachOptions
-            {
-                Source = sourceToken
-            };
-
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
-            Stripe.Source source = null;
+            Source source = null;
 
             try
             {
@@ -907,58 +809,27 @@ namespace AfterSchoolLibrary.Billing
             return card;
         }
 
-        public Stripe.Card AddNewCardToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
+        public void AddNewCardToCustomer(string customerId, Source source, string stripeAccountId, SystemMessages msgs)
         {
-            var options = new Stripe.CardCreateOptions()
+            var options = new CardCreateOptions
             {
-                 Source = source.Id
+                Source = source.Id,
             };
 
-            var requestOptions = new Stripe.RequestOptions();
+            var requestOptions = new RequestOptions();
 
             if (stripeAccountId.IsNotEmpty())
                 requestOptions.StripeAccount = stripeAccountId;
 
-            Stripe.Card card = null;
-
             try
             {
-                card = GetCardService().Create(customerId, options, requestOptions);
+                GetCardService().Create(customerId, options, requestOptions);
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
                 msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
             }
-
-            return card;
-        }
-
-        public Stripe.BankAccount AddNewBankAccountToCustomer(string customerId, Stripe.Source source, string stripeAccountId, SystemMessages msgs)
-        {
-            var options = new Stripe.BankAccountCreateOptions()
-            {
-                Source = source.Id
-            };
-
-            var requestOptions = new Stripe.RequestOptions();
-
-            if (stripeAccountId.IsNotEmpty())
-                requestOptions.StripeAccount = stripeAccountId;
-
-            Stripe.BankAccount bankAccount = null;
-
-            try
-            {
-                bankAccount = GetBankAccountService().Create(customerId, options, requestOptions);
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Customer ({customerId}) was not updated", MessageType.UserError);
-            }
-
-            return bankAccount;
         }
 
         #endregion
@@ -1041,31 +912,21 @@ namespace AfterSchoolLibrary.Billing
 
         public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
             decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
-            Dictionary<string, string> metaData, SystemMessages msgs)
+            Dictionary<string, string> metaData, DateTime? backdateStartDate, SystemMessages msgs)
         {
             msgs ??= new SystemMessages();
 
             var options = new SubscriptionCreateOptions
             {
                 Customer = customerId,
-                CollectionMethod = "charge_automatically",
+                CollectionMethod = CollectionMethodChargeAutomatically,
                 DefaultSource = sourceId,
                 Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
+                Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
                 Metadata = metaData,
-<<<<<<< HEAD
-                ProrationBehavior = isProrated ? "create_prorations" : "none",
-                BillingCycleAnchor = billingCycleAnchor
-=======
-                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
-                BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
-            };
-            var uIOptions = new UpcomingInvoiceOptions
-            {
-                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
->>>>>>> 1a5cfb7d8 (WIP)
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone,
+                BillingCycleAnchor = billingCycleAnchor,
+                BackdateStartDate = backdateStartDate,
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
@@ -2041,7 +1902,7 @@ namespace AfterSchoolLibrary.Billing
 
             return session;
         }
-        
+
         #endregion
     }
 
