@@ -1779,6 +1779,8 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
+            ViewBag.RealProrateMessage = SessionVariables.CurrentAccount.GetStripeProratePreview(StripeAccountType.ConnectAccount,
+                participationObject.SubscriptionPlans.FirstOrDefault(), msgs);
 
             return registration;
         }
@@ -1836,7 +1838,7 @@ namespace AfterSchool.Controllers
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             var coupon = couponCode.IsNotEmpty()
-                ? SessionVariables.CurrentAccount.ValidateCoupon(participationObject, couponCode, msgs)
+                ? currentAccount.ValidateCoupon(participationObject, couponCode, msgs)
                 : new Coupon();
 
             if (ccSourceId.IsEmpty() && stripetoken.IsEmpty() && plaidtoken.IsEmpty() && bankSourceId.IsEmpty() &&
@@ -1853,7 +1855,7 @@ namespace AfterSchool.Controllers
                 return View("Payment");
 
             var billingAccount = participationObject.PaymentAccount;
-            var payingAccount = SessionVariables.CurrentAccount;
+            var payingAccount = currentAccount;
             var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : payingAccount;
 
             var convenienceFeePayer = participationObject.PostPayPlans.Any()
@@ -1923,7 +1925,7 @@ namespace AfterSchool.Controllers
                 CreditCardFeePayer = creditCardFeePayer,
                 SelectedDates = selectedDates,
             };
-            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, msgs);
+            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, msgs);
 
             if (msgs.HasErrors())
                 return View("Payment");

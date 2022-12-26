@@ -501,7 +501,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FigureOutProratingResult FigureOutProrating(this SubscriptionPlan plan, DateTime startOfPeriod, DateTime todayUtc,
-            IStripeProratingService stripeProratingService, ParticipationObject participationObject, DateTime startDateTime)
+            IStripeProratingService stripeProratingService, ParticipationObject participationObject, DateTime startDateTime, Account currentAccount,
+            SystemMessages msgs)
         {
             var result = new FigureOutProratingResult
             {
@@ -522,7 +523,8 @@ namespace AfterSchoolLibrary.Services
             result.ShouldWeBeProratingToday = true;
             result.BackdateStartDate = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
             result.BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc);
-            result.ProratingValue = stripeProratingService.GetProratingValue();
+
+            result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
             return result;
         }
 

@@ -1,6 +1,7 @@
 using System;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using BasicLibrary;
 using Moq;
 using NUnit.Framework;
 
@@ -8,8 +9,11 @@ namespace AfterSchoolLibrary.Tests
 {
     public class SubscriptionPlanServiceTests
     {
+        private readonly Account account = new Account();
         private readonly DateTime lastMonth = new DateTime(2022, 9, 10);
+        private readonly SystemMessages msgs = new SystemMessages();
         private readonly ParticipationObject participationObject;
+        private readonly SubscriptionPlan plan = new SubscriptionPlan();
         private readonly DateTime startDateTime = new DateTime(2022, 10, 4);
         private readonly DateTime startOfPeriod = new DateTime(2022, 10, 1);
         private readonly Mock<IStripeProratingService> stripeProratingService = new Mock<IStripeProratingService>();
@@ -22,15 +26,15 @@ namespace AfterSchoolLibrary.Tests
                 Schedule = new ActivitySchedule {ID = 3},
                 StartDate = startDateTime,
             };
+            stripeProratingService.Setup(x => x.GetProratingValue(account, plan, msgs)).Returns(2);
         }
 
         [Test]
         public void PaymentPlanProratingTest()
         {
-            var plan = new SubscriptionPlan {PlanTypeId = SubscriptionPlanType.PaymentPlan};
-            stripeProratingService.Setup(x => x.GetProratingValue()).Returns(2);
+            plan.PlanTypeId = SubscriptionPlanType.PaymentPlan;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -51,16 +55,11 @@ namespace AfterSchoolLibrary.Tests
     - If after period start and after activity start, Checkout page should show pro-rated value --- ex. You'll pay {pro-rated amount} today and then {full amount} on {next period start date}
     - On activity Payment details screen - "If parent registers in the middle of a period, it will be pro-rated"
              */
-            var plan = new SubscriptionPlan
-            {
-                BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart,
-                PlanTypeId = SubscriptionPlanType.Subscription,
-            };
+            plan.BillingPeriodTypeId = BillingPeriodType.Month;
+            plan.PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart;
+            plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            stripeProratingService.Setup(x => x.GetProratingValue()).Returns(2);
-
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.True);
             Assert.That(result.ProratingValue, Is.EqualTo(2));
             Assert.That(result.BackdateStartDate, Is.EqualTo(startOfPeriod));
@@ -70,14 +69,11 @@ namespace AfterSchoolLibrary.Tests
         [Test]
         public void OnPeriodStartEarlyTest()
         {
-            var plan = new SubscriptionPlan
-            {
-                BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart,
-                PlanTypeId = SubscriptionPlanType.Subscription,
-            };
+            plan.BillingPeriodTypeId = BillingPeriodType.Month;
+            plan.PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart;
+            plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -87,14 +83,11 @@ namespace AfterSchoolLibrary.Tests
         [Test]
         public void OnCheckoutTest()
         {
-            var plan = new SubscriptionPlan
-            {
-                BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.OnCheckout,
-                PlanTypeId = SubscriptionPlanType.Subscription,
-            };
+            plan.BillingPeriodTypeId = BillingPeriodType.Month;
+            plan.PaymentStartTypeId = PlanPaymentStartType.OnCheckout;
+            plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -104,14 +97,11 @@ namespace AfterSchoolLibrary.Tests
         [Test]
         public void WhenActivityStartsEarlyTest()
         {
-            var plan = new SubscriptionPlan
-            {
-                BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts,
-                PlanTypeId = SubscriptionPlanType.Subscription,
-            };
+            plan.BillingPeriodTypeId = BillingPeriodType.Month;
+            plan.PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts;
+            plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -121,14 +111,11 @@ namespace AfterSchoolLibrary.Tests
         [Test]
         public void WhenActivityStartsMidPeriodTest()
         {
-            var plan = new SubscriptionPlan
-            {
-                BillingPeriodTypeId = BillingPeriodType.Month,
-                PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts,
-                PlanTypeId = SubscriptionPlanType.Subscription,
-            };
+            plan.BillingPeriodTypeId = BillingPeriodType.Month;
+            plan.PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts;
+            plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime);
+            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.True);
             Assert.That(result.ProratingValue, Is.EqualTo(2));
             Assert.That(result.BackdateStartDate, Is.EqualTo(startDateTime));
