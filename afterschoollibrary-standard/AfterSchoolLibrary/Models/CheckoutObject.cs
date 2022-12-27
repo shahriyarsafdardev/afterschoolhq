@@ -307,7 +307,7 @@ namespace AfterSchoolLibrary.Models
                 return 0;
 
             var costPerPeriodPerPerson = SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
-            return costPerPeriodPerPerson * NumberOfSeats;
+            return costPerPeriodPerPerson * NumberOfSeats; 
         }
 
         public decimal GetSubscriptionCostNoFees(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -333,6 +333,13 @@ namespace AfterSchoolLibrary.Models
 
             return GetSubscriptionCostTodayNoFees(msgs, dc) + GetSubscriptionCostTodayConvenienceFee(msgs, dc);
         }
+        public decimal GetSubscriptionCostWithConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (SubscriptionPlan.IsNotEmpty() && SubscriptionPlan.IsConvenienceFeeTakenOutOfCost)
+                return GetSubscriptionCostNoFees(msgs, dc);
+
+            return GetSubscriptionCostNoFees(msgs, dc) + GetSubscriptionCostConvenienceFee(msgs, dc);
+        }
 
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -351,6 +358,12 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return new FeeCalculationObject(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount, msgs, dc)
+                .GetConvenienceFee();
+        }
+        
+        public decimal GetSubscriptionCostConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return new FeeCalculationObject(GetSubscriptionCostNoFees(msgs, dc), BillingAccount, msgs, dc)
                 .GetConvenienceFee();
         }
 
