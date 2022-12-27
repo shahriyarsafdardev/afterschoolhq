@@ -34,7 +34,7 @@ namespace AfterSchoolLibrary.Tests
         {
             plan.PlanTypeId = SubscriptionPlanType.PaymentPlan;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating(today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -59,7 +59,7 @@ namespace AfterSchoolLibrary.Tests
             plan.PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart;
             plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating(today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.True);
             Assert.That(result.ProratingValue, Is.EqualTo(2));
             Assert.That(result.BackdateStartDate, Is.EqualTo(startOfPeriod));
@@ -73,7 +73,7 @@ namespace AfterSchoolLibrary.Tests
             plan.PaymentStartTypeId = PlanPaymentStartType.OnPeriodStart;
             plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating(lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -87,7 +87,7 @@ namespace AfterSchoolLibrary.Tests
             plan.PaymentStartTypeId = PlanPaymentStartType.OnCheckout;
             plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating( today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -101,7 +101,7 @@ namespace AfterSchoolLibrary.Tests
             plan.PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts;
             plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating(lastMonth, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.False);
             Assert.That(result.ProratingValue, Is.Null);
             Assert.That(result.BackdateStartDate, Is.Null);
@@ -115,7 +115,7 @@ namespace AfterSchoolLibrary.Tests
             plan.PaymentStartTypeId = PlanPaymentStartType.WhenActivityStarts;
             plan.PlanTypeId = SubscriptionPlanType.Subscription;
 
-            var result = plan.FigureOutProrating(startOfPeriod, today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
+            var result = plan.FigureOutProrating( today, stripeProratingService.Object, participationObject, startDateTime, account, msgs);
             Assert.That(result.ShouldWeBeProratingToday, Is.True);
             Assert.That(result.ProratingValue, Is.EqualTo(2));
             Assert.That(result.BackdateStartDate, Is.EqualTo(startDateTime));
