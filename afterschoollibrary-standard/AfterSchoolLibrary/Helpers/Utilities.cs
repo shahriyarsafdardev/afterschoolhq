@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Web;
 using AfterSchoolLibrary.Models;
 using Amazon;
+using Amazon.Runtime.Internal.Transform;
 using BasicLibrary;
 using Newtonsoft.Json;
 using Rollbar;
@@ -221,8 +222,10 @@ namespace AfterSchoolLibrary.Helpers
                     return false;
 
                 var stringInput = s.Trim();
+
                 if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                     return true; //For json object
+
                 if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                     return true; //For json array
 
@@ -234,8 +237,28 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static List<KeyValuePair> GetKeyValuePairs(string s)
+        public static Dictionary<string, string> GetDictionaryFromFormQuestionsOrAnswers(string s)
         {
+
+            var data = new Dictionary<string, string>();
+
+            if (s.IsEmpty())
+                return data;
+
+            var stringInput = s.Trim();
+
+            if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
+                stringInput = "[" + stringInput + "]"; //For json object
+
+            if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
+                data.Add(JsonConvert.DeserializeObject<Dictionary<string, string>>(stringInput)); //For json array
+
+            return data;
+
+        }
+
+        public static List<KeyValuePair> GetKeyValuePairs(string s)
+        { 
             var data = new List<KeyValuePair>();
 
             if (s.IsEmpty())

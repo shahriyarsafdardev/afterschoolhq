@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
+using System.Windows.Interop;
 using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
@@ -13,6 +16,7 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
+using Stripe.Terminal;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -3398,6 +3402,328 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View(activity);
+        }
+
+        #endregion
+
+        #region Import
+
+        [HttpGet]
+        public ActionResult RegistrantImport(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            ViewBag.Step = 1;
+            ViewBag.StepLabel = "Upload";
+            ViewBag.Messages = new SystemMessages();
+            return View(activity);
+        }
+
+        [HttpPost]
+        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            string extension = "";
+            var questions = activity.GetActiveForm(msgs).GetAllQuestions(msgs);
+            bool createParentAccounts = true;
+
+            if (csv.IsBlank())
+            {
+                if (importfile.IsEmpty())
+                    msgs.Add("Please upload a file", MessageType.UserError);
+                else if (Path.GetExtension(importfile.FileName).NotIn(new string[] { ".xls", ".csv", ".xlsx" }))
+                    msgs.Add("Please upload a valid file", MessageType.UserError);
+                else
+                    extension = Path.GetExtension(importfile.FileName);
+
+                if (msgs.HasNoErrors())
+                {
+                    ViewBag.Step = 2;
+                    ViewBag.StepLabel = "Review";
+
+                    //import
+                    var sr = new StreamReader(importfile.InputStream);
+
+                    List<string> headers = new List<string>();
+                    List<string> headersWithData = new List<string>();
+                    List<List<string>> rows = new List<List<string>>();
+                    List<List<ImportField>> validatedRows = new List<List<ImportField>>();
+
+                    if (extension == ".csv")
+                    {
+                        var reader = new CsvHelper.CsvReader(sr);
+                        reader.Configuration.Delimiter = ",";
+                        reader.Configuration.HasHeaderRecord = true;
+                        reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+
+                        while (reader.Read())
+                        {
+                            if (headers.Count == 0)
+                                headers = reader.Context.HeaderRecord.ToList();
+
+                            var row = new List<string>();
+                            for (var i = 0; i < headers.Count; i++)
+                            {
+                                var header = headers[i];
+                                var field = reader.GetField<string>(i);
+                                if (header.ToLower().In(questions.Select(x => x.QuestionDataTypeId.ToString().ToLower())) && field.IsNotBlank())
+                                {
+                                    row.Add(field);
+                                    if (!headersWithData.Contains(header))
+                                        headersWithData.Add(header);
+                                }
+                            }
+
+                            rows.Add(row);
+                        }
+                    }
+
+
+                    var parentEmailIndex = headersWithData.IndexOf($"{QuestionGroupDataType.Parent1Information} - {QuestionDataType.Parent1Email}");
+
+                    if (createParentAccounts && parentEmailIndex == -1)
+                    {
+                        msgs.Add($"Parent email is required to create a parent account. Please add '{QuestionGroupDataType.Parent1Information} - {QuestionDataType.Parent1Email}' as a column to your import file", MessageType.UserError);
+                    }
+
+                    foreach (var row in rows)
+                    {
+                        var validatedRow = new List<ImportField>();                       
+
+                        for (var i = 0; i < headersWithData.Count; i++)
+                        {
+                            var validatedField = new ImportField();
+                            validatedField.Value = row[i];
+
+                            var field = row[i].ToLower();
+                            var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headersWithData[i].ToLower()).First();
+
+                            validatedField.Value = field;                            
+
+                            if (field.Length > 1000)
+                            {
+                                validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
+                            }
+
+                            switch (question.QuestionTypeId)
+                            {
+                                case QuestionType.Date:
+
+                                    if (field.IsNotBlank() && !field.IsDateTime())
+                                        validatedField.Messages.Add("Must be a valid date", MessageType.UserError);
+
+                                    break;
+
+                                case QuestionType.Checkbox:
+
+                                    if (field.IsNotBlank() && !field.IsBoolean())
+                                        validatedField.Messages.Add("Must be one of the following values: 0, 1, T, F, True, False", MessageType.UserError);
+
+                                    break;
+
+                                case QuestionType.TextBox:
+                                case QuestionType.TextArea:
+
+                                    break;
+
+                                case QuestionType.Email:
+
+                                    if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                        validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
+
+                                    if (createParentAccounts && i == parentEmailIndex)
+                                    {
+                                        var doesParentExist = WebUser.ExistsByEmail(field, msgs);
+                                        validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
+                                    }
+
+                                    break;
+
+                                case QuestionType.DropDownList:
+                                case QuestionType.RadioList:
+
+                                    if (field.IsNotBlank())
+                                    {
+                                        var options = question.Options.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
+
+                                        if (field.NotIn(options))
+                                        {
+                                            validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
+                                        }
+                                    }
+
+                                    break;
+
+                                case QuestionType.CheckboxList:
+
+                                    if (field.IsNotBlank())
+                                    {
+                                        var options = question.Options.Split(',').Select(x => x.Trim().ToLower());
+                                        var fieldvalues = field.Split(',').Select(x => x.Trim().ToLower()).Where(x => x.Length > 0);
+
+                                        foreach (var fieldvalue in fieldvalues)
+                                        {
+                                            if (fieldvalue.NotIn(options))
+                                            {
+                                                validatedField.Messages.Add("Must be one of the following values: " + question.Options.Replace(",", ", "), MessageType.UserError);
+                                            }
+                                        }
+                                    }
+
+                                    break;
+                            }
+
+                            validatedRow.Add(validatedField);
+                        }
+
+                        validatedRows.Add(validatedRow);
+                    }
+
+                    var csvString = new System.Text.StringBuilder();
+                    foreach (var header in headersWithData)
+                    {
+                        csvString.Append(header);
+                        csvString.Append(",");
+                    }
+                    csvString.Append("\n");
+
+                    foreach (var row in rows)
+                    {
+                        foreach (var field in row)
+                        {
+                            csvString.Append(field);
+                            csvString.Append(",");
+                        }
+                        csvString.Append("\n");
+                    }
+
+                    ViewBag.Headers = headersWithData;
+                    ViewBag.Rows = validatedRows;
+                    ViewBag.Csv = csvString.ToString();
+                }
+
+            }
+            else
+            {
+                ViewBag.Step = 3;
+                ViewBag.StepLabel = "Import Complete";
+
+                //import
+                var sr = new StringReader(csv);
+
+                List<string> headers = new List<string>();
+                List<string> headersWithData = new List<string>();
+                List<List<string>> rows = new List<List<string>>();
+                List<List<ImportField>> validatedRows = new List<List<ImportField>>();
+
+                //do import
+                CsvHelper.CsvReader reader = new CsvHelper.CsvReader(sr);
+                reader.Configuration.Delimiter = ",";
+                reader.Configuration.HasHeaderRecord = true;
+                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+
+                Database.ExecuteTransaction(
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        while (reader.Read())
+                        {
+                            if (headers.Count == 0)
+                                headers = reader.Context.HeaderRecord.ToList();
+                            
+
+                            var assignmentType = RegistrationAssignmentType.NotSet;
+
+                            if (activity.GetSeatsRemaining(amsgs, adc) > 0)
+                                assignmentType = RegistrationAssignmentType.Reserved;
+                            else
+                                assignmentType = RegistrationAssignmentType.WaitingList;
+
+                            var hasSeatsAvailable = activity.GetRegistrantCount(amsgs, adc) < activity.SeatsAvailable;
+                            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+
+                            // TODO: need to verify if this really should be the master account. What is master
+                            var registrant = currentAccount.AddRegistrant(0, RegistrantType.Individual, false, amsgs, dc: adc);
+                            var registration = registrant.AddRegistration(
+                                SessionVariables.CurrentAccount.ID.Value,
+                                activity.ActivityGroupId,
+                                activity.AccountActivityGroupId,
+                                period?.ID,
+                                RegistrationCompletionStatus.RequiresParentSignature,
+                                currentUser.ID.Value,
+                                amsgs,
+                                dc: adc);
+
+                            var ra = registrant.AddOrUpdateParticipationObject(
+                                registration.ID.Value,
+                                activity.ID.Value,
+                                ParticipationObjectType.Activity,
+                                assignmentType,
+                                period?.ID,
+                                null,
+                                null,
+                                currentUser.ID.Value,
+                                amsgs,
+                                adc);
+
+                            for (var i = 0; i < headers.Count; i++)
+                            {
+                                var header = headers[i];
+                                if (header.IsNotBlank())
+                                {
+                                    var field = reader.GetField<string>(i);
+                                    var question = questions.Where(x => x.QuestionDataTypeId.ToString().ToLower() == headers[i].ToLower()).First();
+
+                                    if (field.IsNotBlank())
+                                    {
+                                        var answer = registration.AddAnswer(field, question, registrant, 0, amsgs, adc);
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+            }
+
+            ViewBag.Messages = msgs;
+            return View(activity);
+        }
+
+        [HttpGet]
+        public ActionResult GetImportSample(string id)
+        {
+            var msgs = new SystemMessages();
+            var activity = Activity.LoadByUid(id.ToGuid());
+            var af = activity.GetActiveActivityForm();
+
+            var questions = af.GetForm().GetAllQuestions().OrderBy(x => (x.DisplayOrder.Value + 1) * (x.FormQuestionGroupDisplayOrder.Value + 1));
+
+            var swriter = new StringWriter();
+            var csvWriter = new CsvHelper.CsvWriter(swriter);
+            csvWriter.Configuration.HasHeaderRecord = true;
+
+            foreach (var question in questions)
+            {
+                csvWriter.WriteField(question.QuestionDataTypeId.ToString());
+            }
+            csvWriter.NextRecord();
+
+            string csv = swriter.GetStringBuilder().ToString();
+
+            Response.Clear();
+            Response.Write(csv);
+            Response.AddHeader("Content-Disposition", "attachment; filename=importsample.csv");
+            Response.AddHeader("Content-Type", "text/csv");
+            Response.AddHeader("Content-Length", System.Text.Encoding.UTF8.GetByteCount(csv).ToString());
+            Response.End();
+
+            return View();
         }
 
         #endregion
