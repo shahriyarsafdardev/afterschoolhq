@@ -75,6 +75,20 @@ namespace AfterSchool.Models
             return dict;
         }
 
+        public static bool ContainsLike(this List<string> list, string stringToMatch)
+        {
+            return list.Any(x => x.Contains(stringToMatch));
+        }
+
+        public static Dictionary<QuestionDataType, QuestionDataType> Inverse(this Dictionary<QuestionDataType, QuestionDataType> map)
+        {
+            var inverse = new Dictionary<QuestionDataType, QuestionDataType>();
+
+            foreach(var key in map.Keys)
+                inverse.Add(map[key], key);
+
+            return inverse;
+        }
         public  static string GetUserHostAddress(this HttpRequestBase request)
         {
             if (request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())

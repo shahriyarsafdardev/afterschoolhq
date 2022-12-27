@@ -85,6 +85,33 @@ namespace AfterSchool.Controllers
             return user;
         }
 
+        public static WebUser CreateOrUpdateUserWithOptionalPhone(WebUser userToUpdate, string firstName, string lastName, string email,
+            string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (userToUpdate.IsEmpty())
+                return WebUserService.CreateNewWithOptionalPhone(
+                    firstName,
+                    lastName,
+                    email.Trim(),
+                    phone.IfEmpty("").Trim(),
+                    password,
+                    true,
+                    true,
+                    false,
+                    allowTextMessages,
+                    null,
+                    msgs,
+                    dc);
+
+            var user = userToUpdate;
+            user.Phone = phone.IfEmpty("").Trim();
+            user.AllowTextMessages = allowTextMessages;
+            user.LastModifiedBy = userToUpdate.ID;
+            user.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(user.Save(dc));
+            return user;
+        }
+
         public static Account GetOrCreateParentOrStudentRegistrantAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetRegistrantAccount(msgs, dc);
@@ -547,10 +574,7 @@ namespace AfterSchool.Controllers
                             {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
                             {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
                             {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent1Employer},
-                            {
-                                QuestionDataType.RegistrantParentRelationship,
-                                QuestionDataType.Parent1RelationshipToRegistrant
-                            },
+                            {QuestionDataType.RegistrantParentRelationship,QuestionDataType.Parent1RelationshipToRegistrant},
                         };
             }
         }
@@ -586,6 +610,25 @@ namespace AfterSchool.Controllers
                                 {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent2Employer},
                                 {QuestionDataType.RegistrantParentRelationship,QuestionDataType.Parent2RelationshipToRegistrant},
                             };
+            }
+        }
+
+        /// <summary>
+        /// only should be used when mapping from the student record to parent2 
+        /// otherwise you would overwrite the address info that was copied from parent 1 into the student
+        /// </summary>
+        public static Dictionary<QuestionDataType, QuestionDataType> Parent2AddressToMainRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                        {
+                            {QuestionDataType.RegistrantAddress1, QuestionDataType.Parent2Address1},
+                            {QuestionDataType.RegistrantAddress2, QuestionDataType.Parent2Address2},
+                            {QuestionDataType.RegistrantCity, QuestionDataType.Parent2City},
+                            {QuestionDataType.RegistrantState, QuestionDataType.Parent2State},
+                            {QuestionDataType.RegistrantPostalCode, QuestionDataType.Parent2PostalCode},
+                        };
             }
         }
 

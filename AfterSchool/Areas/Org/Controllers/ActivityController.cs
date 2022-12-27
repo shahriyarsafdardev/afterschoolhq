@@ -3678,8 +3678,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     continue;
                                 }
 
-                                parentUser = RegistrationCommon.CreateOrUpdateUser(
-                                    currentUser,
+                                parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                                    null,
                                     parentFirstName,
                                     parentLastName,
                                     parentEmail,
@@ -3695,7 +3695,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (amsgs.HasNoErrors())
                                     parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
 
-                                if (headers.Contains($"{parent2InformationLabel} - ") || headers.Contains($"{parent2AddressLabel} - "))
+                                if (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - "))
                                     parent2Registrant = currentAccount.CreateParentOrStudentRegistrant(
                                                             registrantOwner: null,
                                                             canBeAccessedBy: parentUser.AsList(),
@@ -3734,38 +3734,63 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                     if (field.IsNotBlank() && question.IsNotEmpty())
                                     {
+                                        student.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
+
                                         if (question.QuestionDataTypeId != QuestionDataType.NotSet)
                                         {
                                             switch (question.FormQuestionGroupQuestionGroupDataTypeId)
                                             {
                                                 case QuestionGroupDataType.Parent1Information:
+                                                    parentRegistrant.MapAndAddAnswer(
+                                                        questions,
+                                                        student,
+                                                        question.QuestionDataTypeId,
+                                                        RegistrationCommon.Parent1InfoToMainRegistrantMap.Inverse()[question.QuestionDataTypeId],
+                                                        currentUser,
+                                                        amsgs,
+                                                        adc);
+                                                    break;
                                                 case QuestionGroupDataType.Parent1Address:
+                                                    parentRegistrant.MapAndAddAnswer(
+                                                        questions, 
+                                                        student, 
+                                                        question.QuestionDataTypeId,
+                                                        RegistrationCommon.Parent1AddressToMainRegistrantMap.Inverse()[question.QuestionDataTypeId], 
+                                                        currentUser, 
+                                                        amsgs, 
+                                                        adc);
+                                                    break;
+                                                case QuestionGroupDataType.Parent2Information:
+                                                    parent2Registrant.MapAndAddAnswer(
+                                                        questions,
+                                                        student,
+                                                        question.QuestionDataTypeId,
+                                                        RegistrationCommon.Parent2InfoToMainRegistrantMap.Inverse()[question.QuestionDataTypeId],
+                                                        currentUser,
+                                                        amsgs,
+                                                        adc);
+                                                    break;
+                                                case QuestionGroupDataType.Parent2Address:
+                                                    parent2Registrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
+                                                    parent2Registrant.MapAndAddAnswer(
+                                                        questions,
+                                                        student,
+                                                        question.QuestionDataTypeId,
+                                                        RegistrationCommon.Parent2AddressToMainRegistrantMap.Inverse()[question.QuestionDataTypeId],
+                                                        currentUser,
+                                                        amsgs,
+                                                        adc);
+                                                    break;
                                                 case QuestionGroupDataType.EmergencyContact1:
                                                 case QuestionGroupDataType.EmergencyContact2:
                                                 case QuestionGroupDataType.EmergencyContact3:
                                                     parentRegistrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
                                                     break;
-                                                case QuestionGroupDataType.Parent2Information:
-                                                case QuestionGroupDataType.Parent2Address:
-                                                    parent2Registrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
-                                                    break;
                                             }
-
-                                            student.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
-                                        }
-                                        else
-                                        {
-                                            student.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
                                         }
                                     }
                                 }
                             }
-
-                            // Should skip mapping because information should be in the right fields if they're importing
-                            RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, student, questions, currentUser, amsgs, adc);
-
-                            if (parent2Registrant.IsNotEmpty())
-                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, student, questions, currentUser, amsgs, adc);
 
                             // do registration
                             var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
