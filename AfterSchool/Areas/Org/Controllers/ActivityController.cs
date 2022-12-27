@@ -3545,11 +3545,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                                         validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
 
-                                    if (createParentAccounts && i == parentEmailIndex)
-                                    {
-                                        var doesParentExist = WebUser.ExistsByEmail(field, msgs);
+                                    if (createParentAccounts && i == parentEmailIndex && WebUser.ExistsByEmail(field, msgs))
                                         validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
-                                    }
 
                                     break;
 
