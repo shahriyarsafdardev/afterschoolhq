@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
@@ -13,6 +8,11 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using System.Web.Mvc;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
@@ -122,7 +122,7 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("contactthankyou", new {id = registrationAccount.Uid});
+                return RedirectToAction("contactthankyou", new { id = registrationAccount.Uid });
 
             ViewBag.Messages = msgs;
 
@@ -877,7 +877,7 @@ namespace AfterSchool.Controllers
                     MessageType.UserError);
 
             AddStudentRestrictionsMessages(msgs, participationObject, qvms);
-            
+
             if (msgs.HasNoErrors())
             {
                 Registrant student = null;
@@ -1599,16 +1599,22 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("editpersonal", "family",
                     new
                     {
-                        Area = "user", id = parentOrGuardian.Uid, reg = registration?.Uid,
-                        student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
+                        Area = "user",
+                        id = parentOrGuardian.Uid,
+                        reg = registration?.Uid,
+                        student = currentRegistrant?.Uid,
+                        returnUrl = Url.Action("select", "account"),
                     });
 
             if (!currentRegistrant.IsProfileCompleted)
                 return RedirectToAction("editstudentpersonal", "family",
                     new
                     {
-                        Area = "user", id = currentRegistrant.Uid, reg = registration?.Uid,
-                        student = currentRegistrant?.Uid, returnUrl = Url.Action("select", "account"),
+                        Area = "user",
+                        id = currentRegistrant.Uid,
+                        reg = registration?.Uid,
+                        student = currentRegistrant?.Uid,
+                        returnUrl = Url.Action("select", "account"),
                     });
 
             if (!participationObject.IsStudentGradeInRange(currentRegistrant, msgs) ||
@@ -1623,8 +1629,8 @@ namespace AfterSchool.Controllers
 
             if (gotoPayment)
                 return participationObject.ShouldParentPay()
-                    ? RedirectToAction("payment", new {id = registration.Uid})
-                    : RedirectToAction("finalizeregistration", new {id = registration.Uid});
+                    ? RedirectToAction("payment", new { id = registration.Uid })
+                    : RedirectToAction("finalizeregistration", new { id = registration.Uid });
 
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
             return View(result);
@@ -1668,8 +1674,8 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
                 return participationObject.ShouldParentPay()
-                    ? RedirectToAction("payment", new {id = registration.Uid})
-                    : RedirectToAction("finalizeregistration", new {id = registration.Uid});
+                    ? RedirectToAction("payment", new { id = registration.Uid })
+                    : RedirectToAction("finalizeregistration", new { id = registration.Uid });
 
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, qvms, currentRegistrant);
@@ -1686,7 +1692,7 @@ namespace AfterSchool.Controllers
 
             // if you can't pay later
             if (!participationObject.AllowToPayLater && participationObject.ShouldParentPay())
-                return RedirectToAction("payment", new {id = registrationUid});
+                return RedirectToAction("payment", new { id = registrationUid });
 
             // need to actually register first :)
             if (!registrationUid.IsGuid())
@@ -1729,7 +1735,7 @@ namespace AfterSchool.Controllers
                     msgs);
 
             if (msgs.HasNoErrors())
-                return RedirectToAction("thankyou", new {id = registration.Uid});
+                return RedirectToAction("thankyou", new { id = registration.Uid });
 
             return View();
         }
@@ -1854,7 +1860,7 @@ namespace AfterSchool.Controllers
             var hasWithdrawn = currentRegistrant.HasWithdrawn(participationObject, msgs);
 
             if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
-                return RedirectToAction("thankyou", new {id = registration.Uid});
+                return RedirectToAction("thankyou", new { id = registration.Uid });
 
             if (msgs.HasErrors())
                 return View("Payment");
@@ -1954,7 +1960,7 @@ namespace AfterSchool.Controllers
                 indirectObjectText: activity.Name
             );
 
-            return RedirectToAction("thankyou", new {id = registration.Uid});
+            return RedirectToAction("thankyou", new { id = registration.Uid });
         }
 
         private static string GetActivityLogPhraseForPaidTransaction(ParticipationObject participationObject, PaymentType paymentType, Account billingAccount)
@@ -2009,10 +2015,10 @@ namespace AfterSchool.Controllers
                 SessionVariables.CurrentRegistrant = currentRegistrant;
                 SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
-                return RedirectToAction("payment", new {id = registration.Uid});
+                return RedirectToAction("payment", new { id = registration.Uid });
             }
 
-            return RedirectToAction("thankyou", new {id = registration.Uid});
+            return RedirectToAction("thankyou", new { id = registration.Uid });
         }
 
         [HttpGet]
@@ -2109,7 +2115,7 @@ namespace AfterSchool.Controllers
                 indirectObjectText: billingAccount.Name
             );
 
-            return RedirectToAction("paymentthankyou", new {id = billingAccount.Uid});
+            return RedirectToAction("paymentthankyou", new { id = billingAccount.Uid });
         }
 
         #endregion
@@ -2518,7 +2524,7 @@ namespace AfterSchool.Controllers
             var registration = CreateStudentRegistration(participationObject, qvms, msgs);
 
             if (msgs.HasNoErrors() && registration.IsNotEmpty())
-                return RedirectToAction("RegistrationComplete", new {id = registration?.Uid});
+                return RedirectToAction("RegistrationComplete", new { id = registration?.Uid });
 
             LoadSessionActivitiesViewBag(participationObject, registration, msgs);
 
