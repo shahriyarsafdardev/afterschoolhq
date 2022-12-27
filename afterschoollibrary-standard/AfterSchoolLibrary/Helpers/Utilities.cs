@@ -239,7 +239,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static List<KeyValuePair> GetKeyValuePairs(string s)
         { 
-            var data = new List<KeyValuePair>();
+            var data = new List<AfterSchoolLibrary.Helpers.KeyValuePair>();
 
             if (s.IsEmpty())
                 return data;

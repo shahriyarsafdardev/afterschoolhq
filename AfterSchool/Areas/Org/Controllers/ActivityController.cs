@@ -3878,6 +3878,48 @@ namespace AfterSchool.Areas.Org.Controllers
                                     parentRegistrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
                                     break;
                             }
+
+                            // Should skip mapping because information should be in the right fields if they're importing
+                            RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, student, questions, currentUser, amsgs, adc);
+
+                            if (parent2Registrant.IsNotEmpty())
+                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, student, questions, currentUser, amsgs, adc);
+
+                            // do registration
+                            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+                            var participationObject = activity.GetParticipationObject(amsgs, adc);
+                            Registrant submittedRecord = null;
+                            Registration registration = null;
+
+                            RegistrationCommon.SubmitRecord(
+                                ref registration,
+                                ref submittedRecord,
+                                student,
+                                participationObject,
+                                currentUser,
+                                period,
+                                "",
+                                Request.UserAgent,
+                                Request.GetUserHostAddress(),
+                                amsgs,
+                                adc);
+
+                            AccountService.ProcessRegistrationWithoutPayment(
+                                new CheckoutObject
+                                {
+                                    BillingAccount = participationObject.OwnerAccount,
+                                    PayingAccount = parentAccount,
+                                    NumberOfSeats = 1,
+                                    ParticipationObject = participationObject,
+                                    Registration = registration,
+                                    MasterRegistrant = student,
+                                    SubscriptionPlan = null,
+                                    SelectedDates = new List<DateTime>(),
+                                },
+                                false,
+                                currentUser,
+                                amsgs,
+                                adc);
                         }
                     }
                 }
