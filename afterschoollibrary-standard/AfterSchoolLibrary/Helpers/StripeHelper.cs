@@ -1,12 +1,11 @@
-﻿using System;
 using BasicLibrary;
 using Stripe;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Configuration;
 using Stripe.BillingPortal;
 using Stripe.Checkout;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
 using Configuration = Stripe.BillingPortal.Configuration;
 using Session = Stripe.BillingPortal.Session;
 using SessionCreateOptions = Stripe.BillingPortal.SessionCreateOptions;
@@ -184,7 +183,7 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new TransferCreateOptions
             {
-                Amount = (long) (amount * 100),
+                Amount = (long)(amount * 100),
                 Currency = "usd",
                 Destination = destinationId,
                 Metadata = metaData,
@@ -223,7 +222,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                transferReversal = GetTranferReversalService().Create(stripeTransferId, options);
+                GetTransferReversalService().Create(stripeTransferId, options);
             }
             catch (StripeException ex)
             {
@@ -250,7 +249,7 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new PayoutCreateOptions
             {
-                Amount = (long) (amount * 100),
+                Amount = (long)(amount * 100),
                 Currency = "usd",
                 Destination = externalAccountId,
                 Metadata = metaData,
@@ -417,7 +416,7 @@ namespace AfterSchoolLibrary.Billing
             var options = new PriceCreateOptions
             {
                 Product = productId,
-                UnitAmount = (long) amount,
+                UnitAmount = (long)amount,
                 Currency = "usd",
                 Nickname = nickname,
                 Recurring = new PriceRecurringOptions
@@ -922,7 +921,7 @@ namespace AfterSchoolLibrary.Billing
                 CollectionMethod = CollectionMethodChargeAutomatically,
                 DefaultSource = sourceId,
                 Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions> {new SubscriptionItemOptions {Plan = planId, Quantity = 1}},
+                Items = new List<SubscriptionItemOptions> { new SubscriptionItemOptions { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
                 ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
                 BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
@@ -936,7 +935,7 @@ namespace AfterSchoolLibrary.Billing
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
             if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
-                options.TrialEnd = startDate.Value; 
+                options.TrialEnd = startDate.Value;
 
             // please make sure that billing ends when the program ends.
             if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.AddDays(1).Date))
@@ -1172,7 +1171,7 @@ namespace AfterSchoolLibrary.Billing
             var options = new SetupIntentCreateOptions
             {
                 Customer = customerId,
-                PaymentMethodTypes = new List<string> {"card"},
+                PaymentMethodTypes = new List<string> { "card" },
             };
 
             try
@@ -1549,7 +1548,7 @@ namespace AfterSchoolLibrary.Billing
             {
                 Customer = customerId,
                 SubscriptionBillingCycleAnchor = billingCycleAnchor,
-                SubscriptionItems = new List<InvoiceSubscriptionItemOptions> {new InvoiceSubscriptionItemOptions {Plan = planId, Quantity = 1}},
+                SubscriptionItems = new List<InvoiceSubscriptionItemOptions> { new InvoiceSubscriptionItemOptions { Plan = planId, Quantity = 1 } },
                 SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
                 SubscriptionStartDate = DateTime.UtcNow.Date,
             };
@@ -1693,9 +1692,9 @@ namespace AfterSchoolLibrary.Billing
 
             return session;
         }
-        
+
         #endregion
-        
+
         #region BillingPortalConfiguration
 
         private ConfigurationService GetBillingPortalConfigurationService()
@@ -1757,7 +1756,7 @@ namespace AfterSchoolLibrary.Billing
                     SubscriptionUpdate = new ConfigurationFeaturesSubscriptionUpdateOptions
                     {
                         Enabled = true,
-                        DefaultAllowedUpdates = new List<string> {"price", "promotion_code"},
+                        DefaultAllowedUpdates = new List<string> { "price", "promotion_code" },
                         Products = productOptionsList,
                     },
                     PaymentMethodUpdate = new ConfigurationFeaturesPaymentMethodUpdateOptions
@@ -1824,7 +1823,7 @@ namespace AfterSchoolLibrary.Billing
                     SubscriptionUpdate = new ConfigurationFeaturesSubscriptionUpdateOptions
                     {
                         Enabled = true,
-                        DefaultAllowedUpdates = new List<string> {"price", "promotion_code"},
+                        DefaultAllowedUpdates = new List<string> { "price", "promotion_code" },
                         Products = productOptionsList,
                     },
                 },
@@ -1881,7 +1880,7 @@ namespace AfterSchoolLibrary.Billing
                 {
                     Address = "auto",
                 },
-                PaymentMethodTypes = new List<string> {"card"},
+                PaymentMethodTypes = new List<string> { "card" },
             };
 
             if (couponId.IsNotEmpty())

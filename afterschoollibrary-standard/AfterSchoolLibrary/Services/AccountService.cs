@@ -1,10 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Enums;
@@ -13,6 +6,13 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Stripe;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Account = AfterSchoolLibrary.Models.Account;
 using Coupon = AfterSchoolLibrary.Models.Coupon;
 using Payout = AfterSchoolLibrary.Models.Payout;
@@ -30,7 +30,7 @@ namespace AfterSchoolLibrary.Services
                 var ap = account.GetActiveAccountPackage(msgs, dc);
 
                 if (ap.IsNotEmpty())
-                    return (bool) ap.HasFeature(featureType, msgs, dc);
+                    return (bool)ap.HasFeature(featureType, msgs, dc);
             }
 
             return false;
@@ -432,7 +432,7 @@ namespace AfterSchoolLibrary.Services
             participationObjects.AddRange(bottomParticipationObjects.Shuffle());
 
             return participationObjects
-                .DistinctBy(participationObject => new {participationObject.ObjectID, participationObject.ObjectType})
+                .DistinctBy(participationObject => new { participationObject.ObjectID, participationObject.ObjectType })
                 .ToList();
         }
 
@@ -560,7 +560,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetActivityCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc);
+            return Activity.GetCount(new Hashtable { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
         public static int GetExternallyProvidedActivityCount(this Account account, SystemMessages msgs = null,
@@ -793,7 +793,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetContactListCount(this Account account, DatabaseConnection dc = null)
         {
-            return ContactList.GetCount(criterias: new Hashtable {{"AccountId", account.ID.Value}}, dc: dc);
+            return ContactList.GetCount(criterias: new Hashtable { { "AccountId", account.ID.Value } }, dc: dc);
         }
 
         public static bool DoesContactExist(this Account account, string firstName, string lastName, string email,
@@ -944,7 +944,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetRegistrationPeriodCount(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return RegistrationPeriod.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc);
+            return RegistrationPeriod.GetCount(new Hashtable { { "AccountId", account.ID.Value } }, msgs, dc);
         }
 
         public static List<RegistrationPeriod> GetRegistrationPeriodsByGroupId(this Account account, int id,
@@ -1060,7 +1060,7 @@ namespace AfterSchoolLibrary.Services
         public static bool HasAccountPackage(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return AccountPackage.GetCount(new Hashtable {{"AccountId", account.ID.Value}}, msgs, dc) > 0;
+            return AccountPackage.GetCount(new Hashtable { { "AccountId", account.ID.Value } }, msgs, dc) > 0;
         }
 
         public static List<AccountPackageFeature> GetAccountPackageFeatures(this Account account,
@@ -1445,7 +1445,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return AccountWebUser.GetCount(
-                new Hashtable {{"AccountId", account.ID.Value}, {"UserTypeId", (int) userType}}, msgs, dc) > 0;
+                new Hashtable { { "AccountId", account.ID.Value }, { "UserTypeId", (int)userType } }, msgs, dc) > 0;
         }
 
         #endregion
@@ -1878,7 +1878,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrantActivityCount(this Account account, DatabaseConnection dc = null)
         {
-            return RegistrantActivity.GetCount(new Hashtable {{"ActivityAccountId", account.ID.Value}});
+            return RegistrantActivity.GetCount(new Hashtable { { "ActivityAccountId", account.ID.Value } });
         }
 
         public static Registrant GetRegistrant(this Account account, Guid Uid, SystemMessages msgs = null,
@@ -3472,10 +3472,10 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     var costLow = row["CostLow"].IsNotEmpty()
-                        ? (decimal?) Convert.ToDecimal(row["CostLow"])
+                        ? (decimal?)Convert.ToDecimal(row["CostLow"])
                         : null;
                     var costHigh = row["CostHigh"].IsNotEmpty()
-                        ? (decimal?) Convert.ToDecimal(row["CostHigh"])
+                        ? (decimal?)Convert.ToDecimal(row["CostHigh"])
                         : null;
 
                     var response = new SearchDirectoryResponse
@@ -3550,7 +3550,7 @@ namespace AfterSchoolLibrary.Services
             }
             catch (Exception ex)
             {
-                msgs.Add(new SystemMessage {Exception = ex, Text = ex.Message, MessageType = MessageType.Error});
+                msgs.Add(new SystemMessage { Exception = ex, Text = ex.Message, MessageType = MessageType.Error });
                 Utilities.SystemErrorLog(ex);
             }
 
@@ -3661,7 +3661,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs,
                 dc: dc);
 
-            account.SetDefaultLocation(defaultLocation, new WebUser {ID = 0}, msgs, dc);
+            account.SetDefaultLocation(defaultLocation, new WebUser { ID = 0 }, msgs, dc);
 
             return msgs;
         }
@@ -5219,7 +5219,7 @@ namespace AfterSchoolLibrary.Services
                 var purchaseableObjectCoupon = PurchaseableObjectCoupon.LoadByCouponByPurchaseableObject(
                     coupon.ID.Value,
                     participationObject.ObjectID.Value,
-                    (PurchaseableObjectType) participationObject.ObjectType);
+                    (PurchaseableObjectType)participationObject.ObjectType);
 
                 // if coupon is not assigned to any purchaseable object that means it can be applied to any purchaseable object
                 if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty())
@@ -5408,7 +5408,7 @@ namespace AfterSchoolLibrary.Services
         public static bool IsProviderForOtherAccounts(this Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Activity.GetCount(new Hashtable {{"ProviderAccountId", account.ID.Value}}, msgs, dc) > 0;
+            return Activity.GetCount(new Hashtable { { "ProviderAccountId", account.ID.Value } }, msgs, dc) > 0;
         }
 
         public static bool IsNewProviderForOtherAccounts(this Account account, SystemMessages msgs = null,
@@ -5564,7 +5564,7 @@ namespace AfterSchoolLibrary.Services
         {
             // get current limit
             var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging, msgs, dc)
-                ? (int) accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+                ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
                 : 0;
 
             // get current quota

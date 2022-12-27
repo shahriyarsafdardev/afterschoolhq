@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Stripe;
+using System;
+using System.Collections.Generic;
 using Account = AfterSchoolLibrary.Models.Account;
 using Product = Stripe.Product;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -500,16 +500,15 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static FigureOutProratingResult FigureOutProrating(this SubscriptionPlan plan, DateTime startOfPeriod, DateTime todayUtc,
-            IStripeProratingService stripeProratingService, ParticipationObject participationObject, DateTime startDateTime, Account currentAccount,
-            SystemMessages msgs)
+        public static FigureOutProratingResult FigureOutProrating(this SubscriptionPlan plan, DateTime todayUtc, IStripeProratingService stripeProratingService,
+            ParticipationObject participationObject, DateTime startDateTime, Account currentAccount, SystemMessages msgs)
         {
             var result = new FigureOutProratingResult
             {
                 ShouldWeBeProratingToday = false,
                 ProratingValue = null,
                 BackdateStartDate = null,
-                BillingCycleAnchor = null,
+                BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc),
             };
 
             if (plan.PlanTypeId != SubscriptionPlanType.Subscription ||
@@ -520,13 +519,16 @@ namespace AfterSchoolLibrary.Services
                  plan.PaymentStartTypeId != PlanPaymentStartType.WhenActivityStarts))
                 return result;
 
+            var startOfPeriod = plan.StartDate.HasValue ? plan.StartDate.Value : participationObject.StartDate.Value;
+            if (!plan.StartDate.HasValue)
+                plan.StartDate = participationObject.StartDate;
             result.ShouldWeBeProratingToday = true;
-            result.BackdateStartDate = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
-            result.BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc);
-
+            result.BackdateStartDate = todayUtc;
+            result.BillingCycleAnchor = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
             result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
             return result;
         }
+
 
         private static DateTime? GetBillingCycleAnchor(ParticipationObject participationObject, SubscriptionPlan plan, DateTime startDateTime,
             DateTime todayUtc)
@@ -539,7 +541,7 @@ namespace AfterSchoolLibrary.Services
             {
                 BillingPeriodType.Month => startDateTime.LastDateOfMonth().AddDays(1),
                 BillingPeriodType.Week => startDateTime.LastDateOfWeek().AddDays(1),
-                _ => (DateTime?) null,
+                _ => (DateTime?)null,
             };
             return billingCycleAnchor;
         }

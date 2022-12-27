@@ -1,15 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Stripe;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Twilio.Rest.Api.V2010.Account;
 using Account = AfterSchoolLibrary.Models.Account;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -175,24 +175,26 @@ namespace AfterSchoolLibrary.Services
             msgs ??= new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
-
+            if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+            {
+                var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
+                ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
+                return;
+            }
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
-            var isSubscriptionRequired = true; //.. in some case, we will only charge.
-
+            var isSubscriptionRequired = true;
             var platformFeePercent = useStripeConnectedAccount
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
                 : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
-
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-            
             // Charge parent if they try to join mid-period. 
             // NOTE: This needs to be totally changed for pro-rating
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
@@ -201,7 +203,7 @@ namespace AfterSchoolLibrary.Services
                 participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
             {
                 if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
-                    isSubscriptionRequired = plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
+                    isSubscriptionRequired = true;// plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
 
                 // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
                 submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
@@ -214,16 +216,9 @@ namespace AfterSchoolLibrary.Services
                     _ => startDateTime,
                 };
             }
-
-            var billingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime);
-
-            if (!isSubscriptionRequired)
-                return;
-            var startOfPeriod = plan.StartDate.Value;
-            var todayUtc = DateTime.UtcNow.Date;
             var stripeProratingService = new StripeProratingService();
-            var proratingResult = plan.FigureOutProrating(startOfPeriod, todayUtc, stripeProratingService, participationObject, startDateTime, currentAccount, msgs);
-
+            var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
+                msgs);
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
@@ -419,43 +414,6 @@ namespace AfterSchoolLibrary.Services
             return plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.Schedule.IsEmpty() &&
                    DateTime.UtcNow.Date != DateTime.UtcNow.FirstDateOfMonth().Date;
         }
-
-        public static bool CheckRegistrantChargeForWeeklyBillingType(this Registrant registrant, Activity activity)
-        {
-            //.. this logic is only for billing type week
-            var msgs = new SystemMessages();
-            var anyTransactionInCurrentWeek = false;
-
-            //attendances.ForEach(attendance => {
-            //    var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, registrant.ID.Value, msgs).First();
-
-            //    if (attendanceRegistrant.TransactionId.IsNotEmpty())
-            //        anyTransactionInLastWeek = true;
-            //});
-
-            var activityPayments = ActivityPayment.LoadByParticipationObjectByRegistrant(ParticipationObjectId: activity.ID.Value,
-                ParticipationObjectTypeId: ParticipationObjectType.Activity,
-                RegistrantId: registrant.ID.Value,
-                IsDeleted: false,
-                msgs: msgs);
-
-            //.. special case: post pay plan with # of Pre-pay
-            var count = 0;
-            var postPayPlan = activity.GetPostPayPlan(msgs);
-            if (postPayPlan.NumberOfPeriodsPrePaid > 0)
-                count = 1;
-
-            //.. if registrant has paid for any attendance in last week, don't charge them again.
-            var sunday = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
-            var saturday = DateTime.Now.EndOfWeek(DayOfWeek.Saturday);
-            var currentWeekPayments = activityPayments.Where(m => m.CreateDate >= sunday && m.CreateDate <= saturday).ToList();
-
-            if (currentWeekPayments.Any() && currentWeekPayments.Count > count)
-                anyTransactionInCurrentWeek = true;
-
-            return anyTransactionInCurrentWeek;
-        }
-
         private static string GetSplitEvenlyCoupon(SubscriptionPlan plan, CheckoutObject checkoutObject, Account billingAccount, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
@@ -632,7 +590,7 @@ namespace AfterSchoolLibrary.Services
                     if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
                         return participationObject.StartDate.Value;
                     break;
-                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
+                case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):
                     // if on checkout, start on checkout
                     return today;
                     break;
@@ -727,7 +685,7 @@ namespace AfterSchoolLibrary.Services
         public static bool HasReceivedTextMessages(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return TwilioSMS.GetCount(
-                criterias: new Hashtable() {{"RegistrantId", registrant.ID.Value}},
+                criterias: new Hashtable() { { "RegistrantId", registrant.ID.Value } },
                 msgs: msgs,
                 dc: dc) > 0;
         }
@@ -1354,7 +1312,7 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(ra.Save(dc));
 
-            ra.ChangeSeatAssignment(assignmentType, new WebUser {ID = loggedInUserId}, msgs, dc);
+            ra.ChangeSeatAssignment(assignmentType, new WebUser { ID = loggedInUserId }, msgs, dc);
 
             return ra;
         }
@@ -1573,7 +1531,7 @@ namespace AfterSchoolLibrary.Services
                         // not doing an else if just in case the question comes back null
                         if (question.IsEmpty())
                             question = answer.ToFormQuestion(true, amsgs, adc);
-                            
+
                         copyToRegistrant.AddOrUpdateAnswer(
                             answerText: answer.Text,
                             question: question,
@@ -1623,8 +1581,8 @@ namespace AfterSchoolLibrary.Services
                     ra.ChangeSeatAssignment(RegistrationAssignmentType.Withdrawn, loggedInUser, amsgs, adc);
 
                     // cancel subscription if it has one
-                    if (msgs.HasNoErrors() && isCancelPayment)
-                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
+                    //if (msgs.HasNoErrors() && isCancelPayment)
+                    //registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -1802,7 +1760,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetRegistrationCount(this Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registration.GetCount(new Hashtable() {{"RegistrantId", registrant.ID.Value}}, msgs: msgs, dc: dc);
+            return Registration.GetCount(new Hashtable() { { "RegistrantId", registrant.ID.Value } }, msgs: msgs, dc: dc);
         }
 
         public static Registrant GetParentOrGuardian(this Registrant registrant, SystemMessages msgs, DatabaseConnection dc = null)
@@ -2007,7 +1965,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (registrant.GenderId != GenderType.NotSet || !registrant.ID.HasValue) return;
             var formQuestionAnswer =
-                FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId((int)registrant.ID , QuestionDataType.RegistrantGender, msgs , dc);
+                FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId((int)registrant.ID, QuestionDataType.RegistrantGender, msgs, dc);
             if (formQuestionAnswer.IsNotEmpty() && formQuestionAnswer.Text.IsNotEmpty())
             {
                 registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
