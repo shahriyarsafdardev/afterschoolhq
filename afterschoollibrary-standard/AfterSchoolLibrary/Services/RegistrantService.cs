@@ -1358,10 +1358,10 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer MapAndAddAnswer(this Registrant registrant, List<FormQuestion> questions, Registrant fromRegistrant,
             QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
-            var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
-            if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
-                return registrant.AddOrUpdateAnswer(parentAnswer.Text, studentQuestion, loggedInUser, msgs, dc);
+            var originalAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
+            var destinationQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
+            if (destinationQuestion.IsNotEmpty() && originalAnswer.IsNotEmpty())
+                return registrant.AddOrUpdateAnswer(originalAnswer.Text, destinationQuestion, loggedInUser, msgs, dc);
 
             return null;
         }

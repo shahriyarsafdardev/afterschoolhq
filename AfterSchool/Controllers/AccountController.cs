@@ -573,6 +573,8 @@ namespace AfterSchool.Controllers
         {
             var msgs = new SystemMessages();
             var questions = AddParentViewBag(msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
 
             questions.ForEach(question =>
             {
@@ -603,7 +605,7 @@ namespace AfterSchool.Controllers
                 (
                     (amsgs, adc) =>
                     {
-                        var canBeAccessedBy = SessionVariables.CurrentUser.AsList();
+                        var canBeAccessedBy = currentUser.AsList();
 
                         // create student account if requestioned by parent
                         if (createuseraccount.IsNumber())
@@ -617,14 +619,14 @@ namespace AfterSchool.Controllers
                             var phone = qvms.Find(qvm =>
                                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
 
-                            otherParentUser = SessionVariables.CurrentAccount.InviteUser(
+                            otherParentUser = currentAccount.InviteUser(
                                 firstName,
                                 lastName,
                                 email,
                                 phone.Trim(),
                                 null,
                                 UserType.Student,
-                                SessionVariables.CurrentUser,
+                                currentUser,
                                 amsgs,
                                 adc);
 
@@ -632,7 +634,7 @@ namespace AfterSchool.Controllers
                         }
 
                         // create parent registrant record
-                        otherParent = SessionVariables.CurrentAccount.CreateParentOrStudentRegistrant(
+                        otherParent = currentAccount.CreateParentOrStudentRegistrant(
                             otherParentUser,
                             canBeAccessedBy,
                             RegistrantType.Individual,
@@ -641,7 +643,7 @@ namespace AfterSchool.Controllers
                             false,
                             null,
                             RegistrantProfileStatus.Started,
-                            SessionVariables.CurrentUser,
+                            currentUser,
                             amsgs,
                             adc);
 
@@ -650,7 +652,7 @@ namespace AfterSchool.Controllers
                             otherParent.AddOrUpdateAnswer(
                                 qvm.Value.IfEmpty("").Trim(),
                                 qvm.Question,
-                                SessionVariables.CurrentUser,
+                                currentUser,
                                 amsgs,
                                 adc);
                         });
@@ -916,7 +918,7 @@ namespace AfterSchool.Controllers
                         }
 
                         // create student registrant record
-                        student = SessionVariables.CurrentAccount.CreateParentOrStudentRegistrant(
+                        student = currentAccount.CreateParentOrStudentRegistrant(
                             studentUser,
                             canBeAccessedBy,
                             RegistrantType.Individual,
@@ -943,112 +945,24 @@ namespace AfterSchool.Controllers
                                 indirectObjectText: currentAccount.Name
                             );
 
-                        // add answers to parent registrant record
+                        // add answers to master registrant record
                         // will be used later to copy information over to student records
                         qvms.ForEach(qvm =>
                         {
                             student.AddOrUpdateAnswer(
                                 qvm.Value.IfEmpty("").Trim(),
                                 qvm.Question,
-                                SessionVariables.CurrentUser,
+                                currentUser,
                                 amsgs,
                                 adc);
                         });
 
-                        // copy parent answers to student for home address, emergency contacts
-                        parentRegistrant.GetAnswers(amsgs, adc)
-                            .Where(answer =>
-                                answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
-                                answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
-                                    .GetEmergencyContactQuestionGroups())
-                            )
-                            .ToList()
-                            .ForEach(answer =>
-                            {
-                                student.AddOrUpdateAnswer(
-                                    answer.Text.IfEmpty("").Trim(),
-                                    answer.ToFormQuestion(msgs: amsgs, dc: adc),
-                                    SessionVariables.CurrentUser,
-                                    amsgs,
-                                    adc);
-                            });
-
-                        // copy parent info over to student parent info
-                        var allquestions = adminAccountForm.GetAllQuestions(amsgs, adc);
-                        var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>
-                        {
-                            {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent1FirstName},
-                            {QuestionDataType.RegistrantMiddleName, QuestionDataType.Parent1MiddleName},
-                            {QuestionDataType.RegistrantLastName, QuestionDataType.Parent1LastName},
-                            {QuestionDataType.RegistrantEmail, QuestionDataType.Parent1Email},
-                            {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent1HomePhone},
-                            {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
-                            {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
-                            {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent1Employer},
-                            {
-                                QuestionDataType.RegistrantParentRelationship,
-                                QuestionDataType.Parent1RelationshipToRegistrant
-                            },
-                        };
-
-                        foreach (var key in parent1Map.Keys)
-                            student.MapAndAddAnswer(
-                                allquestions,
-                                parentRegistrant,
-                                key,
-                                parent1Map[key],
-                                SessionVariables.CurrentUser,
-                                amsgs,
-                                adc);
-
-                        var parent1AddressMap = new Dictionary<QuestionDataType, QuestionDataType>
-                        {
-                            {QuestionDataType.RegistrantAddress1, QuestionDataType.Parent1Address1},
-                            {QuestionDataType.RegistrantAddress2, QuestionDataType.Parent1Address2},
-                            {QuestionDataType.RegistrantCity, QuestionDataType.Parent1City},
-                            {QuestionDataType.RegistrantState, QuestionDataType.Parent1State},
-                            {QuestionDataType.RegistrantPostalCode, QuestionDataType.Parent1PostalCode},
-                        };
-
-                        foreach (var key in parent1AddressMap.Keys)
-                            student.MapAndAddAnswer(
-                                allquestions,
-                                parentRegistrant,
-                                key,
-                                parent1AddressMap[key],
-                                SessionVariables.CurrentUser,
-                                amsgs,
-                                adc);
+                        //copy parent info over
+                        var allQuestions = adminAccountForm.GetAllQuestions(amsgs, adc);
+                        RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, student, allQuestions, currentUser, amsgs, adc);
 
                         if (parentRegistrant2.IsNotEmpty())
-                        {
-                            // get parent 2 info
-                            var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>
-                            {
-                                {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent2FirstName},
-                                {QuestionDataType.RegistrantMiddleName, QuestionDataType.Parent2MiddleName},
-                                {QuestionDataType.RegistrantLastName, QuestionDataType.Parent2LastName},
-                                {QuestionDataType.RegistrantEmail, QuestionDataType.Parent2Email},
-                                {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent2HomePhone},
-                                {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent2MobilePhone},
-                                {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
-                                {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent2Employer},
-                                {
-                                    QuestionDataType.RegistrantParentRelationship,
-                                    QuestionDataType.Parent2RelationshipToRegistrant
-                                },
-                            };
-
-                            foreach (var key in parent2Map.Keys)
-                                student.MapAndAddAnswer(
-                                    allquestions,
-                                    parentRegistrant2,
-                                    key,
-                                    parent2Map[key],
-                                    SessionVariables.CurrentUser,
-                                    amsgs,
-                                    adc);
-                        }
+                            RegistrationCommon.MapParent2AnswersToStudent(parentRegistrant2, student, allQuestions, currentUser, amsgs, adc);
 
                         // TODO: maybe should get sibling and copy health info
                     },
@@ -1810,7 +1724,9 @@ namespace AfterSchool.Controllers
                         SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
                         SelectedDates = selectedDates,
                     },
-                    true, SessionVariables.CurrentUser, msgs);
+                    true, 
+                    SessionVariables.CurrentUser, 
+                    msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("thankyou", new {id = registration.Uid});

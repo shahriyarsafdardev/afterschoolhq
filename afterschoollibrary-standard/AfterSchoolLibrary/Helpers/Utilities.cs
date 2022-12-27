@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net.Mail;
 using System.Web;
 using AfterSchoolLibrary.Models;
@@ -237,29 +238,9 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static Dictionary<string, string> GetDictionaryFromFormQuestionsOrAnswers(string s)
-        {
-
-            var data = new Dictionary<string, string>();
-
-            if (s.IsEmpty())
-                return data;
-
-            var stringInput = s.Trim();
-
-            if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
-                stringInput = "[" + stringInput + "]"; //For json object
-
-            if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
-                data.Add(JsonConvert.DeserializeObject<Dictionary<string, string>>(stringInput)); //For json array
-
-            return data;
-
-        }
-
-        public static List<KeyValuePair> GetKeyValuePairs(string s)
+        public static List<AfterSchoolLibrary.Helpers.KeyValuePair> GetKeyValuePairs(string s)
         { 
-            var data = new List<KeyValuePair>();
+            var data = new List<AfterSchoolLibrary.Helpers.KeyValuePair>();
 
             if (s.IsEmpty())
                 return data;
@@ -267,8 +248,11 @@ namespace AfterSchoolLibrary.Helpers
             var stringInput = s.Trim();
             if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                 stringInput = "[" + stringInput + "]"; //For json object
+
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
-                data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
+                data.AddRange(JsonConvert.DeserializeObject<List<AfterSchoolLibrary.Helpers.KeyValuePair>>(stringInput)); //For json array
+            else
+                s.Split(',').ToList().ForEach(x => data.Add(new KeyValuePair() { key = x, value = x }));
 
             return data;
         }

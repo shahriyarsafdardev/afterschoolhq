@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Web;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -61,6 +63,24 @@ namespace AfterSchool.Models
                 text += $" - Ages {activity.AgeStart} to {activity.AgeEnd}";
 
             return text;
+        }
+
+        public static Dictionary<string, string> ToStringDictionary(this List<AfterSchoolLibrary.Helpers.KeyValuePair> keyValuePairs)
+        {
+            var dict = new Dictionary<string, string>();
+
+            foreach (var keyValuePair in keyValuePairs)
+                dict.Add(keyValuePair.key, keyValuePair.value);
+
+            return dict;
+        }
+
+        public  static string GetUserHostAddress(this HttpRequestBase request)
+        {
+            if (request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())
+                return request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',')[0];
+
+            return request.ServerVariables["REMOTE_ADDR"];
         }
 
         public static WebUser ToWebUser(this SignUpIndexViewModel signUpIndexViewModel)

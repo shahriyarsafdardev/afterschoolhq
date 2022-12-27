@@ -71,7 +71,7 @@
                         <p>&nbsp;</p>
 
                         <div class="table-responsive">
-                            <table class="table table-condensed">
+                            <table class="table table-condensed table-striped">
                                 <tr>
                                     <th></th>
                                     @foreach (var header in headers)
@@ -85,7 +85,7 @@
                                         <td>
                                             @if (row.Where(x => x.Messages.HasErrors()).Count() > 0)
                                             {
-                                                <i class="s7-attention icon-large text-danger"></i>
+                                                <i class="s7-attention icon-large text-danger" data-toggle="popover" data-trigger="hover" data-content="This row has errors and cannot be imported" data-placement="top"></i>
                                             }
                                             else
                                             {

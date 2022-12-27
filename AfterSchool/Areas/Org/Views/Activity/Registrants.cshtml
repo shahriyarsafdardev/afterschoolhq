@@ -219,6 +219,10 @@
                 Print Registrations
             </a>
 
+            <a href="@Url.Action("registrantimport", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
+                Import Students
+            </a>
+
             @if (activeRegistrationPeriod.IsNotEmpty())
             {
                 if (showAllowInvites)
