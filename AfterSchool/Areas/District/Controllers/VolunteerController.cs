@@ -68,6 +68,8 @@ namespace AfterSchool.Areas.District.Controllers
             
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
             
+            HandleTempMessages(msgs);
+            
             ViewBag.Messages = msgs;
             ViewBag.SelectedType = (ApprovalStatus) type;
             ViewBag.PagingModel = new PagingModel()
@@ -153,7 +155,7 @@ namespace AfterSchool.Areas.District.Controllers
                         {
                             VolunteerTaskService.EditTask(volunteerTask, msgs);
                             
-                            SendLinkToVolunteer(backgroundCheckRequestResult.BackgroundCheckUrl, webUser);
+                            SendLinkToVolunteer(backgroundCheckRequestResult.BackgroundCheckUrl, webUser, msgs);
                         }
                     }
                 }
@@ -165,9 +167,24 @@ namespace AfterSchool.Areas.District.Controllers
                 msgs.AddRange(backgroundCheckRequestResult.msg);
             }
             
-            TempData["msgs"] = msgs;
+            HandleTempMessages(msgs);
 
             return RedirectToAction("Todo");
+        }
+
+        public ActionResult SendMessage(string email, string subject, string body)
+        {
+            var msgs = new SystemMessages();
+            
+            if(body.Length > 1000)
+                msgs.Add("Message is greater than 1000 characters",MessageType.Error);
+            
+            if(msgs.HasNoErrors())
+                EmailHelper.SendEmail(email, subject, body, true);
+            
+            HandleTempMessages(msgs);
+            
+            return RedirectToAction("Index");
         }
         
         public ActionResult Details(int id, string r, string returnUrl)
@@ -202,7 +219,8 @@ namespace AfterSchool.Areas.District.Controllers
             
             var TodoViewModelList = new List<TodoViewModel>();
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             //var volunteerApprovals = VolunteerApproval.Load();
             var count = VolunteerTask.GetCountTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, msgs);
             var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, start, length, msgs);
@@ -286,7 +304,7 @@ namespace AfterSchool.Areas.District.Controllers
                 );
             }
 
-            TempData["msgs"] = msgs;
+            HandleTempMessages(msgs);
             
             if(returnUrl.IsNotEmpty())
                 return new RedirectResult(returnUrl);
@@ -315,7 +333,7 @@ namespace AfterSchool.Areas.District.Controllers
                 msgs.Add("Email will be sent shortly",MessageType.Success);
             }
             
-            TempData["msgs"] = msgs;
+            HandleTempMessages(msgs);
             
             return RedirectToAction("Index" , new {search,type});
         }
@@ -331,9 +349,6 @@ namespace AfterSchool.Areas.District.Controllers
 
             var registrant = registration.GetRegistrant(msgs);
 
-            // if (registration.AccountId != currentAccount.ID)
-            //     registration = null;
-
             var allRegistrations = registration.GetRelatedRegistrations(msgs);
             allRegistrations.Add(registration);
             allRegistrations = allRegistrations.OrderByDescending(x => x.ID).ToList();
@@ -343,51 +358,14 @@ namespace AfterSchool.Areas.District.Controllers
 
             if (registration.IsEmpty())
                 return;
-
-            var ras = registration.GetRegistrantActivities(msgs);
-            var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+            
             var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
             ViewBag.Answers = registration.GetAnswers(msgs);
-            ViewBag.RegistrantActivities = ras;
             ViewBag.Registrations = allRegistrations;
             ViewBag.SelectedRegistration = registration;
             ViewBag.SelectedType = volunteerApprovalStatus.IsNotEmpty() ? volunteerApprovalStatus :  ApprovalStatus.NotSet;
-
-            if (registration.IsNotEmpty())
-                ViewBag.CanMergeWith = allRegistrations.Where(x =>
-                    x.RegistrationPeriodId == registration.RegistrationPeriodId && x.ID != registration.ID).ToList();
-
-            List<Activity> activities = null;
-
-            if (registration.ActivityGroupId.HasValue)
-                activities = registration.GetActivityGroup(msgs).GetActivities(
-                    activityType: null,
-                    isArchived: false,
-                    isDeleted: false,
-                    start: null,
-                    length: null,
-                    forceReload: false,
-                    msgs: msgs);
-            else
-                activities = currentAccount.GetActivities(
-                    userType: UserType.Administrator,
-                    user: currentUser,
-                    null,
-                    activityType: null,
-                    isArchived: false,
-                    isDeleted: false,
-                    ungroupedOnly: null,
-                    start: null,
-                    length: null,
-                    msgs: msgs);
-
-            ViewBag.AvailableActivities = activities
-                .Where(x => x.ID.Value.NotIn(rasActivityTypes.Select(y => y.ParticipationObjectId.Value)))
-                .OrderBy(x => x.Name)
-                .ToList();
-
             ViewBag.Messages = msgs;
 
             if (Request["returnurl"].IsNotEmpty())
@@ -403,28 +381,9 @@ namespace AfterSchool.Areas.District.Controllers
             return backgroundCheckResult;
         }
 
-        private void SendLinkToVolunteer(string link, WebUser webUser)
+        private void SendLinkToVolunteer(string link, WebUser webUser, SystemMessages msgs)
         {
-            BackgroundJob.Enqueue(() =>
-                EmailHelper.SendEmail(
-                    webUser.Email,
-                    $"ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]",
-                    $"<p>Hello {webUser.FirstName},<br />" +
-                    "Thank you for taking the first step in becoming a volunteer for [ INSERT PROGRAM ? ]! " +
-                    "We are working with <a href='https://www.sterlingcheck.com/services/candidate-hub/' target=_blank >Sterling</a> " +
-                    "to conduct a background check as part of the onboarding process.<br />" +
-                    "The link below will take you to Sterling's secure portal where you can begin the background check process." +
-                    "We encourage you to read the information provided regarding privacy and security.<br/><br/>" +
-                    "Once the background check is complete, you will receive an email letting you know the results.<br/><br/>" +
-                    $"<a href='{link}' target=_blank >Link</a><br/><br/>" +
-                    "If the link above doesn't work, please copy and paste it into your browser.<br/><br/>" +
-                    "If you have any questions about the background check process, please visit Sterling's <a href='https://mybackgroundcheck.sterlingcheck.com/' target=_blank >candidate information page</a>" +
-                    " or contact Sterling Support at 888-889-5248 or <a href='mailto:candidate.support@sterlingcheck.com.'>candidate.support@sterlingcheck.com.</a><br/><br/>" +
-                    "Thank you,<br/><br/>" +
-                    "AfterSchool HQ" +
-                    $"</p>",
-                    true)
-            );
+            EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
         }
         
     }

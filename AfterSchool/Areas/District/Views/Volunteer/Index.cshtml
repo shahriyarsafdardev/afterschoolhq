@@ -96,7 +96,7 @@
                                 <td>@volunteerViewModel.Email</td>
                                 <td>
                                     <div class="pull-right">
-                                        <a class="btn btn-primary whitebgbtn">Message</a>
+                                        <a class="btn btn-primary whitebgbtn" onclick="sendEmail('@volunteerViewModel.FirstName', '@volunteerViewModel.LastName', '@volunteerViewModel.Email')">Message</a>
                                         <a class="btn btn-primary whitebgbtn">View Background Check</a>
                                     </div>
                                 </td>
@@ -128,12 +128,85 @@
     </div>
 </div>
 
+<div id="modal-send-mail" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 id="title" class="modal-title">
+                
+            </h3>
+        </div>
+        <div class="modal-body text-center">
+            <div class="modal-form">
+                <form class="form-horizontal"  action="@Url.Action("SendMessage", "Volunteer")" method="post">
+                    <div class="form-group" id="subject-group">
+                        <label class="col-sm-3 control-label">Message Reason</label>
+                        <div class="col-sm-6">
+                            <select name="subject" id="subject" class="form-control">
+                                <option value="">Select a Message Reason...</option>
+                                @{
+                                    var reasons = FormConstants.VolunteerMessageReasons();
+                                    foreach (var reason in reasons)
+                                    {
+                                        <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Message Body</label>
+                        <div class="col-sm-6">
+                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                            <p class="text-muted">Max of 1000 characters</p>
+                            <input type="hidden" name="email" id="email"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Send Email
+                                </button>
+                                <input type="hidden" class="webUserIDs" name="webUserIDs"/>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
 <script>
     function doSearch() 
     {
         location.href = `@Url.Action("index", "volunteer")?search=${$('#search').val()}&type=` + $('#type').find(":selected").val();
     }
-        
+     
+    function sendEmail(firstName, lastName, email)
+    {
+       $("#title").text("Select Message to " + firstName + ' ' + lastName);
+       $('#email').val(email);
+       $('#modal-send-mail').addClass('md-show'); 
+    }
+    
+    function closeModal()
+    {
+        $('#modal-send-mail').removeClass('md-show');
+        $(':input','.modal-form').val('');
+    }
+    
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $('#search').keypress(function (e) {

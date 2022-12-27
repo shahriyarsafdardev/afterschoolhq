@@ -677,35 +677,16 @@ namespace AfterSchool.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser);
+                    SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, msgs);
                 }
             }
 
             return msgs;
         }
         
-        private void SendLinkToVolunteer(string link, WebUser webUser)
+        private void SendLinkToVolunteer(string link, WebUser webUser, SystemMessages msgs)
         {
-            BackgroundJob.Enqueue(() =>
-                EmailHelper.SendEmail(
-                    webUser.Email,
-                    $"ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]",
-                    $"<p>Hello {webUser.FirstName},<br />" +
-                    "Thank you for taking the first step in becoming a volunteer for [ INSERT PROGRAM ? ]! " +
-                    "We are working with <a href='https://www.sterlingcheck.com/services/candidate-hub/' target=_blank >Sterling</a> " +
-                    "to conduct a background check as part of the onboarding process.<br />" +
-                    "The link below will take you to Sterling's secure portal where you can begin the background check process." +
-                    "We encourage you to read the information provided regarding privacy and security.<br/><br/>" +
-                    "Once the background check is complete, you will receive an email letting you know the results.<br/><br/>" +
-                    $"<a href='{link}' target=_blank >Link</a><br/><br/>" +
-                    "If the link above doesn't work, please copy and paste it into your browser.<br/><br/>" +
-                    "If you have any questions about the background check process, please visit Sterling's <a href='https://mybackgroundcheck.sterlingcheck.com/' target=_blank >candidate information page</a>" +
-                    " or contact Sterling Support at 888-889-5248 or <a href='mailto:candidate.support@sterlingcheck.com.'>candidate.support@sterlingcheck.com.</a><br/><br/>" +
-                    "Thank you,<br/><br/>" +
-                    "AfterSchool HQ" +
-                    $"</p>",
-                    true)
-            );
+            EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
         }
         
     }
