@@ -202,13 +202,18 @@
                 }
             }
 
-            <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
-                Send Registration Report
-            </a>
-
-            <a href="@Url.Action("Report", "Form", new {activity = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
-                View Submissions
-            </a>
+            @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+            {
+                <a href="@Url.Action("Report", "Form", new {activity = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
+                    View Submissions
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
+                    Send Registration Report
+                </a>
+            }
 
             <a href="@Url.Action("printregistrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
                 Print Registrations
