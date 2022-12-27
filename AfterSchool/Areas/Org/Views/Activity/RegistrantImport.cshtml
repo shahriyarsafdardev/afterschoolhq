@@ -5,6 +5,7 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var accountPackage = SessionVariables.AccountPackage;
     var currentUser = SessionVariables.CurrentUser;
+    var anyErrors = false;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -81,6 +82,11 @@
                                 </tr>
                                 @foreach (var row in rows)
                                 {
+                                    if (!anyErrors && row.Any(x => x.Messages.HasErrors()))
+                                    {
+                                        anyErrors = true;
+                                    }
+
                                     <tr>
                                         <td>
                                             @if (row.Any(x => x.Messages.HasErrors()))
@@ -117,7 +123,7 @@
 
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <button type="submit" class="btn btn-primary btn-lg pull-right">Import Registration Data &raquo;</button>
+                                    <button type="submit" class="btn btn-primary btn-lg pull-right" @(anyErrors ? "disabled=\"disabled\"" : "" )>Import Registration Data &raquo;</button>
                                     <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-default">&laquo; Re-Upload</a>
                                 </div>
                             </div>
