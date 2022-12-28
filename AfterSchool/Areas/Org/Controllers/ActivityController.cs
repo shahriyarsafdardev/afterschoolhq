@@ -3641,9 +3641,9 @@ namespace AfterSchool.Areas.Org.Controllers
                             break;
 
                         case QuestionType.TextBox:
-                        case QuestionType.TextArea:
+                        case QuestionType.TextArea:                            
 
-                            if (createParentAccounts && i == parentPhoneIndex && WebUser.ExistsByPhone(field, msgs))
+                            if (createParentAccounts && i == parentPhoneIndex && field.IsNotBlank() && WebUser.ExistsByPhone(field, msgs))
                                 validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
 
                             break;
