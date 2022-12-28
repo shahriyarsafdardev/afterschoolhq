@@ -1877,8 +1877,9 @@ namespace AfterSchool.Controllers
                 currentAccount, msgs);
             var proratedAmount = decimal.Parse(proratingResult.ProratingValue.ToString());
             var calcObj = new FeeCalculationObject(proratedAmount, participationObject.PaymentAccount, msgs);
-            var totalFee = calcObj.GetFinalTotalCost(PaymentType.CreditCard); // Get final cost of stripe prorated amount with fee
-            ViewBag.TotalProratedAmountWithFee = proratingResult.ShouldWeBeProratingToday ? $"{totalFee}" : "No proration needed";
+            var proratedAmountFee = calcObj.GetFinalTotalCost(PaymentType.CreditCard) - proratedAmount; // Get final cost of stripe prorated amount with fee
+            ViewBag.ProratedAmount = proratingResult.ShouldWeBeProratingToday ? $"{proratedAmount}" : "";
+            ViewBag.ProratedAmountFee = proratingResult.ShouldWeBeProratingToday ? $"{proratedAmountFee}" : "";
             return registration;
         }
 
