@@ -205,8 +205,8 @@ namespace AfterSchoolLibrary.Services
                 if (startDateTime.IsNotEmpty() && endDateTime.IsNotEmpty())
                     isSubscriptionRequired = true;// plan.CheckIfSubscriptionRequired(startDateTime, endDateTime.Value);
 
-                // maybe should use stripe subscription pro-rating. but could be a reason we wrote our own
-                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, msgs, dc);
+                // we use stripe subscription pro-rating
+                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, isSubscriptionRequired, loggedInUser, currentAccount, msgs, dc);
 
                 startDateTime = plan.BillingPeriodTypeId switch
                 {
@@ -281,22 +281,29 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
-            bool isSubscriptionRequired, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            bool isSubscriptionRequired, WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
+            var registrant = checkoutObject.Registration.GetRegistrant(msgs);
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
             var billingAccount = checkoutObject.BillingAccount;
             var masterRegistrant = submittedRecord.IsMaster ? submittedRecord : submittedRecord.GetMasterRegistrant(msgs, dc);
-            var classesToCharge = GetClassesForCharge(checkoutObject, plan, msgs, dc);
-            var classesInCurrentCycle = classesToCharge.Item1;
-            var classesRemainingInCurrentCycle = classesToCharge.Item2;
+            //var classesToCharge = GetClassesForCharge(checkoutObject, plan, msgs, dc);
+            //var classesInCurrentCycle = classesToCharge.Item1;
+            //var classesRemainingInCurrentCycle = classesToCharge.Item2;
 
-            if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
-                return;
+            //if (classesInCurrentCycle <= 0 || classesRemainingInCurrentCycle <= 0)
+            //    return;
 
-            var caclObj = GetAmountsRequiredToCharge(checkoutObject, plan, isSubscriptionRequired, classesRemainingInCurrentCycle, classesInCurrentCycle, msgs,
-                dc);
+            // we use stripe service for calculating proration amount 
+            var subscriptionPlan = plan;
+            var stripeProratingService = new StripeProratingService();
+            var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
+            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
+                 currentAccount, msgs);
+            var proratedAmount = proratingResult.ProratingValue.ToString();
+            var caclObj = GetAmountsRequiredToCharge(checkoutObject, decimal.Parse(proratedAmount), msgs, dc);
 
             BankAccountPurchaseObject bankAccountPurchaseObject = null;
             CreditCardPurchaseObject creditCardPurchaseObject = null;
@@ -344,42 +351,41 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null,
+        //public static (int, int) GetClassesForCharge(CheckoutObject checkoutObject, SubscriptionPlan plan, SystemMessages msgs = null,
+        //    DatabaseConnection dc = null)
+        //{
+        //    //get the total number of periods for current cycle x
+        //    var classesInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+        //    //get the total remaining periods in current cycle y
+        //    var classesRemainingInCurrentCycle =
+        //        checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+
+        //    return (classesInCurrentCycle, classesRemainingInCurrentCycle);
+        //}
+
+        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, decimal proratedAmount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            //get the total number of periods for current cycle x
-            var classesInCurrentCycle = checkoutObject.ParticipationObject.GetNumberOfClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+            //var participationObject = checkoutObject.ParticipationObject;
 
-            //get the total remaining periods in current cycle y
-            var classesRemainingInCurrentCycle =
-                checkoutObject.ParticipationObject.GetNumberOfRemainingClassesInCurrentCycle(plan.BillingPeriodTypeId, msgs, dc);
+            ////caluclated price of current cycle to charge p = (y * costperperiod)/ x
+            //var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
 
-            return (classesInCurrentCycle, classesRemainingInCurrentCycle);
-        }
+            //if (!isSubscriptionRequired)
+            //{
+            //    //.. if there will be subscription, we will calculate next cycle also just in case if we miss any classes
+            //    //.. basically this will be just adding a cost directly as we will charge whole for next cycle
+            //    var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
 
-        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, SubscriptionPlan plan,
-            bool isSubscriptionRequired, int classesRemainingInCurrentCycle, int classesInCurrentCycle, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            var participationObject = checkoutObject.ParticipationObject;
+            //    if (classesRemainingInNextCycle > 1)
+            //    {
+            //        var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
+            //        currentCycleCharge += nextCycleCharge;
+            //    }
+            //}
 
-            //caluclated price of current cycle to charge p = (y * costperperiod)/ x
-            var currentCycleCharge = classesRemainingInCurrentCycle * plan.CostPerPeriod.Value / classesInCurrentCycle;
-
-            if (!isSubscriptionRequired)
-            {
-                //.. if there will be subscription, we will calculate next cycle also just in case if we miss any classes
-                //.. basically this will be just adding a cost directly as we will charge whole for next cycle
-                var classesRemainingInNextCycle = participationObject.GetNumberOfRemainingClassesInNextCycle(plan.BillingPeriodTypeId, msgs, dc);
-
-                if (classesRemainingInNextCycle > 1)
-                {
-                    var nextCycleCharge = classesRemainingInNextCycle * plan.CostPerPeriod.Value / classesRemainingInNextCycle;
-                    currentCycleCharge += nextCycleCharge;
-                }
-            }
-
-            var calcObj = new FeeCalculationObject(currentCycleCharge, checkoutObject.BillingAccount, msgs, dc);
+            var calcObj = new FeeCalculationObject(proratedAmount, checkoutObject.BillingAccount, msgs, dc);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
             if (checkoutObject.PaymentType == PaymentType.CreditCard)

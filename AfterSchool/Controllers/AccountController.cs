@@ -1791,8 +1791,10 @@ namespace AfterSchool.Controllers
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
             var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
                 currentAccount, msgs);
-            ViewBag.SubscriptionProration = proratingResult.ProratingValue;
-
+            var proratedAmount = decimal.Parse(proratingResult.ProratingValue.ToString());
+            var calcObj = new FeeCalculationObject(proratedAmount, participationObject.PaymentAccount, msgs);
+            var totalFee = calcObj.GetFinalTotalCost(PaymentType.CreditCard); // Get final cost of stripe prorated amount with fee
+            ViewBag.TotalProratedAmountWithFee = proratingResult.ShouldWeBeProratingToday ? $"{totalFee}" : "No proration needed";
             return registration;
         }
 
