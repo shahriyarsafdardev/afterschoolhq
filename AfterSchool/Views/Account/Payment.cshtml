@@ -58,12 +58,11 @@
             <span>
                 @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
             </span>
-        }
-        else if (plan.RegFeeAsDownPayment)
-        {
-            <span>which will count towards your first subscription payment</span>
-        }
-    }
+     }
+     else if (plan.RegFeeAsDownPayment)
+     {
+         <span>which will count towards your first subscription payment</span>
+     }
 }
 
 @{
@@ -88,7 +87,8 @@
         <h4 class="text-center reg-instructions">
             <strong>Checkout</strong>
         </h4>
-        <p id="prorated-amount">@(ViewBag.TotalProratedAmountWithFee)</p>
+        <span id="prorated-amount" class="hide">@(ViewBag.ProratedAmount)</span>
+        <span id="prorated-amount-fee" class="hide">@(ViewBag.ProratedAmountFee)</span>
         <hr />
     </div>
 </div>

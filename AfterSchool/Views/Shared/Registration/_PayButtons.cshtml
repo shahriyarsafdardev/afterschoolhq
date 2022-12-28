@@ -301,7 +301,7 @@
             total += getSubscriptionTotalValueCC();
         }
         else {
-            total += getProrationAmount();
+            total += getProrationAmount() + getProrationAmountFee();
         }
         $('.total-due-today-cc').html(total.toFixed(2));
     }
@@ -319,6 +319,10 @@
 
     function getProrationAmount() {
         return parseFloat($("#prorated-amount").html());
+    }
+
+    function getProrationAmountFee() {
+        return parseFloat($("#prorated-amount-fee").html());
     }
 
     function getSubscriptionTotalValue() {
