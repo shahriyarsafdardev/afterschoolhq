@@ -7,6 +7,7 @@
     var currentUser = SessionVariables.CurrentUser;
     var anyErrors = false;
     var createAccounts = ((string)ViewBag.CreateAccounts).IsBoolean();
+    var selectedAssignmentType = (RegistrationAssignmentType)ViewBag.SelectedAssignmentType;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -48,9 +49,37 @@
                     {
                         <form method="post" action="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
                             <div class="form-group">
-                                <label class="col-sm-3 control-label">Registration Data File (.csv, .xls, .xlsx)</label>
+                                <label class="col-sm-3 control-label">Registration Data File (.csv only)</label>
                                 <div class="col-md-6">
                                     <input type="file" name="importfile" id="importfile" class="form-control" required />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Seat Assignment Type</label>
+                                <div class="col-md-6">
+                                    <select name="assignmenttype"
+                                            id="assignmenttype"
+                                            class="form-control">
+
+                                        @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                        {
+                                            switch (assignmenttype)
+                                            {
+                                                case RegistrationAssignmentType.NotSet:
+                                                case RegistrationAssignmentType.ReservedPendingBackgroundCheck:
+                                                case RegistrationAssignmentType.Declined:
+                                                case RegistrationAssignmentType.Invited:
+                                                    continue;
+
+                                            }
+
+                                            <option value="@((int)assignmenttype)" @(selectedAssignmentType == assignmenttype ? "selected=\"selected\"" : "")>
+                                                @assignmenttype.ToString().SplitByUpperCase()
+                                            </option>
+                                        }
+
+                                    </select>
                                 </div>
                             </div>
 
@@ -79,7 +108,7 @@
                         var headers = (List<string>)ViewBag.Headers;
                         var rows = (List<List<AfterSchool.Models.ImportField>>)ViewBag.Rows;
 
-                        <p>Below is a table of the registration data that will be imported. Please review the results and confirm or cancel to make adjustments to your file and re-upload.</p>
+                        <p class="text-medium-small">Below is a table of the registration data that will be imported. Please review the results and confirm or cancel to make adjustments to your file and re-upload.</p>
 
                         <p>&nbsp;</p>
 
@@ -129,14 +158,14 @@
                             </table>
                         </div>
 
-                        <form method="post" action="@Url.Action("registrantimport", "activity", new { id = Model.Uid, createaccounts = ViewBag.CreateAccounts })" class="form-horizontal">
+                        <form method="post" action="@Url.Action("registrantimport", "activity", new { id = Model.Uid, createaccounts = ViewBag.CreateAccounts, assignmenttype = (int)selectedAssignmentType })" class="form-horizontal">
 
                             <textarea name="csv" id="csv" class="hidden">@ViewBag.Csv</textarea>
 
                             <div class="form-group">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary btn-lg pull-right" @(anyErrors ? "disabled=\"disabled\"" : "" )>Import Registration Data &raquo;</button>
-                                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-default">&laquo; Re-Upload</a>
+                                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-default">&laquo; Cancel &amp; Re-Upload</a>
                                 </div>
                             </div>
 
@@ -147,7 +176,7 @@
                     {
                         if (msgs.HasNoErrors())
                         {
-                            <p>Your data has been imported successfully.</p>
+                            <p class="text-medium-small">Your data has been imported successfully.</p>
                             <p>
                                 <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-primary btn-lg">View Registration Data &raquo;</a>
                             </p>
