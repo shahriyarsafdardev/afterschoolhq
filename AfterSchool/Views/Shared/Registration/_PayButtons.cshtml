@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Billing
+@using AfterSchoolLibrary.Billing
 @using AfterSchoolLibrary.Helpers
 @using Stripe
 @{
@@ -318,7 +318,7 @@
     }
 
     function getProrationAmount() {
-        return parseFloat($("#prorated-amount").html().split('$').length > 1 ? $("#prorated-amount").html().split('$')[1] : 0);
+        return parseFloat($("#prorated-amount").html());
     }
 
     function getSubscriptionTotalValue() {
