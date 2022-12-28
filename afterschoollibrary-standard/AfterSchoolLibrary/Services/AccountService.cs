@@ -2163,7 +2163,6 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    // var location = account.GetDefaultLocation(amsgs, adc);
                     var groupId = participationObject.GetAnyRelatedActivityGroupId();
                     var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
