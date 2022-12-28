@@ -2151,7 +2151,7 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var location = account.GetDefaultLocation(amsgs, adc);
+                    // var location = account.GetDefaultLocation(amsgs, adc);
                     var groupId = participationObject.GetAnyRelatedActivityGroupId();
                     var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
@@ -2163,7 +2163,7 @@ namespace AfterSchoolLibrary.Services
                         isMaster: false,
                         isParentOrGuardian: false,
                         allowTextMessages: false,
-                        schoolLocationId: location?.ID,
+                        schoolLocationId: null,
                         profileStatus: RegistrantProfileStatus.Started,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,

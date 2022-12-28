@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Windows.Interop;
 using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
@@ -13,9 +14,12 @@ using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using Amazon.S3.Model;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Clever.Models;
 using Hangfire;
+using Stripe.Terminal;
 // using ServiceStack.Text;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -3409,7 +3413,7 @@ namespace AfterSchool.Areas.Org.Controllers
         #region Import
 
         [HttpGet]
-        public ActionResult RegistrantImport(string id)
+        public ActionResult RegistrantImport(string id, string createaccounts)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -3417,19 +3421,20 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Step = 1;
             ViewBag.StepLabel = "Upload";
             ViewBag.Messages = new SystemMessages();
+            ViewBag.CreateAccounts = createaccounts.IfBlank("");
             return View(activity);
         }
 
         [HttpPost]
-        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv)
+        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv, string createaccounts)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             string extension = "";
-            var questions = activity.GetActiveForm(msgs).GetAllQuestions(msgs);
-            bool createParentAccounts = true;
+            var questions = activity.GetActiveForm(msgs).GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            bool createParentAccounts = createaccounts.IsBoolean(); // checkboxes are blank if it's not checked
 
             if (csv.IsBlank())
             {
@@ -3449,7 +3454,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     var sr = new StreamReader(importfile.InputStream);
 
                     List<string> headers = new List<string>();
-                    List<string> headersWithData = new List<string>();
                     List<List<string>> rows = new List<List<string>>();
                     List<List<ImportField>> validatedRows = new List<List<ImportField>>();
 
@@ -3466,21 +3470,13 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 reader.ReadHeader();
                                 headers = reader.Context.HeaderRecord.ToList();
+                                continue;
                             }
 
                             var row = new List<string>();
                             for (var i = 0; i < headers.Count; i++)
-                            {
-                                var header = headers[i];
-                                var field = reader.GetField<string>(i);
-                                if (questions.Any(x => header.IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")))
-                                {                                    
-                                    if (!headersWithData.Contains(header))
-                                        headersWithData.Add(header);
-                                    else
-                                        row.Add(field);
-                                }
-                            }
+                                if (questions.Any(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")))
+                                    row.Add(reader.GetField<string>(i));
 
                             if (row.Count > 0)
                                 rows.Add(row);
@@ -3489,7 +3485,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
                     var parent1EmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).First().Text;
-                    var parentEmailIndex = headersWithData.IndexOf($"{parent1InformationLabel} - {parent1EmailLabel}");
+                    var parentEmailIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1EmailLabel}");
+                    var parent1PhoneLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).First().Text;
+                    var parentPhoneIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1PhoneLabel}");
 
                     if (createParentAccounts && parentEmailIndex == -1)
                     {
@@ -3500,7 +3498,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     {
                         var validatedRow = new List<ImportField>();                       
 
-                        for (var i = 0; i < headersWithData.Count; i++)
+                        for (var i = 0; i < headers.Count; i++)
                         {
                             var validatedField = new ImportField();
                             validatedField.Value = row[i];
@@ -3537,6 +3535,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                 case QuestionType.TextBox:
                                 case QuestionType.TextArea:
+
+                                    if (createParentAccounts && i == parentPhoneIndex && WebUser.ExistsByPhone(field, msgs))
+                                        validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
 
                                     break;
 
@@ -3584,7 +3585,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
 
                     var csvString = new System.Text.StringBuilder();
-                    foreach (var header in headersWithData)
+                    foreach (var header in headers)
                     {
                         csvString.Append(header);
                         csvString.Append(",");
@@ -3601,9 +3602,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         csvString.Append("\n");
                     }
 
-                    ViewBag.Headers = headersWithData;
+                    ViewBag.Headers = headers;
                     ViewBag.Rows = validatedRows;
                     ViewBag.Csv = csvString.ToString();
+                    ViewBag.CreateAccounts = createaccounts;
                 }
 
             }
@@ -3614,11 +3616,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 //import
                 var sr = new StringReader(csv);
-
-                List<string> headers = new List<string>();
-                List<string> headersWithData = new List<string>();
-                List<List<string>> rows = new List<List<string>>();
-                List<List<ImportField>> validatedRows = new List<List<ImportField>>();
+                var headers = new List<string>();
+                var rows = new List<List<string>>();
+                var validatedRows = new List<List<ImportField>>();
 
                 //do import
                 var reader = new CsvHelper.CsvReader(sr);
@@ -3644,82 +3644,34 @@ namespace AfterSchool.Areas.Org.Controllers
                             Registrant parent2Registrant = null;
                             Registrant student = null;
 
+                            var participationObject = activity.GetParticipationObject(amsgs, adc);
                             var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
                             var parent1EmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).First().Text;
-                            var parentEmailIndex = -1; 
-                            
+                            var parentEmailIndex = -1;
+
                             if (parent1EmailLabel.IsNotEmpty())
                                 parentEmailIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1EmailLabel}");
 
                             if (createParentAccounts && parentEmailIndex > -1)
                             {
-                                var parent2InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information).First().FormQuestionGroupName;
-                                var parent2AddressLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Address).First().FormQuestionGroupName;
-
-                                var parent1FirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1FirstName).First().Text;
-                                var parent1LastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1LastName).First().Text;
-                                var parent1PhoneLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).First().Text;
-
-                                var parentFirstNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1FirstNameLabel}");
-                                var parentLastNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1LastNameLabel}");
-                                var parentPhoneIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1PhoneLabel}");
-
-                                var parentFirstName = reader.GetField<string>(parentFirstNameIndex);
-                                var parentLastName = reader.GetField<string>(parentLastNameIndex);
-                                var parentEmail = reader.GetField<string>(parentEmailIndex);
-                                var parentPhone = reader.GetField<string>(parentPhoneIndex);
-
-                                if (WebUser.ExistsByEmail(parentEmail, amsgs, adc))
-                                {
-                                    amsgs.Add($"{parentEmail} is already in use, record will be skipped", MessageType.Warning);
+                                if (!CreateNewAccountRegistrantsDuringImport(questions, headers, reader, parentEmailIndex,
+                                    ref parentUser, ref parentAccount, ref parentRegistrant, ref parent2Registrant, ref student,
+                                    currentUser, currentAccount, amsgs, adc))
                                     continue;
-                                }
-
-                                parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
-                                    null,
-                                    parentFirstName,
-                                    parentLastName,
-                                    parentEmail,
-                                    parentPhone,
-                                    Guid.NewGuid().ToString().MaxChars(8), //setting temp password
-                                    true,
-                                    amsgs,
-                                    adc);
-
-                                if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
-                                    parentAccount = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(parentUser, amsgs, adc);
-
-                                if (amsgs.HasNoErrors())
-                                    parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
-
-                                if (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - "))
-                                    parent2Registrant = currentAccount.CreateParentOrStudentRegistrant(
-                                                            registrantOwner: null,
-                                                            canBeAccessedBy: parentUser.AsList(),
-                                                            registrantType: RegistrantType.Individual,
-                                                            isMaster: true,
-                                                            isParentOrGuardian: true,
-                                                            allowTextMessages: true,
-                                                            schoolLocationId: null,
-                                                            profileStatus: RegistrantProfileStatus.Started,
-                                                            loggedInUser: currentUser,
-                                                            msgs: amsgs,
-                                                            dc: adc);
-
-                                // create student registrant record
-                                student = parentAccount.CreateParentOrStudentRegistrant(
-                                            registrantOwner: null,
-                                            canBeAccessedBy: parentUser.AsList(),
-                                            registrantType: RegistrantType.Individual,
-                                            isMaster: true,
-                                            isParentOrGuardian: false,
-                                            allowTextMessages: false,
-                                            schoolLocationId: null,
-                                            profileStatus: RegistrantProfileStatus.Started,
-                                            loggedInUser: currentUser,
-                                            msgs: amsgs,
-                                            dc: adc);
                             }
+                            else
+                                student = currentAccount.CreateParentOrStudentRegistrant(
+                                    registrantOwner: null,
+                                    canBeAccessedBy: null,
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: false,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: null,
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
 
                             for (var i = 0; i < headers.Count; i++)
                             {
@@ -3733,7 +3685,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     {
                                         student.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
 
-                                        if (question.QuestionDataTypeId != QuestionDataType.NotSet)
+                                        if (createParentAccounts && question.QuestionDataTypeId != QuestionDataType.NotSet)
                                         {
                                             switch (question.FormQuestionGroupQuestionGroupDataTypeId)
                                             {
@@ -3791,39 +3743,69 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             // do registration
                             var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
-                            var participationObject = activity.GetParticipationObject(amsgs, adc);
                             Registrant submittedRecord = null;
                             Registration registration = null;
 
-                            RegistrationCommon.SubmitRecord(
-                                ref registration,
-                                ref submittedRecord,
-                                student,
-                                participationObject,
-                                currentUser,
-                                period,
-                                "",
-                                Request.UserAgent,
-                                Request.GetUserHostAddress(),
-                                amsgs,
-                                adc);
+                            if (createParentAccounts)
+                            {                                
+                                RegistrationCommon.SubmitRecord(
+                                    ref registration,
+                                    ref submittedRecord,
+                                    student,
+                                    participationObject,
+                                    currentUser,
+                                    period,
+                                    "",
+                                    Request.UserAgent,
+                                    Request.GetUserHostAddress(),
+                                    amsgs,
+                                    adc);
 
-                            AccountService.ProcessRegistrationWithoutPayment(
-                                new CheckoutObject
-                                {
-                                    BillingAccount = participationObject.OwnerAccount,
-                                    PayingAccount = parentAccount,
-                                    NumberOfSeats = 1,
-                                    ParticipationObject = participationObject,
-                                    Registration = registration,
-                                    MasterRegistrant = student,
-                                    SubscriptionPlan = null,
-                                    SelectedDates = new List<DateTime>(),
-                                },
-                                false,
-                                currentUser,
-                                amsgs,
-                                adc);
+                                AccountService.ProcessRegistrationWithoutPayment(
+                                    new CheckoutObject
+                                    {
+                                        BillingAccount = participationObject.OwnerAccount,
+                                        PayingAccount = parentAccount,
+                                        NumberOfSeats = 1,
+                                        ParticipationObject = participationObject,
+                                        Registration = registration,
+                                        MasterRegistrant = student,
+                                        SubscriptionPlan = null,
+                                        SelectedDates = new List<DateTime>(),
+                                    },
+                                    false,
+                                    currentUser,
+                                    amsgs,
+                                    adc);
+                            } 
+                            else
+                            {
+                                var groupId = participationObject.GetAnyRelatedActivityGroupId();
+                                var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
+
+                                // create a registration
+                                registration = student.AddRegistration(
+                                    ownerAccountId: currentAccount.ID.Value,
+                                    activityGroupId: groupId,
+                                    accountActivityGroupId: aagId,
+                                    periodId: period?.ID,
+                                    completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                                    loggedInUserId: currentUser.ID.Value,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                                registration.ProcessRegistrationAssignment(
+                                    participationObject: participationObject,
+                                    masterRegistrant: null,
+                                    registrant: student,
+                                    seatsRequested: 1,
+                                    activityGroupId: groupId,
+                                    periodId: period?.ID,
+                                    amountCharged: participationObject.Cost,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -3832,8 +3814,98 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
             }
 
+            ViewBag.CreateAccounts = createaccounts;
             ViewBag.Messages = msgs;
             return View(activity);
+        }
+
+        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvHelper.CsvReader reader, int parentEmailIndex, 
+            ref WebUser parentUser, ref Account parentAccount, ref Registrant parentRegistrant, ref Registrant parent2Registrant, ref Registrant student,
+            WebUser currentUser, Account currentAccount, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
+            var parent1PhoneLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).First().Text;
+            var parentPhoneIndex = -1;
+
+            if (parent1PhoneLabel.IsNotEmpty())
+                parentPhoneIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1PhoneLabel}");
+
+            var parent2InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information).First().FormQuestionGroupName;
+            var parent2AddressLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Address).First().FormQuestionGroupName;
+
+            var parent1FirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1FirstName).First().Text;
+            var parent1LastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1LastName).First().Text;
+
+            var parentFirstNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1FirstNameLabel}");
+            var parentLastNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1LastNameLabel}");
+
+            var parentFirstName = reader.GetField<string>(parentFirstNameIndex);
+            var parentLastName = reader.GetField<string>(parentLastNameIndex);
+            var parentEmail = reader.GetField<string>(parentEmailIndex);
+            var parentPhone = reader.GetField<string>(parentPhoneIndex);
+            var accountIssues = false;
+
+            if (WebUser.ExistsByEmail(parentEmail, amsgs, adc))
+            {
+                amsgs.Add($"{parentEmail} is already in use, record will be skipped", MessageType.Warning);
+                accountIssues = true;
+            }
+
+            if (WebUser.ExistsByPhone(parentPhone, amsgs, adc))
+            {
+                amsgs.Add($"{parentPhone} is already in use, record will be skipped", MessageType.Warning);
+                accountIssues = true;
+            }
+
+            if (accountIssues)
+                return false;
+
+            parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                null,
+                parentFirstName,
+                parentLastName,
+                parentEmail,
+                parentPhone,
+                Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+            true,
+            amsgs,
+                adc);
+
+            if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
+                parentAccount = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(parentUser, amsgs, adc);
+
+            if (amsgs.HasNoErrors())
+                parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
+
+            if (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - "))
+                parent2Registrant = currentAccount.CreateParentOrStudentRegistrant(
+                                        registrantOwner: null,
+                                        canBeAccessedBy: parentUser.AsList(),
+                                        registrantType: RegistrantType.Individual,
+                                        isMaster: true,
+                                        isParentOrGuardian: true,
+                                        allowTextMessages: true,
+                                        schoolLocationId: null,
+                                        profileStatus: RegistrantProfileStatus.Started,
+                                        loggedInUser: currentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+
+            // create student registrant record
+            student = parentAccount.CreateParentOrStudentRegistrant(
+                        registrantOwner: null,
+                        canBeAccessedBy: parentUser.AsList(),
+                        registrantType: RegistrantType.Individual,
+                        isMaster: true,
+                        isParentOrGuardian: false,
+                        allowTextMessages: false,
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: currentUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+            return true;
         }
 
         [HttpGet]

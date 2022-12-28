@@ -378,6 +378,7 @@ namespace AfterSchoolLibrary.Models
                 {
                     {"email", email},
                 },
+                msgs: msgs,
                 dc: dc
             ) > 0;
         }
@@ -389,6 +390,7 @@ namespace AfterSchoolLibrary.Models
                 {
                     {"phone", phone},
                 },
+                msgs: msgs,
                 dc: dc
             ) > 0;
         }
