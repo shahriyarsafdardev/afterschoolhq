@@ -237,9 +237,9 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public static List<AfterSchoolLibrary.Helpers.KeyValuePair> GetKeyValuePairs(string s)
+        public static List<KeyValuePair> GetKeyValuePairs(string s)
         { 
-            var data = new List<AfterSchoolLibrary.Helpers.KeyValuePair>();
+            var data = new List<KeyValuePair>();
 
             if (s.IsEmpty())
                 return data;
@@ -249,7 +249,7 @@ namespace AfterSchoolLibrary.Helpers
                 stringInput = "[" + stringInput + "]"; //For json object
 
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
-                data.AddRange(JsonConvert.DeserializeObject<List<AfterSchoolLibrary.Helpers.KeyValuePair>>(stringInput)); //For json array
+                data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
             else
                 s.Split(',').ToList().ForEach(x => data.Add(new KeyValuePair() { key = x, value = x }));
 
