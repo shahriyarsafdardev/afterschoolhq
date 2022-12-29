@@ -150,13 +150,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (answers.Select(x => x.FormQuestionFormId).Distinct().Count() == 1)
             {
                 var form = Form.Load(answers.Select(x => x.FormQuestionFormId).Distinct().First().Value, msgs);
-                questions = form.GetAllQuestions(msgs).Where(x => !x.IsDeleted).ToList();
-            }
-            else
-            {
-                questions = FormQuestion.LoadList(answers.Select(answer => answer.FormQuestionId.Value).ToList(), msgs);
+                if (form.IsNotEmpty())
+                    questions = form.GetAllQuestions(msgs).Where(x => !x.IsDeleted).ToList();
             }
 
+            if (questions.Count == 0)
+                questions = FormQuestion.LoadList(answers.Select(answer => answer.FormQuestionId.Value).ToList(), msgs);
 
             questions.ForEach(question =>
             {
