@@ -1,4 +1,4 @@
-﻿@model List<RegistrantActivity>
+@model List<RegistrantActivity>
 @{
     var account = (Account) ViewData["Account"];
     var activity = (Activity) ViewData["Activity"];
@@ -192,7 +192,7 @@
                                                 data-modal="modal-waitinglist"
                                                 id="btnsendinvoice-@ra.ID"
                                                 onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                            Send Invoice
+                                            Send Payment Link
                                         </button>
                                     }
                                 }

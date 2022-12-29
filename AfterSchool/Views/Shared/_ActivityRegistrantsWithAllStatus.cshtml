@@ -1,4 +1,4 @@
-﻿@using Email = AfterSchoolLibrary.Helpers.Email
+@using Email = AfterSchoolLibrary.Helpers.Email
 @model List<RegistrantActivity>
 @{
     var account = (Account) ViewData["Account"];
@@ -341,7 +341,7 @@
                         message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@Email.AppSupportEmailAddress" class="white">contact support</a>.`
                     });
                 }
-                $(obj).html('Send Invoice');
+                $(obj).html('Send Payment Link');
                 $(obj).prop('disabled', false);
             }
         );
