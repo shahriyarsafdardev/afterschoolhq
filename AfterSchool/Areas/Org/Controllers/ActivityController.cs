@@ -1174,8 +1174,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             });
 
-            ViewBag.QuestionViewModels = questions.OrderBy(question => question.DisplayOrder)
-                .Select(question => new FormQuestionViewModel(question)).ToList();
+            ViewBag.QuestionViewModels = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                                            .ThenBy(x => x.DisplayOrder)
+                                            .Select(x => new FormQuestionViewModel(x)).ToList();
             ViewBag.Messages = msgs;
 
             return View(activity);

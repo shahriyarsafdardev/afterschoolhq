@@ -145,8 +145,18 @@ namespace AfterSchool.Areas.Org.Controllers
             NameValueCollection formAnswers, SystemMessages msgs)
         {
             var answers = registration.GetAnswers(msgs);
-            var questionIds = answers.Select(answer => answer.FormQuestionId.Value).ToList();
-            var questions = FormQuestion.LoadList(questionIds, msgs);
+            var questions = new List<FormQuestion>();
+
+            if (answers.Select(x => x.FormQuestionFormId).Distinct().Count() == 1)
+            {
+                var form = Form.Load(answers.Select(x => x.FormQuestionFormId).Distinct().First().Value, msgs);
+                questions = form.GetAllQuestions(msgs).Where(x => !x.IsDeleted).ToList();
+            }
+            else
+            {
+                questions = FormQuestion.LoadList(answers.Select(answer => answer.FormQuestionId.Value).ToList(), msgs);
+            }
+
 
             questions.ForEach(question =>
             {
