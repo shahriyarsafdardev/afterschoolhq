@@ -8,7 +8,8 @@ namespace AfterSchool.Models
     {
         public Form Form { get; set; }
         public int? FormId { get; set; }
-        public Activity Activity { get; set; }
+        public List<Activity> SelectedActivities { get; set; }
+        public List<Activity> ActivityOptions { get; set; }
         public string ActivityUid { get; set; }
         public List<FormQuestion> Questions { get; set; }
         public SystemMessages Messages { get; set; }

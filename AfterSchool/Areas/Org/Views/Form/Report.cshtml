@@ -48,7 +48,9 @@
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary" onclick="search()">Search</button>
                     <button type="button" class="btn btn-primary" onclick="emailReport()">Email Report</button>
-                    <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
                         <i class="s7-close-circle"></i> Close Window
                     </button>
                 </div>
@@ -60,9 +62,35 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Manage Columns</button>
+                    <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Visible Columns</button>
                 </div>
             </div>
+
+            <div class="row hide" id="activityoption-selection">
+                @for (var i = 0; i < 4; i++)
+                {
+                    var take = (int)Math.Ceiling(Model.ActivityOptions.Count() / 4M);
+                    var skip = i * take;
+
+                    <div class="col-md-3">
+
+                        @foreach (var activity in Model.ActivityOptions.Skip(skip).Take(take))
+                        {
+                            <div>
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="activityoption-@activity.ID" name="activityoption-@activity.ID" class="form-control" value="1" checked="checked" onclick="toggleActivityOption(@activity.ID)" />
+                                    <label for="activityoption-@activity.ID">
+                                        @activity.Name
+                                    </label>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                }
+            </div>
+
             <div class="row hide" id="column-selection">
                 @{
                     var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
@@ -100,8 +128,8 @@
                         </div>
                     }
                 }
-
             </div>
+
             <div class="row">
                 <div class="col-md-12">
                     &nbsp;
@@ -158,6 +186,7 @@
 <script>
 
     var questions = @Html.Raw(questions.Select(x => new { x.ID, x.Text, QuestionDataTypeId = (int)x.QuestionDataTypeId }).ToJSON());
+    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());;
     var pageStart = 0;
     let pageSize = 25;
 
@@ -186,11 +215,34 @@
         loadRegistrants(pageStart, pageSize);
     }
 
-    function emailReport() {
+    function getSelectedActivities() {
+        var selectedActivities = "";
 
-        let search = encodeURIComponent($('#search').val());
-        let sdate = encodeURIComponent($('#startdate').val());
-        let edate = encodeURIComponent($('#enddate').val());
+        for (let activityOption of activityOptions) {
+            if ($(`#activityoption-${activityOption.ID}`).is(':checked')) {
+                if (selectedActivities.length > 0)
+                    selectedActivities += ',';
+
+                selectedActivities += activityOption.ID;
+            }
+        }
+
+        return selectedActivities;
+    }
+
+    function getSearchValue() {
+        return encodeURIComponent($('#search').val());
+    }
+
+    function getStartDateValue() {
+        return encodeURIComponent($('#startdate').val());
+    }
+
+    function getEndDateValue() {
+        return encodeURIComponent($('#enddate').val());
+    }
+
+    function getHiddenQuestionIdList() {
         var hiddenQuestions = "";
 
         for (let question of questions) {
@@ -202,20 +254,7 @@
             }
         }
 
-        $.get(
-            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activity=@Model.ActivityUid&search=${search}&sdate=${sdate}&edate=${edate}&hidden=${hiddenQuestions}`,
-            function (data) {
-                if (data && data.status === 'ok') {
-                    Notifications.showBar({
-                        title: 'Success',
-                        message: `Your report will be emailed shortly to ${data.email}`,
-                        success: true
-                    });
-                } else {
-                    Notifications.showErrors(data.messages);
-                }
-            }
-        );
+        return hiddenQuestions;
     }
 
     function toggleColumnSelection() {
@@ -223,6 +262,14 @@
             $('#column-selection').removeClass('hide');
         } else {
             $('#column-selection').addClass('hide');
+        }
+    }
+
+    function toggleActivityOptionSelection() {
+        if ($('#activityoption-selection').hasClass('hide')) {
+            $('#activityoption-selection').removeClass('hide');
+        } else {
+            $('#activityoption-selection').addClass('hide');
         }
     }
 
@@ -247,14 +294,31 @@
         }
     }
 
+    function toggleActivityOption() {
+        search();
+    }
+
+    function emailReport() {
+        $.get(
+            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}`,
+            function (data) {
+                if (data && data.status === 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `Your report will be emailed shortly to ${data.email}`,
+                        success: true
+                    });
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
     function loadRegistrants(start, length) {
 
-        let search = encodeURIComponent($('#search').val());
-        let sdate = encodeURIComponent($('#startdate').val());
-        let edate = encodeURIComponent($('#enddate').val());
-
         $.get(
-            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activity=@Model.ActivityUid&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
+            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}`,
             function (data) {
                 if (data && data.status === 'ok') {
 

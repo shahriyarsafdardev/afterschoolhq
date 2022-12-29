@@ -44,15 +44,13 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
-        public static void EmailDataReport(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
+        public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
             var questions = new List<FormQuestion>();
-
-            if (!formId.HasValue && activityId.HasValue)
-                formId = currentAccount.GetActivity(activityId.Value, msgs)?.GetActiveForm(msgs)?.ID;
+            var forms = new List<Form>();
 
             if (formId.HasValue)
                 questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
@@ -60,16 +58,22 @@ namespace AfterSchoolLibrary.Services
                         .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                         .ThenBy(x => x.DisplayOrder).ToList();
 
+            if (activityIds.Any())
+            {
+                var selectedActivities = currentAccount.GetActivities(activityIds, msgs);
+                selectedActivities.ForEach(x => forms.Add(x.GetActiveForm(msgs)));
+            }
+
+            if (!forms.Any())
+                forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
+
             if (!questions.Any())
             {
-                var forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
                 var allQuestions = new List<FormQuestion>();
 
                 forms.ForEach(x => allQuestions.AddRange(x.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)));
-
                 questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet));
                 questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
-
                 questions = questions
                     .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                     .ThenBy(x => x.DisplayOrder)
@@ -78,10 +82,10 @@ namespace AfterSchoolLibrary.Services
 
             var getFirstRegistrantsOnly = false;
 
-            if (!activityId.HasValue && !formId.HasValue)
+            if (!activityIds.Any() && !formId.HasValue)
                 getFirstRegistrantsOnly = true;
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, getFirstRegistrantsOnly, msgs);         
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, getFirstRegistrantsOnly, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 

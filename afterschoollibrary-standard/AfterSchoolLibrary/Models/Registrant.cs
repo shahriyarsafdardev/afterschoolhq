@@ -716,24 +716,24 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, bool getFirstRegistrantsOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, bool getFirstRegistrantsOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, getFirstRegistrantsOnly, true);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, true);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
 
-        public static List<Registrant> LoadByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, bool getFirstRegistrantsOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> LoadByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, bool getFirstRegistrantsOnly, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, getFirstRegistrantsOnly, false);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, false);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -741,7 +741,7 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static string LoadByAnsweredQuery(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, bool getFirstRegistrantsOnly, bool getCountOnly)
+        private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, bool getFirstRegistrantsOnly, bool getCountOnly)
         {
             string sql = @$"
                 select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
@@ -750,7 +750,7 @@ namespace AfterSchoolLibrary.Models
                     FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
                     Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
 
-            if (activityId.HasValue)
+            if (activityIds.Any())
                 sql += @"
                     inner join 
                     RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
@@ -771,9 +771,9 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 sql += $" and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}'";
 
-            if (activityId.HasValue)
+            if (activityIds.Any())
                 sql += @$"
-                    and RegistrantActivity.ParticipationObjectId = {activityId.Value}
+                    and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
 
             if (getFirstRegistrantsOnly)
