@@ -49,7 +49,7 @@
                     <button type="button" class="btn btn-primary" onclick="search()">Search</button>
                     <button type="button" class="btn btn-primary" onclick="emailReport()">Email Report</button>
                     <button type="button" class="btn btn-default hidden-print" onclick="window.close()">
-                        <i class="s7-close-circle"></i> Close
+                        <i class="s7-close-circle"></i> Close Window
                     </button>
                 </div>
             </div>
@@ -101,7 +101,6 @@
                     }
                 }
 
-
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -110,9 +109,9 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <span id="starting-record"></span> -
-                    <span id="total-records-loaded"></span> of
-                    <span id="total-records"></span>
+                    <span id="starting-record">0</span> -
+                    <span id="total-records-loaded">0</span> of
+                    <span id="total-records">0</span>
                 </div>
             </div>
             <div class="row">
@@ -305,11 +304,6 @@
 
         for (let answer of answers) {
             if (answer.Text.trim().length > 0) {
-
-                /*if (registrant.ID == 311 && (answer.RegistrantId == 311 || answer.FirstRegistrantId == 311) && question.ID == 5231) {
-                    console.log(`Registrant = ${answer.RegistrantId}, FirstRegistrant = ${answer.FirstRegistrantId}, questionId = ${question.ID}, answerQuestionId = ${answer.QuestionId}, question = ${question.Text}, answer = ${answer.Text}`);
-                }*/
-
                 if ((answer.RegistrantId == registrant.ID || answer.FirstRegistrantId == registrant.ID) && (answer.QuestionId == question.ID || (answer.QuestionDataTypeId != @((int)QuestionDataType.NotSet) && answer.QuestionDataTypeId == question.QuestionDataTypeId))) {
                     return answer;
                 }

@@ -60,8 +60,28 @@ namespace AfterSchoolLibrary.Services
                         .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                         .ThenBy(x => x.DisplayOrder).ToList();
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, false, msgs);
+            if (!questions.Any())
+            {
+                var forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
+                var allQuestions = new List<FormQuestion>();
 
+                forms.ForEach(x => allQuestions.AddRange(x.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)));
+
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet));
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
+
+                questions = questions
+                    .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                    .ThenBy(x => x.DisplayOrder)
+                    .ToList();
+            }
+
+            var getFirstRegistrantsOnly = false;
+
+            if (!activityId.HasValue && !formId.HasValue)
+                getFirstRegistrantsOnly = true;
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, getFirstRegistrantsOnly, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 
@@ -74,8 +94,12 @@ namespace AfterSchoolLibrary.Services
             table.Add(row);
 
             row = new List<string>();
-            row.Add("Submission Id");
-            row.Add("Submission Date");
+
+            if (getFirstRegistrantsOnly)
+            {
+                row.Add("Submission Id");
+                row.Add("Submission Date");
+            }
 
             foreach (var question in questions)
                 row.Add(question.Text);
@@ -86,14 +110,28 @@ namespace AfterSchoolLibrary.Services
             {
                 row = new List<string>();
 
-                row.Add(registrant.ID.ToString());
-                row.Add(registrant.CreateDate.ToShortDateTimeString());
+                if (getFirstRegistrantsOnly)
+                {
+                    row.Add(registrant.ID.ToString());
+                    row.Add(registrant.CreateDate.ToShortDateTimeString());
+                }
 
                 var answers = registrant.GetAnswers(msgs);
 
+                if (getFirstRegistrantsOnly)
+                {
+                    var related = registrant.GetRelatedRegistrants(msgs);
+                    related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));
+                }
+
                 foreach (var question in questions)
                 {
-                    var answer = answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
+                    var answer = answers.Where(answer => 
+                                    !answer.Text.IsBlank() && 
+                                    (answer.RegistrantId == registrant.ID || answer.FormQuestionId == question.ID) && 
+                                    (answer.FormQuestionId == question.ID || 
+                                        (answer.QuestionDataTypeId != QuestionDataType.NotSet && answer.QuestionDataTypeId == question.QuestionDataTypeId))
+                                    ).OrderByDescending(x => x.CreateDate.Value).FirstOrDefault();
                     row.Add(answer?.GetAnswerText().IfEmpty(""));
                 }
 
@@ -103,8 +141,8 @@ namespace AfterSchoolLibrary.Services
             var csv = CsvFile.Create(table);
             var csvByteData = Encoding.UTF8.GetBytes(csv);
             var subject = $"Submission Data Report";            
-            var body =
-                $"<p>Your Submission Data report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
+            var body = @$"<p>Your Submission Data report is attached.</p>
+                        {Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
 
             msgs.AddRange(SendGridHelper.SendMailWithAttachments(
                 fromEmail: new EmailAddress(
