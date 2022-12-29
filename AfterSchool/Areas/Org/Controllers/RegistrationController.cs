@@ -299,6 +299,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
                 return RedirectToAction("edit", new {id = registration.Uid, returnUrl});
 
+            LoadRegistrationViewBag(registration, id, msgs);
+
             ViewBag.Messages = msgs;
             ViewBag.ReturnURl = returnUrl;
 
