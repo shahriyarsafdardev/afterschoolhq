@@ -154,11 +154,11 @@
 
                                 if (showButton)
                                 {
-                                    <button class="btn btn-default btn-sm" 
-                                            data-modal="modal-waitinglist" 
+                                    <button class="btn btn-default btn-sm"
+                                            data-modal="modal-waitinglist"
                                             id="btnsendinvoice-@ra.ID"
                                             onclick="sendPaymentReminder(this, @ra.RegistrantId, '@UI.JavascriptSafeString(ra.RegistrantName)')">
-                                        Send Invoice
+                                        Send Payment Link
                                     </button>
                                 }   
                             }
@@ -305,7 +305,7 @@
                         message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@AfterSchoolLibrary.Helpers.Email.AppSupportEmailAddress" class="white">contact support</a>.`
                     });
                 }
-                $(obj).html('Send Invoice');
+                $(obj).html('Send Payment Link');
                 $(obj).prop('disabled', false);
             }
         );
