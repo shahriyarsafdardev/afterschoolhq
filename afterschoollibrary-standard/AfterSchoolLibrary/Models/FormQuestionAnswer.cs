@@ -102,6 +102,7 @@ namespace AfterSchoolLibrary.Models
         public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
         public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
         public string RegistrantEmail => (string) MDV["RegistrantEmail"].Value;
+        public int? RegistrantFirstRegistrantId => (int?) MDV["RegistrantFirstRegistrantId"].Value;
 
 
         public FormQuestionAnswer()
@@ -140,9 +141,10 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
                     "FormQuestionGroup");
                 _dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", SqlDbType.Int, "Registration");
-                _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.Int, "Registrant");
-                _dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", SqlDbType.Int, "Registrant");
-                _dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", SqlDbType.Int, "Registrant");
+                _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantFirstRegistrantId", typeof(Registrant).Name, "FirstRegistrantId", SqlDbType.Int, "Registrant");
 
                 return _dp;
             }

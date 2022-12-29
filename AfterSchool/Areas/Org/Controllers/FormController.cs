@@ -336,6 +336,21 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
             }
 
+            if (!questions.Any())
+            {
+                var forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
+                var allQuestions = new List<FormQuestion>();
+
+                forms.ForEach(x => allQuestions.AddRange(x.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)));
+
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet));
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
+
+                questions = questions
+                    .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                    .ThenBy(x => x.DisplayOrder)
+                    .ToList();
+            }
 
             var reportResults = new ReportResults()
             {
@@ -360,6 +375,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var startDate = new DateTime?();
             var endDate = new DateTime?();
             var activityId = new int?();
+            var getFirstRegistrantsOnly = false;
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -373,19 +389,42 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.HasValue)
                 formId = currentAccount.GetForm(form.Value, msgs)?.ID;
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, start, length, msgs);
-            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, msgs);
+            if (!activityId.HasValue && !formId.HasValue)
+                getFirstRegistrantsOnly = true;
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, start, length, getFirstRegistrantsOnly, msgs);
+            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, getFirstRegistrantsOnly, msgs);
             var answers = new List<FormQuestionAnswer>();
 
             if (registrants.Any())
-                answers = FormQuestionAnswer.LoadByRegistrantIds(registrants.Select(x => x.ID.Value), msgs);
+            {
+                var registrantsWithAnswers = new List<Registrant>();
+                registrantsWithAnswers.AddRange(registrants);
+
+                if (getFirstRegistrantsOnly)
+                    registrants.ForEach(registrant => registrantsWithAnswers.AddRange(registrant.GetRelatedRegistrants(msgs)));
+
+                answers = FormQuestionAnswer.LoadByRegistrantIds(registrantsWithAnswers.Select(x => x.ID.Value), msgs)
+                            .Where(x => !x.Text.IsBlank())
+                            .OrderByDescending(x => x.CreateDate.Value)
+                            .ToList();
+            }
 
             if (msgs.HasNoErrors())
                 return Json(new
                 {
                     status = "ok",
-                    registrants = registrants.Select(x => new { ID = x.ID.Value, CreateDate = x.CreateDate.ToShortDateTimeString() }),
-                    answers = answers.Select(x => new { ID = x.ID.Value, Text = x.GetAnswerText().IfEmpty(""), QuestionId = x.FormQuestionId.Value, RegistrantId = x.RegistrantId.Value }),
+                    registrants = registrants.Select(x => new { ID = x.ID.Value, FirstRegistrantId = x.FirstRegistrantId.IfEmpty(""), CreateDate = x.CreateDate.ToShortDateTimeString() }),
+                    answers = answers.Select(x =>
+                                new 
+                                { 
+                                    ID = x.ID.Value, 
+                                    Text = x.GetAnswerText().IfEmpty(""), 
+                                    QuestionId = x.FormQuestionId.Value, 
+                                    QuestionDataTypeId = (int)x.QuestionDataTypeId, 
+                                    RegistrantId = x.RegistrantId.Value,
+                                    FirstRegistrantId = x.RegistrantFirstRegistrantId
+                                }),
                     registrantCount = totalRegistrantCount,
                     messages = msgs,
                 }, JsonRequestBehavior.AllowGet);

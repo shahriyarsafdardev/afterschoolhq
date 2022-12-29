@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Services
                         .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                         .ThenBy(x => x.DisplayOrder).ToList();
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, msgs);
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, false, msgs);
 
             var table = new List<List<string>>();
             var row = new List<string>();

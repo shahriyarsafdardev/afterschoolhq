@@ -1,6 +1,6 @@
 @model AfterSchool.Models.ReportResults
 @{
-    ViewBag.Title = Model.Form.Name;
+    ViewBag.Title = "Report";
     var questions = Model.Questions;
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
@@ -112,7 +112,7 @@
                 <div class="col-md-12">
                     <span id="starting-record"></span> -
                     <span id="total-records-loaded"></span> of
-                    <span id="total-records"></span> Submissions
+                    <span id="total-records"></span>
                 </div>
             </div>
             <div class="row">
@@ -128,12 +128,14 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
+                                    <th></th>
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
                                     }
                                 </tr>
                                 <tr>
+                                    <th>Registrant ID</th>
                                     <th>Submission ID</th>
                                     <th>Submission Date</th>
                                     @foreach (var question in questions)
@@ -156,7 +158,7 @@
 
 <script>
 
-    var questions = @Html.Raw(questions.Select(x => new { x.ID, x.FormQuestionGroupName, x.Text }).ToJSON());
+    var questions = @Html.Raw(questions.Select(x => new { x.ID, x.Text, QuestionDataTypeId = (int)x.QuestionDataTypeId }).ToJSON());
     var pageStart = 0;
     let pageSize = 25;
 
@@ -202,7 +204,7 @@
         }
 
         $.get(
-            `@Url.Action("EmailReport", "Form", new { form = Model.FormId, activity = Model.ActivityUid })&search=${search}&sdate=${sdate}&edate=${edate}&hidden=${hiddenQuestions}`,
+            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activity=@Model.ActivityUid&search=${search}&sdate=${sdate}&edate=${edate}&hidden=${hiddenQuestions}`,
             function (data) {
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
@@ -252,10 +254,8 @@
         let sdate = encodeURIComponent($('#startdate').val());
         let edate = encodeURIComponent($('#enddate').val());
 
-        console.log('loadRegistrations');
-
         $.get(
-            `@Url.Action("GetReportPage", "Form", new { form = Model.FormId, activity = Model.ActivityUid })&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
+            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activity=@Model.ActivityUid&start=${start}&length=${length}&search=${search}&sdate=${sdate}&edate=${edate}`,
             function (data) {
                 if (data && data.status === 'ok') {
 
@@ -263,12 +263,13 @@
 
                         var tableRow = `<tr>`;
 
+                        tableRow += `<td>${registrant.FirstRegistrantId}</td>`;
                         tableRow += `<td>${registrant.ID}</td>`;
                         tableRow += `<td>${registrant.CreateDate}</td>`;
 
                         for (let question of questions) {
 
-                            answer = getAnswerForQuestion(question.ID, registrant, data.answers);
+                            answer = getAnswerForQuestion(question, registrant, data.answers);
 
                             var hide = "";
 
@@ -300,11 +301,19 @@
         );
     }
 
-    function getAnswerForQuestion(questionId, registrant, answers) {
+    function getAnswerForQuestion(question, registrant, answers) {
 
         for (let answer of answers) {
-            if (answer.QuestionId == questionId && answer.RegistrantId == registrant.ID)
-                return answer;
+            if (answer.Text.trim().length > 0) {
+
+                /*if (registrant.ID == 311 && (answer.RegistrantId == 311 || answer.FirstRegistrantId == 311) && question.ID == 5231) {
+                    console.log(`Registrant = ${answer.RegistrantId}, FirstRegistrant = ${answer.FirstRegistrantId}, questionId = ${question.ID}, answerQuestionId = ${answer.QuestionId}, question = ${question.Text}, answer = ${answer.Text}`);
+                }*/
+
+                if ((answer.RegistrantId == registrant.ID || answer.FirstRegistrantId == registrant.ID) && (answer.QuestionId == question.ID || (answer.QuestionDataTypeId != @((int)QuestionDataType.NotSet) && answer.QuestionDataTypeId == question.QuestionDataTypeId))) {
+                    return answer;
+                }
+            }
         }
 
         return null;
