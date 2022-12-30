@@ -67,7 +67,22 @@
                 </div>
             </div>
 
-            <div class="row hide" id="activityoption-selection">
+            <div class="row hide toggles" id="activityoption-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"   
+                               id="activityoptions"
+                               class="form-control"
+                               value="1"
+                               onclick="toggleAllActivityOptions()" />
+
+                        <label for="activityoptions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
                 @for (var i = 0; i < 4; i++)
                 {
                     var take = (int)Math.Ceiling(Model.ActivityOptions.Count() / 4M);
@@ -82,7 +97,7 @@
                                     <input type="checkbox" 
                                            id="activityoption-@activity.ID" 
                                            name="activityoption-@activity.ID" 
-                                           class="form-control" 
+                                           class="form-control activityoption" 
                                            value="1" 
                                            @(activity.ID.In(Model.SelectedActivities.Select(x => x.ID)) ? "checked=\"checked\"" : "")
                                            onclick="toggleActivityOption(@activity.ID)" />
@@ -98,7 +113,7 @@
                 }
             </div>
 
-            <div class="row hide" id="column-selection">
+            <div class="row hide toggles" id="column-selection">
                 @{
                     var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
                 }
@@ -192,6 +207,7 @@
     var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());;
     var pageStart = 0;
     let pageSize = 25;
+    var maxRecords = null;
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -262,6 +278,7 @@
 
     function toggleColumnSelection() {
         if ($('#column-selection').hasClass('hide')) {
+            hideToggles();
             $('#column-selection').removeClass('hide');
         } else {
             $('#column-selection').addClass('hide');
@@ -270,6 +287,7 @@
 
     function toggleActivityOptionSelection() {
         if ($('#activityoption-selection').hasClass('hide')) {
+            hideToggles();
             $('#activityoption-selection').removeClass('hide');
         } else {
             $('#activityoption-selection').addClass('hide');
@@ -301,6 +319,20 @@
         search();
     }
 
+    function toggleAllActivityOptions() {
+        if ($('#activityoptions').is(':checked')) {
+            $('.activityoption').prop('checked', true);
+        } else {
+            $('.activityoption').prop('checked', false);
+        }
+
+        search();
+    }
+
+    function hideToggles() {
+        $('.toggles').addClass('hide');
+    }
+
     function emailReport() {
         $.get(
             `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}`,
@@ -318,11 +350,28 @@
         );
     }
 
+    function addLoading() {
+        $('#answer-tbody').append(`<tr id="tr-loading"><td class="padding-20" colspan="${(questions.length + 1)}"><h4>Loading...</h4></td></tr>`);
+        console.log('should be added');
+    }
+
+    function removeLoading() {
+        $('#tr-loading').remove();
+    }
+
     function loadRegistrants(start, length) {
+
+        if (maxRecords && start >= maxRecords)
+            return;
+
+        addLoading();
 
         $.get(
             `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}`,
             function (data) {
+
+                removeLoading();
+
                 if (data && data.status === 'ok') {
 
                     for (let registrant of data.registrants) {
@@ -357,6 +406,8 @@
                     $('#starting-record').html(1);
                     $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
                     $('#total-records').html(data.registrantCount);
+
+                    maxRecords = data.registrantCount;
 
                 } else {
                     Notifications.showErrors(data.messages);
