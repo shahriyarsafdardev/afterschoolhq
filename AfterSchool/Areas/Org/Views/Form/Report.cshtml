@@ -161,14 +161,12 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th></th>
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
                                     }
                                 </tr>
                                 <tr>
-                                    <th>Submission Date</th>
                                     <th>Activities</th>
                                     @foreach (var question in questions)
                                     {
@@ -331,7 +329,6 @@
 
                         var tableRow = `<tr>`;
                         
-                        tableRow += `<td>${registrant.CreateDate}</td>`;
                         tableRow += `<td>${registrant.Activities}</td>`;
 
                         for (let question of questions) {

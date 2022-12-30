@@ -101,8 +101,7 @@ namespace AfterSchoolLibrary.Services
 
             if (getFirstRegistrantsOnly)
             {
-                row.Add("Submission Id");
-                row.Add("Submission Date");
+                row.Add("Activities");
             }
 
             foreach (var question in questions)
@@ -112,13 +111,18 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var registrant in registrants)
             {
-                row = new List<string>();
+                row = new List<string>();              
+
+                var ras = registrant.GetRegistrantActivities(msgs);
 
                 if (getFirstRegistrantsOnly)
-                {
-                    row.Add(registrant.ID.ToString());
-                    row.Add(registrant.CreateDate.ToShortDateTimeString());
-                }
+                    registrant.GetRelatedRegistrants(msgs)
+                        .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
+
+                if (activityIds.Any())
+                    ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
 
                 var answers = registrant.GetAnswers(msgs);
 
