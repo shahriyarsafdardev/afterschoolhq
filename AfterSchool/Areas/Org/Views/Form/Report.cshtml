@@ -48,7 +48,7 @@
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
                     <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
-                    <button type="button" class="btn btn-primary" onclick="emailReport()">Email Report</button>
+                    <button type="button" class="btn btn-default" onclick="emailReport()">Email Report</button>
                 </div>
                 <div class="col-md-2">
                     <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
@@ -424,7 +424,6 @@
     }
 
     function toggleActivityOption() {
-        search();
     }
 
     function toggleAllActivityOptions() {
@@ -433,8 +432,6 @@
         } else {
             $('.activityoption').prop('checked', false);
         }
-
-        search();
     }
 
     function hideToggles() {

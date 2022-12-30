@@ -1,4 +1,4 @@
-﻿@model AfterSchool.Areas.Org.Assemblers.Registration.RegistrationIndexResult
+@model AfterSchool.Areas.Org.Assemblers.Registration.RegistrationIndexResult
 @{
     var msgs = Model.Messages;
     var paging = Model.PagingModel;
@@ -51,6 +51,7 @@
                 <div class="col-md-12">
                     <button type="button" class="btn btn-primary" onclick="doSearch()">Search</button>
                     <button class="btn btn-default md-trigger" data-modal="modal-emails">Email Report...</button>
+                    <a href="@Url.Action("report", "form")" class="btn btn-default" target="_blank">Custom Report</a>
                     <button class="btn btn-default" onclick="sendMessages()">Send Messages &raquo;</button>
                 </div>
             </div>
