@@ -3915,15 +3915,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 return false;
 
             parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
-                null,
-                parentFirstName,
-                parentLastName,
-                parentEmail,
-                parentPhone,
-                Guid.NewGuid().ToString().MaxChars(8), //setting temp password
-            true,
-            amsgs,
-                adc);
+                            null,
+                            parentFirstName,
+                            parentLastName,
+                            parentEmail,
+                            parentPhone,
+                            Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+                            true,
+                            amsgs,
+                            adc);
 
             if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
                 parentAccount = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(parentUser, amsgs, adc);
@@ -3932,7 +3932,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
 
             if (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - "))
-                parent2Registrant = currentAccount.CreateParentOrStudentRegistrant(
+                parent2Registrant = parentAccount.CreateParentOrStudentRegistrant(
                                         registrantOwner: null,
                                         canBeAccessedBy: parentUser.AsList(),
                                         registrantType: RegistrantType.Individual,
