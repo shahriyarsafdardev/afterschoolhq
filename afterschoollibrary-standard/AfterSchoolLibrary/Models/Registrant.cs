@@ -752,7 +752,7 @@ namespace AfterSchoolLibrary.Models
 
             if (activityIds.Any())
                 sql += @"
-                    inner join 
+                    left outer join 
                     RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
 
             sql += @$"
@@ -771,13 +771,36 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 sql += $" and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}'";
 
-            if (activityIds.Any())
-                sql += @$"
+            if (getFirstRegistrantsOnly)
+            {
+                sql += " and Registrant.FirstRegistrantId is NULL";
+
+                if (activityIds.Any())
+                    sql += @$"
+                    and 
+                    (
+                        (RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                        and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        or 
+                        Registrant.ID in 
+                        (
+                            select r2.FirstRegistrantId 
+                            from 
+                                Registrant r2 inner join RegistrantActivity ra2 on r2.ID = ra2.RegistrantId
+                            where 
+                                r2.FirstRegistrantId = Registrant.ID and
+                                (ra2.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                                and ra2.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        )
+                    )";
+            }
+            else
+            {
+                if (activityIds.Any())
+                    sql += @$"
                     and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
-
-            if (getFirstRegistrantsOnly)
-                sql += " and Registrant.FirstRegistrantId is NULL";
+            }
 
             if (!getCountOnly)
                 sql += @"

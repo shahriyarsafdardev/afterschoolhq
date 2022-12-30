@@ -82,7 +82,7 @@ namespace AfterSchoolLibrary.Services
 
             var getFirstRegistrantsOnly = false;
 
-            if (!activityIds.Any() && !formId.HasValue)
+            if (activityIds.Count != 1 && !formId.HasValue)
                 getFirstRegistrantsOnly = true;
 
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, getFirstRegistrantsOnly, msgs);         

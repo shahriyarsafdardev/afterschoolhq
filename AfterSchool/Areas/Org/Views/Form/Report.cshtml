@@ -79,7 +79,14 @@
                         {
                             <div>
                                 <div class="am-checkbox">
-                                    <input type="checkbox" id="activityoption-@activity.ID" name="activityoption-@activity.ID" class="form-control" value="1" checked="checked" onclick="toggleActivityOption(@activity.ID)" />
+                                    <input type="checkbox" 
+                                           id="activityoption-@activity.ID" 
+                                           name="activityoption-@activity.ID" 
+                                           class="form-control" 
+                                           value="1" 
+                                           @(activity.ID.In(Model.SelectedActivities.Select(x => x.ID)) ? "checked=\"checked\"" : "")
+                                           onclick="toggleActivityOption(@activity.ID)" />
+
                                     <label for="activityoption-@activity.ID">
                                         @activity.Name
                                     </label>
@@ -155,16 +162,14 @@
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th></th>
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
                                     }
                                 </tr>
                                 <tr>
-                                    <th>Registrant ID</th>
-                                    <th>Submission ID</th>
                                     <th>Submission Date</th>
+                                    <th>Activities</th>
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.Text</th>
@@ -325,10 +330,9 @@
                     for (let registrant of data.registrants) {
 
                         var tableRow = `<tr>`;
-
-                        tableRow += `<td>${registrant.FirstRegistrantId}</td>`;
-                        tableRow += `<td>${registrant.ID}</td>`;
+                        
                         tableRow += `<td>${registrant.CreateDate}</td>`;
+                        tableRow += `<td>${registrant.Activities}</td>`;
 
                         for (let question of questions) {
 
