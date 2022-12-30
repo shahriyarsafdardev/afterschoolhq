@@ -44,7 +44,8 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
-        public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
+        public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
@@ -85,7 +86,8 @@ namespace AfterSchoolLibrary.Services
             if (activityIds.Count != 1 && !formId.HasValue)
                 getFirstRegistrantsOnly = true;
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, getFirstRegistrantsOnly, msgs);         
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
+                                getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 
@@ -98,11 +100,7 @@ namespace AfterSchoolLibrary.Services
             table.Add(row);
 
             row = new List<string>();
-
-            if (getFirstRegistrantsOnly)
-            {
-                row.Add("Activities");
-            }
+            row.Add("Activities");
 
             foreach (var question in questions)
                 row.Add(question.Text);

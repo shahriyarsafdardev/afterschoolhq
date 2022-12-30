@@ -204,7 +204,7 @@
 
             @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
             {
-                <a href="@Url.Action("Report", "Form", new {activity = Model.Activity.ID})" class="btn btn-default btn-space" target="_blank">
+                <a href="@Url.Action("Report", "Form", new {activities = Model.Activity.ID})" class="btn btn-default btn-space" target="_blank">
                     View Submissions
                 </a>
             }

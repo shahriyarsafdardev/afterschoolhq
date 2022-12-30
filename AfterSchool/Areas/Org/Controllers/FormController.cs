@@ -364,7 +364,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities)
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, string searchquestions)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -374,6 +374,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var endDate = new DateTime?();
             var activityIds = new List<int>();
             var getFirstRegistrantsOnly = false;
+            var searchQuestionIds = new List<int>();
+            var searchQuestionTypeIds = new List<QuestionDataType>();
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -390,8 +392,14 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activityIds.Count != 1 && !formId.HasValue)
                 getFirstRegistrantsOnly = true;
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, getFirstRegistrantsOnly, msgs);
-            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, msgs);
+            if (searchquestions.IsNotBlank())
+            {
+                searchQuestionIds = searchquestions.Split(',').Select(x => x.Split('|').First().ToInteger()).ToList();
+                searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
+            }
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);
+            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);
             var answers = new List<FormQuestionAnswer>();
             var registrantActivities = new Dictionary<int, string>();
 
@@ -463,7 +471,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities)
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, string searchquestions)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -474,6 +482,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
             var startDate = new DateTime?();
             var endDate = new DateTime?();
+            var searchQuestionIds = new List<int>();
+            var searchQuestionTypeIds = new List<QuestionDataType>();
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -487,6 +497,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (activities.IsNotBlank())
                 activityIds = activities.Split(',').ToIntegerArray().ToList();
 
+            if (searchquestions.IsNotBlank())
+            {
+                searchQuestionIds = searchquestions.Split(',').Select(x => x.Split('|').First().ToInteger()).ToList();
+                searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
+            }
+
             BackgroundJob.Enqueue(() =>
                 FormService.EmailDataReport(
                     currentAccount.ID.Value,
@@ -495,7 +511,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     search, 
                     startDate, 
                     endDate, 
-                    hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { }, 
+                    hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { },
+                    searchQuestionIds, 
+                    searchQuestionTypeIds,
                     currentUser.ID.Value)
             );
 

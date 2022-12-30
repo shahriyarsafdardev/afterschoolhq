@@ -46,7 +46,8 @@
                     <input type="text" id="search" placeholder="Search" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-primary" onclick="search()">Search</button>
+                    <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
+                    <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
                     <button type="button" class="btn btn-primary" onclick="emailReport()">Email Report</button>
                 </div>
                 <div class="col-md-2">
@@ -63,6 +64,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleSearchColumnSelection()"><i class="s7-gleam"></i> Search Columns</button>
                     <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Visible Columns</button>
                 </div>
             </div>
@@ -71,7 +73,7 @@
 
                 <div class="col-md-12">
                     <div class="am-checkbox">
-                        <input type="checkbox"   
+                        <input type="checkbox"
                                id="activityoptions"
                                class="form-control"
                                value="1"
@@ -94,11 +96,11 @@
                         {
                             <div>
                                 <div class="am-checkbox">
-                                    <input type="checkbox" 
-                                           id="activityoption-@activity.ID" 
-                                           name="activityoption-@activity.ID" 
-                                           class="form-control activityoption" 
-                                           value="1" 
+                                    <input type="checkbox"
+                                           id="activityoption-@activity.ID"
+                                           name="activityoption-@activity.ID"
+                                           class="form-control activityoption"
+                                           value="1"
                                            @(activity.ID.In(Model.SelectedActivities.Select(x => x.ID)) ? "checked=\"checked\"" : "")
                                            onclick="toggleActivityOption(@activity.ID)" />
 
@@ -110,6 +112,61 @@
                         }
 
                     </div>
+                }
+            </div>
+
+            <div class="row hide toggles" id="search-column-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="search-columns"
+                               class="form-control"
+                               value="1"
+                               checked="checked"
+                               onclick="toggleAllSearchColumns()" />
+
+                        <label for="search-columns">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
+                @{
+                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                }
+                @foreach (var group in searchGroups)
+                {
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="search-group-@group.ID" name="search-group-@group.ID" class="form-control search-questions" value="1" checked="checked" onclick="toggleSearchGroup(@group.ID)" />
+                            <label for="search-group-@group.ID" class="text-medium-small text-bold">
+                                @group.Name
+                            </label>
+                        </div>
+                    </div>
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var take = (int)Math.Ceiling(questions.Where(x => x.FormQuestionGroupId == group.ID).Count() / 4M);
+                        var skip = i * take;
+
+                        <div class="col-md-3">
+
+                            @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID).Skip(skip).Take(take))
+                            {
+                                <div>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="search-question-@question.ID" name="search-question-@question.ID" class="form-control search-questions search-question-group-@group.ID" value="1" checked="checked" />
+                                        <label for="search-question-@question.ID">
+                                            @question.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
                 }
             </div>
 
@@ -140,7 +197,7 @@
                                 <div>
                                     <div class="am-checkbox">
                                         <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
-                                        <label for="question-@question.ID">                                            
+                                        <label for="question-@question.ID">
                                             @question.Text
                                         </label>
                                     </div>
@@ -203,7 +260,7 @@
 
 <script>
 
-    var questions = @Html.Raw(questions.Select(x => new { x.ID, x.Text, QuestionDataTypeId = (int)x.QuestionDataTypeId }).ToJSON());
+    var questions = @Html.Raw(questions.Select(question => new { question.ID, question.Text, QuestionDataTypeId = (int)question.QuestionDataTypeId }).ToJSON());
     var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());;
     var pageStart = 0;
     let pageSize = 25;
@@ -227,6 +284,11 @@
     function resetScreen() {
         pageStart = 0;
         $('#answer-tbody').html('');
+    }
+
+    function searchClick() {
+        hideToggles();
+        search();
     }
 
     function search() {
@@ -276,21 +338,27 @@
         return hiddenQuestions;
     }
 
+    function getSearchQuestionIdList() {
+        var searchQuestions = "";
+
+        for (let question of questions) {
+            if ($(`#search-question-${question.ID}`).is(':checked')) {
+                if (searchQuestions.length > 0)
+                    searchQuestions += ',';
+
+                searchQuestions += `${question.ID}|${question.QuestionDataTypeId}`;
+            }
+        }
+
+        return searchQuestions;
+    }
+
     function toggleColumnSelection() {
         if ($('#column-selection').hasClass('hide')) {
             hideToggles();
             $('#column-selection').removeClass('hide');
         } else {
             $('#column-selection').addClass('hide');
-        }
-    }
-
-    function toggleActivityOptionSelection() {
-        if ($('#activityoption-selection').hasClass('hide')) {
-            hideToggles();
-            $('#activityoption-selection').removeClass('hide');
-        } else {
-            $('#activityoption-selection').addClass('hide');
         }
     }
 
@@ -315,6 +383,46 @@
         }
     }
 
+    function toggleSearchColumnSelection() {
+        if ($('#search-column-selection').hasClass('hide')) {
+            hideToggles();
+            $('#search-column-selection').removeClass('hide');
+        } else {
+            $('#search-column-selection').addClass('hide');
+        }
+    }
+
+    function toggleSearchGroup(groupId) {
+        if ($(`#search-group-${groupId}`).is(':checked')) {
+            $(`.search-question-group-${groupId}`).prop('checked', true);
+        } else {
+            $(`.search-question-group-${groupId}`).prop('checked', false);
+        }
+
+        $(`.search-question-group-${groupId}`).each(function () {
+            let questionId = $(this).attr('id').split('-')[1];
+            toggleColumn(questionId);
+        });
+    }
+
+    function toggleAllSearchColumns() {
+        if ($('#search-columns').is(':checked')) {
+            $('.search-questions').prop('checked', true);
+        } else {
+            $('.search-questions').prop('checked', false);
+        }
+        search();
+    }
+
+    function toggleActivityOptionSelection() {
+        if ($('#activityoption-selection').hasClass('hide')) {
+            hideToggles();
+            $('#activityoption-selection').removeClass('hide');
+        } else {
+            $('#activityoption-selection').addClass('hide');
+        }
+    }
+
     function toggleActivityOption() {
         search();
     }
@@ -335,7 +443,7 @@
 
     function emailReport() {
         $.get(
-            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}`,
+            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}`,
             function (data) {
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
@@ -367,7 +475,7 @@
         addLoading();
 
         $.get(
-            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}`,
+            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}`,
             function (data) {
 
                 removeLoading();
@@ -403,7 +511,9 @@
 
                     pageStart += pageSize;
 
-                    $('#starting-record').html(1);
+                    if (data.registrants.length > 0)
+                        $('#starting-record').html(1);
+
                     $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
                     $('#total-records').html(data.registrantCount);
 
