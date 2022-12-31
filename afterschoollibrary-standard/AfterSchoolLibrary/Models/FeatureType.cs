@@ -37,4 +37,6 @@ public enum FeatureType
     ManualStripePayouts = 36,
     FreeActivityLimit = 37,
     ManageVolunteerOpportunities = 38,
+    AllowRegistrantImport = 39,
+    
 }

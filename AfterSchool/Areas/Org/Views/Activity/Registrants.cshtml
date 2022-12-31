@@ -219,7 +219,7 @@
                 Print Registrations
             </a>
 
-            @if (!Model.Activity.ActivityGroupId.HasValue)
+            @if (!Model.Activity.ActivityGroupId.HasValue && Model.AccountPackage.HasFeature(FeatureType.AllowRegistrantImport))
             {
                 <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
                     Import Students
