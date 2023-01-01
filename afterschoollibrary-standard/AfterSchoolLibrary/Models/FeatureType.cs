@@ -38,4 +38,5 @@ public enum FeatureType
     FreeActivityLimit = 37,
     ManageVolunteerOpportunities = 38,
     AllowRegistrantImport = 39,
+    AdvancedReports = 40,
 }
