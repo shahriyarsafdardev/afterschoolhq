@@ -3589,6 +3589,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var parentEmailIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1EmailLabel}");
             var parent1PhoneLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).First().Text;
             var parentPhoneIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1PhoneLabel}");
+            var parent1Emails = new List<string>();
 
             if (createParentAccounts && parentEmailIndex == -1)
             {
@@ -3604,7 +3605,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     var validatedField = new ImportField();
                     validatedField.Value = row[i];
 
-                    var field = row[i];
+                    var field = row[i].IfBlank("").Trim();
                     var question = questions.Where(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")).FirstOrDefault();
 
                     if (question.IsEmpty())
@@ -3650,8 +3651,16 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                                 validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
 
-                            if (createParentAccounts && i == parentEmailIndex && WebUser.ExistsByEmail(field, msgs))
-                                validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
+                            if (createParentAccounts && i == parentEmailIndex)
+                            {
+                                if (WebUser.ExistsByEmail(field, msgs))
+                                    validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
+                                
+                                if (field.In(parent1Emails))
+                                    validatedField.Messages.Add("This email is a duplicate of another parent email in this import.", MessageType.UserError);
+
+                                parent1Emails.Add(field);
+                            }
 
                             break;
 
