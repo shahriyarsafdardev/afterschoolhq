@@ -147,11 +147,15 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsActive"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsActive"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
