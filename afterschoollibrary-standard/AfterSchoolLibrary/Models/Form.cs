@@ -26,11 +26,12 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
+        public bool IsActive { get { return (bool) MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+        public bool IsDeleted { get { return (bool) MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+        /// <summary>
+        /// Required.
+        /// </summary>
+        public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -39,8 +40,9 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(Form).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
-			this.IsActive = false;
-			this.FormTypeId = FormType.NotSet;
+            this.IsActive = true;
+            this.IsDeleted = false;
+            this.FormTypeId = FormType.NotSet;
 			
         }
 
@@ -53,8 +55,9 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -167,6 +170,7 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 		
@@ -176,6 +180,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -300,6 +305,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["Id"], Id);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 		
@@ -308,7 +314,8 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
             if (formTypeId != FormType.NotSet)
                 dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
             
@@ -325,7 +332,8 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
             if (formTypeId != FormType.NotSet)
                 dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
             
