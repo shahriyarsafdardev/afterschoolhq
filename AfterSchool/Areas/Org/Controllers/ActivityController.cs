@@ -3635,7 +3635,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             break;
 
                         case QuestionType.TextBox:
-                        case QuestionType.TextArea:                            
+                        case QuestionType.TextArea:
+
+                            if (field.IsNotBlank() && question.IsPhoneDataType() && !field.IsPhone())
+                                validatedField.Messages.Add("Phone must be a valid phone number", MessageType.UserError);
 
                             if (createParentAccounts && i == parentPhoneIndex && field.IsNotBlank() && WebUser.ExistsByPhone(field, msgs))
                                 validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
