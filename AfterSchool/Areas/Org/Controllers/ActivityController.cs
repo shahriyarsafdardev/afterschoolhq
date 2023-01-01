@@ -3765,9 +3765,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
             var parent1EmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).First().Text;
             var parentEmailIndex = -1;
+            var registrationIdIndex = -1;
 
             if (parent1EmailLabel.IsNotEmpty())
                 parentEmailIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1EmailLabel}");
+
+            registrationIdIndex = headers.IndexOf("Registration ID");
 
             period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
             participationObject = activity.GetParticipationObject(amsgs, adc);
@@ -3781,30 +3784,40 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                student = currentAccount.CreateParentOrStudentRegistrant(
-                    registrantOwner: null,
-                    canBeAccessedBy: null,
-                    registrantType: RegistrantType.Individual,
-                    isMaster: false,
-                    isParentOrGuardian: false,
-                    allowTextMessages: false,
-                    schoolLocationId: null,
-                    profileStatus: RegistrantProfileStatus.Started,
-                    loggedInUser: currentUser,
-                    msgs: amsgs,
-                    dc: adc);
+                if (registrationIdIndex > -1)
+                {
+                    var registrationId = reader.GetField<string>(registrationIdIndex);
 
-                // create a registration only if not creating parent accounts
-                // registration will be created later
-                registration = student.AddRegistration(
-                    ownerAccountId: currentAccount.ID.Value,
-                    activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                    accountActivityGroupId: participationObject.GetAnyRelatedAccountActivityGroupId(),
-                    periodId: period?.ID,
-                    completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
-                    loggedInUserId: currentUser.ID.Value,
-                    msgs: amsgs,
-                    dc: adc);
+                    registration = currentAccount.GetRegistration(registrationId.ToInteger(), amsgs, adc);
+                    student = registration.GetRegistrant(amsgs, adc);
+                }
+                else
+                {
+                    student = currentAccount.CreateParentOrStudentRegistrant(
+                        registrantOwner: null,
+                        canBeAccessedBy: null,
+                        registrantType: RegistrantType.Individual,
+                        isMaster: false,
+                        isParentOrGuardian: false,
+                        allowTextMessages: false,
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: currentUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    // create a registration only if not creating parent accounts
+                    // registration will be created later
+                    registration = student.AddRegistration(
+                        ownerAccountId: currentAccount.ID.Value,
+                        activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                        accountActivityGroupId: participationObject.GetAnyRelatedAccountActivityGroupId(),
+                        periodId: period?.ID,
+                        completionStatus: RegistrationCompletionStatus.RequiresParentSignature,
+                        loggedInUserId: currentUser.ID.Value,
+                        msgs: amsgs,
+                        dc: adc);
+                }
             }
 
             return true;

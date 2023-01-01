@@ -2044,6 +2044,15 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static Registration GetRegistration(this Account account, int registrationId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Registration.LoadByIdByAccountId(registrationId, account.ID.Value, msgs, dc);
+
+            return null;
+        }
+
         public static List<Registration> GetRegistrationsByDate(this Account account, DateTime startDate,
             DateTime endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
