@@ -100,6 +100,7 @@ namespace AfterSchoolLibrary.Services
             table.Add(row);
 
             row = new List<string>();
+            row.Add("Registrant ID");
             row.Add("Activities");
 
             foreach (var question in questions)
@@ -120,8 +121,6 @@ namespace AfterSchoolLibrary.Services
                 if (activityIds.Any())
                     ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
 
-                row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
-
                 var answers = registrant.GetAnswers(msgs);
 
                 if (getFirstRegistrantsOnly)
@@ -129,6 +128,12 @@ namespace AfterSchoolLibrary.Services
                     var related = registrant.GetRelatedRegistrants(msgs);
                     related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));
                 }
+
+                row.Add(registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'));
+                if (ras.Any())
+                    row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
+                else
+                    row.Add("");
 
                 foreach (var question in questions)
                 {

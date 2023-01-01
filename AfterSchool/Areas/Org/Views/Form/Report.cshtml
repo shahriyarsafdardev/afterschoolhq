@@ -233,12 +233,14 @@
                             <thead>
                                 <tr>
                                     <th></th>
+                                    <th></th>
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
                                     }
                                 </tr>
                                 <tr>
+                                    <th>Registrant ID</th>
                                     <th>Activities</th>
                                     @foreach (var question in questions)
                                     {
@@ -464,10 +466,17 @@
         $('#tr-loading').remove();
     }
 
+    var isLoading = false;
+
     function loadRegistrants(start, length) {
 
         if (maxRecords && start >= maxRecords)
             return;
+
+        if (isLoading)
+            return;
+
+        isLoading = true;
 
         addLoading();
 
@@ -482,7 +491,8 @@
                     for (let registrant of data.registrants) {
 
                         var tableRow = `<tr>`;
-                        
+
+                        tableRow += `<td>${registrant.RecordId}</td>`;
                         tableRow += `<td>${registrant.Activities}</td>`;
 
                         for (let question of questions) {
@@ -519,6 +529,8 @@
                 } else {
                     Notifications.showErrors(data.messages);
                 }
+
+                isLoading = false;
             }
         );
     }

@@ -447,7 +447,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                     ID = registrant.ID.Value, 
                                     FirstRegistrantId = registrant.FirstRegistrantId.IfEmpty(""), 
                                     CreateDate = registrant.CreateDate.ToShortDateTimeString(),
-                                    Activities = registrantActivities[registrant.ID.Value]
+                                    Activities = registrantActivities[registrant.ID.Value],
+                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0')
                                 }),
                     answers = answers.Select(answer =>
                                 new 
