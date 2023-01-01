@@ -121,6 +121,7 @@ namespace AfterSchoolLibrary.Helpers
                     Migration_20221019_AddBeamerProviderFeatureFlag.Do(amsgs,adc);
                     Migration_20221208_AddActivityMessageParentsOnly.Do(amsgs, adc);
                     Migration_20221225_AddFormsReportingFeatureFlag.Do(amsgs, adc);
+                    Migration_20221231_FormQuestionOptionsJson.Do(amsgs, adc);
 
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
