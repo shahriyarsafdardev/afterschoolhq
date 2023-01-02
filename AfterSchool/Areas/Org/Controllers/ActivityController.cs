@@ -3495,6 +3495,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
+                        var parent1Emails = new List<string>();
+
                         while (reader.Read())
                         {
                             if (headers.Count == 0)
@@ -3514,7 +3516,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             RegistrationPeriod period = null;
                             ParticipationObject participationObject = null;
 
-                            if (!CreateAndLoadDataDuringImport(activity, headers, questions, reader, createParentAccounts, ref parentUser, ref parentAccount,
+                            if (!CreateAndLoadDataDuringImport(activity, headers, questions, reader, createParentAccounts, parent1Emails, ref parentUser, ref parentAccount,
                                 ref student, ref parentRegistrant, ref parent2Registrant, ref registration, ref participationObject, ref period,
                                 currentAccount, currentUser, amsgs, adc))
                                 continue;
@@ -3657,7 +3659,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
                                 
                                 if (field.In(parent1Emails))
-                                    validatedField.Messages.Add("This email is a duplicate of another parent email in this import.", MessageType.UserError);
+                                    validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
 
                                 parent1Emails.Add(field);
                             }
@@ -3751,7 +3753,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
         }
 
-        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts, 
+        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts, List<string> parent1Emails,
             ref WebUser parentUser, ref Account parentAccount,
             ref Registrant student, ref Registrant parentRegistrant, ref Registrant parent2Registrant,
             ref Registration registration, ref ParticipationObject participationObject, ref RegistrationPeriod period,
@@ -3769,7 +3771,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (createParentAccounts && parentEmailIndex > -1)
             {
-                if (!CreateNewAccountRegistrantsDuringImport(questions, headers, reader, parentEmailIndex,
+                if (!CreateNewAccountRegistrantsDuringImport(questions, headers, reader, parentEmailIndex, parent1Emails,
                     ref parentUser, ref parentAccount, ref parentRegistrant, ref parent2Registrant, ref student,
                     currentUser, currentAccount, amsgs, adc))
                     return false;
@@ -3879,7 +3881,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvHelper.CsvReader reader, int parentEmailIndex, 
+        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvHelper.CsvReader reader, int parentEmailIndex, List<string> parent1Emails,
             ref WebUser parentUser, ref Account parentAccount, ref Registrant parentRegistrant, ref Registrant parent2Registrant, ref Registrant student,
             WebUser currentUser, Account currentAccount, SystemMessages amsgs, DatabaseConnection adc)
         {
@@ -3895,32 +3897,40 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var parent1FirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1FirstName).First().Text;
             var parent1LastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1LastName).First().Text;
+            var parent2FirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent2FirstName).First().Text;
+            var parent2LastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent2LastName).First().Text;
 
             var parentFirstNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1FirstNameLabel}");
             var parentLastNameIndex = headers.IndexOf($"{parent1InformationLabel} - {parent1LastNameLabel}");
+            var parent2FirstNameIndex = headers.IndexOf($"{parent2InformationLabel} - {parent2FirstNameLabel}");
+            var parent2LastNameIndex = headers.IndexOf($"{parent2InformationLabel} - {parent2LastNameLabel}");
 
             var parentFirstName = reader.GetField<string>(parentFirstNameIndex);
             var parentLastName = reader.GetField<string>(parentLastNameIndex);
             var parentEmail = reader.GetField<string>(parentEmailIndex);
             var parentPhone = reader.GetField<string>(parentPhoneIndex);
-            var accountIssues = false;
 
-            if (WebUser.ExistsByEmail(parentEmail, amsgs, adc))
+            // if parent account wasn't created during this import
+            if (!parent1Emails.Contains(parentEmail))
             {
-                amsgs.Add($"{parentEmail} is already in use, record will be skipped", MessageType.Warning);
-                accountIssues = true;
-            }
+                var accountIssues = false;
 
-            if (WebUser.ExistsByPhone(parentPhone, amsgs, adc))
-            {
-                amsgs.Add($"{parentPhone} is already in use, record will be skipped", MessageType.Warning);
-                accountIssues = true;
-            }
+                if (WebUser.ExistsByEmail(parentEmail, amsgs, adc))
+                {
+                    amsgs.Add($"{parentEmail} is already in use, record will be skipped", MessageType.Warning);
+                    accountIssues = true;
+                }
 
-            if (accountIssues)
-                return false;
+                if (WebUser.ExistsByPhone(parentPhone, amsgs, adc))
+                {
+                    amsgs.Add($"{parentPhone} is already in use, record will be skipped", MessageType.Warning);
+                    accountIssues = true;
+                }
 
-            parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                if (accountIssues)
+                    return false;
+
+                parentUser = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
                             null,
                             parentFirstName,
                             parentLastName,
@@ -3931,13 +3941,37 @@ namespace AfterSchool.Areas.Org.Controllers
                             amsgs,
                             adc);
 
-            if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
-                parentAccount = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(parentUser, amsgs, adc);
+                if (amsgs.HasNoErrors() && parentUser.IsNotEmpty())
+                    parentAccount = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(parentUser, amsgs, adc);
 
-            if (amsgs.HasNoErrors())
-                parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
+                if (amsgs.HasNoErrors())
+                    parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, amsgs, adc);
+            }
+            else
+            {
+                parentUser = WebUser.LoadByEmail(parentEmail, amsgs, adc);
+                parentAccount = parentUser.GetRegistrantAccount(amsgs, adc);
+                parentRegistrant = parentUser.GetMasterParentOrStudentRegistrant(amsgs, adc);
 
-            if (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - "))
+                // if the existing parent2Registrant is the same as the previous imported one, don't create a new profile
+                // if a different name (could be a different parent), then create a new parent profile
+                var parentRegistrantId = parentRegistrant.ID;
+                var parent2Registrants = parentUser.GetAllRegistrants(amsgs, adc).Where(x => x.IsParentOrGuardian && x.ID != parentRegistrantId).ToList();
+
+                if (parent2Registrants.Any())
+                {
+                    var parent2FirstName = reader.GetField<string>(parent2FirstNameIndex);
+                    var parent2LastName = reader.GetField<string>(parent2LastNameIndex);
+                    var tempParent2Registrant = parent2Registrants.First();
+
+                    if (tempParent2Registrant.FirstName.IsSameAs(parent2FirstName) && tempParent2Registrant.LastName.IsSameAs(parent2LastName))
+                    {
+                        parent2Registrant = tempParent2Registrant;
+                    }
+                }
+            }
+
+            if (parent2Registrant.IsEmpty() && (headers.ContainsLike($"{parent2InformationLabel} - ") || headers.ContainsLike($"{parent2AddressLabel} - ")))
                 parent2Registrant = parentAccount.CreateParentOrStudentRegistrant(
                                         registrantOwner: null,
                                         canBeAccessedBy: parentUser.AsList(),
@@ -3950,6 +3984,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         loggedInUser: currentUser,
                                         msgs: amsgs,
                                         dc: adc);
+
 
             // create student registrant record
             student = parentAccount.CreateParentOrStudentRegistrant(
@@ -3964,6 +3999,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         loggedInUser: currentUser,
                         msgs: amsgs,
                         dc: adc);
+
+            parent1Emails.Add(parentEmail);
 
             return true;
         }
