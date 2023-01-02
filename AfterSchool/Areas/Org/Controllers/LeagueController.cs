@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -395,6 +395,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Edit(string id)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
 
             var league = new ActivityGroup()
             {
@@ -405,11 +406,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.IsGuid())
                 league = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
 
-            var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
+            var aag = league.GetAccountActivityGroup(currentAccount, msgs);
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || league.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.AccountActivityGroup = aag;
 
@@ -518,7 +519,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || league.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Grades = GradeLevel.Load();
             ViewBag.AccountActivityGroup = aag;
 
@@ -786,7 +787,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var aag = league.GetAccountActivityGroup(SessionVariables.CurrentAccount, msgs);
 
             if (aag.FormId.IsEmpty())
-                aag.FormId = SessionVariables.CurrentAccount.GetForms().FirstOrDefault()?.ID;
+                aag.FormId = SessionVariables.CurrentAccount.GetForms(false).FirstOrDefault()?.ID;
             if (aag.ContactName.IsEmpty())
                 aag.ContactName = SessionVariables.CurrentUser.DisplayName;
             if (aag.ContactPhone.IsEmpty())

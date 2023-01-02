@@ -17,6 +17,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using CsvHelper;
 using Hangfire;
+using Twilio.TwiML.Voice;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -1501,7 +1502,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
-            var forms = currentAccount.GetForms(activity.ActivityTypeId, msgs);
+            var forms = currentAccount.GetForms(activity.ActivityTypeId, false, msgs).Where(x => !x.IsArchived || activeForm.FormId == x.ID).OrderBy(x => x.Name).ToList();
 
             return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
                 SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, isNew, forms,
@@ -3183,9 +3184,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
-            var forms = currentAccount.GetSurveyForms(msgs);
+            var forms = currentAccount.GetSurveyForms(false, msgs).OrderBy(x => x.Name).ToList();
+            
             periods.Add(activePeriod);
             periods = periods.OrderBy(period => period.StartDateTime.Value).ToList();
+
             var formsList = forms.OrderBy(x => x.Name).ToList();
             var isActivityLeader =
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType, currentUserIsActivityLeader);
