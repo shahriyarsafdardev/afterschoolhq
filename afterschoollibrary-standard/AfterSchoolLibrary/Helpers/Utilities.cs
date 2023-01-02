@@ -253,6 +253,12 @@ namespace AfterSchoolLibrary.Helpers
             else
                 s.Split(',').ToList().ForEach(x => data.Add(new KeyValuePair() { key = x, value = x }));
 
+            data.ForEach(x =>
+            {
+                x.key = x.key.IfEmpty("").Trim();
+                x.value = x.value.IfEmpty("").Trim();
+            });
+
             return data;
         }
 
