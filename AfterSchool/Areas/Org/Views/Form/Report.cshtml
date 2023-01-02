@@ -13,7 +13,51 @@
     <div class="panel panel-default">
         <div class="panel-body">
 
+            <div class="row">                
+
+                <div class="col-md-4">
+                    <input type="text" id="search" placeholder="Search" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
+                    <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
+                    <button type="button" class="btn btn-default" onclick="emailReport()">Email Report</button>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
+                        <i class="s7-close-circle"></i> Close Window
+                    </button>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
             <div class="row">
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="collapse-records"
+                               class="form-control"
+                               value="1"
+                               @(Model.CollapseRecords ? "checked:\"checked\"" : "")
+                               onclick="toggleCollapseRecords()" />
+
+                        <label for="collapse-records">
+                            Collapse Records
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-gleam"></i> Date Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleSearchColumnSelection()"><i class="s7-gleam"></i> Search Columns</button>
+                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Visible Columns</button>
+                </div>
+            </div>
+
+            <div id="date-selection" class="row hide toggles">
+                <div class="col-md-12">&nbsp;</div>
                 <div class="col-md-2">
                     @{
                         Html.RenderPartial(
@@ -41,31 +85,6 @@
                             }
                             );
                     }
-                </div>
-                <div class="col-md-2">
-                    <input type="text" id="search" placeholder="Search" class="form-control" />
-                </div>
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
-                    <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
-                    <button type="button" class="btn btn-default" onclick="emailReport()">Email Report</button>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
-                        <i class="s7-close-circle"></i> Close Window
-                    </button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    &nbsp;
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
-                    <button type="button" class="btn btn-link" onclick="toggleSearchColumnSelection()"><i class="s7-gleam"></i> Search Columns</button>
-                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Visible Columns</button>
                 </div>
             </div>
 
@@ -209,11 +228,7 @@
                 }
             </div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    &nbsp;
-                </div>
-            </div>
+            <div class="row">&nbsp;</div>
             <div class="row">
                 <div class="col-md-12">
                     <span id="starting-record">0</span> -
@@ -221,11 +236,7 @@
                     <span id="total-records">0</span>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    &nbsp;
-                </div>
-            </div>
+            <div class="row">&nbsp;</div>
             <div class="row">
                 <div class="col-md-12">
                     <div class="table-responsive ">
@@ -233,6 +244,10 @@
                             <thead>
                                 <tr>
                                     <th></th>
+                                    @if (!Model.CollapseRecords)
+                                    {
+                                        <th class="submission-date-col"></th>
+                                    }
                                     <th></th>
                                     @foreach (var question in questions)
                                     {
@@ -241,6 +256,10 @@
                                 </tr>
                                 <tr>
                                     <th>Registrant ID</th>
+                                    @if (!Model.CollapseRecords)
+                                    {
+                                        <th class="submission-date-col">Submission Date</th>
+                                    }
                                     <th>Activities</th>
                                     @foreach (var question in questions)
                                     {
@@ -271,11 +290,8 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
         $(window).on('scroll', function () {
-
             if ((window.innerHeight + window.scrollY) >= $(document).height() - 10) {
                 loadRegistrants(pageStart, pageSize);
-            } else {
-                // console.log('end not reached');
             }
         });
 
@@ -323,6 +339,10 @@
 
     function getEndDateValue() {
         return encodeURIComponent($('#enddate').val());
+    }
+
+    function getCollapseRecordsValue() {
+        return $('#collapse-records').is(':checked') ? "true" : "false";
     }
 
     function getHiddenQuestionIdList() {
@@ -436,13 +456,35 @@
         }
     }
 
+    function toggleDateSelection() {
+        if ($('#date-selection').hasClass('hide')) {
+            hideToggles();
+            $('#date-selection').removeClass('hide');
+        } else {
+            $('#date-selection').addClass('hide');
+        }
+    }
+
+    function toggleCollapseRecords() {
+        if ($('#collapse-records').is(':checked')) {
+            $('#startdate').prop('disabled', true);
+            $('#enddate').prop('disabled', true);
+            $('.submission-date-col').addClass('hide');
+        } else {
+            $('#startdate').prop('disabled', false);
+            $('#enddate').prop('disabled', false);
+            $('.submission-date-col').removeClass('hide');
+        }
+        search();
+    }
+
     function hideToggles() {
         $('.toggles').addClass('hide');
     }
 
     function emailReport() {
         $.get(
-            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}`,
+            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
             function (data) {
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
@@ -481,7 +523,7 @@
         addLoading();
 
         $.get(
-            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}`,
+            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
             function (data) {
 
                 removeLoading();
@@ -493,6 +535,10 @@
                         var tableRow = `<tr>`;
 
                         tableRow += `<td>${registrant.RecordId}</td>`;
+                        if (!$('#collapse-records').is(':checked'))
+                        {
+                            tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
+                        }
                         tableRow += `<td>${registrant.Activities}</td>`;
 
                         for (let question of questions) {

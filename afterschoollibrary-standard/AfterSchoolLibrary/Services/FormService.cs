@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Services
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
         public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
-            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, int loggedInUserId)
+            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
@@ -81,13 +81,8 @@ namespace AfterSchoolLibrary.Services
                     .ToList();
             }
 
-            var getFirstRegistrantsOnly = false;
-
-            if (activityIds.Count != 1 && !formId.HasValue)
-                getFirstRegistrantsOnly = true;
-
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
-                                getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);         
+                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 
@@ -114,7 +109,7 @@ namespace AfterSchoolLibrary.Services
 
                 var ras = registrant.GetRegistrantActivities(msgs);
 
-                if (getFirstRegistrantsOnly)
+                if (collapseRecords)
                     registrant.GetRelatedRegistrants(msgs)
                         .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
 
@@ -123,7 +118,7 @@ namespace AfterSchoolLibrary.Services
 
                 var answers = registrant.GetAnswers(msgs);
 
-                if (getFirstRegistrantsOnly)
+                if (collapseRecords)
                 {
                     var related = registrant.GetRelatedRegistrants(msgs);
                     related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));

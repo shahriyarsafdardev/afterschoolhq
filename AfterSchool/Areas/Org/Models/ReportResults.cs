@@ -13,6 +13,7 @@ namespace AfterSchool.Models
         public string ActivityUid { get; set; }
         public List<FormQuestion> Questions { get; set; }
         public SystemMessages Messages { get; set; }
+        public bool CollapseRecords { get; set; }
     }
 
 }

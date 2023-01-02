@@ -302,7 +302,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Report(int? form, string activities, FormType formType = FormType.StudentForm)
+        public ActionResult Report(int? form, string activities, FormType formType = FormType.StudentForm, bool collapseRecords = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -358,13 +358,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 FormId = form,
                 SelectedActivities = selectedActivities,
                 ActivityOptions = activityOptions.OrderBy(x => x.Name).ToList(),
+                CollapseRecords = collapseRecords,
             };
 
             return View(reportResults);
         }
 
         [HttpGet]
-        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, string searchquestions)
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, string searchquestions, bool collapseRecords = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -373,7 +374,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var startDate = new DateTime?();
             var endDate = new DateTime?();
             var activityIds = new List<int>();
-            var getFirstRegistrantsOnly = false;
             var searchQuestionIds = new List<int>();
             var searchQuestionTypeIds = new List<QuestionDataType>();
 
@@ -389,17 +389,16 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.HasValue)
                 formId = currentAccount.GetForm(form.Value, msgs)?.ID;
 
-            if (activityIds.Count != 1 && !formId.HasValue)
-                getFirstRegistrantsOnly = true;
-
             if (searchquestions.IsNotBlank())
             {
                 searchQuestionIds = searchquestions.Split(',').Select(x => x.Split('|').First().ToInteger()).ToList();
                 searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
             }
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);
-            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, searchQuestionIds, searchQuestionTypeIds, msgs);
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, 
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);
+            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, 
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);
             var answers = new List<FormQuestionAnswer>();
             var registrantActivities = new Dictionary<int, string>();
 
@@ -408,7 +407,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 var registrantsWithAnswers = new List<Registrant>();
                 registrantsWithAnswers.AddRange(registrants);
 
-                if (getFirstRegistrantsOnly)
+                if (collapseRecords)
                     registrants.ForEach(registrant => registrantsWithAnswers.AddRange(registrant.GetRelatedRegistrants(msgs)));
 
                 answers = FormQuestionAnswer.LoadByRegistrantIds(registrantsWithAnswers.Select(x => x.ID.Value), msgs)
@@ -422,7 +421,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var ras = registrant.GetRegistrantActivities(msgs);
 
-                    if (getFirstRegistrantsOnly)
+                    if (collapseRecords)
                         registrant.GetRelatedRegistrants(msgs)
                             .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
 
@@ -472,7 +471,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, string searchquestions)
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, string searchquestions, bool collapseRecords = false)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -515,6 +514,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { },
                     searchQuestionIds, 
                     searchQuestionTypeIds,
+                    collapseRecords,
                     currentUser.ID.Value)
             );
 
