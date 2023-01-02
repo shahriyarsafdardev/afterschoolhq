@@ -1502,7 +1502,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var editSetupAssembler = new EditSetupAssembler();
             var fullScreenExitUrl = GetFullScreenExitUrl(activity, activityGroup?.Uid.ToString());
-            var forms = currentAccount.GetForms(activity.ActivityTypeId, false, msgs).Where(x => !x.IsArchived || activeForm.FormId == x.ID).OrderBy(x => x.Name).ToList();
+            var forms = currentAccount.GetForms(activity.ActivityTypeId, null, msgs).Where(x => !x.IsArchived || activeForm.FormId == x.ID).OrderBy(x => x.Name).ToList();
 
             return editSetupAssembler.AssembleEditSetupResult(activity, activityGroup, msgs, currentAccount, activeMenu, periods, activePeriod, activeForm,
                 SessionVariables.AccountPackage, SessionVariables.AccountUserType, currentUserIsActivityLeader, isNew, forms,

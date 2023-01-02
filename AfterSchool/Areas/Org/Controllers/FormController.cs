@@ -21,7 +21,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Form
         [HttpGet]
-        public ActionResult Index(string fromSurvey, string pn, string rpp, string q, string type, bool isarchived = false)
+        public ActionResult Index(string fromSurvey, string pn, string rpp, string q, string type, bool archived = false)
         {
             if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("forms", "account", new { fromSurvey, pn, rpp, q, type });
@@ -45,8 +45,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var forms = currentAccount.GetForms(isarchived, formType, q, start, length, msgs);
-            var formCount = currentAccount.GetFormCount(isarchived, formType, q, msgs);
+            var forms = currentAccount.GetForms(archived, formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(archived, formType, q, msgs);
             var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.PagingModel = new PagingModel
@@ -58,6 +58,7 @@ namespace AfterSchool.Areas.Org.Controllers
             };
             ViewBag.Messages = msgs;
             ViewBag.FromSurvey = fromSurvey;
+            ViewBag.Archived = archived;
             return View(forms);
         }
 
@@ -653,6 +654,76 @@ namespace AfterSchool.Areas.Org.Controllers
             SetTempMessages(msgs);
 
             return RedirectToAction("edit", new { id = sectionToDelete.FormId, qg = "" });
+        }
+
+
+        [HttpGet]
+        public ActionResult Archive(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(form.MoveToArchive(currentUser.ID.Value));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been archived", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
+        }
+
+        [HttpGet]
+        public ActionResult Restore(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(form.MoveFromArchive(currentUser.ID.Value));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been restored", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
+        }
+
+        [HttpGet]
+        public ActionResult SetAsDefault(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(currentAccount.SetDefaultForm(form, currentUser));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been restored", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
         }
     }
 }

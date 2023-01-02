@@ -123,6 +123,24 @@ namespace AfterSchoolLibrary.Services
             return formCopy;
         }
 
+        public static SystemMessages MoveToArchive(this Form form, int loggedInUserId,
+            DatabaseConnection dc = null)
+        {
+            form.IsArchived = true;
+            form.LastModifiedDate = DateTime.UtcNow;
+            form.LastModifiedBy = loggedInUserId;
+            return form.Save(dc);
+        }
+
+        public static SystemMessages MoveFromArchive(this Form form, int loggedInUserId,
+            DatabaseConnection dc = null)
+        {
+            form.IsArchived = false;
+            form.LastModifiedDate = DateTime.UtcNow;
+            form.LastModifiedBy = loggedInUserId;
+            return form.Save(dc);
+        }
+
         public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
             int[] hiddenQuestionIds, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
         {

@@ -2308,6 +2308,17 @@ namespace AfterSchoolLibrary.Services
             return form;
         }
 
+        public static SystemMessages SetDefaultForm(this Account account, Form form, WebUser loggedInUser,
+            DatabaseConnection dc = null)
+        {
+            if (form.FormTypeId == FormType.StudentForm)
+                return account.SetDefaultStudentForm(form, loggedInUser, dc);
+            else if (form.FormTypeId == FormType.VolunteerForm)
+                return account.SetDefaultVolunteerForm(form, loggedInUser, dc);
+
+            return new SystemMessages() { new SystemMessage("Not a valid form type", MessageType.Error) };
+        }
+
         public static SystemMessages SetDefaultStudentForm(this Account account, Form form, WebUser loggedInUser,
             DatabaseConnection dc = null)
         {
