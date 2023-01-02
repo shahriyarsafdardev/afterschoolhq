@@ -21,6 +21,15 @@ namespace AfterSchoolLibrary
             var valueBytes = Convert.FromBase64String(value);
             return Encoding.UTF8.GetString(valueBytes);
         }
+        public static Dictionary<string, string> ToStringDictionary(this List<AfterSchoolLibrary.Helpers.KeyValuePair> keyValuePairs)
+        {
+            var dict = new Dictionary<string, string>();
+
+            foreach (var keyValuePair in keyValuePairs)
+                dict.Add(keyValuePair.key, keyValuePair.value);
+
+            return dict;
+        }
 
         public static Lob.Models.AccountType ToLobAccountType(this LegalEntityType legalEntityType)
         {
