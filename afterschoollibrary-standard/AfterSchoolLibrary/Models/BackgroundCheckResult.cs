@@ -1,0 +1,16 @@
+﻿namespace AfterSchoolLibrary.Models
+{
+    public enum BackgroundCheckResult
+    {
+        NotSet = 0,
+        Pending,
+        Clear,
+        Complete,
+        Passed,
+        Review,
+        Cancelled,
+        Level1,
+        Level2,
+        Level3
+    }
+}

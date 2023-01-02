@@ -10,7 +10,11 @@ namespace AfterSchoolLibrary.Models
         Completed = 5,
         Review = 6,
         AutomaticallyApproved = 7,
-        predraft,
-        pending,
+        PreDraft = 8,
+        Pending = 9,
+        Hold = 10,
+        AdverseAction = 11,
+        Dispute = 12,
+        Archive = 13
     }
 }

@@ -192,7 +192,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Registrants(string id, string atype, string msg)
+        public ActionResult Registrants(string id, string atype, string msg, string registrationDate)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -201,16 +201,19 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msg.IsNotEmpty())
                 msgs.Add(msg, msg.ToLower().Contains("error") ? MessageType.UserError : MessageType.Success);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var result = GatherDataForAndAssembleRegistrantsResult(activity, atype, currentAccount, currentUser, msgs);
+            var result = GatherDataForAndAssembleRegistrantsResult(activity, atype, currentAccount, currentUser, msgs, registrationDate);
 
             if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
+            {
+                ViewBag.RegistrationDate = RegistrantActivity.LoadByParticipationObject((int) activity.ID, ParticipationObjectType.Activity, msgs).Select(x => x.CreateDate.Value.ToShortDateString()).Distinct();
                 return View("VolunteerRegistrants", result);
+            }
 
             return View(result);
         }
 
         private static RegistrantsResult GatherDataForAndAssembleRegistrantsResult(Activity activity, string assignmentTypeAsString, Account currentAccount,
-            WebUser currentUser, SystemMessages msgs)
+            WebUser currentUser, SystemMessages msgs, string registrationDate = null)
         {
             var assignmentType = RegistrationAssignmentType.NotSet;
             List<RegistrantActivity> registrantActivities = null;
@@ -232,7 +235,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var result = new RegistrantsAssembler().AssembleRegistrantsResult(activity, registrantActivities, currentAccount, currentUser, assignmentType,
                 currentAccount.GetActiveAccountPackage(msgs), isReadOnlySeatStatus, activity.GetSchedule(msgs), accountUserType,
-                currentUserIsActivityLeader, msgs);
+                currentUserIsActivityLeader, msgs, registrationDate);
             return result;
         }
 

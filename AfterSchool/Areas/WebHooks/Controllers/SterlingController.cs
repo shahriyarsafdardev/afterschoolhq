@@ -26,15 +26,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 if (backGroundCheck.IsNotEmpty())
                 {
-                    if (responseBody.status == "PreDraft")
-                        backGroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.predraft;
-            
-                    if (responseBody.status == "Pending")
-                        backGroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.pending;
 
                     if (responseBody.status == "Complete")
                     {
-                        backGroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.Completed;
+                        backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
                 
                         VolunteerApprovalService.AddApproval(backGroundCheck.WebUserId,
                             backGroundCheck.RequestedForFiscalAccountId,
@@ -44,12 +39,13 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             null,
                             msgs
                         );
+                        
                     }
 
                     if (responseBody.status == "Review")
                     {
-                        backGroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.Review;
-                
+                        backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
+                        
                         VolunteerTaskService.AddTask(backGroundCheck.WebUserId, 
                             TaskStatus.ReviewBackground, 
                             ApplicationStatus.FailedBackgroundCheck, 
@@ -57,6 +53,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             null,
                             msgs);
                     }
+                    
+                    backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+                    backGroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
 
                     if(msgs.HasNoErrors())
                         msgs.AddRange(backGroundCheck.Save());

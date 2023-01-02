@@ -20,6 +20,7 @@ namespace AfterSchoolLibrary.Models
             LoadObjectValues(ObjectMap);
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
             BackgroundCheckSourceId = BackgroundCheckSource.NotSet;
+            BackgroundCheckResultId = BackgroundCheckResult.NotSet;
         }
 
         public int WebUserId
@@ -44,6 +45,12 @@ namespace AfterSchoolLibrary.Models
         {
             get => (BackgroundCheckSource) MDV["BackgroundCheckSourceId"].Value;
             set => MDV["BackgroundCheckSourceId"].Value = value;
+        }
+        
+        public BackgroundCheckResult BackgroundCheckResultId
+        {
+            get => (BackgroundCheckResult) MDV["BackgroundCheckResultId"].Value;
+            set => MDV["BackgroundCheckResultId"].Value = value;
         }
 
         public string SterlingCandidateId
@@ -98,6 +105,7 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "RequestedForFiscalAccountId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckSourceId", SqlDbType.Int);
+                dp.Add(className, "BackgroundCheckResultId", SqlDbType.Int);
                 dp.Add(className, "SterlingCandidateId", SqlDbType.NVarChar, "40");
                 dp.Add(className, "SterlingInviteUrl", SqlDbType.NVarChar, "500");
                 dp.Add(className, "ExpirationDate", SqlDbType.DateTime);
@@ -144,7 +152,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Length = length;
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
+        
         public static int GetCount(Hashtable criteria = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -162,6 +170,8 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("RequestedForFiscalAccountId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
+            if (BackgroundCheckResultId.IsEmpty())
+                msgs.Add("BackgroundCheckResultId is required on BackgroundCheck object", MessageType.Error);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(BackgroundCheck)));
@@ -187,6 +197,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["RequestedForFiscalAccountId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckSourceId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckResultId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingCandidateId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingInviteUrl"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ExpirationDate"]}));

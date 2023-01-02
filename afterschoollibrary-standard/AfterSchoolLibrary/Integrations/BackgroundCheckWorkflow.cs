@@ -57,6 +57,7 @@ namespace AfterSchoolLibrary.Integrations
                 WebUserId = webUser.ID!.Value,
                 RequestedForFiscalAccountId = accountId,
                 BackgroundCheckStatusId = status,
+                BackgroundCheckResultId = BackgroundCheckResult.NotSet,
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,

@@ -576,14 +576,21 @@ namespace AfterSchool.Controllers
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
             RegistrationCommon.ValidateRegisterStudentQuestions(questions, msgs, Request);
+            
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, msgs).FirstOrDefault();
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
+            
+            if(backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckResultId == BackgroundCheckResult.Cancelled)
+                msgs.Add("Background Check has been failed", MessageType.UserError);
+            
 
             var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, signature, Request, msgs);
             var currentRegistrant = SessionVariables.CurrentRegistrant;
-            var currentUser = SessionVariables.CurrentUser;
 
             if (msgs.HasNoErrors() && registration != null)
             {
@@ -595,7 +602,7 @@ namespace AfterSchool.Controllers
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
                 }
 
-                if (msgs.HasNoErrors())
+                if (msgs.HasNoErrors() && currentAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
                 {
                     await InitateBackgroundCheck(currentUser, participationObject, msgs);
                 }

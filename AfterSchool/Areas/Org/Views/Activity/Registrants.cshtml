@@ -1,3 +1,4 @@
+@using System.Web.UI.WebControls
 @using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.RegistrantsResult
 @{
@@ -147,6 +148,7 @@
             }
         </select>
     </div>
+
     <div class="col-md-3">
         @if (Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
         {

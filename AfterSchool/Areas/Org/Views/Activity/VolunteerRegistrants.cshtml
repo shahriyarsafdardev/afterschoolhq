@@ -2,7 +2,6 @@
 @model AfterSchool.Areas.Org.Assemblers.Activity.RegistrantsResult
 @{
     var msgs = Model.Messages;
-
     var ras = Model.RegistrantActivities;
     var account = Model.CurrentAccount;
     var activeRegistrationPeriod = Model.Activity.GetActiveRegistrationPeriod();
@@ -18,6 +17,7 @@
     var studentCrmPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, accountPackage);
     var isReadOnlySeatStatus = Model.IsReadOnlySeatStatus;
     var currentUser = Model.CurrentUser;
+    var registrationDates = ViewBag.RegistrationDate;
 }
 
 
@@ -112,7 +112,17 @@
                         }
                     </select>
                 </div>
-
+                
+                <div class="col-md-3">
+                    <select id="registrationDate" onchange="changeRegistrationDate()" class="form-control">
+                        <option value="">View All Dates</option>
+            
+                        @foreach (var x in registrationDates)
+                        {
+                            <option value="@(x)" @(Request["registrationDate"]?.Trim() == x ? "selected=\"selected\"" : "") >@x</option>
+                        }
+                    </select>
+                </div>
 
                 <div class="col-md-4 pull-right">
                     <div class="pull-right">
@@ -153,8 +163,13 @@
 
 <script>
     function changeAssignment() {
-        location.href = '@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})?atype=' + $('#assignmentType').val();
+        location.href = '@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})?atype=' + $('#assignmentType').val() + '&registrationDate= ' + $('#registrationDate').val();
     }
+    
+    function changeRegistrationDate() {
+        location.href = '@Url.Action("registrants", "activity", new {id = Model.Activity.Uid})?atype=' + $('#assignmentType').val() + '&registrationDate= ' + $('#registrationDate').val();
+    }
+    
     function changeClass() {
         $('.instance').addClass('hide');
 
