@@ -10,7 +10,7 @@ using BasicLibrary.DataAccess;
 using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
-
+using AfterSchoolLibrary.Enums;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Services
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
         public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
-            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, int loggedInUserId)
+            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
@@ -82,7 +82,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
-                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);         
+                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 

@@ -1,3 +1,4 @@
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace AfterSchool.Models
         public List<FormQuestion> Questions { get; set; }
         public SystemMessages Messages { get; set; }
         public bool CollapseRecords { get; set; }
+        public RegistrantPersonType PersonType { get; set; }
     }
 
 }

@@ -244,10 +244,7 @@
                             <thead>
                                 <tr>
                                     <th></th>
-                                    @if (!Model.CollapseRecords)
-                                    {
-                                        <th class="submission-date-col"></th>
-                                    }
+                                    <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")"></th>
                                     <th></th>
                                     @foreach (var question in questions)
                                     {
@@ -256,10 +253,7 @@
                                 </tr>
                                 <tr>
                                     <th>Registrant ID</th>
-                                    @if (!Model.CollapseRecords)
-                                    {
-                                        <th class="submission-date-col">Submission Date</th>
-                                    }
+                                    <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
                                     <th>Activities</th>
                                     @foreach (var question in questions)
                                     {
@@ -484,7 +478,7 @@
 
     function emailReport() {
         $.get(
-            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
+            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
             function (data) {
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
@@ -523,7 +517,7 @@
         addLoading();
 
         $.get(
-            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
+            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
             function (data) {
 
                 removeLoading();

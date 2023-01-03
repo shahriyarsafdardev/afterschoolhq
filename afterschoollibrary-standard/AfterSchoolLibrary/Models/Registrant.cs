@@ -717,25 +717,25 @@ namespace AfterSchoolLibrary.Models
         }
 
         public static int GetCountByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
-            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
 
         public static List<Registrant> LoadByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int? start, int? length,
-            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -744,7 +744,7 @@ namespace AfterSchoolLibrary.Models
         }
 
         private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
-            bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds)
+            bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType)
         {
             string sql = @$"
                 select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
@@ -781,6 +781,9 @@ namespace AfterSchoolLibrary.Models
 
             if (endDate.HasValue)
                 sql += $" and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}'";
+
+            if (registrantPersonType != RegistrantPersonType.NotSet)
+                sql += $" and Registrant.PersonTypeId = {(int)registrantPersonType}";
 
             if (getFirstRegistrantsOnly)
             {

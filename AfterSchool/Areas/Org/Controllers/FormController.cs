@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -302,7 +303,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Report(int? form, string activities, FormType formType = FormType.StudentForm, bool collapseRecords = false)
+        public ActionResult Report(int? form, string activities, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -314,6 +315,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
             var questions = new List<FormQuestion>();
             var forms = new List<Form>();
+            var formType = personType == RegistrantPersonType.Student ? FormType.StudentForm : FormType.VolunteerForm;
 
             if (form.HasValue)
             {
@@ -359,13 +361,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 SelectedActivities = selectedActivities,
                 ActivityOptions = activityOptions.OrderBy(x => x.Name).ToList(),
                 CollapseRecords = collapseRecords,
+                PersonType = personType,
             };
 
             return View(reportResults);
         }
 
         [HttpGet]
-        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, string searchquestions, bool collapseRecords = false)
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, 
+            string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -396,9 +400,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, 
-                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
             var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, 
-                collapseRecords, searchQuestionIds, searchQuestionTypeIds, msgs);
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
             var answers = new List<FormQuestionAnswer>();
             var registrantActivities = new Dictionary<int, string>();
 
@@ -471,7 +475,8 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, string searchquestions, bool collapseRecords = false)
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, 
+            string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -515,6 +520,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     searchQuestionIds, 
                     searchQuestionTypeIds,
                     collapseRecords,
+                    personType,
                     currentUser.ID.Value)
             );
 
