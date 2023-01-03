@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -994,7 +994,7 @@ namespace AfterSchoolLibrary.Services
         public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
             string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
-        {
+        {                                   
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
@@ -1027,7 +1027,7 @@ namespace AfterSchoolLibrary.Services
                             account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
 
                         if (account.StripeCustomerId.IsEmpty())
-                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, dc));
+                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, adc));
                     }
                     else
                     {
@@ -1065,7 +1065,7 @@ namespace AfterSchoolLibrary.Services
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
-                msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
+                msgs.AddRange(awu.Activate(loggedInUser, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
         }
