@@ -53,7 +53,7 @@
                     <button class="btn btn-default md-trigger" data-modal="modal-emails">Email Report...</button>
                     @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
                     {
-                        <a href="@Url.Action("report", "form", new { collapseRecords = true })" class="btn btn-default" target="_blank">Custom Report</a>
+                        <a href="@Url.Action("report", "form", new { collapseRecords = true, formType = FormType.StudentForm })" class="btn btn-default" target="_blank">Custom Report</a>
                     }
                     <button class="btn btn-default" onclick="sendMessages()">Send Messages &raquo;</button>
                 </div>
