@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 
 namespace AfterSchoolLibrary
@@ -37,35 +38,6 @@ namespace AfterSchoolLibrary
                 return Lob.Models.AccountType.Company;
 
             return Lob.Models.AccountType.Individual;
-        }
-
-        public static string GetDescription(this StripeVerificationFailedCode stripeVerificationFailedCode)
-        {
-            switch (stripeVerificationFailedCode)
-            {
-                case StripeVerificationFailedCode.FailedKeyedIdentity:
-                    return "the supplied identity information could not be verified";
-                case StripeVerificationFailedCode.FailedOther:
-                    return "verification failed";
-                case StripeVerificationFailedCode.ScanCorrupt:
-                    return "the supplied ID image is corrupt";
-                case StripeVerificationFailedCode.ScanFailedGrayscale:
-                    return "the supplied ID image is not in color";
-                case StripeVerificationFailedCode.ScanFailedOther:
-                    return "the scan failed for an unknown reason, please retry";
-                case StripeVerificationFailedCode.ScanIDCountryNotSupported:
-                    return "the supplied ID type is not supported (e.g., is not government-issued";
-                case StripeVerificationFailedCode.ScanNameMismatch:
-                    return "the name on the ID does not match the name on the account";
-                case StripeVerificationFailedCode.ScanNotReadable:
-                    return "the supplied ID image is not readable (e.g., too blurry or dark)";
-                case StripeVerificationFailedCode.ScanNotUploaded:
-                    return "no ID scan was uploaded";
-                case StripeVerificationFailedCode.ScanFailedTestMode:
-                    return "verification failed - test mode";
-            }
-
-            return "unknown";
         }
 
         public static DayOfWeek ToDayOfWeek(this DayOfWeekASL day)

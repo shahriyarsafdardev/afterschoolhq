@@ -83,6 +83,33 @@ namespace AfterSchool.Controllers
             return user;
         }
 
+        public static WebUser CreateOrUpdateUserWithOptionalPhone(WebUser userToUpdate, string firstName, string lastName, string email,
+            string phone, string password, bool allowTextMessages, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (userToUpdate.IsEmpty())
+                return WebUserService.CreateNewWithOptionalPhone(
+                    firstName,
+                    lastName,
+                    email.Trim(),
+                    phone.IfEmpty("").Trim(),
+                    password,
+                    true,
+                    true,
+                    false,
+                    allowTextMessages,
+                    null,
+                    msgs,
+                    dc);
+
+            var user = userToUpdate;
+            user.Phone = phone.IfEmpty("").Trim();
+            user.AllowTextMessages = allowTextMessages;
+            user.LastModifiedBy = userToUpdate.ID;
+            user.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(user.Save(dc));
+            return user;
+        }
+
         public static Account GetOrCreateParentOrStudentRegistrantAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetRegistrantAccount(msgs, dc);
@@ -274,8 +301,9 @@ namespace AfterSchool.Controllers
                             currentUser,
                             period,
                             signature,
+                            request.UserAgent, 
+                            request.GetUserHostAddress(),
                             amsgs,
-                            request,
                             adc);
 
                         if (qvms.IsNotEmpty())
@@ -318,17 +346,9 @@ namespace AfterSchool.Controllers
             return registration;
         }
 
-        private static string GetUserHostAddress(HttpRequestBase request)
-        {
-            if (request.ServerVariables["HTTP_X_FORWARDED_FOR"].IsNotEmpty())
-                return request.ServerVariables["HTTP_X_FORWARDED_FOR"].Split(',')[0];
-
-            return request.ServerVariables["REMOTE_ADDR"];
-        }
-
-        private static void SubmitRecord(ref Registration registration, ref Registrant submittedRecord,
+        public static void SubmitRecord(ref Registration registration, ref Registrant submittedRecord,
             Registrant currentRegistrant, ParticipationObject participationObject, WebUser currentUser,
-            RegistrationPeriod period, string signature, SystemMessages msgs, HttpRequestBase request, DatabaseConnection dc = null)
+            RegistrationPeriod period, string signature, string userAgent, string hostAddress, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // account gets copy / snapshot of master registrant record
             // required in order to make sure registration data doesn't change as registrant changes information in master record.
@@ -347,7 +367,8 @@ namespace AfterSchool.Controllers
                     participationObject.GetAccountActivityGroupId(),
                     period?.ID,
                     signature,
-                    request.UserAgent.MaxChars(400), GetUserHostAddress(request),
+                    userAgent.MaxChars(400), 
+                    hostAddress,
                     currentUser.ID.Value,
                     msgs,
                     dc);
@@ -356,7 +377,8 @@ namespace AfterSchool.Controllers
             {
                 registration.AddESignature(
                     signature,
-                    request.UserAgent.MaxChars(400), GetUserHostAddress(request),
+                    userAgent.MaxChars(400), 
+                    hostAddress,
                     currentUser,
                     msgs,
                     dc);
@@ -534,6 +556,132 @@ namespace AfterSchool.Controllers
             var assignmentType = registrantActivity.AssignmentTypeId;
 
             return (registrantActivity.GetParticipationObject(msgs), assignmentType);
+        }
+
+        public static Dictionary<QuestionDataType, QuestionDataType> Parent1InfoToMainRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                        {
+                            {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent1FirstName},
+                            {QuestionDataType.RegistrantMiddleName, QuestionDataType.Parent1MiddleName},
+                            {QuestionDataType.RegistrantLastName, QuestionDataType.Parent1LastName},
+                            {QuestionDataType.RegistrantEmail, QuestionDataType.Parent1Email},
+                            {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent1HomePhone},
+                            {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
+                            {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
+                            {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent1Employer},
+                            {QuestionDataType.RegistrantParentRelationship,QuestionDataType.Parent1RelationshipToRegistrant},
+                        };
+            }
+        }
+
+        public static Dictionary<QuestionDataType, QuestionDataType> Parent1AddressToMainRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                        {
+                            {QuestionDataType.RegistrantAddress1, QuestionDataType.Parent1Address1},
+                            {QuestionDataType.RegistrantAddress2, QuestionDataType.Parent1Address2},
+                            {QuestionDataType.RegistrantCity, QuestionDataType.Parent1City},
+                            {QuestionDataType.RegistrantState, QuestionDataType.Parent1State},
+                            {QuestionDataType.RegistrantPostalCode, QuestionDataType.Parent1PostalCode},
+                        };
+            }
+        }
+
+        public static Dictionary<QuestionDataType, QuestionDataType> Parent2InfoToMainRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                            {
+                                {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent2FirstName},
+                                {QuestionDataType.RegistrantMiddleName, QuestionDataType.Parent2MiddleName},
+                                {QuestionDataType.RegistrantLastName, QuestionDataType.Parent2LastName},
+                                {QuestionDataType.RegistrantEmail, QuestionDataType.Parent2Email},
+                                {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent2HomePhone},
+                                {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent2MobilePhone},
+                                {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
+                                {QuestionDataType.RegistrantEmployer, QuestionDataType.Parent2Employer},
+                                {QuestionDataType.RegistrantParentRelationship,QuestionDataType.Parent2RelationshipToRegistrant},
+                            };
+            }
+        }
+
+        /// <summary>
+        /// only should be used when mapping from the student record to parent2 
+        /// otherwise you would overwrite the address info that was copied from parent 1 into the student
+        /// </summary>
+        public static Dictionary<QuestionDataType, QuestionDataType> Parent2AddressToMainRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                        {
+                            {QuestionDataType.RegistrantAddress1, QuestionDataType.Parent2Address1},
+                            {QuestionDataType.RegistrantAddress2, QuestionDataType.Parent2Address2},
+                            {QuestionDataType.RegistrantCity, QuestionDataType.Parent2City},
+                            {QuestionDataType.RegistrantState, QuestionDataType.Parent2State},
+                            {QuestionDataType.RegistrantPostalCode, QuestionDataType.Parent2PostalCode},
+                        };
+            }
+        }
+
+        public static void MapParent1AnswersToStudent(Registrant parentRegistrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc)
+        {
+            // copy parent answers to student for home address, emergency contacts
+            parentRegistrant.GetAnswers(msgs, dc)
+                .Where(answer =>
+                    answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress ||
+                    answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
+                        .GetEmergencyContactQuestionGroups())
+                )
+                .ToList()
+            .ForEach(answer =>
+            {
+                student.AddOrUpdateAnswer(
+                answer.Text.IfEmpty("").Trim(),
+                    answer.ToFormQuestion(msgs: msgs, dc: dc),
+                    currentUser,
+                    msgs,
+                    dc);
+            });
+
+            foreach (var key in Parent1InfoToMainRegistrantMap.Keys)
+                student.MapAndAddAnswer(
+                    allQuestions,
+                    parentRegistrant,
+                    key,
+                    Parent1InfoToMainRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+
+            foreach (var key in Parent1AddressToMainRegistrantMap.Keys)
+                student.MapAndAddAnswer(
+                    allQuestions,
+                    parentRegistrant,
+                    key,
+                    Parent1AddressToMainRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+        }
+
+        public static void MapParent2AnswersToStudent(Registrant parent2Registrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc)
+        {
+            foreach (var key in Parent2InfoToMainRegistrantMap.Keys)
+                student.MapAndAddAnswer(
+                    allQuestions,
+                    parent2Registrant,
+                    key,
+                    Parent2InfoToMainRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
         }
     }
 }

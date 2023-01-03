@@ -2140,6 +2140,18 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        /// <summary>
+        /// This is used for creating a new registrant and registration on the backend
+        /// NOT used when parents are registering
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="participationObject"></param>
+        /// <param name="questionsAndAnswers"></param>
+        /// <param name="activitiesAndPreferences"></param>
+        /// <param name="period"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
             List<(Activity activity, int preferenceNumber)> activitiesAndPreferences, RegistrationPeriod period,
@@ -2151,7 +2163,6 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var location = account.GetDefaultLocation(amsgs, adc);
                     var groupId = participationObject.GetAnyRelatedActivityGroupId();
                     var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
@@ -2163,7 +2174,7 @@ namespace AfterSchoolLibrary.Services
                         isMaster: false,
                         isParentOrGuardian: false,
                         allowTextMessages: false,
-                        schoolLocationId: location?.ID,
+                        schoolLocationId: null,
                         profileStatus: RegistrantProfileStatus.Started,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
