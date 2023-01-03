@@ -476,9 +476,19 @@
         $('.toggles').addClass('hide');
     }
 
+    function toggleEmailReportButton(disable) {
+        $('#btn-email-report').prop('disabled', disable);
+
+        if (disable) {
+            $('#btn-email-report').html('Sending...');
+        } else {
+            $('#btn-email-report').html('Email Report');
+        }
+    }
+
     function emailReport() {
 
-        $('#btn-email-report').prop('disabled', true);
+        toggleEmailReportButton(true);
 
         $.get(
             `@Url.Action("EmailReport", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
@@ -494,7 +504,7 @@
                     Notifications.showErrors(data.messages);
                 }
 
-                $('#btn-email-report').prop('disabled', false);
+                toggleEmailReportButton(false);
             }
         );
     }

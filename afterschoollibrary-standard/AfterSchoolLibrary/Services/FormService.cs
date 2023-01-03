@@ -45,7 +45,7 @@ namespace AfterSchoolLibrary.Services
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
         public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
-            int[] hiddenQuestions, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
+            int[] hiddenQuestionIds, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Services
 
             if (formId.HasValue)
                 questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
-                        .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                        .Where(x => x.ID.Value.NotIn(hiddenQuestionIds) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
                         .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                         .ThenBy(x => x.DisplayOrder).ToList();
 
@@ -79,6 +79,11 @@ namespace AfterSchoolLibrary.Services
                     .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                     .ThenBy(x => x.DisplayOrder)
                     .ToList();
+
+                var hiddenQuestions = questions.Where(question => question.ID.Value.In(hiddenQuestionIds)).ToList();
+                var hiddenQuestionTypes = hiddenQuestions.Where(question => question.QuestionDataTypeId != QuestionDataType.NotSet).Select(question => question.QuestionDataTypeId).ToList();
+
+                questions = questions.Where(question => question.ID.Value.NotIn(hiddenQuestionIds) && question.QuestionDataTypeId.NotIn(hiddenQuestionTypes)).ToList();
             }
 
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
