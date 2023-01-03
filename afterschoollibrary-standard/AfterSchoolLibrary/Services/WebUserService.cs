@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -994,16 +994,30 @@ namespace AfterSchoolLibrary.Services
         public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
             string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
-        {
-            
-            user = SaveWebUser(user, firstName, lastName, email, password, phone, loggedInUser, msgs, dc);
-            
+        {                                   
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = EncryptPassword(password);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
+
+                    if (user.Email.IsSameAs(email))
+                        user.VerifiedAccount = true;
+                    else
+                        user.Email = email;
+
+                    amsgs.AddRange(user.Save(adc));
+
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
 
                     // Registrant accounts don't need a package
@@ -1013,7 +1027,7 @@ namespace AfterSchoolLibrary.Services
                             account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
 
                         if (account.StripeCustomerId.IsEmpty())
-                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, dc));
+                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, adc));
                     }
                     else
                     {
@@ -1033,35 +1047,6 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
         }
-        
-        public static WebUser SaveWebUser(this WebUser user, string firstName, string lastName,
-            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            //WebUser user = null;
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    user.FirstName = firstName;
-                    user.LastName = lastName;
-                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
-                    user.IsRegistered = true;
-                    user.IsActive = true;
-                    user.Password = EncryptPassword(password);
-                    user.LastModifiedDate = DateTime.UtcNow;
-                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                    user.Phone = phone;
-                    if (user.Email.IsSameAs(email))
-                        user.VerifiedAccount = true;
-                    else
-                        user.Email = email;
-                    amsgs.AddRange(user.Save(adc));
-                }
-            );
-            return user;
-        }
 
         /// <summary>
         ///     Change the AccountWebUser record to be active. If it's not active user can't login
@@ -1080,7 +1065,7 @@ namespace AfterSchoolLibrary.Services
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
-                msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
+                msgs.AddRange(awu.Activate(loggedInUser, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
         }
