@@ -87,6 +87,8 @@ namespace AfterSchoolLibrary.Services
             var row = new List<string>();
 
             row.Add("");
+            if (!collapseRecords)
+                row.Add("");
             row.Add("");
 
             foreach (var question in questions)
@@ -95,7 +97,11 @@ namespace AfterSchoolLibrary.Services
             table.Add(row);
 
             row = new List<string>();
+
             row.Add("Registrant ID");
+            if (!collapseRecords)
+                row.Add("Submission Date");
+
             row.Add("Activities");
 
             foreach (var question in questions)
@@ -125,6 +131,10 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 row.Add(registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'));
+                
+                if (!collapseRecords)
+                    row.Add(registrant.CreateDate.ToShortDateTimeString());
+
                 if (ras.Any())
                     row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
                 else

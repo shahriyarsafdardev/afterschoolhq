@@ -21,7 +21,7 @@
                 <div class="col-md-4">
                     <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
                     <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
-                    <button type="button" class="btn btn-default" onclick="emailReport()">Email Report</button>
+                    <button type="button" class="btn btn-default" onclick="emailReport()" id="btn-email-report">Email Report</button>
                 </div>
                 <div class="col-md-4">
                     <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
@@ -477,9 +477,13 @@
     }
 
     function emailReport() {
+
+        $('#btn-email-report').prop('disabled', true);
+
         $.get(
             `@Url.Action("EmailReport", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
             function (data) {
+
                 if (data && data.status === 'ok') {
                     Notifications.showBar({
                         title: 'Success',
@@ -489,6 +493,8 @@
                 } else {
                     Notifications.showErrors(data.messages);
                 }
+
+                $('#btn-email-report').prop('disabled', false);
             }
         );
     }
