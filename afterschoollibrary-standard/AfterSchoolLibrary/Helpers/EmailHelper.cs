@@ -969,6 +969,7 @@ namespace AfterSchoolLibrary.Helpers
             WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+            var proratingResult = AccountService.proratingResult; // set proratingResult to check either proration exists or not
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
@@ -1155,7 +1156,7 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
-            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); 
+            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
             var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
 
@@ -1172,6 +1173,8 @@ namespace AfterSchoolLibrary.Helpers
                 description =
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
+                if (proratingResult.ShouldWeBeProratingToday)
+                    additionalDetails.Insert(0, "Prorated ");
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 subscriptionDetails =
                     $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first subscription payment will be automatically deducted on " +

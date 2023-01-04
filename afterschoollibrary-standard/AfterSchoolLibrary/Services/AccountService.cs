@@ -13,6 +13,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using static AfterSchoolLibrary.Services.SubscriptionPlanService;
 using Account = AfterSchoolLibrary.Models.Account;
 using Coupon = AfterSchoolLibrary.Models.Coupon;
 using Payout = AfterSchoolLibrary.Models.Payout;
@@ -22,6 +23,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AccountService
     {
+        public static FigureOutProratingResult proratingResult;
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -1803,6 +1805,13 @@ namespace AfterSchoolLibrary.Services
             var billingCycleAnchor = plan.StartDate.Value.AddMonths(1);
             var stripeProratePreview = stripeHelper.PreviewSubscriptionProration(customer.Id, plan.StripePlanId, msgs, billingCycleAnchor);
             return stripeProratePreview.AmountDue / 100m;
+        }
+
+        public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
+            SystemMessages msgs = null)
+        {
+            var result = account.GetStripeProratePreview(stripeAccountType, plan, msgs);
+            return result is null ? null : "Amount due: $" + result;
         }
 
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
@@ -4661,7 +4670,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount,
+        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount, FigureOutProratingResult proratingresult,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -4700,7 +4709,7 @@ namespace AfterSchoolLibrary.Services
                     // invalidate coupon
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
-
+                    proratingResult = proratingresult; // set the prorating result
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
