@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.Mvc;
+using static AfterSchoolLibrary.Services.SubscriptionPlanService;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
@@ -27,6 +28,7 @@ namespace AfterSchool.Controllers
             this.featureFlagRepository = featureFlagRepository;
         }
 
+        public FigureOutProratingResult proratingResult;
 
         #region Contact
 
@@ -1789,13 +1791,15 @@ namespace AfterSchool.Controllers
             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
             var stripeProratingService = new StripeProratingService();
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
-            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
+            proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
                 currentAccount, msgs);
-            var proratedAmount = decimal.Parse(proratingResult.ProratingValue.ToString());
-            var calcObj = new FeeCalculationObject(proratedAmount, participationObject.PaymentAccount, msgs);
-            var proratedAmountFee = calcObj.GetFinalTotalCost(PaymentType.CreditCard) - proratedAmount; // Get final cost of stripe prorated amount with fee
-            ViewBag.ProratedAmount = proratingResult.ShouldWeBeProratingToday ? $"{proratedAmount}" : "";
-            ViewBag.ProratedAmountFee = proratingResult.ShouldWeBeProratingToday ? $"{proratedAmountFee}" : "";
+            if (proratingResult.ShouldWeBeProratingToday)
+            {
+                var proratedAmount = decimal.Parse(proratingResult.ProratingValue.ToString());
+                var calcObj = new FeeCalculationObject(proratedAmount, participationObject.PaymentAccount, msgs);
+                ViewBag.ProratedAmount = proratedAmount;
+                ViewBag.ProratedAmountFee = calcObj.GetCreditCardFee(); // Get ccFee cost of stripe prorated amount
+            }
             return registration;
         }
 
@@ -1939,7 +1943,7 @@ namespace AfterSchool.Controllers
                 CreditCardFeePayer = creditCardFeePayer,
                 SelectedDates = selectedDates,
             };
-            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, msgs);
+            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, proratingResult, msgs);
 
             if (msgs.HasErrors())
                 return View("Payment");
