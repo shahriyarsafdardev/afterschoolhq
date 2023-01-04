@@ -28,7 +28,7 @@ namespace AfterSchool.Controllers
             this.featureFlagRepository = featureFlagRepository;
         }
 
-        public FigureOutProratingResult proratingResult;
+        private FigureOutProratingResult proratingResult;
 
         #region Contact
 
