@@ -332,16 +332,16 @@
                                 subtransfeetoday = 0;
                             }
 
-                            <span id="subscription-total-value" class="hide">@subpricetoday</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">@(ViewBag.ProratedAmountFee != null ? ViewBag.ProratedAmountFee : subtransfeetoday)</span>
-                        }
-                        else
-                        {
-                            <span id="subscription-total-value" class="hide">0</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">0</span>
-                        }
+            <span id="subscription-total-value" class="hide">@subpricetoday</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">@(ViewBag.ProratedAmountFee != null ? ViewBag.ProratedAmountFee : subtransfeetoday)</span>
+        }
+        else
+        {
+            <span id="subscription-total-value" class="hide">0</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">0</span>
+        }
 
                         <span id="fee-ccf" class="hide">0</span>
                         <span id="fee-asf" class="hide">0</span>

@@ -277,8 +277,8 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
-            WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser,
+            Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -345,7 +345,6 @@ namespace AfterSchoolLibrary.Services
         public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, decimal proratedAmount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-
             var calcObj = new FeeCalculationObject(proratedAmount, checkoutObject.BillingAccount, msgs, dc);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
