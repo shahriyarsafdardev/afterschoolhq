@@ -329,7 +329,7 @@ else
 
             <span id="subscription-total-value" class="hide">@subpricetoday</span>
             <span id="subscription-asf-value" class="hide">0</span>
-            <span id="subscription-ccf-value" class="hide">@subtransfeetoday</span>
+            <span id="subscription-ccf-value" class="hide">@(ViewBag.ProratedAmountFee != null ? ViewBag.ProratedAmountFee : subtransfeetoday)</span>
         }
         else
         {
