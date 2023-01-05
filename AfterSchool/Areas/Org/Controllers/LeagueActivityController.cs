@@ -132,7 +132,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IsActivityLeader = isLeader;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.ActiveMenu = "EditSetup";
-            ViewBag.Forms = currentAccount.GetForms().OrderBy(x => x.Name).ToList();
+            ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || activityGroup.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.ActiveForm = activity.GetActiveActivityForm();
             ViewBag.Periods = currentAccount.GetRegistrationPeriods();
             ViewBag.ActivePeriod = activePeriod;
@@ -233,7 +233,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms().OrderBy(x => x.Name).ToList();
+            ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || activityGroup.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Periods = currentAccount.GetRegistrationPeriods();
             ViewBag.Group = activityGroup;
             ViewBag.IsActivityLeader = IsActivityLeader(activity);
@@ -328,7 +328,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSetup";
-                        ViewBag.Forms = currentAccount.GetForms().OrderBy(x => x.Name).ToList();
+                        ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || activity.GetActiveActivityForm(msgs).FormId == x.ID).OrderBy(x => x.Name).ToList();
                         ViewBag.IsActivityLeader = IsActivityLeader(activity);
                         ViewBag.ActiveForm = activity.GetActiveActivityForm();
                         return View("EditSetup", activity);
@@ -683,7 +683,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     case "prev":
                         ViewBag.ActiveMenu = "EditSetup";
-                        ViewBag.Forms = SessionVariables.CurrentAccount.GetForms().OrderBy(x => x.Name).ToList();
+                        ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || activity.GetActiveActivityForm(msgs).FormId == x.ID).OrderBy(x => x.Name).ToList();
                         ViewBag.IsActivityLeader = IsActivityLeader(activity);
                         ViewBag.ActiveForm = activity.GetActiveActivityForm();
                         return View("EditSetup", activity);
@@ -691,7 +691,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         //ViewBag.ActiveMenu = "EditDetails";
                         //return View("EditDetails", activity);
                         ViewBag.ActiveMenu = "EditContact";
-                        ViewBag.Instructors = SessionVariables.CurrentAccount.GetUsers(msgs: msgs);
+                        ViewBag.Instructors = currentAccount.GetUsers(msgs: msgs);
                         return View("EditContact", activity);
                 }
             }

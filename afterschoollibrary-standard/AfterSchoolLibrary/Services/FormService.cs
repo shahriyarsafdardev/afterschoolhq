@@ -44,6 +44,103 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
+        public static List<FormQuestion> GetAllQuestions(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestion.LoadByFormId(form.ID.Value, msgs, dc);
+        }
+
+        public static List<FormQuestion> GetActiveQuestions(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestion.LoadByFormIdByIsActive(form.ID.Value, true, msgs, dc);
+        }
+
+        public static FormQuestion GetQuestion(this Form form, QuestionDataType questionDataTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestion.LoadByFormIdByQuestionDataTypeIds(form.ID.Value, questionDataTypeId.AsList(), msgs, dc).FirstOrDefault();
+        }
+
+        public static List<FormQuestionGroup> GetQuestionGroups(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionGroup.LoadByFormIdByIsDeleted(form.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
+        }
+
+        public static int GetQuestionGroupCount(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", form.ID.Value } }, msgs, dc);
+        }
+
+        public static Form Copy(this Form form, int loggedInUserId, int newAccountId, FormType formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            var formCopy = new Form
+            {
+                Name = formName.IfEmpty(form.Name),
+                Description = form.Description,
+                LastModifiedDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow,
+                FormTypeId = formType,
+                LastModifiedBy = loggedInUserId,
+                CreatedBy = loggedInUserId,
+                AccountId = newAccountId,
+                IsActive = true,
+                Uid = Guid.NewGuid()
+            };
+            msgs.AddRange(formCopy.Save(dc: dc));
+
+            var groups = form.FormTypeId == formType || formType == FormType.StudentForm ? FormQuestionGroup.LoadByFormId(FormId: form.ID.Value, dc: dc) : new List<FormQuestionGroup>();
+
+            foreach (var group in groups)
+            {
+                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
+
+                var newGroup = group.Copy();
+                newGroup.LastModifiedDate = DateTime.UtcNow;
+                newGroup.CreateDate = DateTime.UtcNow;
+                newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
+                newGroup.FormId = formCopy.ID;
+                newGroup.IsDeleted = false;
+                msgs.AddRange(newGroup.Save(dc: dc));
+
+                questions.ForEach(question => {
+                    var newQuestion = question.Copy();
+                    newQuestion.LastModifiedDate = newQuestion.CreateDate = DateTime.UtcNow;
+                    newQuestion.LastModifiedBy = newQuestion.CreatedBy = loggedInUserId;
+                    newQuestion.FormQuestionGroupId = newGroup.ID;
+                    newQuestion.FormId = formCopy.ID;
+                    newQuestion.IsTemplate = false;
+                    msgs.AddRange(newQuestion.Save(dc: dc));
+                });
+            }
+
+            //check for default form existence
+            var account = Account.Load(newAccountId, dc: dc);
+            if (account.IsNotEmpty() && !account.DefaultFormId.HasValue)
+            {
+                account.DefaultFormId = formCopy.ID;
+                msgs.AddRange(account.Save(dc: dc));
+            }
+
+            return formCopy;
+        }
+
+        public static SystemMessages MoveToArchive(this Form form, int loggedInUserId,
+            DatabaseConnection dc = null)
+        {
+            form.IsArchived = true;
+            form.LastModifiedDate = DateTime.UtcNow;
+            form.LastModifiedBy = loggedInUserId;
+            return form.Save(dc);
+        }
+
+        public static SystemMessages MoveFromArchive(this Form form, int loggedInUserId,
+            DatabaseConnection dc = null)
+        {
+            form.IsArchived = false;
+            form.LastModifiedDate = DateTime.UtcNow;
+            form.LastModifiedBy = loggedInUserId;
+            return form.Save(dc);
+        }
+
         public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
             int[] hiddenQuestionIds, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
         {

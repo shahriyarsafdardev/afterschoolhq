@@ -467,32 +467,19 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectType.Activity, false, msgs, dc);
         }
 
-        public static Activity CopyWithRegistrants(this Activity activity, string newName, bool useSameForm,
-            int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return activity.Copy(newName, useSameForm, true, true, true, loggedInUserId, msgs, dc);
-        }
-
         public static Activity Copy(this Activity activity, string newName, bool useSameForm, int loggedInUserId,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, true, true, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, true, true, loggedInUserId, msgs, dc);
         }
 
         public static Activity CopyWithoutSchedule(this Activity activity, string newName, bool useSameForm,
             int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, true, false, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, true, false, loggedInUserId, msgs, dc);
         }
 
-        public static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeSignUpPeriods,
-            bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return activity.Copy(newName, useSameForm, false, includeSignUpPeriods, includeSchedule, loggedInUserId,
-                msgs, dc);
-        }
-
-        internal static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeRegistrants,
+        internal static Activity Copy(this Activity activity, string newName, bool useSameForm,
             bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
@@ -522,12 +509,13 @@ namespace AfterSchoolLibrary.Services
                     {
                         //get form and use the same form
                         var formToUse = activity.GetActiveForm(amsgs, adc);
-                        if (formToUse.IsEmpty())
+                        if (formToUse.IsEmpty() || formToUse.IsArchived)
                             formToUse = account.GetDefaultStudentForm(msgs, adc);
 
                         copy.AddFormAndActivate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
-                    //copy form completely
+                    //  copy form completely
+                    // this code should never be used any more
                     else
                     {
                         Form formToCopy = null;
@@ -546,13 +534,12 @@ namespace AfterSchoolLibrary.Services
                         .ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
                     if (!WebUser.Load(loggedInUserId, amsgs, adc).HasAccessToActivity(copy, amsgs, adc))
-                    {
                         copy.AddTeamMember(loggedInUserId, true, loggedInUserId, amsgs, adc);
-                    }
 
                     if (includeSignUpPeriods)
                     {
                         var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
+
                         if (activePeriod.IsNotEmpty())
                         {
                             //copy registration period if doesn't have activity groups
@@ -604,46 +591,6 @@ namespace AfterSchoolLibrary.Services
                     var oldPostPayPlan = activity.GetPostPayPlan(amsgs, adc);
                     if (oldPostPayPlan.IsNotEmpty())
                         oldPostPayPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
-
-                    //if (includeRegistrants)
-                    //{
-                    //    // need a new registration
-                    //    var registrantActivities = activity.GetRegistrantActivities(amsgs, adc);
-
-                    //    registrantActivities.ForEach(registrantActivity => {
-
-                    //        var registrant = registrantActivity.ToRegistrant();
-
-                    //        // copies with no esignature because the parent isn't really signing. 
-                    //        // TODO: Need to get it, request esignature from parent?
-                    //        var newRegistration = registrant.AddRegistration(
-                    //            account.ID.Value,
-                    //            copy.ActivityGroupId,
-                    //            copy.AccountActivityGroupId,
-                    //            null,
-                    //            RegistrationCompletionStatus.RequiresParentSignature,
-                    //            loggedInUserId,
-                    //            amsgs,
-                    //            adc);
-
-                    //        var newRegistrantActivity = new RegistrantActivity()
-                    //        {
-                    //            ActivityGroupId = activity.ActivityGroupId,
-                    //            //ActivityId = copy.ID,
-                    //            CreateDate = DateTime.UtcNow,
-                    //            CreatedBy = loggedInUserId,
-                    //            LastModifiedBy = loggedInUserId,
-                    //            LastModifiedDate = DateTime.UtcNow,
-                    //            PreferenceNumber = registrantActivity.PreferenceNumber,
-                    //            RegistrantId = registrantActivity.RegistrantId,
-                    //            SeatIndex = registrantActivity.SeatIndex,
-                    //            RegistrationId = newRegistration.ID
-                    //        };
-                    //        amsgs.AddRange(newRegistrantActivity.Save(adc));
-
-                    //        // TODO: probably should notify parents that they've been added
-                    //    });
-                    //}
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
