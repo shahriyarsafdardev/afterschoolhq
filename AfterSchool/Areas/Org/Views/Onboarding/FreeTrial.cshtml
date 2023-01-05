@@ -1,5 +1,8 @@
-﻿@model Account
-@{ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml"; }
+@model Account
+@{ 
+    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+    bool signedUpForDefaultPackage = (bool)ViewBag.SignedUpForDefaultPackage;
+ }
 
 <style>
     .free-trial-border {
@@ -78,21 +81,28 @@
 
 <div class="free-trial-border">
     <div class="free-trial-main">
-        <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up"/>
-        <h3 class="lets-get-started">Let’s get started!</h3>
+        <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up" />
+        <h3 class="lets-get-started">Let&rsquo;s get started!</h3>
         <p class="free-trial-p">
             Starting now, you will be able to get the most of AfterSchool HQ
             <strong>free</strong>
-            for 14 days. In addition to features available with our free tier, you will have access to:
+            for 14 days.
+            @if (signedUpForDefaultPackage)
+            {
+                @:In addition to features available with our free tier, you will have access to:
+            }
         </p>
-        <ul class="feature-list">
-            <li>Custom Forms</li>
-            <li>Data Exporting</li>
-            <li>Student CRM</li>
-            <li>Attendance Tracking</li>
-            <li>Text Messaging</li>
-            <li>Unlimited Activities</li>
-        </ul>
+        @if (signedUpForDefaultPackage)
+        {
+            <ul class="feature-list">
+                <li>Custom Forms</li>
+                <li>Data Exporting</li>
+                <li>Student CRM</li>
+                <li>Attendance Tracking</li>
+                <li>Text Messaging</li>
+                <li>Unlimited Activities</li>
+            </ul>
+        }
         <p class="free-trial-p">
             We start everyone with our 14-day free trial so you can get a feel for what you need out of AfterSchool HQ.
             We will only collect your payment information when the trial is complete.
