@@ -1,6 +1,7 @@
 @model Form
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var currentAccount = SessionVariables.CurrentAccount;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
     var individualGroups = (List<FormQuestionGroup>)ViewBag.IndividualGroups;
     var questionGroup = (FormQuestionGroup)ViewBag.QuestionGroup;
@@ -27,7 +28,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-right">
-                @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
                 {
                     <a href="@Url.Action("report", "form", new { form = Model.ID })" class="btn btn-default" target="_blank">View Submissions</a>
                 }

@@ -10,7 +10,7 @@ using BasicLibrary.DataAccess;
 using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
-
+using AfterSchoolLibrary.Enums;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -44,28 +44,56 @@ namespace AfterSchoolLibrary.Services
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
 
-        public static void EmailDataReport(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int[] hiddenQuestions, int loggedInUserId)
+        public static void EmailDataReport(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+            int[] hiddenQuestionIds, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool collapseRecords, RegistrantPersonType registrantPersonType, int loggedInUserId)
         {
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
             var questions = new List<FormQuestion>();
-
-            if (!formId.HasValue && activityId.HasValue)
-                formId = currentAccount.GetActivity(activityId.Value, msgs)?.GetActiveForm(msgs)?.ID;
+            var forms = new List<Form>();
 
             if (formId.HasValue)
                 questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
-                        .Where(x => x.ID.Value.NotIn(hiddenQuestions) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                        .Where(x => x.ID.Value.NotIn(hiddenQuestionIds) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
                         .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                         .ThenBy(x => x.DisplayOrder).ToList();
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, null, null, msgs);
+            if (activityIds.Any())
+            {
+                var selectedActivities = currentAccount.GetActivities(activityIds, msgs);
+                selectedActivities.ForEach(x => forms.Add(x.GetActiveForm(msgs)));
+            }
 
+            if (!forms.Any())
+                forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
+
+            if (!questions.Any())
+            {
+                var allQuestions = new List<FormQuestion>();
+
+                forms.ForEach(x => allQuestions.AddRange(x.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)));
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet));
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
+                questions = questions
+                    .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                    .ThenBy(x => x.DisplayOrder)
+                    .ToList();
+
+                var hiddenQuestions = questions.Where(question => question.ID.Value.In(hiddenQuestionIds)).ToList();
+                var hiddenQuestionTypes = hiddenQuestions.Where(question => question.QuestionDataTypeId != QuestionDataType.NotSet).Select(question => question.QuestionDataTypeId).ToList();
+
+                questions = questions.Where(question => question.ID.Value.NotIn(hiddenQuestionIds) && question.QuestionDataTypeId.NotIn(hiddenQuestionTypes)).ToList();
+            }
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
+                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);         
             var table = new List<List<string>>();
             var row = new List<string>();
 
             row.Add("");
+            if (!collapseRecords)
+                row.Add("");
             row.Add("");
 
             foreach (var question in questions)
@@ -74,8 +102,12 @@ namespace AfterSchoolLibrary.Services
             table.Add(row);
 
             row = new List<string>();
-            row.Add("Submission Id");
-            row.Add("Submission Date");
+
+            row.Add("Registrant ID");
+            if (!collapseRecords)
+                row.Add("Submission Date");
+
+            row.Add("Activities");
 
             foreach (var question in questions)
                 row.Add(question.Text);
@@ -84,16 +116,43 @@ namespace AfterSchoolLibrary.Services
 
             foreach (var registrant in registrants)
             {
-                row = new List<string>();
+                row = new List<string>();              
 
-                row.Add(registrant.ID.ToString());
-                row.Add(registrant.CreateDate.ToShortDateTimeString());
+                var ras = registrant.GetRegistrantActivities(msgs);
+
+                if (collapseRecords)
+                    registrant.GetRelatedRegistrants(msgs)
+                        .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
+
+                if (activityIds.Any())
+                    ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
 
                 var answers = registrant.GetAnswers(msgs);
 
+                if (collapseRecords)
+                {
+                    var related = registrant.GetRelatedRegistrants(msgs);
+                    related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));
+                }
+
+                row.Add(registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'));
+                
+                if (!collapseRecords)
+                    row.Add(registrant.CreateDate.ToShortDateTimeString());
+
+                if (ras.Any())
+                    row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
+                else
+                    row.Add("");
+
                 foreach (var question in questions)
                 {
-                    var answer = answers.Where(x => x.FormQuestionId == question.ID && x.RegistrantId == registrant.ID).FirstOrDefault();
+                    var answer = answers.Where(answer => 
+                                    !answer.Text.IsBlank() && 
+                                    (answer.RegistrantId == registrant.ID || answer.FormQuestionId == question.ID) && 
+                                    (answer.FormQuestionId == question.ID || 
+                                        (answer.QuestionDataTypeId != QuestionDataType.NotSet && answer.QuestionDataTypeId == question.QuestionDataTypeId))
+                                    ).OrderByDescending(x => x.CreateDate.Value).FirstOrDefault();
                     row.Add(answer?.GetAnswerText().IfEmpty(""));
                 }
 
@@ -103,8 +162,8 @@ namespace AfterSchoolLibrary.Services
             var csv = CsvFile.Create(table);
             var csvByteData = Encoding.UTF8.GetBytes(csv);
             var subject = $"Submission Data Report";            
-            var body =
-                $"<p>Your Submission Data report is attached.</p>{Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
+            var body = @$"<p>Your Submission Data report is attached.</p>
+                        {Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
 
             msgs.AddRange(SendGridHelper.SendMailWithAttachments(
                 fromEmail: new EmailAddress(
