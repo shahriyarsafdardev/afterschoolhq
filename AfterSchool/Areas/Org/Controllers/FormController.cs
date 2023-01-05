@@ -336,7 +336,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (!forms.Any())
-                forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == formType).ToList();
+                forms = currentAccount.GetForms(null, msgs).Where(x => x.FormTypeId == formType).ToList();
 
             if (!questions.Any())
             {

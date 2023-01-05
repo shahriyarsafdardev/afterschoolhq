@@ -163,7 +163,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             if (!forms.Any())
-                forms = currentAccount.GetForms(msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
+                forms = currentAccount.GetForms(null, msgs).Where(x => x.FormTypeId == FormType.StudentForm).ToList();
 
             if (!questions.Any())
             {
