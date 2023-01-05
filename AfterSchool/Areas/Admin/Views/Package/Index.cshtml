@@ -1,4 +1,4 @@
-﻿@model List<AfterSchoolLibrary.Models.Package>
+@model List<AfterSchoolLibrary.Models.Package>
 
 @{
     ViewBag.Title = "Packages";
@@ -20,21 +20,21 @@
                     <tr>
                         <th></th>
                         <th>Package Name</th>
-                        <th>Domain</th>
+                        <th>UID</th>
                         <th class="text-center">Active</th>
                         <th class="text-center">$ / Month</th>
                         <th class="text-center">$ / Year</th>
                     </tr>
                     @if (Model.Any())
                     {
-                        foreach (Package item in Model)
+                        foreach (var item in Model)
                         {
                             <tr>
                                 <td>
                                     <a href="@Url.Action("edit", "package", new { id = item.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-edit"></i> Edit</a>
                                 </td>
                                 <td>@item.Name</td>
-                                <td>@(item.IsAfterSchool ? "AfterSchoolHQ.com" : "EnrollHQ.com")</td>
+                                <td>@item.Uid.ToString()</td>
                                 <td class="text-center">@{Html.RenderPartial("_BooleanToHtml", item.IsActive);}</td>
                                 <td class="text-center">@item.Price.ToCurrency()</td>
                                 <td class="text-center">@item.PricePerYear.ToCurrency()</td>

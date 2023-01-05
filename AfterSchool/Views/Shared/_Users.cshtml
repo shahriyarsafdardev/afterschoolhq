@@ -1,4 +1,4 @@
-﻿@model List<WebUser>
+@model List<WebUser>
 @{
     var accountId = "";
     var returnUrl = "";
@@ -70,7 +70,7 @@
                     {
                         <td>
                             <a href="@Url.Action("impersonate", "user", new {id = accountId, uid = user.Uid})" class="btn btn-default btn-xs">
-                                <i class="icon icon-left s7-user"></i> View
+                                <i class="icon icon-left s7-user"></i> Impersonate
                             </a>
                         </td>
                     }
