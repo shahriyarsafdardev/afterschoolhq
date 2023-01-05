@@ -367,7 +367,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(reportResults);
         }
 
-        [HttpGet]
+        [HttpPost]
         public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, 
             string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
@@ -474,7 +474,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
+        [HttpPost]
         public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, 
             string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {

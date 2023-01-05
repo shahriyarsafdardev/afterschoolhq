@@ -490,8 +490,11 @@
 
         toggleEmailReportButton(true);
 
-        $.get(
-            `@Url.Action("EmailReport", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
+        let params = `form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`;
+
+        $.post(
+            '@Url.Action("EmailReport", "Form")',
+            params,
             function (data) {
 
                 if (data && data.status === 'ok') {
@@ -532,8 +535,11 @@
 
         addLoading();
 
-        $.get(
-            `@Url.Action("GetReportPage", "Form")?form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`,
+        let params = `form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`;
+
+        $.post(
+            '@Url.Action("GetReportPage", "Form")',
+            params,
             function (data) {
 
                 removeLoading();
