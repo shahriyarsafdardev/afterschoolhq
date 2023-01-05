@@ -716,7 +716,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             // Show Success Message
             if (msgs.HasNoErrors())
-                msgs.Add($"{form.Name} has been restored", MessageType.Success);
+                msgs.Add($"{form.Name} has been set as the default", MessageType.Success);
 
             ViewBag.Messages = msgs;
 
