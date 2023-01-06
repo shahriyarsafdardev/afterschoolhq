@@ -774,9 +774,10 @@ namespace AfterSchoolLibrary.Models
                     sql += @$" and (
                                 FormQuestion.ID in ({searchQuestionIds.ToStrings().ToStringList()})";
 
-                    if (searchQuestionTypeIds.IsNotEmpty() && searchQuestionTypeIds.Any())
+                    var excludingNotSet = searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).ToList();
+                    if (excludingNotSet.IsNotEmpty() && excludingNotSet.Any())
                         sql += @$" or    
-                                FormQuestion.QuestionDataTypeId in ({searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).Select(x => (int) x).ToStrings().ToStringList()})";
+                                FormQuestion.QuestionDataTypeId in ({excludingNotSet.Select(x => (int) x).ToStrings().ToStringList()})";
 
                     sql += ")";
                 }
