@@ -11,6 +11,9 @@ using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using AfterSchoolLibrary.Enums;
+using Amazon.DynamoDBv2.DocumentModel;
+using Microsoft.Data.SqlClient.Server;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -43,6 +46,12 @@ namespace AfterSchoolLibrary.Services
         //Created separate list from Emergency Contact, as later they can differ at any stage
         public static string ParentRelationshipToRegistrant =>
             "Father,Mother,Grandfather,Grandmother,Brother,Sister,Uncle,Aunt,Legal Guardian,Other";
+
+        public static int GetTotalSubmissionCount(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
+            false, null, null, RegistrantPersonType.NotSet, msgs);
+        }
 
         public static List<FormQuestion> GetAllQuestions(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
