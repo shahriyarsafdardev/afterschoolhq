@@ -190,6 +190,22 @@
             </div>
 
             <div class="row hide toggles" id="column-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="visible-questions"
+                               class="form-control"
+                               value="1"
+                               checked="checked"
+                               onclick="toggleAllVisibleColumns()" />
+
+                        <label for="visible-questions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
                 @{
                     var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
                 }
@@ -197,7 +213,7 @@
                 {
                     <div class="col-md-12">
                         <div class="am-checkbox">
-                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
+                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control visible-questions" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
                             <label for="group-@group.ID" class="text-medium-small text-bold">
                                 @group.Name
                             </label>
@@ -215,7 +231,7 @@
                             {
                                 <div>
                                     <div class="am-checkbox">
-                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
+                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID visible-questions" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
                                         <label for="question-@question.ID">
                                             @question.Text
                                         </label>
@@ -271,12 +287,15 @@
         </div>
     </div>
 </div>
-
+@{ 
+    questions.Select(x => x.FormQuestionGroupId.ToString()).DistinctBy(x => x).ToList().ToStringList();
+}
 
 <script>
 
     var questions = @Html.Raw(questions.Select(question => new { question.ID, question.Text, QuestionDataTypeId = (int)question.QuestionDataTypeId }).ToJSON());
-    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());;
+    var questionGroupIds = @Html.Raw(questions.Select(x => x.FormQuestionGroupId).DistinctBy(x => x).ToList().ToJSON())
+    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());
     var pageStart = 0;
     let pageSize = 25;
     var maxRecords = null;
@@ -430,6 +449,18 @@
         search();
     }
 
+    function toggleAllVisibleColumns() {
+        if ($('#visible-questions').is(':checked')) {
+            $('.visible-questions').prop('checked', true);
+        } else {
+            $('.visible-questions').prop('checked', false);
+        }
+
+        for (var groupId of questionGroupIds) {
+            toggleGroup(groupId);
+        }
+    }
+
     function toggleActivityOptionSelection() {
         if ($('#activityoption-selection').hasClass('hide')) {
             hideToggles();
@@ -514,7 +545,6 @@
 
     function addLoading() {
         $('#answer-tbody').append(`<tr id="tr-loading"><td class="padding-20" colspan="${(questions.length + 1)}"><h4>Loading...</h4></td></tr>`);
-        console.log('should be added');
     }
 
     function removeLoading() {
