@@ -194,28 +194,12 @@ namespace AfterSchoolLibrary.Services
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-            // Charge parent if they try to join mid-period. 
-            // NOTE: This needs to be totally changed for pro-rating
-            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
-                participationObject.Schedule.IsNotEmpty() &&
-                participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
-            {
-
-                // we use stripe subscription pro-rating
-                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, loggedInUser, currentAccount, msgs, dc);
-
-                startDateTime = plan.BillingPeriodTypeId switch
-                {
-                    // we will update starting of subscription for this registrant to next cycle
-                    BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
-                    BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
-                    _ => startDateTime,
-                };
-            }
+            
             var stripeProratingService = new StripeProratingService();
             var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
                 msgs);
+
+
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
@@ -245,6 +229,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasErrors())
                 return;
 
+            // this may be for Attendance Based Billing (PostPay Plan)
             if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
                 new StripeHelper().CreateCustomerBalanceTransaction(
                     subscription.CustomerId,
