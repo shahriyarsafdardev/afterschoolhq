@@ -194,7 +194,27 @@ namespace AfterSchoolLibrary.Services
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-            
+
+            // Charge parent if they try to join mid-period. 
+            // NOTE: This needs to be totally changed for pro-rating
+            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+                participationObject.Schedule.IsNotEmpty() &&
+                participationObject.StartDate.HasValue &&
+                participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
+            {
+
+                // we use stripe subscription pro-rating
+                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, loggedInUser, currentAccount, msgs, dc);
+
+                startDateTime = plan.BillingPeriodTypeId switch
+                {
+                    // we will update starting of subscription for this registrant to next cycle
+                    BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
+                    BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
+                    _ => startDateTime,
+                };
+            }
+
             var stripeProratingService = new StripeProratingService();
             var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
                 msgs);
@@ -334,7 +354,7 @@ namespace AfterSchoolLibrary.Services
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                ccFee = calcObj.GetCreditCardFee();
+                ccFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(proratedAmount); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)// calcObj.GetCreditCardFee();
 
             var amount = proratedAmount + ccFee; //calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
             var amountReceivedByProvider = calcObj.GetAmountToProvider();
