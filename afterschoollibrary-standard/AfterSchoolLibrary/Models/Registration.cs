@@ -703,8 +703,8 @@ namespace AfterSchoolLibrary.Models
 
             if (type != 4)
             {
-                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} ";
-                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} and volunteer.IsActive = 1 ";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on subReg.WebUserId = volunteer.WebUserId ";
             }
 
             var sql = $@"select reg.*,
@@ -715,10 +715,14 @@ namespace AfterSchoolLibrary.Models
                         reg.Uid as RegistrantUid,
                         masterReg.Phone as RegistrantPhone,
                         masterReg.Company as RegistrantCompany
-            from
-                Registrant submittedReg inner join
-                Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+            FROM Registrant subReg
+                JOIN Registrant masterReg
+                ON subReg.ParentRegistrantId = masterReg.ID AND subReg.CreateDate = (
+                SELECT MIN(CreateDate)
+                FROM Registrant
+                WHERE ParentRegistrantId = masterReg.ID
+                )
+                Join Registration reg on subReg.ID = reg.RegistrantId
                 {typecondition}
             WHERE
                 reg.accountid in (
@@ -726,10 +730,10 @@ namespace AfterSchoolLibrary.Models
                     from accountrelationship
                     where hostaccountid = {Id}
                 ) and
-                submittedReg.PersonTypeId = {(int)RegistrantPersonType.Volunteer} and
-                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
+                subReg.PersonTypeId = {(int)RegistrantPersonType.Volunteer} and
+                (subReg.FirstName like '%{search}%' or subReg.lastName like '%{search}%')
                 {typeQuery}
-                order by submittedReg.ID";
+                order by subReg.ID";
 
             return sql;
         }
