@@ -84,6 +84,8 @@ namespace AfterSchoolLibrary.Billing
 
         public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
         {
+            // does this work if it's two months late
+            // won't work for more than 1 month difference
             var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
             var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
             return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
