@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -11,9 +10,6 @@ using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using AfterSchoolLibrary.Enums;
-using Amazon.DynamoDBv2.DocumentModel;
-using Microsoft.Data.SqlClient.Server;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace AfterSchoolLibrary.Services
 {
