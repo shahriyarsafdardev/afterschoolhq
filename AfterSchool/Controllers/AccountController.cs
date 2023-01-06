@@ -1796,9 +1796,8 @@ namespace AfterSchool.Controllers
             if (proratingResult.ShouldWeBeProratingToday)
             {
                 var proratedAmount = decimal.Parse(proratingResult.ProratingValue.ToString());
-                var calcObj = new FeeCalculationObject(proratedAmount, participationObject.PaymentAccount, msgs);
                 ViewBag.ProratedAmount = proratedAmount;
-                ViewBag.ProratedAmountFee = calcObj.GetCreditCardFee(); // Get ccFee cost of stripe prorated amount
+                ViewBag.ProratedAmountFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(proratedAmount); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)(); // Get ccFee cost of stripe prorated amount
             }
             return registration;
         }

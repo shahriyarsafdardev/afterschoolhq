@@ -1551,24 +1551,20 @@ namespace AfterSchoolLibrary.Billing
             return new InvoiceService(StripeClient);
         }
 
-        public Invoice PreviewSubscriptionProration(string customerId, string planId, SystemMessages msgs, DateTime billingCycleAnchor)
+        public decimal PreviewSubscriptionProration(SystemMessages msgs, DateTime billingCycleAnchor)
         {
             msgs ??= new SystemMessages();
 
-            Invoice invoice = null;
-
-            var options = new UpcomingInvoiceOptions
-            {
-                Customer = customerId,
-                SubscriptionBillingCycleAnchor = billingCycleAnchor,
-                SubscriptionItems = new List<InvoiceSubscriptionItemOptions> { new InvoiceSubscriptionItemOptions { Plan = planId, Quantity = 1 } },
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
-            };
-
+            // Invoice invoice = null;
+            decimal listPrice = 0M;
             try
             {
-                invoice = GetInvoiceService().Upcoming(options);
+                // invoice = GetInvoiceService().Upcoming(options);
+                var subscriptionStoredCost = 51.84M;
+                var checkoutDate = DateTime.UtcNow.Date; // stripe uses the exact time to calculate prorating
+                var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(billingCycleAnchor.Date, checkoutDate, subscriptionStoredCost); // use this instead of the stripe prorate preview
+                var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
+                listPrice = predictedStripeCharge - ccFeeForProratedCharge; // how much is the "original" charge before cc fee
             }
             catch (StripeException ex)
             {
@@ -1576,7 +1572,7 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add("Invoice doesn't exist", MessageType.UserError);
             }
 
-            return invoice;
+            return listPrice;
         }
 
         #endregion

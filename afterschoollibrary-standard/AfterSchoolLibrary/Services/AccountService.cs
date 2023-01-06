@@ -1803,8 +1803,8 @@ namespace AfterSchoolLibrary.Services
 
             var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
             var billingCycleAnchor = plan.StartDate.Value.AddMonths(1);
-            var stripeProratePreview = stripeHelper.PreviewSubscriptionProration(customer.Id, plan.StripePlanId, msgs, billingCycleAnchor);
-            return stripeProratePreview.AmountDue / 100m;
+            var stripeProrateValue = stripeHelper.PreviewSubscriptionProration(msgs, billingCycleAnchor);
+            return stripeProrateValue;
         }
 
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
