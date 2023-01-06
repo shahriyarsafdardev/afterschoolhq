@@ -12,6 +12,8 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public List<RegistrantActivity> RegistrantActivities { get; set; }
         public Account CurrentAccount { get; set; }
         public WebUser CurrentUser { get; set; }
+
+        public UserType AccountUserType { get; set; }
         public RegistrationAssignmentType AssignmentType { get; set; }
         public AccountPackage AccountPackage { get; set; }
         public bool IsReadOnlySeatStatus { get; set; }
@@ -60,6 +62,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 DeclinedCount = declinedCount,
                 PendingBackgroundCheckCount = pendingBackgroundCheckCount,
                 Messages = messages,
+                AccountUserType = userType,
             };
         }
     }

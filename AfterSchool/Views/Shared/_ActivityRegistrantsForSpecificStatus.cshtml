@@ -9,6 +9,7 @@
     var isTechSupport = SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var isReadOnly = (bool) ViewData["IsReadOnly"];
     var assignmentTypesForActivity = activity.GetRegistrationAssignmentTypes();
+    var canViewRegistrantData = ViewData["canViewRegistrantData"].IsNotEmpty() ? ViewData["canViewRegistrantData"].ToString().ToBoolean() : true;
 }
 
 <div class="panel panel-default">
@@ -47,7 +48,7 @@
 
                     <tr class="instance @instanceSeats.Select(x => $"instance-{x.ActivityInstanceId.ToString()}").ToStringList(" ")">
                         <td>
-                            @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
+                            @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited && canViewRegistrantData)
                             {
                                 <a href="@Url.Action(editaction, editcontroller, new {id = ra.Uid})" class="btn btn-default btn-sm">
                                     <i class="icon icon-left s7-user"></i> View Details
@@ -135,7 +136,7 @@
                         @if (!participationObject.CanRegisterPerClass)
                         {
                             <td>
-                                @if (ra.IsRegistrantActivityStatusAccessible())
+                                @if (ra.IsRegistrantActivityStatusAccessible() && !isReadOnly)
                                 {
                                     <select name="newassignmenttype"
                                             id="newassignmenttype-@ra.ID"
