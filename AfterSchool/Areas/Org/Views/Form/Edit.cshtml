@@ -425,8 +425,8 @@
             <div class="modal-body form fixed-height-modal-options">
 
                 <p>Update your options here. Your options are not saved until you hit the save button on the screen</p>
-                <p class="twoOptionsValidation text-danger hide">Please add atleast two options.</p>
-                <p class="invalid-char text-danger hide">| sign is not allowed.</p>
+                <p class="twoOptionsValidation text-danger hide">Please add at least two options.</p>
+                <p class="invalid-char text-danger hide">&lsquo;|&rsquo; and &lsquo;,&rsquo; are not allowed.</p>
                 <p class="requiredData text-danger hide">Please select emojis.</p>
 
                 <div class="table-responsive">
@@ -1025,6 +1025,7 @@
                 if (index != 0 && index != rowCount) {
                     var optVal = $(this).find("input.option").val();
                     var optDesc = $(this).find("input.optionDescription").val();
+
                     if ($('#modal-options-title').text() == 'Emojis') {
                         optVal = emojione.toShort($(this).find("input.option").val());
                         if ($(this).find("input.emojionearea2").val() == "") {
@@ -1038,7 +1039,7 @@
                         validation = false;
                     }
                     else {
-                        if (optVal.includes('|')) {
+                        if (optVal.includes('|') || optVal.includes(',')) {
                             $(this).find("input.option").addClass("danger");
                             validChars = false;
                             validation = false;
@@ -1048,7 +1049,7 @@
                             optVal.trim();
                         }
 
-                        if (optDesc.includes('|')) {
+                        if (optDesc.includes('|') || optVal.includes(',')) {
                             $(this).find("input.optionDescription").addClass("danger");
                             validChars = false;
                             validation = false;
