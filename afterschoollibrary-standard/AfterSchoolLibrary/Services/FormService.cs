@@ -193,7 +193,8 @@ namespace AfterSchoolLibrary.Services
             }
 
             var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null, 
-                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);         
+                                collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);
+            var hasRegistrantInfoInQuestions = questions.Any(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
             var table = new List<List<string>>();
             var row = new List<string>();
 
@@ -201,6 +202,13 @@ namespace AfterSchoolLibrary.Services
             if (!collapseRecords)
                 row.Add("");
             row.Add("");
+
+            if (!hasRegistrantInfoInQuestions)
+            {
+                row.Add("");
+                row.Add("");
+                row.Add("");
+            }
 
             foreach (var question in questions)
                 row.Add(question.FormQuestionGroupName);
@@ -214,6 +222,13 @@ namespace AfterSchoolLibrary.Services
                 row.Add("Submission Date");
 
             row.Add("Activities");
+
+            if (!hasRegistrantInfoInQuestions)
+            {
+                row.Add("First Name");
+                row.Add("Last Name");
+                row.Add("Email");
+            }
 
             foreach (var question in questions)
                 row.Add(question.Text);
@@ -250,6 +265,13 @@ namespace AfterSchoolLibrary.Services
                     row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
                 else
                     row.Add("");
+
+                if (!hasRegistrantInfoInQuestions)
+                {
+                    row.Add(registrant.FirstName);
+                    row.Add(registrant.LastName);
+                    row.Add(registrant.Email);
+                }
 
                 foreach (var question in questions)
                 {

@@ -4,6 +4,8 @@
     var questions = Model.Questions;
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+
+    var hasRegistrantInfoInQuestions = questions.Any(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
 }
 
 <div class="main-content">
@@ -30,23 +32,28 @@
                 </div>
             </div>
             <div class="row">&nbsp;</div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="am-checkbox">
-                        <input type="checkbox"
-                               id="collapse-records"
-                               class="form-control"
-                               value="1"
-                               @(Model.CollapseRecords ? "checked=\"checked\"" : "")
-                               onclick="toggleCollapseRecords()" />
 
-                        <label for="collapse-records">
-                            Collapse Records
-                        </label>
+            @if (Model.ShowCollapseRecordOption)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   id="collapse-records"
+                                   class="form-control"
+                                   value="1"
+                                   @(Model.CollapseRecords ? "checked=\"checked\"" : "")
+                                   onclick="toggleCollapseRecords()" />
+
+                            <label for="collapse-records">
+                                Collapse Records
+                            </label>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+            }
+
             <div class="row">
                 <div class="col-md-12">
                     <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-date"></i> Date Filter</button>
@@ -262,6 +269,16 @@
                                     <th></th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")"></th>
                                     <th></th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </text>
+                                    }
+
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
@@ -271,6 +288,16 @@
                                     <th>Registrant ID</th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
                                     <th>Activities</th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Email</th>
+                                        </text>
+                                    }
+
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.Text</th>
@@ -299,6 +326,7 @@
     var pageStart = 0;
     let pageSize = 25;
     var maxRecords = null;
+    var hasRegistrantInfoInQuestions = @hasRegistrantInfoInQuestions.ToString().ToLower();
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -586,6 +614,12 @@
                             tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
                         }
                         tableRow += `<td>${registrant.Activities}</td>`;
+
+                        if (!hasRegistrantInfoInQuestions) {
+                            tableRow += `<td>${registrant.FirstName}</td>`;
+                            tableRow += `<td>${registrant.LastName}</td>`;
+                            tableRow += `<td>${registrant.Email}</td>`;
+                        }
 
                         for (let question of questions) {
 

@@ -16,6 +16,7 @@ namespace AfterSchool.Models
         public SystemMessages Messages { get; set; }
         public bool CollapseRecords { get; set; }
         public RegistrantPersonType PersonType { get; set; }
+        public bool ShowCollapseRecordOption { get; set; }
     }
 
 }
