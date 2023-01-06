@@ -39,4 +39,5 @@ public enum FeatureType
     ManageVolunteerOpportunities = 38,
     AllowRegistrantImport = 39,
     AdvancedReports = 40,
+    LimitInstructorRegistrantView = 41,
 }

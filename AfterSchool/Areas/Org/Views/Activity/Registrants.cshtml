@@ -2,7 +2,6 @@
 @model AfterSchool.Areas.Org.Assemblers.Activity.RegistrantsResult
 @{
     var msgs = Model.Messages;
-
     var ras = Model.RegistrantActivities;
     var account = Model.CurrentAccount;
     var totalPaid = Model.Activity.GetTotalPaid();
@@ -21,6 +20,7 @@
     var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, accountPackage);
     var isReadOnlySeatStatus = Model.IsReadOnlySeatStatus;
     var currentUser = Model.CurrentUser;
+    var canViewRegistrantData = Model.AccountUserType != UserType.Instructor || !Model.CurrentAccount.HasFeature(FeatureType.LimitInstructorRegistrantView);
 }
 
 
@@ -162,90 +162,65 @@
     <div class="col-md-6">
         <div class="btn-group pull-right @(Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "hide" : "")">
 
-            @if (Model.IsActivityLeader)
+            @if (canViewRegistrantData)
             {
-                if (Model.Activity.ActivityTypeId == ActivityType.LearningPod)
+                if (Model.IsActivityLeader)
                 {
-                    var minWarning = $"<p>You have {Model.Activity.GetSeatsTaken()} registrations.</p>";
-
-                    if (Model.Activity.MinSeatsRequired.HasValue && Model.Activity.MinSeatsRequired.Value > Model.Activity.GetSeatsTaken())
+                    if (showStudentCRM)
                     {
-                        minWarning = $"<p class=\"text-danger\"><strong>You have not reached your minimum of {Model.Activity.MinSeatsRequired.Value}</strong></p>";
+                        <a href="@Url.Action("addregistration", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                            Add Student
+                        </a>
                     }
-
-                    <button type="button" class="btn btn-default btn-space md-trigger" data-modal="modal-confirm-finalize" @(Model.Activity.RegistrationFinalized ? "disabled=\"disabled\"" : "")>
-                        Finalize Registration
-                    </button>
-
-                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel { ActionButtonHtml = "Finalize Registration &raquo;", ActionButtonId = "btn-confirm-finalize", HtmlBody = $"{minWarning}<p>Are you sure you want to finalize registration? This will close registration and send emails to existing parents with information about how to pay.</p><p><strong>Emails are only sent to parents of students with the status {RegistrationAssignmentType.ReservedPendingPayment.ToString().SplitByUpperCase()}</strong></p><p><strong>This action cannot be undone</strong></p>", ID = "modal-confirm-finalize", Title = "Finalize Registration" });
-
-                    <script>
-                                    PageEvent.add(PageEvent.AFTER_INIT, function () {
-                                        $('#btn-confirm-finalize').click(function () {
-                                            location.href = '@Url.Action("finalizeregistration", "activity", new {id = Model.Activity.Uid})';
-                                        });
-                                    });
-                    </script>
+                    else
+                    {
+                        <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage?.Name)',@(studentCRMPackage?.ID))" disabled="disabled">
+                            Add Student
+                        </a>
+                    }
                 }
 
-                if (showStudentCRM)
+                if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && Model.CurrentAccount.HasFeature(FeatureType.AdvancedReports))
                 {
-                    <a href="@Url.Action("addregistration", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
-                        Add Student
+                    <a href="@Url.Action("Report", "Form", new { activities = Model.Activity.ID })" class="btn btn-default btn-space" target="_blank">
+                        View Submissions
                     </a>
                 }
                 else
                 {
-                    <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(studentCRMPackage?.Name)',@(studentCRMPackage?.ID))" disabled="disabled">
-                        Add Student
+                    <a href="@Url.Action("registrantsummary", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                        Send Registration Report
                     </a>
                 }
-            }
 
-            @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && Model.CurrentAccount.HasFeature(FeatureType.AdvancedReports))
-            {
-                <a href="@Url.Action("Report", "Form", new {activities = Model.Activity.ID})" class="btn btn-default btn-space" target="_blank">
-                    View Submissions
+                <a href="@Url.Action("printregistrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space" target="_blank">
+                    Print Registrations
                 </a>
-            }
-            else
-            {
-                <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space">
-                    Send Registration Report
-                </a>
-            }
 
-            <a href="@Url.Action("printregistrants", "activity", new {id = Model.Activity.Uid})" class="btn btn-default btn-space" target="_blank">
-                Print Registrations
-            </a>
-
-            @if (!Model.Activity.ActivityGroupId.HasValue && Model.AccountPackage.HasFeature(FeatureType.AllowRegistrantImport))
-            {
-                <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
-                    Import Students
-                </a>
-            }
-
-            @if (activeRegistrationPeriod.IsNotEmpty())
-            {
-                if (showAllowInvites)
+                if (!Model.Activity.ActivityGroupId.HasValue && Model.AccountPackage.HasFeature(FeatureType.AllowRegistrantImport))
                 {
-                    <a href="@Url.Action("inviteto", "contact", new {id = activeRegistrationPeriod.Uid, type = "period"})" class="btn btn-default btn-space">
-                        Invite Contacts
+                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                        Import Students
                     </a>
                 }
-                else
+
+                if (activeRegistrationPeriod.IsNotEmpty())
                 {
-                    <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" disabled="disabled">
-                        Invite Contacts
-                    </a>
+                    if (showAllowInvites)
+                    {
+                        <a href="@Url.Action("inviteto", "contact", new { id = activeRegistrationPeriod.Uid, type = "period" })" class="btn btn-default btn-space">
+                            Invite Contacts
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="#" class="btn btn-default btn-space" onclick="return showUpgradeMyPlan('@(allowInvitesPackage?.Name)',@(allowInvitesPackage?.ID))" disabled="disabled">
+                            Invite Contacts
+                        </a>
+                    }
                 }
             }
         </div>
-
-        <a href="@Url.Action("registrantdownload", "activity", new {id = Model.Activity.Uid})" class="btn btn-primary btn-space hide">
-            <i class="icon icon-left s7-download"></i> Download Registration Data
-        </a>
     </div>
 </div>
 
@@ -269,6 +244,7 @@ else
             {"EditController", "activity"},
             {"AssignmentType", assignmentType},
             {"IsReadOnlySeatStatus", isReadOnlySeatStatus},
+            {"CanViewRegistrantData", canViewRegistrantData }
         }
         );
 }
