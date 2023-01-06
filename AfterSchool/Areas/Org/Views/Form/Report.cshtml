@@ -4,6 +4,8 @@
     var questions = Model.Questions;
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+
+    var hasRegistrantInfoInQuestions = questions.Any(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
 }
 
 <div class="main-content">
@@ -30,23 +32,28 @@
                 </div>
             </div>
             <div class="row">&nbsp;</div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="am-checkbox">
-                        <input type="checkbox"
-                               id="collapse-records"
-                               class="form-control"
-                               value="1"
-                               @(Model.CollapseRecords ? "checked=\"checked\"" : "")
-                               onclick="toggleCollapseRecords()" />
 
-                        <label for="collapse-records">
-                            Collapse Records
-                        </label>
+            @if (Model.ShowCollapseRecordOption)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   id="collapse-records"
+                                   class="form-control"
+                                   value="1"
+                                   @(Model.CollapseRecords ? "checked=\"checked\"" : "")
+                                   onclick="toggleCollapseRecords()" />
+
+                            <label for="collapse-records">
+                                Collapse Records
+                            </label>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">&nbsp;</div>
+                <div class="row">&nbsp;</div>
+            }
+
             <div class="row">
                 <div class="col-md-12">
                     <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-date"></i> Date Filter</button>
@@ -190,6 +197,22 @@
             </div>
 
             <div class="row hide toggles" id="column-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="visible-questions"
+                               class="form-control"
+                               value="1"
+                               checked="checked"
+                               onclick="toggleAllVisibleColumns()" />
+
+                        <label for="visible-questions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
                 @{
                     var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
                 }
@@ -197,7 +220,7 @@
                 {
                     <div class="col-md-12">
                         <div class="am-checkbox">
-                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
+                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control visible-questions" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
                             <label for="group-@group.ID" class="text-medium-small text-bold">
                                 @group.Name
                             </label>
@@ -215,7 +238,7 @@
                             {
                                 <div>
                                     <div class="am-checkbox">
-                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
+                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID visible-questions" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
                                         <label for="question-@question.ID">
                                             @question.Text
                                         </label>
@@ -246,6 +269,16 @@
                                     <th></th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")"></th>
                                     <th></th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </text>
+                                    }
+
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
@@ -255,6 +288,16 @@
                                     <th>Registrant ID</th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
                                     <th>Activities</th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Email</th>
+                                        </text>
+                                    }
+
                                     @foreach (var question in questions)
                                     {
                                         <th class="col-question-@question.ID">@question.Text</th>
@@ -271,15 +314,19 @@
         </div>
     </div>
 </div>
-
+@{ 
+    questions.Select(x => x.FormQuestionGroupId.ToString()).DistinctBy(x => x).ToList().ToStringList();
+}
 
 <script>
 
     var questions = @Html.Raw(questions.Select(question => new { question.ID, question.Text, QuestionDataTypeId = (int)question.QuestionDataTypeId }).ToJSON());
-    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());;
+    var questionGroupIds = @Html.Raw(questions.Select(x => x.FormQuestionGroupId).DistinctBy(x => x).ToList().ToJSON())
+    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());
     var pageStart = 0;
     let pageSize = 25;
     var maxRecords = null;
+    var hasRegistrantInfoInQuestions = @hasRegistrantInfoInQuestions.ToString().ToLower();
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -430,6 +477,18 @@
         search();
     }
 
+    function toggleAllVisibleColumns() {
+        if ($('#visible-questions').is(':checked')) {
+            $('.visible-questions').prop('checked', true);
+        } else {
+            $('.visible-questions').prop('checked', false);
+        }
+
+        for (var groupId of questionGroupIds) {
+            toggleGroup(groupId);
+        }
+    }
+
     function toggleActivityOptionSelection() {
         if ($('#activityoption-selection').hasClass('hide')) {
             hideToggles();
@@ -513,8 +572,8 @@
     }
 
     function addLoading() {
+        $('.no-results').remove();
         $('#answer-tbody').append(`<tr id="tr-loading"><td class="padding-20" colspan="${(questions.length + 1)}"><h4>Loading...</h4></td></tr>`);
-        console.log('should be added');
     }
 
     function removeLoading() {
@@ -546,47 +605,58 @@
 
                 if (data && data.status === 'ok') {
 
-                    for (let registrant of data.registrants) {
-
-                        var tableRow = `<tr>`;
-
-                        tableRow += `<td>${registrant.RecordId}</td>`;
-                        if (!$('#collapse-records').is(':checked'))
-                        {
-                            tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
-                        }
-                        tableRow += `<td>${registrant.Activities}</td>`;
-
-                        for (let question of questions) {
-
-                            answer = getAnswerForQuestion(question, registrant, data.answers);
-
-                            var hide = "";
-
-                            if (!$(`#question-${question.ID}`).is(':checked')) {
-                                hide = "hide";
-                            }
-
-                            tableRow += `<td class="col-question-${question.ID} ${hide}">`;
-                            if (answer) {
-                                tableRow += answer.Text;
-                            }
-                            tableRow += `</td>`;
-                        }
-
-                        tableRow += `</tr>`;
+                    if (data.registrants.length == 0) {
+                        var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
                         $('#answer-tbody').append(tableRow);
+                    } else {
+
+                        for (let registrant of data.registrants) {
+
+                            var tableRow = `<tr>`;
+
+                            tableRow += `<td>${registrant.RecordId}</td>`;
+                            if (!$('#collapse-records').is(':checked')) {
+                                tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
+                            }
+                            tableRow += `<td>${registrant.Activities}</td>`;
+
+                            if (!hasRegistrantInfoInQuestions) {
+                                tableRow += `<td>${registrant.FirstName}</td>`;
+                                tableRow += `<td>${registrant.LastName}</td>`;
+                                tableRow += `<td>${registrant.Email}</td>`;
+                            }
+
+                            for (let question of questions) {
+
+                                answer = getAnswerForQuestion(question, registrant, data.answers);
+
+                                var hide = "";
+
+                                if (!$(`#question-${question.ID}`).is(':checked')) {
+                                    hide = "hide";
+                                }
+
+                                tableRow += `<td class="col-question-${question.ID} ${hide}">`;
+                                if (answer) {
+                                    tableRow += answer.Text;
+                                }
+                                tableRow += `</td>`;
+                            }
+
+                            tableRow += `</tr>`;
+                            $('#answer-tbody').append(tableRow);
+                        }
+
+                        pageStart += pageSize;
+
+                        if (data.registrants.length > 0)
+                            $('#starting-record').html(1);
+
+                        $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
+                        $('#total-records').html(data.registrantCount);
+
+                        maxRecords = data.registrantCount;
                     }
-
-                    pageStart += pageSize;
-
-                    if (data.registrants.length > 0)
-                        $('#starting-record').html(1);
-
-                    $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
-                    $('#total-records').html(data.registrantCount);
-
-                    maxRecords = data.registrantCount;
 
                 } else {
                     Notifications.showErrors(data.messages);

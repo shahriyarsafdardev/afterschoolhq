@@ -753,7 +753,7 @@ namespace AfterSchoolLibrary.Models
                     FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
                     Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
 
-            if (activityIds.Any())
+            if (activityIds.IsNotEmpty() && activityIds.Any())
                 sql += @"
                     left outer join 
                     RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
@@ -769,11 +769,18 @@ namespace AfterSchoolLibrary.Models
             {
                 sql += $" and FormQuestionAnswer.Text like '%{search}%'";
 
-                if (searchQuestionIds.Any())
+                if (searchQuestionIds.IsNotEmpty() && searchQuestionIds.Any())
+                {
                     sql += @$" and (
-                                FormQuestion.ID in ({searchQuestionIds.ToStrings().ToStringList()}) or
-                                FormQuestion.QuestionDataTypeId in ({searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).Select(x => (int)x).ToStrings().ToStringList()})
-                            )";
+                                FormQuestion.ID in ({searchQuestionIds.ToStrings().ToStringList()})";
+
+                    var excludingNotSet = searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).ToList();
+                    if (excludingNotSet.IsNotEmpty() && excludingNotSet.Any())
+                        sql += @$" or    
+                                FormQuestion.QuestionDataTypeId in ({excludingNotSet.Select(x => (int) x).ToStrings().ToStringList()})";
+
+                    sql += ")";
+                }
             }
 
             if (startDate.HasValue)
@@ -789,7 +796,7 @@ namespace AfterSchoolLibrary.Models
             {
                 sql += " and Registrant.FirstRegistrantId is NULL";
 
-                if (activityIds.Any())
+                if (activityIds.IsNotEmpty() && activityIds.Any())
                     sql += @$"
                     and 
                     (
@@ -810,7 +817,7 @@ namespace AfterSchoolLibrary.Models
             }
             else
             {
-                if (activityIds.Any())
+                if (activityIds.IsNotEmpty() && activityIds.Any())
                     sql += @$"
                     and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";

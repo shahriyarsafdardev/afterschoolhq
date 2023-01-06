@@ -97,6 +97,7 @@
                         <tr>
                             <th></th>
                             <th>Form</th>
+                            <td>Submissions</td>
                             <th>Type</th>
                             <th>Default Form?</th>
                             <th>Created On</th>
@@ -115,6 +116,7 @@
                             foreach (var form in Model)
                             {
                                 var isDefaultForm = form.ID == currentAccount.DefaultFormId || form.ID == currentAccount.DefaultVolunteerFormId;
+                                var totalSubmissions = form.GetTotalSubmissionCount();
 
                                 <tr>
                                     <td>
@@ -127,8 +129,11 @@
                                             <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
                                         }
 
+                                        <a href="@Url.Action("report", "form", new { form = form.ID })" class="btn btn-default btn-sm" target="_blank">Submissions</a>
+
                                     </td>
                                     <td><a href="@Url.Action("edit", "form", new { id = form.ID })">@form.Name</a></td>
+                                    <td>@totalSubmissions</td>
                                     <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
                                     <td>@isDefaultForm.ToYesNo()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
@@ -139,7 +144,7 @@
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
                                             </button>
 
-                                            if (!isDefaultForm && !form.IsArchived)
+                                            if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                             {
                                                 var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
 

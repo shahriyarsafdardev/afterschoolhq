@@ -317,6 +317,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var questions = new List<FormQuestion>();
             var forms = new List<Form>();
             var formType = personType == RegistrantPersonType.Student ? FormType.StudentForm : FormType.VolunteerForm;
+            var showCollapsedRecordOption = true;
 
             if (form.HasValue)
             {
@@ -326,6 +327,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                     .ThenBy(x => x.DisplayOrder)
                     .ToList();
+
+                if (formObj.FormTypeId == FormType.Survey)
+                    showCollapsedRecordOption = false;
             }
 
             if (activities.IsNotBlank())
@@ -361,8 +365,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 FormId = form,
                 SelectedActivities = selectedActivities,
                 ActivityOptions = activityOptions.OrderBy(x => x.Name).ToList(),
-                CollapseRecords = collapseRecords,
+                CollapseRecords = collapseRecords && showCollapsedRecordOption,
                 PersonType = personType,
+                ShowCollapseRecordOption = showCollapsedRecordOption,
             };
 
             return View(reportResults);
@@ -452,7 +457,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                     FirstRegistrantId = registrant.FirstRegistrantId.IfEmpty(""), 
                                     CreateDate = registrant.CreateDate.ToShortDateTimeString(),
                                     Activities = registrantActivities[registrant.ID.Value],
-                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0')
+                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'),
+                                    registrant.FirstName,
+                                    registrant.LastName,
+                                    registrant.Email,
                                 }),
                     answers = answers.Select(answer =>
                                 new 
