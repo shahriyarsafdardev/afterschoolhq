@@ -144,7 +144,7 @@
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
                                             </button>
 
-                                            if (!isDefaultForm && !form.IsArchived)
+                                            if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                             {
                                                 var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
 
