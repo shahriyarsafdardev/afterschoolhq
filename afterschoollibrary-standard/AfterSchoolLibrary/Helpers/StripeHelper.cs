@@ -1547,7 +1547,7 @@ namespace AfterSchoolLibrary.Billing
             return new InvoiceService(StripeClient);
         }
 
-        public decimal PreviewSubscriptionProration(SystemMessages msgs, DateTime billingCycleAnchor)
+        public decimal PreviewSubscriptionProration(decimal totalCost, SystemMessages msgs, DateTime billingCycleAnchor)
         {
             msgs ??= new SystemMessages();
 
@@ -1556,7 +1556,7 @@ namespace AfterSchoolLibrary.Billing
             try
             {
                 // invoice = GetInvoiceService().Upcoming(options);
-                var subscriptionStoredCost = 51.84M;
+                var subscriptionStoredCost = totalCost;
                 var checkoutDate = DateTime.UtcNow.Date; // stripe uses the exact time to calculate prorating
                 var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(billingCycleAnchor.Date, checkoutDate, subscriptionStoredCost); // use this instead of the stripe prorate preview
                 var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)

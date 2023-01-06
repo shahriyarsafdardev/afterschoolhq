@@ -1800,8 +1800,14 @@ namespace AfterSchoolLibrary.Services
                 return null;
 
             var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
-            var billingCycleAnchor = plan.StartDate.Value.AddMonths(1);
-            var stripeProrateValue = stripeHelper.PreviewSubscriptionProration(msgs, billingCycleAnchor);
+            var checkoutTime = DateTime.UtcNow; // stripe uses the exact time to calculate prorating
+            var checkoutDate = checkoutTime.Date; // the date the user is checking out to easily calculate the anchor date later
+            var dayDiff = (checkoutDate - plan.StartDate.Value.Date).Days; // difference between the days of the month, for instance if it is the 5th, and the start date is the 1st, then this should be 4, no matter what month it is.
+            var billingCycleAnchor = checkoutDate.AddMonths(1).AddDays(dayDiff * -1); // anchor date has to be in the future. It should be on the same day as the period start or the activity start
+            // var billingCycleAnchor = plan.StartDate.Value.AddMonths(1);
+            var ccFee = StripeHelper.CalculateStripeFee(decimal.Parse(plan.CostPerPeriod.ToString()), true);
+            var totalCost = ccFee + decimal.Parse(plan.CostPerPeriod.ToString()); // Get total cost of stripe with fee
+            var stripeProrateValue = stripeHelper.PreviewSubscriptionProration(totalCost, msgs, billingCycleAnchor);
             return stripeProrateValue;
         }
 

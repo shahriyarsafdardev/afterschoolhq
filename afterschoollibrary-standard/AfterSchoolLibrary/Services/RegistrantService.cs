@@ -200,7 +200,9 @@ namespace AfterSchoolLibrary.Services
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
                 participationObject.Schedule.IsNotEmpty() &&
                 participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
+                participationObject.StartDate.Value.IsBefore(DateTime.Now) &&
+                plan.StartDate.HasValue &&
+                plan.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
             {
 
                 // we use stripe subscription pro-rating
