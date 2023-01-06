@@ -974,7 +974,7 @@ namespace AfterSchoolLibrary.Models
                 typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
             }
 
-                var sql = $@"select masterReg.*
+                var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
@@ -989,7 +989,7 @@ namespace AfterSchoolLibrary.Models
                 submittedReg.PersonTypeId = {persontTypeId} and
                 (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
                 {typeQuery}
-                order by submittedReg.ID
+                order by masterReg.ID
                 offset {start} rows
                 fetch next {length} rows only";
 
@@ -1010,7 +1010,7 @@ namespace AfterSchoolLibrary.Models
                 typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
             }
             
-            var sql = $@"select count(masterReg.ID)
+            var sql = $@"select count(distinct masterReg.webuserid)
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
@@ -1032,7 +1032,7 @@ namespace AfterSchoolLibrary.Models
         private static string GetBackgroundSearchedRegistrant(int Id, RegistrantPersonType personType, string search, int? start, int? length)
         {
             var persontTypeId = (int) personType;
-            var sql = $@"select masterReg.*
+            var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
@@ -1046,7 +1046,7 @@ namespace AfterSchoolLibrary.Models
                 ) and
                 submittedReg.PersonTypeId = {persontTypeId} and
                 (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
-                order by submittedReg.ID
+                order by masterReg.webuserid
                 offset {start} rows
                 fetch next {length} rows only";
 
@@ -1056,7 +1056,7 @@ namespace AfterSchoolLibrary.Models
         private static string GetBackgroundSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search)
         {
             var persontTypeId = (int) personType;
-            var sql = $@"select count(masterReg.ID)
+            var sql = $@"select count(distinct masterReg.WebUserId)
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
