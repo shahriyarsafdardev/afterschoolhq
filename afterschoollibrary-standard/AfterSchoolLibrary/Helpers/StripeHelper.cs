@@ -65,12 +65,25 @@ namespace AfterSchoolLibrary.Billing
                 : (cost + StripeFlatFee) / (1 - StripePercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
+
         public static decimal CalculateStripeAchFee(decimal cost, bool feeTakenOutOfCost)
         {
             var fee = feeTakenOutOfCost
                 ? cost * StripeBankPercentFee
                 : (cost / (1 - StripeBankPercentFee)) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
+        }
+
+        public static decimal CalculateStripeCCFeeOutOfTotalCost(decimal totalCost)
+        {
+            return totalCost - ((totalCost - StripeFlatFee) / (StripePercentFee + 1));
+        }
+
+        public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
+            var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
+            return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
         }
 
         public static StripeHelper GetStripeHelperSubscriberAccount()
@@ -925,12 +938,6 @@ namespace AfterSchoolLibrary.Billing
                 Metadata = metaData,
                 ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
                 BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
-            };
-            var uIOptions = new UpcomingInvoiceOptions
-            {
-                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
