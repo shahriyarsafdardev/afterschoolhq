@@ -561,10 +561,6 @@ namespace AfterSchoolLibrary.Services
 
             - 
             Anchor Date Calculation
-            Predicted Stripe Charge Calculation
-            CC Free for Prorated Charge - CalculateStripeCCFeeOutOfTotalCost
-            ListPrice
-            ConvenienceFee Calc using FeeCalcObject
             Provider Amount
             ACH Coupon Amount
 
