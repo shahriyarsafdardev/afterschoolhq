@@ -572,6 +572,7 @@
     }
 
     function addLoading() {
+        $('.no-results').remove();
         $('#answer-tbody').append(`<tr id="tr-loading"><td class="padding-20" colspan="${(questions.length + 1)}"><h4>Loading...</h4></td></tr>`);
     }
 
@@ -604,53 +605,58 @@
 
                 if (data && data.status === 'ok') {
 
-                    for (let registrant of data.registrants) {
-
-                        var tableRow = `<tr>`;
-
-                        tableRow += `<td>${registrant.RecordId}</td>`;
-                        if (!$('#collapse-records').is(':checked'))
-                        {
-                            tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
-                        }
-                        tableRow += `<td>${registrant.Activities}</td>`;
-
-                        if (!hasRegistrantInfoInQuestions) {
-                            tableRow += `<td>${registrant.FirstName}</td>`;
-                            tableRow += `<td>${registrant.LastName}</td>`;
-                            tableRow += `<td>${registrant.Email}</td>`;
-                        }
-
-                        for (let question of questions) {
-
-                            answer = getAnswerForQuestion(question, registrant, data.answers);
-
-                            var hide = "";
-
-                            if (!$(`#question-${question.ID}`).is(':checked')) {
-                                hide = "hide";
-                            }
-
-                            tableRow += `<td class="col-question-${question.ID} ${hide}">`;
-                            if (answer) {
-                                tableRow += answer.Text;
-                            }
-                            tableRow += `</td>`;
-                        }
-
-                        tableRow += `</tr>`;
+                    if (data.registrants.length == 0) {
+                        var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
                         $('#answer-tbody').append(tableRow);
+                    } else {
+
+                        for (let registrant of data.registrants) {
+
+                            var tableRow = `<tr>`;
+
+                            tableRow += `<td>${registrant.RecordId}</td>`;
+                            if (!$('#collapse-records').is(':checked')) {
+                                tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
+                            }
+                            tableRow += `<td>${registrant.Activities}</td>`;
+
+                            if (!hasRegistrantInfoInQuestions) {
+                                tableRow += `<td>${registrant.FirstName}</td>`;
+                                tableRow += `<td>${registrant.LastName}</td>`;
+                                tableRow += `<td>${registrant.Email}</td>`;
+                            }
+
+                            for (let question of questions) {
+
+                                answer = getAnswerForQuestion(question, registrant, data.answers);
+
+                                var hide = "";
+
+                                if (!$(`#question-${question.ID}`).is(':checked')) {
+                                    hide = "hide";
+                                }
+
+                                tableRow += `<td class="col-question-${question.ID} ${hide}">`;
+                                if (answer) {
+                                    tableRow += answer.Text;
+                                }
+                                tableRow += `</td>`;
+                            }
+
+                            tableRow += `</tr>`;
+                            $('#answer-tbody').append(tableRow);
+                        }
+
+                        pageStart += pageSize;
+
+                        if (data.registrants.length > 0)
+                            $('#starting-record').html(1);
+
+                        $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
+                        $('#total-records').html(data.registrantCount);
+
+                        maxRecords = data.registrantCount;
                     }
-
-                    pageStart += pageSize;
-
-                    if (data.registrants.length > 0)
-                        $('#starting-record').html(1);
-
-                    $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
-                    $('#total-records').html(data.registrantCount);
-
-                    maxRecords = data.registrantCount;
 
                 } else {
                     Notifications.showErrors(data.messages);
