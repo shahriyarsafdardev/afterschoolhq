@@ -3422,19 +3422,27 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = new SystemMessages();
             ViewBag.CreateAccounts = createaccounts.IfBlank("");
             ViewBag.SelectedAssignmentType = RegistrationAssignmentType.Reserved;
+            ViewBag.IgnoreRequiredFields = false;
             return View(activity);
         }
 
         [HttpPost]
-        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv, string createaccounts, string assignmenttype)
+        public ActionResult RegistrantImport(string id, HttpPostedFileBase importfile, string csv, string createaccounts, string assignmenttype, string ignorerequiredfields, string validatephonenumbers)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             string extension = "";
-            var questions = activity.GetActiveForm(msgs).GetAllQuestions(msgs).OrderBy(x => x.FormQuestionGroupDisplayOrder).ThenBy(x => x.DisplayOrder).ToList();
+            var questions = activity.GetActiveForm(msgs)
+                            .GetAllQuestions(msgs)
+                            .Where(question => question.IsDeleted == false)
+                            .OrderBy(x => x.FormQuestionGroupDisplayOrder).
+                            ThenBy(x => x.DisplayOrder)
+                            .ToList();
             bool createParentAccounts = createaccounts.IsBoolean(); // checkboxes are blank if it's not checked
+            bool skipRequiredCheck = ignorerequiredfields.IsBoolean();
+            bool validatePhoneNumbers = validatephonenumbers.IsBoolean();
             var selectedAssignmentType = RegistrationAssignmentType.NotSet;
 
             if (assignmenttype.IsNumber())
@@ -3467,7 +3475,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
 
-                    DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, msgs);
+                    DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, msgs);
 
                     var csvString = LoadCsvStringDuringImport(headers, rows);
 
@@ -3539,6 +3547,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.CreateAccounts = createaccounts;
             ViewBag.SelectedAssignmentType = selectedAssignmentType;
             ViewBag.Messages = msgs;
+            ViewBag.IgnoreRequiredFields = skipRequiredCheck;
             return View(activity);
         }
 
@@ -3572,7 +3581,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (headers.Count == 0)
                 {
                     reader.ReadHeader();
-                    headers.AddRange(reader.Context.HeaderRecord.ToList());
+
+                    foreach(var header in reader.Context.HeaderRecord.ToList())
+                    {
+                        if (questions.Any(x => header.IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")))
+                            headers.Add(header);
+                    }
                     continue;
                 }
 
@@ -3587,7 +3601,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         private void DoRowValidationsDuringImport(List<FormQuestion> questions, List<string> headers, bool createParentAccounts, 
-            List<List<string>> rows, List<List<ImportField>> validatedRows, SystemMessages msgs)
+            List<List<string>> rows, List<List<ImportField>> validatedRows, bool ignoreRequiredFields, bool validatePhoneNumbers, SystemMessages msgs)
         {
             var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
             var parent1EmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).First().Text;
@@ -3622,7 +3636,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
 
                     if (field.IsBlank() && question.IsRequired)
-                        validatedField.Messages.Add("This field is required, but has no value assigned", MessageType.UserError);
+                        validatedField.Messages.Add("This field is required, but has no value assigned", ignoreRequiredFields ? MessageType.Warning : MessageType.UserError);
 
                     switch (question.QuestionTypeId)
                     {
@@ -3644,7 +3658,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         case QuestionType.TextArea:
 
                             if (field.IsNotBlank() && question.IsPhoneDataType() && !field.IsPhone())
-                                validatedField.Messages.Add("Phone must be a valid phone number", MessageType.UserError);
+                                validatedField.Messages.Add("Phone must be a valid phone number", validatePhoneNumbers ? MessageType.UserError : MessageType.Warning);
 
                             if (createParentAccounts && i == parentPhoneIndex && field.IsNotBlank() && WebUser.ExistsByPhone(field, msgs))
                                 validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
@@ -3661,7 +3675,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (WebUser.ExistsByEmail(field, msgs))
                                     validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
                                 
-                                if (field.In(parent1Emails))
+                                else if (field.In(parent1Emails))
                                     validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
 
                                 parent1Emails.Add(field);
@@ -3674,10 +3688,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (field.IsNotBlank())
                             {
-                                var options = Utilities.GetKeyValuePairs(question.Options).ToStringDictionary();
+                                var options = Utilities.GetKeyValuePairs(question.Options.ToLower()).ToStringDictionary();
 
-                                if (!options.ContainsKey(field) && !options.ContainsValue(field))
-                                    validatedField.Messages.Add($"Must be one of the following values: {options.Keys.ToStringList()}", MessageType.UserError);
+                                if (!options.ContainsKey(field.ToLower()) && !options.ContainsValue(field.ToLower()))
+                                    validatedField.Messages.Add($"Must be one of the following values: {Utilities.GetKeyValuePairs(question.Options).ToStringDictionary().Keys.ToStringList()}", MessageType.UserError);
                             }
 
                             break;
@@ -3686,11 +3700,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (field.IsNotBlank())
                             {
-                                var options = Utilities.GetKeyValuePairs(question.Options).ToStringDictionary();
-                                var fieldvalues = field.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0);
+                                var options = Utilities.GetKeyValuePairs(question.Options.ToLower()).ToStringDictionary();
+                                var fieldvalues = field.ToLower().Split(',').Select(x => x.Trim()).Where(x => x.Length > 0);
 
                                 if (!options.Keys.Any(key => key.In(fieldvalues)) && !options.Values.Any(value => value.In(fieldvalues)))
-                                    validatedField.Messages.Add($"Must be one of the following values: {options.Keys.ToStringList()}", MessageType.UserError);
+                                    validatedField.Messages.Add($"Must be one of the following values: {Utilities.GetKeyValuePairs(question.Options).ToStringDictionary().Keys.ToStringList()}", MessageType.UserError);
                             }
 
                             break;

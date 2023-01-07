@@ -8,6 +8,7 @@
     var anyErrors = false;
     var createAccounts = ((string)ViewBag.CreateAccounts).IsBoolean();
     var selectedAssignmentType = (RegistrationAssignmentType)ViewBag.SelectedAssignmentType;
+    var ignoreRequiredFields = (bool)ViewBag.IgnoreRequiredFields;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -84,12 +85,34 @@
                             </div>
 
                             <div class="form-group">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox">
-                                        <input type="checkbox" id="createaccounts" name="createaccounts" class="form-control" value="1" @(createAccounts ? "checked=\"checked\"" : "" ) />
-                                        <label for="createaccounts">
-                                            Create parent accounts upon import?
-                                        </label>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="createaccounts" name="createaccounts" class="form-control" value="1" />
+                                            <label for="createaccounts">
+                                                Create parent accounts upon import?
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="ignoreRequiredFields" name="ignoreRequiredFields" class="form-control" value="1" />
+                                            <label for="ignoreRequiredFields">
+                                                Ignore required fields
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="validatephonenumbers" name="validatephonenumbers" class="form-control" value="1" checked="checked" />
+                                            <label for="validatephonenumbers">
+                                                Validate Phone Numbers
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -145,11 +168,13 @@
                                         </td>
                                         @foreach (var field in row)
                                         {
+                                            var iconColor = field.Messages.HasErrors() ? "text-danger" : "text-warning";
+
                                             <td>
                                                 @field.Value
                                                 @if (field.Messages.HasErrors() || field.Messages.Has(MessageType.Warning))
                                                 {
-                                                    <strong><i class="s7-attention icon-medium text-danger" data-toggle="popover" data-trigger="hover" data-content="@field.Messages.RenderMessageList(MessageOutputType.Text)" data-placement="top"></i></strong>
+                                                    <strong><i class="s7-attention icon-medium @iconColor" data-toggle="popover" data-trigger="hover" data-content="@field.Messages.RenderMessageList(MessageOutputType.Text)" data-placement="top"></i></strong>
                                                 }
                                             </td>
                                         }
