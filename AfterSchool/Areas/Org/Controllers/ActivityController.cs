@@ -3477,11 +3477,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, msgs);
 
-                    var csvString = LoadCsvStringDuringImport(headers, rows);
+                    importfile.InputStream.Position = 0;
+                    var sr2 = new StreamReader(importfile.InputStream);
+                    var csvString = sr2.ReadToEnd();
 
                     ViewBag.Headers = headers;
                     ViewBag.Rows = validatedRows;
-                    ViewBag.Csv = csvString.ToString();
+                    ViewBag.Csv = csvString;
                     ViewBag.CreateAccounts = createaccounts;
                 }
 
@@ -3513,7 +3515,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (headers.Count == 0)
                             {
                                 reader.ReadHeader();
-                                headers = reader.Context.HeaderRecord.ToList();
+                                foreach (var header in reader.Context.HeaderRecord.ToList())
+                                {
+                                    if (questions.Any(x => header.IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")))
+                                        headers.Add(header);
+                                }
                                 continue;
                             }
 
@@ -3549,29 +3555,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.IgnoreRequiredFields = skipRequiredCheck;
             return View(activity);
-        }
-
-        private static StringBuilder LoadCsvStringDuringImport(List<string> headers, List<List<string>> rows)
-        {
-            var csvString = new System.Text.StringBuilder();
-            foreach (var header in headers)
-            {
-                csvString.Append(header);
-                csvString.Append(",");
-            }
-            csvString.Append("\n");
-
-            foreach (var row in rows)
-            {
-                foreach (var field in row)
-                {
-                    csvString.Append(field);
-                    csvString.Append(",");
-                }
-                csvString.Append("\n");
-            }
-
-            return csvString;
         }
 
         private static void LoadHeadersAndRowsDuringImport(List<FormQuestion> questions, List<string> headers, List<List<string>> rows, CsvReader reader)
@@ -3843,6 +3826,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (createParentAccounts && question.QuestionDataTypeId != QuestionDataType.NotSet)
                         {
+                            if (student.Email.IsBlank())
+                            {
+                                student.Email = parentRegistrant.Email;
+                                amsgs.AddRange(student.Save(adc));
+                            }    
+
                             switch (question.FormQuestionGroupQuestionGroupDataTypeId)
                             {
                                 case QuestionGroupDataType.Parent1Information:
@@ -3925,7 +3914,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var parentFirstName = reader.GetField<string>(parentFirstNameIndex);
             var parentLastName = reader.GetField<string>(parentLastNameIndex);
             var parentEmail = reader.GetField<string>(parentEmailIndex);
-            var parentPhone = reader.GetField<string>(parentPhoneIndex);
+
+            var parentPhone = "";
+            if (parentPhoneIndex > -1)
+                parentPhone = reader.GetField<string>(parentPhoneIndex);
 
             // if parent account wasn't created during this import
             if (!parent1Emails.Contains(parentEmail))
@@ -3938,7 +3930,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     accountIssues = true;
                 }
 
-                if (WebUser.ExistsByPhone(parentPhone, amsgs, adc))
+                if (parentPhone.IsNotBlank() && WebUser.ExistsByPhone(parentPhone, amsgs, adc))
                 {
                     amsgs.Add($"{parentPhone} is already in use, record will be skipped", MessageType.Warning);
                     accountIssues = true;
@@ -3952,7 +3944,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             parentFirstName,
                             parentLastName,
                             parentEmail,
-                            parentPhone,
+                            parentPhone.IsPhone() ? parentPhone : "",
                             Guid.NewGuid().ToString().MaxChars(8), //setting temp password
                             true,
                             amsgs,
