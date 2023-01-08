@@ -3679,7 +3679,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                 if (field.In(parent1Emails))
                                     validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
 
-                                parent1Emails.Add(field);
+                                if (!parent1Emails.Contains(field))
+                                    parent1Emails.Add(field);
                             }
 
                             break;
@@ -4044,7 +4045,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (amsgs.HasNoErrors())
                         parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, enableTextMessaging, amsgs, adc);
 
-                    parent1Emails.Add(parentEmail);
+                    if (!parent1Emails.Contains(parentEmail))
+                        parent1Emails.Add(parentEmail);
                 }
                 
             }
