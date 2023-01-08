@@ -466,7 +466,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                     HowHearAboutUs = howHearAboutUs,
                 };
 
@@ -509,7 +509,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())
@@ -551,7 +551,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())
@@ -595,7 +595,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())

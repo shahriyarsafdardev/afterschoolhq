@@ -1067,6 +1067,24 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
+        public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedFor(participationObject, hasParentalConsent, msgs, dc);
+
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.WaitingList,
+            };
+
+            return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+        }
+
         public static bool IsReservedForAllDates(this Registrant masterRegistrant, ParticipationObject participationObject, List<DateTime> dates,
             bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
