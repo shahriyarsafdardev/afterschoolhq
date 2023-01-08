@@ -417,7 +417,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, dc: dc)
+            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -427,6 +427,11 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionAnswer.LoadByRegistrantId(ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
+        }
+
+        public bool HasAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.ExistsByRegistrantId(ID.Value, msgs, dc);
         }
 
         public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -552,6 +557,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["lastName"], lastName);
             dq.Criterias.Add(ObjectMap["email"], email);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static bool ExistsByName(int accountId, string firstName, string lastName, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["accountId"], accountId);
+            dq.Criterias.Add(ObjectMap["firstName"], firstName);
+            dq.Criterias.Add(ObjectMap["lastName"], lastName);
+            return dq.GetCount() > 0;
         }
 
         public static Registrant LoadByEmailOnly(int accountId, string email, DatabaseConnection dc = null)

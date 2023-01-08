@@ -288,6 +288,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static bool ExistsByRegistrantId(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            return dq.GetCount() > 0;
+        }
+
         public static List<FormQuestionAnswer> LoadByRegistrantIds(IEnumerable<int> RegistrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

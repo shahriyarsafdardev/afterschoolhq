@@ -315,6 +315,16 @@ namespace AfterSchoolLibrary.Models
                 FirstRegistrantId = RegistrantFirstRegistrantId
             };
         }
+        public static bool ExistsByParticipationObjectByRegistrantName(int participationObjectId, ParticipationObjectType participationObjectType, string firstName, string lastName, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int) participationObjectType);
+            dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName);
+            dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName);
+            return dq.GetCount() > 0;
+        }
 
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)
         {

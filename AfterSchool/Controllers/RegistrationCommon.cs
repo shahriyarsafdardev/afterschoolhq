@@ -141,8 +141,13 @@ namespace AfterSchool.Controllers
 
             return account;
         }
-
         public static Registrant GetOrCreateParentOrGuardianRegistrant(Account account, WebUser user, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            return GetOrCreateParentOrGuardianRegistrant(account, user, false, msgs, dc);
+        }
+
+        public static Registrant GetOrCreateParentOrGuardianRegistrant(Account account, WebUser user, bool allowTextMessages, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             var registrant = account.GetFirstParentOrGuardianRegistrant(msgs, dc);
@@ -155,7 +160,7 @@ namespace AfterSchool.Controllers
                     RegistrantType.Individual,
                     true,
                     true,
-                    false,
+                    allowTextMessages,
                     null,
                     RegistrantProfileStatus.Started,
                     user,

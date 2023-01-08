@@ -88,9 +88,19 @@
                                 <div class="row">
                                     <div class="col-md-6 col-md-offset-3">
                                         <div class="am-checkbox">
-                                            <input type="checkbox" id="createaccounts" name="createaccounts" class="form-control" value="1" />
+                                            <input type="checkbox" id="createaccounts" name="createaccounts" class="form-control" value="1" onclick="createaccountsClick()" />
                                             <label for="createaccounts">
                                                 Create parent accounts upon import?
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="enabletextmessages" name="enabletextmessages" class="form-control" value="1" disabled="disabled" />
+                                            <label for="enabletextmessages">
+                                                Enable Parents to receive text messages
                                             </label>
                                         </div>
                                     </div>
@@ -130,6 +140,7 @@
                     {
                         var headers = (List<string>)ViewBag.Headers;
                         var rows = (List<List<AfterSchool.Models.ImportField>>)ViewBag.Rows;
+                        var rowCount = 0;
 
                         <p class="text-medium-small">Below is a table of the registration data that will be imported. Please review the results and confirm or cancel to make adjustments to your file and re-upload.</p>
 
@@ -139,6 +150,7 @@
                             <table class="table table-condensed table-striped">
                                 <tr>
                                     <th></th>
+                                    <th></th>
                                     @foreach (var header in headers)
                                     {
                                         <th>@header</th>
@@ -146,12 +158,15 @@
                                 </tr>
                                 @foreach (var row in rows)
                                 {
+                                    rowCount++;
+
                                     if (!anyErrors && row.Any(x => x.Messages.HasErrors()))
                                     {
                                         anyErrors = true;
                                     }
 
                                     <tr>
+                                        <td>@(rowCount)</td>
                                         <td>
                                             @if (row.Any(x => x.Messages.HasErrors()))
                                             {
@@ -183,7 +198,9 @@
                             </table>
                         </div>
 
-                        <form method="post" action="@Url.Action("registrantimport", "activity", new { id = Model.Uid, createaccounts = ViewBag.CreateAccounts, assignmenttype = (int)selectedAssignmentType })" class="form-horizontal">
+                        <form method="post" 
+                              action="@Url.Action("registrantimport", "activity", new { id = Model.Uid, createaccounts = ViewBag.CreateAccounts, assignmenttype = (int)selectedAssignmentType, enabletextmessages = ViewBag.EnableTextMessages })" 
+                              class="form-horizontal">
 
                             <textarea name="csv" id="csv" class="hidden">@ViewBag.Csv</textarea>
 
@@ -216,3 +233,14 @@
 
         </div>
     </div>
+
+
+<script>
+    function createaccountsClick() {
+        if ($('#createaccounts').is(':checked')) {
+            $('#enabletextmessages').prop('disabled', false);
+        } else {
+            $('#enabletextmessages').prop('disabled', true);
+        }
+    }
+</script>
