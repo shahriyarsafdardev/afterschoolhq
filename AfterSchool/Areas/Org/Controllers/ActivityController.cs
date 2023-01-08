@@ -3673,8 +3673,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (createParentAccounts && i == parentEmailIndex)
                             {
-                                if (WebUser.ExistsByEmail(field, msgs))
-                                    validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);
+                                /*if (WebUser.ExistsByEmail(field, msgs))
+                                    validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);*/
                                 
                                 else if (field.In(parent1Emails))
                                     validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
