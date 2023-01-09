@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web.Http;
+using System.Web.Script.Serialization;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
@@ -55,7 +56,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs);
                     }
 
-                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", responseBody.ToString(), false);
+                    JavaScriptSerializer serializer = new JavaScriptSerializer();
+                    string jsonString = serializer.Serialize(json);
+
+                    
+                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", jsonString, false);
                     
                     backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
                     backGroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
