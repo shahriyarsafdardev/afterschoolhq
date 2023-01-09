@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web.Http;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -53,6 +54,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             null,
                             msgs);
                     }
+
+                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", responseBody, false);
                     
                     backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
                     backGroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
