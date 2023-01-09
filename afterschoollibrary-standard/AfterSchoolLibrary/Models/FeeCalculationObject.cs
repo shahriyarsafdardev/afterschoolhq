@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -17,6 +17,14 @@ namespace AfterSchoolLibrary.Models
         public decimal ConvenienceFlatFee { get; private set; }
 
         private bool? _IsConvenienceFeeTakenOutOfCost { get; set; }
+
+        public FeeCalculationObject(decimal cost, decimal convenienceFlatFee, decimal conveniencePercentFee, bool isConvenienceFeeTakenOutOfCost)
+        {
+            Cost = cost;
+            ConvenienceFlatFee = convenienceFlatFee;
+            ConveniencePercentFee= conveniencePercentFee;
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
+        }
 
         public FeeCalculationObject(decimal cost, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -94,7 +102,7 @@ namespace AfterSchoolLibrary.Models
             if (Cost > 50)
                 finalFee = Math.Ceiling(fee);
 
-            return Math.Max(finalFee, 0.50M) + (Math.Ceiling(Cost) - Cost); // Math.Max(finalFee - .01M, 0.59M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
+            return Math.Max(finalFee, 0.50M);
         }
 
         public decimal GetCreditCardFee()
