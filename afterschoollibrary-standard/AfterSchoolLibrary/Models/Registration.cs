@@ -1105,6 +1105,31 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], PurchaserAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static List<Registration> GetRelatedRegistrationByRegistrantId(int Id, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = LoadByRegistrantIdDistrict(Id);
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        private static string LoadByRegistrantIdDistrict(int Id)
+        {
+            var sql = $@"
+            SELECT *
+            FROM Registration reg
+            inner join Registrant subReg on subReg.ID = reg.RegistrantId
+            inner join Registrant mastReg on mastReg.ID = subReg.ParentRegistrantId
+            where mastReg.ID = (
+            SELECT mastReg.ID
+            FROM Registrant subReg
+            inner join Registrant mastReg on mastReg.ID = subReg.ParentRegistrantId
+            where subReg.ID = {Id})";
+
+            return sql;
+        }
 
         #endregion
     }

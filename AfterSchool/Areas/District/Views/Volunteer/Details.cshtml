@@ -67,8 +67,8 @@
                                 @foreach (var registration in registrations)
                                 {
                                     <option
-                                        value="@registration.Uid"
-                                        @(registration.ID == selectedRegistration.ID ? "selected=\"selected\"" : "")>
+                                        value="@registration.RegistrantId"
+                                        @(registration.RegistrantId == selectedRegistration.RegistrantId ? "selected=\"selected\"" : "")>
                                         Registration - @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
                                     </option>
                                 }
@@ -219,8 +219,9 @@
 
 
 <script>
+
     function registrationChange(id){
-        let link = '@Url.Action("edit", "registration", new {id = "ID"})?r=' + id + '&returnUrl=@Request["returnurl"]';
+        let link = '@Url.Action("Details", "Volunteer", new {id = "ID"})?r=' + id + '&returnUrl=@Request["returnurl"]';
         link = link.replace("ID", id);
         location.href = link;
     }

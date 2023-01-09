@@ -349,9 +349,9 @@ namespace AfterSchool.Areas.District.Controllers
 
             var registrant = registration.GetRegistrant(msgs);
 
-            var allRegistrations = registration.GetRelatedRegistrations(msgs);
+            var allRegistrations = registration.GetRelatedRegistrationsDistrict(msgs);
             allRegistrations.Add(registration);
-            allRegistrations = allRegistrations.OrderByDescending(x => x.ID).ToList();
+            allRegistrations = allRegistrations.OrderBy(x => x.ID).ToList();
 
             if (selectedRegistration.IsGuid())
                 registration = allRegistrations.First(x => x.Uid == selectedRegistration.ToGuid());

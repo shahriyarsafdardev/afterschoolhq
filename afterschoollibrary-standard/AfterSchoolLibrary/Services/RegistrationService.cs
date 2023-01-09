@@ -1167,6 +1167,14 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+        
+        public static List<Registration> GetRelatedRegistrationsDistrict(this Registration registration,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrations = Registration.GetRelatedRegistrationByRegistrantId((int)registration.RegistrantId, msgs, dc);
+            
+            return registrations.Where(x => x.ID != registration.ID).ToList();
+        }
 
         public static List<Registration> GetRelatedRegistrations(this Registration registration,
             SystemMessages msgs = null, DatabaseConnection dc = null)
