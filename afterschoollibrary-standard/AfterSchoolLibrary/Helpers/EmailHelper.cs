@@ -969,6 +969,7 @@ namespace AfterSchoolLibrary.Helpers
             WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
+            var proratingResult = AccountService.proratingResult; // set proratingResult to check either proration exists or not
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
@@ -1155,9 +1156,12 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
-            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); 
+            var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
             var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
+            var subscriptionCost = subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
+            var proratedDescription = "";
+            var proratedText = "";
 
             // if has subscription
             // and is not finalized if it is split evenly
@@ -1173,11 +1177,20 @@ namespace AfterSchoolLibrary.Helpers
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
+                if (proratingResult.ShouldWeBeProratingToday)
+                {
+                    var calcObj = new FeeCalculationObject(decimal.Parse(proratingResult.ProratingValue.ToString()), participationObject.PaymentAccount, msgs);
+                    ccSubscriptionFee = calcObj.GetCreditCardFee();
+                    subscriptionCost = decimal.Parse(proratingResult.ProratingValue.ToString());
+                    proratedText = "Prorated ";
+                    additionalDetails = additionalDetails.Insert(0, proratedText);
+                    proratedDescription = " After the first payment, you will be charged the full subscription amount.";
+                }
                 subscriptionDetails =
-                    $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first subscription payment will be automatically deducted on " +
-                    $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee does not apply to ACH payments.</span>" +
+                    $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first {proratedText.ToLower()}subscription payment will be automatically deducted on " +
+                    $"{startDate.ToLongDateString()} from the payment method you provided.{proratedDescription} Credit card fee does not apply to ACH payments.</span>" +
                     $"<span>{description}</span>" +
-                    $"<span style='float:right;margin-right:48px;'>{subscription.CostPerPeriod.Value.ToCurrency()}</span><br/>" +
+                    $"<span style='float:right;margin-right:48px;'>{subscriptionCost.ToCurrency()}</span><br/>" +
                     $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p>" +
                     $"<p style='float:left;padding-bottom:15px;width:100%;'><span>{ccSubscriptionTitle}</span>" +
                     $"<span style='float:right;margin-right:48px;'>{ccSubscriptionFee.ToCurrency()}</span></p>";

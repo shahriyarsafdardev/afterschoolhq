@@ -19,9 +19,9 @@
             : "per class attended"
         : "";
 
-    var startsToday = subscriptionPlan.IsEmpty()? false 
-        : participationObject.OwnerAccount.ConvertFromAccountTimeZone(SessionVariables.CurrentRegistrant
-            .GetPlanStartDate(subscriptionPlan, participationObject)).Date == DateTime.UtcNow.Date;
+    var currentRegistrant = SessionVariables.CurrentRegistrant;
+    var planStartDate = currentRegistrant?.GetPlanStartDate(subscriptionPlan, participationObject);
+    var startsToday = planStartDate.HasValue && participationObject?.OwnerAccount.ConvertFromAccountTimeZone(planStartDate.Value).Date == DateTime.UtcNow.Date;
 }
 
 <div class="margin-t-20 padding-v-20">

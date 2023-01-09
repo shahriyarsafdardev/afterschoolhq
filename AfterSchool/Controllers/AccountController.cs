@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.Mvc;
+using static AfterSchoolLibrary.Services.SubscriptionPlanService;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
@@ -27,6 +28,7 @@ namespace AfterSchool.Controllers
             this.featureFlagRepository = featureFlagRepository;
         }
 
+        private FigureOutProratingResult proratingResult;
 
         #region Contact
 
@@ -1873,7 +1875,7 @@ namespace AfterSchool.Controllers
             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
             var stripeProratingService = new StripeProratingService();
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
-            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
+            proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
                 currentAccount, msgs);
             if (proratingResult.ShouldWeBeProratingToday)
             {
@@ -2024,7 +2026,7 @@ namespace AfterSchool.Controllers
                 CreditCardFeePayer = creditCardFeePayer,
                 SelectedDates = selectedDates,
             };
-            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, msgs);
+            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, proratingResult, msgs);
 
             if (msgs.HasErrors())
                 return View("Payment");
