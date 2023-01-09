@@ -27,7 +27,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 if (backGroundCheck.IsNotEmpty())
                 {
 
-                    if (responseBody.status == "Complete")
+                    if (responseBody.result == "Clear")
                     {
                         backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
                 
@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                         
                     }
 
-                    if (responseBody.status == "Review")
+                    if (responseBody.result == "Review")
                     {
                         backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
                         

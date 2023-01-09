@@ -9,7 +9,7 @@ namespace AfterSchool.Areas.District.Models
         public int WebUserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public BackgroundCheckStatus BackgroundCheckStatus { get; set; } 
+        public BackgroundCheckResult BackgroundCheckStatuResult { get; set; } 
         public DateTime DateSubmitted { get; set; }
     }
     
@@ -20,7 +20,7 @@ namespace AfterSchool.Areas.District.Models
             return new BackgroundViewModel()
             {
                 Id = (int)background.ID,
-                BackgroundCheckStatus = background.BackgroundCheckStatusId,
+                BackgroundCheckStatuResult = background.BackgroundCheckResultId,
                 WebUserId = (int)registrant.WebUserId,
                 FirstName = registrant.FirstName,
                 LastName = registrant.LastName,

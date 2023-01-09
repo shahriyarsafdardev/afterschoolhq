@@ -51,13 +51,17 @@ namespace AfterSchoolLibrary.Integrations
             var status = candidateId is null || backgroundCheckUrl is null
                 ? BackgroundCheckStatus.BackgroundCheckRequested
                 : BackgroundCheckStatus.EmailSentToVolunteer;
+            
+            var result = candidateId is null || backgroundCheckUrl is null
+                ? BackgroundCheckResult.BackgroundCheckRequested
+                : BackgroundCheckResult.EmailSentToVolunteer;
 
             var backgroundCheck = new BackgroundCheck
             {
                 WebUserId = webUser.ID!.Value,
                 RequestedForFiscalAccountId = accountId,
                 BackgroundCheckStatusId = status,
-                BackgroundCheckResultId = BackgroundCheckResult.NotSet,
+                BackgroundCheckResultId = result,
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
