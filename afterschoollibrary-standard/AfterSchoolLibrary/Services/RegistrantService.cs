@@ -194,12 +194,15 @@ namespace AfterSchoolLibrary.Services
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+
             // Charge parent if they try to join mid-period. 
             // NOTE: This needs to be totally changed for pro-rating
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
                 participationObject.Schedule.IsNotEmpty() &&
                 participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
+                participationObject.StartDate.Value.IsBefore(DateTime.Now) &&
+                plan.StartDate.HasValue &&
+                plan.StartDate.Value.IsBefore(DateTime.Now)) // REALLY BAD CODE
             {
 
                 // we use stripe subscription pro-rating
@@ -213,9 +216,12 @@ namespace AfterSchoolLibrary.Services
                     _ => startDateTime,
                 };
             }
+
             var stripeProratingService = new StripeProratingService();
             var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
                 msgs);
+
+
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
@@ -245,6 +251,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasErrors())
                 return;
 
+            // this may be for Attendance Based Billing (PostPay Plan)
             if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
                 new StripeHelper().CreateCustomerBalanceTransaction(
                     subscription.CustomerId,
@@ -345,12 +352,11 @@ namespace AfterSchoolLibrary.Services
         public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, decimal proratedAmount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-
             var calcObj = new FeeCalculationObject(proratedAmount, checkoutObject.BillingAccount, msgs, dc);
             var convenienceFee = calcObj.GetConvenienceFee();
             var ccFee = 0M;
             if (checkoutObject.PaymentType == PaymentType.CreditCard)
-                ccFee = calcObj.GetCreditCardFee();
+                ccFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(proratedAmount); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)// calcObj.GetCreditCardFee();
 
             var amount = proratedAmount + ccFee; //calcObj.GetFinalTotalCost(paymentType: checkoutObject.PaymentType);
             var amountReceivedByProvider = calcObj.GetAmountToProvider();

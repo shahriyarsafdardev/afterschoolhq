@@ -65,12 +65,27 @@ namespace AfterSchoolLibrary.Billing
                 : (cost + StripeFlatFee) / (1 - StripePercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
+
         public static decimal CalculateStripeAchFee(decimal cost, bool feeTakenOutOfCost)
         {
             var fee = feeTakenOutOfCost
                 ? cost * StripeBankPercentFee
                 : (cost / (1 - StripeBankPercentFee)) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
+        }
+
+        public static decimal CalculateStripeCCFeeOutOfTotalCost(decimal totalCost)
+        {
+            return totalCost - ((totalCost - StripeFlatFee) / (StripePercentFee + 1));
+        }
+
+        public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            // does this work if it's two months late
+            // won't work for more than 1 month difference
+            var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
+            var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
+            return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
         }
 
         public static StripeHelper GetStripeHelperSubscriberAccount()
@@ -926,12 +941,6 @@ namespace AfterSchoolLibrary.Billing
                 ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
                 BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
             };
-            var uIOptions = new UpcomingInvoiceOptions
-            {
-                SubscriptionBillingCycleAnchor = new DateTime(2022, 11, 1),
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
-            };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
             if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
@@ -1538,24 +1547,20 @@ namespace AfterSchoolLibrary.Billing
             return new InvoiceService(StripeClient);
         }
 
-        public Invoice PreviewSubscriptionProration(string customerId, string planId, SystemMessages msgs, DateTime billingCycleAnchor)
+        public decimal PreviewSubscriptionProration(decimal totalCost, SystemMessages msgs, DateTime billingCycleAnchor)
         {
             msgs ??= new SystemMessages();
 
-            Invoice invoice = null;
-
-            var options = new UpcomingInvoiceOptions
-            {
-                Customer = customerId,
-                SubscriptionBillingCycleAnchor = billingCycleAnchor,
-                SubscriptionItems = new List<InvoiceSubscriptionItemOptions> { new InvoiceSubscriptionItemOptions { Plan = planId, Quantity = 1 } },
-                SubscriptionProrationBehavior = ProrationBehaviorCreateProrations,
-                SubscriptionStartDate = DateTime.UtcNow.Date,
-            };
-
+            // Invoice invoice = null;
+            decimal listPrice = 0M;
             try
             {
-                invoice = GetInvoiceService().Upcoming(options);
+                // invoice = GetInvoiceService().Upcoming(options);
+                var subscriptionStoredCost = totalCost;
+                var checkoutDate = DateTime.UtcNow.Date; // stripe uses the exact time to calculate prorating
+                var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(billingCycleAnchor.Date, checkoutDate, subscriptionStoredCost); // use this instead of the stripe prorate preview
+                var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
+                listPrice = predictedStripeCharge - ccFeeForProratedCharge; // how much is the "original" charge before cc fee
             }
             catch (StripeException ex)
             {
@@ -1563,7 +1568,7 @@ namespace AfterSchoolLibrary.Billing
                 msgs.Add("Invoice doesn't exist", MessageType.UserError);
             }
 
-            return invoice;
+            return listPrice;
         }
 
         #endregion
