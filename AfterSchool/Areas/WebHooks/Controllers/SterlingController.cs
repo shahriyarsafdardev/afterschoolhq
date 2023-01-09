@@ -55,7 +55,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs);
                     }
 
-                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", responseBody, false);
+                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", responseBody.ToString(), false);
                     
                     backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
                     backGroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
