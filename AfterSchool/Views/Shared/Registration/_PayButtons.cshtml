@@ -300,9 +300,10 @@
         if (@Json.Encode(startsToday) && $("#prorated-amount").is(':empty')) {
             total += getSubscriptionTotalValueCC();
         }
-        else {
+        else if(!$("#prorated-amount").is(':empty')){
             total += getProrationAmount() + getProrationAmountFee();
         }
+        
         $('.total-due-today-cc').html(total.toFixed(2));
     }
 
@@ -311,7 +312,7 @@
         if (@Json.Encode(startsToday) && $("#prorated-amount").is(':empty')) {
             total += getSubscriptionTotalValue();
         }
-        else {
+        else if(!$("#prorated-amount").is(':empty')){
             total += getProrationAmount();
         }
         $('.total-due-today-ach').html(total.toFixed(2));

@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Web;
+using AfterSchoolLibrary.Billing;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -1179,8 +1180,7 @@ namespace AfterSchoolLibrary.Helpers
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
                 if (proratingResult.ShouldWeBeProratingToday)
                 {
-                    var calcObj = new FeeCalculationObject(decimal.Parse(proratingResult.ProratingValue.ToString()), participationObject.PaymentAccount, msgs);
-                    ccSubscriptionFee = calcObj.GetCreditCardFee();
+                    ccSubscriptionFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(decimal.Parse(proratingResult.ProratingValue.ToString()));
                     subscriptionCost = decimal.Parse(proratingResult.ProratingValue.ToString());
                     proratedText = "Prorated ";
                     additionalDetails = additionalDetails.Insert(0, proratedText);

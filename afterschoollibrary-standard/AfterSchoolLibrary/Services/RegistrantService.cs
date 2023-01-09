@@ -207,11 +207,12 @@ namespace AfterSchoolLibrary.Services
 
                 // we use stripe subscription pro-rating
                 submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, loggedInUser, currentAccount, msgs, dc);
-
+                var checkoutDate = DateTime.UtcNow.Date; 
+                var dayDiff = (checkoutDate - plan.StartDate.Value.Date).Days;
                 startDateTime = plan.BillingPeriodTypeId switch
                 {
                     // we will update starting of subscription for this registrant to next cycle
-                    BillingPeriodType.Month => DateTime.UtcNow.LastDateOfMonth().AddDays(1),
+                    BillingPeriodType.Month => checkoutDate.AddMonths(1).AddDays(dayDiff * -1),
                     BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
                     _ => startDateTime,
                 };
