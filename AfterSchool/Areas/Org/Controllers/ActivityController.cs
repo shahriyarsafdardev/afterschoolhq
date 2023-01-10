@@ -3511,7 +3511,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     
                     if(participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
                         DoRowValidationVolunteerReport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
-  
                     else
                         DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
                     
