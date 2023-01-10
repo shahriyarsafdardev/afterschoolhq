@@ -275,7 +275,7 @@ namespace AfterSchool.Areas.District.Controllers
                     {
                         foreach (var webUserID in webUserIDs.Split(','))
                         {
-                            var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger());
+                            var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(), amsgs , adc);
 
                             if (volunteerTask.IsNotEmpty())
                             {
