@@ -522,10 +522,13 @@ namespace AfterSchoolLibrary.Services
             var startOfPeriod = plan.StartDate.HasValue ? plan.StartDate.Value : participationObject.StartDate.Value;
             if (!plan.StartDate.HasValue)
                 plan.StartDate = participationObject.StartDate;
-            result.ShouldWeBeProratingToday = true;
-            result.BackdateStartDate = todayUtc;
-            result.BillingCycleAnchor = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
-            result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
+            if((plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts) && plan.StartDate.HasValue && plan.StartDate.Value.IsBefore((DateTime.UtcNow.Date)))
+            {
+                result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
+                result.ShouldWeBeProratingToday = true;
+                result.BackdateStartDate = todayUtc;
+                result.BillingCycleAnchor = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
+            }
             return result;
         }
 
