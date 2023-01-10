@@ -131,6 +131,10 @@
                         <a href="@Url.Action("registrantsummary", "activity", new {id = Model.Activity.Uid, volunteers = "true"})" class="btn btn-default btn-space pull-right">
                             Send Registration Report
                         </a>
+
+                        <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                            Import Volunteers
+                        </a>
                     </div>
                 </div>
             </div>
