@@ -508,8 +508,11 @@ namespace AfterSchoolLibrary.Services
                 ShouldWeBeProratingToday = false,
                 ProratingValue = null,
                 BackdateStartDate = null,
-                BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc),
+                BillingCycleAnchor = plan.IsNotEmpty() ? GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc): null,
             };
+
+            if (plan.IsEmpty())
+                 return result;
 
             if (plan.PlanTypeId != SubscriptionPlanType.Subscription ||
                 participationObject.Schedule.IsEmpty() ||
