@@ -132,10 +132,13 @@
                             Send Registration Report
                         </a>
 
-                        <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
-                            Import Volunteers
-                        </a>
-                    </div>
+                        @if (!Model.Activity.ActivityGroupId.HasValue && Model.AccountPackage.HasFeature(FeatureType.AllowRegistrantImport) && Model.CurrentUser.IsTechSupport(Model.CurrentAccount))
+                        {
+                            <a href="@Url.Action("registrantimport", "activity", new { id = Model.Activity.Uid })" class="btn btn-default btn-space">
+                                Import Volunteers
+                            </a>
+                        }
+                        </div>
                 </div>
             </div>
 

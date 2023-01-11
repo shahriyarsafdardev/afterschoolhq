@@ -8,10 +8,12 @@ using System.Web;
 using System.Web.Mvc;
 using System.Windows.Interop;
 using AfterSchool.Areas.Org.Assemblers.Activity;
+using AfterSchool.Assemblers;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -3542,6 +3544,24 @@ namespace AfterSchool.Areas.Org.Controllers
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = TrimOptions.Trim;
 
+                LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
+
+                SystemMessages amsgs = new SystemMessages();
+                DatabaseConnection adc = new DatabaseConnection();
+
+
+                //if (participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
+                //{
+                //    Registrant registrant = null;
+                //    Registration registration = null;
+                //    var x = 2;
+                //    if (!CreateVolunteerAndLoadDataDuringImport(registrant, registration, activity, headers, questions, rows, reader, ref participationObject))
+                //        x = 1;
+
+                //    SaveAnswersToRegistrantsDuringImport(headers, questions, reader, currentUser, amsgs, adc);
+
+                //}
+
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
@@ -3563,9 +3583,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
                             {
-                                if (!CreateVolunteerAndLoadDataDuringImport(activity, headers, questions, reader, ref participationObject, currentAccount, currentUser, amsgs, adc))
+                                Registrant registrant = null;
+                                Registration registration = null;
+                                if (!CreateVolunteerAndLoadDataDuringImport(registrant, registration, activity, headers, questions, rows, reader, ref participationObject))
                                     continue;
+
+                                //SaveAnswersToRegistrantsDuringImport(headers, questions, reader, currentUser, amsgs, adc);
+
                             }
+
                             else
                             {
                                 WebUser parentUser = null;
@@ -4019,27 +4045,82 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             return true;
         }
-        private bool CreateVolunteerAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader,
-            ref ParticipationObject participationObject, Account currentAccount, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+
+
+        private bool CreateVolunteerAndLoadDataDuringImport(Registrant registrant, Registration registration, Activity activity, List<string> headers, List<FormQuestion> questions, List<List<string>> rows, CsvHelper.CsvReader reader,
+            ref ParticipationObject participationObject)
         {
             WebUser user = null;
+            Account account = null;
+            SystemMessages msgs = new SystemMessages();
+            DatabaseConnection adc = null;
+            SystemMessages amsgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            Registrant submittedRecord = null;
+            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
 
-            Database.ExecuteTransaction
+            foreach (var row in rows)
+            { 
+                Database.ExecuteTransaction
                 (
                     (amsgs, adc) =>
                     {
+                        user = RegistrationCommon.CreateOrUpdateUser(
+                            //currentUser,
+                            null,
+                            row[0].ToString(),
+                            row[2].ToString(),
+                            row[3].ToString(),
+                            row[4].ToString(),
+                            Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+                            true,
+                            amsgs,
+                            adc);
 
-                    }
+                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                        {
+                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
+                        }
+
+                        if (amsgs.HasNoErrors())
+                            registrant = RegistrationCommon.GetOrCreateVolunteerRegistrant(account, user, amsgs, adc);
+                    },
+                    smsgs =>
+                    {
+                        msgs.AddRange(smsgs);
+                        LoadSessionInfo(user, account);
+                    },
+                    failureMessages => msgs.AddRange(failureMessages),
+                    Utilities.SystemErrorLog
                 );
+            }
 
 
-             return true;
+            if (!registrant.IsRegisteredFor(participationObject, null, amsgs, adc))
+                RegistrationCommon.SubmitRecord(
+                    ref registration,
+                    ref submittedRecord,
+                    registrant,
+                    participationObject,
+                    currentUser,
+                    period,
+                    "",
+                    Request.UserAgent,
+                    Request.GetUserHostAddress(),
+                    amsgs,
+                    adc);
+            else
+                return false;
+
+
+
+            return true;
         }
 
 
-
-        private void SaveAnswersToRegistrantsDuringImport(List<string> headers, List<FormQuestion> questions, CsvReader reader, bool createParentAccounts,
-            Registrant student, Registrant parentRegistrant, Registrant parent2Registrant, Registration registration, Registrant submittedRecord,
+        private void SaveAnswersToRegistrantsDuringImport(List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts, 
+            Registrant student, Registrant parentRegistrant, Registrant parent2Registrant, Registration registration, Registrant submittedRecord, 
             WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
         {
             var saveParent2Answers = parent2Registrant.IsEmpty() || parent2Registrant.HasAnswers(amsgs, adc) || submittedRecord.IsNotEmpty() ? false : true;
@@ -4126,10 +4207,31 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
         }
+        
+        private void SaveVolunteerAnswersToRegistrantsDuringImport(Registrant registrant, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader,
+            WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            for (var i = 0; i < headers.Count; i++)
+            {
+                var header = headers[i];
+                if (header.IsNotBlank())
+                {
+                    var field = reader.GetField<string>(i);
+                    var question = questions.Where(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")).FirstOrDefault();
 
-        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvReader reader, bool enableTextMessaging,
-            int parentEmailIndex, List<string> parent1Emails, ParticipationObject participationObject, RegistrationPeriod period, ref Registration registration,
-            ref Registrant submittedRecord,
+                    if (field.IsNotBlank() && question.IsNotEmpty())
+                    {
+                        // having a submittedRecord means that the parent already had an account before this import
+                        //registrant.AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
+                    }
+                }
+            }
+        }
+
+
+
+        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvHelper.CsvReader reader, bool enableTextMessaging, 
+            int parentEmailIndex, List<string> parent1Emails, ParticipationObject participationObject, RegistrationPeriod period, ref Registration registration, ref Registrant submittedRecord,
             ref WebUser parentUser, ref Account parentAccount, ref Registrant parentRegistrant, ref Registrant parent2Registrant, ref Registrant student,
             WebUser currentUser, Account currentAccount, SystemMessages amsgs, DatabaseConnection adc)
         {
@@ -4335,6 +4437,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View();
         }
+
 
         #endregion
     }
