@@ -248,6 +248,17 @@ namespace AfterSchoolLibrary.Helpers
             if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                 stringInput = "[" + stringInput + "]"; //For json object
 
+            // for data formatted like this '[[1,2,3,4]]"
+            if (stringInput.StartsWith("[["))
+            {
+                // get rid of the surrounding brac
+                stringInput = stringInput.Substring(2); 
+                if (stringInput.EndsWith("]]"))
+                    stringInput = stringInput.Substring(0, stringInput.Length - 2);
+
+                s = stringInput;
+            }
+
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                 data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
             else

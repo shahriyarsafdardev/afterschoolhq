@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Configuration;
 using System.Linq;
@@ -148,9 +148,9 @@ namespace AfterSchool.Models
 
                 return text;
             }
-            catch (Exception e)
+            catch
             {
-                return "";
+                return "** ERROR RETRIEVING DATA **";
             }
         }
 
@@ -163,9 +163,9 @@ namespace AfterSchool.Models
 
                 return text;
             }
-            catch (Exception e)
+            catch
             {
-                return "";
+                return "** ERROR RETRIEVING DATA **";
             }
         }
 
