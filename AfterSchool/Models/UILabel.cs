@@ -150,7 +150,7 @@ namespace AfterSchool.Models
             }
             catch (Exception e)
             {
-                return null;
+                return "";
             }
         }
 
@@ -165,7 +165,7 @@ namespace AfterSchool.Models
             }
             catch (Exception e)
             {
-                return null;
+                return "";
             }
         }
 
