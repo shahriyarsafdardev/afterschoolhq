@@ -534,6 +534,8 @@ namespace AfterSchoolLibrary.Services
         public static DateTime GetPlanStartDateUtc(this Registrant registrant, SubscriptionPlan plan, ParticipationObject participationObject,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (plan.IsEmpty())
+                return DateTime.UtcNow.Date;
             var billingAccount = plan.GetAccount(msgs, dc);
             var planStartDate = registrant.GetPlanStartDate(plan, participationObject, msgs, dc);
             return billingAccount.ConvertFromAccountTimeZone(planStartDate);

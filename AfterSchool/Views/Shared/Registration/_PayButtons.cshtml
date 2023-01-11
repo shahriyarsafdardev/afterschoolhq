@@ -20,7 +20,7 @@
         : "";
 
     var currentRegistrant = SessionVariables.CurrentRegistrant;
-    var planStartDate = currentRegistrant?.GetPlanStartDate(subscriptionPlan, participationObject);
+    var planStartDate = subscriptionPlan.IsNotEmpty() ? currentRegistrant?.GetPlanStartDate(subscriptionPlan, participationObject) : null;
     var startsToday = planStartDate.HasValue && participationObject?.OwnerAccount.ConvertFromAccountTimeZone(planStartDate.Value).Date == DateTime.UtcNow.Date;
 }
 
