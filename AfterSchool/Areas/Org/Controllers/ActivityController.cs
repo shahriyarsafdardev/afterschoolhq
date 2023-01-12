@@ -3510,9 +3510,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     reader.Configuration.TrimOptions = TrimOptions.Trim;
 
                     LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
-                    
-                    if(participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
-                        DoRowValidationVolunteerReport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
+                    //volunteer 
+                    if(participationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                        DoRowValidationVolunteerReport(questions, headers, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
                     else
                         DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
                     
@@ -3561,7 +3561,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 //    SaveAnswersToRegistrantsDuringImport(headers, questions, reader, currentUser, amsgs, adc);
 
                 //}
-
+                
+                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
+                
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
@@ -3581,17 +3583,26 @@ namespace AfterSchool.Areas.Org.Controllers
                                 continue;
                             }
 
-                            if (participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
+                            if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                             {
+                                WebUser user = null;
+                                Account account = null;
                                 Registrant registrant = null;
                                 Registration registration = null;
-                                if (!CreateVolunteerAndLoadDataDuringImport(registrant, registration, activity, headers, questions, rows, reader, ref participationObject))
+                                Registrant submittedRecord = null;
+                                RegistrationPeriod period = null;
+                                ParticipationObject participationObject = null;
+
+                                if (!CreateVolunteerAndLoadDataDuringImport(ref registrant,ref registration,ref account,ref user, activity, headers, questions, rows, reader,
+                                        ref participationObject,ref submittedRecord,ref period, currentUser, amsgs, adc))
                                     continue;
 
-                                //SaveAnswersToRegistrantsDuringImport(headers, questions, reader, currentUser, amsgs, adc);
-
+                                SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
+                                
+                                CompleteVolunteerRegistration(account, registrant, ref registration, ref submittedRecord,
+                                    period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
+                                
                             }
-
                             else
                             {
                                 WebUser parentUser = null;
@@ -3655,32 +3666,31 @@ namespace AfterSchool.Areas.Org.Controllers
                     rows.Add(row);
             }
         }
-        
-        private void DoRowValidationVolunteerReport(List<FormQuestion> questions, List<string> headers, bool createParentAccounts,
+
+        private void DoRowValidationVolunteerReport(List<FormQuestion> questions, List<string> headers,
             List<List<string>> rows, List<List<ImportField>> validatedRows, bool ignoreRequiredFields, bool validatePhoneNumbers,
             ParticipationObject participationObject, SystemMessages msgs)
         {
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
-
-
             var volunteerInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First().FormQuestionGroupName;
             var volunteerFirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First().Text;
             var volunteerLastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First().Text;
+            var volunteerEmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantEmail).First().Text;
             var volunteerFirstNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerFirstNameLabel}");
             var volunteerLastNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerLastNameLabel}");
+            var volunteerEmailIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerEmailLabel}");
 
 
             foreach (var row in rows)
             {
-                var studentFirstName = row[volunteerFirstNameIndex];
-                var studentLastName = row[volunteerLastNameIndex];
+                var volunteerFirstName = row[volunteerFirstNameIndex];
+                var volunteerLastName = row[volunteerLastNameIndex];
+                var volunteerEmail = row[volunteerEmailIndex];
 
                 var validatedRow = new List<ImportField>();
                 var possibleDuplicate = false;
 
-                if (studentFirstName.IsNotEmpty() && studentLastName.IsNotEmpty() &&
-                    RegistrantActivity.ExistsByParticipationObjectByRegistrantName(participationObject.GetId().Value, participationObject.ObjectType, studentFirstName, studentLastName))
+                if (volunteerFirstName.IsNotEmpty() && volunteerLastName.IsNotEmpty() &&
+                    RegistrantActivity.ExistsByParticipationObjectByRegistrantName(participationObject.GetId().Value, participationObject.ObjectType, volunteerFirstName, volunteerLastName))
                     possibleDuplicate = true;
 
                 for (var i = 0; i < headers.Count; i++)
@@ -3988,9 +3998,27 @@ namespace AfterSchool.Areas.Org.Controllers
             if (selectedAssignmentType != RegistrationAssignmentType.NotSet)
                 registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
         }
+        
+        private void CompleteVolunteerRegistration(Account account, Registrant registrant, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            registration.ProcessRegistrationAssignment(
+                participationObject: participationObject,
+                masterRegistrant: registrant,
+                registrant: submittedRecord,
+                seatsRequested: 1,
+                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
+                periodId: period?.ID,
+                amountCharged: participationObject.Cost,
+                loggedInUser: currentUser,
+                msgs: amsgs,
+                dc: adc);
 
-        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvReader reader,
-            bool createParentAccounts,
+            if (selectedAssignmentType != RegistrationAssignmentType.NotSet)
+                registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
+        }
+
+        
+        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts,
             bool enableTextMessaging, List<string> parent1Emails,
             ref WebUser parentUser, ref Account parentAccount,
             ref Registrant student, ref Registrant parentRegistrant, ref Registrant parent2Registrant,
@@ -4047,54 +4075,53 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
 
-        private bool CreateVolunteerAndLoadDataDuringImport(Registrant registrant, Registration registration, Activity activity, List<string> headers, List<FormQuestion> questions, List<List<string>> rows, CsvHelper.CsvReader reader,
-            ref ParticipationObject participationObject)
+        private bool CreateVolunteerAndLoadDataDuringImport(ref Registrant registrant,ref Registration registration,ref Account account,ref WebUser user, Activity activity, List<string> headers, List<FormQuestion> questions, List<List<string>> rows, CsvHelper.CsvReader reader,
+            ref ParticipationObject participationObject,ref Registrant submittedRecord,ref RegistrationPeriod period, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
         {
-            WebUser user = null;
-            Account account = null;
-            SystemMessages msgs = new SystemMessages();
-            DatabaseConnection adc = null;
-            SystemMessages amsgs = new SystemMessages();
-            var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
-            Registrant submittedRecord = null;
-            var period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+            var volunteerInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First().FormQuestionGroupName;
+            var volunteerFirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First().Text;
+            var volunteerLastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First().Text;
+            var volunteerEmailNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantEmail).First().Text;
+            var phoneLable = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).First().Text;
+            
+            var volunteerFirstNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerFirstNameLabel}");
+            var volunteerLastNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerLastNameLabel}");
+            var volunteerEmailIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerEmailNameLabel}");
 
-            foreach (var row in rows)
-            { 
-                Database.ExecuteTransaction
-                (
-                    (amsgs, adc) =>
-                    {
-                        user = RegistrationCommon.CreateOrUpdateUser(
-                            //currentUser,
-                            null,
-                            row[0].ToString(),
-                            row[2].ToString(),
-                            row[3].ToString(),
-                            row[4].ToString(),
-                            Guid.NewGuid().ToString().MaxChars(8), //setting temp password
-                            true,
-                            amsgs,
-                            adc);
+            var phoneIndex = -1;
+            
+            var volunteerFirstName = reader.GetField<string>(volunteerFirstNameIndex);
+            var volunteerLastName = reader.GetField<string>(volunteerLastNameIndex);
+            var volunteerEmail = reader.GetField<string>(volunteerEmailIndex);
+            var phone = "";
+            
+            if (phoneLable.IsNotEmpty())
+                phoneIndex = headers.IndexOf($"{volunteerInformationLabel} - {phoneLable}");
+            
+            if (phoneIndex > -1)
+                phone = reader.GetField<string>(phoneIndex);
+            
+            period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+            participationObject = activity.GetParticipationObject(amsgs, adc);
 
-                        if (amsgs.HasNoErrors() && user.IsNotEmpty())
-                        {
-                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
-                        }
+            user = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                null,
+                volunteerFirstName,
+                volunteerLastName,
+                volunteerEmail,
+                phone.IsPhone() ? phone : "",
+                Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+                true,
+                amsgs,
+                adc);
 
-                        if (amsgs.HasNoErrors())
-                            registrant = RegistrationCommon.GetOrCreateVolunteerRegistrant(account, user, amsgs, adc);
-                    },
-                    smsgs =>
-                    {
-                        msgs.AddRange(smsgs);
-                        LoadSessionInfo(user, account);
-                    },
-                    failureMessages => msgs.AddRange(failureMessages),
-                    Utilities.SystemErrorLog
-                );
+            if (amsgs.HasNoErrors() && user.IsNotEmpty())
+            {
+                account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
             }
+
+            if (amsgs.HasNoErrors())
+                registrant = RegistrationCommon.GetOrCreateVolunteerRegistrant(account, user, amsgs, adc);
 
 
             if (!registrant.IsRegisteredFor(participationObject, null, amsgs, adc))
@@ -4113,9 +4140,7 @@ namespace AfterSchool.Areas.Org.Controllers
             else
                 return false;
 
-
-
-            return true;
+                return true;
         }
 
 
@@ -4207,9 +4232,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
         }
-        
         private void SaveVolunteerAnswersToRegistrantsDuringImport(Registrant registrant, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader,
-            WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+            WebUser currentUser,Registrant submittedRecord, Registration registration, SystemMessages amsgs, DatabaseConnection adc)
         {
             for (var i = 0; i < headers.Count; i++)
             {
@@ -4221,8 +4245,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
-                        // having a submittedRecord means that the parent already had an account before this import
-                        //registrant.AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
+                        (submittedRecord ?? registrant).AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
+                        registrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
                     }
                 }
             }
