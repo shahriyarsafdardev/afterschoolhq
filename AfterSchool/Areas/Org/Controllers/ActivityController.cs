@@ -4245,7 +4245,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
-                        (submittedRecord ?? registrant).AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
+                        submittedRecord.AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
                         registrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
                     }
                 }
