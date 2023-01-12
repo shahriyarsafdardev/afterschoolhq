@@ -3599,7 +3599,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                                 SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
                                 
-                                CompleteVolunteerRegistration(account, registrant, ref registration, ref submittedRecord,
+                                CompleteVolunteerRegistration(account, user, registrant, ref registration, ref submittedRecord,
                                     period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
                                 
                             }
@@ -3998,20 +3998,25 @@ namespace AfterSchool.Areas.Org.Controllers
             if (selectedAssignmentType != RegistrationAssignmentType.NotSet)
                 registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
         }
-        
-        private void CompleteVolunteerRegistration(Account account, Registrant registrant, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+
+        private void CompleteVolunteerRegistration(Account account,WebUser user, Registrant registrant, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
         {
-            registration.ProcessRegistrationAssignment(
-                participationObject: participationObject,
-                masterRegistrant: registrant,
-                registrant: submittedRecord,
-                seatsRequested: 1,
-                activityGroupId: participationObject.GetAnyRelatedActivityGroupId(),
-                periodId: period?.ID,
-                amountCharged: participationObject.Cost,
-                loggedInUser: currentUser,
-                msgs: amsgs,
-                dc: adc);
+            AccountService.ProcessRegistrationWithoutPayment(
+                new CheckoutObject
+                {
+                    BillingAccount = participationObject.OwnerAccount,
+                    PayingAccount = account,
+                    NumberOfSeats = 1,
+                    ParticipationObject = participationObject,
+                    Registration = registration,
+                    MasterRegistrant = registrant,
+                    SubscriptionPlan = null,
+                    SelectedDates = new List<DateTime>(),
+                },
+                true,
+                user,
+                amsgs,
+                adc);
 
             if (selectedAssignmentType != RegistrationAssignmentType.NotSet)
                 registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
@@ -4139,7 +4144,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     adc);
             else
                 return false;
-
+            
                 return true;
         }
 
