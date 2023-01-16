@@ -736,9 +736,10 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
+            var searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+            dq.Criterias.Add(searchCriteria);
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
@@ -748,17 +749,19 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
+            var searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+            dq.Criterias.Add(searchCriteria);
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
+
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+        private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, DatabaseCriteria search, DateTime? startDate, DateTime? endDate, 
             bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType)
         {
             string sql = @$"
@@ -782,7 +785,7 @@ namespace AfterSchoolLibrary.Models
 
             if (search.IsNotEmpty())
             {
-                sql += $" and FormQuestionAnswer.Text like '%{search}%'";
+                sql += $" and FormQuestionAnswer.Text like @{search.UniqueName}";
 
                 if (searchQuestionIds.IsNotEmpty() && searchQuestionIds.Any())
                 {
@@ -840,7 +843,7 @@ namespace AfterSchoolLibrary.Models
 
             if (!getCountOnly)
                 sql += @"
-                    order by Registrant.CreateDate";
+                    order by Registrant.CreateDate";            
 
             return sql;
         }
