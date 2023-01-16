@@ -1499,6 +1499,7 @@ namespace AfterSchoolLibrary.Helpers
             msgs = msgs ?? new SystemMessages();
 
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var isRegFree = checkoutObject.ParticipationObject.IsRegistrationFree;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
             var billingAccount = checkoutObject.BillingAccount;
@@ -1512,6 +1513,9 @@ namespace AfterSchoolLibrary.Helpers
             var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
             var description = $"Payment to {billingAccount.Name}";
+            var hasPaymentPlan = checkoutObject.PaymentPlan.IsNotEmpty();
+            var hasSubscriptionPlan = checkoutObject.SubscriptionPlan.IsNotEmpty();
+            var stripeNote = "";
 
             if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
                 description =
@@ -1584,12 +1588,14 @@ namespace AfterSchoolLibrary.Helpers
                 },
                 "Registration_Confirmation_Table-1.0",
                 msgs);
-
+            stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges subscription fees as a separate transaction.</p><br/>";
+            customMessage = "Thank you for subscribing";
             var model = new NameValueCollection
             {
                 {"FirstName", loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", Utilities.LoginUrl()},
+                {"ActivityName", checkoutObject.ParticipationObject.Name},
                 {"ActivityContactEmail", billingAccount.Email},
                 {"ActivityContactPhone", billingAccount.Phone},
                 {"ActivityContactName", billingAccount.Name},
@@ -1603,6 +1609,10 @@ namespace AfterSchoolLibrary.Helpers
                 {"RegistrationDetails", "Login to your account to view more details about this payment."},
                 {"VirtualInfo", ""},
                 {"SplitPaymentSubscriptionInfo", ""},
+                {"SubscriptionDetails", ""},
+                {"PaymentPlanDetails", ""},
+                {"StripeNote", stripeNote},
+                {"YourRecepitText", isRegFree ? "" : "Your payment receipt is below."},
             };
 
             var subject = $"Payment receipt for {billingAccount.Name}";
