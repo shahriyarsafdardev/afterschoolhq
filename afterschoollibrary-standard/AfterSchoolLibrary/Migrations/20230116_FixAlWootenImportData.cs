@@ -17,14 +17,21 @@ namespace AfterSchoolLibrary.Migrations
                                 select fqa.*
                                 from 
 	                                FormQuestionAnswer fqa inner join
-	                                Registrant r on fqa.RegistrantId = r.ID
+	                                Registrant r on fqa.RegistrantId = r.ID inner join
+	                                FormQuestion fq on fqa.FormQuestionId = fq.ID
                                 where 
 	                                fqa.CreateDate between '2023-01-07 02:55:00.757' and '2023-01-09 06:45:47.677' and
                                     (
-                                        ((fqa.text like '%[[][[]%' or fqa.Text like '%[[]%') and fqa.Text not like '%{%') or 
-	                                    (fqa.QuestionDataTypeId = 45 and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0) or
-	                                    (fqa.QuestionDataTypeId in (12,24,36) and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0) or
-	                                    (fqa.QuestionDataTypeId = 44 and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0)
+                                        (
+                                            (fqa.text like '%[[][[]%' or fqa.Text like '%[[]%') and 
+                                            fqa.Text not like '%{%'
+                                        ) or 
+	                                    (
+                                            LEN(fqa.text) > 0 and
+	                                        fq.QuestionTypeId in (3,4,6) and
+	                                        fqa.Text not like '%[%' and 
+	                                        fqa.text not like '%{%'
+                                        )
                                     )";
 
                     var dq = new DatabaseQuery();
