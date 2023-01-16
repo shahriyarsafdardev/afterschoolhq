@@ -20,6 +20,7 @@ namespace AfterSchoolLibrary.Migrations
 	                                Registrant r on fqa.RegistrantId = r.ID inner join
 	                                FormQuestion fq on fqa.FormQuestionId = fq.ID
                                 where 
+                                    r.AccountId = 6613 and
 	                                fqa.CreateDate between '2023-01-07 02:55:00.757' and '2023-01-09 06:45:47.677' and
                                     (
                                         (
