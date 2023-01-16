@@ -4166,6 +4166,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
                         // having a submittedRecord means that the parent already had an account before this import
+                        
+                        if (question.QuestionTypeId == QuestionType.RadioList || question.QuestionTypeId == QuestionType.DropDownList || question.QuestionTypeId == QuestionType.CheckboxList )
+                            field = Utilities.GetKeyValuePairs(field).ToJSON();
+                        
                         (submittedRecord ?? student).AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
 
                         if (createParentAccounts && question.QuestionDataTypeId != QuestionDataType.NotSet)
@@ -4250,8 +4254,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
                         //var qvm = question.ToFormQuestionViewModel(question,);
-                        if (question.QuestionTypeId == QuestionType.RadioList || question.Text == "State")
-                            field = new List<KeyValuePair<string, string>>() {new KeyValuePair<string, string>(field, field)}.ToJSON();
+                        if (question.QuestionTypeId == QuestionType.RadioList || question.QuestionTypeId == QuestionType.DropDownList)
+                            field = Utilities.GetKeyValuePairs(field).ToJSON();
 
                         submittedRecord.AddOrUpdateAnswer(field,question, registration?.ID, currentUser, amsgs, adc);
                         registrant.AddOrUpdateAnswer(field,question,currentUser, amsgs, adc);
