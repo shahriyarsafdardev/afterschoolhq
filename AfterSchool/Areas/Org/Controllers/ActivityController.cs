@@ -4247,11 +4247,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var field = reader.GetField<string>(i);
                     var question = questions.Where(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")).FirstOrDefault();
-
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
-                        submittedRecord.AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
-                        registrant.AddOrUpdateAnswer(field, question, currentUser, amsgs, adc);
+                        //var qvm = question.ToFormQuestionViewModel(question,);
+                        if (question.QuestionTypeId == QuestionType.RadioList || question.Text == "State")
+                            field = new List<KeyValuePair<string, string>>() {new KeyValuePair<string, string>(field, field)}.ToJSON();
+
+                        submittedRecord.AddOrUpdateAnswer(field,question, registration?.ID, currentUser, amsgs, adc);
+                        registrant.AddOrUpdateAnswer(field,question,currentUser, amsgs, adc);
                     }
                 }
             }
