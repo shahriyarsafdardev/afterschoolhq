@@ -258,6 +258,14 @@ namespace AfterSchoolLibrary.Helpers
 
                 s = stringInput;
             }
+            else if (stringInput.StartsWith("[") && !stringInput.Contains("{"))
+            {
+                stringInput = stringInput.Substring(1);
+                if (stringInput.EndsWith("]"))
+                    stringInput = stringInput.Substring(0, stringInput.Length - 1);
+
+                s = stringInput;
+            }
 
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                 data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
