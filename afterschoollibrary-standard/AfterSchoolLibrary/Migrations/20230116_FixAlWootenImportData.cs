@@ -20,7 +20,12 @@ namespace AfterSchoolLibrary.Migrations
 	                                Registrant r on fqa.RegistrantId = r.ID
                                 where 
 	                                fqa.CreateDate between '2023-01-07 02:55:00.757' and '2023-01-09 06:45:47.677' and
-                                    (fqa.text like '%[[][[]%' or fqa.Text like '%[[]%') and fqa.Text not like '%{%'";
+                                    (
+                                        ((fqa.text like '%[[][[]%' or fqa.Text like '%[[]%') and fqa.Text not like '%{%') or 
+	                                    (fqa.QuestionDataTypeId = 45 and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0) or
+	                                    (fqa.QuestionDataTypeId in (12,24,36) and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0) or
+	                                    (fqa.QuestionDataTypeId = 44 and fqa.Text not like '%[%' and fqa.text not like '%{%' and LEN(fqa.Text) > 0)
+                                    )";
 
                     var dq = new DatabaseQuery();
                     dq.Connection = dc;
