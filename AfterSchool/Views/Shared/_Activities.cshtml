@@ -1,4 +1,4 @@
-﻿@model List<Activity>
+@model List<Activity>
 @{
     var account = (Account) ViewData["Account"];
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
@@ -138,6 +138,7 @@ else
                     <a href="@archivedListUrl" class="@archiveClass">Archived</a>
                 </div>
             </div>
+            <div class="col-md-12">&nbsp;</div>
         </div>
     }
 

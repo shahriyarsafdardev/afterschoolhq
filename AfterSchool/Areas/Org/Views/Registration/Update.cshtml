@@ -1,4 +1,4 @@
-﻿@model Registration
+@model Registration
 @{
     ViewBag.Title = Model.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -44,7 +44,7 @@
                             @group.Name
                         </div>
                         <div class="panel-body">
-                            @foreach (var qvm in qvms.Where(qvm => qvm.Question.GetFormQuestionGroup().ID == group.ID))
+                            @foreach (var qvm in qvms.Where(qvm => qvm.Question.FormQuestionGroupId == group.ID))
                             {
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
                             }

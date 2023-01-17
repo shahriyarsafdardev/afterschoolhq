@@ -26,11 +26,13 @@ namespace AfterSchoolLibrary.Models
 		/// Required.
 		/// </summary>
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
-		public bool IsActive { get { return (bool)MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
-		/// <summary>
-		/// Required.
-		/// </summary>
-		public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
+        public bool IsActive { get { return (bool) MDV["IsActive"].Value; } set { MDV["IsActive"].Value = value; } }
+        public bool IsDeleted { get { return (bool) MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+        public bool IsArchived { get { return (bool) MDV["IsArchived"].Value; } set { MDV["IsArchived"].Value = value; } }
+        /// <summary>
+        /// Required.
+        /// </summary>
+        public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
 		
 
@@ -39,8 +41,10 @@ namespace AfterSchoolLibrary.Models
             this.Config(ObjectMap, DatabaseQuery, typeof(Form).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.Uid = Guid.NewGuid();
-			this.IsActive = false;
-			this.FormTypeId = FormType.NotSet;
+            this.IsActive = true;
+            this.IsDeleted = false;
+            this.IsArchived = false;
+            this.FormTypeId = FormType.NotSet;
 			
         }
 
@@ -53,8 +57,10 @@ namespace AfterSchoolLibrary.Models
                 _dp = BasicLookUpObject.get_BaseObjectMap(className);
 				_dp.Add(className, "AccountId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
-				_dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "IsActive", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -144,11 +150,19 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Uid"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["IsActive"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsActive"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsArchived"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
@@ -162,20 +176,30 @@ namespace AfterSchoolLibrary.Models
 			return Form.Load(this.ID.Value, msgs, dc: dc);
 		}
 		
-		public static List<Form> LoadByAccountId(int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+		public static List<Form> LoadByAccountId(int AccountId, bool? isArchived, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
+            if (isArchived.HasValue)
+                dq.Criterias.Add(ObjectMap["isArchived"], isArchived.Value);
+
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 		
-        public static List<Form> LoadByAccountIdByFormTypeId(int AccountId, FormType formTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Form> LoadByAccountIdByFormTypeId(int AccountId, bool? isArchived, FormType formTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
+            if (isArchived.HasValue)
+                dq.Criterias.Add(ObjectMap["isArchived"], isArchived.Value);
+
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -216,99 +240,30 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public List<FormQuestion> GetAllQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestion.LoadByFormId(this.ID.Value, msgs, dc);
-        }
-
-        public List<FormQuestion> GetActiveQuestions(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestion.LoadByFormIdByIsActive(this.ID.Value, true, msgs, dc);
-        }
-
-        public FormQuestion GetQuestion(QuestionDataType questionDataTypeId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestion.LoadByFormIdByQuestionDataTypeIds(this.ID.Value, questionDataTypeId.AsList(), msgs, dc).FirstOrDefault();
-        }
-
-        public List<FormQuestionGroup> GetQuestionGroups(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionGroup.LoadByFormIdByIsDeleted(this.ID.Value, false, msgs, dc).OrderBy(x => x.DisplayOrder).ToList();
-        }
-
-        public int GetQuestionGroupCount(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return FormQuestionGroup.GetCount(new Hashtable() { { "FormId", this.ID.Value } }, msgs, dc);
-        }
-
-        public Form Copy(int loggedInUserId, int newAccountId, FormType formType, string formName = null, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();           
-            var form = new Form
-            {
-                Name = formName.IfEmpty(this.Name),
-                Description = this.Description,
-                LastModifiedDate = DateTime.UtcNow,
-                CreateDate = DateTime.UtcNow,
-                FormTypeId = formType,
-                LastModifiedBy = loggedInUserId,
-                CreatedBy = loggedInUserId,
-                AccountId = newAccountId,
-                IsActive = true,
-                Uid = Guid.NewGuid()
-            };
-            msgs.AddRange(form.Save(dc: dc));
-
-            var groups = this.FormTypeId == formType || formType == FormType.StudentForm ? FormQuestionGroup.LoadByFormId(FormId:this.ID.Value, dc:dc): new List<FormQuestionGroup>();
-            foreach (var group in groups)
-            {
-                var questions = FormQuestion.LoadByFormQuestionGroupId(group.ID.Value, dc: dc);
-
-                var newGroup = group.Copy();
-                newGroup.LastModifiedDate = DateTime.UtcNow;
-                newGroup.CreateDate = DateTime.UtcNow;
-                newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
-                newGroup.FormId = form.ID;
-                newGroup.IsDeleted = false;
-                msgs.AddRange(newGroup.Save(dc: dc));
-
-                questions.ForEach(question => {
-                    var newQuestion = question.Copy();
-                    newQuestion.LastModifiedDate = newQuestion.CreateDate = DateTime.UtcNow;
-                    newQuestion.LastModifiedBy = newQuestion.CreatedBy = loggedInUserId;
-                    newQuestion.FormQuestionGroupId = newGroup.ID;
-                    newQuestion.FormId = form.ID;
-                    newQuestion.IsTemplate = false;
-                    msgs.AddRange(newQuestion.Save(dc: dc));
-                });
-            }
-
-            //check for default form existence
-            var account = Account.Load(newAccountId, dc: dc);
-            if (account.IsNotEmpty() && !account.DefaultFormId.HasValue)
-            {
-                account.DefaultFormId = form.ID;
-                msgs.AddRange(account.Save(dc: dc));
-            }
-
-            return form;
-        }
-
-        public static Form LoadByIdByAccountId(int Id, int AccountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static Form LoadByIdByAccountId(int Id, int AccountId, bool? isArchived, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["Id"], Id);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
+            if (isArchived.HasValue)
+                dq.Criterias.Add(ObjectMap["isArchived"], isArchived.Value);
+
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 		
-        public static List<Form> Search(int AccountId, FormType formTypeId, string search, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<Form> Search(int AccountId, bool? isArchived, FormType formTypeId, string search, int? start, int? length, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
+            if (isArchived.HasValue)
+                dq.Criterias.Add(ObjectMap["isArchived"], isArchived.Value);
+
             if (formTypeId != FormType.NotSet)
                 dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
             
@@ -320,12 +275,16 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 		
-        public static int GetSearchCount(int AccountId, FormType formTypeId, string search, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static int GetSearchCount(int AccountId, bool? isArchived, FormType formTypeId, string search, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+
+            if (isArchived.HasValue)
+                dq.Criterias.Add(ObjectMap["isArchived"], isArchived.Value);
+
             if (formTypeId != FormType.NotSet)
                 dq.Criterias.Add(ObjectMap["FormTypeId"], formTypeId);
             

@@ -106,7 +106,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 group.Details = group.Description;
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms(FormType.StudentForm, msgs);
+            ViewBag.Forms = currentAccount.GetForms(null, FormType.StudentForm, msgs).Where(x => !x.IsArchived || group.FormId == x.ID).ToList();
             ViewBag.Messages = msgs;
 
             return View(group);
@@ -153,7 +153,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms(msgs);
+            ViewBag.Forms = currentAccount.GetForms(null, msgs).Where(x => !x.IsArchived || group.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Messages = msgs;
 
             return View(group);
@@ -1215,7 +1215,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Account = currentAccount;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = currentAccount.GetForms(msgs).OrderBy(x => x.Name).ToList();
+            ViewBag.Forms = currentAccount.GetForms(null, msgs).Where(x => !x.IsArchived || activeForm.ID == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.ActiveForm = activeForm;
             ViewBag.IsFullScreen = GetIsFullScreen(league);
         }

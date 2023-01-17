@@ -315,31 +315,33 @@
                         {
                             <span id="fee-total-value" class="hide">@participationObject.GetCheckoutCostWithConvenienceFee().ToString("0.00")</span>
                         }
+
                         @if (participationObject.SubscriptionPlans.Any())
                         {
                             var accountDate = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
                             var subpricetoday = subscriptionPlan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount);
                             var subtransfeetoday = subscriptionPlan.GetCreditCardFee(paymentAccount);
+                            var learningPodSplitEvenly = subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized;
                             var activityStartIsInFuture = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts &&
                                                           participationObject.StartDate.HasValue &&
                                                           participationObject.StartDate.Value.Date.IsAfter(accountDate.Date);
 
-                            if (activityStartIsInFuture)
+                            if (learningPodSplitEvenly || activityStartIsInFuture)
                             {
                                 subpricetoday = 0;
                                 subtransfeetoday = 0;
                             }
 
-                            <span id="subscription-total-value" class="hide">@subpricetoday</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">@(ViewBag.ProratedAmountFee != null ? ViewBag.ProratedAmountFee : subtransfeetoday)</span>
-                        }
-                        else
-                        {
-                            <span id="subscription-total-value" class="hide">0</span>
-                            <span id="subscription-asf-value" class="hide">0</span>
-                            <span id="subscription-ccf-value" class="hide">0</span>
-                        }
+            <span id="subscription-total-value" class="hide">@subpricetoday</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">@(ViewBag.ProratedAmountFee != null ? ViewBag.ProratedAmountFee : subtransfeetoday)</span>
+        }
+        else
+        {
+            <span id="subscription-total-value" class="hide">0</span>
+            <span id="subscription-asf-value" class="hide">0</span>
+            <span id="subscription-ccf-value" class="hide">0</span>
+        }
 
                         <span id="fee-ccf" class="hide">0</span>
                         <span id="fee-asf" class="hide">0</span>

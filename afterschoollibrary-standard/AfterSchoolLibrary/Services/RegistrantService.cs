@@ -227,13 +227,13 @@ namespace AfterSchoolLibrary.Services
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: proratingResult.ShouldWeBeProratingToday,
+                isProrated: proratingResult.BillingCycleAnchor.HasValue,
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
+                stripeAccountId: stripeAccountId,
                 startDate: startDateTime,
                 endDate: endDateTime,
                 billingCycleAnchor: proratingResult.BillingCycleAnchor,
-                stripeAccountId: stripeAccountId,
                 stripeCouponId: stripeCouponId,
                 metaData: new Dictionary<string, string>
                 {
@@ -285,8 +285,8 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
-            WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser,
+            Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
@@ -601,8 +601,8 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                convenienceFee = checkoutObject.GetSubscriptionCostTodayConvenienceFee(msgs, dc);
-                paymentTypeFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc);
+                convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
+                paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
                 amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
 
                 var po = checkoutObject.ParticipationObject;
@@ -1005,6 +1005,24 @@ namespace AfterSchoolLibrary.Services
             return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
         }
 
+        public static bool IsRegisteredFor(this Registrant masterRegistrant, ParticipationObject participationObject, bool? hasParentalConsent,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (!masterRegistrant.IsMaster)
+                return masterRegistrant.GetMasterRegistrant(msgs, dc).IsReservedFor(participationObject, hasParentalConsent, msgs, dc);
+
+            var assignmentTypes = new List<RegistrationAssignmentType>()
+            {
+                RegistrationAssignmentType.Reserved,
+                RegistrationAssignmentType.ReservedPendingPayment,
+                RegistrationAssignmentType.ReservedPendingParentalConsent,
+                RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.WaitingList,
+            };
+
+            return HasParticipationAssignment(masterRegistrant, participationObject, assignmentTypes, hasParentalConsent, msgs, dc);
+        }
+
         public static bool IsReservedForAllDates(this Registrant masterRegistrant, ParticipationObject participationObject, List<DateTime> dates,
             bool? hasParentalConsent, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -1296,10 +1314,10 @@ namespace AfterSchoolLibrary.Services
         public static FormQuestionAnswer MapAndAddAnswer(this Registrant registrant, List<FormQuestion> questions, Registrant fromRegistrant,
             QuestionDataType fromType, QuestionDataType toType, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var parentAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
-            var studentQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
-            if (studentQuestion.IsNotEmpty() && parentAnswer.IsNotEmpty())
-                return registrant.AddOrUpdateAnswer(parentAnswer.Text, studentQuestion, loggedInUser, msgs, dc);
+            var originalAnswer = fromRegistrant.GetAnswer(fromType, msgs, dc);
+            var destinationQuestion = questions.Find(question => question.QuestionDataTypeId == toType);
+            if (destinationQuestion.IsNotEmpty() && originalAnswer.IsNotEmpty())
+                return registrant.AddOrUpdateAnswer(originalAnswer.Text, destinationQuestion, loggedInUser, msgs, dc);
 
             return null;
         }

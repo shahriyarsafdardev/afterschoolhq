@@ -484,6 +484,14 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
+                    // check for archived form
+                    var currentForm = activityGroup.GetForm(amsgs, adc);
+
+                    // don't want to use an archived form
+                    if (currentForm.IsArchived)
+                        // can use student form because sessions are only valid for students
+                        currentForm = activityGroup.GetAccount(amsgs, adc).GetDefaultStudentForm(amsgs, adc); 
+
                     // copy group
                     copy = new ActivityGroup
                     {
@@ -493,7 +501,7 @@ namespace AfterSchoolLibrary.Services
                         CreatedBy = loggedInUserId,
                         LastModifiedBy = loggedInUserId,
                         Description = activityGroup.Description,
-                        FormId = activityGroup.FormId,
+                        FormId = currentForm.ID,
                         IsArchived = activityGroup.IsArchived,
                         IsInviteOnly = activityGroup.IsInviteOnly,
                         IsPublished = false,

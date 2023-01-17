@@ -417,7 +417,7 @@ namespace AfterSchoolLibrary.Models
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, dc: dc)
+            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -427,6 +427,11 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionAnswer.LoadByRegistrantId(ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
+        }
+
+        public bool HasAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.ExistsByRegistrantId(ID.Value, msgs, dc);
         }
 
         public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -552,6 +557,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["lastName"], lastName);
             dq.Criterias.Add(ObjectMap["email"], email);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static bool ExistsByName(int accountId, string firstName, string lastName, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["accountId"], accountId);
+            dq.Criterias.Add(ObjectMap["firstName"], firstName);
+            dq.Criterias.Add(ObjectMap["lastName"], lastName);
+            return dq.GetCount() > 0;
         }
 
         public static Registrant LoadByEmailOnly(int accountId, string email, DatabaseConnection dc = null)
@@ -716,24 +731,26 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, true);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
 
-        public static List<Registrant> LoadByAnswered(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Registrant> LoadByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int? start, int? length,
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityId, search, startDate, endDate, false);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -741,7 +758,8 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static string LoadByAnsweredQuery(int accountId, int? formId, int? activityId, string search, DateTime? startDate, DateTime? endDate, bool getCountOnly)
+        private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+            bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType)
         {
             string sql = @$"
                 select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
@@ -750,9 +768,9 @@ namespace AfterSchoolLibrary.Models
                     FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
                     Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
 
-            if (activityId.HasValue)
+            if (activityIds.IsNotEmpty() && activityIds.Any())
                 sql += @"
-                    inner join 
+                    left outer join 
                     RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
 
             sql += @$"
@@ -763,18 +781,62 @@ namespace AfterSchoolLibrary.Models
                 sql += $" and FormQuestion.FormId = {formId.Value}";
 
             if (search.IsNotEmpty())
-                sql += $" and FormQuestionAnswer.Text like '%{search}%' ";
+            {
+                sql += $" and FormQuestionAnswer.Text like '%{search}%'";
+
+                if (searchQuestionIds.IsNotEmpty() && searchQuestionIds.Any())
+                {
+                    sql += @$" and (
+                                FormQuestion.ID in ({searchQuestionIds.ToStrings().ToStringList()})";
+
+                    var excludingNotSet = searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).ToList();
+                    if (excludingNotSet.IsNotEmpty() && excludingNotSet.Any())
+                        sql += @$" or    
+                                FormQuestion.QuestionDataTypeId in ({excludingNotSet.Select(x => (int) x).ToStrings().ToStringList()})";
+
+                    sql += ")";
+                }
+            }
 
             if (startDate.HasValue)
-                sql += $"and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}' ";
+                sql += $" and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}'";
 
             if (endDate.HasValue)
-                sql += $"and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}' ";
+                sql += $" and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}'";
 
-            if (activityId.HasValue)
-                sql += @$"
-                    and RegistrantActivity.ParticipationObjectId = {activityId.Value}
+            if (registrantPersonType != RegistrantPersonType.NotSet)
+                sql += $" and Registrant.PersonTypeId = {(int)registrantPersonType}";
+
+            if (getFirstRegistrantsOnly)
+            {
+                sql += " and Registrant.FirstRegistrantId is NULL";
+
+                if (activityIds.IsNotEmpty() && activityIds.Any())
+                    sql += @$"
+                    and 
+                    (
+                        (RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                        and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        or 
+                        Registrant.ID in 
+                        (
+                            select r2.FirstRegistrantId 
+                            from 
+                                Registrant r2 inner join RegistrantActivity ra2 on r2.ID = ra2.RegistrantId
+                            where 
+                                r2.FirstRegistrantId = Registrant.ID and
+                                (ra2.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                                and ra2.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        )
+                    )";
+            }
+            else
+            {
+                if (activityIds.IsNotEmpty() && activityIds.Any())
+                    sql += @$"
+                    and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
+            }
 
             if (!getCountOnly)
                 sql += @"

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net.Mail;
 using System.Web;
 using AfterSchoolLibrary.Models;
@@ -221,8 +222,10 @@ namespace AfterSchoolLibrary.Helpers
                     return false;
 
                 var stringInput = s.Trim();
+
                 if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                     return true; //For json object
+
                 if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                     return true; //For json array
 
@@ -235,7 +238,7 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static List<KeyValuePair> GetKeyValuePairs(string s)
-        {
+        { 
             var data = new List<KeyValuePair>();
 
             if (s.IsEmpty())
@@ -244,8 +247,36 @@ namespace AfterSchoolLibrary.Helpers
             var stringInput = s.Trim();
             if (stringInput.StartsWith("{") && stringInput.EndsWith("}"))
                 stringInput = "[" + stringInput + "]"; //For json object
+
+            // for data formatted like this '[[1,2,3,4]]"
+            if (stringInput.StartsWith("[["))
+            {
+                // get rid of the surrounding brac
+                stringInput = stringInput.Substring(2); 
+                if (stringInput.EndsWith("]]"))
+                    stringInput = stringInput.Substring(0, stringInput.Length - 2);
+
+                s = stringInput;
+            }
+            else if (stringInput.StartsWith("[") && !stringInput.Contains("{"))
+            {
+                stringInput = stringInput.Substring(1);
+                if (stringInput.EndsWith("]"))
+                    stringInput = stringInput.Substring(0, stringInput.Length - 1);
+
+                s = stringInput;
+            }
+
             if (stringInput.StartsWith("[") && stringInput.EndsWith("]"))
                 data.AddRange(JsonConvert.DeserializeObject<List<KeyValuePair>>(stringInput)); //For json array
+            else
+                s.Split(',').ToList().ForEach(x => data.Add(new KeyValuePair() { key = x, value = x }));
+
+            data.ForEach(x =>
+            {
+                x.key = x.key.IfEmpty("").Trim();
+                x.value = x.value.IfEmpty("").Trim();
+            });
 
             return data;
         }

@@ -2,13 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using Amazon.DynamoDBv2;
-using Amazon.Runtime.Internal;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
@@ -23,7 +21,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         // GET: Org/Form
         [HttpGet]
-        public ActionResult Index(string fromSurvey, string pn, string rpp, string q, string type)
+        public ActionResult Index(string fromSurvey, string pn, string rpp, string q, string type, bool archived = false)
         {
             if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("forms", "account", new { fromSurvey, pn, rpp, q, type });
@@ -47,8 +45,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
 
-            var forms = currentAccount.GetForms(formType, q, start, length, msgs);
-            var formCount = currentAccount.GetFormCount(formType, q, msgs);
+            var forms = currentAccount.GetForms(archived, formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(archived, formType, q, msgs);
             var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.PagingModel = new PagingModel
@@ -60,6 +58,7 @@ namespace AfterSchool.Areas.Org.Controllers
             };
             ViewBag.Messages = msgs;
             ViewBag.FromSurvey = fromSurvey;
+            ViewBag.Archived = archived;
             return View(forms);
         }
 
@@ -305,15 +304,20 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Report(int? form, string activity)
+        public ActionResult Report(int? form, string activities, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
 
             Form formObj = null;
-            Activity activityObj = null;
+            var selectedActivities = new List<Activity>();
+            var activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
             var questions = new List<FormQuestion>();
+            var forms = new List<Form>();
+            var formType = personType == RegistrantPersonType.Student ? FormType.StudentForm : FormType.VolunteerForm;
+            var showCollapsedRecordOption = true;
 
             if (form.HasValue)
             {
@@ -323,19 +327,35 @@ namespace AfterSchool.Areas.Org.Controllers
                     .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                     .ThenBy(x => x.DisplayOrder)
                     .ToList();
+
+                if (formObj.FormTypeId == FormType.Survey)
+                    showCollapsedRecordOption = false;
             }
 
-            if (activity.IsGuid())
+            if (activities.IsNotBlank())
             {
-                activityObj = currentAccount.GetActivity(activity.ToGuid(), msgs);
-                formObj = activityObj.GetActiveForm(msgs);
-                questions = formObj.GetAllQuestions(msgs)
-                    .Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                var activityIds = activities.Split(',').ToIntegerArray().ToList();
+                selectedActivities = currentAccount.GetActivities(activityIds, msgs);
+                selectedActivities.ForEach(x => forms.Add(x.GetActiveForm(msgs)));                
+            }
+
+            if (!forms.Any())
+                forms = currentAccount.GetForms(null, msgs).Where(x => x.FormTypeId == formType).ToList();
+
+            if (!questions.Any())
+            {
+                var allQuestions = new List<FormQuestion>();
+
+                forms.ForEach(x => allQuestions.AddRange(x.GetAllQuestions(msgs).Where(x => !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)));
+
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId == QuestionDataType.NotSet));
+                questions.AddRange(allQuestions.Where(x => x.QuestionDataTypeId != QuestionDataType.NotSet).DistinctBy(x => x.QuestionDataTypeId));
+
+                questions = questions
                     .OrderBy(x => x.FormQuestionGroupDisplayOrder)
                     .ThenBy(x => x.DisplayOrder)
                     .ToList();
             }
-
 
             var reportResults = new ReportResults()
             {
@@ -343,15 +363,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 Messages = msgs,
                 Form = formObj,
                 FormId = form,
-                Activity = activityObj,
-                ActivityUid = activity,
+                SelectedActivities = selectedActivities,
+                ActivityOptions = activityOptions.OrderBy(x => x.Name).ToList(),
+                CollapseRecords = collapseRecords && showCollapsedRecordOption,
+                PersonType = personType,
+                ShowCollapseRecordOption = showCollapsedRecordOption,
             };
 
             return View(reportResults);
         }
 
-        [HttpGet]
-        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activity)
+        [HttpPost]
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, 
+            string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -359,7 +383,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var formId = new int?();
             var startDate = new DateTime?();
             var endDate = new DateTime?();
-            var activityId = new int?();
+            var activityIds = new List<int>();
+            var searchQuestionIds = new List<int>();
+            var searchQuestionTypeIds = new List<QuestionDataType>();
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -367,25 +393,85 @@ namespace AfterSchool.Areas.Org.Controllers
             if (edate.IsDateTime())
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
-            if (activity.IsGuid())
-                activityId = currentAccount.GetActivity(activity.ToGuid(), msgs)?.ID;
+            if (activities.IsNotBlank())
+                activityIds = activities.Split(',').ToIntegerArray().ToList();
 
             if (form.HasValue)
                 formId = currentAccount.GetForm(form.Value, msgs)?.ID;
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, start, length, msgs);
-            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityId, search, startDate, endDate, msgs);
+            if (searchquestions.IsNotBlank())
+            {
+                searchQuestionIds = searchquestions.Split(',').Select(x => x.Split('|').First().ToInteger()).ToList();
+                searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
+            }
+
+            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, 
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
+            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, 
+                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
             var answers = new List<FormQuestionAnswer>();
+            var registrantActivities = new Dictionary<int, string>();
 
             if (registrants.Any())
-                answers = FormQuestionAnswer.LoadByRegistrantIds(registrants.Select(x => x.ID.Value), msgs);
+            {
+                var registrantsWithAnswers = new List<Registrant>();
+                registrantsWithAnswers.AddRange(registrants);
+
+                if (collapseRecords)
+                    registrants.ForEach(registrant => registrantsWithAnswers.AddRange(registrant.GetRelatedRegistrants(msgs)));
+
+                answers = FormQuestionAnswer.LoadByRegistrantIds(registrantsWithAnswers.Select(x => x.ID.Value), msgs)
+                            .Where(x => !x.Text.IsBlank())
+                            .OrderByDescending(x => x.CreateDate.Value)
+                            .ToList();
+               
+                // preload the registrants activities
+                // only show activities that are in the filter
+                registrants.ForEach(registrant => 
+                {
+                    var ras = registrant.GetRegistrantActivities(msgs);
+
+                    if (collapseRecords)
+                        registrant.GetRelatedRegistrants(msgs)
+                            .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
+
+                    if (activityIds.Any())
+                        ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                    registrantActivities.Add(
+                        registrant.ID.Value,
+                        ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
+                    );
+                });
+
+            }
 
             if (msgs.HasNoErrors())
                 return Json(new
                 {
                     status = "ok",
-                    registrants = registrants.Select(x => new { ID = x.ID.Value, CreateDate = x.CreateDate.ToShortDateTimeString() }),
-                    answers = answers.Select(x => new { ID = x.ID.Value, Text = x.GetAnswerText().IfEmpty(""), QuestionId = x.FormQuestionId.Value, RegistrantId = x.RegistrantId.Value }),
+                    registrants = registrants.Select(registrant => 
+                                new 
+                                { 
+                                    ID = registrant.ID.Value, 
+                                    FirstRegistrantId = registrant.FirstRegistrantId.IfEmpty(""), 
+                                    CreateDate = registrant.CreateDate.ToShortDateTimeString(),
+                                    Activities = registrantActivities[registrant.ID.Value],
+                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'),
+                                    registrant.FirstName,
+                                    registrant.LastName,
+                                    registrant.Email,
+                                }),
+                    answers = answers.Select(answer =>
+                                new 
+                                { 
+                                    ID = answer.ID.Value, 
+                                    Text = answer.GetAnswerText().IfEmpty(""), 
+                                    QuestionId = answer.FormQuestionId.Value, 
+                                    QuestionDataTypeId = (int)answer.QuestionDataTypeId, 
+                                    RegistrantId = answer.RegistrantId.Value,
+                                    FirstRegistrantId = answer.RegistrantFirstRegistrantId
+                                }),
                     registrantCount = totalRegistrantCount,
                     messages = msgs,
                 }, JsonRequestBehavior.AllowGet);
@@ -397,8 +483,9 @@ namespace AfterSchool.Areas.Org.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
-        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activity)
+        [HttpPost]
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, 
+            string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -406,9 +493,11 @@ namespace AfterSchool.Areas.Org.Controllers
             HandleTempMessages(msgs);
 
             var formId = new int?();
-            var activityId = new int?();
+            var activityIds = new List<int>();
             var startDate = new DateTime?();
             var endDate = new DateTime?();
+            var searchQuestionIds = new List<int>();
+            var searchQuestionTypeIds = new List<QuestionDataType>();
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -419,18 +508,28 @@ namespace AfterSchool.Areas.Org.Controllers
             if (form.HasValue)
                 formId = currentAccount.GetForm(form.Value, msgs)?.ID;
 
-            if (activity.IsGuid())
-                activityId = currentAccount.GetActivity(activity.ToGuid(), msgs)?.ID;
+            if (activities.IsNotBlank())
+                activityIds = activities.Split(',').ToIntegerArray().ToList();
+
+            if (searchquestions.IsNotBlank())
+            {
+                searchQuestionIds = searchquestions.Split(',').Select(x => x.Split('|').First().ToInteger()).ToList();
+                searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
+            }
 
             BackgroundJob.Enqueue(() =>
                 FormService.EmailDataReport(
                     currentAccount.ID.Value,
                     formId,
-                    activityId,
+                    activityIds,
                     search, 
                     startDate, 
                     endDate, 
-                    hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { }, 
+                    hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { },
+                    searchQuestionIds, 
+                    searchQuestionTypeIds,
+                    collapseRecords,
+                    personType,
                     currentUser.ID.Value)
             );
 
@@ -563,6 +662,76 @@ namespace AfterSchool.Areas.Org.Controllers
             SetTempMessages(msgs);
 
             return RedirectToAction("edit", new { id = sectionToDelete.FormId, qg = "" });
+        }
+
+
+        [HttpGet]
+        public ActionResult Archive(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(form.MoveToArchive(currentUser.ID.Value));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been archived", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
+        }
+
+        [HttpGet]
+        public ActionResult Restore(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(form.MoveFromArchive(currentUser.ID.Value));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been restored", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
+        }
+
+        [HttpGet]
+        public ActionResult SetAsDefault(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (form.IsNotEmpty())
+                msgs.AddRange(currentAccount.SetDefaultForm(form, currentUser));
+
+            // Show Success Message
+            if (msgs.HasNoErrors())
+                msgs.Add($"{form.Name} has been set as the default", MessageType.Success);
+
+            ViewBag.Messages = msgs;
+
+            if (Request.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+
+            return RedirectToAction("index", "form");
         }
     }
 }

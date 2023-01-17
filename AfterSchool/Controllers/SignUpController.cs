@@ -472,7 +472,7 @@ namespace AfterSchool.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        awu.Activate(wu, msgs);
+                        msgs.AddRange(awu.Activate(wu));
                         account.SetIsActive(true, wu, msgs);
                     }
 

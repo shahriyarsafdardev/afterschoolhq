@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -66,6 +66,14 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateTrialDaysWithStripe(this AccountPackage accountPackage, int trialDays, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var newTrialEndDate = accountPackage.TrialStartDate.Value.AddDays(trialDays);
+
+            if (newTrialEndDate.IsBefore(DateTime.UtcNow))
+            {
+                msgs.Add("Trial days not updated because the trial end date would still be in the past", MessageType.Notice);
+                return;
+            }
+
             accountPackage.UpdateTrialDays(trialDays, msgs, dc);
 
             if (msgs.HasNoErrors())
@@ -74,7 +82,7 @@ namespace AfterSchoolLibrary.Services
                     priceId: null,
                     billingCycleAnchorNow: null,
                     billingCycleAnchorUnchanged: null,
-                    trialEndDate: accountPackage.TrialStartDate.Value.AddDays(trialDays),
+                    trialEndDate: newTrialEndDate,
                     prorate: null,
                     couponId: null,
                     msgs: msgs);

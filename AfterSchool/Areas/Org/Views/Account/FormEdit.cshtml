@@ -1,4 +1,4 @@
-﻿@model Form
+@model Form
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var questionGroups = (List<FormQuestionGroup>)ViewBag.QuestionGroups;
@@ -302,7 +302,15 @@
                                                               });}
                                                     </td>
                                                     <td>
-                                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-delete" onclick="deleteQuestion('@UI.JavascriptSafeString(question.Text)', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')"><span class="text-danger"><i class="s7-trash"></i></span></button>
+                                                        @if (question.QuestionDataTypeId == QuestionDataType.NotSet)
+                                                        {
+                                                            <button class="btn btn-default btn-sm md-trigger" 
+                                                                    data-modal="modal-delete" 
+                                                                    onclick="deleteQuestion('@UI.JavascriptSafeString(question.Text)', '@Url.Action("delete","Account", new { id = question.ID.ToString()})')">
+                                                                <span class="text-danger"><i class="s7-trash"></i></span>
+                                                            </button>
+                                                        }
+                                                        
                                                     </td>
                                                 </tr>
                                                 count++;

@@ -1,11 +1,11 @@
-using BasicLibrary;
-using Stripe;
-using Stripe.BillingPortal;
-using Stripe.Checkout;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using BasicLibrary;
+using Stripe;
+using Stripe.BillingPortal;
+using Stripe.Checkout;
 using Configuration = Stripe.BillingPortal.Configuration;
 using Session = Stripe.BillingPortal.Session;
 using SessionCreateOptions = Stripe.BillingPortal.SessionCreateOptions;
@@ -38,8 +38,11 @@ namespace AfterSchoolLibrary.Billing
         private static string DevPlatformClientId => "ca_7kmNt22jLhXZWtyVV1884Kng6mgs79Jv";
         private static string LivePlatformClientId => ConfigurationManager.AppSettings["Stripe.LivePlatformClientId"];
 
-        private static string DevSubscriptionsSecretKey => "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
-        private static string DevSubscriptionsPublishableKey => "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
+        private static string DevSubscriptionsSecretKey =>
+            "sk_test_51L86SRKqvjOx1xht5HLUSdCXXvePMWwsmWyqjJpwH5vBWPJaBcwrRM3HqfNHAsjn8cDolgGx2NQr7P7tombgd1Kw000Ej19ATs";
+
+        private static string DevSubscriptionsPublishableKey =>
+            "pk_test_51L86SRKqvjOx1xhtySfmOFLymwZjBhtoUweSkImAJbF52trFklUdsEmDewGcxs7JFmZddTvSmkAhj3f8UfkMJOpV00aFruefGr";
 
         public static string ReferralCouponId => Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
 
@@ -70,7 +73,7 @@ namespace AfterSchoolLibrary.Billing
         {
             var fee = feeTakenOutOfCost
                 ? cost * StripeBankPercentFee
-                : (cost / (1 - StripeBankPercentFee)) - cost;
+                : cost / (1 - StripeBankPercentFee) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
         }
 
@@ -225,15 +228,12 @@ namespace AfterSchoolLibrary.Billing
         }
 
 
-        internal TransferReversal CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
+        internal void CreateTransferReversal(string stripeTransferId, decimal amountToReverse, SystemMessages msgs)
         {
-
             var options = new TransferReversalCreateOptions
             {
-                Amount = (long)(amountToReverse * 100),
+                Amount = (long) (amountToReverse * 100),
             };
-
-            TransferReversal transferReversal = null;
 
             try
             {
@@ -242,10 +242,8 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Transfer Reversal was not created", MessageType.UserError);
+                msgs.Add("Transfer Reversal was not created", MessageType.UserError);
             }
-
-            return transferReversal;
         }
 
         #endregion
@@ -812,7 +810,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                card = GetCardService().Create(customerId, options, requestOptions);
+                GetCardService().Create(customerId, options, requestOptions);
             }
             catch (StripeException ex)
             {
@@ -1501,9 +1499,13 @@ namespace AfterSchoolLibrary.Billing
                 options.Duration = StripeCouponDuration.Repeating.ToString().ToLower();
             }
             else if (couponDuration == StripeCouponDuration.Once)
+            {
                 options.Duration = StripeCouponDuration.Once.ToString().ToLower();
+            }
             else
+            {
                 options.Duration = StripeCouponDuration.Forever.ToString().ToLower();
+            }
 
             var value = (discountValue * 100).ToInteger();
 
@@ -1513,7 +1515,9 @@ namespace AfterSchoolLibrary.Billing
                 options.Currency = "USD";
             }
             else
+            {
                 options.PercentOff = value;
+            }
 
             if (couponName.IsNotEmpty())
                 options.Name = couponName.MaxChars(40);

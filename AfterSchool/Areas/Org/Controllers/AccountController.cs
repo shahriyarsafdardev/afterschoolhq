@@ -578,7 +578,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type)
+        public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type, bool isarchived = false)
         {
             if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("index", "form", new { fromSurvey, pn, rpp, q, type });
@@ -602,8 +602,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             
-            var forms = currentAccount.GetForms(formType, q, start, length, msgs);
-            var formCount = currentAccount.GetFormCount(formType, q, msgs);
+            var forms = currentAccount.GetForms(isarchived, formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(isarchived, formType, q, msgs);
             var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
             
             ViewBag.PagingModel = new PagingModel

@@ -56,41 +56,41 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static List<Form> GetForms(this Account account, SystemMessages msgs = null,
+        public static List<Form> GetForms(this Account account, bool? isArchived, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountId(account.ID.Value, msgs, dc);
+            return Form.LoadByAccountId(account.ID.Value, isArchived, msgs, dc);
         }
 
-        public static List<Form> GetForms(this Account account, FormType formType, SystemMessages msgs = null,
+        public static List<Form> GetForms(this Account account, bool? isArchived, FormType formType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, formType, msgs, dc);
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, isArchived, formType, msgs, dc);
         }
 
-        public static List<Form> GetForms(this Account account, FormType formType, string search, int? start, int? length, SystemMessages msgs = null,
+        public static List<Form> GetForms(this Account account, bool? isArchived, FormType formType, string search, int? start, int? length, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Form.Search(account.ID.Value, formType, search, start, length, msgs, dc);
+            return Form.Search(account.ID.Value, isArchived, formType, search, start, length, msgs, dc);
         }
 
-        public static int GetFormCount(this Account account, FormType formType, string search, SystemMessages msgs = null,
+        public static int GetFormCount(this Account account, bool? isArchived, FormType formType, string search, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Form.GetSearchCount(account.ID.Value, formType, search, msgs, dc);
+            return Form.GetSearchCount(account.ID.Value, isArchived, formType, search, msgs, dc);
         }
 
-        public static List<Form> GetForms(this Account account, ActivityType activityType, SystemMessages msgs = null,
+        public static List<Form> GetForms(this Account account, ActivityType activityType, bool? isArchived, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var formType = activityType == ActivityType.VolunteerOpportunity ? FormType.VolunteerForm : FormType.StudentForm;
-            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, formType, msgs, dc);
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, isArchived, formType, msgs, dc);
         }
 
-        public static List<Form> GetSurveyForms(this Account account, SystemMessages msgs = null,
+        public static List<Form> GetSurveyForms(this Account account, bool? isArchived, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, FormType.Survey, msgs, dc);
+            return Form.LoadByAccountIdByFormTypeId(account.ID.Value, isArchived, FormType.Survey, msgs, dc);
         }
 
         public static Form GetContactForm(this Account account, SystemMessages msgs = null,
@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return Form.LoadByIdByAccountId(Id, account.ID.Value, msgs, dc);
+                return Form.LoadByIdByAccountId(Id, account.ID.Value, null, msgs, dc);
 
             return null;
         }
@@ -1811,13 +1811,6 @@ namespace AfterSchoolLibrary.Services
             return stripeProrateValue;
         }
 
-        public static string GetStripeProratePreviewText(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
-            SystemMessages msgs = null)
-        {
-            var result = account.GetStripeProratePreview(stripeAccountType, plan, msgs);
-            return result is null ? null : "Amount due: $" + result;
-        }
-
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2170,6 +2163,18 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
+        /// <summary>
+        /// This is used for creating a new registrant and registration on the backend
+        /// NOT used when parents are registering
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="participationObject"></param>
+        /// <param name="questionsAndAnswers"></param>
+        /// <param name="activitiesAndPreferences"></param>
+        /// <param name="period"></param>
+        /// <param name="loggedInUser"></param>
+        /// <param name="msgs"></param>
+        /// <param name="dc"></param>
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
             List<(Activity activity, int preferenceNumber)> activitiesAndPreferences, RegistrationPeriod period,
@@ -2181,7 +2186,6 @@ namespace AfterSchoolLibrary.Services
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var location = account.GetDefaultLocation(amsgs, adc);
                     var groupId = participationObject.GetAnyRelatedActivityGroupId();
                     var aagId = participationObject.GetAnyRelatedAccountActivityGroupId();
 
@@ -2193,7 +2197,7 @@ namespace AfterSchoolLibrary.Services
                         isMaster: false,
                         isParentOrGuardian: false,
                         allowTextMessages: false,
-                        schoolLocationId: location?.ID,
+                        schoolLocationId: null,
                         profileStatus: RegistrantProfileStatus.Started,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
@@ -2325,6 +2329,17 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(formOwner.SetDefaultVolunteerForm(form, loggedInUser, dc));
 
             return form;
+        }
+
+        public static SystemMessages SetDefaultForm(this Account account, Form form, WebUser loggedInUser,
+            DatabaseConnection dc = null)
+        {
+            if (form.FormTypeId == FormType.StudentForm)
+                return account.SetDefaultStudentForm(form, loggedInUser, dc);
+            else if (form.FormTypeId == FormType.VolunteerForm)
+                return account.SetDefaultVolunteerForm(form, loggedInUser, dc);
+
+            return new SystemMessages() { new SystemMessage("Not a valid form type", MessageType.Error) };
         }
 
         public static SystemMessages SetDefaultStudentForm(this Account account, Form form, WebUser loggedInUser,
