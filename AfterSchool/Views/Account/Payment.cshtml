@@ -262,7 +262,7 @@
                                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                                     }
 
-                                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue && !participationObject.Schedule.IsOngoing)
                                     {
                                         <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date)</strong>.</p>
                                     }
