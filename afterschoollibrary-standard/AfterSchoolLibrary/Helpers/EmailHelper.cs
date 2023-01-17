@@ -1287,7 +1287,7 @@ namespace AfterSchoolLibrary.Helpers
                     customMessage += ".";
 
                 if (customMessage.Contains("<p>Thank you for registering.</p>"))
-                    customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
+                    customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", " for");
 
                 if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
                 {
@@ -1589,7 +1589,7 @@ namespace AfterSchoolLibrary.Helpers
                 "Registration_Confirmation_Table-1.0",
                 msgs);
             stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges subscription fees as a separate transaction.</p><br/>";
-            customMessage = "Thank you for subscribing";
+            customMessage = "Thank you for subscribing to";
             var model = new NameValueCollection
             {
                 {"FirstName", loggedInUser.FirstName},

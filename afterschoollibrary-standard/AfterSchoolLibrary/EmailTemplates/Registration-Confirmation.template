@@ -2,7 +2,7 @@
   <p>Hello @Model.FirstName,</p>
     <br/>
   <p>
-      @Model.CustomMessage for <u>@Model.ActivityName</u>, provided by <u>@Model.ActivityContactName</u>. @Model.YourRecepitText
+      @Model.CustomMessage <u>@Model.ActivityName</u>, provided by <u>@Model.ActivityContactName</u>. @Model.YourRecepitText
   </p>
     <br/>
   @Model.StripeNote
