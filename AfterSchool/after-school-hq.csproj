@@ -1476,6 +1476,7 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
+    <Content Include="referral-program.html"
     <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
     <Content Include="service-fee-schedule.html" />
