@@ -1472,6 +1472,7 @@
     <Content Include="parents.html" />
     <Content Include="pdf\casestudy-ahq.pdf" />
     <Content Include="press-kit.html" />
+    <Content Include="pricing.html" />
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
@@ -722,6 +722,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FreeTrial()
         {
             var account = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            ViewBag.SignedUpForDefaultPackage = SessionVariables.AccountPackage.GetPackage(msgs).IsDefaultCustomerPackage;
             return View(account);
         }
     }
