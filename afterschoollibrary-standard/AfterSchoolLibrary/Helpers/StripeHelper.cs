@@ -941,7 +941,7 @@ namespace AfterSchoolLibrary.Billing
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
-            if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
+            if (startDate != null && startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
                 options.TrialEnd = startDate.Value;
 
             // please make sure that billing ends when the program ends.

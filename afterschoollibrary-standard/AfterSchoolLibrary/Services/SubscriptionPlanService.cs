@@ -513,25 +513,21 @@ namespace AfterSchoolLibrary.Services
 
             if (plan.IsEmpty())
                  return result;
+            plan.StartDate ??= participationObject.StartDate;
 
-            if (plan.PlanTypeId != SubscriptionPlanType.Subscription ||
-                participationObject.Schedule.IsEmpty() ||
-                !participationObject.StartDate.HasValue ||
-                !participationObject.StartDate.Value.IsBefore(todayUtc) ||
-                (plan.PaymentStartTypeId != PlanPaymentStartType.OnPeriodStart &&
-                 plan.PaymentStartTypeId != PlanPaymentStartType.WhenActivityStarts))
+            if (plan.PlanTypeId != SubscriptionPlanType.Subscription || //Payment Plans are not prorated
+                participationObject.Schedule.IsEmpty() || // If schedule is empty then no proration
+                !participationObject.StartDate.HasValue || // Activity Start Date should have value for proration to happen
+                (!participationObject.StartDate.Value.IsBefore(todayUtc) && !participationObject.Schedule.IsOngoing) || // If activity start date is in future don't do proration
+                plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout ||
+                !plan.StartDate.HasValue || !plan.StartDate.Value.IsBefore(todayUtc))// Proration should not occur on Checkout
                 return result;
 
-            var startOfPeriod = plan.StartDate.HasValue ? plan.StartDate.Value : participationObject.StartDate.Value;
-            if (!plan.StartDate.HasValue)
-                plan.StartDate = participationObject.StartDate;
-            if((plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart || plan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts) && plan.StartDate.HasValue && plan.StartDate.Value.IsBefore((DateTime.UtcNow.Date)))
-            {
-                result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
-                result.ShouldWeBeProratingToday = true;
-                result.BackdateStartDate = todayUtc;
-                result.BillingCycleAnchor = plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? startOfPeriod.Date : startDateTime.Date;
-            }
+            var startOfPeriod = plan.StartDate ?? participationObject.StartDate.Value;
+            result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
+            result.ShouldWeBeProratingToday = true;
+            result.BackdateStartDate = todayUtc;
+            result.BillingCycleAnchor = startDateTime.Date;
             return result;
         }
 

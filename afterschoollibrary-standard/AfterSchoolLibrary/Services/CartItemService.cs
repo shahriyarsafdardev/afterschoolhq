@@ -21,14 +21,13 @@ namespace AfterSchoolLibrary.Services
 
         public static ParticipationObject GetParticipationObject(this CartItem cartItem, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (cartItem.ParticipationObjectTypeId == ParticipationObjectType.Activity)
-                return cartItem.GetActivity(msgs, dc).GetParticipationObject(msgs, dc);
-            else if (cartItem.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup)
-                return cartItem.GetActivityGroup(msgs, dc).GetParticipationObject(msgs, dc);
-            else if (cartItem.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup)
-                return cartItem.GetAccountActivityGroup(msgs, dc).GetParticipationObject(msgs, dc);
-
-            return null;
+            return cartItem.ParticipationObjectTypeId switch
+            {
+                ParticipationObjectType.Activity => cartItem.GetActivity(msgs, dc).GetParticipationObject(msgs, dc),
+                ParticipationObjectType.ActivityGroup => cartItem.GetActivityGroup(msgs, dc).GetParticipationObject(msgs, dc),
+                ParticipationObjectType.AccountActivityGroup => cartItem.GetAccountActivityGroup(msgs, dc).GetParticipationObject(msgs, dc),
+                _ => null,
+            };
         }
     }
 }

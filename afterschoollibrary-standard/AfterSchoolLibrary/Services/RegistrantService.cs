@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Services
             if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
                 participationObject.Schedule.IsNotEmpty() &&
                 participationObject.StartDate.HasValue &&
-                participationObject.StartDate.Value.IsBefore(DateTime.UtcNow.Date) &&
+                (participationObject.StartDate.Value.IsBefore(DateTime.UtcNow.Date) || participationObject.Schedule.IsOngoing) &&
                 plan.StartDate.HasValue &&
                 plan.StartDate.Value.IsBefore(DateTime.UtcNow.Date)) // REALLY BAD CODE
             {
