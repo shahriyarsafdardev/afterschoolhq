@@ -736,8 +736,14 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
-            dq.Criterias.Add(searchCriteria);
+
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
 
             var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
@@ -749,8 +755,14 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
-            dq.Criterias.Add(searchCriteria);
+
+            DatabaseCriteria searchCriteria = null;
+
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
 
             var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
 
