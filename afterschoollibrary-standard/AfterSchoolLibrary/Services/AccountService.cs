@@ -23,7 +23,6 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AccountService
     {
-        public static FigureOutProratingResult proratingResult;
         public static bool HasFeature(this Account account, FeatureType featureType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -4616,41 +4615,6 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.EnsureSeat(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
         }
 
-        public static void ProcessStudentRegistration(CheckoutObject checkoutObject, bool sendConfirmationEmail,
-            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            Database.ExecuteTransaction
-            (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                {
-                    checkoutObject.Registration.SetRegistrationStatus(
-                        completionStatus: checkoutObject.ParticipationObject.RequiresParentalConsent
-                            ? RegistrationCompletionStatus.RequiresParentSignature
-                            : RegistrationCompletionStatus.Completed,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-
-                    // TODO: Allow user to register for multiple activities in one session at once MAYBE
-                    RegistrationService.ProcessRegistrationAssignment(
-                        checkoutObject: checkoutObject,
-                        loggedInUser: loggedInUser,
-                        msgs: amsgs,
-                        dc: adc);
-                },
-                onSuccess: (SystemMessages smsgs) =>
-                {
-                    msgs.AddRange(smsgs);
-
-                    if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
-                },
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
-                dc: dc
-            );
-        }
-
         public static void ProcessRegistrationWithoutPayment(CheckoutObject checkoutObject, bool sendConfirmationEmail,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -4689,7 +4653,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
 
-        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount, FigureOutProratingResult proratingresult,
+        public static CheckoutObject ProcessRegistrationWithPayment(CheckoutObject checkoutObject, WebUser loggedInUser, Account currentAccount,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
@@ -4723,16 +4687,17 @@ namespace AfterSchoolLibrary.Services
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
-                    msgs.AddRange(smsgs);
+                    msgs?.AddRange(smsgs);
 
                     // invalidate coupon
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
-                    proratingResult = proratingresult; // set the prorating result
+                    // DELETE
+                    // we need to send prorating result here
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
-                onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
-                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                onFailure: amsgs => msgs?.AddRange(amsgs),
+                onException: emsgs => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
 

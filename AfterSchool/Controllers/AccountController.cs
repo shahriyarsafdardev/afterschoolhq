@@ -27,9 +27,7 @@ namespace AfterSchool.Controllers
         {
             this.featureFlagRepository = featureFlagRepository;
         }
-
-        private FigureOutProratingResult proratingResult;
-
+        
         #region Contact
 
         private List<FormQuestionViewModel> ContactViewBag(Account account, SystemMessages msgs)
@@ -1791,14 +1789,13 @@ namespace AfterSchool.Controllers
             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
             var stripeProratingService = new StripeProratingService();
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
-            proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
+            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
                 currentAccount, msgs);
-            if (proratingResult.ShouldWeBeProratingToday)
-            {
-                var proratedAmount = Math.Round((decimal.Parse(proratingResult.ProratingValue.ToString())),2);
-                ViewBag.ProratedAmount = proratedAmount;
-                ViewBag.ProratedAmountFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(proratedAmount); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)(); // Get ccFee cost of stripe prorated amount
-            }
+            if (!proratingResult.ShouldWeBeProratingToday)
+                return registration;
+            var proratedAmount = Math.Round((decimal.Parse(proratingResult.ProratingValue.ToString())),2);
+            ViewBag.ProratedAmount = proratedAmount;
+            ViewBag.ProratedAmountFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(proratedAmount);
             return registration;
         }
 
@@ -1942,7 +1939,8 @@ namespace AfterSchool.Controllers
                 CreditCardFeePayer = creditCardFeePayer,
                 SelectedDates = selectedDates,
             };
-            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, proratingResult, msgs);
+            
+            var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, currentAccount, msgs);
 
             if (msgs.HasErrors())
                 return View("Payment");

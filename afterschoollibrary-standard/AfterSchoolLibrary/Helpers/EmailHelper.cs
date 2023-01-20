@@ -970,13 +970,12 @@ namespace AfterSchoolLibrary.Helpers
             WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var proratingResult = AccountService.proratingResult; // set proratingResult to check either proration exists or not
+            var proratingResult = new SubscriptionPlanService.FigureOutProratingResult();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
             var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.ParticipationObject.OwnerAccount;
-            var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var paymentPlan = checkoutObject.PaymentPlan;
             var subscription = checkoutObject.SubscriptionPlan;
             var postPayPlan = checkoutObject.PostPayPlan;
@@ -1178,7 +1177,7 @@ namespace AfterSchoolLibrary.Helpers
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                if (proratingResult.ShouldWeBeProratingToday)
+                if ((bool) proratingResult?.ShouldWeBeProratingToday)
                 {
                     ccSubscriptionFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(decimal.Parse(proratingResult.ProratingValue.ToString()));
                     subscriptionCost = decimal.Parse(proratingResult.ProratingValue.ToString());

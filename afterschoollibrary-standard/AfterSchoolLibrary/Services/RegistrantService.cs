@@ -227,7 +227,7 @@ namespace AfterSchoolLibrary.Services
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: proratingResult.BillingCycleAnchor.HasValue,
+                isProrated: proratingResult.ShouldWeBeProratingToday,
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
                 stripeAccountId: stripeAccountId,
