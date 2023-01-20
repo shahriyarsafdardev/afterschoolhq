@@ -741,7 +741,7 @@ namespace AfterSchoolLibrary.Models
             
             if (search.IsNotBlank())
             {
-                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
                 dq.Criterias.Add(searchCriteria);
             }
 
@@ -760,7 +760,7 @@ namespace AfterSchoolLibrary.Models
 
             if (search.IsNotBlank())
             {
-                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search, DatabaseCriteriaOperatorEnum.Like);
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
                 dq.Criterias.Add(searchCriteria);
             }
 
