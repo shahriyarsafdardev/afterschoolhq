@@ -33,6 +33,13 @@ namespace AfterSchoolLibrary.Services
                 return;
             }
 
+            if (checkoutObject.ParticipationObject.ActivityType == ActivityType.Activity)
+            {
+                msgs.AddRange(EmailHelper.SendStudentImportConfirmed(checkoutObject, loggedInUser, dc));
+                return;
+            }
+
+
             msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, false, sendBcc, dc));
 
             // if the person registering is the student

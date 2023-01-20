@@ -3736,6 +3736,23 @@ namespace AfterSchool.Areas.Org.Controllers
                         loggedInUser: currentUser,
                         msgs: amsgs,
                         dc: adc);
+
+                    AccountService.ProcessRegistrationWithoutPayment(
+                        new CheckoutObject
+                        {
+                            BillingAccount = participationObject.OwnerAccount,
+                            PayingAccount = parentAccount,
+                            NumberOfSeats = 1,
+                            ParticipationObject = participationObject,
+                            Registration = registration,
+                            MasterRegistrant = student,
+                            SubscriptionPlan = null,
+                            SelectedDates = new List<DateTime>(),
+                        },
+                        true,
+                        currentUser,
+                        amsgs,
+                        adc);
                 }
                 else
                 {
@@ -3764,7 +3781,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             SubscriptionPlan = null,
                             SelectedDates = new List<DateTime>(),
                         },
-                        false,
+                        true,
                         currentUser,
                         amsgs,
                         adc);

@@ -4654,13 +4654,13 @@ namespace AfterSchoolLibrary.Services
                     // subscribe to the account
                     checkoutObject.BillingAccount.AddOrUpdateSubscriber(loggedInUser, SubscriberStatus.Subscribed,
                         loggedInUser, amsgs, adc);
+
+                    if (sendConfirmationEmail)
+                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-
-                    if (sendConfirmationEmail)
-                        checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),

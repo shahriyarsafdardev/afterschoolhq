@@ -2,13 +2,17 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Clever.Models;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Web;
+using Twilio.TwiML.Voice;
+using Stream = System.IO.Stream;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -162,7 +166,42 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject,
+        public static SystemMessages SendStudentImportConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            string parentFirstName = checkoutObject.PayingAccount.Name;
+
+
+
+            var model = new NameValueCollection
+            {
+                //{"FirstName", checkoutObject.MasterRegistrant.FirstName},
+                { "FirstName", parentFirstName},
+                { "Provider", checkoutObject.ParticipationObject.Name},
+            };
+
+            var subject = $"Final step needed to complete your student’s registration in {checkoutObject.ParticipationObject.Name}";
+
+            var body = ProcessTemplate(
+                EmailTemplates.Import_Parent,
+                model,
+                "Import_Parent",
+                msgs);
+
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(),
+                new EmailAddress(checkoutObject.PayingAccount.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+
+            public static SystemMessages SendAccountConfirmationEmail(ParticipationObject participationObject,
             Registration registration)
         {
             var msgs = new SystemMessages();
