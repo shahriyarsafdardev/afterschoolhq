@@ -23,6 +23,7 @@ namespace AfterSchoolLibrary.Models
         public Registration Registration { get; set; }
         public Coupon Coupon { get; set; }
         public SubscriptionPlan SubscriptionPlan { get; set; }
+        public SubscriptionPlanService.FigureOutProratingResult ProratingResult { get; set; }
         public SubscriptionPlan PaymentPlan { get; set; }
         public SubscriptionPlan PostPayPlan { get; set; }
         public BankAccountPurchaseObject BankAccountPurchaseObject { get; set; }

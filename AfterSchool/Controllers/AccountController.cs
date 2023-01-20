@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Web.Mvc;
-using static AfterSchoolLibrary.Services.SubscriptionPlanService;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
@@ -22,7 +21,6 @@ namespace AfterSchool.Controllers
     public class AccountController : BaseController
     {
         private readonly IFeatureFlagRepository featureFlagRepository;
-
         public AccountController(IFeatureFlagRepository featureFlagRepository)
         {
             this.featureFlagRepository = featureFlagRepository;
@@ -1787,9 +1785,8 @@ namespace AfterSchool.Controllers
             ViewBag.AccountCanAcceptPayments = participationObject.PaymentAccount.CanProcessPayments(msgs);
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-            var stripeProratingService = new StripeProratingService();
             var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
-            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
+            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, new StripeProratingService(), participationObject, startDateTime,
                 currentAccount, msgs);
             if (!proratingResult.ShouldWeBeProratingToday)
                 return registration;

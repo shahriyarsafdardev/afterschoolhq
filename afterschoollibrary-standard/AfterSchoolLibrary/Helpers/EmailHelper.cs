@@ -970,7 +970,6 @@ namespace AfterSchoolLibrary.Helpers
             WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var proratingResult = new SubscriptionPlanService.FigureOutProratingResult();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
             var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
@@ -1177,10 +1176,10 @@ namespace AfterSchoolLibrary.Helpers
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                if ((bool) proratingResult?.ShouldWeBeProratingToday)
+                if ((bool) checkoutObject.ProratingResult?.ShouldWeBeProratingToday)
                 {
-                    ccSubscriptionFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(decimal.Parse(proratingResult.ProratingValue.ToString()));
-                    subscriptionCost = decimal.Parse(proratingResult.ProratingValue.ToString());
+                    ccSubscriptionFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(decimal.Parse(checkoutObject.ProratingResult.ProratingValue.ToString()));
+                    subscriptionCost = decimal.Parse(checkoutObject.ProratingResult.ProratingValue.ToString());
                     proratedText = "Prorated ";
                     additionalDetails = additionalDetails.Insert(0, proratedText);
                     proratedDescription = " After the first payment, you will be charged the full subscription amount.";

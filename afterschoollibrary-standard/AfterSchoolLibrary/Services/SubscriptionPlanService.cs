@@ -508,22 +508,22 @@ namespace AfterSchoolLibrary.Services
                 ShouldWeBeProratingToday = false,
                 ProratingValue = null,
                 BackdateStartDate = null,
-                BillingCycleAnchor = plan.IsNotEmpty() ? GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc): null,
+                BillingCycleAnchor = GetBillingCycleAnchor(participationObject, plan, startDateTime, todayUtc),
             };
 
             if (plan.IsEmpty())
                  return result;
+            
             plan.StartDate ??= participationObject.StartDate;
-
-            if (plan.PlanTypeId != SubscriptionPlanType.Subscription || //Payment Plans are not prorated
-                participationObject.Schedule.IsEmpty() || // If schedule is empty then no proration
-                !participationObject.StartDate.HasValue || // Activity Start Date should have value for proration to happen
-                (!participationObject.StartDate.Value.IsBefore(todayUtc) && !participationObject.Schedule.IsOngoing) || // If activity start date is in future don't do proration
-                plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout ||
-                !plan.StartDate.HasValue || !plan.StartDate.Value.IsBefore(todayUtc))// Proration should not occur on Checkout
+            var planIsSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
+            var activityStartDateIsInFutureButNotOnGoing = !participationObject.StartDate.HasValue ||
+                                                           (!participationObject.StartDate.Value.IsBefore(todayUtc) && !participationObject.Schedule.IsOngoing);
+            var subscriptionSetOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
+            var planStartsInFuture = !plan.StartDate.HasValue || !plan.StartDate.Value.IsBefore(todayUtc);
+            if (!planIsSubscription || participationObject.Schedule.IsEmpty() || activityStartDateIsInFutureButNotOnGoing ||
+                subscriptionSetOnCheckout || planStartsInFuture)
                 return result;
 
-            var startOfPeriod = plan.StartDate ?? participationObject.StartDate.Value;
             result.ProratingValue = stripeProratingService.GetProratingValue(currentAccount, plan, msgs);
             result.ShouldWeBeProratingToday = true;
             result.BackdateStartDate = todayUtc;
@@ -535,7 +535,7 @@ namespace AfterSchoolLibrary.Services
         private static DateTime? GetBillingCycleAnchor(ParticipationObject participationObject, SubscriptionPlan plan, DateTime startDateTime,
             DateTime todayUtc)
         {
-            if (plan.PlanTypeId != SubscriptionPlanType.Subscription || participationObject.Schedule.IsNotEmpty() ||
+            if (plan.IsEmpty() || plan.PlanTypeId != SubscriptionPlanType.Subscription || participationObject.Schedule.IsNotEmpty() ||
                 todayUtc == todayUtc.FirstDateOfMonth().Date)
                 return null;
 

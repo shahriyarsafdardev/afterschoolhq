@@ -175,12 +175,6 @@ namespace AfterSchoolLibrary.Services
             msgs ??= new SystemMessages();
             var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
-            if (plan.SplitCostEvenly && !participationObject.RegistrationFinalized)
-            {
-                var ra = checkoutObject.Registration.GetRegistrantActivity(participationObject, msgs, dc);
-                ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, msgs, dc);
-                return;
-            }
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
@@ -218,10 +212,9 @@ namespace AfterSchoolLibrary.Services
                 };
             }
 
-            var stripeProratingService = new StripeProratingService();
-            var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime, currentAccount,
+            var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, new StripeProratingService(), participationObject, startDateTime, currentAccount,
                 msgs);
-
+            checkoutObject.ProratingResult = proratingResult;
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
@@ -252,7 +245,6 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasErrors())
                 return;
 
-            // this may be for Attendance Based Billing (PostPay Plan)
             if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
                 new StripeHelper().CreateCustomerBalanceTransaction(
                     subscription.CustomerId,

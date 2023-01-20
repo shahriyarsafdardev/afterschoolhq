@@ -13,7 +13,6 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using static AfterSchoolLibrary.Services.SubscriptionPlanService;
 using Account = AfterSchoolLibrary.Models.Account;
 using Coupon = AfterSchoolLibrary.Models.Coupon;
 using Payout = AfterSchoolLibrary.Models.Payout;
@@ -4692,8 +4691,7 @@ namespace AfterSchoolLibrary.Services
                     // invalidate coupon
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
-                    // DELETE
-                    // we need to send prorating result here
+                    
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: amsgs => msgs?.AddRange(amsgs),
