@@ -54,10 +54,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs);
                     }
                     
-                    EmailHelper.SendEmail("bilal@reborncode.com", "Json", $"<html><body><h1>HTML Email</h1><p>{parsedObject}</p></body></html>", false);
+                    //EmailHelper.SendEmail("bilal@reborncode.com", "Json", $"<html><body><h1>HTML Email</h1><p>{parsedObject}</p></body></html>", false);
                     
                     backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-                    backGroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
+                    backGroundCheck.BackgroundCheckResultId = responseBody.result == "" ? BackgroundCheckResult.Pending : (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
 
                     if(msgs.HasNoErrors())
                         msgs.AddRange(backGroundCheck.Save());

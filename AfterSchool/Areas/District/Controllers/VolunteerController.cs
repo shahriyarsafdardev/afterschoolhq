@@ -267,6 +267,9 @@ namespace AfterSchool.Areas.District.Controllers
             
             if(expirationDate.IsEmpty())
                 msgs.Add("Expiration date was not selected",MessageType.UserError);
+            
+            if((expirationDate - DateTime.UtcNow).TotalDays < 30)
+                msgs.Add("Expiration date should be greater than a month",MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
