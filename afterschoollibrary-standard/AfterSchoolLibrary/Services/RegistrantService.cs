@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Twilio.Rest.Api.V2010.Account;
 using Account = AfterSchoolLibrary.Models.Account;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -169,7 +170,7 @@ namespace AfterSchoolLibrary.Services
             return payments.IsNotEmpty() ? payments.Count : 0;
         }
 
-        private static async void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+        private static async Task<CheckoutObject> StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
             WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
@@ -243,7 +244,7 @@ namespace AfterSchoolLibrary.Services
                 msgs: msgs);
 
             if (msgs.HasErrors())
-                return;
+                return null;
 
             if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
                 new StripeHelper().CreateCustomerBalanceTransaction(
@@ -275,6 +276,7 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
+            return checkoutObject;
         }
 
         public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser,
