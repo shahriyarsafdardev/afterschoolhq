@@ -1,5 +1,4 @@
 using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Helpers;
 using System.Linq;
 using BasicLibrary;
 
@@ -18,7 +17,14 @@ namespace AfterSchoolLibrary.Services
         public static string GetAnswerText(this FormQuestionAnswer answer)
         {
             if (answer.Text.IsJson())
-                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.value;
+            {
+                // apparently ratings have the value as the text and sometimes the key
+                // to be consistent need to always return the key instead
+                if (answer.FormQuestionQuestionTypeId == QuestionType.Rating)
+                    return Helpers.Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.key;
+
+                return Helpers.Utilities.GetKeyValuePairs(answer.Text).FirstOrDefault()?.value;
+            }
 
             if (answer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                 return answer.Text.IsBoolean() ? answer.Text.ToBoolean().ToYesNo() : "";

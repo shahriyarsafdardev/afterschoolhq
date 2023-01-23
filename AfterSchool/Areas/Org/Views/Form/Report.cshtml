@@ -1,4 +1,4 @@
-@model AfterSchool.Models.ReportResults
+@model AfterSchool.Models.ReportPageResults
 @{
     ViewBag.Title = "Report";
     var questions = Model.Questions;
@@ -285,7 +285,7 @@
                                     }
                                 </tr>
                                 <tr>
-                                    <th>Registrant ID</th>
+                                    <th>@(Model.Form.FormTypeId == FormType.Survey ? "Submission ID" : "Registrant ID")</th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
                                     <th>Activities</th>
 
@@ -605,30 +605,30 @@
 
                 if (data && data.status === 'ok') {
 
-                    if (data.registrants.length == 0) {
+                    if (data.records.length == 0) {
                         var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
                         $('#answer-tbody').append(tableRow);
                     } else {
 
-                        for (let registrant of data.registrants) {
+                        for (let record of data.records) {
 
                             var tableRow = `<tr>`;
 
-                            tableRow += `<td>${registrant.RecordId}</td>`;
+                            tableRow += `<td>${record.RecordId}</td>`;
                             if (!$('#collapse-records').is(':checked')) {
-                                tableRow += `<td class="submission-date-col">${registrant.CreateDate}</td>`;
+                                tableRow += `<td class="submission-date-col">${record.SubmissionDate}</td>`;
                             }
-                            tableRow += `<td>${registrant.Activities}</td>`;
+                            tableRow += `<td>${record.Activities}</td>`;
 
                             if (!hasRegistrantInfoInQuestions) {
-                                tableRow += `<td>${registrant.FirstName}</td>`;
-                                tableRow += `<td>${registrant.LastName}</td>`;
-                                tableRow += `<td>${registrant.Email}</td>`;
+                                tableRow += `<td>${record.FirstName}</td>`;
+                                tableRow += `<td>${record.LastName}</td>`;
+                                tableRow += `<td>${record.Email}</td>`;
                             }
 
                             for (let question of questions) {
 
-                                answer = getAnswerForQuestion(question, registrant, data.answers);
+                                answer = getAnswerForQuestion(question, record, data.answers);
 
                                 var hide = "";
 
@@ -649,13 +649,13 @@
 
                         pageStart += pageSize;
 
-                        if (data.registrants.length > 0)
+                        if (data.records.length > 0)
                             $('#starting-record').html(1);
 
-                        $('#total-records-loaded').html(pageStart < data.registrantCount ? pageStart : data.registrantCount);
-                        $('#total-records').html(data.registrantCount);
+                        $('#total-records-loaded').html(pageStart < data.recordCount ? pageStart : data.recordCount);
+                        $('#total-records').html(data.recordCount);
 
-                        maxRecords = data.registrantCount;
+                        maxRecords = data.recordCount;
                     }
 
                 } else {
@@ -667,12 +667,18 @@
         );
     }
 
-    function getAnswerForQuestion(question, registrant, answers) {
+    function getAnswerForQuestion(question, record, answers) {
 
         for (let answer of answers) {
             if (answer.Text.trim().length > 0) {
-                if ((answer.RegistrantId == registrant.ID || answer.FirstRegistrantId == registrant.ID) && (answer.QuestionId == question.ID || (answer.QuestionDataTypeId != @((int)QuestionDataType.NotSet) && answer.QuestionDataTypeId == question.QuestionDataTypeId))) {
-                    return answer;
+                if (answer.QuestionId == question.ID || (answer.QuestionDataTypeId != @((int)QuestionDataType.NotSet) && answer.QuestionDataTypeId == question.QuestionDataTypeId)) {
+
+                    if (answer.RegistrantId == record.RegistrantId || answer.FirstRegistrantId == record.FirstRegistrantId) {
+                        return answer;
+                    } else if (answer.SurveyResponseId == record.SurveyResponseId) {
+                        return answer;
+                    }
+
                 }
             }
         }

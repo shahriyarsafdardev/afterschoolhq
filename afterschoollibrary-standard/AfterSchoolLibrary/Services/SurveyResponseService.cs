@@ -1,9 +1,10 @@
-﻿using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AfterSchoolLibrary.Services
@@ -93,12 +94,11 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static Registrant GetRegistrantName(this SurveyResponse surveyResponse, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<FormQuestionAnswer> GetAnswers(this SurveyResponse surveyResponse, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (surveyResponse.RegistrantId.HasValue)
-                return Registrant.Load(surveyResponse.RegistrantId.Value, msgs, dc);
-
-            return null;
+            return FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs, dc)
+                .OrderBy(x => x.FormQuestionDisplayOrder)
+                .ToList();
         }
 
 
