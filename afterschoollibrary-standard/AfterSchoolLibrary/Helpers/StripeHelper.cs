@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Threading.Tasks;
 using BasicLibrary;
 using Stripe;
 using Stripe.BillingPortal;
@@ -922,7 +923,7 @@ namespace AfterSchoolLibrary.Billing
             return new SubscriptionService(StripeClient);
         }
 
-        public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
+        public async Task<Subscription> CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
             decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
             Dictionary<string, string> metaData, SystemMessages msgs)
         {
@@ -957,7 +958,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                var subscription = GetSubscriptionService().Create(options);
+                var subscription = await GetSubscriptionService().CreateAsync(options);
                 return subscription;
             }
             catch (StripeException ex)

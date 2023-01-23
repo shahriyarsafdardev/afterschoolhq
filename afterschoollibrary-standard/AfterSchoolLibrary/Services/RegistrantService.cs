@@ -169,7 +169,7 @@ namespace AfterSchoolLibrary.Services
             return payments.IsNotEmpty() ? payments.Count : 0;
         }
 
-        private static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+        private static async void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
             WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
@@ -217,7 +217,7 @@ namespace AfterSchoolLibrary.Services
             checkoutObject.ProratingResult = proratingResult;
 
             // create the subscription on the stripe account (could be added to main account or connected account)
-            var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
+            var subscription = await StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
                 isProrated: proratingResult.ShouldWeBeProratingToday,
