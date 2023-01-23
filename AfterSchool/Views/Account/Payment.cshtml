@@ -64,7 +64,7 @@
             </span>
         }
     }
-    else if (plan.RegFeeAsDownPayment)
+    else if (plan.IsNotEmpty() && plan.RegFeeAsDownPayment)
     {
         <span>which will count towards your first subscription payment</span>
     }
