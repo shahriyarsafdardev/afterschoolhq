@@ -1,0 +1,23 @@
+<div>
+    <p>Hi @Model.FirstName,</p>
+
+    <p>
+        You’ve been invited to join AfterSchool HQ by @Model.Provider. Claim your account to manage your student(s) registrations,
+        stay up to date with communication, and track their schedule. With an AfterSchool HQ account, you’ll be able to find, register,
+        and pay for more great programs in your area and online!
+    </p>
+    <p>
+        <b>
+            Claim your account by <a href="">clicking here</a> to reset your password using this email address.
+        </b>
+     </p>
+  <p>
+      If you have any questions or need assistance, please contact <a href="support@afterschoolhq.com">support@afterschoolhq.com</a>.
+  </p>
+    <p>
+        Thank you,
+    </p>
+    <p>
+        The AfterSchool HQ Team
+    </p>
+</div>
