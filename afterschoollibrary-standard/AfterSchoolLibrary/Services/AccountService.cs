@@ -1791,25 +1791,24 @@ namespace AfterSchoolLibrary.Services
         public static decimal? GetStripeProratePreview(this Account account, StripeAccountType stripeAccountType, SubscriptionPlan plan,
             SystemMessages msgs = null)
         {
-            if (plan.IsEmpty())
-                return null;
-
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
             var customer = account.GetStripeCustomer(stripeAccountType, msgs);
-            if (customer.IsEmpty())
+            if (customer.IsEmpty() || plan.IsEmpty())
                 return null;
 
-            var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
             var checkoutTime = DateTime.UtcNow;
             var checkoutDate = checkoutTime.Date;
-            
-            var dayDiff = (checkoutDate - plan.StartDate.Value.Date).Days;
+
+            var dayDiff = (checkoutDate - (plan.StartDate?.Date ?? checkoutDate)).Days;
             var billingCycleAnchor = checkoutDate.AddMonths(1).AddDays(dayDiff * -1);
-            var ccFee = StripeHelper.CalculateStripeFee(decimal.Parse(plan.CostPerPeriod.ToString()), true);
-            var totalCost = ccFee + decimal.Parse(plan.CostPerPeriod.ToString()); // Get total cost of stripe with fee
-            var stripeProrateValue = stripeHelper.PreviewSubscriptionProration(totalCost, msgs, billingCycleAnchor);
-            return stripeProrateValue;
+
+            var costPerPeriod = decimal.Parse(plan.CostPerPeriod.ToString());
+            var ccFee = StripeHelper.CalculateStripeFee(costPerPeriod, true);
+            var totalCost = ccFee + costPerPeriod;
+
+            var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(billingCycleAnchor.Date, checkoutDate, totalCost);
+            var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge);
+
+            return predictedStripeCharge - ccFeeForProratedCharge;
         }
 
         public static List<Charge> GetStripeBillingHistory(this Account account, StripeAccountType stripeAccountType, SystemMessages msgs = null)

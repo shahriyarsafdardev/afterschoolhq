@@ -1547,36 +1547,6 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeInvoices
 
-        private InvoiceService GetInvoiceService()
-        {
-            return new InvoiceService(StripeClient);
-        }
-
-        // PUT IT SOMEWHERE ELSE BUT NOT IN STRIPE HELPER
-        public decimal PreviewSubscriptionProration(decimal totalCost, SystemMessages msgs, DateTime billingCycleAnchor)
-        {
-            msgs ??= new SystemMessages();
-
-            // Invoice invoice = null;
-            decimal listPrice = 0M;
-            try
-            {
-                // invoice = GetInvoiceService().Upcoming(options);
-                var subscriptionStoredCost = totalCost;
-                var checkoutDate = DateTime.UtcNow.Date; // stripe uses the exact time to calculate prorating
-                var predictedStripeCharge = CalculateStripeProratedCharge(billingCycleAnchor.Date, checkoutDate, subscriptionStoredCost); // use this instead of the stripe prorate preview
-                var ccFeeForProratedCharge = CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
-                listPrice = predictedStripeCharge - ccFeeForProratedCharge; // how much is the "original" charge before cc fee
-            }
-            catch (StripeException ex)
-            {
-                msgs.Add(ex.Message, MessageType.Error, ex);
-                msgs.Add("Invoice doesn't exist", MessageType.UserError);
-            }
-
-            return listPrice;
-        }
-
         #endregion
 
         #region StripeOAuth
