@@ -224,9 +224,16 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, true, searchQuestionIds, searchQuestionTypeIds);
+            DatabaseCriteria searchCriteria = null;
+
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, true, searchQuestionIds, searchQuestionTypeIds);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
@@ -238,7 +245,15 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, search, startDate, endDate, false, searchQuestionIds, searchQuestionTypeIds);
+            DatabaseCriteria searchCriteria = null;
+
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, false, searchQuestionIds, searchQuestionTypeIds);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -246,7 +261,7 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        private static string LoadByAnsweredQuery(int accountId, int formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+        private static string LoadByAnsweredQuery(int accountId, int formId, List<int> activityIds, DatabaseCriteria search, DateTime? startDate, DateTime? endDate, 
             bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds)
         {
             string sql = @$"
@@ -270,7 +285,7 @@ namespace AfterSchoolLibrary.Models
 
             if (search.IsNotEmpty())
             {
-                sql += $" and FormQuestionAnswer.Text like '%{search}%'";
+                sql += $" and FormQuestionAnswer.Text like @{search.UniqueName}";
 
                 if (searchQuestionIds.IsNotEmpty() && searchQuestionIds.Any())
                 {
