@@ -10,6 +10,7 @@ using SendGrid.Helpers.Mail;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using AfterSchoolLibrary.Enums;
+using System.Text.RegularExpressions;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -45,8 +46,12 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetTotalSubmissionCount(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (form.FormTypeId == FormType.Survey)
+                return SurveyResponse.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
+                    null, null, msgs);
+
             return Registrant.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
-            false, null, null, RegistrantPersonType.NotSet, msgs);
+                    false, null, null, RegistrantPersonType.NotSet, msgs);
         }
 
         public static List<FormQuestion> GetAllQuestions(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -152,17 +157,29 @@ namespace AfterSchoolLibrary.Services
             var msgs = new SystemMessages();
             var currentAccount = Account.Load(accountId, msgs);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs);
+            var attachmentName = "Submission-Data-Report";
 
             try
             {
                 var questions = new List<FormQuestion>();
                 var forms = new List<Form>();
+                var formType = FormType.NotSet;
 
                 if (formId.HasValue)
-                    questions = currentAccount.GetForm(formId.Value)?.GetAllQuestions(msgs)
-                            .Where(x => x.ID.Value.NotIn(hiddenQuestionIds) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
-                            .OrderBy(x => x.FormQuestionGroupDisplayOrder)
-                            .ThenBy(x => x.DisplayOrder).ToList();
+                {
+                    var form = currentAccount.GetForm(formId.Value);
+
+                    if (form.IsNotEmpty())
+                    {
+                        formType = form.FormTypeId;
+                        attachmentName = Regex.Replace(form.Name.Trim().Replace(" ", "-"), Utilities.SpecialCharsRegEx, "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+                        questions = form.GetAllQuestions(msgs)
+                                .Where(x => x.ID.Value.NotIn(hiddenQuestionIds) && !x.IsDeleted && x.QuestionTypeId != QuestionType.TextBlock)
+                                .OrderBy(x => x.FormQuestionGroupDisplayOrder)
+                                .ThenBy(x => x.DisplayOrder).ToList();
+                    }
+                }
 
                 if (activityIds.Any())
                 {
@@ -191,8 +208,18 @@ namespace AfterSchoolLibrary.Services
                     questions = questions.Where(question => question.ID.Value.NotIn(hiddenQuestionIds) && question.QuestionDataTypeId.NotIn(hiddenQuestionTypes)).ToList();
                 }
 
-                var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null,
+                var registrants = new List<Registrant>();
+                var responses = new List<SurveyResponse>();
+
+                if (formType == FormType.Survey)
+                    responses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
+                                    searchQuestionIds, searchQuestionTypeIds, msgs);
+                else
+                    registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null,
                                     collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);
+
+
+
                 var hasRegistrantInfoInQuestions = questions.Any(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
                 var table = new List<List<string>>();
                 var row = new List<string>();
@@ -216,7 +243,11 @@ namespace AfterSchoolLibrary.Services
 
                 row = new List<string>();
 
-                row.Add("Registrant ID");
+                if (formType == FormType.Survey)
+                    row.Add("Submission ID");
+                else
+                    row.Add("Registrant ID");
+
                 if (!collapseRecords)
                     row.Add("Submission Date");
 
@@ -234,57 +265,69 @@ namespace AfterSchoolLibrary.Services
 
                 table.Add(row);
 
-                foreach (var registrant in registrants)
-                {
-                    row = new List<string>();
-
-                    var ras = registrant.GetRegistrantActivities(msgs);
-
-                    if (collapseRecords)
-                        registrant.GetRelatedRegistrants(msgs)
-                            .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
-
-                    if (activityIds.Any())
-                        ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
-
-                    var answers = registrant.GetAnswers(msgs);
-
-                    if (collapseRecords)
+                if (formType == FormType.Survey)
+                    foreach (var response in responses)
                     {
-                        var related = registrant.GetRelatedRegistrants(msgs);
-                        related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));
+                        var registrant = new Registrant() { ID = response.RegistrantId };
+                        var ras = registrant.GetRegistrantActivities(msgs);
+
+                        if (activityIds.Any())
+                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                        var answers = response.GetAnswers(msgs);
+
+                        table.Add(AddEmailDataReportRow(
+                            response.ID.ToString().PadLeft(9, '0'),
+                            collapseRecords,
+                            response.LastModifiedDate.ToShortDateTimeString(),
+                            ras.Any() ? ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ") : "",
+                            hasRegistrantInfoInQuestions,
+                            response.RegistrantFirstName,
+                            response.RegistrantLastName,
+                            response.RegistrantEmail,
+                            questions,
+                            answers,
+                            formType,
+                            null,
+                            null,
+                            response.ID));
                     }
-
-                    row.Add(registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'));
-
-                    if (!collapseRecords)
-                        row.Add(registrant.CreateDate.ToShortDateTimeString());
-
-                    if (ras.Any())
-                        row.Add(ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", "));
-                    else
-                        row.Add("");
-
-                    if (!hasRegistrantInfoInQuestions)
+                else
+                    foreach (var registrant in registrants)
                     {
-                        row.Add(registrant.FirstName);
-                        row.Add(registrant.LastName);
-                        row.Add(registrant.Email);
-                    }
+                        var ras = registrant.GetRegistrantActivities(msgs);
 
-                    foreach (var question in questions)
-                    {
-                        var answer = answers.Where(answer =>
-                                        !answer.Text.IsBlank() &&
-                                        (answer.RegistrantId == registrant.ID || answer.FormQuestionId == question.ID) &&
-                                        (answer.FormQuestionId == question.ID ||
-                                            (answer.QuestionDataTypeId != QuestionDataType.NotSet && answer.QuestionDataTypeId == question.QuestionDataTypeId))
-                                        ).OrderByDescending(x => x.CreateDate.Value).FirstOrDefault();
-                        row.Add(answer?.GetAnswerText().IfEmpty(""));
-                    }
+                        if (collapseRecords)
+                            registrant.GetRelatedRegistrants(msgs)
+                                .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
 
-                    table.Add(row);
-                }
+                        if (activityIds.Any())
+                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                        var answers = registrant.GetAnswers(msgs);
+
+                        if (collapseRecords)
+                        {
+                            var related = registrant.GetRelatedRegistrants(msgs);
+                            related.ForEach(x => answers.AddRange(x.GetAnswers(msgs)));
+                        }
+
+                        table.Add(AddEmailDataReportRow(
+                            registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'),
+                            collapseRecords,
+                            registrant.CreateDate.ToShortDateTimeString(),
+                            ras.Any() ? ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ") : "",
+                            hasRegistrantInfoInQuestions,
+                            registrant.FirstName,
+                            registrant.LastName,
+                            registrant.Email,
+                            questions,
+                            answers,
+                            formType, 
+                            registrant.ID,
+                            registrant.FirstRegistrantId,
+                            null));
+                    }
 
                 var csv = CsvFile.Create(table);
                 var csvByteData = Encoding.UTF8.GetBytes(csv);
@@ -302,7 +345,7 @@ namespace AfterSchoolLibrary.Services
                     body: body,
                     emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
                     attachmentByteData: csvByteData,
-                    attachmentFilename: $"Submission-Data-Report.csv"
+                    attachmentFilename: $"{attachmentName}.csv"
                 ));
             }
             catch (Exception ex)
@@ -336,6 +379,41 @@ namespace AfterSchoolLibrary.Services
                     ));
                 }
             }
+        }
+
+        private static List<string> AddEmailDataReportRow(string id, bool collapseRecords, string createDate, string activityList, bool hasRegistrantInfoInQuestions, 
+            string firstName, string lastName, string email, List<FormQuestion> questions, List<FormQuestionAnswer> answers, 
+            FormType formType, int? registrantId, int? firstRegistrantId, int? surveyResponseId)
+        {
+            var row = new List<string>();
+            row.Add(id);
+
+            if (!collapseRecords)
+                row.Add(createDate);
+
+            row.Add(activityList);
+
+            if (!hasRegistrantInfoInQuestions)
+            {
+                row.Add(firstName);
+                row.Add(lastName);
+                row.Add(email);
+            }
+
+            foreach (var question in questions)
+            {
+                var answer = answers.Where(answer =>
+                                !answer.Text.IsBlank() &&
+                                ((formType == FormType.Survey && answer.SurveyResponseId == surveyResponseId) ||
+                                (formType != FormType.Survey && (answer.RegistrantId == registrantId || answer.RegistrantFirstRegistrantId == firstRegistrantId))) &&
+                                (answer.FormQuestionId == question.ID ||
+                                    (answer.QuestionDataTypeId != QuestionDataType.NotSet && answer.QuestionDataTypeId == question.QuestionDataTypeId))
+                                ).OrderByDescending(x => x.CreateDate.Value)
+                                .FirstOrDefault();
+                row.Add(answer?.GetAnswerText().IfEmpty(""));
+            }
+
+            return row;
         }
 
         public static Form GetAdministratorAccountStudentForm(SystemMessages msgs = null, DatabaseConnection dc = null)

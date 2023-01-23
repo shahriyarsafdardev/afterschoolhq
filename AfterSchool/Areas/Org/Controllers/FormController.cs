@@ -357,7 +357,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
             }
 
-            var reportResults = new ReportResults()
+            var reportResults = new ReportPageResults()
             {
                 Questions = questions,
                 Messages = msgs,
@@ -381,6 +381,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             var formId = new int?();
+            var formType = FormType.NotSet;
             var startDate = new DateTime?();
             var endDate = new DateTime?();
             var activityIds = new List<int>();
@@ -397,7 +398,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 activityIds = activities.Split(',').ToIntegerArray().ToList();
 
             if (form.HasValue)
-                formId = currentAccount.GetForm(form.Value, msgs)?.ID;
+            {
+                var curForm = currentAccount.GetForm(form.Value, msgs);
+                if (curForm.IsNotEmpty())
+                {
+                    formId = curForm.ID;
+                    formType = curForm.FormTypeId;
+                }
+            }
 
             if (searchquestions.IsNotBlank())
             {
@@ -405,63 +413,120 @@ namespace AfterSchool.Areas.Org.Controllers
                 searchQuestionTypeIds = searchquestions.Split(',').Select(x => x.Split('|').Last().ToInteger().ToEnum<QuestionDataType>()).ToList();
             }
 
-            var registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length, 
-                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
-            var totalRegistrantCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, 
-                collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
+            var registrants = new List<Registrant>();
             var answers = new List<FormQuestionAnswer>();
             var registrantActivities = new Dictionary<int, string>();
+            var totalRecordCount = 0;
+            var responses = new List<SurveyResponse>();
+            var records = new List<ReportPageDataResult>();
 
-            if (registrants.Any())
+            if (formType == FormType.Survey)
             {
-                var registrantsWithAnswers = new List<Registrant>();
-                registrantsWithAnswers.AddRange(registrants);
+                responses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, start, length,
+                    searchQuestionIds, searchQuestionTypeIds, msgs);
+                totalRecordCount = SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
+                    searchQuestionIds, searchQuestionTypeIds, msgs);
 
-                if (collapseRecords)
-                    registrants.ForEach(registrant => registrantsWithAnswers.AddRange(registrant.GetRelatedRegistrants(msgs)));
-
-                answers = FormQuestionAnswer.LoadByRegistrantIds(registrantsWithAnswers.Select(x => x.ID.Value), msgs)
-                            .Where(x => !x.Text.IsBlank())
-                            .OrderByDescending(x => x.CreateDate.Value)
-                            .ToList();
-               
-                // preload the registrants activities
-                // only show activities that are in the filter
-                registrants.ForEach(registrant => 
+                if (responses.Any())
                 {
-                    var ras = registrant.GetRegistrantActivities(msgs);
+                    answers = FormQuestionAnswer.LoadBySurveyResponseIds(responses.Select(x => x.ID.Value), msgs)
+                                                    .Where(x => !x.Text.IsBlank())
+                                                    .OrderByDescending(x => x.CreateDate.Value)
+                                                    .ToList();
+
+                    responses.ForEach(response =>
+                    {
+                        var registrant = new Registrant() { ID = response.RegistrantId };
+                        var ras = registrant.GetRegistrantActivities(msgs);
+
+                        if (activityIds.Any())
+                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                        if (!registrantActivities.ContainsKey(registrant.ID.Value))
+                            registrantActivities.Add(
+                                registrant.ID.Value,
+                                ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
+                            );
+                    });
+                }
+
+                records = responses.Select(response =>
+                                new ReportPageDataResult()
+                                {
+                                    ID = response.ID.ToString(),
+                                    FirstRegistrantId = "",
+                                    SubmissionDate = response.LastModifiedDate.ToShortDateTimeString(),
+                                    Activities = registrantActivities[response.RegistrantId.Value],
+                                    RecordId = response.ID.ToString().PadLeft(9, '0'),
+                                    FirstName = response.RegistrantFirstName,
+                                    LastName = response.RegistrantLastName,
+                                    Email = response.RegistrantEmail,
+                                    RegistrantId = "",
+                                    SurveyResponseId = response.ID.ToString(),
+                                }).ToList();
+            }
+            else
+            {
+                registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, start, length,
+                    collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
+                totalRecordCount = Registrant.GetCountByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate,
+                    collapseRecords, searchQuestionIds, searchQuestionTypeIds, personType, msgs);
+
+                if (registrants.Any())
+                {
+                    var registrantsWithAnswers = new List<Registrant>();
+                    registrantsWithAnswers.AddRange(registrants);
 
                     if (collapseRecords)
-                        registrant.GetRelatedRegistrants(msgs)
-                            .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
+                        registrants.ForEach(registrant => registrantsWithAnswers.AddRange(registrant.GetRelatedRegistrants(msgs)));
 
-                    if (activityIds.Any())
-                        ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+                    answers = FormQuestionAnswer.LoadByRegistrantIds(registrantsWithAnswers.Select(x => x.ID.Value), msgs)
+                                .Where(x => !x.Text.IsBlank())
+                                .OrderByDescending(x => x.CreateDate.Value)
+                                .ToList();
 
-                    registrantActivities.Add(
-                        registrant.ID.Value,
-                        ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
-                    );
-                });
+                    // preload the registrants activities
+                    // only show activities that are in the filter
+                    registrants.ForEach(registrant =>
+                    {
+                        var ras = registrant.GetRegistrantActivities(msgs);
 
+                        if (collapseRecords)
+                            registrant.GetRelatedRegistrants(msgs)
+                                .ForEach(relatedRegistrant => ras.AddRange(relatedRegistrant.GetRegistrantActivities(msgs)));
+
+                        if (activityIds.Any())
+                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+
+                        if (!registrantActivities.ContainsKey(registrant.ID.Value))
+                            registrantActivities.Add(
+                                registrant.ID.Value,
+                                ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
+                        );
+                    });
+                }
+
+                records = registrants.Select(registrant =>
+                                new ReportPageDataResult()
+                                {
+                                    ID = registrant.ID.ToString(),
+                                    FirstRegistrantId = registrant.FirstRegistrantId.IfEmpty(""),
+                                    SubmissionDate = registrant.CreateDate.ToShortDateTimeString(),
+                                    Activities = registrantActivities[registrant.ID.Value],
+                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'),
+                                    FirstName = registrant.FirstName,
+                                    LastName = registrant.LastName,
+                                    Email = registrant.Email,
+                                    RegistrantId = registrant.ID.ToString(),
+                                    SurveyResponseId = "",
+                                }).ToList();
             }
 
             if (msgs.HasNoErrors())
                 return Json(new
                 {
                     status = "ok",
-                    registrants = registrants.Select(registrant => 
-                                new 
-                                { 
-                                    ID = registrant.ID.Value, 
-                                    FirstRegistrantId = registrant.FirstRegistrantId.IfEmpty(""), 
-                                    CreateDate = registrant.CreateDate.ToShortDateTimeString(),
-                                    Activities = registrantActivities[registrant.ID.Value],
-                                    RecordId = registrant.FirstRegistrantId.IfEmpty(registrant.ID.Value).ToString().PadLeft(9, '0'),
-                                    registrant.FirstName,
-                                    registrant.LastName,
-                                    registrant.Email,
-                                }),
+                    records,
                     answers = answers.Select(answer =>
                                 new 
                                 { 
@@ -470,9 +535,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                     QuestionId = answer.FormQuestionId.Value, 
                                     QuestionDataTypeId = (int)answer.QuestionDataTypeId, 
                                     RegistrantId = answer.RegistrantId.Value,
-                                    FirstRegistrantId = answer.RegistrantFirstRegistrantId
+                                    FirstRegistrantId = answer.RegistrantFirstRegistrantId,
+                                    answer.SurveyResponseId,
                                 }),
-                    registrantCount = totalRegistrantCount,
+                    recordCount = totalRecordCount,
                     messages = msgs,
                 }, JsonRequestBehavior.AllowGet);
 
