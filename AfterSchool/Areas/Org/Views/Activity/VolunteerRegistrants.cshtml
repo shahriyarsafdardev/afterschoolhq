@@ -114,14 +114,27 @@
                 </div>
                 
                 <div class="col-md-3">
-                    <select id="registrationDate" onchange="changeRegistrationDate()" class="form-control">
-                        <option value="">View All Dates</option>
-            
-                        @foreach (var x in registrationDates)
+                    @if (Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
                         {
-                            <option value="@(x)" @(Request["registrationDate"]?.Trim() == x ? "selected=\"selected\"" : "") >@x</option>
+                            <select id="classes" onchange="changeClass()" class="form-control">
+                                <option value="">View All Dates</option>
+                                @foreach (var instance in Model.ActivitySchedule.GetInSessionInstances())
+                                {
+                                    <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
+                                }
+                            </select>
                         }
-                    </select>
+                    else
+                    {
+                        <select id="registrationDate" onchange="changeRegistrationDate()" class="form-control">
+                            <option value="">View All Dates</option>
+            
+                            @foreach (var x in registrationDates)
+                            {
+                                <option value="@(x)" @(Request["registrationDate"]?.Trim() == x ? "selected=\"selected\"" : "") >@x</option>
+                            }
+                        </select>   
+                    }
                 </div>
 
                 <div class="col-md-4 pull-right">
