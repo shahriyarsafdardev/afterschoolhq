@@ -285,7 +285,7 @@
                                     }
                                 </tr>
                                 <tr>
-                                    <th>@(Model.Form.FormTypeId == FormType.Survey ? "Submission ID" : "Registrant ID")</th>
+                                    <th>@(Model.Form.IsNotEmpty() && Model.Form.FormTypeId == FormType.Survey ? "Submission ID" : "Registrant ID")</th>
                                     <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
                                     <th>Activities</th>
 
