@@ -129,9 +129,12 @@
                                             <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
                                         }
 
-                                        <a href="@Url.Action("report", "form", new { form = form.ID })" class="btn btn-default btn-sm" target="_blank">Submissions</a>
+                                        @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
+                                        {
+                                            <a href="@Url.Action("report", "form", new { form = form.ID })" class="btn btn-default btn-sm" target="_blank">Submissions</a>
+                                        }
 
-                                    </td>
+                                     </td>
                                     <td><a href="@Url.Action("edit", "form", new { id = form.ID })">@form.Name</a></td>
                                     <td>@totalSubmissions</td>
                                     <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
