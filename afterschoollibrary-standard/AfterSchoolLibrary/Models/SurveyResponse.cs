@@ -243,7 +243,6 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.UseParameterizedQuery = false;
 
             DatabaseCriteria searchCriteria = null;
 
