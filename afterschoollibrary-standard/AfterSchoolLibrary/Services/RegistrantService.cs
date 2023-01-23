@@ -170,7 +170,7 @@ namespace AfterSchoolLibrary.Services
             return payments.IsNotEmpty() ? payments.Count : 0;
         }
 
-        private static async Task<CheckoutObject> StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
+        private static void StartPlan(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType,
             WebUser loggedInUser, Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
@@ -192,7 +192,7 @@ namespace AfterSchoolLibrary.Services
 
             // Charge parent if they try to join mid-period. 
             // NOTE: This needs to be totally changed for pro-rating
-            if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
+            /*if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
                 participationObject.Schedule.IsNotEmpty() &&
                 participationObject.StartDate.HasValue &&
                 (participationObject.StartDate.Value.IsBefore(DateTime.UtcNow.Date) || participationObject.Schedule.IsOngoing) &&
@@ -211,14 +211,14 @@ namespace AfterSchoolLibrary.Services
                     BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
                     _ => startDateTime,
                 };
-            }
+            }*/
 
             var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, new StripeProratingService(), participationObject, startDateTime, currentAccount,
                 msgs);
             checkoutObject.ProratingResult = proratingResult;
 
             // create the subscription on the stripe account (could be added to main account or connected account)
-            var subscription = await StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
+            var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
                 isProrated: proratingResult.ShouldWeBeProratingToday,
@@ -242,9 +242,9 @@ namespace AfterSchoolLibrary.Services
                     {"DateRequested", DateTime.Now.ToShortDateTimeString()},
                 },
                 msgs: msgs);
-
+            
             if (msgs.HasErrors())
-                return null;
+                return;
 
             if (plan.RegFeeAsDownPayment && submittedRecord.GetAmountPaid(msgs, dc) > 0)
                 new StripeHelper().CreateCustomerBalanceTransaction(
@@ -276,7 +276,6 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
-            return checkoutObject;
         }
 
         public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser,

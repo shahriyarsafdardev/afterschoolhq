@@ -13,6 +13,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Account = AfterSchoolLibrary.Models.Account;
 using Coupon = AfterSchoolLibrary.Models.Coupon;
 using Payout = AfterSchoolLibrary.Models.Payout;
@@ -1800,7 +1801,9 @@ namespace AfterSchoolLibrary.Services
                 return null;
 
             var stripeHelper = StripeHelper.GetStripeHelper(stripeAccountType);
-            var checkoutDate = DateTime.UtcNow.Date; 
+            var checkoutTime = DateTime.UtcNow;
+            var checkoutDate = checkoutTime.Date;
+            
             var dayDiff = (checkoutDate - plan.StartDate.Value.Date).Days;
             var billingCycleAnchor = checkoutDate.AddMonths(1).AddDays(dayDiff * -1);
             var ccFee = StripeHelper.CalculateStripeFee(decimal.Parse(plan.CostPerPeriod.ToString()), true);
@@ -4570,8 +4573,8 @@ namespace AfterSchoolLibrary.Services
 
         private static void ProcessSubscriptionPlan(CheckoutObject checkoutObject, Registrant submittedRecord,
             WebUser loggedInUser, Account currentAccount, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            submittedRecord.StartSubscriptionPlan(checkoutObject, loggedInUser, currentAccount, msgs, dc);
+        { 
+             submittedRecord.StartSubscriptionPlan(checkoutObject, loggedInUser, currentAccount, msgs, dc);
 
             if (msgs.HasNoErrors())
                 CreatePurchase(checkoutObject, loggedInUser, msgs, dc);
@@ -4657,7 +4660,7 @@ namespace AfterSchoolLibrary.Services
         {
             Database.ExecuteTransaction
             (
-                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                action:  (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     // TODO: Decide if master account registrant should be added to plans or the account copy
                     // get the registrant record that was created just for the account

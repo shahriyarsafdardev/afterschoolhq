@@ -923,7 +923,7 @@ namespace AfterSchoolLibrary.Billing
             return new SubscriptionService(StripeClient);
         }
 
-        public async Task<Subscription> CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
+        public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
             decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
             Dictionary<string, string> metaData, SystemMessages msgs)
         {
@@ -958,7 +958,7 @@ namespace AfterSchoolLibrary.Billing
 
             try
             {
-                var subscription = await GetSubscriptionService().CreateAsync(options);
+                var subscription = GetSubscriptionService().Create(options);
                 return subscription;
             }
             catch (StripeException ex)
@@ -1552,6 +1552,7 @@ namespace AfterSchoolLibrary.Billing
             return new InvoiceService(StripeClient);
         }
 
+        // PUT IT SOMEWHERE ELSE BUT NOT IN STRIPE HELPER
         public decimal PreviewSubscriptionProration(decimal totalCost, SystemMessages msgs, DateTime billingCycleAnchor)
         {
             msgs ??= new SystemMessages();
