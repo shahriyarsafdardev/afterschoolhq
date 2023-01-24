@@ -5029,15 +5029,19 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false,
                 msgs, dc);
         }
+        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan,
+            PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, plan.CostPerPeriod.Value, msgs, dc);
+        }
 
         // TODO: Needs review
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan,
-            PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+            PaymentType paymentType, decimal costPerPeriod, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.CostPerPeriod <= 0)
                 return 0;
 
-            var costPerPeriod = plan.GetCostPerPeriodPerPerson(msgs, dc);
             var calcObj = new FeeCalculationObject(
                 costPerPeriod,
                 billingAccount,

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using BasicLibrary;
 using Stripe;
 using System.Collections.Generic;
@@ -7,7 +7,6 @@ using System.IO;
 using System.Configuration;
 using Stripe.BillingPortal;
 using Stripe.Checkout;
-using Twilio.Types;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Billing
@@ -43,6 +42,17 @@ namespace AfterSchoolLibrary.Billing
                 ? cost * StripeBankPercentFee
                 : (cost / (1 - StripeBankPercentFee)) - cost;
             return Math.Round(fee, 2, MidpointRounding.AwayFromZero);
+        }
+        public static decimal CalculateStripeCCFeeOutOfTotalCost(decimal totalCost)
+        {
+            return totalCost - ((totalCost - StripeFlatFee) / (StripePercentFee + 1));
+        }
+
+        public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
+            var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
+            return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
         }
 
         public static string ReferralCouponId => Helpers.Utilities.IsProduction ? "4BOLxUYy" : "5zMx3Z7l";
@@ -1157,58 +1167,58 @@ namespace AfterSchoolLibrary.Billing
 
         #region StripeSubscriptions
 
+        private const string CollectionMethodChargeAutomatically = "charge_automatically";
+        private const string ProrationBehaviorAlwaysInvoice = "always_invoice";
+        private const string ProrationBehaviorCreateProrations = "create_prorations";
+        private const string ProrationBehaviorNone = "none";
+
         private Stripe.SubscriptionService GetSubscriptionService()
         {
             return new Stripe.SubscriptionService(StripeClient);
         }
 
-        public Stripe.Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId, decimal? platformFeePercent, 
-            DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId, Dictionary<string, string> metaData, SystemMessages msgs)
+        public Subscription CreateRegistrantSubscription(string customerId, string planId, bool isProrated, string sourceId,
+            decimal? platformFeePercent, DateTime? startDate, DateTime? endDate, DateTime? billingCycleAnchor, string stripeAccountId, string stripeCouponId,
+            Dictionary<string, string> metaData, SystemMessages msgs)
         {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-
-            Stripe.Subscription subscription = null;
-
-            var options = new Stripe.SubscriptionCreateOptions
+            msgs ??= new SystemMessages();
+            var options = new SubscriptionCreateOptions
             {
                 Customer = customerId,
-                CollectionMethod = "charge_automatically",
+                CollectionMethod = CollectionMethodChargeAutomatically,
                 DefaultSource = sourceId,
                 Coupon = stripeCouponId,
-                Items = new List<SubscriptionItemOptions>() { new SubscriptionItemOptions() { Plan = planId, Quantity = 1 } },
+                Items = new List<SubscriptionItemOptions> { new SubscriptionItemOptions { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                ProrationBehavior = isProrated ? "create_prorations" : "none",
-                BillingCycleAnchor = billingCycleAnchor
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
+                BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
             if (startDate.Value.Date.IsAfter(DateTime.UtcNow.Date))
-                options.TrialEnd = startDate.Value; 
+                options.TrialEnd = startDate.Value;
 
             // please make sure that billing ends when the program ends.
-            if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.Date.AddDays(1)))
+            if (endDate.HasValue && endDate.Value.Date.IsOnOrAfter(DateTime.UtcNow.AddDays(1).Date))
                 options.CancelAt = endDate.Value;
 
-            // options.ProrationBehavior = "none";
-
             if (stripeAccountId.IsNotEmpty())
-                options.TransferData = new SubscriptionTransferDataOptions()
+                options.TransferData = new SubscriptionTransferDataOptions
                 {
                     Destination = stripeAccountId,
-                    AmountPercent = 100 - (platformFeePercent * 100)
+                    AmountPercent = 100 - platformFeePercent * 100,
                 };
-
             try
             {
-                subscription = GetSubscriptionService().Create(options);
+                var subscription = GetSubscriptionService().Create(options);
+                return subscription;
             }
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Subscription was not created", MessageType.UserError);
+                msgs.Add("Subscription was not created", MessageType.UserError);
+                return null;
             }
-
-            return subscription;
         }
 
         public Stripe.Subscription CreatePackageSubscription(string customerId, string priceId, string sourceId, DateTime? trialEndDate, string stripeCouponId, 

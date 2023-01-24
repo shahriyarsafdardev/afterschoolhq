@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -17,6 +17,21 @@ namespace AfterSchoolLibrary.Models
         public decimal ConvenienceFlatFee { get; private set; }
 
         private bool? _IsConvenienceFeeTakenOutOfCost { get; set; }
+
+        public FeeCalculationObject(decimal cost, decimal convenienceFlatFee, decimal conveniencePercentFee, bool isConvenienceFeeTakenOutOfCost)
+        {
+            Cost = cost;
+            ConvenienceFlatFee = convenienceFlatFee;
+            ConveniencePercentFee = conveniencePercentFee;
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
+        }
+
+        public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
+            var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
+            return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
+        }
 
         public FeeCalculationObject(decimal cost, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
