@@ -189,32 +189,20 @@ namespace AfterSchoolLibrary.Services
             var stripeCouponId = plan.SplitCostEvenly
                 ? GetSplitEvenlyCoupon(plan, checkoutObject, billingAccount, msgs, dc)
                 : GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-
-            // Charge parent if they try to join mid-period. 
-            // NOTE: This needs to be totally changed for pro-rating
-            /*if (subscriptionPlanType != SubscriptionPlanType.PaymentPlan &&
-                participationObject.Schedule.IsNotEmpty() &&
-                participationObject.StartDate.HasValue &&
-                (participationObject.StartDate.Value.IsBefore(DateTime.UtcNow.Date) || participationObject.Schedule.IsOngoing) &&
-                plan.StartDate.HasValue &&
-                plan.StartDate.Value.IsBefore(DateTime.UtcNow.Date)) // REALLY BAD CODE
-            {
-
-                // we use stripe subscription pro-rating
-                submittedRecord.ChargeRegistrantMidPeriod(checkoutObject, subscriptionPlanType, loggedInUser, currentAccount, msgs, dc);
-                var checkoutDate = DateTime.UtcNow.Date; 
-                var dayDiff = (checkoutDate - plan.StartDate.Value.Date).Days;
-                startDateTime = plan.BillingPeriodTypeId switch
-                {
-                    // we will update starting of subscription for this registrant to next cycle
-                    BillingPeriodType.Month => checkoutDate.AddMonths(1).AddDays(dayDiff * -1),
-                    BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
-                    _ => startDateTime,
-                };
-            }*/
-
             var proratingResult = plan.FigureOutProrating(DateTime.UtcNow.Date, new StripeProratingService(), participationObject, startDateTime, currentAccount,
                 msgs);
+            if (proratingResult.ShouldWeBeProratingToday)
+            {
+                var checkoutDate = DateTime.UtcNow.Date; 
+                var dayDiff = (checkoutDate - (plan.StartDate?.Date ?? checkoutDate)).Days;
+                proratingResult.BillingCycleAnchor = plan.BillingPeriodTypeId switch
+                {
+                    // we will update starting of subscription for this registrant to next cycle during pro-rate
+                    BillingPeriodType.Month => checkoutDate.AddMonths(1).AddDays((dayDiff * -1) + 1),
+                    BillingPeriodType.Week => DateTime.UtcNow.LastDateOfWeek().AddDays(1),
+                    _ => proratingResult.BillingCycleAnchor,
+                };
+            }
             checkoutObject.ProratingResult = proratingResult;
 
             // create the subscription on the stripe account (could be added to main account or connected account)
@@ -278,72 +266,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static void ChargeRegistrantMidPeriod(this Registrant submittedRecord, CheckoutObject checkoutObject, SubscriptionPlanType subscriptionPlanType, WebUser loggedInUser,
-            Account currentAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            if (msgs.IsEmpty()) msgs = new SystemMessages();
-            var participationObject = checkoutObject.ParticipationObject;
-            var registrant = checkoutObject.Registration.GetRegistrant(msgs);
-            var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
-            var billingAccount = checkoutObject.BillingAccount;
-            var masterRegistrant = submittedRecord.IsMaster ? submittedRecord : submittedRecord.GetMasterRegistrant(msgs, dc);
-
-            // we use stripe service for calculating proration amount 
-            var subscriptionPlan = plan;
-            var stripeProratingService = new StripeProratingService();
-            var startDateTime = registrant.GetPlanStartDateUtc(subscriptionPlan, participationObject, msgs);
-            var proratingResult = subscriptionPlan.FigureOutProrating(DateTime.UtcNow.Date, stripeProratingService, participationObject, startDateTime,
-                 currentAccount, msgs);
-            var proratedAmount = proratingResult.ProratingValue.ToString();
-            var caclObj = GetAmountsRequiredToCharge(checkoutObject, decimal.Parse(proratedAmount), msgs, dc);
-
-            BankAccountPurchaseObject bankAccountPurchaseObject = null;
-            CreditCardPurchaseObject creditCardPurchaseObject = null;
-
-            if (checkoutObject.PaymentType == PaymentType.ACH)
-            {
-                bankAccountPurchaseObject = new BankAccountPurchaseObject()
-                {
-                    StripeSourceId = checkoutObject.StripeSourceId,
-                };
-            }
-            else if (checkoutObject.PaymentType == PaymentType.CreditCard)
-            {
-                creditCardPurchaseObject = new CreditCardPurchaseObject()
-                {
-                    StripeSourceId = checkoutObject.StripeSourceId,
-                };
-            }
-
-            AccountService.ProcessPayment(
-                checkoutObject: new CheckoutObject()
-                {
-                    OverrideAmount = caclObj.Item1,
-                    AmountPaidByParent = caclObj.Item1,
-                    AmountReceivedByProvider = caclObj.Item2,
-                    IsAmountProRated = true,
-                    ConvenienceFeeOverrideAmount = caclObj.Item3,
-                    PaymentTypeFeeOverrideAmount = caclObj.Item4,
-                    PayingAccount = checkoutObject.PayingAccount,
-                    BillingAccount = billingAccount,
-                    CreditCardPurchaseObject = creditCardPurchaseObject,
-                    BankAccountPurchaseObject = bankAccountPurchaseObject,
-                    SavePaymentInfo = false,
-                    PaymentType = checkoutObject.PaymentType,
-                    PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                    ConvenienceFeePayer = checkoutObject.ConvenienceFeePayer,
-                    CreditCardFeePayer = checkoutObject.CreditCardFeePayer,
-                    Registration = checkoutObject.Registration,
-                    ParticipationObject = participationObject,
-                    MasterRegistrant = masterRegistrant,
-                    Description = "Pro-rating charge on joining mid-period",
-                },
-                loggedInUser: loggedInUser,
-                msgs: msgs,
-                dc: dc);
-        }
-
-        public static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, decimal proratedAmount, SystemMessages msgs = null,
+        private static (decimal, decimal, decimal, decimal) GetAmountsRequiredToCharge(CheckoutObject checkoutObject, decimal proratedAmount, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var calcObj = new FeeCalculationObject(proratedAmount, checkoutObject.BillingAccount, msgs, dc);
@@ -594,9 +517,20 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
-                paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
-                amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
+                if (checkoutObject.IsNotEmpty() && checkoutObject.ProratingResult.ShouldWeBeProratingToday)
+                {
+                    var (amountVal, providerVal, convFee, ccFee) = GetAmountsRequiredToCharge(checkoutObject, 
+                        decimal.Parse(checkoutObject.ProratingResult.ProratingValue.ToString()), msgs, dc);
+                    amount = providerVal;
+                    convenienceFee = convFee;
+                    paymentTypeFee = ccFee;
+                }
+                else
+                {
+                    convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
+                    paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
+                    amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
+                }
 
                 var po = checkoutObject.ParticipationObject;
 
@@ -633,7 +567,7 @@ namespace AfterSchoolLibrary.Services
                 ConvenienceFeesPaidBy = billingAccount.ConvenienceFeesPaidBy,
                 PaymentTypeFee = paymentTypeFee.Value,
                 PaymentTypeFeesPaidBy = billingAccount.CreditCardFeesPaidBy,
-                Amount = amount.Value,
+                Amount = amount ?? 0,
                 TotalPeriods = totalPeriods,
                 PaymentType = checkoutObject.PaymentType,
                 BillingPeriodType = plan.BillingPeriodTypeId,
