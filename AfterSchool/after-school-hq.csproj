@@ -593,6 +593,7 @@
     <Compile Include="Areas\District\Controllers\ProviderController.cs" />
     <Compile Include="Areas\District\Controllers\SchoolController.cs" />
     <Compile Include="Areas\District\Controllers\ServicesController.cs" />
+    <Compile Include="Areas\District\Controllers\TagController.cs" />
     <Compile Include="Areas\District\Controllers\UserController.cs" />
     <Compile Include="Areas\District\DistrictAreaRegistration.cs" />
     <Compile Include="Areas\Org\Assemblers\Activity\EditConfirmationAssembler.cs" />
@@ -726,6 +727,11 @@
     <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
+    <Content Include="Areas\District\Views\Shared\_TagHeader.cshtml" />
+    <Content Include="Areas\District\Views\Shared\_TagManagementHeader.cshtml" />
+    <Content Include="Areas\District\Views\Tag\Activity.cshtml" />
+    <Content Include="Areas\District\Views\Tag\Index.cshtml" />
+    <Content Include="Areas\District\Views\Tag\School.cshtml" />
     <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
@@ -1462,6 +1468,7 @@
     <Content Include="js\blocs.min.js" />
     <Content Include="js\bootstrap.bundle.min.js" />
     <Content Include="js\jquery-3.5.1.min.js" />
+    <Content Include="js\jquery-3.6.3.min.js" />
     <Content Include="js\lazysizes.min.js" />
     <Content Include="js\scrollFX.js" />
     <Content Include="js\universal-parallax.min.js" />

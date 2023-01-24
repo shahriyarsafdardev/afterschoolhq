@@ -1,0 +1,103 @@
+﻿@model List<AvailableTag>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var objectType = (ObjectType)ViewBag.ObjectType;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+@{Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);}
+
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_TagHeader");}
+
+    <div class="panel panel-default">
+        
+        <div class="panel-heading">
+            <h2><i class="s7-smile"></i> Tag Management</h2>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+        
+            @{ Html.RenderPartial("_TagManagementHeader", new ViewDataDictionary {{"objectType", (int)objectType}}); }
+            
+            <div class="table-responsive">
+                <table class="table options-table emoji-option-table" id="tags-table">
+                    <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    
+                    @if (Model.Count > 0)
+                    {
+                        foreach (var tag in Model)
+                        {
+                            <tr class="questionRow">
+                                <td>
+                                    <input type="text" value="@tag.Tag" disabled="disabled" required class="form-control col-sm-3 option"/>
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("AddRemoveTag" , "Tag" , new {Id = tag.ID , objectType = (int)objectType})">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    
+                    <tr class="questionRow" id="tag-1">
+                        <td>
+                            <input type="text" value="" id="tagDescription-1" name="tag" required class="form-control col-sm-3 option" onfocus="this.select()"/>
+                        </td>
+                        <td>
+                            <a class="save" id="save" >Save</a>
+                        </td>
+                        <td>
+                            <a class="remove">Cancel</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="4">
+                            <button type="button" class="btn btn-default" onclick="addRow()">
+                                <i class="s7-plus"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/jquery-3.6.3.min.js" ></script>
+<script>
+
+    $(document).ready(function(){
+              
+        $('body').on('click','.remove', function(){
+           $(this).parent().parent().remove();
+        })
+        
+        $('body').on('click','.save', function(){
+            var tag = $(this).parent().prev().children().val();
+            var objectType = '@((int)objectType)';
+            
+            location.href = `@Url.Action("AddRemoveTag", "tag")?tag=${tag}&objectType=${objectType}`;
+        })
+        
+    });
+    
+    function addRow() {
+        var clonedObject = $("#tag-1").clone();
+        clonedObject.find('#tagDescription-1').val("")
+        clonedObject.insertAfter("#tag-1");
+    }
+    
+</script>
+
+
+

@@ -98,6 +98,7 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Create(dc);
             BackgroundCheck.Create(dc);
             ProviderJotFormSubmission.Create(dc);
+            AvailableTag.Create(dc);
 
             return msgs;
         }
@@ -188,6 +189,7 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Alter(dc);
             BackgroundCheck.Alter(dc);
             ProviderJotFormSubmission.Alter(dc);
+            AvailableTag.Alter(dc);
 
             return msgs;
         }
