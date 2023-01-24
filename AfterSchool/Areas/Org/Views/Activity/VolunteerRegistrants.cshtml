@@ -115,25 +115,14 @@
                 
                 <div class="col-md-3">
                     @if (Model.Activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass)
-                        {
-                            <select id="classes" onchange="changeClass()" class="form-control">
-                                <option value="">View All Dates</option>
-                                @foreach (var instance in Model.ActivitySchedule.GetInSessionInstances())
-                                {
-                                    <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
-                                }
-                            </select>
-                        }
-                    else
                     {
-                        <select id="registrationDate" onchange="changeRegistrationDate()" class="form-control">
+                        <select id="classes" onchange="changeClass()" class="form-control">
                             <option value="">View All Dates</option>
-            
-                            @foreach (var x in registrationDates)
+                            @foreach (var instance in Model.ActivitySchedule.GetInSessionInstances())
                             {
-                                <option value="@(x)" @(Request["registrationDate"]?.Trim() == x ? "selected=\"selected\"" : "") >@x</option>
+                                <option value="@instance.ID">@instance.StartDateTime.ToShortDateTimeString()</option>
                             }
-                        </select>   
+                        </select>
                     }
                 </div>
 

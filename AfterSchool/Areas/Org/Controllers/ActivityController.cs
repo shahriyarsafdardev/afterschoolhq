@@ -205,7 +205,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
             {
-                ViewBag.RegistrationDate = RegistrantActivity.LoadByParticipationObject((int) activity.ID, ParticipationObjectType.Activity, msgs).Select(x => x.CreateDate.Value.ToShortDateString()).Distinct();
                 return View("VolunteerRegistrants", result);
             }
 
