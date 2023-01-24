@@ -517,21 +517,9 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                if (checkoutObject.IsNotEmpty() && checkoutObject.ProratingResult.ShouldWeBeProratingToday)
-                {
-                    var (amountVal, providerVal, convFee, ccFee) = GetAmountsRequiredToCharge(checkoutObject, 
-                        decimal.Parse(checkoutObject.ProratingResult.ProratingValue.ToString()), msgs, dc);
-                    amount = providerVal;
-                    convenienceFee = convFee;
-                    paymentTypeFee = ccFee;
-                }
-                else
-                {
-                    convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
-                    paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
-                    amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
-                }
-
+                convenienceFee = checkoutObject.GetSubscriptionCostConvenienceFee(msgs, dc);
+                paymentTypeFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc);
+                amount = checkoutObject.SubscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc);
                 var po = checkoutObject.ParticipationObject;
 
                 if (po.Schedule.IsNotEmpty() && !po.Schedule.IsOngoing && po.Schedule.EndDate.HasValue)
