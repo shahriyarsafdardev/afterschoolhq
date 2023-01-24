@@ -66,8 +66,6 @@ namespace AfterSchoolLibrary.Services
 
         }
 
-     
-
         public static void NotifyStudents(int surveyResponseId, int registrantId, int surveyRequestId, string code, int codeId, SystemMessages msgs)
         {
             EmailHelper.SendSurveyEmail(surveyResponseId: surveyResponseId,
@@ -99,6 +97,11 @@ namespace AfterSchoolLibrary.Services
             return FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
+        }
+
+        public static string GetRegistrantName(this SurveyResponse surveyResponse)
+        {
+            return BasePerson.BuildDisplayName(surveyResponse.RegistrantFirstName, surveyResponse.RegistrantLastName);
         }
 
 
