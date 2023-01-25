@@ -5032,7 +5032,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan,
             PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, plan.CostPerPeriod.Value, msgs, dc);
+            return billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, plan.GetCostPerPeriodPerPerson(msgs, dc), msgs, dc);
         }
 
         // TODO: Needs review
