@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -35,6 +36,7 @@ namespace AfterSchoolLibrary.Models
         public bool SavePaymentInfo { get; set; }
         public PaymentType PaymentType { get; set; }
         public List<DateTime> SelectedDates { get; set; }
+        public ProratingCalculationHelper ProratingCalculation { get; set; }
 
 
         /// <summary>
