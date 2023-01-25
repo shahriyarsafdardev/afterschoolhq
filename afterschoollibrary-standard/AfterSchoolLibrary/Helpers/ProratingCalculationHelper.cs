@@ -186,7 +186,6 @@ namespace AfterSchoolLibrary.Helpers
         {
             if (paymentType == PaymentType.ACH)
                 StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, -ProratedCCFee.Value, "Adjustments for pro-rated subscription coupon", null, msgs);
-
         }
 
     }
