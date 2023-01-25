@@ -112,6 +112,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["tag"], tag);
             dq.Criterias.Add(ObjectMap["ObjectType"], objectType);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.GetCount(msgs) > 0;
         }
 
