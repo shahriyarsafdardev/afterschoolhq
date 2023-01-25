@@ -166,18 +166,14 @@ namespace AfterSchoolLibrary.Helpers
         }
 
 
-        public static SystemMessages SendStudentImportConfirmed(CheckoutObject checkoutObject, WebUser loggedInUser, DatabaseConnection dc = null)
+        public static SystemMessages SendStudentImportConfirmed(CheckoutObject checkoutObject, string parentFirstName, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            string parentFirstName = checkoutObject.PayingAccount.Name;
-
-
 
             var model = new NameValueCollection
             {
-                //{"FirstName", checkoutObject.MasterRegistrant.FirstName},
                 { "FirstName", parentFirstName},
-                { "Provider", checkoutObject.ParticipationObject.Name},
+                { "Provider", checkoutObject.BillingAccount.Name},
             };
 
             var subject = $"Final step needed to complete your student’s registration in {checkoutObject.ParticipationObject.Name}";

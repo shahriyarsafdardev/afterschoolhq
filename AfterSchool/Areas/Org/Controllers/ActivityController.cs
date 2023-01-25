@@ -3544,7 +3544,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             SaveAnswersToRegistrantsDuringImport(headers, questions, reader, createParentAccounts, student, parentRegistrant, parent2Registrant, registration, submittedRecord, currentUser, amsgs, adc);
 
                             CompleteRegistration(createParentAccounts, parentAccount, student, ref registration, ref submittedRecord, 
-                                period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
+                                period, participationObject, selectedAssignmentType, currentUser, parentRegistrant, amsgs, adc);
                         }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -3719,7 +3719,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        private void CompleteRegistration(bool createParentAccounts, Account parentAccount, Registrant student, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+        private void CompleteRegistration(bool createParentAccounts, Account parentAccount, Registrant student, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, Registrant parentRegistrant, SystemMessages amsgs, DatabaseConnection adc)
         {
             if (createParentAccounts)
             {
@@ -3737,22 +3737,31 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs: amsgs,
                         dc: adc);
 
+                    var checkoutObject = new CheckoutObject
+                    {
+                        BillingAccount = participationObject.OwnerAccount,
+                        PayingAccount = parentAccount,
+                        NumberOfSeats = 1,
+                        ParticipationObject = participationObject,
+                        Registration = registration,
+                        MasterRegistrant = student,
+                        SubscriptionPlan = null,
+                        SelectedDates = new List<DateTime>(),
+                    };
+
                     AccountService.ProcessRegistrationWithoutPayment(
-                        new CheckoutObject
-                        {
-                            BillingAccount = participationObject.OwnerAccount,
-                            PayingAccount = parentAccount,
-                            NumberOfSeats = 1,
-                            ParticipationObject = participationObject,
-                            Registration = registration,
-                            MasterRegistrant = student,
-                            SubscriptionPlan = null,
-                            SelectedDates = new List<DateTime>(),
-                        },
-                        true,
+                        checkoutObject,
+                        false,
                         currentUser,
                         amsgs,
                         adc);
+
+                    if (amsgs.HasNoErrors())
+                    {
+                        DatabaseConnection dc = new DatabaseConnection();
+                        EmailHelper.SendStudentImportConfirmed(checkoutObject, parentRegistrant.FirstName, dc);
+                    }
+
                 }
                 else
                 {
@@ -3769,22 +3778,30 @@ namespace AfterSchool.Areas.Org.Controllers
                         amsgs,
                         adc);
 
+                    var checkoutObject = new CheckoutObject
+                    {
+                        BillingAccount = participationObject.OwnerAccount,
+                        PayingAccount = parentAccount,
+                        NumberOfSeats = 1,
+                        ParticipationObject = participationObject,
+                        Registration = registration,
+                        MasterRegistrant = student,
+                        SubscriptionPlan = null,
+                        SelectedDates = new List<DateTime>(),
+                    };
+
                     AccountService.ProcessRegistrationWithoutPayment(
-                        new CheckoutObject
-                        {
-                            BillingAccount = participationObject.OwnerAccount,
-                            PayingAccount = parentAccount,
-                            NumberOfSeats = 1,
-                            ParticipationObject = participationObject,
-                            Registration = registration,
-                            MasterRegistrant = student,
-                            SubscriptionPlan = null,
-                            SelectedDates = new List<DateTime>(),
-                        },
-                        true,
+                        checkoutObject,
+                        false,
                         currentUser,
                         amsgs,
                         adc);
+
+                    if (amsgs.HasNoErrors())
+                    {
+                        DatabaseConnection dc = new DatabaseConnection();
+                        EmailHelper.SendStudentImportConfirmed(checkoutObject, parentRegistrant.FirstName, dc);
+                    }
                 }
             }
             else
