@@ -23,13 +23,17 @@ namespace AfterSchoolLibrary.Helpers
         private decimal? ProratedCCFee { get; set; }
         private decimal? ProratedAmountWithoutCCFee { get; set; }
 
-        public ProratingCalculationHelper(CheckoutObject checkoutObject, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc) 
+        public ProratingCalculationHelper(SubscriptionPlan plan, ParticipationObject participationObject, Models.Account billingAccount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc = null) 
         {
             IsProrated = false;
             AnchorDate = new DateTime?();
             StartDate = new DateTime?();
             EndDate = new DateTime?();
-            CalculateProration(checkoutObject, customer, msgs, dc);
+            PlatformFeePercent = new decimal?();
+            PredictedStripeCharge = new decimal?();
+            ProratedCCFee = new decimal?();
+            ProratedAmountWithoutCCFee = new decimal?();
+            CalculateProration(plan, participationObject, billingAccount, paymentType, msgs, dc);
         }
 
         public DateTime GetAnchorDate()
@@ -72,12 +76,9 @@ namespace AfterSchoolLibrary.Helpers
             return IsProrated;
         }
 
-        private void CalculateProration(CheckoutObject checkoutObject, Stripe.Customer customer, SystemMessages msgs, DatabaseConnection dc)
+        private void CalculateProration(SubscriptionPlan plan, ParticipationObject participationObject, Models.Account billingAccount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var plan = checkoutObject.SubscriptionPlan;
             var subscriptionPlanType = plan.PlanTypeId;
-            var participationObject = checkoutObject.ParticipationObject;
-            var billingAccount = checkoutObject.BillingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
 
             // need to check if we need to apply pro-rating
@@ -89,7 +90,7 @@ namespace AfterSchoolLibrary.Helpers
                 //loading variables
                 // understand when first charge happens
                 // if the user is checking out on a charge date
-                // how many months are left in the subscription
+                // how many periods are left in the subscription
                 // TODO: Consider weekly subscriptions
                 var firstChargeDateProviderTimeZone = (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? plan.StartDate.Value : participationObject.StartDate.Value).Date;
                 var lastActivityDateProviderTimeZone = participationObject.EndDate.Value.Date;
@@ -98,7 +99,7 @@ namespace AfterSchoolLibrary.Helpers
                 var checkoutTimeProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(nowUtc);
                 var checkoutDateProviderTimeZone = checkoutTimeProviderTimeZone.Date;
                 var isCheckoutAfterFirstChargeDate = checkoutDateProviderTimeZone.IsAfter(firstChargeDateProviderTimeZone);
-                var lengthOfSubscriptionFromBeginning = 1; // at least one month if last activity date is after first charge date
+                var lengthOfSubscriptionFromBeginning = 1; // at least one period if last activity date is after first charge date
                 var chargeDates = new List<DateTime>();
                 var lengthOfSubscriptionFromToday = 0;
                 var isCheckoutOnAnyChargeDate = false;
@@ -108,8 +109,16 @@ namespace AfterSchoolLibrary.Helpers
                 var isCurrentlyBeforeLastActivityDate = firstChargeDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
                 while (isCurrentlyBeforeLastActivityDate)
                 {
-                    if (firstChargeDateProviderTimeZone.AddMonths(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month && firstChargeDateProviderTimeZone.AddMonths(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
                         lengthOfSubscriptionFromBeginning++;
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && firstChargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                        lengthOfSubscriptionFromBeginning++;
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && firstChargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning * 2).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                        lengthOfSubscriptionFromBeginning += 1;
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && firstChargeDateProviderTimeZone.AddDays(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                        lengthOfSubscriptionFromBeginning += 1;
+                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && firstChargeDateProviderTimeZone.AddYears(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                        lengthOfSubscriptionFromBeginning += 1;
                     else
                         isCurrentlyBeforeLastActivityDate = false;
                 }
@@ -126,13 +135,40 @@ namespace AfterSchoolLibrary.Helpers
                     lengthOfSubscriptionFromToday = 1; // at least one month then
                     while (isCurrentlyBeforeLastActivityDate)
                     {
-                        if (nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
+
+                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month && nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                            lengthOfSubscriptionFromToday++;
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && nextChargeDate.Value.AddWeeks(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                            lengthOfSubscriptionFromToday++;
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && nextChargeDate.Value.AddBiWeeks(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                            lengthOfSubscriptionFromToday++;
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && nextChargeDate.Value.AddDays(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                            lengthOfSubscriptionFromToday++;
+                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && nextChargeDate.Value.AddYears(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
                             lengthOfSubscriptionFromToday++;
                         else
                             isCurrentlyBeforeLastActivityDate = false;
                     }
 
-                    EndDate = nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday); // end the subscription exactly x months after activity start date (if it needs to end)
+                    // end the subscription exactly x periods after activity start date (if it needs to end)
+                    switch (plan.BillingPeriodTypeId)
+                    {
+                        case BillingPeriodType.Month:
+                            EndDate = nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday);
+                            break;
+                        case BillingPeriodType.Week:
+                            EndDate = nextChargeDate.Value.AddWeeks(lengthOfSubscriptionFromToday);
+                            break;
+                        case BillingPeriodType.TwoWeeks:
+                            EndDate = nextChargeDate.Value.AddBiWeeks(lengthOfSubscriptionFromToday);
+                            break;
+                        case BillingPeriodType.Day:
+                            EndDate = nextChargeDate.Value.AddDays(lengthOfSubscriptionFromToday);
+                            break;
+                        case BillingPeriodType.Year:
+                            EndDate = nextChargeDate.Value.AddYears(lengthOfSubscriptionFromToday);
+                            break;
+                    }
                 }
 
                 // needs prorating
@@ -149,9 +185,9 @@ namespace AfterSchoolLibrary.Helpers
                     ProratedAmountWithoutCCFee = PredictedStripeCharge - ProratedCCFee; //how much is the "original" charge before cc fee
 
                     // get percent that subscription convenience fee should be
-                    PlatformFeePercent = useStripeConnectedAccount
-                    ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, ProratedAmountWithoutCCFee.Value, msgs, dc)
-                        : new decimal?();
+                    PlatformFeePercent = useStripeConnectedAccount ?
+                                            billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, ProratedAmountWithoutCCFee.Value, msgs, dc)
+                                            : new decimal?();
                     
 
                     IsProrated = true;
@@ -159,14 +195,10 @@ namespace AfterSchoolLibrary.Helpers
             }
         }
 
-        public void ProcessCustomerBalanceTransactionAsCoupon(CheckoutObject checkoutObject, Stripe.Customer customer, SystemMessages msgs)
+        public void ProcessCustomerBalanceTransactionAsCoupon(PaymentType paymentType, Stripe.Customer customer, SystemMessages msgs)
         {
-            if (checkoutObject.PaymentType == PaymentType.ACH)
-            {
-                // coupons don't work when prorating
-                // stripeCouponId = null;
+            if (paymentType == PaymentType.ACH)
                 StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, -ProratedCCFee.Value, "Adjustments for pro-rated subscription coupon", null, msgs);
-            }
 
         }
 
