@@ -135,7 +135,6 @@ namespace AfterSchoolLibrary.Helpers
                     lengthOfSubscriptionFromToday = 1; // at least one month then
                     while (isCurrentlyBeforeLastActivityDate)
                     {
-
                         if (plan.BillingPeriodTypeId == BillingPeriodType.Month && nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
                             lengthOfSubscriptionFromToday++;
                         else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && nextChargeDate.Value.AddWeeks(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
