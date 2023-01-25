@@ -76,6 +76,50 @@ namespace AfterSchoolLibrary.Helpers
             return IsProrated;
         }
 
+        public static int NumberOfPeriodsForSubscription(SubscriptionPlan plan, DateTime chargeDateProviderTimeZone, DateTime lastActivityDateProviderTimeZone)
+        {
+            var lengthOfSubscriptionFromBeginning = 1;
+            var isCurrentlyBeforeLastActivityDate = chargeDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
+
+            while (isCurrentlyBeforeLastActivityDate)
+            {
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month && chargeDateProviderTimeZone.AddMonths(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscriptionFromBeginning++;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && chargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscriptionFromBeginning++;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && chargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning * 2).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscriptionFromBeginning += 1;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && chargeDateProviderTimeZone.AddDays(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscriptionFromBeginning += 1;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && chargeDateProviderTimeZone.AddYears(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscriptionFromBeginning += 1;
+                else
+                    isCurrentlyBeforeLastActivityDate = false;
+            }
+
+            return lengthOfSubscriptionFromBeginning;
+        }
+
+        public static DateTime? GetEndDateFromNumberOfPeriods(SubscriptionPlan plan, DateTime chargeDate, int numberOfPeriods)
+        {
+            // end the subscription exactly x periods after activity start date (if it needs to end)
+            switch (plan.BillingPeriodTypeId)
+            {
+                case BillingPeriodType.Month:
+                    return chargeDate.AddMonths(numberOfPeriods);
+                case BillingPeriodType.Week:
+                    return chargeDate.AddWeeks(numberOfPeriods);
+                case BillingPeriodType.TwoWeeks:
+                    return chargeDate.AddBiWeeks(numberOfPeriods);
+                case BillingPeriodType.Day:
+                    return chargeDate.AddDays(numberOfPeriods);
+                case BillingPeriodType.Year:
+                    return chargeDate.AddYears(numberOfPeriods);
+            }
+
+            return null;
+        }
+
         private void CalculateProration(SubscriptionPlan plan, ParticipationObject participationObject, Models.Account billingAccount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var subscriptionPlanType = plan.PlanTypeId;
@@ -98,77 +142,21 @@ namespace AfterSchoolLibrary.Helpers
                 var nowUtc = DateTime.UtcNow;
                 var checkoutTimeProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(nowUtc);
                 var checkoutDateProviderTimeZone = checkoutTimeProviderTimeZone.Date;
-                var isCheckoutAfterFirstChargeDate = checkoutDateProviderTimeZone.IsAfter(firstChargeDateProviderTimeZone);
-                var lengthOfSubscriptionFromBeginning = 1; // at least one period if last activity date is after first charge date
                 var chargeDates = new List<DateTime>();
-                var lengthOfSubscriptionFromToday = 0;
                 var isCheckoutOnAnyChargeDate = false;
                 var nextChargeDate = new DateTime?();
 
-                // get months between first charge and activity end date
-                var isCurrentlyBeforeLastActivityDate = firstChargeDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
-                while (isCurrentlyBeforeLastActivityDate)
-                {
-                    if (plan.BillingPeriodTypeId == BillingPeriodType.Month && firstChargeDateProviderTimeZone.AddMonths(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning++;
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && firstChargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning++;
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && firstChargeDateProviderTimeZone.AddWeeks(lengthOfSubscriptionFromBeginning * 2).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning += 1;
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && firstChargeDateProviderTimeZone.AddDays(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning += 1;
-                    else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && firstChargeDateProviderTimeZone.AddYears(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning += 1;
-                    else
-                        isCurrentlyBeforeLastActivityDate = false;
-                }
+                var lengthOfSubscriptionFromBeginning = NumberOfPeriodsForSubscription(plan, firstChargeDateProviderTimeZone, lastActivityDateProviderTimeZone);                
 
                 for (var i = 0; i < lengthOfSubscriptionFromBeginning; i++)
                     chargeDates.Add(firstChargeDateProviderTimeZone.AddMonths(i));
 
                 isCheckoutOnAnyChargeDate = chargeDates.Any(chargeDate => chargeDate == checkoutDateProviderTimeZone);
-                isCurrentlyBeforeLastActivityDate = checkoutDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
-                nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));
+                nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));               
+                var lengthOfSubscriptionFromToday = NumberOfPeriodsForSubscription(plan, checkoutDateProviderTimeZone, lastActivityDateProviderTimeZone);
 
-                if (isCurrentlyBeforeLastActivityDate)
-                {
-                    lengthOfSubscriptionFromToday = 1; // at least one month then
-                    while (isCurrentlyBeforeLastActivityDate)
-                    {
-                        if (plan.BillingPeriodTypeId == BillingPeriodType.Month && nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && nextChargeDate.Value.AddWeeks(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && nextChargeDate.Value.AddBiWeeks(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && nextChargeDate.Value.AddDays(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && nextChargeDate.Value.AddYears(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else
-                            isCurrentlyBeforeLastActivityDate = false;
-                    }
-
-                    // end the subscription exactly x periods after activity start date (if it needs to end)
-                    switch (plan.BillingPeriodTypeId)
-                    {
-                        case BillingPeriodType.Month:
-                            EndDate = nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday);
-                            break;
-                        case BillingPeriodType.Week:
-                            EndDate = nextChargeDate.Value.AddWeeks(lengthOfSubscriptionFromToday);
-                            break;
-                        case BillingPeriodType.TwoWeeks:
-                            EndDate = nextChargeDate.Value.AddBiWeeks(lengthOfSubscriptionFromToday);
-                            break;
-                        case BillingPeriodType.Day:
-                            EndDate = nextChargeDate.Value.AddDays(lengthOfSubscriptionFromToday);
-                            break;
-                        case BillingPeriodType.Year:
-                            EndDate = nextChargeDate.Value.AddYears(lengthOfSubscriptionFromToday);
-                            break;
-                    }
-                }
+                if (nextChargeDate.HasValue)
+                    EndDate = GetEndDateFromNumberOfPeriods(plan, nextChargeDate.Value, lengthOfSubscriptionFromToday);
 
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date
