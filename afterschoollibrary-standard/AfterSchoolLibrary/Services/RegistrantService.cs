@@ -199,105 +199,31 @@ namespace AfterSchoolLibrary.Services
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
                 : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
-            var (stripeCouponId, stripeCouponValue) = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-
-            // need to check if we need to apply pro-rating
-            var isSubscription = subscriptionPlanType == SubscriptionPlanType.Subscription;
-            var isOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
-            var isProrated = false;
+            var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+            var proratingCalculation = new ProratingCalculationHelper(checkoutObject, customer, msgs, dc);
             var anchorDate = new DateTime?();
 
-            if (isSubscription && !isOnCheckout)
+            if (proratingCalculation.GetIsProrated())
             {
-                //loading variables
-                // understand when first charge happens
-                // if the user is checking out on a charge date
-                // how many months are left in the subscription
-                // TODO: Consider weekly subscriptions
-                var firstChargeDateProviderTimeZone = (plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? plan.StartDate.Value : participationObject.StartDate.Value).Date;
-                var lastActivityDateProviderTimeZone = participationObject.EndDate.Value.Date;
+                metaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
+                metaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
+                metaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
 
-                var nowUtc = DateTime.UtcNow;
-                var checkoutTimeProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(nowUtc);
-                var checkoutDateProviderTimeZone = checkoutTimeProviderTimeZone.Date;
-                var isCheckoutAfterFirstChargeDate = checkoutDateProviderTimeZone.IsAfter(firstChargeDateProviderTimeZone);
-                var lengthOfSubscriptionFromBeginning = 1; // at least one month if last activity date is after first charge date
-                var chargeDates = new List<DateTime>();
-                var lengthOfSubscriptionFromToday = 0;
-                var isCheckoutOnAnyChargeDate = false;
-                var nextChargeDate = new DateTime?();
+                startDateTime = proratingCalculation.GetStartDate();
+                endDateTime = proratingCalculation.GetEndDate();
+                anchorDate = proratingCalculation.GetAnchorDate();
+                platformFeePercent = proratingCalculation.GetPlatformFeePercent();
 
-                // get months between first charge and activity end date
-                var isCurrentlyBeforeLastActivityDate = firstChargeDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
-                while (isCurrentlyBeforeLastActivityDate)
-                {
-                    if (firstChargeDateProviderTimeZone.AddMonths(lengthOfSubscriptionFromBeginning).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                        lengthOfSubscriptionFromBeginning++;
-                    else
-                        isCurrentlyBeforeLastActivityDate = false;
-                }
-
-                for (var i = 0; i < lengthOfSubscriptionFromBeginning; i++)
-                    chargeDates.Add(firstChargeDateProviderTimeZone.AddMonths(i));
-
-                isCheckoutOnAnyChargeDate = chargeDates.Any(chargeDate => chargeDate == checkoutDateProviderTimeZone);
-                isCurrentlyBeforeLastActivityDate = checkoutDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
-                nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));
-
-                if (isCurrentlyBeforeLastActivityDate)
-                {
-                    lengthOfSubscriptionFromToday = 1; // at least one month then
-                    while (isCurrentlyBeforeLastActivityDate)
-                    {
-                        if (nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday).IsOnOrBefore(lastActivityDateProviderTimeZone))
-                            lengthOfSubscriptionFromToday++;
-                        else
-                            isCurrentlyBeforeLastActivityDate = false;
-                    }
-
-                    endDateTime = nextChargeDate.Value.AddMonths(lengthOfSubscriptionFromToday); // end the subscription exactly x months after activity start date (if it needs to end)
-                }
-
-                // needs prorating
-                // time to prorate if the checkout date is after the billing start date
-                // TODO: need to check if it is after the first month. If it's after the next billing date it should also prorate
-                if (!isCheckoutOnAnyChargeDate && lengthOfSubscriptionFromToday > 0)
-                {
-                    var subscriptionStoredCost = plan.GetTotalCostWithFees(participationObject.OwnerAccount, msgs, dc);
-
-                    // var dayDiff = (checkoutDateProviderTimeZone - firstChargeDateProviderTimeZone).Days; // difference between the days of the month, for instance if it is the 5th, and the start date is the 1st, then this should be 4, no matter what month it is.
-                    anchorDate = nextChargeDate; // anchor date has to be in the future. It should be on the same day as the period start or the activity start
-                    startDateTime = DateTime.UtcNow.AddSeconds(1); // start the subscription right now
-
-                    var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(anchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
-                    var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
-                    var listPrice = predictedStripeCharge - ccFeeForProratedCharge; //how much is the "original" charge before cc fee
-
-                    // get percent that subscription convenience fee should be
-                    platformFeePercent = useStripeConnectedAccount
-                        ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, listPrice, msgs, dc)
-                        : new decimal?();
-
-                    if (checkoutObject.PaymentType == PaymentType.ACH)
-                    {
-                        // coupons don't work when prorating
-                        stripeCouponId = null;
-                        StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, -ccFeeForProratedCharge, "Adjustments for pro-rated subscription coupon", null, msgs);
-                    }
-
-                    isProrated = true;
-
-                    metaData.Add("Prorated Charge With CC Fee", predictedStripeCharge.ToCurrency());
-                    metaData.Add("Prorated CC Fee", ccFeeForProratedCharge.ToCurrency());
-                    metaData.Add("Prorated Amount Without CC Fee", listPrice.ToCurrency());
-                }
+                // coupons don't apply to prorated charges in stripe, so have to use balance transaction
+                if (msgs.HasNoErrors())
+                    proratingCalculation.ProcessCustomerBalanceTransactionAsCoupon(checkoutObject, customer, msgs);
             }
 
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
                 planId: plan.StripePlanId,
-                isProrated: isProrated,
+                isProrated: proratingCalculation.GetIsProrated(),
                 sourceId: sourceId,
                 platformFeePercent: platformFeePercent,
                 stripeAccountId: stripeAccountId,
@@ -323,6 +249,8 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
+
+            checkoutObject.ProratingCalculation = proratingCalculation;
         }
 
         /// <summary>
@@ -336,7 +264,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static (string, decimal) GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId,
+        private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId,
             SystemMessages msgs, DatabaseConnection dc)
         {
             var ccFee = plan.GetCreditCardFee(billingAccount, msgs, dc);
@@ -345,7 +273,7 @@ namespace AfterSchoolLibrary.Services
             return GetACHCoupon(checkoutObject, plan, totalCost, ccFee, stripeAccountId, msgs, dc);
         }
 
-        private static (string, decimal) GetACHCoupon(CheckoutObject checkoutObject, SubscriptionPlan plan, decimal totalCost, decimal ccFee, string stripeAccountId,
+        private static string GetACHCoupon(CheckoutObject checkoutObject, SubscriptionPlan plan, decimal totalCost, decimal ccFee, string stripeAccountId,
             SystemMessages msgs, DatabaseConnection dc)
         {
             if (checkoutObject.PaymentType == PaymentType.ACH)
@@ -360,10 +288,10 @@ namespace AfterSchoolLibrary.Services
                     stripeAccountId: stripeAccountId,
                     msgs: msgs);
 
-                return (coupon.Id, ccFee);
+                return coupon.Id;
             }
 
-            return (null, 0);
+            return null;
         }
 
         public static bool HasActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
