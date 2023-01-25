@@ -182,6 +182,18 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
+            var metaData = new Dictionary<string, string>
+                            {
+                                {"BillingAccountUid", billingAccount.Uid.ToString()},
+                                {"BillingAccountName", billingAccount.Name},
+                                {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                                {"PayingAccountName", purchasingAccount.Name},
+                                {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+                                {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
+                                {"SourceId", sourceId},
+                                {"ApprovedBy", loggedInUser.Uid.ToString()},
+                                {"DateRequested", DateTime.Now.ToShortDateTimeString()},
+                            };
 
             var platformFeePercent = useStripeConnectedAccount
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
@@ -260,7 +272,6 @@ namespace AfterSchoolLibrary.Services
                     var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(anchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
                     var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
                     var listPrice = predictedStripeCharge - ccFeeForProratedCharge; //how much is the "original" charge before cc fee
-                    var achCouponAmount = ccFeeForProratedCharge; // how much should the ACH coupon be for
 
                     // get percent that subscription convenience fee should be
                     platformFeePercent = useStripeConnectedAccount
@@ -269,13 +280,16 @@ namespace AfterSchoolLibrary.Services
 
                     if (checkoutObject.PaymentType == PaymentType.ACH)
                     {
-                        // there is a problem here because it would use this same coupon for all charges going forward
-                        var (proratedCouponId, proratedCouponValue) = GetACHCoupon(checkoutObject, plan, predictedStripeCharge, ccFeeForProratedCharge, null, msgs, dc);
-
-                        StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, stripeCouponValue - proratedCouponValue, "Adjustments for pro-rated subscription coupon", null, msgs);
+                        // coupons don't work when prorating
+                        stripeCouponId = null;
+                        StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, -ccFeeForProratedCharge, "Adjustments for pro-rated subscription coupon", null, msgs);
                     }
 
                     isProrated = true;
+
+                    metaData.Add("Prorated Charge With CC Fee", predictedStripeCharge.ToCurrency());
+                    metaData.Add("Prorated CC Fee", ccFeeForProratedCharge.ToCurrency());
+                    metaData.Add("Prorated Amount Without CC Fee", listPrice.ToCurrency());
                 }
             }
 
@@ -291,18 +305,7 @@ namespace AfterSchoolLibrary.Services
                 endDate: endDateTime,
                 billingCycleAnchor: anchorDate,
                 stripeCouponId: stripeCouponId,
-                metaData: new Dictionary<string, string>
-                {
-                    {"BillingAccountUid", billingAccount.Uid.ToString()},
-                    {"BillingAccountName", billingAccount.Name},
-                    {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                    {"PayingAccountName", purchasingAccount.Name},
-                    {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
-                    {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
-                    {"SourceId", sourceId},
-                    {"ApprovedBy", loggedInUser.Uid.ToString()},
-                    {"DateRequested", DateTime.Now.ToShortDateTimeString()},
-                },
+                metaData: metaData,
                 msgs: msgs);
 
             if (msgs.HasErrors())
