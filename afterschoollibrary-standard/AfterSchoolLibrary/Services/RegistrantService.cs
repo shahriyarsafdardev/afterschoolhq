@@ -187,12 +187,13 @@ namespace AfterSchoolLibrary.Services
                 ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
                 : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
-            var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+            var (stripeCouponId, stripeCouponValue) = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
 
             // need to check if we need to apply pro-rating
             var isSubscription = subscriptionPlanType == SubscriptionPlanType.Subscription;
             var isOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
             var isProrated = false;
+            var anchorDate = new DateTime?();
 
             if (isSubscription && !isOnCheckout)
             {
@@ -210,7 +211,6 @@ namespace AfterSchoolLibrary.Services
                 var isCheckoutAfterFirstChargeDate = checkoutDateProviderTimeZone.IsAfter(firstChargeDateProviderTimeZone);
                 var lengthOfSubscriptionFromBeginning = 1; // at least one month if last activity date is after first charge date
                 var chargeDates = new List<DateTime>();
-                var anchorDate = new DateTime?();
                 var lengthOfSubscriptionFromToday = 0;
                 var isCheckoutOnAnyChargeDate = false;
                 var nextChargeDate = new DateTime?();
@@ -224,8 +224,6 @@ namespace AfterSchoolLibrary.Services
                     else
                         isCurrentlyBeforeLastActivityDate = false;
                 }
-
-                chargeDates.Add(firstChargeDateProviderTimeZone);
 
                 for (var i = 0; i < lengthOfSubscriptionFromBeginning; i++)
                     chargeDates.Add(firstChargeDateProviderTimeZone.AddMonths(i));
@@ -257,7 +255,7 @@ namespace AfterSchoolLibrary.Services
 
                     // var dayDiff = (checkoutDateProviderTimeZone - firstChargeDateProviderTimeZone).Days; // difference between the days of the month, for instance if it is the 5th, and the start date is the 1st, then this should be 4, no matter what month it is.
                     anchorDate = nextChargeDate; // anchor date has to be in the future. It should be on the same day as the period start or the activity start
-                    startDateTime = DateTime.UtcNow.AddSeconds(10); // start the subscription right now
+                    startDateTime = DateTime.UtcNow.AddSeconds(1); // start the subscription right now
 
                     var predictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(anchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
                     var ccFeeForProratedCharge = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(predictedStripeCharge); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
@@ -269,8 +267,13 @@ namespace AfterSchoolLibrary.Services
                         ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, listPrice, msgs, dc)
                         : new decimal?();
 
-                    // there is a problem here because it would use this same coupon for all charges going forward
-                    stripeCouponId = GetACHCoupon(checkoutObject, plan, predictedStripeCharge, ccFeeForProratedCharge, null, msgs, dc);
+                    if (checkoutObject.PaymentType == PaymentType.ACH)
+                    {
+                        // there is a problem here because it would use this same coupon for all charges going forward
+                        var (proratedCouponId, proratedCouponValue) = GetACHCoupon(checkoutObject, plan, predictedStripeCharge, ccFeeForProratedCharge, null, msgs, dc);
+
+                        StripeHelper.GetStripeHelperConnectAccount().CreateCustomerBalanceTransaction(customer.Id, stripeCouponValue - proratedCouponValue, "Adjustments for pro-rated subscription coupon", null, msgs);
+                    }
 
                     isProrated = true;
                 }
@@ -330,7 +333,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        private static string GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId,
+        private static (string, decimal) GetACHCoupon(CheckoutObject checkoutObject, Account billingAccount, SubscriptionPlan plan, string stripeAccountId,
             SystemMessages msgs, DatabaseConnection dc)
         {
             var ccFee = plan.GetCreditCardFee(billingAccount, msgs, dc);
@@ -339,7 +342,7 @@ namespace AfterSchoolLibrary.Services
             return GetACHCoupon(checkoutObject, plan, totalCost, ccFee, stripeAccountId, msgs, dc);
         }
 
-        private static string GetACHCoupon(CheckoutObject checkoutObject, SubscriptionPlan plan, decimal totalCost, decimal ccFee, string stripeAccountId,
+        private static (string, decimal) GetACHCoupon(CheckoutObject checkoutObject, SubscriptionPlan plan, decimal totalCost, decimal ccFee, string stripeAccountId,
             SystemMessages msgs, DatabaseConnection dc)
         {
             if (checkoutObject.PaymentType == PaymentType.ACH)
@@ -354,10 +357,10 @@ namespace AfterSchoolLibrary.Services
                     stripeAccountId: stripeAccountId,
                     msgs: msgs);
 
-                return coupon.Id;
+                return (coupon.Id, ccFee);
             }
 
-            return null;
+            return (null, 0);
         }
 
         public static bool HasActiveSubscription(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs = null,
