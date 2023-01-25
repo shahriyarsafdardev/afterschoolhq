@@ -173,16 +173,16 @@ namespace AfterSchoolLibrary.Services
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
-            var participationObject = checkoutObject.ParticipationObject;
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
+            var participationObject = checkoutObject.ParticipationObject;
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = plan.GetPlanEndDateForRegistrantSubscriptionUtc(startDateTime, checkoutObject.ParticipationObject, msgs, dc);
-            var metaData = new Dictionary<string, string>
+            var stripeMetaData = new Dictionary<string, string>
                             {
                                 {"BillingAccountUid", billingAccount.Uid.ToString()},
                                 {"BillingAccountName", billingAccount.Name},
@@ -200,14 +200,14 @@ namespace AfterSchoolLibrary.Services
                 : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
             var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-            var proratingCalculation = new ProratingCalculationHelper(checkoutObject, customer, msgs, dc);
             var anchorDate = new DateTime?();
+            var proratingCalculation = new ProratingCalculationHelper(plan, participationObject, billingAccount, checkoutObject.PaymentType, msgs, dc);
 
             if (proratingCalculation.GetIsProrated())
             {
-                metaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
-                metaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
-                metaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
+                stripeMetaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
+                stripeMetaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
+                stripeMetaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
 
                 startDateTime = proratingCalculation.GetStartDate();
                 endDateTime = proratingCalculation.GetEndDate();
@@ -216,7 +216,7 @@ namespace AfterSchoolLibrary.Services
 
                 // coupons don't apply to prorated charges in stripe, so have to use balance transaction
                 if (msgs.HasNoErrors())
-                    proratingCalculation.ProcessCustomerBalanceTransactionAsCoupon(checkoutObject, customer, msgs);
+                    proratingCalculation.ProcessCustomerBalanceTransactionAsCoupon(checkoutObject.PaymentType, customer, msgs);
             }
 
             // create the subscription on the stripe account (could be added to main account or connected account)
@@ -231,7 +231,7 @@ namespace AfterSchoolLibrary.Services
                 endDate: endDateTime,
                 billingCycleAnchor: anchorDate,
                 stripeCouponId: stripeCouponId,
-                metaData: metaData,
+                metaData: stripeMetaData,
                 msgs: msgs);
 
             if (msgs.HasErrors())
