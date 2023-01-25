@@ -1190,8 +1190,8 @@ namespace AfterSchoolLibrary.Billing
                 Coupon = stripeCouponId,
                 Items = new List<SubscriptionItemOptions> { new SubscriptionItemOptions { Plan = planId, Quantity = 1 } },
                 Metadata = metaData,
-                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone, // pass in from applesauce
-                BillingCycleAnchor = billingCycleAnchor, // pass in from applesauce
+                ProrationBehavior = isProrated ? ProrationBehaviorCreateProrations : ProrationBehaviorNone,
+                BillingCycleAnchor = billingCycleAnchor,
             };
 
             // if the start date is after today, then end the trial (start the subscription) on the start date of the subscription
@@ -1206,7 +1206,7 @@ namespace AfterSchoolLibrary.Billing
                 options.TransferData = new SubscriptionTransferDataOptions
                 {
                     Destination = stripeAccountId,
-                    AmountPercent = 100 - platformFeePercent * 100,
+                    AmountPercent = 100 - (platformFeePercent * 100),
                 };
             try
             {
