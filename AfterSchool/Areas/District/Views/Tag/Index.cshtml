@@ -4,6 +4,12 @@
     var objectType = (ObjectType)ViewBag.ObjectType;
 }
 
+<style>
+    a {
+      cursor: pointer;
+    }
+</style>
+
 @{Html.RenderPartial("DistrictHeader");}
 
 @{Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);}
@@ -47,7 +53,7 @@
                         }
                     }
                     
-                    <tr class="questionRow" id="tag-1">
+                    <tr class="questionRow new" id="tag-1">
                         <td>
                             <input type="text" value="" id="tagDescription-1" name="tag" required class="form-control col-sm-3 option" onfocus="this.select()"/>
                         </td>
@@ -73,18 +79,24 @@
     </div>
 </div>
 
-<script src="~/js/jquery-3.6.3.min.js" ></script>
-<script>
+@section scripts
+{
+    <script>
 
     $(document).ready(function(){
               
         $('body').on('click','.remove', function(){
-           $(this).parent().parent().remove();
+           
+            if($('.new').length > 1)
+            {
+                $(this).parent().parent().remove();
+            }
+            
         })
         
         $('body').on('click','.save', function(){
             var tag = $(this).parent().prev().children().val();
-            var objectType = '@((int)objectType)';
+            var objectType = '@((int) objectType)';
             
             location.href = `@Url.Action("AddRemoveTag", "tag")?tag=${tag}&objectType=${objectType}`;
         })
@@ -99,5 +111,5 @@
     
 </script>
 
-
+}
 

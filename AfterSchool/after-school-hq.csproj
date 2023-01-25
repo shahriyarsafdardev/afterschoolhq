@@ -1355,6 +1355,8 @@
     <Content Include="Assets\lib\summernote\summernote.js" />
     <Content Include="Assets\lib\summernote\summernote.min.js" />
     <Content Include="Assets\lib\tinycolor\tinycolor-min.js" />
+    <Content Include="Assets\tagsinput\tagsinput-angular.js" />
+    <Content Include="Assets\tagsinput\tagsinput-typeahead.css" />
     <Content Include="Assets\tagsinput\tagsinput.css" />
     <Content Include="Assets\tagsinput\tagsinput.js" />
     <Content Include="case-study-cfi70.html" />

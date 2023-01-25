@@ -85,12 +85,13 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static List<AvailableTag> LoadByObjectType(int objectType, SystemMessages msgs = null,
+        public static List<AvailableTag> LoadByObjectType(int objectType, int accountId, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ObjectType"], objectType);
+            dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

@@ -7,10 +7,10 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AvailableTagService
     {
-        public static List<AvailableTag> GetByObjectType(int objectType, SystemMessages msgs = null,
+        public static List<AvailableTag> GetByObjectType(int objectType, Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return AvailableTag.LoadByObjectType(objectType, msgs);
+            return AvailableTag.LoadByObjectType(objectType, (int)account.ID, msgs);
         }
         
         public static AvailableTag GetById(int? Id, SystemMessages msgs = null,
@@ -49,6 +49,7 @@ namespace AfterSchoolLibrary.Services
         {
             return AvailableTag.UniqueTag(tag, objectType, msgs);
         }
+        
         
     }
 }

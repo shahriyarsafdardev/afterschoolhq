@@ -99,6 +99,7 @@ namespace AfterSchoolLibrary.Models
             BackgroundCheck.Create(dc);
             ProviderJotFormSubmission.Create(dc);
             AvailableTag.Create(dc);
+            AssignedTag.Create(dc);
 
             return msgs;
         }
@@ -190,6 +191,7 @@ namespace AfterSchoolLibrary.Models
             BackgroundCheck.Alter(dc);
             ProviderJotFormSubmission.Alter(dc);
             AvailableTag.Alter(dc);
+            AssignedTag.Alter(dc);
 
             return msgs;
         }

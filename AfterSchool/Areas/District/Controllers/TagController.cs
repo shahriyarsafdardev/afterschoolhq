@@ -18,11 +18,11 @@ namespace AfterSchool.Areas.District.Controllers
         // GET
         public ActionResult Index(int objectType = (int)ObjectType.Account)
         {
-
+            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
             
-            var availableTags = AvailableTagService.GetByObjectType(objectType, msgs);
+            var availableTags = AvailableTagService.GetByObjectType(objectType, currentAccount, msgs);
             
             ViewBag.Messages = msgs;
             ViewBag.ObjectType = objectType;
@@ -61,12 +61,38 @@ namespace AfterSchool.Areas.District.Controllers
         
         public ActionResult School()
         {
-            return View();
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
+            var availableTags = AvailableTagService.GetByObjectType((int) ObjectType.Account, currentAccount, msgs);
+
+            ViewBag.Messages = msgs;
+            ViewBag.AvailableTags = availableTags;
+            
+            return View(schools);
         }
         
         public ActionResult Activity()
         {
             return View();
         }
+
+        public bool AddRemoveAssignedTag(string tag, int objectID, int objectType, string operation)
+        {
+            var msgs = new SystemMessages();
+            
+            if (operation == "add")
+            {
+                msgs.AddRange(AssignedTagService.Save(tag, objectID, objectType, msgs));
+            }
+            
+            if (operation == "remove")
+            {
+                AssignedTagService.Remove(tag, objectID, objectType, msgs);
+            }
+
+            return true;
+        }
+        
     }
 }
