@@ -176,7 +176,7 @@ namespace AfterSchoolLibrary.Helpers
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date
                 // TODO: need to check if it is after the first month. If it's after the next billing date it should also prorate
-                if (!isCheckoutOnAnyChargeDate && lengthOfSubscriptionFromToday > 0)
+                if (!isCheckoutOnAnyChargeDate && lengthOfSubscriptionFromToday > 0 && nextChargeDate != chargeDates.First())
                 {
                     var subscriptionStoredCostCC = plan.GetTotalCostWithFees(participationObject.OwnerAccount, msgs, dc);
                     var subscriptionStoredCostACH = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount, msgs, dc);
