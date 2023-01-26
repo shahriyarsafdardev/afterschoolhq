@@ -192,8 +192,8 @@ namespace AfterSchoolLibrary.Models
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
                 PostPayPlans = activity.GetActivePostPayPlans(msgs, dc);
                 IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0 && PostPayPlans.Count == 0;
-                StartDate = Schedule.StartDate ?? activity.GetFirstDate(msgs, dc);
-                EndDate = Schedule.EndDate ?? activity.GetLastDate(msgs, dc);
+                StartDate = Schedule?.StartDate ?? activity.GetFirstDate(msgs, dc);
+                EndDate = Schedule?.EndDate ?? activity.GetLastDate(msgs, dc);
             }
         }
 
@@ -240,8 +240,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
                 IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
-                StartDate = Schedule.StartDate ?? activityGroup.GetFirstDate(msgs, dc);
-                EndDate = Schedule.EndDate ?? activityGroup.GetLastDate(msgs, dc);
+                StartDate = Schedule?.StartDate ?? activityGroup.GetFirstDate(msgs, dc);
+                EndDate = Schedule?.EndDate ?? activityGroup.GetLastDate(msgs, dc);
             }
         }
 

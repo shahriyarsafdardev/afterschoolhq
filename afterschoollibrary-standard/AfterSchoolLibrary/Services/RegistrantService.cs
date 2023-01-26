@@ -196,8 +196,8 @@ namespace AfterSchoolLibrary.Services
                             };
 
             var platformFeePercent = useStripeConnectedAccount
-                ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
-                : new decimal?();
+                                        ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
+                                        : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
             var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
             var anchorDate = new DateTime?();
@@ -208,11 +208,17 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
                 stripeMetaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
                 stripeMetaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
+                stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
+                stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
                 startDateTime = proratingCalculation.GetStartDate();
                 endDateTime = proratingCalculation.GetEndDate();
                 anchorDate = proratingCalculation.GetAnchorDate();
-                platformFeePercent = proratingCalculation.GetPlatformFeePercent();
+
+                // can't set during proration since it is permanently assigned to subscription
+                // have to keep the same platform percent determined for the full price
+                // which means we may gain or lose money
+                // platformFeePercent = proratingCalculation.GetPlatformFeePercent();
 
                 // coupons don't apply to prorated charges in stripe, so have to use balance transaction
                 if (msgs.HasNoErrors())
@@ -481,7 +487,7 @@ namespace AfterSchoolLibrary.Services
             return new PlanFeeObject()
             {
                 ConvenienceFee = convenienceFee.Value,
-                ConvenienceFeesPaidBy = billingAccount.ConvenienceFeesPaidBy,
+                ConvenienceFeesPaidBy = plan.IsConvenienceFeeTakenOutOfCost ? FeesPaidByType.Account : FeesPaidByType.Parent,
                 PaymentTypeFee = paymentTypeFee.Value,
                 PaymentTypeFeesPaidBy = billingAccount.CreditCardFeesPaidBy,
                 Amount = amount.Value,

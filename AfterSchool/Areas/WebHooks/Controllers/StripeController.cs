@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -269,15 +269,58 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(stripeInvoice.ChargeId, msgs);
             var amountRefunded = charge.IsNotEmpty() && charge.AmountRefunded.IsNotEmpty() ? charge.AmountRefunded : 0m;
-            //we will need this logic to ensure we are adding pro-rated amount in ActivityPayment and RegistrantSubscriptionPlan
-            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal)stripeInvoice.AmountPaid / 100) : 0m;
-            // NOTE: need to do a check if our data is different than stripe. What if stripe.InvoiceAmount != rsp.Amount ?
-            var amountReceivedByProvider = amountPaidByParent - (rsp.ConvenienceFee + rsp.PaymentTypeFee);
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal) stripeInvoice.AmountPaid / 100) : 0m;
+
+            // get the amount paid by the parent, and work out numbers from there regardless of what our system says should happen
+            // could be a good place to do some auditing
+            // just because numbers don't match doesn't mean the first payment was prorated
+            // if we can figure out proration from the total the parent was supposed to pay and what they did pay
+            // OR according to the date they paid that would be ideal
+            // but either way the numbers should be tracked as exactly what they paid via stripe regardless
+            // we can also check to see if the transfer amount is correct.
+
+            // get the original price
+            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(stripeInvoice.SubscriptionId, msgs);
+            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
+            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+            var paymentType = rsp.PaymentTypeId;
+            var isAmountProrated = false;
+
+            // TODO: potentially problematic as the plan may have changed
+            var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
+            var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
+            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
+
+            if (paymentType == PaymentType.ACH)
+                stripeSubscriptionPrice -= calculatedFullCCFee;
+
+            isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
+
+            if (isAmountProrated)
+            {
+                if (paymentType == PaymentType.CreditCard)
+                    paymentTypeFeeOverrideAmount = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(amountPaidByParent);
+                else
+                    paymentTypeFeeOverrideAmount = 0;
+
+                var calcObj = new FeeCalculationObject(
+                                amountPaidByParent - paymentTypeFeeOverrideAmount.Value,
+                                billingAccount,
+                                plan.IsConvenienceFeeTakenOutOfCost,
+                                msgs);
+
+                convenienceFeeOverrideAmount = calcObj.GetConvenienceFee();
+            }
+
+            var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
 
             if (isStripeInvoiceTransferData)
-                amountReceivedByProvider = (decimal)stripeInvoice.TransferData.Amount / 100;
+            {
+                amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
 
-            var isAmountProRated = amountReceivedByProvider < plan.CostPerPeriod;
+                if (amountPaidByParent - paymentTypeFeeOverrideAmount - convenienceFeeOverrideAmount != amountReceivedByProvider)
+                    convenienceFeeOverrideAmount = amountPaidByParent - paymentTypeFeeOverrideAmount.Value - amountReceivedByProvider.Value;
+            }
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
@@ -287,9 +330,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 OverrideAmount = amountPaidByParent,
                 AmountPaidByParent = amountPaidByParent,
                 AmountReceivedByProvider = amountReceivedByProvider,
-                IsAmountProRated = isAmountProRated,
-                ConvenienceFeeOverrideAmount = rsp.ConvenienceFee,
-                PaymentTypeFeeOverrideAmount = rsp.PaymentTypeFee,
+                IsAmountProRated = isAmountProrated,
+                ConvenienceFeeOverrideAmount = convenienceFeeOverrideAmount,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
                 ParticipationObject = participationObject,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                 PaymentType = rsp.PaymentTypeId,
@@ -309,6 +352,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
                 msgs.Add($"New Transaction Created {checkoutObject.Transaction.ID.Value}", MessageType.Notice);
+
                 // only want to create a transfer if there isnt an existing one from stripe
                 if (!isStripeInvoiceTransferData && msgs.HasNoErrors())
                     checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);

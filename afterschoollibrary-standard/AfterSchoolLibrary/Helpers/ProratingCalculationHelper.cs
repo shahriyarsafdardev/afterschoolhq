@@ -21,7 +21,9 @@ namespace AfterSchoolLibrary.Helpers
         private bool IsProrated { get; set; }
         private decimal? PredictedStripeCharge { get; set; }
         private decimal? ProratedCCFee { get; set; }
+        private decimal? ProratedConvenienceFee { get; set; }
         private decimal? ProratedAmountWithoutCCFee { get; set; }
+        private decimal? ProratedAmountWithoutFees { get; set; }
 
         public ProratingCalculationHelper(SubscriptionPlan plan, ParticipationObject participationObject, Models.Account billingAccount, PaymentType paymentType, SystemMessages msgs, DatabaseConnection dc = null) 
         {
@@ -32,7 +34,9 @@ namespace AfterSchoolLibrary.Helpers
             PlatformFeePercent = new decimal?();
             PredictedStripeCharge = new decimal?();
             ProratedCCFee = new decimal?();
+            ProratedConvenienceFee = new decimal?();
             ProratedAmountWithoutCCFee = new decimal?();
+            ProratedAmountWithoutFees = new decimal?();
             CalculateProration(plan, participationObject, billingAccount, paymentType, msgs, dc);
         }
 
@@ -59,6 +63,16 @@ namespace AfterSchoolLibrary.Helpers
         public decimal GetProratedAmountWithoutCCFee()
         {
             return ProratedAmountWithoutCCFee.Value;
+        }
+
+        public decimal GetProratedConvenienceFee()
+        {
+            return ProratedConvenienceFee.Value;
+        }
+
+        public decimal GetProratedAmountWithoutFees()
+        {
+            return ProratedAmountWithoutFees.Value;
         }
 
         public DateTime GetStartDate()
@@ -170,10 +184,12 @@ namespace AfterSchoolLibrary.Helpers
                     PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
                     ProratedCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(PredictedStripeCharge.Value); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
                     ProratedAmountWithoutCCFee = PredictedStripeCharge - ProratedCCFee; //how much is the "original" charge before cc fee
+                    ProratedConvenienceFee = new FeeCalculationObject(ProratedAmountWithoutCCFee.Value, billingAccount, plan.IsConvenienceFeeTakenOutOfCost, msgs, dc).GetConvenienceFee();
+                    ProratedAmountWithoutFees = ProratedAmountWithoutCCFee - ProratedConvenienceFee;
 
                     // get percent that subscription convenience fee should be
                     PlatformFeePercent = useStripeConnectedAccount ?
-                                            billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, ProratedAmountWithoutCCFee.Value, msgs, dc)
+                                            billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, ProratedAmountWithoutFees.Value, msgs, dc)
                                             : new decimal?();
                     
 

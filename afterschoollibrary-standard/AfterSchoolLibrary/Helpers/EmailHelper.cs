@@ -1218,11 +1218,11 @@ namespace AfterSchoolLibrary.Helpers
                         msgs);
                 }
             }
-            var ccPaymentPlanFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Payment Plan
-            var ccPaymentPlanTitle = "Credit Card Fee";
             // add payment-plan block 
             if (hasPaymentPlan)
             {
+                var ccPaymentPlanFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Payment Plan
+                var ccPaymentPlanTitle = "Credit Card Fee";
                 var startDate = submittedRecord.GetPlanStartDate(paymentPlan, participationObject, msgs, dc);
                 var paymentDescription =
                     $"{participationObject.Name} - Payment Plan";
