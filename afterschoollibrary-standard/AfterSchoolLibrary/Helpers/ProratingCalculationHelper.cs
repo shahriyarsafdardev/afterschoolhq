@@ -154,9 +154,9 @@ namespace AfterSchoolLibrary.Helpers
                 var lastActivityDateProviderTimeZone = participationObject.EndDate.Value.Date;
 
                 var checkoutTimeUtc = DateTime.UtcNow;
-                var checkOutDateUtc = checkoutTimeUtc.Date;
-               /* var checkoutTimeProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(checkoutTimeUtc);
-                var checkoutDateProviderTimeZone = checkoutTimeProviderTimeZone.Date;*/
+                // var checkOutDateUtc = checkoutTimeUtc.Date;
+                var checkoutTimeProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(checkoutTimeUtc);
+                var checkoutDateProviderTimeZone = checkoutTimeProviderTimeZone.Date;
                 var chargeDates = new List<DateTime>();
                 var isCheckoutOnAnyChargeDate = false;
                 var nextChargeDate = new DateTime?();
@@ -166,9 +166,9 @@ namespace AfterSchoolLibrary.Helpers
                 for (var i = 0; i < lengthOfSubscriptionFromBeginning; i++)
                     chargeDates.Add(firstChargeDateProviderTimeZone.AddMonths(i));
 
-                isCheckoutOnAnyChargeDate = chargeDates.Any(chargeDate => chargeDate == checkOutDateUtc);
-                nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkOutDateUtc));               
-                var lengthOfSubscriptionFromToday = NumberOfPeriodsForSubscription(plan, checkOutDateUtc, lastActivityDateProviderTimeZone);
+                isCheckoutOnAnyChargeDate = chargeDates.Any(chargeDate => chargeDate == checkoutDateProviderTimeZone);
+                nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));               
+                var lengthOfSubscriptionFromToday = NumberOfPeriodsForSubscription(plan, checkoutDateProviderTimeZone, lastActivityDateProviderTimeZone);
 
                 if (nextChargeDate.HasValue)
                     EndDate = GetEndDateFromNumberOfPeriods(plan, nextChargeDate.Value, lengthOfSubscriptionFromToday);
@@ -182,7 +182,7 @@ namespace AfterSchoolLibrary.Helpers
                     AnchorDate = nextChargeDate; // anchor date has to be in the future. It should be on the same day as the period start or the activity start
                     StartDate = DateTime.UtcNow.AddSeconds(1); // start the subscription right now
 
-                    PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeUtc, subscriptionStoredCost);
+                    PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
                     ProratedCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(PredictedStripeCharge.Value); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
                     ProratedAmountWithoutCCFee = PredictedStripeCharge - ProratedCCFee; //how much is the "original" charge before cc fee
                     ProratedConvenienceFee = new FeeCalculationObject(ProratedAmountWithoutCCFee.Value, billingAccount, plan.IsConvenienceFeeTakenOutOfCost, msgs, dc).GetConvenienceFee();
