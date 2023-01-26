@@ -192,7 +192,7 @@ namespace AfterSchoolLibrary.Services
                                 {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
                                 {"SourceId", sourceId},
                                 {"ApprovedBy", loggedInUser.Uid.ToString()},
-                                {"DateRequested", DateTime.Now.ToShortDateTimeString()},
+                                {"DateRequested", DateTime.UtcNow.ToShortDateTimeString()},
                             };
 
             var platformFeePercent = useStripeConnectedAccount
