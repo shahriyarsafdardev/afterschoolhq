@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
@@ -437,7 +437,7 @@ namespace AfterSchoolLibrary.Services
             if (!subscriptionPlan.CostPerPeriod.HasValue)
                 return 0;
 
-            var feeCalculationObject = new FeeCalculationObject(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount, msgs, dc);
+            var feeCalculationObject = new FeeCalculationObject(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount, subscriptionPlan.IsConvenienceFeeTakenOutOfCost, msgs, dc);
             return feeCalculationObject.GetCreditCardFee();
         }
 
@@ -449,7 +449,7 @@ namespace AfterSchoolLibrary.Services
             if (!subscriptionPlan.CostPerPeriod.HasValue)
                 return 0;
 
-            var feeCalculationObject = new FeeCalculationObject(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount, msgs, dc);
+            var feeCalculationObject = new FeeCalculationObject(subscriptionPlan.GetCostPerPeriodPerPerson(msgs, dc), ownerAccount, subscriptionPlan.IsConvenienceFeeTakenOutOfCost, msgs, dc);
             return feeCalculationObject.GetConvenienceFee();
         }
 

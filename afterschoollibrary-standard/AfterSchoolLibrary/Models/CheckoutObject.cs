@@ -346,27 +346,45 @@ namespace AfterSchoolLibrary.Models
         public decimal GetSubscriptionCostTodayCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return CreditCardPurchaseObject.IsNotEmpty()
-                ? new FeeCalculationObject(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount, msgs, dc).GetCreditCardFee()
+                ? new FeeCalculationObject(
+                    GetSubscriptionCostTodayNoFees(msgs, dc), 
+                    BillingAccount, 
+                    SubscriptionPlan.IsConvenienceFeeTakenOutOfCost, 
+                    msgs, 
+                    dc).GetCreditCardFee()
                 : 0;
         }
 
         public decimal GetSubscriptionCostCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return CreditCardPurchaseObject.IsNotEmpty()
-                ? new FeeCalculationObject(GetSubscriptionCostNoFees(msgs, dc), BillingAccount, msgs, dc).GetCreditCardFee()
+                ? new FeeCalculationObject(
+                    GetSubscriptionCostNoFees(msgs, dc), 
+                    BillingAccount, 
+                    SubscriptionPlan.IsConvenienceFeeTakenOutOfCost, 
+                    msgs, 
+                    dc).GetCreditCardFee()
                 : 0;
         }
 
         public decimal GetSubscriptionCostTodayConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return new FeeCalculationObject(GetSubscriptionCostTodayNoFees(msgs, dc), BillingAccount, msgs, dc)
-                .GetConvenienceFee();
+            return new FeeCalculationObject(
+                    GetSubscriptionCostTodayNoFees(msgs, dc), 
+                    BillingAccount, 
+                    SubscriptionPlan.IsConvenienceFeeTakenOutOfCost, 
+                    msgs, 
+                    dc).GetConvenienceFee();
         }
         
         public decimal GetSubscriptionCostConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return new FeeCalculationObject(GetSubscriptionCostNoFees(msgs, dc), BillingAccount, msgs, dc)
-                .GetConvenienceFee();
+            return new FeeCalculationObject(
+                GetSubscriptionCostNoFees(msgs, dc), 
+                BillingAccount, 
+                SubscriptionPlan.IsConvenienceFeeTakenOutOfCost, 
+                msgs, 
+                dc).GetConvenienceFee();
         }
 
         private decimal GetPlatformPercentFee(SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -479,6 +497,7 @@ namespace AfterSchoolLibrary.Models
                         PaymentPlanCostTodayNoFees,
                         BillingAccount,
                         ParticipationObject,
+                        PaymentPlan.IsConvenienceFeeTakenOutOfCost,
                         msgs,
                         dc)
                     .GetCreditCardFee();
@@ -492,6 +511,7 @@ namespace AfterSchoolLibrary.Models
                     PaymentPlanCostTodayNoFees,
                     BillingAccount,
                     ParticipationObject,
+                    PaymentPlan.IsConvenienceFeeTakenOutOfCost,
                     msgs,
                     dc)
                 .GetConvenienceFee();
