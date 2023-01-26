@@ -44,10 +44,10 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
         
-        public static bool UniqueTag(string tag, int objectType, SystemMessages msgs = null,
+        public static bool UniqueTag(string tag, int objectType, Account account, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return AvailableTag.UniqueTag(tag, objectType, msgs);
+            return AvailableTag.UniqueTag(tag, objectType, (int)account.ID, msgs);
         }
         
         

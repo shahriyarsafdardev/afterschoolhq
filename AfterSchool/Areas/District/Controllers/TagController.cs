@@ -40,7 +40,7 @@ namespace AfterSchool.Areas.District.Controllers
                 if(tag.IsEmpty())
                     msgs.Add("Tag name should not be empty", MessageType.UserError);
             
-                if(AvailableTagService.UniqueTag(tag.Trim(), objectType, msgs))
+                if(AvailableTagService.UniqueTag(tag.Trim(), objectType, currentAccount, msgs))
                     msgs.Add("Tag should be unique", MessageType.UserError);
             }
 
@@ -54,7 +54,7 @@ namespace AfterSchool.Areas.District.Controllers
                     AvailableTagService.Delete(availableTag, msgs);
             }
             
-            HandleTempMessages(msgs);
+            SetTempMessages(msgs);
             
             return RedirectToAction("Index" , new {objectType});
         }
@@ -74,7 +74,21 @@ namespace AfterSchool.Areas.District.Controllers
         
         public ActionResult Activity()
         {
-            return View();
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var availableTags = AvailableTagService.GetByObjectType((int) ObjectType.Activity, currentAccount, msgs);
+            var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
+            var activities = new List<Activity>();
+            foreach (var school in schools)
+            {
+                 var schoolActivities = school.GetAllActivitiesForAccount(msgs);
+                 activities.AddRange(schoolActivities);
+            }
+            
+            ViewBag.Messages = msgs;
+            ViewBag.AvailableTags = availableTags;
+            
+            return View(activities);
         }
 
         public bool AddRemoveAssignedTag(string tag, int objectID, int objectType, string operation)

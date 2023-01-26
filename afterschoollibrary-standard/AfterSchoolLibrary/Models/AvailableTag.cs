@@ -106,12 +106,13 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
-        public static bool UniqueTag(string tag, int objectType, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static bool UniqueTag(string tag, int objectType, int accountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["tag"], tag);
             dq.Criterias.Add(ObjectMap["ObjectType"], objectType);
+            dq.Criterias.Add(ObjectMap["AccountId"], accountId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.GetCount(msgs) > 0;
         }
