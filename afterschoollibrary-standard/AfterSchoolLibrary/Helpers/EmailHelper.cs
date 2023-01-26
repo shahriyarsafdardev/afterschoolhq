@@ -1158,6 +1158,7 @@ namespace AfterSchoolLibrary.Helpers
             var ccSubscriptionFee = checkoutObject.GetSubscriptionCostCreditCardFee(msgs, dc); 
             var totalSubscriptionCost = ccSubscriptionFee + subscription?.CostPerPeriod ?? 0;
             var ccSubscriptionTitle = "Credit Card Fee";
+            var achPaymentText = checkoutObject.PaymentType != PaymentType.ACH ? "Credit card fee does not apply to ACH payments." : "";
 
             // if has subscription
             // and is not finalized if it is split evenly
@@ -1173,14 +1174,30 @@ namespace AfterSchoolLibrary.Helpers
                     $"{participationObject.Name} - Subscription";
                 additionalDetails = $"{subscription.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Charge";
                 cost = checkoutObject.GetSubscriptionCostTodayWithConvenienceFee(msgs, dc).ToCurrency();
-                subscriptionDetails =
-                    $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first subscription payment will be automatically deducted on " +
-                    $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee does not apply to ACH payments.</span>" +
+                if (checkoutObject.ProratingCalculation.IsNotEmpty() && checkoutObject.ProratingCalculation.GetIsProrated())
+                {
+                    subscriptionDetails =
+                        $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first <strong>prorated subscription</strong> payment will be automatically deducted on " +
+                        $"<strong>{startDate.ToLongDateString()}</strong> from the payment method you provided. You will receive an email confirmation when the payment goes through.</span>" +
+                        $"<span style='float:left;padding-bottom:13px;width:100%;'><strong>After the first payment, you will be charged the full subscription amount.</strong>  {achPaymentText}</span>";
+                    additionalDetails = additionalDetails.Insert(0, "Full ");
+                }
+                else
+                {
+                    subscriptionDetails =
+                        $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first subscription payment will be automatically deducted on " +
+                        $"{startDate.ToLongDateString()} from the payment method you provided. {achPaymentText}</span>";
+                }
+
+                subscriptionDetails +=
                     $"<span>{description}</span>" +
                     $"<span style='float:right;margin-right:48px;'>{subscription.CostPerPeriod.Value.ToCurrency()}</span><br/>" +
-                    $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p>" +
-                    $"<p style='float:left;padding-bottom:15px;width:100%;'><span>{ccSubscriptionTitle}</span>" +
-                    $"<span style='float:right;margin-right:48px;'>{ccSubscriptionFee.ToCurrency()}</span></p>";
+                    $"<span style='text-align:left;font-size:12px;'>{additionalDetails}</span></p>";
+
+                if (checkoutObject.PaymentType != PaymentType.ACH)
+                    subscriptionDetails +=
+                        $"<p style='float:left;padding-bottom:15px;width:100%;'><span>{ccSubscriptionTitle}</span>" +
+                        $"<span style='float:right;margin-right:48px;'>{ccSubscriptionFee.ToCurrency()}</span></p>";
 
                 if (isRegFree || (splitCostEvenly && regFinalized))
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
