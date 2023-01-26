@@ -1812,6 +1812,21 @@ namespace AfterSchool.Controllers
                 if (isReservedAndPaidFor || masterRegistrantHasPlan)
                     return RedirectToAction("select");
             }
+            
+            var checkoutObject = new CheckoutObject
+            {
+                SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                BillingAccount = participationObject.PaymentAccount,
+                PaymentType = PaymentType.CreditCard,
+            };
+            
+            var proratingCalculation = new ProratingCalculationHelper(checkoutObject.SubscriptionPlan, participationObject, checkoutObject.BillingAccount,
+                checkoutObject.PaymentType, msgs, null);
+            
+            if (proratingCalculation.IsEmpty() || !proratingCalculation.GetIsProrated()) return View("Payment");
+            
+            ViewBag.IsProrated =  proratingCalculation.GetIsProrated();
+            ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
 
             return View("Payment");
         }
