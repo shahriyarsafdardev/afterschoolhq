@@ -201,7 +201,7 @@ namespace AfterSchoolLibrary.Services
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
             // coupons don't apply during prorating period, but we still need to assign it to the subscription for full periods
             // ACH coupons don't need to apply during prorating either because stripe fixes the charges accordingly
-            // TODO: Do we need ACH coupons?
+            // TODO: Do we need ACH coupons? Yes apparently you still need it for the full month charges (odd)
             var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
             var anchorDate = new DateTime?();
             var proratingCalculation = new ProratingCalculationHelper(plan, participationObject, billingAccount, checkoutObject.PaymentType, msgs, dc);
