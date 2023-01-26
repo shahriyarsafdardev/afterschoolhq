@@ -199,6 +199,9 @@ namespace AfterSchoolLibrary.Services
                                         ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
                                         : new decimal?();
             var stripeAccountId = useStripeConnectedAccount ? billingAccount.StripeUserId : null;
+            // coupons don't apply during prorating period, but we still need to assign it to the subscription for full periods
+            // ACH coupons don't need to apply during prorating either because stripe fixes the charges accordingly
+            // TODO: Do we need ACH coupons?
             var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
             var anchorDate = new DateTime?();
             var proratingCalculation = new ProratingCalculationHelper(plan, participationObject, billingAccount, checkoutObject.PaymentType, msgs, dc);
@@ -213,16 +216,7 @@ namespace AfterSchoolLibrary.Services
 
                 startDateTime = proratingCalculation.GetStartDate();
                 endDateTime = proratingCalculation.GetEndDate();
-                anchorDate = proratingCalculation.GetAnchorDate();
-
-                // can't set during proration since it is permanently assigned to subscription
-                // have to keep the same platform percent determined for the full price
-                // which means we may gain or lose money
-                // platformFeePercent = proratingCalculation.GetPlatformFeePercent();
-
-                // coupons don't apply to prorated charges in stripe, so have to use balance transaction
-                if (msgs.HasNoErrors())
-                    proratingCalculation.ProcessCustomerBalanceTransactionAsCoupon(checkoutObject.PaymentType, customer, msgs);
+                anchorDate = proratingCalculation.GetAnchorDate();               
             }
 
             // create the subscription on the stripe account (could be added to main account or connected account)
