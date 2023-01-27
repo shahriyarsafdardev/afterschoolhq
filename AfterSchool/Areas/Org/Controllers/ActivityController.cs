@@ -3678,6 +3678,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var volunteerFirstNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerFirstNameLabel}");
             var volunteerLastNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerLastNameLabel}");
             var volunteerEmailIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerEmailLabel}");
+            var volunteerEmails = new List<string>();
 
 
             foreach (var row in rows)
@@ -3746,6 +3747,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                                 validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
+                            
+                            if (field.In(volunteerEmails))
+                                validatedField.Messages.Add("This email is a duplicate of another volunteer email in this import.", MessageType.Warning);
+                            
+                            if (!volunteerEmails.Contains(field))
+                                volunteerEmails.Add(field);
 
                             break;
 
