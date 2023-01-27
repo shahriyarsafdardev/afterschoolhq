@@ -1227,6 +1227,25 @@ Public MustInherit Class BaseLocation
         Return rtn & MyBase.FormatAddress(useLineBreaks)
     End Function
 
+    Public Shared Function BuildLocationString(name As String, address1 As String, address2 As String, city As String, county As String,
+                                         state As String, postalCode As String, country As String,
+                                         Optional ByVal useLineBreaks As Boolean = True) As String
+        Dim rtn = ""
+
+        If name.IsEmpty = False And name <> city And name <> county And name <> address1 Then
+            rtn &= name
+            If useLineBreaks Then
+                rtn &= vbCrLf
+            Else
+                rtn &= ", "
+            End If
+        End If
+
+        Return rtn & BaseAddress.FormatAddress(address1, address2, city, county, state, postalCode, country, useLineBreaks)
+
+    End Function
+
+
     Public Function FormatAddressWithoutName(Optional ByVal useLineBreaks As Boolean = True) As String
         Return MyBase.FormatAddress(useLineBreaks)
     End Function
