@@ -1812,22 +1812,20 @@ namespace AfterSchool.Controllers
                 if (isReservedAndPaidFor || masterRegistrantHasPlan)
                     return RedirectToAction("select");
             }
-            
-            var checkoutObject = new CheckoutObject
-            {
-                SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
-                BillingAccount = participationObject.PaymentAccount,
-                PaymentType = PaymentType.CreditCard,
-            };
-            
-            var proratingCalculation = new ProratingCalculationHelper(checkoutObject.SubscriptionPlan, participationObject, checkoutObject.BillingAccount,
-                checkoutObject.PaymentType, msgs, null);
-            
-            if (proratingCalculation.IsEmpty() || !proratingCalculation.GetIsProrated()) return View("Payment");
-            
-            ViewBag.IsProrated =  proratingCalculation.GetIsProrated();
-            ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
 
+            if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Any())
+            {
+                var proratingCalculation = new ProratingCalculationHelper(
+                                                participationObject.SubscriptionPlans.FirstOrDefault(),
+                                                participationObject,
+                                                participationObject.OwnerAccount,
+                                                PaymentType.CreditCard,
+                                                msgs);
+
+                ViewBag.IsProrated = proratingCalculation.GetIsProrated();
+                ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
+            }
+            
             return View("Payment");
         }
 
