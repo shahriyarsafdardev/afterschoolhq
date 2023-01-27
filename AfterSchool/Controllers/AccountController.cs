@@ -1813,6 +1813,19 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select");
             }
 
+            if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Any())
+            {
+                var proratingCalculation = new ProratingCalculationHelper(
+                                                participationObject.SubscriptionPlans.FirstOrDefault(),
+                                                participationObject,
+                                                participationObject.OwnerAccount,
+                                                PaymentType.CreditCard,
+                                                msgs);
+
+                ViewBag.IsProrated = proratingCalculation.GetIsProrated();
+                ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
+            }
+            
             return View("Payment");
         }
 
