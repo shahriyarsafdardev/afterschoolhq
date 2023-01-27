@@ -557,6 +557,71 @@ namespace AfterSchoolLibrary.Services
             return !tooShort;
         }
 
+        public static DateTime? GetFirstChargeDateProviderTimeZone(this SubscriptionPlan plan, ParticipationObject participationObject)
+        {
+            switch(plan.PaymentStartTypeId)
+            {
+                case PlanPaymentStartType.OnPeriodStart:
+                    return plan.StartDate.Value;
+                case PlanPaymentStartType.WhenActivityStarts:
+                    return participationObject.StartDate.Value;
+                case PlanPaymentStartType.OnCheckout:
+                    return participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            }
+
+            return null;
+        }
+
+        public static DateTime? CalculatePlanEndDate(this SubscriptionPlan plan, DateTime chargeDateProviderTimeZone, DateTime lastActivityDateProviderTimeZone)
+        {
+            var numOfPeriods = plan.NumberOfPeriodsForSubscription(chargeDateProviderTimeZone, lastActivityDateProviderTimeZone);
+            return plan.CalculateEndDateFromNumberOfPeriods(chargeDateProviderTimeZone, numOfPeriods);
+        }
+
+        public static int NumberOfPeriodsForSubscription(this SubscriptionPlan plan, DateTime chargeDateProviderTimeZone, DateTime lastActivityDateProviderTimeZone)
+        {
+            var lengthOfSubscription = 1;
+            var isBeforeLastActivityDate = chargeDateProviderTimeZone.IsBefore(lastActivityDateProviderTimeZone);
+
+            while (isBeforeLastActivityDate)
+            {
+                if (plan.BillingPeriodTypeId == BillingPeriodType.Month && chargeDateProviderTimeZone.AddMonths(lengthOfSubscription).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscription++;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Week && chargeDateProviderTimeZone.AddWeeks(lengthOfSubscription).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscription++;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.TwoWeeks && chargeDateProviderTimeZone.AddWeeks(lengthOfSubscription * 2).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscription += 1;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Day && chargeDateProviderTimeZone.AddDays(lengthOfSubscription).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscription += 1;
+                else if (plan.BillingPeriodTypeId == BillingPeriodType.Year && chargeDateProviderTimeZone.AddYears(lengthOfSubscription).IsOnOrBefore(lastActivityDateProviderTimeZone))
+                    lengthOfSubscription += 1;
+                else
+                    isBeforeLastActivityDate = false;
+            }
+
+            return lengthOfSubscription;
+        }
+
+        public static DateTime? CalculateEndDateFromNumberOfPeriods(this SubscriptionPlan plan, DateTime chargeDate, int numberOfPeriods)
+        {
+            // end the subscription exactly x periods after activity start date (if it needs to end)
+            switch (plan.BillingPeriodTypeId)
+            {
+                case BillingPeriodType.Month:
+                    return chargeDate.AddMonths(numberOfPeriods);
+                case BillingPeriodType.Week:
+                    return chargeDate.AddWeeks(numberOfPeriods);
+                case BillingPeriodType.TwoWeeks:
+                    return chargeDate.AddBiWeeks(numberOfPeriods);
+                case BillingPeriodType.Day:
+                    return chargeDate.AddDays(numberOfPeriods);
+                case BillingPeriodType.Year:
+                    return chargeDate.AddYears(numberOfPeriods);
+            }
+
+            return null;
+        }
+
         public static DateTime? GetPlanEndDateForRegistrantSubscriptionUtc(this SubscriptionPlan plan, DateTime startDateTime,
             ParticipationObject participationObject, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -607,7 +672,7 @@ namespace AfterSchoolLibrary.Services
             if (endDate.IsEmpty())
             {
                 if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-                    endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
+                    endDate = plan.GetSubscriptionEndDate(participationObject);
 
                 if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
                     endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
@@ -624,7 +689,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             var billingAccount = plan.GetAccount(msgs, dc);
-            var endDate = plan.GetSubscriptionEndDate(participationObject, msgs);
+            var endDate = plan.GetSubscriptionEndDate(participationObject);
 
             if (endDate.HasValue)
                 return billingAccount.ConvertFromAccountTimeZone(endDate.Value);
@@ -632,11 +697,13 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject, SystemMessages msgs = null)
+        private static DateTime? GetSubscriptionEndDate(this SubscriptionPlan plan, ParticipationObject participationObject)
         {
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.EndDate.HasValue)
-                return participationObject.EndDate.Value.AddDays(1); // don't want it to end at the start of the end date, should end at the end of the end date
-
+                return plan.CalculatePlanEndDate(
+                        plan.GetFirstChargeDateProviderTimeZone(participationObject).Value, 
+                        participationObject.EndDate.Value.Date);
+            
             return null;
         }
 
