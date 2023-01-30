@@ -1991,21 +1991,18 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static SystemMessages SendSubscriptionPaymentSucceeded(WebUser payingAccountUser,
-            RegistrantSubscriptionPlan rsp, SubscriptionPlan plan)
+            CheckoutObject checkoutObject)
         {
             var msgs = new SystemMessages();
-            var participationObject = plan.GetParticipationObject(msgs);
-            var billingPeriodTypeId = rsp.BillingPeriodTypeId;
-
-            if (billingPeriodTypeId == BillingPeriodType.NotSet)
-                billingPeriodTypeId = rsp.BillingPeriodTypeId;
+            var participationObject = checkoutObject.ParticipationObject;
+            var billingPeriodTypeId = checkoutObject.RegistrantSubscriptionPlan.BillingPeriodTypeId;
 
             var model = new NameValueCollection
             {
                 {"FirstName", payingAccountUser.FirstName},
                 {"AccountName", participationObject.OwnerAccount.Name},
                 {"Period", $"{billingPeriodTypeId.ToString().ToLower()}ly"},
-                {"PaymentAmount", rsp.TotalPaidWithFees.ToCurrency()},
+                {"PaymentAmount", checkoutObject.OverrideAmount.ToCurrency()},
                 {"ActivityName", participationObject.Name},
                 {"LoginLink", Utilities.LoginUrl()},
             };

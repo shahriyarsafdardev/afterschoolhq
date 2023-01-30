@@ -404,7 +404,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                                stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
 
             if (wasPaidToday && stripeInvoice.AmountPaid > 0)
-                purchasingAccount.SendSubscriptionPaymentSucceeded(rsp, plan);
+                purchasingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
 
             return ReturnOK(msgs);
         }
