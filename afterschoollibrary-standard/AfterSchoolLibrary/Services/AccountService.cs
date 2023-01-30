@@ -1458,11 +1458,11 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account,
-            RegistrantSubscriptionPlan rsp, SubscriptionPlan plan, DatabaseConnection dc = null)
+            CheckoutObject checkoutObject, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, rsp, plan));
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, checkoutObject));
             return msgs;
         }
 
