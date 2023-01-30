@@ -8,6 +8,7 @@ namespace AfterSchoolLibrary.Integrations
     public interface IBackgroundCheckWorkflow
     {
         Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
+        void ScheduleBackgroundCheck();
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -69,6 +70,11 @@ namespace AfterSchoolLibrary.Integrations
                 messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
             
             return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl , msg = messages};
+        }
+
+        public void ScheduleBackgroundCheck()
+        {
+            
         }
     }
 
