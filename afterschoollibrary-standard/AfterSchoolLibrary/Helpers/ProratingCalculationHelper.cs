@@ -176,14 +176,24 @@ namespace AfterSchoolLibrary.Helpers
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date
                 // TODO: need to check if it is after the first month. If it's after the next billing date it should also prorate
-                if (!isCheckoutOnAnyChargeDate && lengthOfSubscriptionFromToday > 0)
+                if (!isCheckoutOnAnyChargeDate && lengthOfSubscriptionFromToday > 0 && nextChargeDate != chargeDates.First())
                 {
-                    var subscriptionStoredCost = plan.GetTotalCostWithFees(participationObject.OwnerAccount, msgs, dc);
+                    var subscriptionStoredCostCC = plan.GetTotalCostWithFees(participationObject.OwnerAccount, msgs, dc);
+                    var subscriptionStoredCostACH = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount, msgs, dc);
                     AnchorDate = nextChargeDate; // anchor date has to be in the future. It should be on the same day as the period start or the activity start
                     StartDate = DateTime.UtcNow.AddSeconds(1); // start the subscription right now
 
-                    PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCost);
-                    ProratedCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(PredictedStripeCharge.Value); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
+                    if (paymentType == PaymentType.ACH)
+                    {
+                        PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCostACH);
+                        ProratedCCFee = 0;
+                    }
+                    else
+                    {
+                        PredictedStripeCharge = StripeHelper.CalculateStripeProratedCharge(AnchorDate.Value, checkoutTimeProviderTimeZone, subscriptionStoredCostCC);
+                        ProratedCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(PredictedStripeCharge.Value); // get our estimated CC fee (it will be wrong for a few reasons, we can discuss)
+                    }
+
                     ProratedAmountWithoutCCFee = PredictedStripeCharge - ProratedCCFee; //how much is the "original" charge before cc fee
                     ProratedConvenienceFee = new FeeCalculationObject(ProratedAmountWithoutCCFee.Value, billingAccount, plan.IsConvenienceFeeTakenOutOfCost, msgs, dc).GetConvenienceFee();
                     ProratedAmountWithoutFees = ProratedAmountWithoutCCFee - ProratedConvenienceFee;
