@@ -57,14 +57,12 @@
             <span>
                 @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()ly subscription.<br/>Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() every month.</strong>
             </span>
-            
         }
         else
         {
             <span>
                 @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
             </span>
-
         }
     }
 }
@@ -384,6 +382,7 @@ else
             {"acceptACH", true},
             {"participationObject", participationObject},
             {"quantity", quantity},
+            {"isProrated", ViewBag.IsProrated ?? false},
         }
         );
 
