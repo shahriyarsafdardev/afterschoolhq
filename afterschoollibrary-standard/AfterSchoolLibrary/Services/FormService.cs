@@ -235,6 +235,10 @@ namespace AfterSchoolLibrary.Services
                     row.Add("");
                     row.Add("");
                 }
+                else
+                {
+                    row.Add("");
+                }
 
                 foreach (var question in questions)
                     row.Add(question.FormQuestionGroupName);
@@ -258,6 +262,10 @@ namespace AfterSchoolLibrary.Services
                     row.Add("First Name");
                     row.Add("Last Name");
                     row.Add("Email");
+                } 
+                else
+                {
+                    row.Add("School");
                 }
 
                 foreach (var question in questions)
@@ -285,6 +293,7 @@ namespace AfterSchoolLibrary.Services
                             response.RegistrantFirstName,
                             response.RegistrantLastName,
                             response.RegistrantEmail,
+                            null,
                             questions,
                             answers,
                             formType,
@@ -321,6 +330,16 @@ namespace AfterSchoolLibrary.Services
                             registrant.FirstName,
                             registrant.LastName,
                             registrant.Email,
+                            BaseLocation.BuildLocationString(
+                                        registrant.LocationName,
+                                        registrant.LocationAddress1,
+                                        registrant.LocationAddress2,
+                                        registrant.LocationCity,
+                                        null,
+                                        registrant.LocationState,
+                                        registrant.LocationPostalCode,
+                                        null,
+                                        false),
                             questions,
                             answers,
                             formType, 
@@ -382,7 +401,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static List<string> AddEmailDataReportRow(string id, bool collapseRecords, string createDate, string activityList, bool hasRegistrantInfoInQuestions, 
-            string firstName, string lastName, string email, List<FormQuestion> questions, List<FormQuestionAnswer> answers, 
+            string firstName, string lastName, string email, string school, List<FormQuestion> questions, List<FormQuestionAnswer> answers, 
             FormType formType, int? registrantId, int? firstRegistrantId, int? surveyResponseId)
         {
             var row = new List<string>();
@@ -398,6 +417,10 @@ namespace AfterSchoolLibrary.Services
                 row.Add(firstName);
                 row.Add(lastName);
                 row.Add(email);
+            }
+            else
+            {
+                row.Add(school);
             }
 
             foreach (var question in questions)
