@@ -1205,7 +1205,10 @@ namespace AfterSchoolLibrary.Models
                 "CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProviderJotFormSubmission_SubmissionId ON [ProviderJotFormSubmission] (SubmissionId)"));
-
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AvailableTag_Tag_AccountId ON [AvailableTag] (Tag,AccountId)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AvailableTag_Tag_AccountId_ObjectType ON [AvailableTag] (Tag,AccountId,ObjectType)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AssignedTag_Tag_ObjectId_ObjectType ON [AssignedTag] (Tag,ObjectId,ObjectType)"));
+            
 
             return msgs;
         }
