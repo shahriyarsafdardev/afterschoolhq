@@ -7,20 +7,6 @@ namespace AfterSchoolLibrary.Services
 {
     public static class AssignedTagService
     {
-        public static SystemMessages Save(string tag, int objectID, int objectType, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            var assignedTag = new AssignedTag();
-            
-            assignedTag.Tag = tag;
-            assignedTag.ObjectId = objectID;
-            assignedTag.ObjectType = (ObjectType)objectType;
-            
-            msgs.AddRange(assignedTag.Save(dc));
-            
-            return msgs;
-        }
-        
         public static int Remove(string tag, int objectID, int objectType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -30,7 +16,7 @@ namespace AfterSchoolLibrary.Services
         public static List<AssignedTag> GetByIdByType(int objectId, int objectType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return AssignedTag.LoadByObjectTypeObjectID(objectId, objectType, msgs);
+            return AssignedTag.LoadByObjectIdByObjectType(objectId, objectType, msgs);
         }
         
     }

@@ -79,11 +79,10 @@
     </div>
 </div>
 
-@section scripts
-{
-    <script>
 
-    $(document).ready(function(){
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
               
         $('body').on('click','.remove', function(){
            
@@ -102,14 +101,13 @@
         })
         
     });
-    
+
     function addRow() {
         var clonedObject = $("#tag-1").clone();
         clonedObject.find('#tagDescription-1').val("")
         clonedObject.insertAfter("#tag-1");
     }
-    
+
 </script>
 
-}
 

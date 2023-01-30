@@ -9,7 +9,7 @@ using BasicLibrary.DataAccess;
 namespace AfterSchoolLibrary.Models
 {
     [Serializable]
-    public class AvailableTag : BasicIDObject
+    public class AvailableTag : BasicObject
     {
         public AvailableTag()
         {
@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static List<AvailableTag> LoadByObjectType(int objectType, int accountId, SystemMessages msgs = null,
+        public static List<AvailableTag> LoadByAccountIdByObjectType(int accountId, int objectType, SystemMessages msgs = null, 
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static AvailableTag LoadById(int? Id, SystemMessages msgs = null,
+        public static AvailableTag? Load(int Id, SystemMessages msgs = null, 
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -106,7 +106,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
-        public static bool UniqueTag(string tag, int objectType, int accountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static bool ExistsByTag(string tag, int objectType, int accountId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

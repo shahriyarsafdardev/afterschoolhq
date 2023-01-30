@@ -49,11 +49,11 @@
 </div>
 
 
-@section scripts
-{
-    <script>
+
+
+<script>
     
-    $(document).ready(function(){
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
         
         $(".assignedTags").on('beforeItemAdd', function(event) {
             
@@ -64,26 +64,13 @@
             }
             else
             {
-                 var tag = event.item;
-                 var objectId = $(this).next().attr("id");
-                 var objectType = '@((int)ObjectType.Activity)';
+               var tag = event.item;
+               var objectId = $(this).next().attr("id");
+               var objectType = '@((int)ObjectType.Activity)';
                  
-                 $.ajax({  
-                     type: "GET",  
-                     url: '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=add' ,  
-                     data: {},  
-                     contentType: "application/json; charset=utf-8",  
-                     dataType: "json",  
-                     success: function (msgs) {  
-                         
-                     },            
-                     complete: function(){  
-                          
-                     },  
-                     failure: function (jqXHR, textStatus, errorThrown) {                  
-                          event.cancel = true;
-                     }  
-                 }); 
+               $.get(
+              '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=add',
+              function (data) {});
                  
             }
             
@@ -95,27 +82,13 @@
              var objectId = $(this).next().attr("id");
              var objectType = '@((int)ObjectType.Activity)';
              
-             $.ajax({  
-                 type: "GET",  
-                 url: '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=remove' ,  
-                 data: {},  
-                 contentType: "application/json; charset=utf-8",  
-                 dataType: "json",  
-                 success: function (msgs) {  
-                     
-                 },            
-                 complete: function(){  
-                      
-                 },  
-                 failure: function (jqXHR, textStatus, errorThrown) {                  
-                      event.cancel = true;
-                 }  
-             }); 
+             $.get(
+             '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=remove',
+             function (data) {});
             
         });
         
     }); 
     
-    </script>
-
-}
+</script>
+    

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using AfterSchool.Models;
@@ -34,24 +35,39 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var availableTag = new AvailableTag();
 
             if (Id.IsEmpty())
             {
-                if(tag.IsEmpty())
+                if (tag.IsEmpty())
                     msgs.Add("Tag name should not be empty", MessageType.UserError);
-            
-                if(AvailableTagService.UniqueTag(tag.Trim(), objectType, currentAccount, msgs))
+
+                if (AvailableTagService.IsUniqueTag(tag.Trim(), objectType, currentAccount, msgs))
                     msgs.Add("Tag should be unique", MessageType.UserError);
+            }
+            else
+            {
+                availableTag = AvailableTag.Load((int)Id, msgs);
             }
 
             if (msgs.HasNoErrors())
             {
-                var availableTag = AvailableTagService.GetById(Id, msgs);
-
-                if (availableTag.IsEmpty())
-                    AvailableTagService.Save(objectType, tag, currentAccount, msgs);
+                if (availableTag.ID.IsEmpty())
+                {
+                    availableTag.Tag = tag;
+                    availableTag.AccountId = (int)currentAccount.ID;
+                    availableTag.ObjectType = (ObjectType)objectType;
+                    availableTag.IsDeleted = false;
+                    availableTag.CreateDate = DateTime.UtcNow;
+                    availableTag.CreatedBy = currentAccount.ID;
+                    msgs.AddRange(availableTag.Save());
+                }
                 else
-                    AvailableTagService.Delete(availableTag, msgs);
+                {
+                    availableTag.IsDeleted = true;
+            
+                    msgs.AddRange(availableTag.Save());
+                }
             }
             
             SetTempMessages(msgs);
@@ -94,15 +110,24 @@ namespace AfterSchool.Areas.District.Controllers
         public bool AddRemoveAssignedTag(string tag, int objectID, int objectType, string operation)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
             
             if (operation == "add")
             {
-                msgs.AddRange(AssignedTagService.Save(tag, objectID, objectType, msgs));
+                var assignedTag = new AssignedTag();
+            
+                assignedTag.Tag = tag;
+                assignedTag.ObjectId = objectID;
+                assignedTag.ObjectType = (ObjectType)objectType;
+                assignedTag.CreateDate = DateTime.UtcNow;
+                assignedTag.CreatedBy = currentAccount.ID;
+            
+                msgs.AddRange(assignedTag.Save());
             }
             
             if (operation == "remove")
             {
-                AssignedTagService.Remove(tag, objectID, objectType, msgs);
+                AssignedTag.Delete(tag, objectID, objectType, msgs);
             }
 
             return true;
