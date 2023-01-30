@@ -1823,7 +1823,9 @@ namespace AfterSchool.Controllers
                                                 msgs);
 
                 ViewBag.IsProrated = proratingCalculation.GetIsProrated();
-                ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
+
+                if (proratingCalculation.GetIsProrated())
+                    ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
             }
             
             return View("Payment");

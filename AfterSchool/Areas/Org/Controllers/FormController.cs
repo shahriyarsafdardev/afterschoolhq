@@ -519,6 +519,16 @@ namespace AfterSchool.Areas.Org.Controllers
                                     Email = registrant.Email,
                                     RegistrantId = registrant.ID.ToString(),
                                     SurveyResponseId = "",
+                                    School = BaseLocation.BuildLocationString(
+                                                registrant.LocationName, 
+                                                registrant.LocationAddress1,
+                                                registrant.LocationAddress2,
+                                                registrant.LocationCity,
+                                                null,
+                                                registrant.LocationState,
+                                                registrant.LocationPostalCode,
+                                                null,
+                                                false),
                                 }).ToList();
             }
 

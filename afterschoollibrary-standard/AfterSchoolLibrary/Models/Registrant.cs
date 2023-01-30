@@ -121,6 +121,42 @@ namespace AfterSchoolLibrary.Models
             set => MDV["FormDataFixProcessed"].Value = value;
         }
 
+        public string LocationName
+        {
+            get => (string) MDV["LocationName"].Value;
+            set => MDV["LocationName"].Value = value;
+        }
+
+        public string LocationAddress1
+        {
+            get => (string) MDV["LocationAddress1"].Value;
+            set => MDV["LocationAddress1"].Value = value;
+        }
+
+        public string LocationAddress2
+        {
+            get => (string) MDV["LocationAddress2"].Value;
+            set => MDV["LocationAddress2"].Value = value;
+        }
+
+        public string LocationCity
+        {
+            get => (string) MDV["LocationCity"].Value;
+            set => MDV["LocationCity"].Value = value;
+        }
+
+        public string LocationState
+        {
+            get => (string) MDV["LocationState"].Value;
+            set => MDV["LocationState"].Value = value;
+        }
+
+        public string LocationPostalCode
+        {
+            get => (string) MDV["LocationPostalCode"].Value;
+            set => MDV["LocationPostalCode"].Value = value;
+        }
+
 
         public Registrant()
         {
@@ -161,6 +197,13 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "PersonTypeId", SqlDbType.Int);
                 _dp.Add(className, "FormDataFixProcessed", SqlDbType.Bit);
 
+                _dp.Add(className, "LocationName", typeof(Location).Name, "Name", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationAddress1", typeof(Location).Name, "Address1", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationAddress2", typeof(Location).Name, "Address2", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationCity", typeof(Location).Name, "City", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationState", typeof(Location).Name, "State", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationPostalCode", typeof(Location).Name, "PostalCode", SqlDbType.NVarChar);
+
                 return _dp;
             }
         }
@@ -177,6 +220,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 var dq = get_DatabaseQuery(ObjectMap, typeof(Registrant).Name);
+                dq.Joins.Add(Location.ObjectMap["ID"], ObjectMap["SchoolLocationId"], DatabaseJoinTypeEnum.LeftOuterJoin);
 
                 return dq;
             }
@@ -777,11 +821,20 @@ namespace AfterSchoolLibrary.Models
             bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType)
         {
             string sql = @$"
-                select {(getCountOnly ? "count(distinct Registrant.ID)" : "distinct Registrant.*")} 
+                select {(getCountOnly ? 
+                    "count(distinct Registrant.ID)" : "" +
+                    @"distinct Registrant.*, 
+                        Location.Name as LocationName, 
+                        Location.Address1 as LocationAddress1, 
+                        Location.Address2 as LocationAddress2, 
+                        Location.City as LocationCity, 
+                        Location.State as LocationState, 
+                        Location.PostalCode as LocationPostalCode")} 
                 from 
                     FormQuestionAnswer inner join 
                     FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
-                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID";
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID left outer join
+                    Location on Registrant.SchoolLocationId = Location.ID";
 
             if (activityIds.IsNotEmpty() && activityIds.Any())
                 sql += @"

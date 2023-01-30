@@ -278,6 +278,12 @@
                                             <th></th>
                                         </text>
                                     }
+                                    else
+                                    {
+                                        <text>
+                                            <th></th>
+                                        </text>
+                                    }
 
                                     @foreach (var question in questions)
                                     {
@@ -295,6 +301,12 @@
                                             <th>First Name</th>
                                             <th>Last Name</th>
                                             <th>Email</th>
+                                        </text>
+                                    }
+                                    else
+                                    {
+                                        <text>
+                                            <th>School</th>
                                         </text>
                                     }
 
@@ -624,6 +636,8 @@
                                 tableRow += `<td>${record.FirstName}</td>`;
                                 tableRow += `<td>${record.LastName}</td>`;
                                 tableRow += `<td>${record.Email}</td>`;
+                            } else {
+                                tableRow += `<td>${record.School}</td>`;
                             }
 
                             for (let question of questions) {
