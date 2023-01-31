@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -8,7 +9,7 @@ namespace AfterSchoolLibrary.Integrations
     public interface IBackgroundCheckWorkflow
     {
         Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
-        void ScheduleBackgroundCheck();
+        Task ScheduleBackgroundCheck();
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -72,8 +73,52 @@ namespace AfterSchoolLibrary.Integrations
             return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl , msg = messages};
         }
 
-        public void ScheduleBackgroundCheck()
+        public async Task ScheduleBackgroundCheck()
         {
+            var msgs = new SystemMessages();
+            var volunteerApprovals = VolunteerApproval.LoadExpiredVolunteers(msgs);
+
+            try
+            {
+                if (volunteerApprovals.IsNotEmpty())
+                {
+                    foreach (var volunteerApproval in volunteerApprovals)
+                    {
+                        var webUser = WebUser.LoadbyId((int) volunteerApproval.WebUserId, msgs);
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, msgs).FirstOrDefault();
+
+                        var token = await tokenQuery.GetAsync(credentials);
+
+                        var candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+
+                        if (candidateId.IsNotEmpty())
+                        {
+
+                            var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
+
+                            var newBackgroundCheck = new BackgroundCheck
+                            {
+                                WebUserId = webUser.ID!.Value,
+                                RequestedForFiscalAccountId = backgroundCheck.RequestedForFiscalAccountId,
+                                BackgroundCheckStatusId = BackgroundCheckStatus.EmailSentToVolunteer,
+                                BackgroundCheckResultId = BackgroundCheckResult.Pending,
+                                SterlingCandidateId = candidateId,
+                                SterlingInviteUrl = backgroundCheckUrl,
+                                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                            };
+
+                            if (msgs.HasNoErrors())
+                                msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+            }
             
         }
     }

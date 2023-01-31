@@ -124,6 +124,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
         }
         
+        public static List<VolunteerApproval> LoadExpiredVolunteers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = $@"select * from VolunteerApproval where DATEDIFF(day, GETDATE(), CONVERT(DATE, ExpirationDate)) = 30 and IsActive = 1";
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
         public static SystemMessages Alter(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
