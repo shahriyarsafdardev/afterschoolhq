@@ -361,7 +361,7 @@ namespace AfterSchoolLibrary.Models
                 ? new FeeCalculationObject(
                     GetSubscriptionCostNoFees(msgs, dc), 
                     BillingAccount, 
-                    SubscriptionPlan.IsConvenienceFeeTakenOutOfCost, 
+                    SubscriptionPlan?.IsConvenienceFeeTakenOutOfCost ?? true , 
                     msgs, 
                     dc).GetCreditCardFee()
                 : 0;
