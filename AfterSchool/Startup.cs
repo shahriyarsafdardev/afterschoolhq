@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool;
+using AfterSchool.Areas.District.Controllers;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
@@ -61,7 +62,7 @@ namespace AfterSchool
             RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(3, 00));
             
             //Try anyone
-            RecurringJob.AddOrUpdate(() => app.Use<IBackgroundCheckWorkflow>(resolver.GetService<BackgroundCheckWorkflow>().ScheduleBackgroundCheck()), Cron.Daily(0, 05));
+            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckRepository>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
 
         }
 
