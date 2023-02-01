@@ -1246,15 +1246,14 @@ namespace AfterSchoolLibrary.Helpers
                 var paymentAdditionalDetails = $"{paymentPlan.BillingPeriodTypeId.ToString().SplitByUpperCase()}ly Payment Plan Charge";
                 paymentPlanDetails =
                             $"<p style='float:left;padding-bottom:15px;'><span style='float:left;padding-bottom:13px;'>Your first payment plan installment will be automatically deducted on " +
-                            $"{startDate.ToLongDateString()} from the payment method you provided. Credit card fee does not apply to ACH payments.</span>" +
+                            $"{startDate.ToLongDateString()} from the payment method you provided. {achPaymentText}</span>" +
                             $"<span>{paymentDescription}</span>" +
                             $"<span style='float:right;margin-right:48px;'>{paymentPlan.CostPerPeriod.Value.ToCurrency()}</span><br/>" +
                             $"<span style='text-align:left;font-size:12px;'>{paymentAdditionalDetails}</span></p>";
-                if (ccPaymentPlanFee > 0)
-                {
+
+                if (ccPaymentPlanFee > 0 && checkoutObject.PaymentType != PaymentType.ACH)
                     paymentPlanDetails += $"<p style='float:left;padding-bottom:15px;width:100%;'><span>{ccPaymentPlanTitle}</span>" +
-                                                                $"<span style='float:right;margin-right:48px;'>{ccPaymentPlanFee.ToCurrency()}</span></p>";
-                }
+                                          $"<span style='float:right;margin-right:48px;'>{ccPaymentPlanFee.ToCurrency()}</span></p>";
             }
 
             if (showTable)
