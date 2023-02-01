@@ -1,5 +1,7 @@
 using System;
+using System.Security.Policy;
 using System.Threading.Tasks;
+using System.Web;
 using AfterSchoolLibrary.Models;
 using Emmersion.Http;
 using Newtonsoft.Json;
@@ -55,7 +57,7 @@ namespace AfterSchoolLibrary.Integrations
         {
             var request = new HttpRequest
             {
-                Url = $"{credentials.Endpoint}/v2/candidates?email={webUser.Email}",
+                Url = $"{credentials.Endpoint}/v2/candidates?email={HttpUtility.UrlEncode(webUser.Email)}",
                 Method = HttpMethod.GET,
                 Headers = new HttpHeaders()
                     .Add("Authorization", $"Bearer {bearerToken}")

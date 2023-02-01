@@ -3,11 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool;
-using AfterSchool.Areas.District.Controllers;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Emmersion.InfluxDB;
 using Hangfire;
@@ -15,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
+using AccountService = AfterSchoolLibrary.Services.AccountService;
 
 [assembly: OwinStartup(typeof(Startup))]
 
@@ -52,17 +51,18 @@ namespace AfterSchool
             Database.ConnectionString = connectionString;
 
             AppConfig.Init();
-
+            
             app.Use<RecordControllerActionsToInfluxMiddleware>(resolver.GetService<IInfluxRecorder>());
-
+            
             app.UseHangfireDashboard();
             app.UseHangfireServer();
-
+            
             // schedule and run the task daily at 3am EST
             RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(3, 00));
-            
+
             //Try anyone
-            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckRepository>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
+            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
+            //RecurringJob.AddOrUpdate<IBackgroundCheckWorkflow>(x => x.ScheduleBackgroundCheck(), Cron.Daily(3, 00));
 
         }
 
