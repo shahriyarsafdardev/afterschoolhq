@@ -1458,11 +1458,11 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SystemMessages SendSubscriptionPaymentSucceeded(this Account account,
-            RegistrantSubscriptionPlan rsp, SubscriptionPlan plan, DatabaseConnection dc = null)
+            CheckoutObject checkoutObject, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
-            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, rsp, plan));
+            msgs.AddRange(EmailHelper.SendSubscriptionPaymentSucceeded(accountOwner, checkoutObject));
             return msgs;
         }
 
@@ -5029,15 +5029,19 @@ namespace AfterSchoolLibrary.Services
             return Transaction.GetTotalAmountDebitedFromAccount(account.ID.Value, search, startDate, endDate, false,
                 msgs, dc);
         }
+        public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan,
+            PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return billingAccount.GetSubscriptionPlatformFeePercent(plan, paymentType, plan.GetCostPerPeriodPerPerson(msgs, dc), msgs, dc);
+        }
 
         // TODO: Needs review
         public static decimal GetSubscriptionPlatformFeePercent(this Account billingAccount, SubscriptionPlan plan,
-            PaymentType paymentType, SystemMessages msgs = null, DatabaseConnection dc = null)
+            PaymentType paymentType, decimal costPerPeriod, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (plan.CostPerPeriod <= 0)
                 return 0;
 
-            var costPerPeriod = plan.GetCostPerPeriodPerPerson(msgs, dc);
             var calcObj = new FeeCalculationObject(
                 costPerPeriod,
                 billingAccount,

@@ -51,10 +51,19 @@
         var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
             ? "today"
             : planStartDate.ToLongDateString();
-
-        <span>
-            @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
-        </span>
+        if (ViewBag.IsProrated ?? false)
+        {
+            var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
+            <span>
+                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()ly subscription.<br/>Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() every month.</strong>
+            </span>
+        }
+        else
+        {
+            <span>
+                @(includePlus ? "plus a" : "") subscription of <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong> every <strong>@plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong> starting <strong>@startDateText</strong>
+            </span>
+        }
     }
 }
 
@@ -248,9 +257,9 @@ else
                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                     }
 
-                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue)
+                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue && !participationObject.Schedule.IsOngoing)
                     {
-                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date) </strong>.</p>
+                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date)</strong>.</p>
                     }
 
                     <hr/>
@@ -373,6 +382,7 @@ else
             {"acceptACH", true},
             {"participationObject", participationObject},
             {"quantity", quantity},
+            {"isProrated", ViewBag.IsProrated ?? false},
         }
         );
 

@@ -510,6 +510,11 @@ Public Module Extensions
     End Function
 
     <Extension()>
+    Public Function AddBiWeeks(ByVal aDateTime As Date, ByVal weeks As Integer) As Date
+        Return aDateTime.AddDays(weeks * 14)
+    End Function
+
+    <Extension()>
     Public Function NextDayOfWeek(ByVal aStartDate As Date, ByVal day As DayOfWeek) As Date
         Dim daysToAdd As Integer = (Convert.ToInt32(day) - Convert.ToInt32(aStartDate.DayOfWeek) + 7) Mod 7
         Return aStartDate.AddDays(daysToAdd)
