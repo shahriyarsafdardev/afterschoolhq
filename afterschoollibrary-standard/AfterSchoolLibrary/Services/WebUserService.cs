@@ -692,7 +692,7 @@ namespace AfterSchoolLibrary.Services
         /// <param name="msgs"></param>
         /// <param name="dc"></param>
         /// <returns></returns>
-        public static Account AddNewVolunteerAccount(this WebUser user, UserType userType, bool isActive, WebUser loggedInUser,ParticipationObject participationObject, SystemMessages msgs = null,
+        public static Account AddNewVolunteerAccount(this WebUser user, UserType userType, bool isActive, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             Account account = null;
@@ -713,7 +713,6 @@ namespace AfterSchoolLibrary.Services
                         timeZone: null,
                         createWithStripe: false,
                         loggedInUser: loggedInUser,
-                        participationObject:participationObject,
                         msgs: amsgs,
                         dc: adc);
 
@@ -762,7 +761,6 @@ namespace AfterSchoolLibrary.Services
                         timeZone: null,
                         createWithStripe: true,
                         loggedInUser: loggedInUser,
-                        participationObject:null,
                         msgs: amsgs,
                         dc: adc);
 
@@ -813,7 +811,6 @@ namespace AfterSchoolLibrary.Services
                         timeZone: null,
                         createWithStripe: true,
                         loggedInUser: loggedInUser,
-                        participationObject:null,
                         msgs: amsgs,
                         dc: adc);
 

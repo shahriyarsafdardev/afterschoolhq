@@ -136,7 +136,6 @@ namespace AfterSchool.Controllers
                     UserType.Owner,
                     true,
                     user,
-                    participationObject,
                     msgs,
                     dc);
 

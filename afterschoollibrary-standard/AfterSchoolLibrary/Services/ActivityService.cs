@@ -1533,7 +1533,6 @@ namespace AfterSchoolLibrary.Services
                         timeZone: activityAccount.TimeZone,
                         loggedInUser: loggedInUser,
                         createWithStripe: false,
-                        participationObject:null,
                         msgs: msgs,
                         dc: dc);
 

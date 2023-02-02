@@ -51,7 +51,7 @@ namespace AfterSchool.Controllers
 
                     // if no parent account, then create one real quick
                     if (registrantAccount.IsEmpty())
-                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser,participationObject, msgs);
+                        registrantAccount = currentUser.AddNewVolunteerAccount(UserType.Owner, true, currentUser, msgs);
                 }
 
                 var masterRegistrant = currentUser.GetMasterVolunteerRegistrant(msgs);
@@ -602,7 +602,7 @@ namespace AfterSchool.Controllers
                     ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
                 }
 
-                if (msgs.HasNoErrors() && currentAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
+                if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
                 {
                     await InitateBackgroundCheck(currentUser, participationObject, msgs);
                 }
@@ -674,18 +674,12 @@ namespace AfterSchool.Controllers
 
         private async Task<SystemMessages> InitateBackgroundCheck(WebUser webUser,ParticipationObject participationObject,SystemMessages msgs)
         {
-            var backgroundCheck = LibraryModels.BackgroundCheck.LoadByWebUserId((int) webUser.ID, msgs).FirstOrDefault();
-            var fiscalAccountId = AccountRelationship.LoadAccountByVisitorAccountId((int) participationObject.OwnerAccount.ID)?.HostAccountId;
-            var accountId = fiscalAccountId.IsNotEmpty() ? fiscalAccountId : SessionVariables.CurrentAccount.ID;
-            if (backgroundCheck.IsEmpty())
-            {
-                if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
-                var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, (int)accountId, msgs);
+            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
+            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, (int) participationObject.OwnerAccount.FiscalAccountId, msgs);
 
-                if (msgs.HasNoErrors())
-                {
-                    SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, msgs);
-                }
+            if (msgs.HasNoErrors())
+            {
+                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, msgs);
             }
 
             return msgs;

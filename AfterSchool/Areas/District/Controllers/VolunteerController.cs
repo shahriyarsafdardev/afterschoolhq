@@ -59,7 +59,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault();
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).LastOrDefault();
                     
                     volunteerViewModel.Add(VolunteerAssembler.VolunteerAssemblerResult(registrant, volunteerApproval));
                     
@@ -107,7 +107,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId((int)registrant.WebUserId).FirstOrDefault();
+                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId((int)registrant.WebUserId).LastOrDefault();
                     
                     if(backgroundCheck.IsNotEmpty())
                         backgroundViewModel.Add(BackgroundAssembler.BackgroundAssemblerResult(registrant, backgroundCheck));
@@ -221,7 +221,6 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
-            //var volunteerApprovals = VolunteerApproval.Load();
             var count = VolunteerTask.GetCountTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, msgs);
             var volunteerTasks = VolunteerTask.LoadByTaskTypeAndAppStatus(taskType, applicationStatus, search, currentAccount, start, length, msgs);
 

@@ -46,9 +46,6 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
             if (assignmentType != RegistrationAssignmentType.NotSet)
                 registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId == assignmentType).OrderBy(x => x.SeatIndex).ToList();
 
-            if (date.IsNotEmpty())
-                registrantActivities = registrantActivities.Where(x => String.Equals(x.CreateDate.Value.ToShortDateString(), date.Trim())).ToList();
-
             return new RegistrantsResult
             {
                 Activity = activity,

@@ -2906,7 +2906,7 @@ namespace AfterSchoolLibrary.Services
         {
 
             return CreateNew(orgName, null, null, false, accountType, null, null, null, null, 
-                loggedInUser, false,null, msgs, dc);
+                loggedInUser, false, msgs, dc);
         }
 
         public static Account CreateNewUnclaimedAccount(string orgName, string email, string claimemaildomain,
@@ -2920,12 +2920,12 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
             AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
-            string timeZone, WebUser loggedInUser, bool createWithStripe,ParticipationObject participationObject, SystemMessages msgs,
+            string timeZone, WebUser loggedInUser, bool createWithStripe, SystemMessages msgs,
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
                     packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
-                SignUpType.NotSet, loggedInUser,participationObject, msgs, dc);
+                SignUpType.NotSet, loggedInUser, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
@@ -2935,7 +2935,7 @@ namespace AfterSchoolLibrary.Services
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
                     packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
-                signUpTypeId, loggedInUser,null, msgs, dc);
+                signUpTypeId, loggedInUser, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
@@ -2944,13 +2944,13 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, stripeAccountType, true, SignUpType.NotSet, loggedInUser,null, msgs, dc);
+                packageBillingPeriod, timeZone, createWithStripe, stripeAccountType, true, SignUpType.NotSet, loggedInUser, msgs, dc);
         }
 
         public static Account CreateNew(string orgName, string email, string phone, bool isActive,
             AccountType accountType, WebUser accountOwner, int? packageId, BillingPeriodType? packageBillingPeriod,
             string timeZone, bool createWithStripe, StripeAccountType stripeAccountType, bool isClaimed, SignUpType signupTypeId, WebUser loggedInUser,
-            ParticipationObject participationObject,SystemMessages msgs, DatabaseConnection dc)
+            SystemMessages msgs, DatabaseConnection dc)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var uniqueName = GenerateUniqueName(orgName, null, msgs, dc);
@@ -2983,7 +2983,6 @@ namespace AfterSchoolLibrary.Services
                 IsClaimed = isClaimed,
                 OnboardingStepDone = onboardingStepDone,
                 SignUpTypeId = signupTypeId,
-                FiscalAccountId = accountType == AccountType.Volunteer && participationObject.IsNotEmpty() ? AccountRelationship.LoadAccountByVisitorAccountId((int)participationObject.OwnerAccount.ID)?.HostAccountId : null 
             };
 
             if (createWithStripe)
