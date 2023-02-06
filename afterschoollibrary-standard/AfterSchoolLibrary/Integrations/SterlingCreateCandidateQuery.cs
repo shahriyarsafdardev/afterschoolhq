@@ -67,6 +67,10 @@ namespace AfterSchoolLibrary.Integrations
 
             var response = await httpClient.ExecuteAsync(request);
 
+            if (response.StatusCode == 404 || response.StatusCode == 400)
+                return null;
+            
+                
             JArray responseBody = JArray.Parse(response.Body);
 
             if (response.StatusCode == 200)
