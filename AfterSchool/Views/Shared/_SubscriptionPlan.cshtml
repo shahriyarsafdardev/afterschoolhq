@@ -161,11 +161,22 @@
                         </select>
                     </div>
 
-                    <p id="container-subscription-enddate-label" class="text-muted text-medium-small hide">
+                    <p id="container-subscription-enddate-label hide" class="text-muted text-medium-small hide">
                         <span>
                             As per the activity schedule and subscription configuration, <strong id="calculatedEnddate"></strong>.
                         </span>
                     </p>
+                    <span class="is-schedule-ongoing hide">@schedule.IsOngoing</span>
+                    if (schedule.IsOngoing)
+                    {
+                        <p class="text-muted text-medium-small is-ongoing-checkout">Payment will start at the time of checkout and will continue until cancelled.</p>
+                        <p class="text-muted text-medium-small is-ongoing-period-start hide">Payment will start on <b class="periodstartdate"></b> and will continue until cancelled.</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-medium-small not-ongoing-activity-start">Payment will start on <b>@schedule.StartDate.ToLongDateString()</b> or will be prorated for the date of registration, and the last payment will be taken out on <b>@schedule.EndDate.ToLongDateString()</b>.</p>
+                        <p class="text-muted text-medium-small not-ongoing-period-start hide">Payment will start on <b class="periodstartdate"></b> or will be prorated for the date of registration, and the last payment will be taken out on <b class="scheduleenddate"></b>.</p>
+                    }
                     <p class="text-muted text-medium-small">
                         If a registrant joins in the middle of an activity, AfterSchool HQ will pro-rate the cost at the time of registration.
                     </p>
@@ -263,6 +274,8 @@
                     let endDateFormatted = data.endDateFormatted;
                     $('#subscriptionStartDate').val(startDateFormatted);
                     $('#subscriptionEndDate').val(endDateFormatted);
+                    $('.periodstartdate').html(startDateFormatted);
+                    $('.scheduleenddate').html(endDateFormatted);
                     endDateInput.html(`payment will start on ${startDateFormatted} and it will end on ${endDateFormatted}`);
                     return false;
                 } else {
