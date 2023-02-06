@@ -510,6 +510,14 @@
         });
 
         $('#subscriptionPaymentStartType').change(function () {
+            if ($('.is-schedule-ongoing').html().toLowerCase() === 'true')
+                {
+                    ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
+                }
+            else 
+                {
+                    ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
+                }
             toggleSubscriptionPeriodWeek();
         });
 
@@ -538,6 +546,12 @@
             @:disableAll();
         }
     });
+    
+    function addOrRemoveClass(elem1, elem2)
+    {
+        $(elem1).addClass(' hide');
+        $(elem2).removeClass('hide');
+    }
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
