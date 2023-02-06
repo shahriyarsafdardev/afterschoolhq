@@ -21,6 +21,7 @@ namespace AfterSchoolLibrary.Models
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
             BackgroundCheckSourceId = BackgroundCheckSource.NotSet;
             BackgroundCheckResultId = BackgroundCheckResult.NotSet;
+            IsActive = false;
         }
 
         public int WebUserId
@@ -94,6 +95,12 @@ namespace AfterSchoolLibrary.Models
             get => (DateTime?) MDV["ManualReviewCompleteDate"].Value;
             set => MDV["ManualReviewCompleteDate"].Value = value;
         }
+        
+        public bool IsActive
+        {
+            get => (bool) MDV["IsActive"].Value;
+            set => MDV["IsActive"].Value = value;
+        }
 
         public static DatabaseParameters ObjectMap
         {
@@ -113,6 +120,7 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "VolunteerCompletedDate", SqlDbType.DateTime);
                 dp.Add(className, "SterlingReviewCompleteDate", SqlDbType.DateTime);
                 dp.Add(className, "ManualReviewCompleteDate", SqlDbType.DateTime);
+                dp.Add(className, "IsActive", SqlDbType.Bit);
 
                 return dp;
             }
@@ -172,6 +180,8 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckResultId.IsEmpty())
                 msgs.Add("BackgroundCheckResultId is required on BackgroundCheck object", MessageType.Error);
+            if (IsActive.IsEmpty())
+                msgs.Add("IsActive is Required", MessageType.Error);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(BackgroundCheck)));
@@ -205,6 +215,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["VolunteerCompletedDate"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingReviewCompleteDate"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ManualReviewCompleteDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["IsActive"]}));
 
             return msgs;
         }

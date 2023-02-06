@@ -5,6 +5,7 @@ using System.Web;
 using AfterSchoolLibrary.Models;
 using Emmersion.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace AfterSchoolLibrary.Integrations
 {
@@ -63,11 +64,13 @@ namespace AfterSchoolLibrary.Integrations
                     .Add("Authorization", $"Bearer {bearerToken}")
                     .Add("Content-Type", "application/json"),
             };
-        
+
             var response = await httpClient.ExecuteAsync(request);
 
+            JArray responseBody = JArray.Parse(response.Body);
+
             if (response.StatusCode == 200)
-                return jsonSerializer.Deserialize<SterlingCandidateResponse>(response.Body).Id;
+                return jsonSerializer.Deserialize<SterlingCandidateResponse>(responseBody[0].ToString()).Id;
             
             return null;
         }

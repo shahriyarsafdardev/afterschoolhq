@@ -25,8 +25,8 @@ namespace AfterSchool
             
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                Formatting = Newtonsoft.Json.Formatting.Indented,
-                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             
         }
