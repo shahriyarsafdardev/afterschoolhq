@@ -153,7 +153,8 @@ namespace AfterSchool.Areas.District.Controllers
 
                         if (msgs.HasNoErrors())
                         {
-                            VolunteerTaskService.EditTask(volunteerTask, msgs);
+                            volunteerTask.DateCompleted = DateTime.UtcNow;
+                            msgs.AddRange(volunteerTask.Save());
                             
                             SendLinkToVolunteer(backgroundCheckRequestResult.BackgroundCheckUrl, webUser, msgs);
                         }
@@ -281,8 +282,8 @@ namespace AfterSchool.Areas.District.Controllers
 
                             if (volunteerTask.IsNotEmpty())
                             {
-                                VolunteerTaskService.EditTask(volunteerTask,
-                                    amsgs, adc);
+                                volunteerTask.DateCompleted = DateTime.UtcNow;
+                                amsgs.AddRange(volunteerTask.Save(adc));
                             }
 
                             VolunteerApprovalService.AddApproval(Convert.ToInt32(webUserID),
@@ -293,7 +294,6 @@ namespace AfterSchool.Areas.District.Controllers
                                 currentUser,
                                 amsgs,adc
                             );
-
                         }
                     },
                     onSuccess: (SystemMessages smsgs) =>

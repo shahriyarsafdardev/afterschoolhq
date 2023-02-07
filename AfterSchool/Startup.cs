@@ -60,10 +60,8 @@ namespace AfterSchool
             // schedule and run the task daily at 3am EST
             RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(3, 00));
 
-            //Try anyone
-            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
-            //RecurringJob.AddOrUpdate<IBackgroundCheckWorkflow>(x => x.ScheduleBackgroundCheck(), Cron.Daily(3, 00));
-
+            // Schedule reinitiate backgroundcheck
+            //RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
         }
 
         private void ConfigureServices(IServiceCollection services)

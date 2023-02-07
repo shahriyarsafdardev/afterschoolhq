@@ -34,14 +34,5 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(volunteerTask.Save(dc: dc));
             return volunteerTask;
         }
-        
-        public static VolunteerTask EditTask(VolunteerTask volunteerTask , SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            volunteerTask.DateCompleted = DateTime.UtcNow;
-            msgs.AddRange(volunteerTask.Save(dc: dc));
-            return volunteerTask;
-        }
-        
     }
 }
