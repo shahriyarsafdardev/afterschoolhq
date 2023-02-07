@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -21,46 +23,54 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var parsedObject = JObject.Parse(json.ToString());
                 var payload = parsedObject["payload"].ToString();
                 var responseBody = JsonConvert.DeserializeObject<Payload>(payload);
-            
-                BackgroundCheck backGroundCheck = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
-
-                if (backGroundCheck.IsNotEmpty())
-                {
-
-                    if (responseBody.result == "Clear")
-                    {
-                        backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
                 
-                        VolunteerApprovalService.AddApproval(backGroundCheck.WebUserId,
-                            backGroundCheck.RequestedForFiscalAccountId,
+                List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
+                var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
+                
+                if (responseBody.result != "")
+                {
+                    
+                    if (backgroundChecks.IsNotEmpty())
+                    {
+                        foreach (var backgroundCheck in backgroundChecks)
+                        {
+                            backgroundCheck.IsActive = false;
+                            msgs.AddRange(backgroundCheck.Save());
+                        }
+                    }
+
+                    latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
+            
+                    if(responseBody.result == "Clear")
+                        VolunteerApprovalService.AddApproval(latestBackgroundCheck.WebUserId,
+                            latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
                             "Approve By Sterling",
-                            (DateTime)backGroundCheck.ExpirationDate,
+                            (DateTime)latestBackgroundCheck.ExpirationDate,
                             null,
                             msgs
                         );
-                        
-                    }
-
-                    if (responseBody.result == "Review")
-                    {
-                        backGroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
-                        
-                        VolunteerTaskService.AddTask(backGroundCheck.WebUserId, 
+                    
+                    if(responseBody.result == "Review")
+                        VolunteerTaskService.AddTask(latestBackgroundCheck.WebUserId, 
                             TaskStatus.ReviewBackground, 
                             ApplicationStatus.FailedBackgroundCheck, 
-                            backGroundCheck.RequestedForFiscalAccountId,
+                            latestBackgroundCheck.RequestedForFiscalAccountId,
                             null,
                             msgs);
-                    }
                     
-                    //EmailHelper.SendEmail("bilal@reborncode.com", "Json", $"<html><body><h1>HTML Email</h1><p>{parsedObject}</p></body></html>", false);
+                    latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+                    latestBackgroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
+                    latestBackgroundCheck.IsActive = true;
                     
-                    backGroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-                    backGroundCheck.BackgroundCheckResultId = responseBody.result == "" ? BackgroundCheckResult.Pending : (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
-
-                    if(msgs.HasNoErrors())
-                        msgs.AddRange(backGroundCheck.Save());
+                    msgs.AddRange(latestBackgroundCheck.Save());
+                }
+                else
+                {
+                    latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+                    latestBackgroundCheck.BackgroundCheckResultId = BackgroundCheckResult.Pending;
+                    
+                    msgs.AddRange(latestBackgroundCheck.Save());
                 }
 
                 return ReturnOK(msgs);

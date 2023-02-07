@@ -3,8 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AfterSchoolLibrary.Enums;
+using Amazon.DynamoDBv2.DocumentModel;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Twilio.TwiML.Voice;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -230,15 +233,16 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static BackgroundCheck LoadByCandidateId(string candidateId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByCandidateId(string candidateId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["SterlingCandidateId"], candidateId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static List<BackgroundCheck> LoadByRequestedForFiscalAccountId(int requestedForFiscalAccountId, SystemMessages msgs = null,
@@ -249,5 +253,6 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RequestedForFiscalAccountId"], requestedForFiscalAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+
     }
 }

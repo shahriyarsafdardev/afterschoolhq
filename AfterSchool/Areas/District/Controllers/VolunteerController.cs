@@ -1,4 +1,4 @@
-﻿using AfterSchool.Models;
+using AfterSchool.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -360,7 +360,9 @@ namespace AfterSchool.Areas.District.Controllers
 
             if (registration.IsEmpty())
                 return;
-            
+
+            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId((int) registrant.WebUserId, msgs).LastOrDefault();
+
             var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
@@ -368,6 +370,7 @@ namespace AfterSchool.Areas.District.Controllers
             ViewBag.Registrations = allRegistrations;
             ViewBag.SelectedRegistration = registration;
             ViewBag.SelectedType = volunteerApprovalStatus.IsNotEmpty() ? volunteerApprovalStatus :  ApprovalStatus.NotSet;
+            ViewBag.BackgroundCheck = backgroundCheck;
             ViewBag.Messages = msgs;
 
             if (Request["returnurl"].IsNotEmpty())

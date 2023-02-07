@@ -65,6 +65,8 @@ namespace AfterSchoolLibrary.Integrations
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
                 SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
                 ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                IsActive = true,
+                CreateDate = DateTime.UtcNow,
             };
             
             if(messages.HasNoErrors())
@@ -107,6 +109,8 @@ namespace AfterSchoolLibrary.Integrations
                                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
                                 SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
                                 ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                                IsActive = false,
+                                CreateDate = DateTime.UtcNow,
                             };
 
                             if (msgs.HasNoErrors())

@@ -1,4 +1,4 @@
-﻿@model Registration
+@model Registration
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
     var registrant = (Registrant) ViewBag.Registrant;
@@ -7,6 +7,7 @@
     var registrations = (List<Registration>) ViewBag.Registrations;
     var selectedRegistration = (Registration) ViewBag.SelectedRegistration;
     var type = (ApprovalStatus)ViewBag.SelectedType;
+    var backgroundCheck = (BackgroundCheck)ViewBag.BackgroundCheck;
 }
 
 <style>
@@ -66,9 +67,8 @@
                             <select name="r" id="r" class="form-control" onchange="registrationChange(this.value)">
                                 @foreach (var registration in registrations)
                                 {
-                                    <option
-                                        value="@registration.RegistrantId"
-                                        @(registration.RegistrantId == selectedRegistration.RegistrantId ? "selected=\"selected\"" : "")>
+                                    <option value="@registration.RegistrantId"
+                                            @(registration.RegistrantId == selectedRegistration.RegistrantId ? "selected=\"selected\"" : "")>
                                         Registration - @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
                                     </option>
                                 }
@@ -76,10 +76,10 @@
                         </div>
 
                         <div class="col-lg-2 pull-right" onchange="volunteerStatusChange()">
-                            <select name="type" id="type" class="form-control">
+                            <select name="type" id="type" class="form-control" @(backgroundCheck.BackgroundCheckResultId == BackgroundCheckResult.Pending ? "disabled" : "")>
                                 @foreach (var status in Enum.GetValues(typeof(ApprovalStatus)).Cast<ApprovalStatus>().Except(ApprovalStatus.Requested.AsList()).Except(ApprovalStatus.All.AsList()))
                                 {
-                                    <option @(status == type ? "selected" : "") value="@((int)status)">
+                                    <option @(status == type ? "selected" : "") value="@((int) status)">
                                         @status
                                     </option>
                                 }
