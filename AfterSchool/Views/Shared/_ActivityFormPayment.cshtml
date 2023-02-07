@@ -510,14 +510,6 @@
         });
 
         $('#subscriptionPaymentStartType').change(function () {
-            if ($('.is-schedule-ongoing').html().toLowerCase() === 'true')
-                {
-                    ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
-                }
-            else 
-                {
-                    ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
-                }
             toggleSubscriptionPeriodWeek();
         });
 
@@ -576,6 +568,14 @@
             clearSubscriptionPaymentHiddenInputs();
             hideWeekMonthContainers();
         }
+        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true')
+            {
+                ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
+            }
+        else 
+            {
+                ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
+            }
     }
 
     function hideWeekMonthContainers() {
