@@ -2823,15 +2823,6 @@ namespace AfterSchoolLibrary.Services
 
             if (ap.IsEmpty())
                 return;
-
-            if (account.AccountTypeId == AccountType.School)
-            {
-                ap.AddOrUpdatePackageFeature(FeatureType.ManagePermissionSlips, 1, loggedInUser, msgs, dc);
-                ap.AddOrUpdatePackageFeature(FeatureType.ManageFieldTrips, 1, loggedInUser, msgs, dc);
-                ap.AddOrUpdatePackageFeature(FeatureType.ManageActivityGroups, 1, loggedInUser, msgs, dc);
-            }
-
-            ap.AddOrUpdatePackageFeature(FeatureType.AcceptACH, 1, loggedInUser, msgs, dc);
         }
 
         public static int GetTrialDaysRemaining(this Account account, AccountPackage currentPackage,
