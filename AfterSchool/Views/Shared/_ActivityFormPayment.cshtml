@@ -417,7 +417,9 @@
         setSubscriptionPlanSection();
         setPaymentPlanSection();
         $(document).ready(function (){
-            disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));    
+            let isPublished = @Model.IsPublished.ToString().ToLower();
+            if (!isPublished)
+                disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
         });
         setPostPayPlanSection();
         toggleSubscriptionPeriodWeek();
