@@ -8,6 +8,8 @@ using System.Text.Json;
 using System.Web.Http;
 using Newtonsoft.Json;
 using RestSharp;
+using AfterSchoolLibrary.Services;
+using Account = Stripe.Account;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
