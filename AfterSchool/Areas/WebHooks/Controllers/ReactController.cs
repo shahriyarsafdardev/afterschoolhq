@@ -4,29 +4,36 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Web.Http;
-using AfterSchoolLibrary.Services;
-using Account = Stripe.Account;
+using Newtonsoft.Json;
+using RestSharp;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
     public class ReactController : ApiController
     {
         [HttpGet]
-        public IHttpActionResult GetCurrentUser()
+        public HttpResponseMessage GetCurrentUser()
         {
             var msgs = new SystemMessages();
             try
             {
                 var currentUser = CurrentUser(msgs);
+
+                var obj = new ApiResponse(msgs , new ApiUser(currentUser.FirstName, currentUser.LastName, currentUser.Email, currentUser.Phone, currentUser.Username));
                 
-                return Ok(new ApiResponse(msgs, HttpStatusCode.OK, new ApiUser(currentUser.FirstName, currentUser.LastName, currentUser.Email, currentUser.Phone, currentUser.Username)).ToJSON());
+                var response = Request.CreateResponse(HttpStatusCode.OK);
+                response.Content = new StringContent((new ApiResponse(msgs , new ApiUser(currentUser.FirstName, currentUser.LastName, currentUser.Email, currentUser.Phone, currentUser.Username))).ToJSON(), System.Text.Encoding.UTF8, "application/json");
+                return response;
             }
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
-                return Ok(new ApiResponse(msgs, HttpStatusCode.InternalServerError, null).ToJSON());
+                
+                var response = Request.CreateResponse(HttpStatusCode.NotFound);
+                response.Content = new StringContent((new ApiResponse(msgs, null)).ToJSON(), System.Text.Encoding.UTF8, "application/json");
+                return response;
             }
         }
 
@@ -44,13 +51,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         public class ApiResponse
         {
             public SystemMessages msgs { get; set; }
-            public HttpStatusCode code { get; set; }
             public dynamic obj { get; set; }
 
-            public ApiResponse(SystemMessages msgs, HttpStatusCode code, dynamic obj)
+            public ApiResponse(SystemMessages msgs, dynamic obj)
             {
                 this.msgs = msgs;
-                this.code = code;
                 this.obj = obj;
             }
         }
