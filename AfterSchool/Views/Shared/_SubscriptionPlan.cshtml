@@ -93,9 +93,9 @@
                             {
                                 selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
                             }
-                            if ((!Model.HasSchedule && item == PlanPaymentStartType.OnCheckout) || (Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.WhenActivityStarts) || (!Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.OnCheckout))
+                            if ((!Model.HasSchedule && item == PlanPaymentStartType.OnCheckout) || (Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.WhenActivityStarts) || (!Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.OnCheckout) || Model.IsPublished)
                             {
-                                    <option value = "@((int)item)" @selected > @item.ToString().SplitByUpperCase() </option>
+                                <option value="@((int) item)" @selected> @item.ToString().SplitByUpperCase() </option>
                             }
                         }
 
