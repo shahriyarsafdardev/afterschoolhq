@@ -635,6 +635,7 @@
     <Compile Include="Areas\Volunteer\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Volunteer\Controllers\SettingController.cs" />
     <Compile Include="Areas\Volunteer\VolunteerAreaRegistration.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\ReactController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
