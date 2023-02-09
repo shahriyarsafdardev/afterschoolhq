@@ -1,18 +1,13 @@
-using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Services;
 using BasicLibrary;
-using Newtonsoft.Json;
-using Stripe;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using AfterSchool.Models;
-using Amazon.DynamoDBv2.Model;
+using AfterSchoolLibrary.Services;
+using Account = Stripe.Account;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
@@ -22,23 +17,28 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         public IHttpActionResult GetCurrentUser()
         {
             var msgs = new SystemMessages();
-            var getCurrentUserUid = GetCookie("CurrentUser")?.Value;
-
-            if (getCurrentUserUid.IsEmpty())
+            try
             {
-                msgs.Add("User not found" , MessageType.ApiError);
-                return Ok(new ApiResponse(msgs, HttpStatusCode.NotFound, null).ToJSON());
+                var currentUser = CurrentUser(msgs);
+                
+                return Ok(new ApiResponse(msgs, HttpStatusCode.OK, new ApiUser(currentUser.FirstName, currentUser.LastName, currentUser.Email, currentUser.Phone, currentUser.Username)).ToJSON());
             }
-
-            var CurrentUser = WebUser.LoadByUid(getCurrentUserUid.ToGuid(), msgs);
-            
-
-            return Ok(new ApiResponse(msgs, HttpStatusCode.OK, CurrentUser).ToJSON());
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Ok(new ApiResponse(msgs, HttpStatusCode.InternalServerError, null).ToJSON());
+            }
         }
 
-        private CookieState GetCookie(string name)
+        private WebUser CurrentUser(SystemMessages msgs)
         {
-            return Request.Headers.GetCookies().FirstOrDefault().Cookies.Where(x => x.Name == name).FirstOrDefault();
+            var currentUserUid = Request.Headers.GetCookies().FirstOrDefault().Cookies.Where(x => x.Name == "CurrentUser").FirstOrDefault();
+
+            if (currentUserUid.IsEmpty())
+                throw new Exception("Session not found");
+
+            msgs.Add("User Found", MessageType.Success);
+            return WebUser.LoadByUid(currentUserUid.Value.ToGuid(), msgs);
         }
 
         public class ApiResponse
@@ -53,7 +53,26 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 this.code = code;
                 this.obj = obj;
             }
+        }
+
+        public class ApiUser
+        {
+            public string firstName { get; set; }
+            public string lastName { get; set; }
+            public string email { get; set; }
+            public string phone { get; set; }
+            public string userName { get; set; }
+
+            public ApiUser(string firstName, string lastName, string email, string phone, string userName)
+            {
+                this.firstName = firstName;
+                this.lastName = lastName;
+                this.email = email;
+                this.phone = phone;
+                this.userName = userName;
+            }
             
         }
+        
     }
 }
