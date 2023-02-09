@@ -285,6 +285,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -458,6 +459,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -468,6 +470,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["Uid"], Uid);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -477,6 +480,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -486,6 +490,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -495,6 +500,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -505,6 +511,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -514,6 +521,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -523,6 +531,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -532,6 +541,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], FirstRegistrationId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -574,6 +584,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["RegistrantLastName"], OrderByDirectionEnum.Ascending);
             dq.SelectRange.Start = start;
@@ -587,6 +598,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CreateDate"], startDate,
                 DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate,
@@ -602,6 +614,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CreateDate"], startDate,
                 DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
             dq.Criterias.Add(ObjectMap["CreateDate"], endDate,
@@ -616,6 +629,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -647,6 +661,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
@@ -664,6 +679,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["FirstRegistrationId"], DBNull.Value, DatabaseCriteriaOperatorEnum.Is);
@@ -899,6 +915,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrationPeriodId"], RegistrationPeriodId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
@@ -914,6 +931,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ActivityGroupId"], ActivityGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
@@ -929,6 +947,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountActivityGroupId"], AccountActivityGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["CompletionStatusId"], ValidCompletionStatus.Select(x => (int) x).ToArray(),
                 DatabaseCriteriaOperatorEnum.In);
             dq.OrderBys.Add(ObjectMap["RegistrantFirstName"], OrderByDirectionEnum.Ascending);
@@ -1021,6 +1040,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -1030,6 +1050,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], PurchaserAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

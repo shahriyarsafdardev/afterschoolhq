@@ -64,7 +64,8 @@ namespace AfterSchoolLibrary.Services
                     registration.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(amsgs, adc);
                     registration.DeleteSessionActions(amsgs, adc);
                     registration.DeleteAnswers(amsgs, adc);
-                    amsgs.AddRange(registration.Delete(adc));
+                    registration.IsDeleted = true;
+                    amsgs.AddRange(registration.Save(adc));
                     registration.UpdateRelatedRegistrationsAfterDelete(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
