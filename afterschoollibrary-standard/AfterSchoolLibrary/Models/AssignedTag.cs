@@ -87,7 +87,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
-        public static AssignedTag LoadById(int? Id, SystemMessages msgs = null,
+        public static AssignedTag Load(int Id, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

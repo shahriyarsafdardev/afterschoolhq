@@ -22,8 +22,7 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
-            
-            var availableTags = AvailableTagService.GetByObjectType(objectType, currentAccount, msgs);
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,objectType, msgs);
             
             ViewBag.Messages = msgs;
             ViewBag.ObjectType = objectType;
@@ -42,7 +41,7 @@ namespace AfterSchool.Areas.District.Controllers
                 if (tag.IsEmpty())
                     msgs.Add("Tag name should not be empty", MessageType.UserError);
 
-                if (AvailableTagService.IsUniqueTag(tag.Trim(), objectType, currentAccount, msgs))
+                if (AvailableTag.ExistsByTag(tag.Trim(), objectType, (int)currentAccount.ID, msgs))
                     msgs.Add("Tag should be unique", MessageType.UserError);
             }
             else
@@ -80,8 +79,8 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var availableTags = AvailableTagService.GetByObjectType((int) ObjectType.Account, currentAccount, msgs);
-
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,(int) ObjectType.Activity, msgs);
+            
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
             
@@ -92,7 +91,7 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var availableTags = AvailableTagService.GetByObjectType((int) ObjectType.Activity, currentAccount, msgs);
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,(int) ObjectType.Activity, msgs);
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
             var activities = new List<Activity>();
             foreach (var school in schools)
