@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Services;
@@ -37,8 +37,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!currentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                 return RedirectToAction("getstartedpayments", "account");
 
+            /*
+             * probably not necessary, every body that works with a new account doesn't need payments setup
             if (currentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
+            */
 
             if (currentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
                 (currentAccount.AccountTypeId != AccountType.School || currentAccount.GetExternalLeagueInviteCount() == 0))
