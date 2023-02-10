@@ -1007,6 +1007,7 @@ namespace AfterSchoolLibrary.Helpers
             var additionalDetails = "";
             var subscriptionDetails = "";
             var paymentPlanDetails = "";
+            var allowPayLaterDetails = "";
             var stripeNote = "";
 
             switch (mainRA.AssignmentTypeId)
@@ -1085,6 +1086,13 @@ namespace AfterSchoolLibrary.Helpers
                     additionalDetails =
                         $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {paymentPlan.TotalPeriods.Value - 1} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
                 }
+                else if (participationObject.IsNotEmpty() && participationObject.AllowToPayLater && mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment)
+                {
+                    var providerContactName = participationObject.ContactName.IfBlank(billingAccount.Name);
+                    var regCost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
+                    allowPayLaterDetails = 
+                        $"You have elected to pay the {regCost} registration fee later. {providerContactName} will reach out to you with more information on how to make that payment.";
+                }
                 else
                 {
                     if (checkoutObject.Coupon.IsNotEmpty() &&
@@ -1152,7 +1160,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         cost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
                         additionalDetails = "Registration Fee";
-
+                        
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection
                         {
@@ -1379,7 +1387,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
                 {"RegistrationTable", registrationTable},
-                {"YourRecepitText", isRegFree ? "" : "Your payment receipt is below."},
+                {"YourRecepitText", isRegFree || (participationObject.IsNotEmpty() && participationObject.AllowToPayLater && mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment) ? "" : "Your payment receipt is below."},
+                {"AllowPayLaterDetails", allowPayLaterDetails},
             };
 
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
