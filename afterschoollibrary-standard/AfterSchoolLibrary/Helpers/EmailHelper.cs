@@ -1002,6 +1002,7 @@ namespace AfterSchoolLibrary.Helpers
             var additionalDetails = "";
             var subscriptionDetails = "";
             var paymentPlanDetails = "";
+            var postPayPlanDetails = "";
             var stripeNote = "";
 
             switch (mainRA.AssignmentTypeId)
@@ -1085,6 +1086,36 @@ namespace AfterSchoolLibrary.Helpers
 
                     additionalDetails =
                         $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {paymentPlan.TotalPeriods.Value - 1} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                }
+                else if (checkoutObject.PostPayPlan.IsNotEmpty())
+                {
+                    var costPerPeriod = postPayPlan.NumberOfPeriodsPrePaid > 0
+                        ? (postPayPlan.CostPerPeriod * postPayPlan.NumberOfPeriodsPrePaid)
+                        : postPayPlan.CostPerPeriod;
+                    cost = costPerPeriod.ToCurrency();
+                    ccFee = checkoutObject.GetPostPayPlanCostTodayCreditCardFee().ToCurrency();
+                    totalCost = decimal.Parse((checkoutObject.GetPostPayPlanCostTodayCreditCardFee() + costPerPeriod).ToString());
+                    var noOfPrepayment = (postPayPlan.NumberOfPeriodsPrePaid > 0) ? postPayPlan.NumberOfPeriodsPrePaid : 0;
+                    var billingPeriodType = postPayPlan.BillingPeriodTypeId.ToString();
+                    if (noOfPrepayment > 1)
+                        billingPeriodType += "s";
+                    additionalDetails = $"{noOfPrepayment} {billingPeriodType} Prepayment";
+
+                    // add attendance based fee row
+                    var registrationFeeModel = new NameValueCollection
+                    {
+                        {"Description", description},
+                        {"Quantity", noOfPrepayment > 0 ? noOfPrepayment.ToString() : "1"},
+                        {"Cost", cost},
+                        {"AdditionalDetails", additionalDetails},
+                    };
+
+                    receiptRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        registrationFeeModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+                    showTable = true;
                 }
                 else
                 {
@@ -1256,6 +1287,17 @@ namespace AfterSchoolLibrary.Helpers
                                           $"<span style='float:right;margin-right:48px;'>{ccPaymentPlanFee.ToCurrency()}</span></p>";
             }
 
+            //add post-pay plan block
+            if (hasPostPayPlan)
+            {
+                var noOfPrepayment = postPayPlan.NumberOfPeriodsPrePaid > 0 ? postPayPlan.NumberOfPeriodsPrePaid : 1;
+                var billingPeriodType = postPayPlan.BillingPeriodTypeId.ToString().ToLower();
+                if (noOfPrepayment > 1)
+                    billingPeriodType += "s";
+                postPayPlanDetails =
+                    $"<p style='float:left;padding-bottom:15px;width:100%;'><span>After the pre-paid {billingPeriodType} have been attended, you will be charged <b>{postPayPlan.CostPerPeriod.ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()} attended.</b></span>";
+            }
+
             if (showTable)
                 registrationTable = ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Table,
@@ -1337,7 +1379,7 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
                 splitPaymentSubscriptionInfo =
                     $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
-            if (hasSubscriptionPlan || hasPaymentPlan)
+            if (hasSubscriptionPlan || hasPaymentPlan || hasPostPayPlan)
                 stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges " + (hasSubscriptionPlan && hasPaymentPlan ? "subscription fees and payment plans" : hasSubscriptionPlan ? "subscription fees" : "payment plans") + " as a separate transaction.</p><br/>";
             var model = new NameValueCollection
             {
@@ -1354,12 +1396,13 @@ namespace AfterSchoolLibrary.Helpers
                 {"RegistrationDetails", registrationDetails},
                 {"SubscriptionDetails", subscriptionDetails},
                 {"PaymentPlanDetails", paymentPlanDetails},
+                {"PostPlanDetails", postPayPlanDetails},
                 {"StripeNote", stripeNote},
                 {"VirtualInfo", virtualInfo},
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
                 {"RegistrationTable", registrationTable},
-                {"YourRecepitText", isRegFree ? "" : "Your payment receipt is below."},
+                {"YourRecepitText", (isRegFree && !hasPostPayPlan) ? "" : "Your payment receipt is below."},
             };
 
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";

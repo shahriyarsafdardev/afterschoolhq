@@ -17,6 +17,8 @@
   
   @Model.PaymentPlanDetails
   
+  @Model.PostPlanDetails
+  
   <p>
     <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
   </p>
