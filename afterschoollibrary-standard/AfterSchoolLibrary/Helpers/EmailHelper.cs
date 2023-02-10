@@ -1095,6 +1095,7 @@ namespace AfterSchoolLibrary.Helpers
                         //for now lets not apply coupon and just get the value of total cost. (to show proper cost per item in email)
                         var amountCC = checkoutObject.GetRegistrationCostWithFeeAndCoupon(false, msgs, dc);
                         var couponValueCC = checkoutObject.CouponValue(msgs, dc);
+                        var subAmount = amountCC - couponValueCC;
 
                         cost = amountCC.ToCurrency();
                         additionalDetails = "Registration Fee";
@@ -1117,15 +1118,34 @@ namespace AfterSchoolLibrary.Helpers
                         // add coupon discount row
                         var couponDiscountModel = new NameValueCollection
                         {
-                            {"Description", $"Coupon {checkoutObject.Coupon.Name} Applied"},
-                            {"Quantity", "1"},
-                            {"Cost", couponValueCC.ToCurrency()},
-                            {"AdditionalDetails", $"{checkoutObject.Coupon.GetDiscountString()} discount applied."},
+                            {"Description", $"Discount"},
+                            {"Quantity", ""},
+                            {"Cost", $"-{couponValueCC.ToCurrency()}"},
+                            {"AdditionalDetails", $"Coupon Code: {checkoutObject.Coupon.CouponCode}"},
                         };
 
                         receiptRows += ProcessTemplate(
                             EmailTemplates.Registration_Confirmation_Rows,
                             couponDiscountModel,
+                            "Registration_Confirmation_Rows",
+                            msgs);
+                        
+                        //add horizontal line
+                        receiptRows +=
+                            "<tr><td colspan='3' style='padding:15px 0px;'><hr style='border-top: 1px solid #D8D8D9; border-left: none; margin: 0px 30px 0px 30px;'></td><td></td></tr>";
+
+                        // add subtotal amount row
+                        var subTotalModel = new NameValueCollection
+                        {
+                            {"Description", $"Subtotal"},
+                            {"Quantity", ""},
+                            {"Cost", $"{subAmount.ToCurrency()}"},
+                            {"AdditionalDetails", ""},
+                        };
+                        
+                        receiptRows += ProcessTemplate(
+                            EmailTemplates.Registration_Confirmation_Rows,
+                            subTotalModel,
                             "Registration_Confirmation_Rows",
                             msgs);
                     }
