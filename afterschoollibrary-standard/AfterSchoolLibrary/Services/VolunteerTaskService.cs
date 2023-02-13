@@ -30,7 +30,9 @@ namespace AfterSchoolLibrary.Services
             volunteerTask.DateSubmitted = DateTime.UtcNow;
             volunteerTask.DateCompleted = dateCompleted;
             volunteerTask.AccountId = fiscalAccountId;
-            
+            volunteerTask.CreatedBy = WebUserId;
+            volunteerTask.CreateDate = DateTime.UtcNow;
+
             msgs.AddRange(volunteerTask.Save(dc: dc));
             return volunteerTask;
         }

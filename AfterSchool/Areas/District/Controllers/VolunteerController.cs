@@ -154,6 +154,9 @@ namespace AfterSchool.Areas.District.Controllers
                         if (msgs.HasNoErrors())
                         {
                             volunteerTask.DateCompleted = DateTime.UtcNow;
+                            volunteerTask.LastModifiedBy = SessionVariables.CurrentUser.ID;
+                            volunteerTask.LastModifiedDate = DateTime.UtcNow;
+                            
                             msgs.AddRange(volunteerTask.Save());
                             
                             SendLinkToVolunteer(backgroundCheckRequestResult.BackgroundCheckUrl, webUser, msgs);
@@ -283,6 +286,9 @@ namespace AfterSchool.Areas.District.Controllers
                             if (volunteerTask.IsNotEmpty())
                             {
                                 volunteerTask.DateCompleted = DateTime.UtcNow;
+                                volunteerTask.LastModifiedBy = currentUser.ID;
+                                volunteerTask.LastModifiedDate = DateTime.UtcNow;
+                                
                                 amsgs.AddRange(volunteerTask.Save(adc));
                             }
 

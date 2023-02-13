@@ -10,7 +10,7 @@ using Twilio.Rest.Preview.TrustedComms;
 namespace AfterSchoolLibrary.Models
 {
     [Serializable]
-    public class VolunteerTask : BasicIDObject
+    public class VolunteerTask : BasicObjectWithModified
     {
         public VolunteerTask()
         {
