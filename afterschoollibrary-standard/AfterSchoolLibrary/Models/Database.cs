@@ -1263,7 +1263,6 @@ namespace AfterSchoolLibrary.Models
 
             // Migration_20220202_SessionActionToWebSessionAction.Do(amsgs, adc);     
             Migration_20220214_UpdateActivityContinuousEnrollmentFlag.Do(amsgs, adc);
-            Migration_20230213_UpdateRegistrationIsDeletedColumn.Do(amsgs, adc);
             Migration_20220323_1_LatitudeLongitudeAlterColumns.Do(amsgs, adc);
             Migration_20220323_2_LatitudeLongitudeRefetch.Do(amsgs, adc);
             Migration_20220407_SetActivityRegistrantIsDeleted.Do(amsgs, adc);
@@ -1289,6 +1288,8 @@ namespace AfterSchoolLibrary.Models
             Migration_20230101_AddFormIsArchivedDefault.Do(amsgs, adc);
             Migration_20230116_FixAlWootenImportData.Do(amsgs, adc);
             Migration_20220106_AddRegistrantSchoolLocationIdIndex.Do(amsgs, adc);
+            Migration_20230213_UpdateRegistrationIsDeletedColumn.Do(amsgs, adc);
+
         }
 
         public static DatabaseConnection StartTransaction()
