@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
             
                     if(responseBody.result == "Clear")
-                        VolunteerApprovalService.AddApproval(latestBackgroundCheck.WebUserId,
+                        VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
                             "Approve By Sterling",
@@ -52,7 +52,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                         );
                     
                     if(responseBody.result == "Review")
-                        VolunteerTaskService.AddTask(latestBackgroundCheck.WebUserId, 
+                        VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId, 
                             TaskStatus.ReviewBackground, 
                             ApplicationStatus.FailedBackgroundCheck, 
                             latestBackgroundCheck.RequestedForFiscalAccountId,

@@ -179,7 +179,7 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, participationObject ,amsgs, adc);
+                            account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
                                 account,

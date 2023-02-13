@@ -19,7 +19,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class VolunteerTaskService
     {
-        public static VolunteerTask AddTask(int? WebUserId, TaskStatus task, ApplicationStatus applicationStatus, int? fiscalAccountId ,DateTime? dateCompleted , SystemMessages msgs,
+        public static VolunteerTask CreateNewTask(int? WebUserId, TaskStatus task, ApplicationStatus applicationStatus, int? fiscalAccountId ,DateTime? dateCompleted , SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             var volunteerTask = new VolunteerTask();
@@ -30,7 +30,7 @@ namespace AfterSchoolLibrary.Services
             volunteerTask.DateSubmitted = DateTime.UtcNow;
             volunteerTask.DateCompleted = dateCompleted;
             volunteerTask.AccountId = fiscalAccountId;
-
+            
             msgs.AddRange(volunteerTask.Save(dc: dc));
             return volunteerTask;
         }

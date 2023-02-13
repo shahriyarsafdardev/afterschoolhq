@@ -7,7 +7,7 @@ namespace AfterSchoolLibrary.Services
 {
     public class VolunteerApprovalService
     {
-        public static VolunteerApproval AddApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate ,WebUser loggedInUser ,SystemMessages msgs,
+        public static VolunteerApproval CreateNewApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate ,WebUser loggedInUser ,SystemMessages msgs,
             DatabaseConnection dc = null)
         {
 

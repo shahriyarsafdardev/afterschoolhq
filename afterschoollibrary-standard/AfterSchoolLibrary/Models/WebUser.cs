@@ -253,24 +253,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
-        public static List<WebUser> LoadVolunteerWebUsers(SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Joins.Add(AccountWebUser.ObjectMap["WebUserId"], ObjectMap["Id"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "AccountWebUser");
-            dq.Joins.Add(Account.ObjectMap["ID"], AccountWebUser.ObjectMap["AccountId"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "Account");
-            dq.Criterias.Add(Account.ObjectMap["AccountTypeId"], AccountType.Volunteer);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
-        }
-        
-        public static WebUser LoadbyId(int Id, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ID"], Id);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-
         public static WebUser LoadByUidByIsActive(Guid Uid, bool IsActive, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

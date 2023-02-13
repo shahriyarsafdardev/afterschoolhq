@@ -63,6 +63,7 @@
                     {
                         foreach (var backgroundViewModel in Model.OrderByDescending(x => x.DateSubmitted))
                         {
+                            var registrantId = Registrant.LoadByWebUserId((int)backgroundViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID;
                             <tr>
                                 <td>
                                     <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
@@ -74,7 +75,7 @@
                                 <td>@(backgroundViewModel.BackgroundCheckResult == BackgroundCheckResult.NotSet ? BackgroundCheckResult.Pending.ToString().SplitByUpperCase() : backgroundViewModel.BackgroundCheckResult.ToString().SplitByUpperCase())</td>
                                 <td>
                                     <div class="pull-right">
-                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int) backgroundViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID, returnUrl = returnUrl})"
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = registrantId, returnUrl = returnUrl})"
                                            class="btn btn-primary whitebgbtn">
                                             View Volunteer Info
                                         </a>

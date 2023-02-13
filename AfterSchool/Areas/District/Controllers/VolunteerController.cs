@@ -52,14 +52,14 @@ namespace AfterSchool.Areas.District.Controllers
             var volunteerViewModel = new List<VolunteerViewModel>();
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var count = Registrant.GetCountApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, type, msgs);
-            var registeredVolunteerRegistrants = Registrant.LoadApprovedMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search,type, start, length, msgs);
+            var count = Registrant.GetCountApprovedMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search, type, msgs);
+            var registeredVolunteerRegistrants = Registrant.LoadApprovedMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search,type, start, length, msgs);
             
             if (registeredVolunteerRegistrants.IsNotEmpty())
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var volunteerApproval = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).LastOrDefault();
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId(registrant.WebUserId.Value, msgs).LastOrDefault();
                     
                     volunteerViewModel.Add(VolunteerAssembler.VolunteerAssemblerResult(registrant, volunteerApproval));
                     
@@ -100,14 +100,14 @@ namespace AfterSchool.Areas.District.Controllers
             var backgroundViewModel = new List<BackgroundViewModel>();
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var count = Registrant.GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, msgs);
-            var registeredVolunteerRegistrants = Registrant.LoadABackgroundMasterRegistrantsByAccountHostAndPersonType((int)currentAccount.ID, RegistrantPersonType.Volunteer, search, start, length, msgs);
+            var count = Registrant.GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search, msgs);
+            var registeredVolunteerRegistrants = Registrant.LoadABackgroundMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search, start, length, msgs);
 
             if (registeredVolunteerRegistrants.IsNotEmpty())
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId((int)registrant.WebUserId).LastOrDefault();
+                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value).LastOrDefault();
                     
                     if(backgroundCheck.IsNotEmpty())
                         backgroundViewModel.Add(BackgroundAssembler.BackgroundAssemblerResult(registrant, backgroundCheck));
@@ -146,10 +146,10 @@ namespace AfterSchool.Areas.District.Controllers
                 {
                     foreach (var webUserID in webUserIDs.Split(','))
                     {
-                        var webUser = WebUser.LoadbyId(webUserID.ToInteger(), msgs);
+                        var webUser = WebUser.Load(webUserID.ToInteger(), msgs);
                         var volunteerTask = VolunteerTask.LoadByWebUser(webUserID.ToInteger(),msgs);
 
-                        backgroundCheckRequestResult = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, (int)currentAccount.ID);
+                        backgroundCheckRequestResult = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, webUser, currentAccount.ID.Value);
 
                         if (msgs.HasNoErrors())
                         {
@@ -229,7 +229,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 volunteerTasks.ForEach(task =>
                 {
-                    var webUser = WebUser.LoadbyId((int)task.WebUserId);
+                    var webUser = WebUser.Load(task.WebUserId.Value);
                     if(task.IsNotEmpty())
                         TodoViewModelList.Add(TodoAssembler.TodoAssemblerResult(webUser, task));
                 });
@@ -286,7 +286,7 @@ namespace AfterSchool.Areas.District.Controllers
                                 amsgs.AddRange(volunteerTask.Save(adc));
                             }
 
-                            VolunteerApprovalService.AddApproval(Convert.ToInt32(webUserID),
+                            VolunteerApprovalService.CreateNewApproval(Convert.ToInt32(webUserID),
                                 currentAccount.ID,
                                 (operation.Equals("approve") ? ApprovalStatus.Approved : ApprovalStatus.Denied),
                                 reason,
@@ -361,9 +361,9 @@ namespace AfterSchool.Areas.District.Controllers
             if (registration.IsEmpty())
                 return;
 
-            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId((int) registrant.WebUserId, msgs).LastOrDefault();
+            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, msgs).LastOrDefault();
 
-            var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId((int)registrant.WebUserId,msgs).FirstOrDefault()?.ApprovalStatusId;
+            var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId(registrant.WebUserId.Value, msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
             ViewBag.Answers = registration.GetAnswers(msgs);

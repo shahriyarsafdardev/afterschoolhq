@@ -696,7 +696,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(Save(dc));
         }
         
-        private static string GetSearchSqlDistrict(int Id, string search, int type)
+        private static string GetSearchSqlDistrict(int Id, DatabaseCriteria search, int type)
         {
             var typeQuery = "";
             var typecondition = "";
@@ -730,9 +730,12 @@ namespace AfterSchoolLibrary.Models
                     from accountrelationship
                     where hostaccountid = {Id}
                 ) and
-                subReg.PersonTypeId = {(int)RegistrantPersonType.Volunteer} and
-                (subReg.FirstName like '%{search}%' or subReg.lastName like '%{search}%')
-                {typeQuery}
+                subReg.PersonTypeId = {(int) RegistrantPersonType.Volunteer}";
+
+            if (search.IsNotEmpty())
+                sql += $" and (subReg.FirstName like @{search.UniqueName} or subReg.lastName like @{search.UniqueName})";
+                
+            sql += @$"{typeQuery}
                 order by subReg.ID";
 
             return sql;
@@ -934,7 +937,15 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetSearchSqlDistrict(accountId, searchText, type);
+            DatabaseCriteria searchCriteria = null;
+            
+            if (searchText.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], searchText.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetSearchSqlDistrict(accountId, searchCriteria, type);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

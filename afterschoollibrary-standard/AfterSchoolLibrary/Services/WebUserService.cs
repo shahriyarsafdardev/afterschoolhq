@@ -104,7 +104,7 @@ namespace AfterSchoolLibrary.Services
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer);
         }
         
-        public static bool IsVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer) != null ? true : false;
         }

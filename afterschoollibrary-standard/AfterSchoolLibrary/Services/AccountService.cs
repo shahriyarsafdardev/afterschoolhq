@@ -2959,8 +2959,6 @@ namespace AfterSchoolLibrary.Services
 
             if (accountType != AccountType.NotSet && signupTypeId != SignUpType.DirectPurchase)
                 onboardingStepDone = OnboardingStepType.AccountType;
-            
-            
 
             var account = new Account
             {

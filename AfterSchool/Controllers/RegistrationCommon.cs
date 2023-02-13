@@ -126,7 +126,7 @@ namespace AfterSchool.Controllers
             return account;
         }
 
-        public static Account GetOrCreateVolunteerAccount(WebUser user, ParticipationObject participationObject, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Account GetOrCreateVolunteerAccount(WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var account = user.GetVolunteerAccount(msgs, dc);
 
