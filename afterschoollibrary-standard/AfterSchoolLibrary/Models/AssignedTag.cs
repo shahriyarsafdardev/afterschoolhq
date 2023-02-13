@@ -86,6 +86,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["ObjectType"], objectType);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        public static AssignedTag LoadByObjectIdByObjectTypeByTag(int objectId, int objectType, string tag, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["tag"], tag);
+            dq.Criterias.Add(ObjectMap["objectId"], objectId);
+            dq.Criterias.Add(ObjectMap["ObjectType"], objectType);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
         
         public static AssignedTag Load(int Id, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -96,14 +106,9 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static int Delete(string tag, int objectID, int objectType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["tag"], tag);
-            dq.Criterias.Add(ObjectMap["objectID"], objectID);
-            dq.Criterias.Add(ObjectMap["objectType"], objectType);
-            return dq.Delete(nameof(AssignedTag), msgs);
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(AssignedTag).Name);
         }
 
         public static SystemMessages Create(DatabaseConnection dc = null)

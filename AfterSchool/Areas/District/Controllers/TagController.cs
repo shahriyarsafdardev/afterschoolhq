@@ -126,7 +126,8 @@ namespace AfterSchool.Areas.District.Controllers
             
             if (operation == "remove")
             {
-                AssignedTag.Delete(tag, objectID, objectType, msgs);
+                var assignedTag = AssignedTag.LoadByObjectIdByObjectTypeByTag(objectID, objectType,tag, msgs);
+                msgs.AddRange(assignedTag.Delete());
             }
 
             return true;
