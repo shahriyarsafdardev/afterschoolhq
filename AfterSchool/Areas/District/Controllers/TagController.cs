@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
-            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,objectType, msgs);
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,objectType, msgs);
             
             ViewBag.Messages = msgs;
             ViewBag.ObjectType = objectType;
@@ -41,12 +41,12 @@ namespace AfterSchool.Areas.District.Controllers
                 if (tag.IsEmpty())
                     msgs.Add("Tag name should not be empty", MessageType.UserError);
 
-                if (AvailableTag.ExistsByTag(tag.Trim(), objectType, (int)currentAccount.ID, msgs))
+                if (AvailableTag.ExistsByTag(tag.Trim(), objectType, currentAccount.ID.Value, msgs))
                     msgs.Add("Tag should be unique", MessageType.UserError);
             }
             else
             {
-                availableTag = AvailableTag.Load((int)Id, msgs);
+                availableTag = AvailableTag.Load(Id.Value, msgs);
             }
 
             if (msgs.HasNoErrors())
@@ -54,7 +54,7 @@ namespace AfterSchool.Areas.District.Controllers
                 if (availableTag.ID.IsEmpty())
                 {
                     availableTag.Tag = tag;
-                    availableTag.AccountId = (int)currentAccount.ID;
+                    availableTag.AccountId = currentAccount.ID.Value;
                     availableTag.ObjectType = (ObjectType)objectType;
                     availableTag.IsDeleted = false;
                     availableTag.CreateDate = DateTime.UtcNow;
@@ -79,7 +79,7 @@ namespace AfterSchool.Areas.District.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,(int) ObjectType.Activity, msgs);
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Account, msgs);
             
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
@@ -91,7 +91,7 @@ namespace AfterSchool.Areas.District.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var availableTags = AvailableTag.LoadByAccountIdByObjectType((int)currentAccount.ID ,(int) ObjectType.Activity, msgs);
+            var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Activity, msgs);
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
             var activities = new List<Activity>();
             foreach (var school in schools)

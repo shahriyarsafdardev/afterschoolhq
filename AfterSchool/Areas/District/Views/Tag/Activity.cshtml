@@ -36,7 +36,7 @@
                             <td>@activity.Name</td>
                             <td><a href="@activity.HomePageUrl" target="_blank" >@activity.HomePageUrl</a></td>
                             <td>
-                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTagService.GetByIdByType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">
+                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">
                                 <input type="hidden" id="@activity.ID"/>
                             </td>
                         </tr>

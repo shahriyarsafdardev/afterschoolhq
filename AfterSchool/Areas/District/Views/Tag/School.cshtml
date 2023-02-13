@@ -37,7 +37,7 @@
                             <td>@school.Name</td>
                             <td><a href="@school.BrowseUrl" target="_blank" >@school.BrowseUrl</a></td>
                             <td>
-                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTagService.GetByIdByType((int)school.ID, (int)ObjectType.Account).Select(x => x.Tag).ToStringList(","))">
+                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)school.ID, (int)ObjectType.Account).Select(x => x.Tag).ToStringList(","))">
                                 <input type="hidden" id="@school.ID"/>
                             </td>
                         </tr>
