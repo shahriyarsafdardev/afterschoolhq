@@ -1,7 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
 
-    string homeactive = "", leaguesactive = "", schoolsactive = "", providersactive = "", formactive = "", messagesactive = "", teamactive = "", profileactive = "";
+    string homeactive = "", leaguesactive = "", schoolsactive = "", providersactive = "", formactive = "", messagesactive = "", teamactive = "", profileactive = "", tagactive = "";
 
     switch (controller)
     {
@@ -10,6 +10,9 @@
             break;
         case "school":
             schoolsactive = "active";
+            break;
+        case "tag":
+            tagactive = "active";
             break;
         case "league":
             leaguesactive = "active";
@@ -47,6 +50,9 @@
             </li>
             <li class="@schoolsactive">
                 <a href="@Url.Action("index", "school")"><i class="icon s7-study"></i><span>Schools</span></a>
+            </li>
+            <li class="@tagactive">
+                <a href="@Url.Action("index", "tag")"><i class="icon s7-study"></i><span>Tag</span></a>
             </li>
             <li class="hide @providersactive">
                 <a href="@Url.Action("index", "provider")"><i class="icon s7-rocket"></i><span>Providers</span></a>

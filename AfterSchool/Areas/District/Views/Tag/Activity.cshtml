@@ -1,0 +1,94 @@
+﻿@using Microsoft.Ajax.Utilities
+@model List<Activity>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var availableTags = (List<AvailableTag>)ViewBag.AvailableTags;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);};
+
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_TagHeader");}
+
+    <div class="panel panel-default">
+        
+        <div class="panel-heading">
+            <h2><i class="s7-smile"></i> Activity</h2>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            
+            <table class="table">
+                <tr>
+                    <th>School</th>
+                    <th>Link</th>
+                    <th>Tag</th>
+                </tr>
+                @if (Model.Count > 0)
+                {
+                    foreach (var activity in Model)
+                    {
+                        <tr>
+                            <td>@activity.Name</td>
+                            <td><a href="@activity.HomePageUrl" target="_blank" >@activity.HomePageUrl</a></td>
+                            <td>
+                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">
+                                <input type="hidden" id="@activity.ID"/>
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        
+        $(".assignedTags").on('beforeItemAdd', function(event) {
+            
+            var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJSON())');
+            
+            if(!availableTags.includes(event.item)) {
+                 event.cancel = true;
+            }
+            else
+            {
+               var tag = event.item;
+               var objectId = $(this).next().attr("id");
+               var objectType = '@((int)ObjectType.Activity)';
+                 
+               $.get(
+              '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=add',
+              function (data) {});
+                 
+            }
+            
+        });
+        
+        $(".assignedTags").on('beforeItemRemove', function(event) {
+                        
+             var tag = event.item;
+             var objectId = $(this).next().attr("id");
+             var objectType = '@((int)ObjectType.Activity)';
+             
+             $.get(
+             '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=remove',
+             function (data) {});
+            
+        });
+        
+    }); 
+    
+</script>
+    
