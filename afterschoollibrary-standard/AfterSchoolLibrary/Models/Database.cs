@@ -1295,6 +1295,8 @@ namespace AfterSchoolLibrary.Models
             Migration_20230101_AddFormIsArchivedDefault.Do(amsgs, adc);
             Migration_20230116_FixAlWootenImportData.Do(amsgs, adc);
             Migration_20220106_AddRegistrantSchoolLocationIdIndex.Do(amsgs, adc);
+            Migration_20230213_UpdateRegistrationIsDeletedColumn.Do(amsgs, adc);
+
         }
 
         public static DatabaseConnection StartTransaction()

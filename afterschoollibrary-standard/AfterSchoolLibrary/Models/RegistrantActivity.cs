@@ -516,6 +516,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
