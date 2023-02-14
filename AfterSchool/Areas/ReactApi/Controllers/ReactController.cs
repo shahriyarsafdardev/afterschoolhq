@@ -61,6 +61,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
                         {
+                         ID = question.ID.Value,
                          FormQuestionGroupId = question.FormQuestionGroupId,
                          Text = question.Text,
                          Description = question.Description,
