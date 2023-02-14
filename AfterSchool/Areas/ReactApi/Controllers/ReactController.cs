@@ -64,6 +64,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                          FormQuestionGroupId = question.FormQuestionGroupId,
                          Text = question.Text,
                          Description = question.Description,
+                         Options = question.Options,
                          QuestionTypeId = question.QuestionTypeId,
                          QuestionDataTypeId = question.QuestionDataTypeId,
                          FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
@@ -77,7 +78,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         new FormQuestionGroupDto()
                         {
                             FormId = questionGroup.FormId,
-                            Text = questionGroup.QuestionGroupDataTypeId.ToString(),
+                            Name = questionGroup.Name,
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
@@ -159,6 +160,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public int? FormQuestionGroupId { get; set; }
             public string Text { get; set; }
             public string Description { get; set; }
+            public string Options { get; set; }
             public QuestionType QuestionTypeId { get; set; }
             public QuestionDataType QuestionDataTypeId { get; set; }
             public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
@@ -174,7 +176,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         public class FormQuestionGroupDto
         {
             public int? FormId { get; set; }
-            public string Text { get; set; }
+            public string Name { get; set; }
             public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
         }
     }
