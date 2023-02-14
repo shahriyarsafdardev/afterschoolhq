@@ -65,6 +65,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                          Text = question.Text,
                          Description = question.Description,
                          Options = question.Options,
+                         IsRequired = question.IsRequired,
                          QuestionTypeId = question.QuestionTypeId,
                          QuestionDataTypeId = question.QuestionDataTypeId,
                          FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
@@ -161,6 +162,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string Text { get; set; }
             public string Description { get; set; }
             public string Options { get; set; }
+            public bool IsRequired { get; set; }
             public QuestionType QuestionTypeId { get; set; }
             public QuestionDataType QuestionDataTypeId { get; set; }
             public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
