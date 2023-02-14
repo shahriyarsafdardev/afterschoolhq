@@ -1,4 +1,6 @@
-﻿using AfterSchoolLibrary.Models;
+﻿using System;
+using System.Collections;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -12,9 +14,12 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var query = "UPDATE Registration SET IsDeleted = 0 WHERE IsDeleted IS NULL";
-                    var dq = Activity.get_DatabaseQuery(Activity.ObjectMap, adc);
-                    amsgs.AddRange(dq.ExecuteSql(query));
+                    amsgs.AddRange(Registration.Update(
+                        new Hashtable() { { "IsDeleted", 0 } },
+                        new Hashtable() { { "IsDeleted", DBNull.Value } },
+                        Registration.ObjectMap,
+                        adc
+                    ));
                 },
                 uniqueIdenfier: "Migration_20230213_UpdateRegistrationIsDeletedColumn",
                 msgs: msgs,
