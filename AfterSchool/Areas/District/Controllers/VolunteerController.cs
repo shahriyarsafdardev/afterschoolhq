@@ -193,8 +193,8 @@ namespace AfterSchool.Areas.District.Controllers
         
         public ActionResult Details(int id, string r, string returnUrl)
         {
-            var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             var registration = Registration.LoadByRegistrantId(id, msgs).FirstOrDefault();
 
             LoadRegistrationViewBag(registration, r, msgs);
@@ -312,10 +312,10 @@ namespace AfterSchool.Areas.District.Controllers
                 );
             }
 
-            HandleTempMessages(msgs);
+            SetTempMessages(msgs);
             
             if(returnUrl.IsNotEmpty())
-                return new RedirectResult(returnUrl);
+                return RedirectToAction("Details" ,new {id = webUserIDs.Split(',')[0]});
             
             return RedirectToAction("Todo");
         }
