@@ -52,6 +52,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var activity = participationObject.GetActivity();
                 List<FormQuestionDto> formQuestionDtoList = new List<FormQuestionDto>();
                 List<FormQuestionAnswerDto> formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 List<FormQuestionGroupDto> formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
@@ -92,14 +93,25 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
                             Text = questionAnswer.Text
                         }
                     );
                 }
+
+                dynamic response = new
+                {
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    activityDto = new
+                    {
+                    Name = activity.Name,
+                    Organization = activity.AccountName
+                    }
+                };
                 
                 return Json(
-                    new ApiResponse(msgs,new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList)),
+                    new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -172,6 +184,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         public class FormQuestionAnswerDto
         {
             public int? FormQuestionId { get; set; }
+            public int QuestionDataTypeId { get; set; }
             public string QuestionText { get; set; }
             public string Text { get; set; }
         }
