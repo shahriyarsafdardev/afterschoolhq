@@ -259,7 +259,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications, int optionSelected , DateTime birthdate)
         {
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
