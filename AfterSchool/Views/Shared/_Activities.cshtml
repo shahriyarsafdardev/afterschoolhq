@@ -343,6 +343,7 @@ else
 
                     @if (group.IsEmpty())
                     {
+                        <a href="@Url.Action("pinfeatureactivity", "activity", new {id = activity.Uid})" class="btn btn-sm btn-default @(activity?.IsFeatured ?? false ? "btn-primary" : "btn-default")"><i class="s7-pin"></i></a>
                         <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
                     }
 

@@ -1231,6 +1231,14 @@ namespace AfterSchoolLibrary.Services
             return activity;
         }
 
+        public static void UpdateIsFeatured(Activity activity, SystemMessages msgs)
+        {
+            if(msgs.HasErrors())
+                return;
+            activity.IsFeatured = !(activity.IsFeatured ?? false);
+            msgs.AddRange(activity.Save());
+        }
+
         private static SystemMessages SetupInstructor(this Activity activity, Account account, string instructor,
             string instructorfirstname, string instructorlastname, string instructoremail, string instructorphone,
             int loggedInUserId, DatabaseConnection dc = null)

@@ -263,6 +263,10 @@
 .s7-star:before {
 	content: "\e611";
 }
+.s7-star-filled:before
+{
+    content: "\2605";
+}
 .s7-speaker:before {
 	content: "\e612";
 }

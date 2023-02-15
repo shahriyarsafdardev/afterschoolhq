@@ -100,6 +100,7 @@ namespace AfterSchoolLibrary.Models
         public int? RegistrationCutoffHours { get; set; }
         public bool IsContinuousEnrollmentEnabled { get; set; }
         public bool IsGenderEnforced { get; set; }
+        public bool? IsFeatured { get; set; }
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -160,6 +161,7 @@ namespace AfterSchoolLibrary.Models
             RegistrationCutoffHours = activity.RegistrationCutoffHours;
             IsContinuousEnrollmentEnabled = activity.IsContinuousEnrollment;
             IsGenderEnforced = activity.IsGenderEnforced;
+            IsFeatured = activity.IsFeatured;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -227,6 +229,7 @@ namespace AfterSchoolLibrary.Models
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = activityGroup.IsPublished;
             IsGenderEnforced = false;
+            IsFeatured = false;
 
             if (loadAllDetails)
             {
@@ -272,6 +275,7 @@ namespace AfterSchoolLibrary.Models
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = aag.IsPublished;
             IsGenderEnforced = false;
+            IsFeatured = false;
 
             if (loadAllDetails)
             {

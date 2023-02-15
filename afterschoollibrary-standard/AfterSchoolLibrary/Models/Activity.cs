@@ -130,8 +130,10 @@ namespace AfterSchoolLibrary.Models
 		public string ActivityGroupName { get { return (string)MDV["ActivityGroupName"].Value; } }
 		public Guid ActivityGroupUid { get { return (Guid)MDV["ActivityGroupUid"].Value; } }
         public bool IsGenderEnforced { get { return (bool)MDV["IsGenderEnforced"].Value; } set { MDV["IsGenderEnforced"].Value = value; } }
-		
-
+        /// <summary>
+        /// For setting the activity to featured
+        /// </summary>
+        public bool? IsFeatured { get { return (bool?)MDV["IsFeatured"].Value; } set { MDV["IsFeatured"].Value = value; } }
         public Activity()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Activity).Name, "ID");
@@ -155,6 +157,7 @@ namespace AfterSchoolLibrary.Models
 			this.IsConvenienceFeeTakenOutOfCost = false;
 			this.CostFrequencyTypeId = ActivityCostFrequencyType.NotSet;
             this.IsGenderEnforced = false;
+            this.IsFeatured = false;
 
         }
 
@@ -217,6 +220,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "ActivityGroupName", typeof(ActivityGroup).Name, "Name", System.Data.SqlDbType.NVarChar, "ActivityGroup");
 				_dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", System.Data.SqlDbType.UniqueIdentifier, "ActivityGroup");
                 _dp.Add(className, "IsGenderEnforced", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "IsFeatured", System.Data.SqlDbType.Bit);
 				
                 return _dp;
             }
@@ -487,6 +491,11 @@ namespace AfterSchoolLibrary.Models
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
             dps.Add(ObjectMap["IsGenderEnforced"]);
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsFeatured"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            
 
 			
 

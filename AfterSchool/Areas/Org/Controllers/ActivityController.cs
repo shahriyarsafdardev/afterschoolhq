@@ -66,7 +66,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-
+            HandleTempMessages(msgs);
             var pageNumber = pn.IsNumber() && pn.ToInteger() > 0 ? pn.ToInteger() : 1;
             var recordsPerPage = rpp.IsNumber() && rpp.ToInteger() > 0 ? rpp.ToInteger() : 10;
             var isArchived = archive.IsBoolean() && archive.ToBoolean();
@@ -2396,7 +2396,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         #endregion
 
-        #region Copy, Delete, Archive, Restore
+        #region Copy, Delete, Archive, Restore, Pinned
 
         [HttpPost]
         public ActionResult Copy(string id, string activitynamecopy, string usesameformcopy, string copywithregistrants,
@@ -2552,6 +2552,27 @@ namespace AfterSchool.Areas.Org.Controllers
                 return Redirect(Request.UrlReferrer.ToString());
 
             return RedirectToAction("index", "activity");
+        }
+
+        [HttpGet]
+        public ActionResult PinFeatureActivity(string id)
+        {
+            var msgs = new SystemMessages();
+            
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            
+            if (activity.IsEmpty()) 
+                msgs.Add("Activity not found.", MessageType.Error);
+
+            ActivityService.UpdateIsFeatured(activity, msgs);
+
+            SetTempMessages(msgs);
+            
+            if ((bool)Request?.UrlReferrer.IsNotEmpty())
+                return Redirect(Request.UrlReferrer.ToString());
+            
+            return RedirectToAction("index", "activity", new {type = (int) activity.ActivityTypeId});
         }
 
         #endregion
