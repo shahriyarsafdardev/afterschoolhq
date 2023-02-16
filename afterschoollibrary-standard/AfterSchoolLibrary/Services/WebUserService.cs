@@ -673,6 +673,55 @@ namespace AfterSchoolLibrary.Services
 
             return account;
         }
+        
+        public static Account AddNewParentOrStudentRegistrantOrAdultAccount(this WebUser user, UserType userType, WebUser loggedInUser, RegistrantPersonType registrantPersonType,int? locationId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Account account = null;
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    account = AccountService.CreateNew(
+                        orgName: $"{user.LastName}" + (registrantPersonType != RegistrantPersonType.Adult ? "Family" : ""),
+                        email: user.Email,
+                        phone: user.Phone,
+                        isActive: true,
+                        accountType: AccountType.Registrant,
+                        accountOwner: userType == UserType.Owner ? user : null,
+                        packageId: null,
+                        packageBillingPeriod: null,
+                        timeZone: null,
+                        createWithStripe: true,
+                        stripeAccountType: StripeAccountType.ConnectAccount,
+                        loggedInUser: loggedInUser,
+                        msgs: amsgs,
+                        dc: adc);
+
+                    user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                    account.CreateParentOrStudentOrAdultRegistrant(
+                        user,
+                        user.AsList(),
+                        RegistrantType.Individual,
+                        true,
+                        (registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult),
+                        false,
+                        locationId, // probably should have a school location id
+                        RegistrantProfileStatus.Started,
+                        user,
+                        registrantPersonType,
+                        amsgs,
+                        adc);;
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return account;
+        }
 
         /// <summary>
         ///     For adding a payment account to a volunteer account

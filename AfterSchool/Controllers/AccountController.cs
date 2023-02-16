@@ -382,11 +382,17 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
+                            var location = participationObject?.Location;
+                            if (location.IsNotEmpty() &&
+                                location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
+                                location = null;
+                            
                             if (account.IsEmpty())
-                                account = user.AddNewParentOrStudentRegistrantAccount(
+                                account = user.AddNewParentOrStudentRegistrantOrAdultAccount(
                                     UserType.Owner,
-                                    true,
                                     user,
+                                    registrantPersonType,
+                                    location?.ID,
                                     amsgs,
                                     adc);
 
@@ -409,28 +415,6 @@ namespace AfterSchool.Controllers
                                 objectId: user.ID.Value,
                                 objectText: user.FullName
                             );
-                        }
-
-                        if (amsgs.HasNoErrors())
-                        {
-                            var location = participationObject?.Location;
-                            if (location.IsNotEmpty() &&
-                                location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
-                                location = null;
-                            //registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
-                            registrant = account.CreateParentOrStudentOrAdultRegistrant(
-                                user,
-                                user.AsList(),
-                                RegistrantType.Individual,
-                                true,
-                                (registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult),
-                                false,
-                                location?.ID, // probably should have a school location id
-                                RegistrantProfileStatus.Started,
-                                user,
-                                registrantPersonType,
-                                amsgs,
-                                adc);
                         }
 
                         if (amsgs.HasNoErrors())
