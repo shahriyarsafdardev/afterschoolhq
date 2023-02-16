@@ -3735,6 +3735,17 @@ namespace AfterSchoolLibrary.Services
                 .OrderBy(registrant => registrant.DisplayName)
                 .ToList();
         }
+        
+        public static Registrant GetRegitrantByRegistrantPersonType(this Account account, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
+                .Where(registrant => registrant.PersonTypeId == registrantPersonType)
+                .OrderBy(registrant => registrant.ID)
+                .FirstOrDefault();
+        }
+
+        
 
         /// <summary>
         ///     Create basic registrant/student record for an account user, not attached to an account, so it's attached to the

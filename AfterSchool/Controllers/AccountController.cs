@@ -386,7 +386,7 @@ namespace AfterSchool.Controllers
                             if (location.IsNotEmpty() &&
                                 location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
                                 location = null;
-                            
+
                             if (account.IsEmpty())
                                 account = user.AddNewParentOrStudentRegistrantOrAdultAccount(
                                     UserType.Owner,
@@ -415,10 +415,13 @@ namespace AfterSchool.Controllers
                                 objectId: user.ID.Value,
                                 objectText: user.FullName
                             );
-                        }
 
-                        if (amsgs.HasNoErrors())
-                            RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            if (amsgs.HasNoErrors())
+                            {
+                                registrant = account.GetRegitrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
+                                RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            }
+                        }
                     },
                     smsgs =>
                     {
