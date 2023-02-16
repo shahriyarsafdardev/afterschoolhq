@@ -264,13 +264,20 @@ namespace AfterSchool.Controllers
         {
 
             RegistrantPersonType registrantPersonType = RegistrantPersonType.Parent;
+            UserType userType = UserType.Owner;
 
             if (birthdate.IsNotEmpty())
             {
                 if (DateTime.UtcNow.Year - birthdate.Value.Year >= 18)
+                {
                     registrantPersonType = RegistrantPersonType.Adult;
+                    userType = UserType.Adult;
+                }
                 else
+                {
                     registrantPersonType = RegistrantPersonType.Student;
+                    userType = UserType.Student;
+                }
             }
             
             var msgs = new SystemMessages();
@@ -335,7 +342,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("Passwords must match", MessageType.UserError);
                 if(optionSelected.IsEmpty())
                     msgs.Add("Select Registrant Type", MessageType.UserError);
-                if(optionSelected.IsNotEmpty() && birthdate.IsEmpty())
+                if(optionSelected == "2" && birthdate.IsEmpty())
                     msgs.Add("Birthdate is requirerd", MessageType.UserError);
                 if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
@@ -375,13 +382,13 @@ namespace AfterSchool.Controllers
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = (registrantPersonType == RegistrantPersonType.Parent ? RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(user, amsgs, adc) :
-                                user.AddNewParentOrStudentRegistrantAccount(
-                                (registrantPersonType == RegistrantPersonType.Student ? UserType.Student : UserType.Adult),
-                                true,
-                                user,
-                                amsgs,
-                                adc));
+                            if (account.IsEmpty())
+                                account = user.AddNewParentOrStudentRegistrantAccount(
+                                    UserType.Owner,
+                                    true,
+                                    user,
+                                    amsgs,
+                                    adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -411,16 +418,17 @@ namespace AfterSchool.Controllers
                                 location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
                                 location = null;
                             //registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
-                            registrant = account.CreateParentOrStudentRegistrant(
+                            registrant = account.CreateParentOrStudentOrAdultRegistrant(
                                 user,
                                 user.AsList(),
                                 RegistrantType.Individual,
                                 true,
-                                (registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult ? true : false),
+                                (registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult),
                                 false,
                                 location?.ID, // probably should have a school location id
                                 RegistrantProfileStatus.Started,
                                 user,
+                                registrantPersonType,
                                 amsgs,
                                 adc);
                         }
@@ -438,7 +446,7 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            if (msgs.HasNoErrors())
+            /*if (msgs.HasNoErrors())
                 return RedirectToAction("addhomeaddress");
 
             Account registrationAccount = null;
@@ -450,7 +458,8 @@ namespace AfterSchool.Controllers
             var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-            return View(result);
+            return View(result);*/
+            return null;
         }
 
         #endregion
