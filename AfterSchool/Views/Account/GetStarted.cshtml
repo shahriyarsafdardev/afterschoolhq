@@ -263,7 +263,7 @@
         });
         
         $("input[type='radio']").click(function(){
-            var radioValue = $("input[name='accountType']:checked").attr("id");
+            var radioValue = $("input[name='optionSelected']:checked").attr("id");
             if(radioValue === 'student'){
                 $('#birthdate').removeClass("hidden");
             }
