@@ -4020,7 +4020,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     SubscriptionPlan = null,
                     SelectedDates = new List<DateTime>(),
                 },
-                true,
+                false,
                 user,
                 amsgs,
                 adc);
