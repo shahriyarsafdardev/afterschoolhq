@@ -1005,7 +1005,7 @@ namespace AfterSchoolLibrary.Services
 
             if (cutoffHours.IsNotEmpty() && cutoffHours.IsNumber())
                 activity.RegistrationCutoffHours = cutoffHours.ToString().ToInteger();
-            
+
             if (strictgenderrestrictions.IsNumber())
                 activity.IsGenderEnforced = strictgenderrestrictions.ToString().ToBoolean();
 
@@ -1231,12 +1231,15 @@ namespace AfterSchoolLibrary.Services
             return activity;
         }
 
-        public static void UpdateIsFeatured(Activity activity, SystemMessages msgs)
+        public static SystemMessages SetIsFeatured(this Activity activity, bool isFeatured, int loggedInUserId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
-            if(msgs.HasErrors())
-                return;
-            activity.IsFeatured = !(activity.IsFeatured ?? false);
-            msgs.AddRange(activity.Save());
+            if ((bool) msgs?.HasErrors())
+                return new SystemMessages();
+            activity.IsFeatured = isFeatured;
+            activity.LastModifiedBy = loggedInUserId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            return activity.Save(dc);
         }
 
         private static SystemMessages SetupInstructor(this Activity activity, Account account, string instructor,

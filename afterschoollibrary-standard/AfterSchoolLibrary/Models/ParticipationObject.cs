@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -100,7 +99,7 @@ namespace AfterSchoolLibrary.Models
         public int? RegistrationCutoffHours { get; set; }
         public bool IsContinuousEnrollmentEnabled { get; set; }
         public bool IsGenderEnforced { get; set; }
-        public bool? IsFeatured { get; set; }
+        public bool IsFeatured { get; set; }
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -291,7 +290,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public bool AcceptsGenderType (GenderType? gender)
+        public bool AcceptsGenderType(GenderType? gender)
         {
             return gender switch
             {
@@ -549,7 +548,7 @@ namespace AfterSchoolLibrary.Models
                 return IsGradeInRange(registrantGradeLevelAnswer.Text, msgs, dc);
             return false;
         }
-        
+
         public bool IsGradeInRange(string answer, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
@@ -1216,7 +1215,7 @@ namespace AfterSchoolLibrary.Models
                 Uid = Guid.NewGuid(),
             };
 
-            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            var reg = new Regex(Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 
