@@ -315,6 +315,12 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student},
                 true, false, msgs, dc).FirstOrDefault();
         }
+        
+        public static Registrant GetMasterParentOrStudentOrAdultRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student, RegistrantPersonType.Adult},
+                true, false, msgs, dc).FirstOrDefault();
+        }
 
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -705,7 +711,7 @@ namespace AfterSchoolLibrary.Services
                         user.AsList(),
                         RegistrantType.Individual,
                         true,
-                        (registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult),
+                        (registrantPersonType == RegistrantPersonType.Parent),
                         false,
                         locationId, // probably should have a school location id
                         RegistrantProfileStatus.Started,
