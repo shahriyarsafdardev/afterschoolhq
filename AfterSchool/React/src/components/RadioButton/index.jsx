@@ -9,19 +9,19 @@ function RadioButton({ label, value, selectedValue }) {
   return (
     <div className={classes.radioButtonWrapper}>
       <FormControlLabel
-        control={(
+        control={
           <Radio
             classes={{
-              root: classes.root,
+              root: classes.root
             }}
             checked={selectedValue === value}
             checkedIcon={<span className={cs(classes.icon, classes.checkedIcon)} />}
           />
-        )}
+        }
         label={label}
         value={value}
         classes={{
-          root: classes.formControlLabelRoot,
+          root: classes.formControlLabelRoot
         }}
       />
     </div>

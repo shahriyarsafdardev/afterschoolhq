@@ -1,3 +1,5 @@
 export default {
-  navigateTo: (path) => { window.location.href = path; },
+  navigateTo: path => {
+    window.location.href = path;
+  }
 };

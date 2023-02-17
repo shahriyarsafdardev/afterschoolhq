@@ -5,6 +5,6 @@ export default makeStyles(() => ({
     padding: '2px 8px',
     marginTop: '-5px',
     height: '37px',
-    background: '#787E81',
-  },
+    background: '#787E81'
+  }
 }));

@@ -4,16 +4,14 @@ import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
 import cs from 'classnames';
 import useStyles from './styles';
 
-function ApiTextField({
-  formik, question,
-}) {
+function ApiTextField({ formik, question }) {
   const inputRef = useRef();
   const classes = useStyles();
-  const {
-    touched, errors, setFieldValue,
-  } = formik;
+  const { touched, errors, setFieldValue } = formik;
   const { ID, IsRequired: required = false } = question;
-  const [typeClass, typeText] = required ? [classes.fieldLabelRequired, '*'] : [classes.fieldLabelOptional, '(Optional)'];
+  const [typeClass, typeText] = required
+    ? [classes.fieldLabelRequired, '*']
+    : [classes.fieldLabelOptional, '(Optional)'];
 
   const handlePlaceChanged = () => {
     const [place] = inputRef.current.getPlaces();
@@ -26,16 +24,19 @@ function ApiTextField({
     <Grid className={classes.textFieldBox} xs={12}>
       <Grid xs={12} md={4} item className={classes.titleGrid}>
         <Typography variant="h6" className={classes.fieldLabel}>
-          Street Address
- &nbsp;
+          Street Address &nbsp;
           <Typography className={typeClass}>{typeText}</Typography>
         </Typography>
       </Grid>
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
-
-        <LoadScript googleMapsApiKey="AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc" libraries={['places']}>
+        <LoadScript
+          googleMapsApiKey="AIzaSyBq47Ro2O69sQhVLEW4_2L0ClOBSW_Srmc"
+          libraries={['places']}
+        >
           <StandaloneSearchBox
-            onLoad={(ref) => { inputRef.current = ref; }}
+            onLoad={ref => {
+              inputRef.current = ref;
+            }}
             onPlacesChanged={handlePlaceChanged}
           >
             <MuiTextField
@@ -47,13 +48,11 @@ function ApiTextField({
               type="text"
               className={cs('form-control', classes.formControlClass)}
               placeholder="Enter your address"
-
             />
           </StandaloneSearchBox>
         </LoadScript>
       </Grid>
     </Grid>
-
   );
 }
 

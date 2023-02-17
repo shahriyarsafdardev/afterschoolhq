@@ -2,11 +2,11 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(() => ({
   progressBar: {
-    position: 'relative',
+    position: 'relative'
   },
   progressNumber: {
     position: 'absolute',
-    color: '#ffffff',
+    color: '#ffffff'
   },
   progressWrapper: {
     display: 'flex',
@@ -18,9 +18,9 @@ const useStyles = makeStyles(() => ({
     maxWidth: '366px',
     margin: 'auto',
     '& .MuiLinearProgress-barColorPrimary': {
-      borderRadius: 10,
-    },
-  },
+      borderRadius: 10
+    }
+  }
 }));
 
 export default useStyles;

@@ -11,7 +11,7 @@ function I18n() {
   const menuRef = useRef(null);
   const classes = useStyles();
 
-  const handleLanguageChange = (event) => {
+  const handleLanguageChange = event => {
     setSelectedLanguage(event.target.getAttribute('value'));
     setSelectedLanguageName(event.target.innerText);
     setOpen(false);

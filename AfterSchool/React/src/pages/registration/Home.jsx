@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box, Button, Grid, Typography,
-} from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
-import useStyles from './styles';
+
 import TextField from '../../components/TextField/TextField';
 import ProgressBar from '../../components/ProgressBar/ProgressBar';
 import NavBar from '../../components/NavBar/NavBar';
 import Loader from '../../components/Loader/Loader';
-
 import CheckBox from '../../components/CheckBox';
 import { useUser, useRegistration } from '../../redux/hooks/index';
 import questionType from '../../constants/questionType';
@@ -19,22 +16,29 @@ import TextAreaQuestion from '../../components/Questions/TextAreaQuestion';
 import ApiTextField from '../../components/ApiTextField/ApiTextField';
 import Validations from '../../constants/regex';
 
+import useStyles from './styles';
+
 export default function Home() {
   const classes = useStyles();
-  const { user, loadUser } = useUser();
+  const { loadUser } = useUser();
   const {
     loading,
-    questions, questionsGroups, answeredQuestions,
-    loadFormData, submitFormSection,
+    questions,
+    questionsGroups,
+    answeredQuestions,
+    loadFormData,
+    submitFormSection
   } = useRegistration();
   const { emailValidationRegex, phoneValidationRegex } = Validations;
 
   const [activeGroup, setActiveGroup] = useState(0);
-  const [activeGroupId, setActiveGroupId] = useState(questionsGroups ? questionsGroups[0]?.QuestionGroupDataTypeId : 0);
+  const [activeGroupId, setActiveGroupId] = useState(
+    questionsGroups ? questionsGroups[0]?.QuestionGroupDataTypeId : 0
+  );
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const totalGroups = questionsGroups?.length || 1;
 
-  const handleSection = (action) => {
+  const handleSection = action => {
     if (action === 'next') {
       setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
       setActiveGroup(activeGroup + 1);
@@ -44,23 +48,28 @@ export default function Home() {
     }
   };
 
-  const submittedAnswer = (id) => answeredQuestions.find((q) => q.QuestionDataTypeId === id)?.Text || '';
+  const submittedAnswer = id =>
+    answeredQuestions.find(q => q.QuestionDataTypeId === id)?.Text || '';
 
-  const questionObjectFindById = (id) => currentQuestions.find((q) => q.ID === Number(id)) || {};
+  const questionObjectFindById = id => currentQuestions.find(q => q.ID === Number(id)) || {};
 
   const answerObject = (key, values) => {
     if (!values[key]) return undefined;
     const question = questionObjectFindById(key);
-    return ({ QuestionDataTypeId: question.QuestionDataTypeId, QuestionText: question.Text, Text: values[key] });
+    return {
+      QuestionDataTypeId: question.QuestionDataTypeId,
+      QuestionText: question.Text,
+      Text: values[key]
+    };
   };
 
-  const formSectionSubmitObject = (values) => {
+  const formSectionSubmitObject = values => {
     const answers = [];
-    Object.keys(values).forEach((key) => {
+    Object.keys(values).forEach(key => {
       const answer = answerObject(key, values);
       if (answer) answers.push(answer);
     });
-    answeredQuestions.forEach((answer) => {
+    answeredQuestions.forEach(answer => {
       if (!Object.keys(values).includes(answer.QuestionDataTypeId)) {
         answers.push(answer);
       }
@@ -68,10 +77,14 @@ export default function Home() {
     return answers;
   };
 
-  const validator = (values) => {
+  const validator = values => {
     const errors = {};
-    currentQuestions?.forEach((question) => {
-      if (question?.IsRequired && question.QuestionTypeId === questionType.email && values[question.ID]) {
+    currentQuestions?.forEach(question => {
+      if (
+        question?.IsRequired &&
+        question.QuestionTypeId === questionType.email &&
+        values[question.ID]
+      ) {
         if (!emailValidationRegex.test(values[question.ID])) {
           errors[question.ID] = 'Please enter a valid email address';
         }
@@ -96,24 +109,22 @@ export default function Home() {
   };
 
   const initialvalues = {};
-  currentQuestions?.forEach((question) => {
+  currentQuestions?.forEach(question => {
     initialvalues[question.ID] = submittedAnswer(question.QuestionDataTypeId);
   });
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: (values) => validator(values),
-    onSubmit: async (values, { setErrors, setSubmitting, resetForm }) => {
+    validate: values => validator(values),
+    onSubmit: async (values, { resetForm }) => {
       await submitFormSection(formSectionSubmitObject(values));
       handleSection('next');
       resetForm();
-    },
+    }
   });
 
-  const {
-    errors, touched, handleSubmit, isSubmitting, getFieldProps, isValid,
-  } = formik;
+  const { handleSubmit } = formik;
 
   useEffect(() => {
     loadUser();
@@ -122,17 +133,25 @@ export default function Home() {
 
   useEffect(() => {
     if (questions) {
-      const groupedQuestions = questions.filter((question) => question.FormQuestionGroupQuestionGroupDataTypeId === questionsGroups[activeGroup].QuestionGroupDataTypeId);
+      const groupedQuestions = questions.filter(
+        question =>
+          question.FormQuestionGroupQuestionGroupDataTypeId ===
+          questionsGroups[activeGroup].QuestionGroupDataTypeId
+      );
       setCurrentQuestions(groupedQuestions);
     }
   }, [activeGroup, activeGroupId, questions]);
 
-  const showQuestion = (currentQuestion) => {
+  const showQuestion = currentQuestion => {
     const { QuestionTypeId } = currentQuestion;
 
     switch (QuestionTypeId) {
       case questionType.text:
-        return currentQuestion.Text === 'Street Address' ? <ApiTextField question={currentQuestion} formik={formik} /> : <TextField question={currentQuestion} formik={formik} />;
+        return currentQuestion.Text === 'Street Address' ? (
+          <ApiTextField question={currentQuestion} formik={formik} />
+        ) : (
+          <TextField question={currentQuestion} formik={formik} />
+        );
       case questionType.email:
         return <TextField question={currentQuestion} formik={formik} />;
       case questionType.date:
@@ -144,7 +163,14 @@ export default function Home() {
       case questionType.textArea:
         return <TextAreaQuestion question={currentQuestion} formik={formik} />;
       case questionType.checkBox:
-        return <CheckBox option={{ key: 1, value: 'Test Value' }} click={() => {}} checked formik={formik} />;
+        return (
+          <CheckBox
+            option={{ key: 1, value: 'Test Value' }}
+            click={() => {}}
+            checked
+            formik={formik}
+          />
+        );
       default:
         return <TextField question={currentQuestion} formik={formik} />;
     }
@@ -154,7 +180,9 @@ export default function Home() {
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
         <Box className={classes.home}>
-          {loading ? <Loader /> : (
+          {loading ? (
+            <Loader />
+          ) : (
             <>
               <NavBar />
               <Box className={classes.outerWrapper}>
@@ -163,7 +191,9 @@ export default function Home() {
                   <Box className={classes.formInnerWrapper}>
                     <Typography
                       style={{
-                        paddingTop: '30px', fontSize: 18, color: '#555555',
+                        paddingTop: '30px',
+                        fontSize: 18,
+                        color: '#555555'
                       }}
                       variant="h6"
                       color="secondary"
@@ -175,17 +205,29 @@ export default function Home() {
                     </Typography>
                     <Grid container className={classes.justifyContentCenter}>
                       <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                        {currentQuestions?.map((question) => (
-                          showQuestion(question)
-                        ))}
+                        {currentQuestions?.map(question => showQuestion(question))}
                       </Grid>
                     </Grid>
                     <Box className={classes.buttonWrapper}>
-                      <Button color="primary" variant="outlined" className={classes.backButton} disabled={!activeGroup > 0} onClick={() => handleSection('previous')}>
+                      <Button
+                        color="primary"
+                        variant="outlined"
+                        className={classes.backButton}
+                        disabled={!activeGroup > 0}
+                        onClick={() => handleSection('previous')}
+                      >
                         Back
                       </Button>
-                      <Button color="primary" className={classes.saveButton} variant="contained" disabled={activeGroup === totalGroups - 1} type="submit">
-                        {activeGroup === totalGroups - 1 ? 'Confirm Registration' : 'Save & Continue'}
+                      <Button
+                        color="primary"
+                        className={classes.saveButton}
+                        variant="contained"
+                        disabled={activeGroup === totalGroups - 1}
+                        type="submit"
+                      >
+                        {activeGroup === totalGroups - 1
+                          ? 'Confirm Registration'
+                          : 'Save & Continue'}
                       </Button>
                     </Box>
                   </Box>

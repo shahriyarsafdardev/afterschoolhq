@@ -1,23 +1,15 @@
 import React from 'react';
-import {
-  Box, FormHelperText, RadioGroup,
-} from '@material-ui/core';
+import { Box, FormHelperText, RadioGroup } from '@material-ui/core';
 import FieldWrapper from '../../FieldWrapper/FieldWrapper';
 import RadioButton from '../../RadioButton';
 
 import useStyles from './styles';
 
-function RadioQuestion({
-  question, formik,
-}) {
+function RadioQuestion({ question, formik }) {
   const classes = useStyles();
-  const {
-    ID, Options, Text: title, IsRequired: isRequired = false,
-  } = question;
-  const {
-    touched, values, errors, setFieldValue,
-  } = formik;
-  const options = Options.split(',').map((option) => ({ key: option, value: option }));
+  const { ID, Options, Text: title, IsRequired: isRequired = false } = question;
+  const { touched, values, errors, setFieldValue } = formik;
+  const options = Options.split(',').map(option => ({ key: option, value: option }));
 
   const handleRadioChange = ({ target: { value } }) => {
     setFieldValue(ID, value);
@@ -32,18 +24,29 @@ function RadioQuestion({
               onChange={handleRadioChange}
               value={values[ID] || ''}
               classes={{
-                root: classes.radioGroupRoot,
+                root: classes.radioGroupRoot
               }}
             >
-              {options.length
-              && options.map((option) => (
-                <RadioButton key={option.key} label={option.value} value={option.value} selectedValue={formik.values[ID]} />
-              ))}
+              {options.length &&
+                options.map(option => (
+                  <RadioButton
+                    key={option.key}
+                    label={option.value}
+                    value={option.value}
+                    selectedValue={formik.values[ID]}
+                  />
+                ))}
             </RadioGroup>
           </div>
         </div>
       </FieldWrapper>
-      {touched[ID] && <Box className={classes.flexCenter}><FormHelperText className={classes.maxWidth} error>{errors[ID]}</FormHelperText></Box>}
+      {touched[ID] && (
+        <Box className={classes.flexCenter}>
+          <FormHelperText className={classes.maxWidth} error>
+            {errors[ID]}
+          </FormHelperText>
+        </Box>
+      )}
     </>
   );
 }

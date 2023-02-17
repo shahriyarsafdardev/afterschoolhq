@@ -10,28 +10,31 @@ const RegistrationSlice = createSlice({
     questionsGroups: [],
     answeredQuestions: [],
     activity: {},
-    loading: true,
+    loading: true
   },
   reducers: {
-    loadingFormData: (state) => {
+    loadingFormData: state => {
       state.loading = true;
     },
-    formDataLoaded: (state) => {
+    formDataLoaded: state => {
       state.loading = false;
     },
-    formDataLoadingFailed: (state) => {
+    formDataLoadingFailed: state => {
       state.loading = false;
     },
     setFormData: (state, { payload }) => {
       state.questions = [...payload.FormDto.formQuestion, ...eSignatureSection.questions];
-      state.questionsGroups = [...payload.FormDto.formQuestionGroup, ...eSignatureSection.questionsGroups];
+      state.questionsGroups = [
+        ...payload.FormDto.formQuestionGroup,
+        ...eSignatureSection.questionsGroups
+      ];
       state.answeredQuestions = payload.FormDto.formQuestionAnswer;
       state.activity = payload.activityDto;
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
-    },
-  },
+    }
+  }
 });
 
 export const useRegistrationActions = () => {
@@ -44,7 +47,7 @@ export const useRegistrationActions = () => {
     dispatch(actions.formDataLoaded());
   };
 
-  const submitFormSection = async (formSectionSubmitObject) => {
+  const submitFormSection = async formSectionSubmitObject => {
     // const formData = await RegistrationRepository.getFormData();
     dispatch(actions.submitFormSection(formSectionSubmitObject));
   };

@@ -1,8 +1,8 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export default makeStyles((theme) => ({
+export default makeStyles(theme => ({
   home: {
-    height: '100vh',
+    height: '100vh'
   },
   progressCard: {
     display: 'flex',
@@ -14,29 +14,29 @@ export default makeStyles((theme) => ({
     background: '#FDFDFD',
     border: `1px solid ${theme.palette.success.main}`,
     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-    borderRadius: '10px',
+    borderRadius: '10px'
   },
   progressList: {
     lineHeight: '1rem',
     textAlign: 'left',
-    paddingLeft: '7px',
+    paddingLeft: '7px'
   },
   progressListIcon: {
-    fontSize: '12px',
+    fontSize: '12px'
   },
   icon: {
     width: '15px !important',
-    height: '15px  !important',
+    height: '15px  !important'
   },
   fieldLabel: {
     display: 'flex',
-    justifyContent: 'end',
+    justifyContent: 'end'
   },
   fieldLabelOptional: {
-    fontStyle: 'italic',
+    fontStyle: 'italic'
   },
   fieldLabelRequired: {
-    color: 'red',
+    color: 'red'
   },
   buttonWrapper: {
     width: '300px',
@@ -47,8 +47,8 @@ export default makeStyles((theme) => ({
       minHeight: '80px',
       flexDirection: 'column',
       width: '90%',
-      maxWidth: 540,
-    },
+      maxWidth: 540
+    }
   },
   saveButton: {
     background: theme.palette.primary.main,
@@ -56,16 +56,16 @@ export default makeStyles((theme) => ({
     color: '#FFFFFF',
     width: 200,
     [theme.breakpoints.down('sm')]: {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   backButton: {
     fontSize: 14,
     width: 90,
     color: theme.palette.primary.main,
     [theme.breakpoints.down('sm')]: {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   outerWrapper: {
     minHeight: '100%',
@@ -79,30 +79,30 @@ export default makeStyles((theme) => ({
     textAlign: 'center',
     borderBottomRightRadius: 0,
     borderBottomLeftRadius: 0,
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.secondary
   },
   formWrapper: {
     display: 'flex',
     justifyContent: 'center',
     flexDirection: 'column',
-    alignContent: 'center',
+    alignContent: 'center'
   },
   formInnerWrapper: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   flexColCentered: {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    width: '45%',
+    width: '45%'
   },
   textFieldBox: {
     display: 'flex',
     justifyContent: 'flex-end',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   formControlClass: {
     display: 'block',
@@ -117,15 +117,15 @@ export default makeStyles((theme) => ({
     borderRadius: '0',
     '& .MuiOutlinedInput-root': {
       width: '100%',
-      height: '40px',
-    },
+      height: '40px'
+    }
   },
   innerContainer: {
     [theme.breakpoints.down('sm')]: {
-      maxWidth: '540px',
-    },
+      maxWidth: '540px'
+    }
   },
   justifyContentCenter: {
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 }));

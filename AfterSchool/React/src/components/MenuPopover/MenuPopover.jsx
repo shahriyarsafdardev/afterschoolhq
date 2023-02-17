@@ -18,8 +18,8 @@ const ArrowStyle = styled('span')(({ theme }) => ({
     transform: 'rotate(-135deg)',
     background: theme.palette.background.paper,
     borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.12)}`,
-    borderBottom: `solid 1px ${alpha(theme.palette.grey[500], 0.12)}`,
-  },
+    borderBottom: `solid 1px ${alpha(theme.palette.grey[500], 0.12)}`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -29,21 +29,21 @@ function MenuPopover({ children, sx, ...other }) {
     <Popover
       anchorOrigin={{
         vertical: 'bottom',
-        horizontal: 'right',
+        horizontal: 'right'
       }}
       transformOrigin={{
         vertical: 'top',
-        horizontal: 'right',
+        horizontal: 'right'
       }}
       PaperProps={{
         sx: {
           mt: 1.5,
           ml: 0.5,
           overflow: 'inherit',
-          boxShadow: (theme) => theme.customShadows.z20,
-          border: (theme) => `solid 1px ${theme.palette.grey[500_8]}`,
-          ...sx,
-        },
+          boxShadow: theme => theme.customShadows.z20,
+          border: theme => `solid 1px ${theme.palette.grey[500_8]}`,
+          ...sx
+        }
       }}
       {...other}
     >

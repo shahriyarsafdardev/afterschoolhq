@@ -5,13 +5,13 @@ import UserRepository from '../../repository/UserRepository';
 const UserSlice = createSlice({
   name: 'userSlice',
   initialState: {
-    user: {},
+    user: {}
   },
   reducers: {
     setUser: (state, { payload }) => {
       state.user = payload.obj;
-    },
-  },
+    }
+  }
 });
 
 export const useUserActions = () => {

@@ -2,38 +2,38 @@ import { makeStyles } from '@material-ui/core/styles';
 import header from '../../assets/header.png';
 import headerMobile from '../../assets/header-mob.png';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   headerWrapper: {
     background: '#454E51',
     '& .MuiButton-label': {
-      color: 'white',
+      color: 'white'
     },
     '& .MuiButton-contained': {
-      background: '#787E81',
-    },
+      background: '#787E81'
+    }
   },
   outerOption: {
-    display: 'flex',
+    display: 'flex'
   },
   option: {
     display: 'none',
     [theme.breakpoints.up('md')]: {
-      display: 'flex',
-    },
+      display: 'flex'
+    }
   },
   menu: {
     display: 'flex',
     [theme.breakpoints.up('md')]: {
-      display: 'none',
-    },
+      display: 'none'
+    }
   },
   navBar: {
     background: 'grey',
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between'
   },
   navOptions: {
-    display: 'flex',
+    display: 'flex'
   },
   navImage: {
     marginTop: '30px',
@@ -43,26 +43,26 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: 'cover',
     gap: '8px',
     [theme.breakpoints.down('sm')]: {
-      backgroundImage: `url(${headerMobile})`,
+      backgroundImage: `url(${headerMobile})`
     },
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   organizationName: {
     fontSize: '16px',
     color: '#ffffff',
     [theme.breakpoints.down('sm')]: {
-      fontSize: '14px',
-    },
+      fontSize: '14px'
+    }
   },
   activityName: {
     fontSize: '24px',
     color: '#ffffff',
     [theme.breakpoints.down('sm')]: {
-      fontSize: '20px',
-    },
-  },
+      fontSize: '20px'
+    }
+  }
 }));
 
 export default useStyles;

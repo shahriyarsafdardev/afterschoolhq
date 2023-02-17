@@ -6,21 +6,17 @@ import FieldWrapper from '../../FieldWrapper/FieldWrapper';
 
 import useStyles from './styles';
 
-function DateQuestion({
-  question, formik,
-}) {
+function DateQuestion({ question, formik }) {
   const classes = useStyles();
   const datePicker = useRef();
-  const {
-    touched, values, errors, setFieldValue,
-  } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired = false } = question;
 
-  const handleDateChange = (date) => {
+  const handleDateChange = date => {
     setFieldValue(ID, date);
   };
 
-  const handleError = (error) => {};
+  const handleError = () => {};
 
   return (
     <>
@@ -40,24 +36,30 @@ function DateQuestion({
                 onChange={handleDateChange}
                 autoOk
                 classes={{
-                  root: classes.dateInput,
+                  root: classes.dateInput
                 }}
                 PopoverProps={{
                   anchorEl: datePicker.current,
                   anchorOrigin: {
                     horizontal: 150,
-                    vertical: 'bottom',
-                  },
+                    vertical: 'bottom'
+                  }
                 }}
                 KeyboardButtonProps={{
-                  'aria-label': 'change date',
+                  'aria-label': 'change date'
                 }}
               />
             </MuiPickersUtilsProvider>
           </div>
         </div>
       </FieldWrapper>
-      {touched[ID] && <Box className={classes.flexCenter}><FormHelperText className={classes.maxWidth} error>{errors[ID]}</FormHelperText></Box>}
+      {touched[ID] && (
+        <Box className={classes.flexCenter}>
+          <FormHelperText className={classes.maxWidth} error>
+            {errors[ID]}
+          </FormHelperText>
+        </Box>
+      )}
     </>
   );
 }

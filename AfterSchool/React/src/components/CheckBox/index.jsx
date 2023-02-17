@@ -3,9 +3,7 @@ import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 
-function CheckBox({
-  option, click, checked, formik,
-}) {
+function CheckBox({ option, click, checked }) {
   const classes = useStyles();
   const handleCheck = ({ target: { checked } }) => {
     click(checked, option);
@@ -17,26 +15,27 @@ function CheckBox({
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
-            control={(
+            control={
               <Checkbox
                 checked={checked}
                 classes={{
                   checked: classes.checked,
-                  root: classes.root,
+                  root: classes.root
                 }}
-                checkedIcon={(
-                  <CheckIcon style={{
-                    height: '18px',
-                    width: '18px',
-                  }}
+                checkedIcon={
+                  <CheckIcon
+                    style={{
+                      height: '18px',
+                      width: '18px'
+                    }}
                   />
-                )}
+                }
                 IconStyle={{ fill: 'black' }}
               />
-            )}
+            }
             label={option.value}
             classes={{
-              root: classes.formControlLabelRoot,
+              root: classes.formControlLabelRoot
             }}
             onChange={handleCheck}
           />

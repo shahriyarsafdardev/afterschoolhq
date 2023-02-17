@@ -6,16 +6,16 @@ import useStyles from './styles';
 
 export default function ProgressBar({ activeGroup, totalGroups }) {
   const classes = useStyles();
-  const BorderLinearProgress = withStyles((theme) => ({
+  const BorderLinearProgress = withStyles(theme => ({
     root: {
       height: 20,
       borderRadius: 10,
       width: '100%',
-      maxWidth: '366px',
+      maxWidth: '366px'
     },
     colorPrimary: {
-      backgroundColor: theme.palette.info,
-    },
+      backgroundColor: theme.palette.info
+    }
   }))(LinearProgress);
 
   const currentProgress = ((activeGroup + 1) / totalGroups) * 100;

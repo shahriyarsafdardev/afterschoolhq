@@ -15,5 +15,5 @@ export default {
   radioList: 3,
   radioMatrix: 10,
   email: 7,
-  number: 9,
+  number: 9
 };

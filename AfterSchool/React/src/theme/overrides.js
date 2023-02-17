@@ -1,7 +1,7 @@
 export default {
   MuiButton: {
     root: {
-      borderRadius: '6px',
-    },
-  },
+      borderRadius: '6px'
+    }
+  }
 };

@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   dateWrapper: {
     display: 'block',
     maxWidth: 540,
@@ -11,11 +11,11 @@ const useStyles = makeStyles((theme) => ({
     color: '#777777',
     backgroundColor: '#ffffff',
     [theme.breakpoints.down('sm')]: {
-      width: '100%',
+      width: '100%'
     },
     '&.MuiPickersDay-daySelected': {
-      background: 'red',
-    },
+      background: 'red'
+    }
   },
   dateInput: {
     display: 'flex',
@@ -29,31 +29,31 @@ const useStyles = makeStyles((theme) => ({
     height: '40px',
     position: 'relative',
     '& .MuiInput-underline:before': {
-      borderBottom: 0,
+      borderBottom: 0
     },
     '& .MuiInput-underline:after': {
-      borderBottom: 0,
+      borderBottom: 0
     },
     '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
-      borderBottom: 0,
+      borderBottom: 0
     },
     '& .MuiFormControl-marginNormal': {
       marginTop: 0,
-      marginBottom: 0,
-    },
+      marginBottom: 0
+    }
   },
   datePicker: {
-    position: 'relative',
+    position: 'relative'
   },
   flexCenter: {
     display: 'flex',
     justifyContent: 'center',
-    paddingLeft: 50,
+    paddingLeft: 50
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500,
-  },
+    maxWidth: 500
+  }
 }));
 
 export default useStyles;

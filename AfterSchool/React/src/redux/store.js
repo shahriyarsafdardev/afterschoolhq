@@ -5,7 +5,6 @@ import RegistrationSlice from './slices/RegistrationSlice';
 export default configureStore({
   reducer: {
     [UserSlice.name]: UserSlice.reducer,
-    [RegistrationSlice.name]: RegistrationSlice.reducer,
-  },
-  devTools: process.env.NODE_ENV !== 'production',
+    [RegistrationSlice.name]: RegistrationSlice.reducer
+  }
 });

@@ -6,17 +6,18 @@ import Home from './pages/registration/Home';
 import theme from './theme/theme';
 
 function App() {
-  const Router = () => (useRoutes([
-    {
-      path: '/',
-      children: [
-        {
-          path: 'reactapp',
-          element: <Home />,
-        },
-      ],
-    },
-  ]));
+  const Router = () =>
+    useRoutes([
+      {
+        path: '/',
+        children: [
+          {
+            path: 'reactapp',
+            element: <Home />
+          }
+        ]
+      }
+    ]);
 
   return (
     <ThemeProvider theme={theme}>

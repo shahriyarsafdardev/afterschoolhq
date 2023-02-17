@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export default makeStyles((theme) => ({
+export default makeStyles(theme => ({
   fieldLabel: {
     display: 'flex',
     justifyContent: 'end',
@@ -8,35 +8,35 @@ export default makeStyles((theme) => ({
       justifyContent: 'start',
       textAlign: 'left',
       padding: '0px 12px',
-      fontSize: '14px',
-    },
+      fontSize: '14px'
+    }
   },
   fieldLabelOptional: {
-    fontStyle: 'italic',
+    fontStyle: 'italic'
   },
   fieldLabelRequired: {
-    color: 'red',
+    color: 'red'
   },
   textFieldGrid: {
     maxWidth: 540,
     width: '100%',
     padding: '8px 12px',
     [theme.breakpoints.down('sm')]: {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   titleGrid: {
     [theme.breakpoints.down('sm')]: {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   textFieldBox: {
     display: 'flex',
     alignItems: 'center',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column',
-      justifyContent: 'flex-start',
-    },
+      justifyContent: 'flex-start'
+    }
   },
   formControlClass: {
     display: 'block',
@@ -51,7 +51,7 @@ export default makeStyles((theme) => ({
     borderRadius: '5px',
     '& .MuiOutlinedInput-root': {
       width: '100%',
-      minHeight: '40px',
-    },
-  },
+      minHeight: '40px'
+    }
+  }
 }));
