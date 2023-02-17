@@ -245,6 +245,7 @@ namespace AfterSchool.Controllers
             var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            
             return View(result);
         }
 
