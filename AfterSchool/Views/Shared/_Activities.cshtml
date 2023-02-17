@@ -344,7 +344,7 @@ else
                     @if (group.IsEmpty())
                     {
                         <button data-uid="@UI.JavascriptSafeString(activity.Uid.ToString())" data-name="@UI.JavascriptSafeString(activity.Name)" data-isfeatured="@activity.IsFeatured"
-                                @*onclick="updateIsFeatured('@UI.JavascriptSafeString(activity.Uid.ToString())', '@UI.JavascriptSafeString(activity.Name)')"*@ class="btn btn-sm featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
+                                class="btn btn-sm featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
                             <i class="s7-pin"></i>
                         </button>
                         <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
@@ -669,29 +669,6 @@ PageEvent.add(PageEvent.AFTER_INIT, function () {
         var q = $('#search').val();
         return `q=${q}`;
     }
-    /*function updateIsFeatured(uid, name){
-        $.get(
-                    `/org/activity/PinFeatureActivity?id=${uid}`,
-                    function (data) {
-                        debugger
-                        if (data) { 
-        
-                            $()
-                            Notifications.showBar({
-                                title: 'Success',
-                                message: `Featured Settings for <strong>${name}</strong> has been updated`,
-                                success: true
-                            });
-                        } else {  
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: `Featured Settings for <strong>${name}</strong> has NOT been updated`,
-                                success: false
-                            });
-                        }
-                    }
-                );
-    }*/
 </script>
 <script>
     
