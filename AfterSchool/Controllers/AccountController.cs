@@ -389,7 +389,7 @@ namespace AfterSchool.Controllers
 
                             if (account.IsEmpty())
                                 account = user.AddNewParentOrStudentRegistrantOrAdultAccount(
-                                    UserType.Owner,
+                                    userType,
                                     user,
                                     registrantPersonType,
                                     location?.ID,
@@ -433,7 +433,7 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            return new RedirectResult("Faq/Index");
+            return Redirect("ReactApp/Index");
         }
 
         #endregion
