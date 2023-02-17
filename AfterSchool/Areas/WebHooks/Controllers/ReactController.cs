@@ -30,10 +30,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
-                
+
                 var response = Request.CreateResponse(HttpStatusCode.NotFound);
                 response.Content = new StringContent((new ApiResponse(msgs, null)).ToJSON(), System.Text.Encoding.UTF8, "application/json");
                 return response;
+
             }
         }
 
