@@ -3736,7 +3736,7 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
         
-        public static Registrant GetRegitrantByRegistrantPersonType(this Account account, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+        public static Registrant GetRegistrantByRegistrantPersonType(this Account account, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
@@ -3793,7 +3793,7 @@ namespace AfterSchoolLibrary.Services
             return registrant;
         }
         
-        public static Registrant CreateParentOrStudentOrAdultRegistrant(this Account account, WebUser registrantOwner,
+        public static Registrant CreateRegistrant(this Account account, WebUser registrantOwner,
             List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian,
             bool allowTextMessages, int? schoolLocationId, RegistrantProfileStatus profileStatus, WebUser loggedInUser, RegistrantPersonType registrantPersonType,
             SystemMessages msgs = null, DatabaseConnection dc = null)

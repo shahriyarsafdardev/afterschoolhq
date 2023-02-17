@@ -418,7 +418,7 @@ namespace AfterSchool.Controllers
 
                             if (amsgs.HasNoErrors())
                             {
-                                registrant = account.GetRegitrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
+                                registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                             }
                         }
@@ -433,7 +433,7 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            return Redirect("ReactApp/Index");
+            return Redirect("ReactApp");
         }
 
         #endregion

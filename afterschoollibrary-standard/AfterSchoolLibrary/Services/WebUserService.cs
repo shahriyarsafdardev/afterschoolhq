@@ -706,7 +706,7 @@ namespace AfterSchoolLibrary.Services
 
                     user.AddAccount(account, userType, loggedInUser, amsgs, adc);
 
-                    account.CreateParentOrStudentOrAdultRegistrant(
+                    account.CreateRegistrant(
                         user,
                         user.AsList(),
                         RegistrantType.Individual,
