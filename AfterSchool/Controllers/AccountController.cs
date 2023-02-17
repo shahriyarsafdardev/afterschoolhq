@@ -7,6 +7,7 @@ using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -259,15 +260,47 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications, string optionSelected,  DateTime? birthdate)
         {
+
+            RegistrantPersonType registrantPersonType = RegistrantPersonType.Parent;
+            UserType userType = UserType.Owner;
+
+            if (birthdate.IsNotEmpty())
+            {
+                if (DateTime.UtcNow.Year - birthdate.Value.Year >= 18)
+                {
+                    registrantPersonType = RegistrantPersonType.Adult;
+                    userType = UserType.Adult;
+                }
+                else
+                {
+                    registrantPersonType = RegistrantPersonType.Student;
+                    userType = UserType.Student;
+                }
+            }
+            
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
+            var qvms = allQuestionsForQuestionGroup.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            
+            qvms.ForEach(qvm =>
+            {
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantMobilePhone:
+                        if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(Utilities.PhoneRegEx))
+                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                        break;
+                }
+            });
 
             if (!agree.IsBoolean())
                 msgs.Add("You must agree to the terms of service", MessageType.UserError);
@@ -307,6 +340,10 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
+                if(optionSelected.IsEmpty())
+                    msgs.Add("Select Registrant Type", MessageType.UserError);
+                if(optionSelected == "2" && birthdate.IsEmpty())
+                    msgs.Add("Birthdate is requirerd", MessageType.UserError);
                 if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
@@ -329,20 +366,35 @@ namespace AfterSchool.Controllers
                 (
                     (amsgs, adc) =>
                     {
-                        user = RegistrationCommon.CreateOrUpdateUser(
-                            currentUser,
-                            firstName.Value.Trim(),
-                            lastName.Value.Trim(),
+                        user = WebUserService.CreateNewWithOptionalPhone(
+                            firstName.Value,
+                            lastName.Value,
                             email.Value.Trim(),
                             phone.Value.Trim(),
                             password1,
+                            true,
+                            true,
+                            false,
                             textnotifications.IfBlank("0").ToBoolean(),
+                            null,
                             amsgs,
                             adc);
 
                         if (amsgs.HasNoErrors() && user.IsNotEmpty())
                         {
-                            account = RegistrationCommon.GetOrCreateParentOrStudentRegistrantAccount(user, amsgs, adc);
+                            var location = participationObject?.Location;
+                            if (location.IsNotEmpty() &&
+                                location.GetHostAccount(amsgs, adc)?.AccountTypeId != AccountType.School)
+                                location = null;
+
+                            if (account.IsEmpty())
+                                account = user.AddNewParentOrStudentRegistrantOrAdultAccount(
+                                    userType,
+                                    user,
+                                    registrantPersonType,
+                                    location?.ID,
+                                    amsgs,
+                                    adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -363,13 +415,13 @@ namespace AfterSchool.Controllers
                                 objectId: user.ID.Value,
                                 objectText: user.FullName
                             );
+
+                            if (amsgs.HasNoErrors())
+                            {
+                                registrant = account.GetRegitrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
+                                RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            }
                         }
-
-                        if (amsgs.HasNoErrors())
-                            registrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(account, user, amsgs, adc);
-
-                        if (amsgs.HasNoErrors())
-                            RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
                     },
                     smsgs =>
                     {
@@ -381,19 +433,7 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("addhomeaddress");
-
-            Account registrationAccount = null;
-
-            if (regaccount.IsGuid())
-                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-            var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
-            var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
-            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
-                SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
-            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-            return View(result);
+            return Redirect("ReactApp/Index");
         }
 
         #endregion
