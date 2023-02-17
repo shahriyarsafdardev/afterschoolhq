@@ -433,20 +433,7 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            /*if (msgs.HasNoErrors())
-                return RedirectToAction("addhomeaddress");
-
-            Account registrationAccount = null;
-
-            if (regaccount.IsGuid())
-                registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
-            var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
-            var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
-            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
-                SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
-            ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-            return View(result);*/
-            return null;
+            return new RedirectResult("Faq/Index");
         }
 
         #endregion
