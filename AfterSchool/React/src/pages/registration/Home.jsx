@@ -2,19 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 
-import TextField from '../../components/TextField/TextField';
-import ProgressBar from '../../components/ProgressBar/ProgressBar';
-import NavBar from '../../components/NavBar/NavBar';
-import Loader from '../../components/Loader/Loader';
-import CheckBox from '../../components/CheckBox';
-import { useUser, useRegistration } from '../../redux/hooks/index';
-import questionType from '../../constants/questionType';
-import DateQuestion from '../../components/Questions/DateQuestion';
-import DropdownQuestion from '../../components/Questions/DropdownQuestion';
-import RadioQuestion from '../../components/Questions/RadioQuestion';
-import TextAreaQuestion from '../../components/Questions/TextAreaQuestion';
-import ApiTextField from '../../components/ApiTextField/ApiTextField';
-import Validations from '../../constants/regex';
+import TextField from 'components/TextField/TextField';
+import ProgressBar from 'components/ProgressBar/ProgressBar';
+import NavBar from 'components/NavBar/NavBar';
+import Loader from 'components/Loader/Loader';
+import CheckBox from 'components/CheckBox';
+import { useUser, useRegistration } from 'redux/hooks/index';
+import questionType from 'constants/questionType';
+import DateQuestion from 'components/Questions/DateQuestion';
+import DropdownQuestion from 'components/Questions/DropdownQuestion';
+import RadioQuestion from 'components/Questions/RadioQuestion';
+import TextAreaQuestion from 'components/Questions/TextAreaQuestion';
+import ApiTextField from 'components/ApiTextField/ApiTextField';
+import Validations from 'constants/regex';
 
 import useStyles from './styles';
 

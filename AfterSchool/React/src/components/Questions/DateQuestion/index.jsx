@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import { Box, FormHelperText } from '@material-ui/core';
 import DayjsUtils from '@date-io/dayjs';
-import FieldWrapper from '../../FieldWrapper/FieldWrapper';
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 
 import useStyles from './styles';
 

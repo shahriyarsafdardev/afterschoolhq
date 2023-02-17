@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button, MenuItem } from '@material-ui/core';
-import MenuPopover from '../MenuPopover/MenuPopover';
+import MenuPopover from 'components/MenuPopover/MenuPopover';
 import useStyles from './styles';
 
 function I18n() {

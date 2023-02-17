@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import UserRepository from '../../repository/UserRepository';
+import UserRepository from 'repository/UserRepository';
 
 const UserSlice = createSlice({
   name: 'userSlice',

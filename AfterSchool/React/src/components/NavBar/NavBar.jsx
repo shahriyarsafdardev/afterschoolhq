@@ -4,11 +4,11 @@ import { AppBar, Button, Box, Link, MenuItem, IconButton, Typography } from '@ma
 import { styled } from '@material-ui/core/styles';
 import { Icon } from '@iconify/react';
 import menu2Fill from '@iconify/icons-eva/menu-2-fill';
-import MenuPopover from '../MenuPopover/MenuPopover';
-import I18n from '../i18n/I18n';
+import MenuPopover from 'components/MenuPopover/MenuPopover';
+import I18n from 'components/i18n/I18n';
 import useStyles from './styles';
 
-import { useRegistration } from '../../redux/hooks';
+import { useRegistration } from 'redux/hooks';
 
 // ----------------------------------------------------------------------
 

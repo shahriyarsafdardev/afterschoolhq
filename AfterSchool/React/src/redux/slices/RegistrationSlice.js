@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import RegistrationRepository from '../../repository/RegistrationRepository';
-import eSignatureSection from '../../constants/eSignatureSectionTest';
+import RegistrationRepository from 'repository/RegistrationRepository';
+import eSignatureSection from 'constants/eSignatureSectionTest';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',

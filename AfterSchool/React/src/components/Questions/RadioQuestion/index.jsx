@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, FormHelperText, RadioGroup } from '@material-ui/core';
-import FieldWrapper from '../../FieldWrapper/FieldWrapper';
-import RadioButton from '../../RadioButton';
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import RadioButton from 'components/RadioButton';
 
 import useStyles from './styles';
 

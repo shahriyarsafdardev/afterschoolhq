@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
-import { useUserActions } from '../slices/UserSlice';
-import { useRegistrationActions } from '../slices/RegistrationSlice';
+import { useUserActions } from 'redux/slices/UserSlice';
+import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
 
 export const useUser = () => ({
   ...useSelector(state => state.userSlice),

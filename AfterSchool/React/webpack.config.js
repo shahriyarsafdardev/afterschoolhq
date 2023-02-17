@@ -6,7 +6,7 @@ module.exports = {
   entry: ['babel-polyfill', './src/index.jsx'],
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'bundle.js',
+    filename: 'bundle.js'
   },
   module: {
     rules: [
@@ -14,8 +14,8 @@ module.exports = {
         test: /\.jsx$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
-        },
+          loader: 'babel-loader'
+        }
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
@@ -23,16 +23,17 @@ module.exports = {
           {
             loader: 'url-loader',
             options: {
-              limit: 8192,
-            },
-          },
-        ],
-      },
-    ],
+              limit: 8192
+            }
+          }
+        ]
+      }
+    ]
   },
   devtool: 'inline-source-map',
   plugins: [new WebpackNotifierPlugin(), new BrowserSyncPlugin()],
   resolve: {
     extensions: ['', '.js', '.jsx'],
-  },
+    modules: [path.resolve('./src'), 'node_modules']
+  }
 };

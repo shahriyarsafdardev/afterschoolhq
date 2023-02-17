@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
-import header from '../../assets/header.png';
-import headerMobile from '../../assets/header-mob.png';
+import header from 'assets/header.png';
+import headerMobile from 'assets/header-mob.png';
 
 const useStyles = makeStyles(theme => ({
   headerWrapper: {
