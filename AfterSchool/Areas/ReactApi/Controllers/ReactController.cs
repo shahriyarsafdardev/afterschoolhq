@@ -87,7 +87,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentRegistrant(msgs).ID))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).ID))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -122,6 +122,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+
         public class ApiResponse
         {
             public SystemMessages msgs { get; set; }
