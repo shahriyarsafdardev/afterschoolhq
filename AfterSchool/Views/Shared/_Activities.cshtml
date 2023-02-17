@@ -343,6 +343,10 @@ else
 
                     @if (group.IsEmpty())
                     {
+                        <button data-uid="@UI.JavascriptSafeString(activity.Uid.ToString())" data-name="@UI.JavascriptSafeString(activity.Name)" data-isfeatured="@activity.IsFeatured"
+                                class="btn btn-sm featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
+                            <i class="s7-pin"></i>
+                        </button>
                         <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
                     }
 
@@ -564,10 +568,51 @@ else
         </div>
     </div>
 </div>
-
 <script>
+PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#registration-group').change(function () {
+            location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
+        });
+         $(document).on('click','.featured',function(){
+            
+            var uid = $(this).attr("data-uid");
+            var name = $(this).attr("data-name");
+            var wasFeatured = $(this).attr("data-isfeatured") === "True"; 
+            $.get(
+                    `/org/activity/PinFeatureActivity?id=${uid}`,
+                    function (data) {
+                        if (data) { 
+                            Notifications.showBar({
+                                title: 'Success',
+                                message: `Featured Settings for <strong>${name}</strong> has been updated`,
+                                success: true
+                            });
+                            if (wasFeatured){
+                                $(this).removeClass('btn-primary')  
+                                $(this).addClass('btn-default')   
+                                $(this).attr("data-isfeatured","False")                       
+                            } 
+                            else {
+                                $(this).removeClass('btn-default')  
+                                $(this).addClass('btn-primary') 
+                                $(this).attr("data-isfeatured","True")                    
+                            }
+                            
+                        } else {  
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: `Featured Settings for <strong>${name}</strong> has NOT been updated`,
+                                success: false
+                            });
+                            
+                        }
+                    }.bind(this)
+                )
+        }); 
+        
+        });
      function doSearch(){
-         location.href = `@Url.Action("index", "activity")?type=@((int)activityType)&archive=@(newArchiveValue)&${getQuery()}`;
+         location.href = `@Url.Action("index", "activity")?type=@((int) activityType)&archive=@(newArchiveValue)&${getQuery()}`;
     }
     function updateSchedule() {
         var schedule = $('#schedule').val();
@@ -624,13 +669,8 @@ else
         return `q=${q}`;
     }
 </script>
-
 <script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#registration-group').change(function () {
-            location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
-        });
-    });
+    
 
     function HandleNotification(packageName, packageID) {
         if(packageID > 0 && packageName !== ""){
