@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -47,17 +48,27 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = SessionVariables.CurrentRegistrant;
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var activity = participationObject.GetActivity();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                {
+                    questions = questions.Where(question =>
+                            question.QuestionDataTypeId.In(FormConstants.QuestionsToIncludeParentPanel()))
+                        .ToList();
+                }
+                
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
-                foreach (var question in participationObject.Form.GetAllQuestions(msgs))
+                foreach (var question in questions)
                 {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
