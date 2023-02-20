@@ -48,7 +48,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
