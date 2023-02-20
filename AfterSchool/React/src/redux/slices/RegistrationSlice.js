@@ -48,8 +48,14 @@ export const useRegistrationActions = () => {
   };
 
   const submitFormSection = async formSectionSubmitObject => {
-    // const formData = await RegistrationRepository.getFormData();
-    dispatch(actions.submitFormSection(formSectionSubmitObject));
+    const { answers, answerQuery } = formSectionSubmitObject;
+    const { answerQuery: answersQuery, groupId } = answerQuery;
+    const params = {
+      groupId: new URLSearchParams({ groupId }).toString(),
+      answers: new URLSearchParams(answersQuery).toString()
+    };
+    await RegistrationRepository.submitFormSection(params);
+    dispatch(actions.submitFormSection(answers));
   };
 
   return { loadFormData, submitFormSection };

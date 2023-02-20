@@ -2,18 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 
-import TextField from 'components/TextField/TextField';
-import ProgressBar from 'components/ProgressBar/ProgressBar';
-import NavBar from 'components/NavBar/NavBar';
-import Loader from 'components/Loader/Loader';
-import CheckBox from 'components/CheckBox';
 import { useUser, useRegistration } from 'redux/hooks/index';
+import {
+  DateQuestion,
+  DropdownQuestion,
+  RadioQuestion,
+  TextAreaQuestion
+} from 'components/Questions';
+import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
+
 import questionType from 'constants/questionType';
-import DateQuestion from 'components/Questions/DateQuestion';
-import DropdownQuestion from 'components/Questions/DropdownQuestion';
-import RadioQuestion from 'components/Questions/RadioQuestion';
-import TextAreaQuestion from 'components/Questions/TextAreaQuestion';
-import ApiTextField from 'components/ApiTextField/ApiTextField';
 import Validations from 'constants/regex';
 
 import useStyles from './styles';
@@ -32,9 +30,7 @@ export default function Home() {
   const { emailValidationRegex, phoneValidationRegex } = Validations;
 
   const [activeGroup, setActiveGroup] = useState(0);
-  const [activeGroupId, setActiveGroupId] = useState(
-    questionsGroups ? questionsGroups[0]?.QuestionGroupDataTypeId : 0
-  );
+  const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const totalGroups = questionsGroups?.length || 1;
 
@@ -48,8 +44,8 @@ export default function Home() {
     }
   };
 
-  const submittedAnswer = id =>
-    answeredQuestions.find(q => q.QuestionDataTypeId === id)?.Text || '';
+  const submittedAnswer = (id, text) =>
+    answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)?.Text || '';
 
   const questionObjectFindById = id => currentQuestions.find(q => q.ID === Number(id)) || {};
 
@@ -64,17 +60,22 @@ export default function Home() {
   };
 
   const formSectionSubmitObject = values => {
+    const answerQuery = {};
     const answers = [];
     Object.keys(values).forEach(key => {
       const answer = answerObject(key, values);
-      if (answer) answers.push(answer);
+      if (answer) {
+        answers.push(answer);
+        answerQuery[`question-${answer.QuestionDataTypeId}`] = answer.Text;
+      }
     });
     answeredQuestions.forEach(answer => {
       if (!Object.keys(values).includes(answer.QuestionDataTypeId)) {
         answers.push(answer);
+        answerQuery[`question-${answer.QuestionDataTypeId}`] = answer.Text;
       }
     });
-    return answers;
+    return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
   };
 
   const validator = values => {
@@ -110,7 +111,7 @@ export default function Home() {
 
   const initialvalues = {};
   currentQuestions?.forEach(question => {
-    initialvalues[question.ID] = submittedAnswer(question.QuestionDataTypeId);
+    initialvalues[question.ID] = submittedAnswer(question.QuestionDataTypeId, question.Text);
   });
 
   const formik = useFormik({
@@ -130,6 +131,10 @@ export default function Home() {
     loadUser();
     loadFormData();
   }, []);
+
+  useEffect(() => {
+    if (questionsGroups.length) setActiveGroupId(questionsGroups[0].QuestionGroupDataTypeId);
+  }, [questionsGroups.length]);
 
   useEffect(() => {
     if (questions) {

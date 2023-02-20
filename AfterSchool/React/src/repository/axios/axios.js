@@ -6,7 +6,7 @@ const { navigateTo } = utils;
 axios.interceptors.response.use(
   response => {
     const { msgs } = response.data;
-    if (msgs.length && msgs[0].IsError) {
+    if (msgs?.length && msgs[0].IsError) {
       if (msgs[0].Text === 'Unauthorized') {
         alert(msgs[0].Text); // TODO: For testing purpose/phase
         navigateTo('/login');
@@ -15,7 +15,7 @@ axios.interceptors.response.use(
     return response;
   },
   error => {
-    if (error.response.status === 404) {
+    if (error.response?.status === 404) {
       navigateTo('/login');
     }
 
@@ -26,7 +26,10 @@ axios.interceptors.response.use(
 export default {
   get: async url => {
     const response = await axios.get(url).then(res => res.data);
-
+    return response;
+  },
+  post: async (url, params) => {
+    const response = await axios.post(url, params);
     return response;
   }
 };
