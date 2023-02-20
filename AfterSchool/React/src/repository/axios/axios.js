@@ -2,6 +2,7 @@ import axios from 'axios';
 import utils from 'utils';
 
 const { navigateTo } = utils;
+axios.defaults.baseURL = 'http://localhost:54849/';
 
 axios.interceptors.response.use(
   response => {

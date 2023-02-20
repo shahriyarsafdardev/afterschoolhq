@@ -1,6 +1,6 @@
 import axios from './axios/axios';
+import ApiRoutes from 'routes/apiRoutes';
 
 export default {
-  getCurrentUser: () =>
-    axios.get('http://localhost:54849/ReactApi/React/GetCurrentUser').then(res => res)
+  getCurrentUser: () => axios.get(ApiRoutes.currentUserAPI).then(res => res)
 };
