@@ -2557,7 +2557,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public bool PinFeatureActivity(string id)
+        public JsonResult PinFeatureActivity(string id)
         {
             var msgs = new SystemMessages();
 
@@ -2570,7 +2570,7 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.AddRange(activity.SetIsFeatured(!activity.IsFeatured, (int) currentAccount?.ID, msgs));
 
             // This will return True if during switching of IsFeatured; we faced no problems.
-            return msgs.HasNoErrors();
+            return Json(new {success = msgs.HasNoErrors(), isFeaturedNow = activity.IsFeatured}, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
