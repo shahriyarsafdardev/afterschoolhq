@@ -313,10 +313,13 @@ namespace AfterSchool.Areas.District.Controllers
             }
 
             SetTempMessages(msgs);
-            
-            if(returnUrl.IsNotEmpty())
-                return RedirectToAction("Details" ,new {id = webUserIDs.Split(',')[0]});
-            
+
+            if (returnUrl.IsNotEmpty())
+            {
+                var registrant = Registrant.LoadByWebUserId(Convert.ToInt32(webUserIDs.Split(',')[0]), RegistrantPersonType.Volunteer, false, false).FirstOrDefault();
+                return RedirectToAction("Details" ,new {id = registrant.ID});
+            }
+
             return RedirectToAction("Todo");
         }
 
