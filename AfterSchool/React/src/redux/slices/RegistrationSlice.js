@@ -51,7 +51,7 @@ export const useRegistrationActions = () => {
     const { answers, answerQuery } = formSectionSubmitObject;
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = {
-      groupId: new URLSearchParams({ groupId }).toString(),
+      groupId,
       answers: new URLSearchParams(answersQuery).toString()
     };
     await RegistrationRepository.submitFormSection(params);
