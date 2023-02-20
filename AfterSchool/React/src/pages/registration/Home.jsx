@@ -3,13 +3,13 @@ import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 
 import { useUser, useRegistration } from 'redux/hooks/index';
+import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
 import {
   DateQuestion,
   DropdownQuestion,
   RadioQuestion,
   TextAreaQuestion
 } from 'components/Questions';
-import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
 
 import questionType from 'constants/questionType';
 import Validations from 'constants/regex';
@@ -138,11 +138,12 @@ export default function Home() {
 
   useEffect(() => {
     if (questions) {
-      const groupedQuestions = questions.filter(
+      let groupedQuestions = questions.filter(
         question =>
           question.FormQuestionGroupQuestionGroupDataTypeId ===
           questionsGroups[activeGroup].QuestionGroupDataTypeId
       );
+      groupedQuestions = groupedQuestions.sort((q1, q2) => q1.DispalayOrder - q2.DispalayOrder);
       setCurrentQuestions(groupedQuestions);
     }
   }, [activeGroup, activeGroupId, questions]);
