@@ -66,13 +66,14 @@ export default function Home() {
       const answer = answerObject(key, values);
       if (answer) {
         answers.push(answer);
-        answerQuery[`question-${answer.QuestionDataTypeId}`] = answer.Text;
+        answerQuery[`question-${key}`] = answer.Text;
       }
     });
     answeredQuestions.forEach(answer => {
       if (!Object.keys(values).includes(answer.QuestionDataTypeId)) {
         answers.push(answer);
-        answerQuery[`question-${answer.QuestionDataTypeId}`] = answer.Text;
+        const ID = questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
+        answerQuery[`question-${ID}`] = answer.Text;
       }
     });
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
@@ -146,6 +147,7 @@ export default function Home() {
       groupedQuestions = groupedQuestions.sort((q1, q2) => q1.DispalayOrder - q2.DispalayOrder);
       setCurrentQuestions(groupedQuestions);
     }
+    window.scrollTo(0, 0);
   }, [activeGroup, activeGroupId, questions]);
 
   const showQuestion = currentQuestion => {
