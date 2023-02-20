@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -23,12 +24,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 if (currentUser.IsEmpty())
                 {
                     msgs.Add("User Not Found" , MessageType.ApiError);
-                    throw new Exception("Unauthrized");
+                    throw new Exception("Unauthorized");
                 }
 
                 return Json(
                 new ApiResponse(msgs,
-                    new WebUserDto(currentUser.FirstName, currentUser.LastName, currentUser.Email, currentUser.Phone, currentUser.Username)),
+                    new WebUserDto(currentUser)),
                 JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -47,32 +48,43 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var activity = participationObject.GetActivity();
-                List<FormQuestionDto> formQuestionDtoList = new List<FormQuestionDto>();
-                List<FormQuestionAnswerDto> formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
-                List<FormQuestionGroupDto> formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                {
+                    questions = questions.Where(question =>
+                            question.QuestionDataTypeId.In(FormConstants.QuestionsToIncludeParentPanel()))
+                        .ToList();
+                }
+                
+                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
-                foreach (var question in participationObject.Form.GetAllQuestions(msgs))
+                foreach (var question in questions)
                 {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
                         {
-                         ID = question.ID.Value,
-                         FormQuestionGroupId = question.FormQuestionGroupId,
-                         Text = question.Text,
-                         Description = question.Description,
-                         Options = question.Options,
-                         IsRequired = question.IsRequired,
-                         QuestionTypeId = question.QuestionTypeId,
-                         QuestionDataTypeId = question.QuestionDataTypeId,
-                         FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                             ID = question.ID.Value,
+                             FormQuestionGroupId = question.FormQuestionGroupId,
+                             Text = question.Text,
+                             Description = question.Description,
+                             Options = question.Options,
+                             IsRequired = question.IsRequired,
+                             DispalayOrder = question.DisplayOrder,
+                             QuestionTypeId = question.QuestionTypeId,
+                             QuestionDataTypeId = question.QuestionDataTypeId,
+                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
                         }
-                        );
+                    );
                 }
                 
                 foreach (var questionGroup in participationObject.Form.GetQuestionGroups(msgs))
@@ -82,12 +94,13 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         {
                             FormId = questionGroup.FormId,
                             Name = questionGroup.Name,
+                            DispalayOrder = questionGroup.DisplayOrder,
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentRegistrant(msgs).ID))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).ID))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -105,8 +118,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
                     activityDto = new
                     {
-                    Name = activity.Name,
-                    Organization = activity.AccountName
+                        Name = activity.Name,
+                        Organization = activity.AccountName
                     }
                 };
                 
@@ -122,6 +135,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+
         public class ApiResponse
         {
             public SystemMessages msgs { get; set; }
@@ -142,13 +156,13 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string phone { get; set; }
             public string userName { get; set; }
 
-            public WebUserDto(string firstName, string lastName, string email, string phone, string userName)
+            public WebUserDto(WebUser currentUser)
             {
-                this.firstName = firstName;
-                this.lastName = lastName;
-                this.email = email;
-                this.phone = phone;
-                this.userName = userName;
+                this.firstName = currentUser.FirstName;
+                this.lastName = currentUser.LastName;
+                this.email = currentUser.Email;
+                this.phone = currentUser.Phone;
+                this.userName = currentUser.Username;
             }
             
         }
@@ -176,6 +190,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string Description { get; set; }
             public string Options { get; set; }
             public bool IsRequired { get; set; }
+            public int? DispalayOrder { get; set; }
             public QuestionType QuestionTypeId { get; set; }
             public QuestionDataType QuestionDataTypeId { get; set; }
             public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
@@ -193,6 +208,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         {
             public int? FormId { get; set; }
             public string Name { get; set; }
+            public int? DispalayOrder { get; set; }
             public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
         }
     }
