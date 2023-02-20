@@ -79,6 +79,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                              Description = question.Description,
                              Options = question.Options,
                              IsRequired = question.IsRequired,
+                             DispalayOrder = question.DisplayOrder,
                              QuestionTypeId = question.QuestionTypeId,
                              QuestionDataTypeId = question.QuestionDataTypeId,
                              FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
@@ -93,6 +94,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         {
                             FormId = questionGroup.FormId,
                             Name = questionGroup.Name,
+                            DispalayOrder = questionGroup.DisplayOrder,
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
@@ -188,6 +190,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string Description { get; set; }
             public string Options { get; set; }
             public bool IsRequired { get; set; }
+            public int? DispalayOrder { get; set; }
             public QuestionType QuestionTypeId { get; set; }
             public QuestionDataType QuestionDataTypeId { get; set; }
             public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
@@ -205,6 +208,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         {
             public int? FormId { get; set; }
             public string Name { get; set; }
+            public int? DispalayOrder { get; set; }
             public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
         }
     }
