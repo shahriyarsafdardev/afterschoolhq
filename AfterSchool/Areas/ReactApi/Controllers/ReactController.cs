@@ -8,6 +8,7 @@ using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using Newtonsoft.Json;
 
 namespace AfterSchool.Areas.ReactApi.Controllers
 {
@@ -136,6 +137,18 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
 
+        [HttpPost]
+
+        public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
+        {
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var questions = participationObject.Form.GetAllQuestions(msgs);
+            var qvms = questions.Select(question => new FormQuestionViewModel(question, json.answers)).ToList();
+            return null;
+        }
+
+
         public class ApiResponse
         {
             public SystemMessages msgs { get; set; }
@@ -211,5 +224,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public int? DispalayOrder { get; set; }
             public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
         }
+
+        public class QuestionAnswerResponse
+        {
+            public string groupid { get; set; }
+            public string answers { get; set; }
+        }
+        
     }
 }
