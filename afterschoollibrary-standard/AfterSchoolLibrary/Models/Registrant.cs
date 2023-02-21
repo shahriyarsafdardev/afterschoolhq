@@ -246,18 +246,7 @@ namespace AfterSchoolLibrary.Models
            
             return BaseLoad(criterias, orderBys, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-        
-        
-        public static List<Registrant> LoadMasterVolunteersRegistrantsbyHostAccountId(List<Registrant> volunteerRegistrants,int id ,SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            
-            
-            
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
-        }
-        
+
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
