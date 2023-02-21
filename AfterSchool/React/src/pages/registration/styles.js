@@ -127,5 +127,13 @@ export default makeStyles(theme => ({
   },
   justifyContentCenter: {
     justifyContent: 'center'
+  },
+  leftPadding: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: '3rem'
+    },
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: '0rem'
+    }
   }
 }));

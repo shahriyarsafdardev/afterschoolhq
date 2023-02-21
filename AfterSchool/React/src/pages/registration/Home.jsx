@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography } from '@material-ui/core';
+import cs from 'classnames';
 import { useFormik, Form, FormikProvider } from 'formik';
 
 import { useUser, useRegistration } from 'redux/hooks/index';
@@ -29,7 +30,7 @@ export default function Home() {
   } = useRegistration();
   const { emailValidationRegex, phoneValidationRegex } = Validations;
 
-  const [activeGroup, setActiveGroup] = useState(0);
+  const [activeGroup, setActiveGroup] = useState(10);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const totalGroups = questionsGroups?.length || 1;
@@ -206,7 +207,10 @@ export default function Home() {
                     <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
                       {questionsGroups[activeGroup].Name}
                     </Typography>
-                    <Grid container className={classes.justifyContentCenter}>
+                    <Grid
+                      container
+                      className={cs(classes.justifyContentCenter, classes.leftPadding)}
+                    >
                       <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
                         {currentQuestions?.map(question => showQuestion(question))}
                       </Grid>
@@ -225,7 +229,7 @@ export default function Home() {
                         color="primary"
                         className={classes.saveButton}
                         variant="contained"
-                        disabled={activeGroup === totalGroups - 1}
+                        // disabled={activeGroup === totalGroups - 1}
                         type="submit"
                       >
                         {activeGroup === totalGroups - 1
