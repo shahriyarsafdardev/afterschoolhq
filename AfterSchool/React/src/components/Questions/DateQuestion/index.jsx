@@ -13,7 +13,14 @@ function DateQuestion({ question, formik }) {
   const { ID, Text: title, IsRequired: isRequired = false } = question;
 
   const handleDateChange = date => {
-    setFieldValue(ID, date);
+    setFieldValue(
+      ID,
+      new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date)
+    );
   };
 
   const handleError = () => {};

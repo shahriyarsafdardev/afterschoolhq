@@ -3,10 +3,13 @@ import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 
-function CheckBox({ option, click, checked }) {
+function CheckBox({ formik, question }) {
   const classes = useStyles();
+  const { ID, Text: title } = question;
+  const { values, setFieldValue } = formik;
+
   const handleCheck = ({ target: { checked } }) => {
-    click(checked, option);
+    setFieldValue(ID, checked ? 1 : 0);
   };
 
   return (
@@ -17,7 +20,7 @@ function CheckBox({ option, click, checked }) {
           <FormControlLabel
             control={
               <Checkbox
-                checked={checked}
+                checked={values[ID]}
                 classes={{
                   checked: classes.checked,
                   root: classes.root
@@ -33,7 +36,7 @@ function CheckBox({ option, click, checked }) {
                 IconStyle={{ fill: 'black' }}
               />
             }
-            label={option.value}
+            label={title}
             classes={{
               root: classes.formControlLabelRoot
             }}

@@ -62,19 +62,23 @@ export default function Home() {
   const formSectionSubmitObject = values => {
     const answerQuery = {};
     const answers = [];
-    Object.keys(values).forEach(key => {
-      const answer = answerObject(key, values);
-      if (answer) {
-        answers.push(answer);
-        answerQuery[`question-${key}`] = answer.Text;
-      }
-    });
+    const keys = Object.keys(values);
+    const getQuestionID = answer =>
+      questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
+    function addToAnswerQuery(ID, text) {
+      answerQuery[`question-${ID}`] = text;
+    }
+    function composeAnswers(answer, ID, shouldCompose) {
+      if (!shouldCompose) return;
+      answers.push(answer);
+      addToAnswerQuery(ID, answer.Text);
+    }
     answeredQuestions.forEach(answer => {
-      if (!Object.keys(values).includes(answer.QuestionDataTypeId)) {
-        answers.push(answer);
-        const ID = questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
-        answerQuery[`question-${ID}`] = answer.Text;
-      }
+      composeAnswers(answer, getQuestionID(answer), !keys.includes(answer.QuestionDataTypeId));
+    });
+    keys.forEach(key => {
+      const answer = answerObject(key, values);
+      composeAnswers(answer, key, answer);
     });
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
   };
@@ -82,27 +86,25 @@ export default function Home() {
   const validator = values => {
     const errors = {};
     currentQuestions?.forEach(question => {
-      if (
-        question?.IsRequired &&
-        question.QuestionTypeId === questionType.email &&
-        values[question.ID]
-      ) {
-        if (!emailValidationRegex.test(values[question.ID])) {
-          errors[question.ID] = 'Please enter a valid email address';
+      const { ID, IsRequired, QuestionTypeId, Text } = question;
+      const valueOfCurrentQuestion = values[ID];
+      if (IsRequired && QuestionTypeId === questionType.email && valueOfCurrentQuestion) {
+        if (!emailValidationRegex.test(valueOfCurrentQuestion)) {
+          errors[ID] = 'Please enter a valid email address';
         }
-      } else if (question?.IsRequired && !values[question.ID]) {
-        errors[question.ID] = `${question.Text} is required`;
+      } else if (IsRequired && !valueOfCurrentQuestion) {
+        errors[ID] = `${Text} is required`;
       }
 
-      if (values[question.ID]) {
-        if (question.QuestionTypeId === questionType.email) {
-          if (!emailValidationRegex.test(values[question.ID])) {
-            errors[question.ID] = 'Please enter a valid email address';
+      if (valueOfCurrentQuestion) {
+        if (QuestionTypeId === questionType.email) {
+          if (!emailValidationRegex.test(valueOfCurrentQuestion)) {
+            errors[ID] = 'Please enter a valid email address';
           }
         }
-        if (question.QuestionTypeId === questionType.text && question.Text.includes('Phone')) {
-          if (!phoneValidationRegex.test(values[question.ID])) {
-            errors[question.ID] = 'Please enter a valid phone number';
+        if (QuestionTypeId === questionType.text && Text.includes('Phone')) {
+          if (!phoneValidationRegex.test(valueOfCurrentQuestion)) {
+            errors[ID] = 'Please enter a valid phone number';
           }
         }
       }
@@ -171,14 +173,7 @@ export default function Home() {
       case questionType.textArea:
         return <TextAreaQuestion question={currentQuestion} formik={formik} />;
       case questionType.checkBox:
-        return (
-          <CheckBox
-            option={{ key: 1, value: 'Test Value' }}
-            click={() => {}}
-            checked
-            formik={formik}
-          />
-        );
+        return <CheckBox question={currentQuestion} formik={formik} />;
       default:
         return <TextField question={currentQuestion} formik={formik} />;
     }

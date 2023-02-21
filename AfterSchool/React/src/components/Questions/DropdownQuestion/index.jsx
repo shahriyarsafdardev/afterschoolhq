@@ -14,9 +14,11 @@ function DropdownQuestion({ question, formik }) {
   const handleChange = ({ target: { value } }) => {
     const selectedOption = options.find(option => option.value === value);
     if (selectedOption) {
-      setFieldValue(ID, selectedOption.value);
+      setFieldValue(ID, JSON.stringify([selectedOption]));
     }
   };
+
+  const value = values[ID] ? JSON.parse(values[ID])[0]?.value : 'Select';
 
   return (
     <>
@@ -32,7 +34,7 @@ function DropdownQuestion({ question, formik }) {
               >
                 <Select
                   id="dropdown-question"
-                  value={values[ID] || 'Select'}
+                  value={value}
                   onChange={handleChange}
                   classes={{
                     select: classes.select

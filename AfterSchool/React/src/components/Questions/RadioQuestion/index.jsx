@@ -12,8 +12,9 @@ function RadioQuestion({ question, formik }) {
   const options = Options.split(',').map(option => ({ key: option, value: option }));
 
   const handleRadioChange = ({ target: { value } }) => {
-    setFieldValue(ID, value);
+    setFieldValue(ID, JSON.stringify([{ key: value, value }]));
   };
+  const value = values[ID] ? JSON.parse(values[ID])[0].value : '';
   return (
     <>
       <FieldWrapper label={title} isRequired={isRequired}>
@@ -22,7 +23,7 @@ function RadioQuestion({ question, formik }) {
             <RadioGroup
               name="radio-question"
               onChange={handleRadioChange}
-              value={values[ID] || ''}
+              value={value}
               classes={{
                 root: classes.radioGroupRoot
               }}
@@ -33,7 +34,7 @@ function RadioQuestion({ question, formik }) {
                     key={option.key}
                     label={option.value}
                     value={option.value}
-                    selectedValue={formik.values[ID]}
+                    selectedValue={value}
                   />
                 ))}
             </RadioGroup>
