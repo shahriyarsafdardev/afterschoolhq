@@ -446,6 +446,18 @@ namespace AfterSchoolLibrary.Models
                     case QuestionDataType.RegistrantGender:
                         registrant.GenderId = FormService.GetGenderFromAnswer(Text);
                         break;
+                    case QuestionDataType.Parent1FirstName:
+                        registrant.FirstName = Text;
+                        break;
+                    case QuestionDataType.Parent1LastName:
+                        registrant.LastName = Text;
+                        break;
+                    case QuestionDataType.Parent1Email:
+                        registrant.Email = Text;
+                        break;
+                    case QuestionDataType.Parent1MobilePhone:
+                        registrant.Phone = Text;
+                        break;
                 }
 
                 msgs.AddRange(registrant.Save(dc));

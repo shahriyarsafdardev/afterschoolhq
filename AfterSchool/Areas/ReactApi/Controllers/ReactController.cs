@@ -150,110 +150,147 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 
                 var currentUser = SessionVariables.CurrentUser;
-            var currentAccount = SessionVariables.CurrentAccount;
-            //parentUser.GetRegistrantAccount(amsgs, adc)
-            //parentUser.GetMasterParentOrStudentRegistrant(amsgs, adc)
+                var currentAccount = SessionVariables.CurrentAccount;
+                //parentUser.GetRegistrantAccount(amsgs, adc)
+                //parentUser.GetMasterParentOrStudentRegistrant(amsgs, adc)
 
-            if (currentUser.IsEmpty())
-                throw new Exception("Unauthorized");
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
 
-            var group = Regex.Match(json.groupid, @"\d+").Value;
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
-            var questions = participationObject.Form.GetAllQuestions(msgs);
-            NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
-            
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-            
-            var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-            var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-            var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
-            var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
-            
-            var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
-            var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
-            var parent1phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
-            var parent1email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
-            
-            var parent2FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
-            var parent2LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
-            var parent2phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
-            var parent2email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
+                var group = Regex.Match(json.groupid, @"\d+").Value;
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+                
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+                
+                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                var middleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).Value;
+                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
+                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
+                
+                var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
+                var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
+                var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName).Value;
+                var parent1phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
+                var parent1email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
+                
+                var parent2FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
+                var parent2LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
+                var parent2MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MiddleName).Value;
+                var parent2phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
+                var parent2email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
 
-            if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
-            {
-                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
-                    currentAccount.CreateParentOrStudentRegistrant(
-                        registrantOwner: null,
-                        canBeAccessedBy: currentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: false,
-                        allowTextMessages: false,
-                        schoolLocationId: null,
-                        profileStatus: RegistrantProfileStatus.Started,
-                        loggedInUser: currentUser,
-                        msgs: msgs);
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
+                    {
+                        var studentReg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+
+                        studentReg.FirstName = firstName;
+                        studentReg.LastName = lastName;
+                        studentReg.MiddleName = middleName;
+                        studentReg.Email = firstName;
+                        studentReg.Phone = firstName;
+
+                        studentReg.Save();
+                    }
+                    
+                    if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
+                    {
+                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: null,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: true,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+                        
+                         parent2Reg.FirstName = parent2FirstName;
+                         parent2Reg.LastName = parent2LastName;
+                         parent2Reg.MiddleName = parent2MiddleName;
+                         parent2Reg.Email = parent2email;
+                         parent2Reg.Phone = parent2phone;
+
+                         parent2Reg.Save();
+                        
+                        //RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(currentAccount, currentUser, false, msgs);
+                    }
                 }
                 
-                if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 {
-                    currentAccount.CreateParentOrStudentRegistrant(
-                        registrantOwner: null,
-                        canBeAccessedBy: currentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: true,
-                        allowTextMessages: true,
-                        schoolLocationId: null,
-                        profileStatus: RegistrantProfileStatus.Started,
-                        loggedInUser: currentUser,
-                        msgs: msgs);
-                }
-            }
-            
-            if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
-            {
-                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
-                {
-                    currentAccount.CreateParentOrStudentRegistrant(
-                        registrantOwner: null,
-                        canBeAccessedBy: currentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: true,
-                        allowTextMessages: false,
-                        schoolLocationId: null,
-                        profileStatus: RegistrantProfileStatus.Started,
-                        loggedInUser: currentUser,
-                        msgs: msgs);
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
+                    {
+                        var parent1Reg =currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+                        
+                        parent1Reg.FirstName = parent1FirstName;
+                        parent1Reg.LastName = parent1LastName;
+                        parent1Reg.MiddleName = parent1MiddleName;
+                        parent1Reg.Email = parent1email;
+                        parent1Reg.Phone = parent1phone;
+
+                        parent1Reg.Save();
+                    }
+                    
+                    if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
+                    {
+                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: true,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+                        
+                        parent2Reg.FirstName = parent2FirstName;
+                        parent2Reg.LastName = parent2LastName;
+                        parent2Reg.MiddleName = parent2MiddleName;
+                        parent2Reg.Email = parent2email;
+                        parent2Reg.Phone = parent2phone;
+
+                        parent2Reg.Save();
+                    }
                 }
                 
-                if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
+                qvms.ForEach(qvm =>
                 {
-                    currentAccount.CreateParentOrStudentRegistrant(
-                        registrantOwner: null,
-                        canBeAccessedBy: currentUser.AsList(),
-                        registrantType: RegistrantType.Individual,
-                        isMaster: true,
-                        isParentOrGuardian: true,
-                        allowTextMessages: true,
-                        schoolLocationId: null,
-                        profileStatus: RegistrantProfileStatus.Started,
-                        loggedInUser: currentUser,
-                        msgs: msgs);
-                }
-            }
-            
-            qvms.ForEach(qvm =>
-            {
-                currentRegistrant.AddOrUpdateAnswer(
-                    qvm.Value.IfEmpty("").Trim(),
-                    qvm.Question,
-                    SessionVariables.CurrentUser,
-                    msgs);
-            });
+                    currentRegistrant.AddOrUpdateAnswer(
+                        qvm.Value.IfEmpty("").Trim(),
+                        qvm.Question,
+                        SessionVariables.CurrentUser,
+                        msgs);
+                });
                 
             }
             catch (Exception ex)
