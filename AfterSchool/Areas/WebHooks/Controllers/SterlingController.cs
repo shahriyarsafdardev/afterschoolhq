@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -60,7 +61,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs);
                     
                     latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-                    latestBackgroundCheck.BackgroundCheckResultId = (BackgroundCheckResult)Enum.Parse(typeof(BackgroundCheckResult), responseBody.result);
+                    latestBackgroundCheck.BackgroundCheckResultId = (SterlingBackgroundCheckResult)Enum.Parse(typeof(SterlingBackgroundCheckResult), responseBody.result);
                     latestBackgroundCheck.IsActive = true;
                     
                     msgs.AddRange(latestBackgroundCheck.Save());
@@ -68,7 +69,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 else
                 {
                     latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-                    latestBackgroundCheck.BackgroundCheckResultId = BackgroundCheckResult.Pending;
+                    latestBackgroundCheck.BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending;
                     
                     msgs.AddRange(latestBackgroundCheck.Save());
                 }

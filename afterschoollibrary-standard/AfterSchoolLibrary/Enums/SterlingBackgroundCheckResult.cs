@@ -1,6 +1,6 @@
-﻿namespace AfterSchoolLibrary.Models
+namespace AfterSchoolLibrary.Enums
 {
-    public enum BackgroundCheckResult
+    public enum SterlingBackgroundCheckResult
     {
         NotSet = 0,
         Pending,

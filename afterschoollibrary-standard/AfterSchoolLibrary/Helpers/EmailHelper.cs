@@ -1878,8 +1878,6 @@ namespace AfterSchoolLibrary.Helpers
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
-            
-            Utilities.SystemErrorLog(mailMsgs);
         }
 
         public static SystemMessages SendAttachedCoupon(AttachedCoupon attachedCoupon)

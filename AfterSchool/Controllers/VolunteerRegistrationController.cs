@@ -584,7 +584,7 @@ namespace AfterSchool.Controllers
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
             
-            if(backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckResultId == BackgroundCheckResult.Cancelled)
+            if(backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckResultId == SterlingBackgroundCheckResult.Cancelled)
                 msgs.Add("Background Check has been failed", MessageType.UserError);
             
 

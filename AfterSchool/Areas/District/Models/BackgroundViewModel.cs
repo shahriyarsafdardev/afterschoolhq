@@ -1,4 +1,5 @@
 ﻿using System;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 
 namespace AfterSchool.Areas.District.Models
@@ -10,7 +11,7 @@ namespace AfterSchool.Areas.District.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public BackgroundCheckStatus BackgroundCheckStatus { get; set; } 
-        public BackgroundCheckResult? BackgroundCheckResult { get; set; } 
+        public SterlingBackgroundCheckResult? BackgroundCheckResult { get; set; } 
         public DateTime DateSubmitted { get; set; }
     }
     

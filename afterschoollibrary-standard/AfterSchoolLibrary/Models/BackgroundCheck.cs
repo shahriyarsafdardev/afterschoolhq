@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AfterSchoolLibrary.Enums;
-using Amazon.DynamoDBv2.DocumentModel;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Twilio.TwiML.Voice;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -23,7 +21,7 @@ namespace AfterSchoolLibrary.Models
             LoadObjectValues(ObjectMap);
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
             BackgroundCheckSourceId = BackgroundCheckSource.NotSet;
-            BackgroundCheckResultId = BackgroundCheckResult.NotSet;
+            BackgroundCheckResultId = SterlingBackgroundCheckResult.NotSet;
             IsActive = false;
         }
 
@@ -51,9 +49,9 @@ namespace AfterSchoolLibrary.Models
             set => MDV["BackgroundCheckSourceId"].Value = value;
         }
         
-        public BackgroundCheckResult BackgroundCheckResultId
+        public SterlingBackgroundCheckResult BackgroundCheckResultId
         {
-            get => (BackgroundCheckResult) MDV["BackgroundCheckResultId"].Value;
+            get => (SterlingBackgroundCheckResult) MDV["BackgroundCheckResultId"].Value;
             set => MDV["BackgroundCheckResultId"].Value = value;
         }
 

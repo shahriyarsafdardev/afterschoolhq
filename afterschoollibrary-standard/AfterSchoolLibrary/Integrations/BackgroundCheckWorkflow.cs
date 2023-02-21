@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -59,7 +60,7 @@ namespace AfterSchoolLibrary.Integrations
                 WebUserId = webUser.ID!.Value,
                 RequestedForFiscalAccountId = accountId,
                 BackgroundCheckStatusId = status,
-                BackgroundCheckResultId = BackgroundCheckResult.Pending,
+                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
@@ -103,7 +104,7 @@ namespace AfterSchoolLibrary.Integrations
                                 WebUserId = webUser.ID!.Value,
                                 RequestedForFiscalAccountId = backgroundCheck.RequestedForFiscalAccountId,
                                 BackgroundCheckStatusId = BackgroundCheckStatus.EmailSentToVolunteer,
-                                BackgroundCheckResultId = BackgroundCheckResult.Pending,
+                                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
                                 SterlingCandidateId = candidateId,
                                 SterlingInviteUrl = backgroundCheckUrl,
                                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
