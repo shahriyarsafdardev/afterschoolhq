@@ -70,6 +70,8 @@
                                 {"ActivityType", (int) Model.Activity.ActivityTypeId},
                                 {"hasSchedule", hasSchedule},
                                 {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
+                                {"isDisabled", (Model.Activity?.HasSubscriptionPlan() ?? false) && 
+                                                Model.Activity.GetSubscriptionPlan().PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts},
                             });
                         }
                     }

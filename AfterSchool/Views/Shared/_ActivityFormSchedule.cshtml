@@ -12,6 +12,7 @@
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
+    var isDisabled = ViewData["isDisabled"] != null && Equals(ViewData["isDisabled"], true);
 
     if (isContinuousEnrollmentEnabled)
     {
@@ -139,7 +140,7 @@
                                     {
                                         {"checkboxname", "isongoing"},
                                         {"checkboxid", "isongoing"},
-                                        {"disabled", isContinuousEnrollmentEnabled || !showAllowSubscriptionPlans},
+                                        {"disabled", isDisabled || isContinuousEnrollmentEnabled || !showAllowSubscriptionPlans},
                                     }
                                     );
                             }
@@ -152,6 +153,17 @@
                             }
                         </div>
                     </div>
+                    @if (isDisabled)
+                    {
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div class="col-sm-9">
+                                <p class="text-muted">
+                                    Subscription plans beginning on activity start cannot be set to ongoing. To enable this setting, please update your subscription plan to begin on period start.
+                                </p>  
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
