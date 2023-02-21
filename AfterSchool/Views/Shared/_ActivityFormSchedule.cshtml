@@ -12,7 +12,7 @@
     var activityMeetingVerbLabel = "meet";
     var forceNonRepeating = false;
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
-    var isDisabled = ViewData["isDisabled"] != null && Equals(ViewData["isDisabled"], true);
+    var isDisabled = ViewData["isDisabled"]?.ToString().AsBool() ?? false;
 
     if (isContinuousEnrollmentEnabled)
     {
