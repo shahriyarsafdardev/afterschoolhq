@@ -1069,6 +1069,11 @@ namespace AfterSchoolLibrary.Services
             return user;
         }
 
+        public static bool HasBackgroundCheck(this WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BackgroundCheck.HasBackgroundCheck((int)webUser.ID, msgs, dc);
+        }
+
         /// <summary>
         ///     Change the AccountWebUser record to be active. If it's not active user can't login
         /// </summary>

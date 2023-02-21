@@ -253,6 +253,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RequestedForFiscalAccountId"], requestedForFiscalAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static bool HasBackgroundCheck(int webUserID, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], webUserID);
+            return dq.GetCount() > 0;
+        }
 
     }
 }

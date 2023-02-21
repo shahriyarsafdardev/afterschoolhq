@@ -579,7 +579,7 @@ namespace AfterSchool.Controllers
             
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
-            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, msgs).FirstOrDefault();
+            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
@@ -618,60 +618,7 @@ namespace AfterSchool.Controllers
         ///     Form to request a background check. To access this, you must have the "background-check" feature flag enabled and go through the registration process for a
         ///     volunteer opportunity. When you get to the Register action, manually change the URL to take you to the BackgroundCheck action.
         /// </summary>
-        /*[HttpGet]
-        public ActionResult BackgroundCheck()
-        {
-            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer) || !featureFlagRepository.IsEnabled("background-check"))
-                return Logout(Request.Url!.ToString(), true);
-
-            var results = CheckRedirect(true);
-            if (results.IsNotEmpty()) return results;
-
-            var msgs = new SystemMessages();
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var currentUser = SessionVariables.CurrentUser;
-            var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
-            SessionVariables.CurrentRegistrant = currentRegistrant;
-
-            return AssembleResultAndGoToBackgroundCheckView(participationObject, msgs, currentUser.ID!.Value);
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> BackgroundCheck(string signature)
-        {
-            if (!RegistrationCommon.IsValidLogin(AccountType.Volunteer) || !featureFlagRepository.IsEnabled("background-check"))
-                return Logout(Request.Url!.ToString(), true);
-
-            var results = CheckRedirect(true);
-            if (results.IsNotEmpty()) return results;
-
-            var msgs = new SystemMessages();
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-
-            var currentUser = SessionVariables.CurrentUser;
-
-            var _ = await CheckIfBackgroundCheckIsEnabledAndRequestUrl(msgs, currentUser, participationObject.OwnerAccount.ID!.Value);
-
-            return AssembleResultAndGoToBackgroundCheckView(participationObject, msgs, currentUser.ID!.Value);
-        }
-
-        private async Task<string> CheckIfBackgroundCheckIsEnabledAndRequestUrl(SystemMessages msgs, WebUser webUser, int accountId)
-        {
-            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
-            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, accountId, msgs);
-            return backgroundCheckResult.BackgroundCheckUrl;
-        }
-
-        private ActionResult AssembleResultAndGoToBackgroundCheckView(ParticipationObject participationObject, SystemMessages msgs, int webUserId)
-        {
-            var registrationStartPageAccount = SessionVariables.RegistrationStartPageAccount;
-            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(webUserId, msgs).FirstOrDefault();
-            ViewBag.Messages = msgs;
-            ViewBag.ParticipationObject = participationObject;
-            ViewBag.RegistrationStartPageAccount = registrationStartPageAccount;
-            return View("BackgroundCheck", backgroundCheck);
-        }*/
-
+        
         private async Task<SystemMessages> InitateBackgroundCheck(WebUser webUser,ParticipationObject participationObject,SystemMessages msgs)
         {
             if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;

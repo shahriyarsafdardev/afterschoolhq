@@ -31,7 +31,7 @@
         
         <div class="panel-heading">
             <div class="pull-right">
-                <a class="btn btn-primary">View Background Check Dashboard <i><img src="/Assets/img/expand 1.svg"/></i></a>
+                <a class="btn btn-primary hidden">View Background Check Dashboard <i><img src="/Assets/img/expand 1.svg"/></i></a>
             </div>
             <h2><i class="s7-smile"></i> Background Checks</h2>
             <div class="clearfix"></div>
@@ -66,7 +66,7 @@
                             var registrantId = Registrant.LoadByWebUserId((int)backgroundViewModel.WebUserId, RegistrantPersonType.Volunteer, false, false).FirstOrDefault().ID;
                             <tr>
                                 <td>
-                                    <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
+                                    <a href="@Url.Action("loginto", "school")" class="btn btn-primary btn-md hidden">View Background Check <i><img src="/Assets/img/expand 1.svg"/></i></a>
                                 </td>
                                 <td>@(backgroundViewModel.FirstName)</td>
                                 <td>@(backgroundViewModel.LastName)</td>

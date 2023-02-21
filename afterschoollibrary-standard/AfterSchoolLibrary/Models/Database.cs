@@ -101,7 +101,6 @@ namespace AfterSchoolLibrary.Models
             AvailableTag.Create(dc);
             AssignedTag.Create(dc);
             VolunteerApproval.Create(dc);
-            VolunteerApproval.Create(dc);
             VolunteerTask.Create(dc);
 
             return msgs;
