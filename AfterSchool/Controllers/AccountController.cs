@@ -352,6 +352,8 @@ namespace AfterSchool.Controllers
             {
                 var firstName = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var middleName = qvms.First(qvm =>
+                    qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName);
                 var lastName = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
                 var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
@@ -419,7 +421,68 @@ namespace AfterSchool.Controllers
                             if (amsgs.HasNoErrors())
                             {
                                 registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
-                                RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+
+                                if (registrant.PersonTypeId == RegistrantPersonType.Adult || registrant.PersonTypeId == RegistrantPersonType.Student)
+                                {
+                                    RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                                }
+                                else
+                                {
+                                    var parentQuestions = participationObject.Form.GetAllQuestions(msgs)
+                                        .Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).ToList();
+                                    parentQuestions.ForEach(question =>
+                                    {
+                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1FirstName)
+                                        {
+                                            registrant.AddOrUpdateAnswer(
+                                                firstName.Value,
+                                                question,
+                                                user,
+                                                amsgs,
+                                                adc);
+                                        }
+                                        
+                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName)
+                                        {
+                                            registrant.AddOrUpdateAnswer(
+                                                middleName.Value.IfEmpty("").Trim(),
+                                                question,
+                                                user,
+                                                amsgs,
+                                                adc);
+                                        }
+                                        
+                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1LastName)
+                                        {
+                                            registrant.AddOrUpdateAnswer(
+                                                lastName.Value,
+                                                question,
+                                                user,
+                                                amsgs,
+                                                adc);
+                                        }
+                                        
+                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1Email)
+                                        {
+                                            registrant.AddOrUpdateAnswer(
+                                                email.Value,
+                                                question,
+                                                user,
+                                                amsgs,
+                                                adc);
+                                        }
+                                        
+                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone)
+                                        {
+                                            registrant.AddOrUpdateAnswer(
+                                                phone.Value,
+                                                question,
+                                                user,
+                                                amsgs,
+                                                adc);
+                                        }
+                                    });
+                                }
                             }
                         }
                     },

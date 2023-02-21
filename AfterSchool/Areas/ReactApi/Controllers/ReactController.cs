@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Controllers;
@@ -155,7 +156,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
             if (currentUser.IsEmpty())
                 throw new Exception("Unauthorized");
-            
+
+            var group = Regex.Match(json.groupid, @"\d+").Value;
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
             var questions = participationObject.Form.GetAllQuestions(msgs);
@@ -180,7 +182,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
             if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
             {
-                if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.PersonalInformation)
+                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
                 {
                     currentAccount.CreateParentOrStudentRegistrant(
                         registrantOwner: null,
@@ -195,7 +197,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         msgs: msgs);
                 }
                 
-                if (Convert.ToInt32(json.groupid) == (int)QuestionGroupDataType.Parent2Information)
+                if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
                 {
                     currentAccount.CreateParentOrStudentRegistrant(
                         registrantOwner: null,
@@ -213,7 +215,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             
             if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
             {
-                if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.PersonalInformation)
+                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
                 {
                     currentAccount.CreateParentOrStudentRegistrant(
                         registrantOwner: null,
@@ -228,7 +230,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         msgs: msgs);
                 }
                 
-                if (Convert.ToInt32(json.groupid) == (int)QuestionGroupDataType.Parent2Information)
+                if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
                 {
                     currentAccount.CreateParentOrStudentRegistrant(
                         registrantOwner: null,
