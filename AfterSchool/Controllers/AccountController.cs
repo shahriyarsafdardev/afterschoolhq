@@ -397,7 +397,6 @@ namespace AfterSchool.Controllers
                                     location?.ID,
                                     amsgs,
                                     adc);
-
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
                                 account,

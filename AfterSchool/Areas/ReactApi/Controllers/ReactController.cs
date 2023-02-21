@@ -60,13 +60,14 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var activity = participationObject.GetActivity();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
                 
-                // if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
-                // {
-                //     questions = questions.Where(question =>
-                //             question.QuestionDataTypeId.In(FormConstants.QuestionsToIncludeParentPanel()))
-                //         .ToList();
-                // }
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Adult)
+                {
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
+                    ).ToList();
+                }
                 
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
@@ -91,7 +92,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionGroup in participationObject.Form.GetQuestionGroups(msgs))
+                foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
                         new FormQuestionGroupDto()
@@ -148,18 +149,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
             try
             {
-                
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                //parentUser.GetRegistrantAccount(amsgs, adc)
-                //parentUser.GetMasterParentOrStudentRegistrant(amsgs, adc)
+                var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
                 var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                //var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -202,8 +201,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         studentReg.FirstName = firstName;
                         studentReg.LastName = lastName;
                         studentReg.MiddleName = middleName;
-                        studentReg.Email = firstName;
-                        studentReg.Phone = firstName;
+                        studentReg.Email = email;
+                        studentReg.Phone = phone;
 
                         studentReg.Save();
                     }
@@ -230,7 +229,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                          parent2Reg.Save();
                         
-                        //RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(currentAccount, currentUser, false, msgs);
                     }
                 }
                 
@@ -288,7 +286,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     currentRegistrant.AddOrUpdateAnswer(
                         qvm.Value.IfEmpty("").Trim(),
                         qvm.Question,
-                        SessionVariables.CurrentUser,
+                        currentUser,
                         msgs);
                 });
                 
