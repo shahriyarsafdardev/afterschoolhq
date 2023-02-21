@@ -8,7 +8,7 @@ function ApiTextField({ formik, question }) {
   const inputRef = useRef();
   const classes = useStyles();
   const { touched, errors, setFieldValue } = formik;
-  const { ID, IsRequired: required = false } = question;
+  const { ID, Text, IsRequired: required = false } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
@@ -24,7 +24,7 @@ function ApiTextField({ formik, question }) {
     <Grid className={classes.textFieldBox} xs={12}>
       <Grid xs={12} md={4} item className={classes.titleGrid}>
         <Typography variant="h6" className={classes.fieldLabel}>
-          Street Address &nbsp;
+          {Text} &nbsp;
           <Typography className={typeClass}>{typeText}</Typography>
         </Typography>
       </Grid>
