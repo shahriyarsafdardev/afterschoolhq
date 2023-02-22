@@ -2570,7 +2570,14 @@ namespace AfterSchool.Areas.Org.Controllers
             msgs.AddRange(activity.SetIsFeatured(!activity.IsFeatured, (int) currentAccount?.ID, msgs));
 
             // This will return True if during switching of IsFeatured; we faced no problems.
-            return Json(new {success = msgs.HasNoErrors(), isFeaturedNow = activity.IsFeatured}, JsonRequestBehavior.AllowGet);
+            if (msgs.HasNoErrors()) 
+                return Json(new
+                {
+                    status = "ok",
+                    isFeaturedNow = activity.IsFeatured,
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         #endregion

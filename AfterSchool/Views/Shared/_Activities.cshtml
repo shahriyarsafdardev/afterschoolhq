@@ -583,7 +583,7 @@ PageEvent.add(PageEvent.AFTER_INIT, function () {
             $.get(
                 `/org/activity/PinFeatureActivity?id=${uid}`,
                 function (data) {
-                  if (data && data.success === true) {
+                  if (data && data.status === 'ok') {
                      Notifications.showBar({
                         title: 'Success',
                         message: `Featured Settings for <strong>${name}</strong> has been updated`,
