@@ -38,8 +38,15 @@ export default makeStyles(theme => ({
   fieldLabelRequired: {
     color: 'red'
   },
+  buttonOuterWrapper: {
+    [theme.breakpoints.down('sm')]: {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center'
+    }
+  },
   buttonWrapper: {
-    width: '300px',
+    minWidth: '235px',
     justifyContent: 'space-between',
     display: 'flex',
     [theme.breakpoints.down('sm')]: {
@@ -54,9 +61,11 @@ export default makeStyles(theme => ({
     background: theme.palette.primary.main,
     fontSize: 14,
     color: '#FFFFFF',
-    width: 200,
+    marginLeft: 15,
+    minWidth: 200,
     [theme.breakpoints.down('sm')]: {
-      width: '100%'
+      width: '100%',
+      marginLeft: 0
     }
   },
   backButton: {

@@ -28,10 +28,13 @@ export default function Home() {
     questionsGroups,
     answeredQuestions,
     loadFormData,
-    submitFormSection
+    submitFormSection,
+    isActivityPaid,
+    isParent
   } = useRegistration();
   const { emailValidationRegex, phoneValidationRegex } = Validations;
   const { scrollToTop, redirect } = utils;
+  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
 
   const [activeGroup, setActiveGroup] = useState(10);
   const [activeGroupId, setActiveGroupId] = useState(0);
@@ -48,6 +51,9 @@ export default function Home() {
     }
   };
 
+  const handleRedirection = () => {
+    redirect(isActivityPaid ? paymentScreenPath : thankyouScreenPath);
+  };
   const submittedAnswer = (id, text) =>
     answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)?.Text || '';
 
@@ -127,7 +133,7 @@ export default function Home() {
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       await submitFormSection(formSectionSubmitObject(values));
-      if (activeGroup === totalGroups - 1) redirect(apiRoutes.payment);
+      if (activeGroup === totalGroups - 1) handleRedirection();
       else handleSection('next');
       resetForm();
     }
@@ -219,27 +225,33 @@ export default function Home() {
                         {currentQuestions?.map(question => showQuestion(question))}
                       </Grid>
                     </Grid>
-                    <Box className={classes.buttonWrapper}>
-                      <Button
-                        color="primary"
-                        variant="outlined"
-                        className={classes.backButton}
-                        disabled={!activeGroup > 0}
-                        onClick={() => handleSection('previous')}
-                      >
-                        Back
-                      </Button>
-                      <Button
-                        color="primary"
-                        className={classes.saveButton}
-                        variant="contained"
-                        // disabled={activeGroup === totalGroups - 1}
-                        type="submit"
-                      >
-                        {activeGroup === totalGroups - 1
-                          ? 'Confirm Registration'
-                          : 'Save & Continue'}
-                      </Button>
+                    <Box className={classes.buttonOuterWrapper}>
+                      <Box className={classes.buttonWrapper}>
+                        <Button
+                          color="primary"
+                          variant="outlined"
+                          className={classes.backButton}
+                          disabled={!activeGroup > 0}
+                          onClick={() => handleSection('previous')}
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          color="primary"
+                          className={classes.saveButton}
+                          variant="contained"
+                          // disabled={activeGroup === totalGroups - 1}
+                          type="submit"
+                        >
+                          {activeGroup === totalGroups - 1
+                            ? isParent
+                              ? isActivityPaid
+                                ? 'E-Sign and Continue to Payment '
+                                : 'Confirm Registration'
+                              : 'Confirm'
+                            : 'Save & Continue'}
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>

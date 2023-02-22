@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 import RegistrationRepository from 'repository/RegistrationRepository';
-import eSignatureSection from 'constants/eSignatureSection';
+import ConfirmRegistrationSection from 'constants/eSignatureSection';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
@@ -10,7 +10,9 @@ const RegistrationSlice = createSlice({
     questionsGroups: [],
     answeredQuestions: [],
     activity: {},
-    loading: true
+    loading: true,
+    isActivityPaid: true, //TODO: Just for testing purpose
+    isParent: true //TODO: Just for testing purpose
   },
   reducers: {
     loadingFormData: state => {
@@ -23,6 +25,7 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload }) => {
+      const eSignatureSection = ConfirmRegistrationSection(state.isParent);
       state.questions = [...payload.FormDto.formQuestion, ...eSignatureSection.questions];
       state.questionsGroups = [
         ...payload.FormDto.formQuestionGroup,
