@@ -3,6 +3,7 @@ import { Box, Button, Grid, Typography } from '@material-ui/core';
 import cs from 'classnames';
 import { useFormik, Form, FormikProvider } from 'formik';
 
+import RegistrationService from 'sevices/RegistrationService';
 import apiRoutes from 'routes/apiRoutes';
 import utils from 'utils';
 import { useUser, useRegistration } from 'redux/hooks/index';
@@ -15,7 +16,6 @@ import {
 } from 'components/Questions';
 
 import questionType from 'constants/questionType';
-import Validations from 'constants/regex';
 
 import useStyles from './styles';
 
@@ -32,7 +32,6 @@ export default function Home() {
     isActivityPaid,
     isParent
   } = useRegistration();
-  const { emailValidationRegex, phoneValidationRegex } = Validations;
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
 
@@ -40,6 +39,17 @@ export default function Home() {
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const totalGroups = questionsGroups?.length || 1;
+  const registrationService = new RegistrationService(
+    questions,
+    answeredQuestions,
+    currentQuestions
+  );
+  const {
+    initialValues,
+    validator,
+    formSectionSubmitObject,
+    groupedQuestions
+  } = registrationService;
 
   const handleSection = action => {
     if (action === 'next') {
@@ -54,85 +64,15 @@ export default function Home() {
   const handleRedirection = () => {
     redirect(isActivityPaid ? paymentScreenPath : thankyouScreenPath);
   };
-  const submittedAnswer = (id, text) =>
-    answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)?.Text || '';
 
-  const questionObjectFindById = id => currentQuestions.find(q => q.ID === Number(id)) || {};
-
-  const answerObject = (key, values) => {
-    if (!values[key]) return undefined;
-    const question = questionObjectFindById(key);
-    return {
-      QuestionDataTypeId: question.QuestionDataTypeId,
-      QuestionText: question.Text,
-      Text: values[key]
-    };
-  };
-
-  const formSectionSubmitObject = values => {
-    const answerQuery = {};
-    const answers = [];
-    const keys = Object.keys(values);
-    const getQuestionID = answer =>
-      questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
-    function addToAnswerQuery(ID, text) {
-      answerQuery[`question-${ID}`] = text;
-    }
-    function composeAnswers(answer, ID, shouldCompose) {
-      if (!shouldCompose) return;
-      answers.push(answer);
-      addToAnswerQuery(ID, answer.Text);
-    }
-    answeredQuestions.forEach(answer => {
-      composeAnswers(answer, getQuestionID(answer), !keys.includes(answer.QuestionDataTypeId));
-    });
-    keys.forEach(key => {
-      const answer = answerObject(key, values);
-      composeAnswers(answer, key, answer);
-    });
-    return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
-  };
-
-  const validator = values => {
-    const errors = {};
-    currentQuestions?.forEach(question => {
-      const { ID, IsRequired, QuestionTypeId, Text } = question;
-      const valueOfCurrentQuestion = values[ID];
-      if (IsRequired && QuestionTypeId === questionType.email && valueOfCurrentQuestion) {
-        if (!emailValidationRegex.test(valueOfCurrentQuestion)) {
-          errors[ID] = 'Please enter a valid email address';
-        }
-      } else if (IsRequired && !valueOfCurrentQuestion) {
-        errors[ID] = `${Text} is required`;
-      }
-
-      if (valueOfCurrentQuestion) {
-        if (QuestionTypeId === questionType.email) {
-          if (!emailValidationRegex.test(valueOfCurrentQuestion)) {
-            errors[ID] = 'Please enter a valid email address';
-          }
-        }
-        if (QuestionTypeId === questionType.text && Text.includes('Phone')) {
-          if (!phoneValidationRegex.test(valueOfCurrentQuestion)) {
-            errors[ID] = 'Please enter a valid phone number';
-          }
-        }
-      }
-    });
-    return errors;
-  };
-
-  const initialvalues = {};
-  currentQuestions?.forEach(question => {
-    initialvalues[question.ID] = submittedAnswer(question.QuestionDataTypeId, question.Text);
-  });
+  const initialvalues = initialValues();
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
-      await submitFormSection(formSectionSubmitObject(values));
+      await submitFormSection(formSectionSubmitObject(values, activeGroupId));
       if (activeGroup === totalGroups - 1) handleRedirection();
       else handleSection('next');
       resetForm();
@@ -151,15 +91,8 @@ export default function Home() {
   }, [questionsGroups.length]);
 
   useEffect(() => {
-    if (questions) {
-      let groupedQuestions = questions.filter(
-        question =>
-          question.FormQuestionGroupQuestionGroupDataTypeId ===
-          questionsGroups[activeGroup].QuestionGroupDataTypeId
-      );
-      groupedQuestions = groupedQuestions.sort((q1, q2) => q1.DispalayOrder - q2.DispalayOrder);
-      setCurrentQuestions(groupedQuestions);
-    }
+    if (questions)
+      setCurrentQuestions(groupedQuestions(questionsGroups[activeGroup]?.QuestionGroupDataTypeId));
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
