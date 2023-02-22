@@ -52,7 +52,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentAccount = SessionVariables.CurrentAccount;
                 var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
@@ -104,8 +106,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         }
                     );
                 }
-                //dvar studentReg = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).ID))
+                
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant.ID.Value : currentRegistrant.ID.Value)))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -150,31 +152,26 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                //var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
                 var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                //var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
-                
+
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-                
-                var firstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                var lastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                var middleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).Value;
-                var phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).Value;
-                var email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail).Value;
                 
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName).Value;
                 var parent1Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
                 var parent1Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
-                
+
                 var parent2FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
                 var parent2LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
                 var parent2MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MiddleName).Value;
@@ -183,56 +180,53 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information)
                     {
-                        var studentReg = currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: currentUser,
+                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: null,
                             canBeAccessedBy: currentUser.AsList(),
                             registrantType: RegistrantType.Individual,
                             isMaster: true,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
+                            isParentOrGuardian: true,
+                            allowTextMessages: true,
                             schoolLocationId: null,
                             profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: currentUser,
                             msgs: msgs);
 
-                        studentReg.FirstName = firstName;
-                        studentReg.LastName = lastName;
-                        studentReg.MiddleName = middleName;
-                        studentReg.Email = email;
-                        studentReg.Phone = phone;
-                        
-                        studentReg.Save();
-                        
-                        qvms = qvms.Where(qvm =>
-                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).ToList();
-         
-                        qvms.ForEach(qvm =>
-                        {
-                            studentReg.AddOrUpdateAnswer(
-                                qvm.Value.IfEmpty("").Trim(),
-                                qvm.Question,
-                                currentUser,
-                                msgs);
-                        });
+                        parent2Reg.FirstName = parent2FirstName;
+                        parent2Reg.LastName = parent2LastName;
+                        parent2Reg.MiddleName = parent2MiddleName;
+                        parent2Reg.Email = parent2Email;
+                        parent2Reg.Phone = parent2Phone;
+
+                        parent2Reg.Save();
                     }
-                    
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.HomeAddress)
+                }
+                
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
+                {
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
                     {
-                        var studentReg = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
-                        
-                        qvms = qvms.Where(qvm =>
-                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress).ToList();
-         
-                        qvms.ForEach(qvm =>
-                        {
-                            studentReg.AddOrUpdateAnswer(
-                                qvm.Value.IfEmpty("").Trim(),
-                                qvm.Question,
-                                currentUser,
-                                msgs);
-                        });
+                        var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+        
+                        parent1Reg.FirstName = parent1FirstName;
+                        parent1Reg.LastName = parent1LastName;
+                        parent1Reg.MiddleName = parent1MiddleName;
+                        parent1Reg.Email = parent1Email;
+                        parent1Reg.Phone = parent1Phone;
+    
+                        parent1Reg.Save();
                     }
                     
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information)
@@ -248,7 +242,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: currentUser,
                             msgs: msgs);
-        
+
                         parent2Reg.FirstName = parent2FirstName;
                         parent2Reg.LastName = parent2LastName;
                         parent2Reg.MiddleName = parent2MiddleName;
@@ -256,20 +250,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent2Reg.Phone = parent2Phone;
 
                         parent2Reg.Save();
-                        
-                        qvms = qvms.Where(qvm =>
-                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information).ToList();
-         
-                        qvms.ForEach(qvm =>
-                        {
-                            parent2Reg.AddOrUpdateAnswer(
-                                qvm.Value.IfEmpty("").Trim(),
-                                qvm.Question,
-                                currentUser,
-                                msgs);
-                        });
                     }
                 }
+                
+                qvms.ForEach(qvm =>
+                {
+                    studentRegistrant.AddOrUpdateAnswer(
+                        qvm.Value.IfEmpty("").Trim(),
+                        qvm.Question,
+                        currentUser,
+                        msgs);
+                });
 
             }
             catch (Exception ex)

@@ -439,7 +439,7 @@ namespace AfterSchool.Controllers
                                     loggedInUser: currentUser,
                                     msgs: msgs);
                                 
-                                RegistrationCommon.MapParent1AnswersToStudent(registrant, studentReg, allQuestionsForQuestionGroup, currentUser, amsgs, adc);
+                                RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                             }
                         }
                     },
