@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
                             "Approve By Sterling",
-                            (DateTime)latestBackgroundCheck.ExpirationDate,
+                            DateTime.UtcNow.AddYears(1),
                             null,
                             msgs
                         );

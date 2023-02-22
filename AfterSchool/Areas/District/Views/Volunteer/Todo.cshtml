@@ -187,7 +187,7 @@
                                     <td>
                                         <div>
                                             <span>
-                                                <span class="btn btn-default btn-sm" onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img class="paper-plan" src="/Assets/img/paper-plane.svg"/> Initiate </span>
+                                                <span class="btn btn-default btn-sm hidden" onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img class="paper-plan" src="/Assets/img/paper-plane.svg"/> Initiate </span>
                                             </span>
                                             <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
                                             <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>

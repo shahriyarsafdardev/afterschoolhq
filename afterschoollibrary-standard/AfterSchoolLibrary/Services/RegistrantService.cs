@@ -1485,6 +1485,7 @@ namespace AfterSchoolLibrary.Services
                 LastUpdated = DateTime.UtcNow,
                 ESignatureUserAgent = userAgent,
                 ESignatureIPAddress = ipAddress,
+                IsDeleted = false
             };
             msgs.AddRange(reg.Save(dc));
             
