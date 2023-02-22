@@ -397,6 +397,9 @@ namespace AfterSchool.Controllers
                                     location?.ID,
                                     amsgs,
                                     adc);
+                            
+                            registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
+
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
                                 account,
@@ -416,72 +419,27 @@ namespace AfterSchool.Controllers
                                 objectId: user.ID.Value,
                                 objectText: user.FullName
                             );
-
+                            
                             if (amsgs.HasNoErrors())
                             {
-                                registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
-
-                                if (registrant.PersonTypeId == RegistrantPersonType.Adult || registrant.PersonTypeId == RegistrantPersonType.Student)
-                                {
-                                    RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
-                                }
-                                else
-                                {
-                                    var parentQuestions = participationObject.Form.GetAllQuestions(msgs)
-                                        .Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).ToList();
-                                    parentQuestions.ForEach(question =>
-                                    {
-                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1FirstName)
-                                        {
-                                            registrant.AddOrUpdateAnswer(
-                                                firstName.Value,
-                                                question,
-                                                user,
-                                                amsgs,
-                                                adc);
-                                        }
-                                        
-                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName)
-                                        {
-                                            registrant.AddOrUpdateAnswer(
-                                                middleName.Value.IfEmpty("").Trim(),
-                                                question,
-                                                user,
-                                                amsgs,
-                                                adc);
-                                        }
-                                        
-                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1LastName)
-                                        {
-                                            registrant.AddOrUpdateAnswer(
-                                                lastName.Value,
-                                                question,
-                                                user,
-                                                amsgs,
-                                                adc);
-                                        }
-                                        
-                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1Email)
-                                        {
-                                            registrant.AddOrUpdateAnswer(
-                                                email.Value,
-                                                question,
-                                                user,
-                                                amsgs,
-                                                adc);
-                                        }
-                                        
-                                        if (question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone)
-                                        {
-                                            registrant.AddOrUpdateAnswer(
-                                                phone.Value,
-                                                question,
-                                                user,
-                                                amsgs,
-                                                adc);
-                                        }
-                                    });
-                                }
+                                RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            }
+                            
+                            if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                            {
+                                var studentReg = account.CreateParentOrStudentRegistrant(
+                                    registrantOwner: currentUser,
+                                    canBeAccessedBy: currentUser.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: null,
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: currentUser,
+                                    msgs: msgs);
+                                
+                                RegistrationCommon.MapParent1AnswersToStudent(registrant, studentReg, allQuestionsForQuestionGroup, currentUser, amsgs, adc);
                             }
                         }
                     },

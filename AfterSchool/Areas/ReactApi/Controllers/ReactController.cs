@@ -104,7 +104,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         }
                     );
                 }
-                
+                //dvar studentReg = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
                 foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).ID))
                 {
                     formQuestionAnswerDtoList.Add(
@@ -202,11 +202,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         studentReg.MiddleName = middleName;
                         studentReg.Email = email;
                         studentReg.Phone = phone;
-
-                        studentReg.Save();
-
-                        qvms = qvms.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).ToList();
                         
+                        studentReg.Save();
+                        
+                        qvms = qvms.Where(qvm =>
+                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).ToList();
+         
                         qvms.ForEach(qvm =>
                         {
                             studentReg.AddOrUpdateAnswer(
@@ -217,20 +218,26 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         });
                     }
                     
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.HomeAddress)
                     {
-                        currentRegistrant.FirstName = parent1FirstName;
-                        currentRegistrant.LastName = parent1LastName;
-                        currentRegistrant.MiddleName = parent1MiddleName;
-                        currentRegistrant.Email = parent1Email;
-                        currentRegistrant.Phone = parent1Phone;
-
-                        currentRegistrant.Save();
+                        var studentReg = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
+                        
+                        qvms = qvms.Where(qvm =>
+                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.HomeAddress).ToList();
+         
+                        qvms.ForEach(qvm =>
+                        {
+                            studentReg.AddOrUpdateAnswer(
+                                qvm.Value.IfEmpty("").Trim(),
+                                qvm.Question,
+                                currentUser,
+                                msgs);
+                        });
                     }
                     
-                    if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information)
                     {
-                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: null,
                             canBeAccessedBy: currentUser.AsList(),
                             registrantType: RegistrantType.Individual,
@@ -241,60 +248,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             profileStatus: RegistrantProfileStatus.Started,
                             loggedInUser: currentUser,
                             msgs: msgs);
-                        
-                         parent2Reg.FirstName = parent2FirstName;
-                         parent2Reg.LastName = parent2LastName;
-                         parent2Reg.MiddleName = parent2MiddleName;
-                         parent2Reg.Email = parent2Email;
-                         parent2Reg.Phone = parent2Phone;
-
-                         parent2Reg.Save();
-                        
-                    }
-                }
-                
-                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
-                {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
-                    {
-                        var parent1Reg =currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: currentUser,
-                            canBeAccessedBy: currentUser.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: true,
-                            allowTextMessages: false,
-                            schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: currentUser,
-                            msgs: msgs);
-                        
-                        parent1Reg.FirstName = parent1FirstName;
-                        parent1Reg.LastName = parent1LastName;
-                        parent1Reg.MiddleName = parent1MiddleName;
-                        parent1Reg.Email = parent1Email;
-                        parent1Reg.Phone = parent1Phone;
-                    
-                        parent1Reg.Save();
-                        
-                        
-                        
-                    }
-                    
-                    if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
-                    {
-                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: currentUser,
-                            canBeAccessedBy: currentUser.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: true,
-                            allowTextMessages: true,
-                            schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: currentUser,
-                            msgs: msgs);
-                        
+        
                         parent2Reg.FirstName = parent2FirstName;
                         parent2Reg.LastName = parent2LastName;
                         parent2Reg.MiddleName = parent2MiddleName;
@@ -302,19 +256,19 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent2Reg.Phone = parent2Phone;
 
                         parent2Reg.Save();
+                        
+                        qvms = qvms.Where(qvm =>
+                            qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Information).ToList();
+         
+                        qvms.ForEach(qvm =>
+                        {
+                            parent2Reg.AddOrUpdateAnswer(
+                                qvm.Value.IfEmpty("").Trim(),
+                                qvm.Question,
+                                currentUser,
+                                msgs);
+                        });
                     }
-                }
-
-                if (currentRegistrant.PersonTypeId != RegistrantPersonType.Parent && Convert.ToInt32(group) != (int) QuestionGroupDataType.PersonalInformation)
-                {
-                    qvms.ForEach(qvm =>
-                    {
-                        currentRegistrant.AddOrUpdateAnswer(
-                            qvm.Value.IfEmpty("").Trim(),
-                            qvm.Question,
-                            currentUser,
-                            msgs);
-                    });   
                 }
 
             }
