@@ -142,7 +142,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
 
         [HttpPost]
-
         public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
@@ -173,14 +172,14 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName).Value;
-                var parent1phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
-                var parent1email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
+                var parent1Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
+                var parent1Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
                 
                 var parent2FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
                 var parent2LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
                 var parent2MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MiddleName).Value;
-                var parent2phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
-                var parent2email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
+                var parent2Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
+                var parent2Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
@@ -207,6 +206,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         studentReg.Save();
                     }
                     
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
+                    {
+                        currentRegistrant.FirstName = parent1FirstName;
+                        currentRegistrant.LastName = parent1LastName;
+                        currentRegistrant.MiddleName = parent1MiddleName;
+                        currentRegistrant.Email = parent1Email;
+                        currentRegistrant.Phone = parent1Phone;
+
+                        currentRegistrant.Save();
+                    }
+                    
                     if (Convert.ToInt32(group) == (int)QuestionGroupDataType.Parent2Information)
                     {
                          var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
@@ -224,8 +234,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                          parent2Reg.FirstName = parent2FirstName;
                          parent2Reg.LastName = parent2LastName;
                          parent2Reg.MiddleName = parent2MiddleName;
-                         parent2Reg.Email = parent2email;
-                         parent2Reg.Phone = parent2phone;
+                         parent2Reg.Email = parent2Email;
+                         parent2Reg.Phone = parent2Phone;
 
                          parent2Reg.Save();
                         
@@ -251,8 +261,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent1Reg.FirstName = parent1FirstName;
                         parent1Reg.LastName = parent1LastName;
                         parent1Reg.MiddleName = parent1MiddleName;
-                        parent1Reg.Email = parent1email;
-                        parent1Reg.Phone = parent1phone;
+                        parent1Reg.Email = parent1Email;
+                        parent1Reg.Phone = parent1Phone;
 
                         parent1Reg.Save();
                     }
