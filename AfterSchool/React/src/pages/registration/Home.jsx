@@ -3,6 +3,8 @@ import { Box, Button, Grid, Typography } from '@material-ui/core';
 import cs from 'classnames';
 import { useFormik, Form, FormikProvider } from 'formik';
 
+import apiRoutes from 'routes/apiRoutes';
+import utils from 'utils';
 import { useUser, useRegistration } from 'redux/hooks/index';
 import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
 import {
@@ -29,6 +31,7 @@ export default function Home() {
     submitFormSection
   } = useRegistration();
   const { emailValidationRegex, phoneValidationRegex } = Validations;
+  const { scrollToTop, redirect } = utils;
 
   const [activeGroup, setActiveGroup] = useState(10);
   const [activeGroupId, setActiveGroupId] = useState(0);
@@ -124,7 +127,8 @@ export default function Home() {
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       await submitFormSection(formSectionSubmitObject(values));
-      handleSection('next');
+      if (activeGroup === totalGroups - 1) redirect(apiRoutes.payment);
+      else handleSection('next');
       resetForm();
     }
   });
@@ -150,7 +154,7 @@ export default function Home() {
       groupedQuestions = groupedQuestions.sort((q1, q2) => q1.DispalayOrder - q2.DispalayOrder);
       setCurrentQuestions(groupedQuestions);
     }
-    window.scrollTo(0, 0);
+    scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
   const showQuestion = currentQuestion => {
