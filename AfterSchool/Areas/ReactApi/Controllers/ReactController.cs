@@ -204,6 +204,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         studentReg.Phone = phone;
 
                         studentReg.Save();
+
+                        qvms = qvms.Where(qvm => qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).ToList();
                         
                         qvms.ForEach(qvm =>
                         {
@@ -302,19 +304,19 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent2Reg.Save();
                     }
                 }
-                
-                qvms.ForEach(qvm =>
+
+                if (currentRegistrant.PersonTypeId != RegistrantPersonType.Parent && Convert.ToInt32(group) != (int) QuestionGroupDataType.PersonalInformation)
                 {
-                    if (currentRegistrant.PersonTypeId != RegistrantPersonType.Parent && Convert.ToInt32(group) != (int) QuestionGroupDataType.PersonalInformation)
+                    qvms.ForEach(qvm =>
                     {
                         currentRegistrant.AddOrUpdateAnswer(
                             qvm.Value.IfEmpty("").Trim(),
                             qvm.Question,
                             currentUser,
                             msgs);
-                    }
-                });
-                
+                    });   
+                }
+
             }
             catch (Exception ex)
             {
