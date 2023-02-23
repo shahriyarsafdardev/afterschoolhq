@@ -749,7 +749,6 @@ namespace AfterSchool.Controllers
             // copy parent answers to student for home address, emergency contacts
             student.GetAnswers(msgs, dc)
                 .Where(answer =>
-                    answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Address ||
                     answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
                         .GetEmergencyContactQuestionGroups())
                 )
@@ -787,20 +786,6 @@ namespace AfterSchool.Controllers
         
         public static void MapStudentAnswersToParent2(Registrant student, Registrant parent2Registrant, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            student.GetAnswers(msgs, dc)
-                .Where(answer =>
-                    answer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent2Address)
-                .ToList()
-                .ForEach(answer =>
-                {
-                    parent2Registrant.AddOrUpdateAnswer(
-                        answer.Text.IfEmpty("").Trim(),
-                        answer.ToFormQuestion(msgs: msgs, dc: dc),
-                        currentUser,
-                        msgs,
-                        dc);
-                });
-
             foreach (var key in StudentInfoToParent2RegistrantMap.Keys)
                 parent2Registrant.MapAndAddAnswer(
                     allQuestions,

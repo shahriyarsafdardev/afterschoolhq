@@ -335,7 +335,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         currentUser,
                         msgs);
                 }*/
-                
+
+                return null;
+
             }
             catch (Exception ex)
             {
