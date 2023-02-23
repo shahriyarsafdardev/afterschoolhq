@@ -1,23 +1,21 @@
-import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography } from '@material-ui/core';
-import cs from 'classnames';
 import { useFormik, Form, FormikProvider } from 'formik';
+import React, { useEffect, useState } from 'react';
+import cs from 'classnames';
 
-import RegistrationService from 'sevices/RegistrationService';
-import apiRoutes from 'routes/apiRoutes';
-import utils from 'utils';
-import { useUser, useRegistration } from 'redux/hooks/index';
 import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
+import RegistrationService from 'sevices/RegistrationService';
+import { useUser, useRegistration } from 'redux/hooks/index';
+import questionType from 'constants/questionType';
+import apiRoutes from 'routes/apiRoutes';
+import useStyles from './styles';
+import utils from 'utils';
 import {
   DateQuestion,
   DropdownQuestion,
   RadioQuestion,
   TextAreaQuestion
 } from 'components/Questions';
-
-import questionType from 'constants/questionType';
-
-import useStyles from './styles';
 
 export default function Home() {
   const classes = useStyles();
@@ -35,7 +33,7 @@ export default function Home() {
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
 
-  const [activeGroup, setActiveGroup] = useState(10);
+  const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const totalGroups = questionsGroups?.length || 1;
@@ -65,6 +63,7 @@ export default function Home() {
     redirect(isActivityPaid ? paymentScreenPath : thankyouScreenPath);
   };
 
+  const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
 
   const formik = useFormik({
@@ -72,8 +71,8 @@ export default function Home() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
-      await submitFormSection(formSectionSubmitObject(values, activeGroupId));
-      if (activeGroup === totalGroups - 1) handleRedirection();
+      await submitFormSection(formSectionSubmitObject(values, activeGroupId), lastSection);
+      if (lastSection) handleRedirection();
       else handleSection('next');
       resetForm();
     }
@@ -101,7 +100,7 @@ export default function Home() {
 
     switch (QuestionTypeId) {
       case questionType.text:
-        return currentQuestion.Text === 'Street Address' ? (
+        return ['School', 'Street Address'].includes(currentQuestion.Text) ? (
           <ApiTextField question={currentQuestion} formik={formik} />
         ) : (
           <TextField question={currentQuestion} formik={formik} />
@@ -173,10 +172,9 @@ export default function Home() {
                           color="primary"
                           className={classes.saveButton}
                           variant="contained"
-                          // disabled={activeGroup === totalGroups - 1}
                           type="submit"
                         >
-                          {activeGroup === totalGroups - 1
+                          {lastSection
                             ? isParent
                               ? isActivityPaid
                                 ? 'E-Sign and Continue to Payment '

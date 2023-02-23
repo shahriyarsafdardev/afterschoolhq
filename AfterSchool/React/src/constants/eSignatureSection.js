@@ -2,14 +2,14 @@ export default (isParent = true) => {
   const eSignSection = {
     questions: [],
     answeredQuestions: [],
-    questionsGroups: [{ FormId: 10, Name: 'Confirm Registration', QuestionGroupDataTypeId: null }]
+    questionsGroups: [{ FormId: 999, Name: 'Confirm Registration', QuestionGroupDataTypeId: null }]
   };
   const question = isParent
     ? {
         Description: null,
         FormQuestionGroupId: 91,
         FormQuestionGroupQuestionGroupDataTypeId: null,
-        ID: 670,
+        ID: 6799,
         IsRequired: true,
         Options: null,
         QuestionDataTypeId: 999,
@@ -20,7 +20,7 @@ export default (isParent = true) => {
         Description: null,
         FormQuestionGroupId: 91,
         FormQuestionGroupQuestionGroupDataTypeId: null,
-        ID: 670,
+        ID: 6799,
         IsRequired: true,
         Options: null,
         QuestionDataTypeId: 999,

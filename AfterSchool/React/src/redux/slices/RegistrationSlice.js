@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 import RegistrationRepository from 'repository/RegistrationRepository';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
+import schoolField from 'constants/schoolField';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
@@ -26,7 +27,11 @@ const RegistrationSlice = createSlice({
     },
     setFormData: (state, { payload }) => {
       const eSignatureSection = ConfirmRegistrationSection(state.isParent);
-      state.questions = [...payload.FormDto.formQuestion, ...eSignatureSection.questions];
+      state.questions = [
+        ...payload.FormDto.formQuestion,
+        ...eSignatureSection.questions,
+        schoolField
+      ];
       state.questionsGroups = [
         ...payload.FormDto.formQuestionGroup,
         ...eSignatureSection.questionsGroups
@@ -50,14 +55,17 @@ export const useRegistrationActions = () => {
     dispatch(actions.formDataLoaded());
   };
 
-  const submitFormSection = async formSectionSubmitObject => {
+  const submitFormSection = async (formSectionSubmitObject, lastSection) => {
     const { answers, answerQuery } = formSectionSubmitObject;
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = {
       groupId,
       answers: new URLSearchParams(answersQuery).toString()
     };
-    await RegistrationRepository.submitFormSection(params);
+    if (lastSection) {
+      const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
+      await RegistrationRepository.register({ ...params, eSignature });
+    } else await RegistrationRepository.submitFormSection(params);
     dispatch(actions.submitFormSection(answers));
   };
 
