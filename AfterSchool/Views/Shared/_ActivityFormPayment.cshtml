@@ -541,8 +541,18 @@
     
     function addOrRemoveClass(elem1, elem2)
     {
-        $(elem1).addClass(' hide');
-        $(elem2).removeClass('hide');
+        if ($('#subscriptionplanperiod').val() == "1" || $('#subscriptionplanperiod').val() == "3")
+        {
+            $(elem1).addClass(' hide');
+            $(elem2).removeClass('hide');
+        }
+    }
+    function hideSubscriptionPaymentTypeContent()
+    {
+        $('.not-ongoing-activity-start').addClass(' hide');
+        $('.not-ongoing-period-start').addClass(' hide');
+        $('.is-ongoing-period-start').addClass(' hide');
+        $('.is-ongoing-checkout').addClass(' hide');   
     }
 
     function toggleSubscriptionPeriodWeek() {
@@ -554,12 +564,14 @@
                 $("#subscriptionperiodstartmonthday").prop('required', true);
                 $("#subscriptionperiodstartweekday").prop('required', false);
                 LoadEndDate();
+                setPeriodStartDate();
             } else if ($('#subscriptionplanperiod').val() == "3") {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
                 $("#subscriptionperiodstartmonthday").prop('required', false);
                 LoadEndDate();
+                setPeriodStartDate();
             } else {
                 clearSubscriptionPaymentHiddenInputs();
                 hideWeekMonthContainers();
@@ -568,18 +580,25 @@
             clearSubscriptionPaymentHiddenInputs();
             hideWeekMonthContainers();
         }
-        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true')
-            {
-                ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
-            }
-        else 
-            {
-                ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
-            }
+        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true' && $('#subscriptionPaymentStartType').val() !== "1")
+        {
+            ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : 
+            addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
+        }
+        else if ($('.is-schedule-ongoing').html().toLowerCase() === 'false' && $('#subscriptionPaymentStartType').val() !== "2")
+        {
+            ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : 
+            addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
+        }
+        else
+        {
+            hideSubscriptionPaymentTypeContent();
+        }
     }
 
     function hideWeekMonthContainers() {
         Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });
+        hideSubscriptionPaymentTypeContent();
         $("#subscriptionperiodstartweekday").prop('required', false);
         $("#subscriptionperiodstartmonthday").prop('required', false);
     }

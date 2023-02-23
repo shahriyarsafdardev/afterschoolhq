@@ -170,12 +170,17 @@
                     if (schedule.IsOngoing)
                     {
                         <p class="text-muted text-medium-small is-ongoing-checkout">Payment will start at the time of checkout and will continue until cancelled.</p>
-                        <p class="text-muted text-medium-small is-ongoing-period-start hide">Payment will start on <b class="periodstartdate"></b> and will continue until cancelled.</p>
+                        <p class="text-muted text-medium-small is-ongoing-period-start hide">Payment will start on 
+                            <b class="periodstartdate" date-loaded="false"></b> and will continue until cancelled.</p>
                     }
                     else
                     {
-                        <p class="text-muted text-medium-small not-ongoing-activity-start">Payment will start on <b>@schedule.StartDate.ToLongDateString()</b> or will be prorated for the date of registration, and the last payment will be taken out on <b>@schedule.EndDate.ToLongDateString()</b>.</p>
-                        <p class="text-muted text-medium-small not-ongoing-period-start hide">Payment will start on <b class="periodstartdate"></b> or will be prorated for the date of registration, and the last payment will be taken out on <b class="scheduleenddate"></b>.</p>
+                        <p class="text-muted text-medium-small not-ongoing-activity-start">Payment will start on <b>@schedule.StartDate.ToLongDateString()</b> 
+                            or will be prorated for the date of registration, and the last payment will be taken out on 
+                            <b>@schedule.EndDate.ToLongDateString()</b>.</p>
+                        <p class="text-muted text-medium-small not-ongoing-period-start hide">Payment will start on 
+                            <b class="periodstartdate" date-loaded="false"></b> or will be prorated for the date of registration, and the last payment will be 
+                            taken out on <b class="scheduleenddate"></b>.</p>
                     }
                     <p class="text-muted text-medium-small">
                         If a registrant joins in the middle of an activity, AfterSchool HQ will pro-rate the cost at the time of registration.
@@ -274,7 +279,11 @@
                     let endDateFormatted = data.endDateFormatted;
                     $('#subscriptionStartDate').val(startDateFormatted);
                     $('#subscriptionEndDate').val(endDateFormatted);
-                    $('.periodstartdate').html(startDateFormatted);
+                    if ($('.periodstartdate').attr('date-loaded') === 'false')
+                    {
+                       $('.periodstartdate').html(startDateFormatted);
+                       $('.periodstartdate').attr('date-loaded', 'true');
+                    }
                     $('.scheduleenddate').html(endDateFormatted);
                     endDateInput.html(`payment will start on ${startDateFormatted} and it will end on ${endDateFormatted}`);
                     return false;
@@ -283,6 +292,49 @@
                 }
             }
         });
+    }
+    function setPeriodStartDate()
+    {
+        let dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if ($('#subscriptionplanperiod').val() === '1')
+        {
+            let dateObj = new Date($("#subscriptionperiodstartmonthday").val());
+            $('.periodstartdate').html(getFormattedDateString(dateObj, dayNames));
+        }
+        else
+        {
+            let currentWeekDay = $("#subscriptionperiodstartweekday").val();
+            let currentDate = getWeeklyCurrentDate(dayNames, currentWeekDay);
+            $('.periodstartdate').html(getFormattedDateString(currentDate, dayNames));
+        }
+        showPeriodStartContent();
+    }
+    
+    function getFormattedDateString(dateObj, dayNames)
+    {
+        let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        let date = dateObj.getDate() < 10 ? "0" + dateObj.getDate() : dateObj.getDate();
+        return dayNames[dateObj.getDay()] + ', ' + monthNames[dateObj.getMonth()] + ' ' + date + ', ' + dateObj.getFullYear();
+    }
+    
+    function getWeeklyCurrentDate(dayNames, currentWeekDay)
+    {
+        let weekDates = {};
+        for (let i=0; i<7; i++)
+        {
+            let dateObj = new Date();
+            let dayOfWeek = dateObj.getDay();
+            let dayNo = dayOfWeek + i > 6 ? (dayOfWeek + i) - 7 : dayOfWeek + i;
+            dateObj.setDate(dateObj.getDate() + i);
+            weekDates[dayNames[dayNo]] = dateObj;
+        }
+        return weekDates[currentWeekDay];
+    }
+    
+    function showPeriodStartContent()
+    {
+        $('.is-schedule-ongoing').html().toLowerCase() === 'true' ? $(".is-ongoing-period-start").removeClass('hide') : 
+        $(".not-ongoing-period-start").removeClass('hide');
     }
 
 </script>
