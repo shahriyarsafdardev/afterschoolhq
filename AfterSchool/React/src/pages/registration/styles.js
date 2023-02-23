@@ -46,6 +46,7 @@ export default makeStyles(theme => ({
     }
   },
   buttonWrapper: {
+    margin: '60px 0px',
     minWidth: '235px',
     justifyContent: 'space-between',
     display: 'flex',
