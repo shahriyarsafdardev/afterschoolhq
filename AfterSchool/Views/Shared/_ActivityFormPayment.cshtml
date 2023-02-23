@@ -416,6 +416,11 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         setSubscriptionPlanSection();
         setPaymentPlanSection();
+        $(document).ready(function (){
+            let isPublished = @Model.IsPublished.ToString().ToLower();
+            if (!isPublished)
+                disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
+        });
         setPostPayPlanSection();
         toggleSubscriptionPeriodWeek();
 
@@ -436,10 +441,12 @@
         });
 
         $('#hassubscriptionplan').change(function (cb) {
+            disableSubscriptionOrPaymentPlan($('#hassubscriptionplan'), $('#haspaymentplan'));
             setSubscriptionPlanSection();
         });
 
         $('#haspaymentplan').change(function (cb) {
+            disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
             setPaymentPlanSection();
         });
 
@@ -542,6 +549,17 @@
             @:disableAll();
         }
     });
+
+    function disableSubscriptionOrPaymentPlan(plan1, plan2) {
+        if(plan1.is(':checked') && plan2.is(':checked')) {   
+            plan1.prop('checked',false);
+            plan1.prop('disabled',true);
+            disablePaymentPlanSection();
+        }
+        else {       
+            plan1.is(':checked') ? plan2.prop('disabled', true) : plan2.prop('disabled', false);
+        }
+    }
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
