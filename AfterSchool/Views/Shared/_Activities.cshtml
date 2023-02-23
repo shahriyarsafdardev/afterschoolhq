@@ -343,8 +343,8 @@ else
 
                     @if (group.IsEmpty())
                     {
-                        <button data-uid="@UI.JavascriptSafeString(activity.Uid.ToString())" data-name="@UI.JavascriptSafeString(activity.Name)" data-isfeatured="@activity.IsFeatured"
-                                class="btn btn-sm featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
+                        <button data-uid="@UI.JavascriptSafeString(activity.Uid.ToString())" data-name="@UI.JavascriptSafeString(activity.Name)"
+                                class="btn btn-sm shadow-none featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
                             <i class="s7-pin"></i>
                         </button>
                         <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
@@ -573,43 +573,46 @@ PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#registration-group').change(function () {
             location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
         });
-         $(document).on('click','.featured',function(){
-            
-            var uid = $(this).attr("data-uid");
-            var name = $(this).attr("data-name");
-            var wasFeatured = $(this).attr("data-isfeatured") === "True"; 
-            $.get(
-                    `/org/activity/PinFeatureActivity?id=${uid}`,
-                    function (data) {
-                        if (data) { 
-                            Notifications.showBar({
-                                title: 'Success',
-                                message: `Featured Settings for <strong>${name}</strong> has been updated`,
-                                success: true
-                            });
-                            if (wasFeatured){
-                                $(this).removeClass('btn-primary')  
-                                $(this).addClass('btn-default')   
-                                $(this).attr("data-isfeatured","False")                       
-                            } 
-                            else {
-                                $(this).removeClass('btn-default')  
-                                $(this).addClass('btn-primary') 
-                                $(this).attr("data-isfeatured","True")                    
-                            }
-                            
-                        } else {  
-                            Notifications.showBar({
-                                title: 'Error',
-                                message: `Featured Settings for <strong>${name}</strong> has NOT been updated`,
-                                success: false
-                            });
-                            
-                        }
-                    }.bind(this)
-                )
-        }); 
         
+         $(document).on('click','.featured',function(){   
+            showLoader();
+            showProgressBar();
+            let uid = $(this).attr("data-uid");
+            let name = $(this).attr("data-name");
+            let currentBtn = $(this); // get current activity pin button
+            $.get(
+                `/org/activity/PinFeatureActivity?id=${uid}`,
+                function (data) {
+                  if (data && data.status === 'ok') {
+                     Notifications.showBar({
+                        title: 'Success',
+                        message: `Featured Settings for <strong>${name}</strong> has been updated`,
+                        success: true
+                     });
+                     if (data.isFeaturedNow === true)
+                     {
+                        currentBtn.removeClass('btn-default');  
+                        currentBtn.addClass('btn-primary'); 
+                     }
+                     else 
+                     {
+                        currentBtn.removeClass('btn-primary');  
+                        currentBtn.addClass('btn-default');  
+                     }
+                  }
+                  else
+                  {
+                     Notifications.showBar({
+                         title: 'Error',
+                         message: 'Something went wrong. Please contact customer support.',
+                         success: false
+                     });
+                  }
+                  hideLoader();
+                  hideProgressBar();
+               });
+        }); 
+         
         });
      function doSearch(){
          location.href = `@Url.Action("index", "activity")?type=@((int) activityType)&archive=@(newArchiveValue)&${getQuery()}`;
