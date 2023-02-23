@@ -438,6 +438,9 @@ namespace AfterSchool.Controllers
                                     profileStatus: RegistrantProfileStatus.Started,
                                     loggedInUser: currentUser,
                                     msgs: msgs);
+
+                                // studentReg.ParentRegistrantId = registrant.ID;
+                                // studentReg.Save(adc);
                                 
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                             }
