@@ -552,12 +552,12 @@
 
     function disableSubscriptionOrPaymentPlan(plan1, plan2) {
         if(plan1.is(':checked') && plan2.is(':checked')) {   
-            plan1.prop('checked','');
-            plan1.attr('disabled',true);
+            plan1.prop('checked',false);
+            plan1.prop('disabled',true);
             disablePaymentPlanSection();
         }
         else {       
-            plan1.is(':checked') ? plan2.attr('disabled', true) : plan2.attr('disabled', false);
+            plan1.is(':checked') ? plan2.prop('disabled', true) : plan2.prop('disabled', false);
         }
     }
 
