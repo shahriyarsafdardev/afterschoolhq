@@ -11,6 +11,7 @@ using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
 
 namespace AfterSchool.Areas.ReactApi.Controllers
@@ -155,6 +156,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 //var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
                 var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
+                var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
@@ -163,6 +166,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 
@@ -180,7 +184,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                     {
                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: null,
@@ -206,7 +210,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsNotEmpty())
                     {
                         var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: currentUser,
@@ -229,7 +233,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent1Reg.Save();
                     }
                     
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information)
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsNotEmpty())
                     {
                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: null,
@@ -262,6 +266,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         msgs);
                 });
 
+                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group) && currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
+                {
+                    RegistrationCommon.MapStudentAnswersToParent1(studentRegistrant, parentRegistrant, questions, currentUser, msgs);
+                    RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                }
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+
             }
             catch (Exception ex)
             {
@@ -270,9 +284,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
             }
-            
-
-            return null;
         }
 
 
