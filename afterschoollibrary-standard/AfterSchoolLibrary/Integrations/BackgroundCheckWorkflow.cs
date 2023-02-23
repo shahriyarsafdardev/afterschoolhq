@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -8,23 +10,24 @@ namespace AfterSchoolLibrary.Integrations
     public interface IBackgroundCheckWorkflow
     {
         Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
+        Task ScheduleBackgroundCheck();
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
     {
         private readonly IBackgroundCheckRepository backgroundCheckRepository;
-        private readonly ISterlingCreateCandidateQuery createCandidateQuery;
+        private readonly ISterlingCandidateQuery candidateQuery;
         private readonly ISterlingCreateScreeningQuery createScreeningQuery;
         private readonly SterlingCredentials credentials;
         private readonly ISterlingBearerTokenQuery tokenQuery;
 
         public BackgroundCheckWorkflow(SterlingCredentials credentials, ISterlingBearerTokenQuery tokenQuery,
-            ISterlingCreateCandidateQuery createCandidateQuery, ISterlingCreateScreeningQuery createScreeningQuery,
+            ISterlingCandidateQuery candidateQuery, ISterlingCreateScreeningQuery createScreeningQuery,
             IBackgroundCheckRepository backgroundCheckRepository)
         {
             this.credentials = credentials;
             this.tokenQuery = tokenQuery;
-            this.createCandidateQuery = createCandidateQuery;
+            this.candidateQuery = candidateQuery;
             this.createScreeningQuery = createScreeningQuery;
             this.backgroundCheckRepository = backgroundCheckRepository;
         }
@@ -36,7 +39,11 @@ namespace AfterSchoolLibrary.Integrations
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-                candidateId = await createCandidateQuery.CreateAsync(credentials, token.Token, webUser);
+                candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+                
+                if(candidateId.IsEmpty())
+                    candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
+                
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
             }
             catch (Exception ex)
@@ -53,20 +60,78 @@ namespace AfterSchoolLibrary.Integrations
                 WebUserId = webUser.ID!.Value,
                 RequestedForFiscalAccountId = accountId,
                 BackgroundCheckStatusId = status,
+                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
                 SterlingCandidateId = candidateId,
                 SterlingInviteUrl = backgroundCheckUrl,
                 BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
                 SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
                 ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                IsActive = true,
+                CreateDate = DateTime.UtcNow,
             };
-            messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
-            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl};
+            
+            if(messages.HasNoErrors())
+                messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
+            
+            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl , msg = messages};
+        }
+
+        public async Task ScheduleBackgroundCheck()
+        {
+            var msgs = new SystemMessages();
+            var volunteerApprovals = VolunteerApproval.LoadExpiredVolunteers(msgs);
+
+            try
+            {
+                if (volunteerApprovals.IsNotEmpty())
+                {
+                    foreach (var volunteerApproval in volunteerApprovals)
+                    {
+                        var webUser = WebUser.Load(volunteerApproval.WebUserId.Value, msgs);
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, msgs).FirstOrDefault();
+
+                        var token = await tokenQuery.GetAsync(credentials);
+
+                        var candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+
+                        if (candidateId.IsNotEmpty())
+                        {
+
+                            var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
+
+                            var newBackgroundCheck = new BackgroundCheck
+                            {
+                                WebUserId = webUser.ID!.Value,
+                                RequestedForFiscalAccountId = backgroundCheck.RequestedForFiscalAccountId,
+                                BackgroundCheckStatusId = BackgroundCheckStatus.EmailSentToVolunteer,
+                                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
+                                SterlingCandidateId = candidateId,
+                                SterlingInviteUrl = backgroundCheckUrl,
+                                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                                IsActive = false,
+                                CreateDate = DateTime.UtcNow,
+                            };
+
+                            if (msgs.HasNoErrors())
+                                msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+            }
+            
         }
     }
 
     public class BackgroundCheckRequestResult
     {
         public string BackgroundCheckUrl { get; set; }
+        public SystemMessages msg { get; set; }
     }
 
     public class SterlingCredentials

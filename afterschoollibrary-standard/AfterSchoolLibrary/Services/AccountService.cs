@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -2904,7 +2904,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, null, null, false, accountType, null, null, null, null,
+
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, null, 
                 loggedInUser, false, msgs, dc);
         }
 
@@ -2923,7 +2924,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
                 SignUpType.NotSet, loggedInUser, msgs, dc);
         }
 
@@ -2933,7 +2934,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
                 signUpTypeId, loggedInUser, msgs, dc);
         }
 
@@ -4652,6 +4653,7 @@ namespace AfterSchoolLibrary.Services
 
                     if (sendConfirmationEmail)
                         checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -5098,7 +5100,7 @@ namespace AfterSchoolLibrary.Services
                         msgs: msgs, dc: dc);
             }
         }
-
+        
         #endregion
 
         #region Coupons

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 
@@ -20,6 +21,8 @@ namespace AfterSchoolLibrary.Models
             LoadObjectValues(ObjectMap);
             BackgroundCheckStatusId = BackgroundCheckStatus.NotSet;
             BackgroundCheckSourceId = BackgroundCheckSource.NotSet;
+            BackgroundCheckResultId = SterlingBackgroundCheckResult.NotSet;
+            IsActive = false;
         }
 
         public int WebUserId
@@ -44,6 +47,12 @@ namespace AfterSchoolLibrary.Models
         {
             get => (BackgroundCheckSource) MDV["BackgroundCheckSourceId"].Value;
             set => MDV["BackgroundCheckSourceId"].Value = value;
+        }
+        
+        public SterlingBackgroundCheckResult BackgroundCheckResultId
+        {
+            get => (SterlingBackgroundCheckResult) MDV["BackgroundCheckResultId"].Value;
+            set => MDV["BackgroundCheckResultId"].Value = value;
         }
 
         public string SterlingCandidateId
@@ -87,6 +96,12 @@ namespace AfterSchoolLibrary.Models
             get => (DateTime?) MDV["ManualReviewCompleteDate"].Value;
             set => MDV["ManualReviewCompleteDate"].Value = value;
         }
+        
+        public bool IsActive
+        {
+            get => (bool) MDV["IsActive"].Value;
+            set => MDV["IsActive"].Value = value;
+        }
 
         public static DatabaseParameters ObjectMap
         {
@@ -98,6 +113,7 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "RequestedForFiscalAccountId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckStatusId", SqlDbType.Int);
                 dp.Add(className, "BackgroundCheckSourceId", SqlDbType.Int);
+                dp.Add(className, "BackgroundCheckResultId", SqlDbType.Int);
                 dp.Add(className, "SterlingCandidateId", SqlDbType.NVarChar, "40");
                 dp.Add(className, "SterlingInviteUrl", SqlDbType.NVarChar, "500");
                 dp.Add(className, "ExpirationDate", SqlDbType.DateTime);
@@ -105,6 +121,7 @@ namespace AfterSchoolLibrary.Models
                 dp.Add(className, "VolunteerCompletedDate", SqlDbType.DateTime);
                 dp.Add(className, "SterlingReviewCompleteDate", SqlDbType.DateTime);
                 dp.Add(className, "ManualReviewCompleteDate", SqlDbType.DateTime);
+                dp.Add(className, "IsActive", SqlDbType.Bit);
 
                 return dp;
             }
@@ -144,7 +161,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Length = length;
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
+        
         public static int GetCount(Hashtable criteria = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -162,6 +179,10 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("RequestedForFiscalAccountId is required on BackgroundCheck object", MessageType.Error);
             if (BackgroundCheckStatusId.IsEmpty())
                 msgs.Add("BackgroundCheckStatusId is required on BackgroundCheck object", MessageType.Error);
+            if (BackgroundCheckResultId.IsEmpty())
+                msgs.Add("BackgroundCheckResultId is required on BackgroundCheck object", MessageType.Error);
+            if (IsActive.IsEmpty())
+                msgs.Add("IsActive is Required", MessageType.Error);
 
             if (msgs.HasNoErrors())
                 msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(BackgroundCheck)));
@@ -187,6 +208,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["RequestedForFiscalAccountId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckStatusId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckSourceId"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["BackgroundCheckResultId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingCandidateId"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingInviteUrl"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ExpirationDate"]}));
@@ -194,6 +216,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["VolunteerCompletedDate"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["SterlingReviewCompleteDate"]}));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["ManualReviewCompleteDate"]}));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters {ObjectMap["IsActive"]}));
 
             return msgs;
         }
@@ -208,6 +231,15 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        public static List<BackgroundCheck> LoadByCandidateId(string candidateId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SterlingCandidateId"], candidateId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -219,5 +251,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RequestedForFiscalAccountId"], requestedForFiscalAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static bool HasBackgroundCheck(int webUserID, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["WebUserId"], webUserID);
+            return dq.GetCount() > 0;
+        }
+
     }
 }

@@ -1854,6 +1854,32 @@ namespace AfterSchoolLibrary.Helpers
             Utilities.SystemErrorLog(mailMsgs);
         }
 
+        public static void InitiateBackgroundCheckMail(WebUser webUser, string link, SystemMessages msgs)
+        {
+            var model = new NameValueCollection
+            {
+                {"FirstName", webUser.FirstName},
+                {"Link", link},
+            };
+            
+            var body = ProcessTemplate(
+                EmailTemplates.Initiate_BackgoundCheck,
+                model,
+                "refund_denied-1.0.1",
+                msgs
+            );
+            
+            var subject = "ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]";
+            
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(),
+                new EmailAddress(webUser.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            );
+        }
+
         public static SystemMessages SendAttachedCoupon(AttachedCoupon attachedCoupon)
         {
             var msgs = new SystemMessages();

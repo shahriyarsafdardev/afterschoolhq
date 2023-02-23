@@ -103,6 +103,11 @@ namespace AfterSchoolLibrary.Services
         {
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer);
         }
+        
+        public static bool HasVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer) != null ? true : false;
+        }
 
         public static bool HasRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -995,29 +1000,16 @@ namespace AfterSchoolLibrary.Services
             string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {                                   
+        
+            
+            user = SaveWebUser(user, firstName, lastName, email, password, phone, loggedInUser, msgs, dc);
+            
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    user.FirstName = firstName;
-                    user.LastName = lastName;
-                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
-                    user.IsRegistered = true;
-                    user.IsActive = true;
-                    user.Password = EncryptPassword(password);
-                    user.LastModifiedDate = DateTime.UtcNow;
-                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                    user.Phone = phone;
-
-                    if (user.Email.IsSameAs(email))
-                        user.VerifiedAccount = true;
-                    else
-                        user.Email = email;
-
-                    amsgs.AddRange(user.Save(adc));
-
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
 
                     // Registrant accounts don't need a package
@@ -1046,6 +1038,40 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+        
+        public static WebUser SaveWebUser(this WebUser user, string firstName, string lastName,
+            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            //WebUser user = null;
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = EncryptPassword(password);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
+                    if (user.Email.IsSameAs(email))
+                        user.VerifiedAccount = true;
+                    else
+                        user.Email = email;
+                    amsgs.AddRange(user.Save(adc));
+                }
+            );
+            return user;
+        }
+
+        public static bool HasBackgroundCheck(this WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BackgroundCheck.HasBackgroundCheck((int)webUser.ID, msgs, dc);
         }
 
         /// <summary>

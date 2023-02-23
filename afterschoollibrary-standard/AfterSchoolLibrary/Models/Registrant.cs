@@ -7,6 +7,7 @@ using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Microsoft.Identity.Client;
+using Dapper;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
@@ -751,7 +752,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int) x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
-
+        
         public static List<Registrant> LoadByAnsweredFormId(int formId, int accountId, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -912,7 +913,180 @@ namespace AfterSchoolLibrary.Models
 
             return sql;
         }
+        
+        public static List<Registrant> LoadApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetApprovedSearchedRegistrant(AccountHostId, registrantPersonType, searchCriteria, type, start, length);
 
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        public static int GetCountApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetApprovedSearchedRegistrantCount(AccountHostId, registrantPersonType, searchCriteria, type);
+
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
+        }
+        
+        public static List<Registrant> LoadABackgroundMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetBackgroundSearchedRegistrant(AccountHostId, registrantPersonType, search, start, length);
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        public static int GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetBackgroundSearchedRegistrantCount(AccountHostId, registrantPersonType, search);
+
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
+        }
+        
+        private static string GetApprovedSearchedRegistrant(int Id, RegistrantPersonType personType, DatabaseCriteria search, int type, int? start, int? length)
+        {
+            var persontTypeId = (int) personType;
+            var typeQuery = "";
+            var typecondition = "";
+
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+            var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                {typecondition}
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+
+            if (search.IsNotEmpty())
+                 sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+             
+            sql += @$"{typeQuery}
+                order by masterReg.ID
+                offset {start} rows
+                fetch next {length} rows only";
+
+            return sql;
+        }
+
+        private static string GetApprovedSearchedRegistrantCount(int Id, RegistrantPersonType personType, DatabaseCriteria search, int type)
+        {
+            var persontTypeId = (int) personType;
+            
+            var typeQuery = "";
+            var typecondition = "";
+            
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+            var sql = $@"select count(distinct masterReg.webuserid)
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+                {typecondition}   
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})"; 
+                
+            sql += @$"{typeQuery}";
+            
+            return sql;
+        }
+        
+        private static string GetBackgroundSearchedRegistrant(int Id, RegistrantPersonType personType, string search, int? start, int? length)
+        {
+            var persontTypeId = (int) personType;
+            var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
+                BackgroundCheck bg on submittedReg.WebUserId = bg.WebUserId 
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId} and
+                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
+                and bg.IsActive = 1
+                order by masterReg.webuserid
+                offset {start} rows
+                fetch next {length} rows only";
+
+            return sql;
+        }
+        
+        private static string GetBackgroundSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search)
+        {
+            var persontTypeId = (int) personType;
+            var sql = $@"select count(distinct masterReg.WebUserId)
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
+                BackgroundCheck bg on submittedReg.WebUserId = bg.WebUserId 
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId} and
+                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
+                and bg.IsActive = 1";
+
+            return sql;
+        }
+        
         #endregion
     }
 }
