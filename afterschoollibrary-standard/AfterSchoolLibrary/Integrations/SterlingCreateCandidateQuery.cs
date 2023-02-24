@@ -44,8 +44,12 @@ namespace AfterSchoolLibrary.Integrations
                     .Add("Content-Type", "application/json"),
                 Body = jsonSerializer.Serialize(sterlingRequest),
             };
-
+            
+            Helpers.Utilities.SystemLog(request.ToString());
+            
             var response = await httpClient.ExecuteAsync(request);
+            
+            Helpers.Utilities.SystemLog(response.ToString());
 
             if (response.StatusCode != 201)
                 throw new Exception($"Sterling candidate request failed with status code {response.StatusCode}; body: {response.Body}");
@@ -64,13 +68,19 @@ namespace AfterSchoolLibrary.Integrations
                     .Add("Authorization", $"Bearer {bearerToken}")
                     .Add("Content-Type", "application/json"),
             };
+            
+            Helpers.Utilities.SystemLog(request.ToString());
 
             var response = await httpClient.ExecuteAsync(request);
+            
+            Helpers.Utilities.SystemLog(response.ToString());
 
             if (response.StatusCode == 404 || response.StatusCode == 400)
+            {
                 return null;
+                Helpers.Utilities.SystemLog(response.ToString());
+            }
             
-                
             JArray responseBody = JArray.Parse(response.Body);
 
             if (response.StatusCode == 200)
