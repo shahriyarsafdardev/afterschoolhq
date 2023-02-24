@@ -626,15 +626,15 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, msgs);
+                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, participationObject, msgs);
             }
 
             return msgs;
         }
         
-        private void SendLinkToVolunteer(string link, WebUser webUser, SystemMessages msgs)
+        private void SendLinkToVolunteer(string link, WebUser webUser, ParticipationObject participationObject, SystemMessages msgs)
         {
-            EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
+            EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, link, msgs);
         }
         
     }

@@ -1854,12 +1854,13 @@ namespace AfterSchoolLibrary.Helpers
             Utilities.SystemErrorLog(mailMsgs);
         }
 
-        public static void InitiateBackgroundCheckMail(WebUser webUser, string link, SystemMessages msgs)
+        public static void InitiateBackgroundCheckMail(WebUser webUser, ParticipationObject participationObject, string link, SystemMessages msgs)
         {
             var model = new NameValueCollection
             {
                 {"FirstName", webUser.FirstName},
                 {"Link", link},
+                {"Name", participationObject.Name},
             };
             
             var body = ProcessTemplate(
