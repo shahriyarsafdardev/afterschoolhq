@@ -210,7 +210,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsNotEmpty())
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                     {
                         var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: currentUser,
@@ -239,7 +239,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         // }
                     }
                     
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsNotEmpty())
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                     {
                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: null,
@@ -265,11 +265,22 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 qvms.ForEach(qvm =>
                 {
-                    studentRegistrant.AddOrUpdateAnswer(
-                        qvm.Value.IfEmpty("").Trim(),
-                        qvm.Question,
-                        currentUser,
-                        msgs);
+                    if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    {
+                        studentRegistrant.AddOrUpdateAnswer(
+                            qvm.Value.IfEmpty("").Trim(),
+                            qvm.Question,
+                            currentUser,
+                            msgs);
+                    }
+                    else
+                    {
+                        currentRegistrant.AddOrUpdateAnswer(
+                            qvm.Value.IfEmpty("").Trim(),
+                            qvm.Question,
+                            currentUser,
+                            msgs);
+                    }
                 });
 
                 if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group) && currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
