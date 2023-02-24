@@ -397,7 +397,7 @@ namespace AfterSchool.Areas.District.Controllers
 
         private void SendLinkToVolunteer(string link, WebUser webUser, SystemMessages msgs)
         {
-            EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
+            // EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
         }
         
     }

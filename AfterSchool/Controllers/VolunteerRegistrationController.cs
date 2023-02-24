@@ -634,6 +634,7 @@ namespace AfterSchool.Controllers
         
         private void SendLinkToVolunteer(string link, WebUser webUser, ParticipationObject participationObject, SystemMessages msgs)
         {
+            //Add Model
             EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, link, msgs);
         }
         
