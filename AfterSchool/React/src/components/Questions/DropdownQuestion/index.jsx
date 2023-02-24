@@ -18,7 +18,7 @@ function DropdownQuestion({ question, formik }) {
     }
   };
 
-  const value = values[ID] ? JSON.parse(values[ID])[0]?.value : 'Select';
+  const value = values[ID] && values[ID] != 'null' ? JSON.parse(values[ID])[0]?.value : 'Select';
 
   return (
     <>

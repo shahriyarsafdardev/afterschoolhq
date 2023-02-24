@@ -27,8 +27,8 @@ export default function Home() {
     answeredQuestions,
     loadFormData,
     submitFormSection,
-    isActivityPaid,
-    isParent
+    registrationId,
+    activity: { IsFree, RegistrantType }
   } = useRegistration();
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
@@ -46,7 +46,8 @@ export default function Home() {
     initialValues,
     validator,
     formSectionSubmitObject,
-    groupedQuestions
+    groupedQuestions,
+    saveButtonText
   } = registrationService;
 
   const handleSection = action => {
@@ -59,9 +60,12 @@ export default function Home() {
     }
   };
 
-  const handleRedirection = () => {
-    redirect(isActivityPaid ? paymentScreenPath : thankyouScreenPath);
-  };
+  useEffect(() => {
+    if (registrationId) handleRedirection();
+  }, [registrationId]);
+
+  const handleRedirection = () =>
+    redirect(IsFree ? thankyouScreenPath(registrationId) : paymentScreenPath(registrationId));
 
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -72,8 +76,7 @@ export default function Home() {
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       await submitFormSection(formSectionSubmitObject(values, activeGroupId), lastSection);
-      if (lastSection) handleRedirection();
-      else handleSection('next');
+      if (!lastSection) handleSection('next');
       resetForm();
     }
   });
@@ -175,13 +178,7 @@ export default function Home() {
                           variant="contained"
                           type="submit"
                         >
-                          {lastSection
-                            ? isParent
-                              ? isActivityPaid
-                                ? 'E-Sign and Continue to Payment '
-                                : 'Confirm Registration'
-                              : 'Confirm'
-                            : 'Save & Continue'}
+                          {saveButtonText(lastSection, RegistrantType, IsFree)}
                         </Button>
                       </Box>
                     </Box>

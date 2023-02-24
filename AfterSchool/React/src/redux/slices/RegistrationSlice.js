@@ -12,8 +12,7 @@ const RegistrationSlice = createSlice({
     answeredQuestions: [],
     activity: {},
     loading: true,
-    isActivityPaid: true, //TODO: Just for testing purpose
-    isParent: true //TODO: Just for testing purpose
+    registrationId: null
   },
   reducers: {
     loadingFormData: state => {
@@ -26,7 +25,7 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload }) => {
-      const eSignatureSection = ConfirmRegistrationSection(state.isParent);
+      const eSignatureSection = ConfirmRegistrationSection();
       state.questions = [
         ...payload.FormDto.formQuestion,
         ...eSignatureSection.questions,
@@ -41,6 +40,9 @@ const RegistrationSlice = createSlice({
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
+    },
+    setRegistrationId: (state, { payload }) => {
+      state.registrationId = payload;
     }
   }
 });
@@ -60,10 +62,16 @@ export const useRegistrationActions = () => {
     const { answers, answerQuery } = formSectionSubmitObject;
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = { answers: new URLSearchParams(answersQuery).toString(), groupId };
+
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
-      await RegistrationRepository.register({ ...params, eSignature });
+      dispatch(actions.loadingFormData());
+      RegistrationRepository.register({ ...params, eSignature }).then(res => {
+        dispatch(actions.setRegistrationId(res.data.obj));
+        dispatch(actions.formDataLoaded());
+      });
     } else await RegistrationRepository.submitFormSection(params);
+
     dispatch(actions.submitFormSection(answers));
   };
 

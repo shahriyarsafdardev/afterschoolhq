@@ -73,6 +73,15 @@ export default class RegistrationService {
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
   };
 
+  saveButtonText = (lastSection, RegistrantType, IsFree) =>
+    lastSection
+      ? RegistrantType === 'Parent'
+        ? IsFree
+          ? 'Confirm Registration'
+          : 'E-Sign and Continue to Payment '
+        : 'Confirm'
+      : 'Save & Continue';
+
   //Private methods, only being called within the class
   submittedAnswer = (id, text) =>
     this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
