@@ -352,6 +352,8 @@ namespace AfterSchool.Controllers
             {
                 var firstName = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName);
+                var middleName = qvms.First(qvm =>
+                    qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName);
                 var lastName = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName);
                 var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
@@ -395,6 +397,8 @@ namespace AfterSchool.Controllers
                                     location?.ID,
                                     amsgs,
                                     adc);
+                            
+                            registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
 
                             // LOG: Someone Created Account AccountName
                             SessionVariables.WebSession.LogActivity(
@@ -415,11 +419,30 @@ namespace AfterSchool.Controllers
                                 objectId: user.ID.Value,
                                 objectText: user.FullName
                             );
-
+                            
                             if (amsgs.HasNoErrors())
                             {
-                                registrant = account.GetRegistrantByRegistrantPersonType(registrantPersonType, amsgs, adc);
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
+                            }
+                            
+                            if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                            {
+                                var studentReg = account.CreateParentOrStudentRegistrant(
+                                    registrantOwner: currentUser,
+                                    canBeAccessedBy: currentUser.AsList(),
+                                    registrantType: RegistrantType.Individual,
+                                    isMaster: true,
+                                    isParentOrGuardian: false,
+                                    allowTextMessages: false,
+                                    schoolLocationId: null,
+                                    profileStatus: RegistrantProfileStatus.Started,
+                                    loggedInUser: currentUser,
+                                    msgs: msgs);
+
+                                // studentReg.ParentRegistrantId = registrant.ID;
+                                // studentReg.Save(adc);
+                                
+                                RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                             }
                         }
                     },

@@ -706,19 +706,22 @@ namespace AfterSchoolLibrary.Services
 
                     user.AddAccount(account, userType, loggedInUser, amsgs, adc);
 
-                    account.CreateRegistrant(
-                        user,
-                        user.AsList(),
-                        RegistrantType.Individual,
-                        true,
-                        (registrantPersonType == RegistrantPersonType.Parent),
-                        false,
-                        locationId, // probably should have a school location id
-                        RegistrantProfileStatus.Started,
-                        user,
-                        registrantPersonType,
-                        amsgs,
-                        adc);;
+                    account.CreateParentOrStudentorAdultRegistrant(
+                        firstName: user.FirstName,
+                        lastName: user.LastName,
+                        email: user.Email,
+                        registrantOwner: user,
+                        canBeAccessedBy: user.AsList(),
+                        registrantType: RegistrantType.Individual,
+                        isMaster: true,
+                        isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent ? true : false,
+                        allowTextMessages: false,
+                        schoolLocationId: null,
+                        profileStatus: RegistrantProfileStatus.Started,
+                        loggedInUser: user,
+                        registrantPersonType : registrantPersonType,
+                        msgs: amsgs,
+                        dc: adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

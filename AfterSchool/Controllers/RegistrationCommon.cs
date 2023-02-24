@@ -581,6 +581,74 @@ namespace AfterSchool.Controllers
                         };
             }
         }
+        
+        public static Dictionary<QuestionDataType, QuestionDataType> StudentInfoToParentRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                {
+                    {QuestionDataType.Parent1FirstName, QuestionDataType.RegistrantFirstName},
+                    {QuestionDataType.Parent1MiddleName, QuestionDataType.RegistrantMiddleName},
+                    {QuestionDataType.Parent1LastName, QuestionDataType.RegistrantLastName},
+                    {QuestionDataType.Parent1Email, QuestionDataType.RegistrantEmail},
+                    {QuestionDataType.Parent1HomePhone, QuestionDataType.RegistrantHomePhone},
+                    {QuestionDataType.Parent1MobilePhone, QuestionDataType.RegistrantMobilePhone},
+                    {QuestionDataType.Parent1WorkPhone, QuestionDataType.RegistrantWorkPhone},
+                    {QuestionDataType.Parent1Employer, QuestionDataType.RegistrantEmployer},
+                    {QuestionDataType.Parent1RelationshipToRegistrant, QuestionDataType.RegistrantParentRelationship},
+                };
+            }
+        }
+        
+        public static Dictionary<QuestionDataType, QuestionDataType> StudentInfoToParent2RegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                {
+                    {QuestionDataType.Parent2FirstName, QuestionDataType.RegistrantFirstName},
+                    {QuestionDataType.Parent2MiddleName, QuestionDataType.RegistrantMiddleName},
+                    {QuestionDataType.Parent2LastName, QuestionDataType.RegistrantLastName},
+                    {QuestionDataType.Parent2Email, QuestionDataType.RegistrantEmail},
+                    {QuestionDataType.Parent2HomePhone, QuestionDataType.RegistrantHomePhone},
+                    {QuestionDataType.Parent2MobilePhone, QuestionDataType.RegistrantMobilePhone},
+                    {QuestionDataType.Parent2WorkPhone, QuestionDataType.RegistrantWorkPhone},
+                    {QuestionDataType.Parent2Employer, QuestionDataType.RegistrantEmployer},
+                    {QuestionDataType.Parent2RelationshipToRegistrant, QuestionDataType.RegistrantParentRelationship},
+                };
+            }
+        }
+        
+        public static Dictionary<QuestionDataType, QuestionDataType> StudentAddressToParentRegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                {
+                    {QuestionDataType.Parent1Address1, QuestionDataType.RegistrantAddress1},
+                    {QuestionDataType.Parent1Address2, QuestionDataType.RegistrantAddress2},
+                    {QuestionDataType.Parent1City, QuestionDataType.RegistrantCity},
+                    {QuestionDataType.Parent1State, QuestionDataType.RegistrantState},
+                    {QuestionDataType.Parent1PostalCode, QuestionDataType.RegistrantPostalCode},
+                };
+            }
+        }
+        
+        public static Dictionary<QuestionDataType, QuestionDataType> StudentAddressToParent2RegistrantMap
+        {
+            get
+            {
+                return new Dictionary<QuestionDataType, QuestionDataType>
+                {
+                    {QuestionDataType.Parent2Address1, QuestionDataType.RegistrantAddress1},
+                    {QuestionDataType.Parent2Address2, QuestionDataType.RegistrantAddress2},
+                    {QuestionDataType.Parent2City, QuestionDataType.RegistrantCity},
+                    {QuestionDataType.Parent2State, QuestionDataType.RegistrantState},
+                    {QuestionDataType.Parent2PostalCode, QuestionDataType.RegistrantPostalCode},
+                };
+            }
+        }
 
         public static Dictionary<QuestionDataType, QuestionDataType> Parent1AddressToMainRegistrantMap
         {
@@ -671,6 +739,95 @@ namespace AfterSchool.Controllers
                     parentRegistrant,
                     key,
                     Parent1AddressToMainRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+        }
+        
+        public static void MapStudentAnswersToParent1(Registrant student, Registrant parentRegistrant, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // copy parent answers to student for home address, emergency contacts
+            student.GetAnswers(msgs, dc)
+                .Where(answer =>
+                    answer.FormQuestionGroupQuestionGroupDataTypeId.In(FormQuestionService
+                        .GetEmergencyContactQuestionGroups())
+                )
+                .ToList()
+                .ForEach(answer =>
+                {
+                    parentRegistrant.AddOrUpdateAnswer(
+                        answer.Text.IfEmpty("").Trim(),
+                        answer.ToFormQuestion(msgs: msgs, dc: dc),
+                        currentUser,
+                        msgs,
+                        dc);
+                });
+
+            foreach (var key in StudentInfoToParentRegistrantMap.Keys)
+                parentRegistrant.MapAndAddAnswer(
+                    allQuestions,
+                    student,
+                    key,
+                    StudentInfoToParentRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+
+            foreach (var key in StudentAddressToParentRegistrantMap.Keys)
+                parentRegistrant.MapAndAddAnswer(
+                    allQuestions,
+                    student,
+                    key,
+                    StudentAddressToParentRegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+        }
+        
+        public static void MapStudentAnswersToParent2(Registrant student, Registrant parent2Registrant, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            foreach (var key in StudentInfoToParent2RegistrantMap.Keys)
+                parent2Registrant.MapAndAddAnswer(
+                    allQuestions,
+                    student,
+                    key,
+                    StudentInfoToParent2RegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+
+            foreach (var key in StudentAddressToParent2RegistrantMap.Keys)
+                parent2Registrant.MapAndAddAnswer(
+                    allQuestions,
+                    student,
+                    key,
+                    StudentAddressToParent2RegistrantMap[key],
+                    currentUser,
+                    msgs,
+                    dc);
+        }
+        
+        public static void MapParent1AllAnswersToStudent(Registrant parentRegistrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc)
+        {
+            // copy parent answers to student for home address, emergency contacts
+            parentRegistrant.GetAnswers(msgs, dc)
+                .ToList()
+                .ForEach(answer =>
+                {
+                    student.AddOrUpdateAnswer(
+                        answer.Text.IfEmpty("").Trim(),
+                        answer.ToFormQuestion(msgs: msgs, dc: dc),
+                        currentUser,
+                        msgs,
+                        dc);
+                });
+
+            foreach (var key in Parent1InfoToMainRegistrantMap.Keys)
+                student.MapAndAddAnswer(
+                    allQuestions,
+                    parentRegistrant,
+                    key,
+                    Parent1InfoToMainRegistrantMap[key],
                     currentUser,
                     msgs,
                     dc);

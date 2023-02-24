@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
@@ -8,6 +11,7 @@ using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
 
 namespace AfterSchool.Areas.ReactApi.Controllers
@@ -49,7 +53,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentAccount = SessionVariables.CurrentAccount;
                 var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
@@ -57,12 +63,13 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var activity = participationObject.GetActivity();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
                 
-                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Adult)
                 {
-                    questions = questions.Where(question =>
-                            question.QuestionDataTypeId.In(FormConstants.QuestionsToIncludeParentPanel()))
-                        .ToList();
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
+                    ).ToList();
                 }
                 
                 var formQuestionDtoList = new List<FormQuestionDto>();
@@ -88,7 +95,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionGroup in participationObject.Form.GetQuestionGroups(msgs))
+                foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
                         new FormQuestionGroupDto()
@@ -101,7 +108,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((int)currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).ID))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant.ID.Value : currentRegistrant.ID.Value)))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -120,7 +127,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     activityDto = new
                     {
                         Name = activity.Name,
-                        Organization = activity.AccountName
+                        Organization = activity.AccountName,
+                        IsFree = participationObject.IsFree,
+                        RegistrantType = currentRegistrant.PersonTypeId.ToString()
                     }
                 };
                 
@@ -138,14 +147,202 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
 
         [HttpPost]
-
         public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var questions = participationObject.Form.GetAllQuestions(msgs);
-            var qvms = questions.Select(question => new FormQuestionViewModel(question, json.answers)).ToList();
-            return null;
+
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                var currentAccount = SessionVariables.CurrentAccount;
+                //var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
+                var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+
+                var group = Regex.Match(json.groupid, @"\d+").Value;
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+                
+                var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
+                var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
+                var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName).Value;
+                var parent1Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MobilePhone).Value;
+                var parent1Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1Email).Value;
+
+                var parent2FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2FirstName).Value;
+                var parent2LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2LastName).Value;
+                var parent2MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MiddleName).Value;
+                var parent2Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
+                var parent2Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
+
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                {
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
+                    {
+                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: null,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: true,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+
+                        parent2Reg.FirstName = parent2FirstName;
+                        parent2Reg.LastName = parent2LastName;
+                        parent2Reg.MiddleName = parent2MiddleName;
+                        parent2Reg.Email = parent2Email;
+                        parent2Reg.Phone = parent2Phone;
+
+                        parent2Reg.Save();
+                    }
+                }
+                
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
+                {
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
+                    {
+                        var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+        
+                        parent1Reg.FirstName = parent1FirstName;
+                        parent1Reg.LastName = parent1LastName;
+                        parent1Reg.MiddleName = parent1MiddleName;
+                        parent1Reg.Email = parent1Email;
+                        parent1Reg.Phone = parent1Phone;
+    
+                        parent1Reg.Save();
+                    }
+                    
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
+                    {
+                        var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: null,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: true,
+                            allowTextMessages: true,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: msgs);
+
+                        parent2Reg.FirstName = parent2FirstName;
+                        parent2Reg.LastName = parent2LastName;
+                        parent2Reg.MiddleName = parent2MiddleName;
+                        parent2Reg.Email = parent2Email;
+                        parent2Reg.Phone = parent2Phone;
+
+                        parent2Reg.Save();
+                    }
+                }
+                
+                qvms.ForEach(qvm =>
+                {
+                    if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    {
+                        studentRegistrant.AddOrUpdateAnswer(
+                            qvm.Value.IfEmpty("").Trim(),
+                            qvm.Question,
+                            currentUser,
+                            msgs);
+                    }
+                    else
+                    {
+                        currentRegistrant.AddOrUpdateAnswer(
+                            qvm.Value.IfEmpty("").Trim(),
+                            qvm.Question,
+                            currentUser,
+                            msgs);
+                    }
+                });
+
+                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group))
+                {
+                    if(currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
+                    {
+                        RegistrationCommon.MapStudentAnswersToParent1(studentRegistrant, parentRegistrant, questions, currentUser, msgs);
+                        RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                    }
+
+                    SessionVariables.CurrentRegistrant = (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant : currentRegistrant);
+
+                }
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult Register(QuestionAnswerResponse json)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                var currentAccount = SessionVariables.CurrentAccount;
+                Registrant submittedRecord;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+
+                if (json.esignature.IsEmpty())
+                    msgs.Add("E-signature is required", MessageType.UserError);
+                
+                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
+
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+                var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
+                
+                return Json(
+                    new ApiResponse(msgs,registration.ID),
+                    JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
         }
 
 
@@ -228,6 +425,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         public class QuestionAnswerResponse
         {
             public string groupid { get; set; }
+            
+            public string esignature { get; set; }
             public string answers { get; set; }
         }
         
