@@ -15,9 +15,7 @@ function ApiTextField({ formik, question }) {
 
   const handlePlaceChanged = () => {
     const [place] = inputRef.current.getPlaces();
-    if (place) {
-      setFieldValue(ID, place.formatted_address);
-    }
+    if (place) setFieldValue(ID, place.formatted_address);
   };
 
   return (
@@ -47,7 +45,7 @@ function ApiTextField({ formik, question }) {
               helperText={touched[ID] && errors[ID]}
               type="text"
               className={cs('form-control', classes.formControlClass)}
-              placeholder="Enter your address"
+              placeholder={`Enter your ${Text}`}
             />
           </StandaloneSearchBox>
         </LoadScript>

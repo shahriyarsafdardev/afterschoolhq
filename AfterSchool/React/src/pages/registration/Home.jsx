@@ -86,7 +86,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (questionsGroups.length) setActiveGroupId(questionsGroups[0].QuestionGroupDataTypeId);
+    if (questionsGroups.length)
+      setActiveGroupId(questionsGroups[activeGroup].QuestionGroupDataTypeId);
   }, [questionsGroups.length]);
 
   useEffect(() => {

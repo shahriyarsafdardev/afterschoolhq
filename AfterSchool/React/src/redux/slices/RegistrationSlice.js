@@ -48,6 +48,7 @@ const RegistrationSlice = createSlice({
 export const useRegistrationActions = () => {
   const { actions } = RegistrationSlice;
   const dispatch = useDispatch();
+
   const loadFormData = async () => {
     dispatch(actions.loadingFormData());
     const formData = await RegistrationRepository.getFormData();
@@ -58,10 +59,7 @@ export const useRegistrationActions = () => {
   const submitFormSection = async (formSectionSubmitObject, lastSection) => {
     const { answers, answerQuery } = formSectionSubmitObject;
     const { answerQuery: answersQuery, groupId } = answerQuery;
-    const params = {
-      groupId,
-      answers: new URLSearchParams(answersQuery).toString()
-    };
+    const params = { answers: new URLSearchParams(answersQuery).toString(), groupId };
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       await RegistrationRepository.register({ ...params, eSignature });
