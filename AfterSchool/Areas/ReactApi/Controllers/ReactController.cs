@@ -127,7 +127,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     activityDto = new
                     {
                         Name = activity.Name,
-                        Organization = activity.AccountName
+                        Organization = activity.AccountName,
+                        IsFree = participationObject.IsFree,
+                        RegistrantType = currentRegistrant.PersonTypeId.ToString()
                     }
                 };
                 
@@ -231,12 +233,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         parent1Reg.Phone = parent1Phone;
     
                         parent1Reg.Save();
-
-                        // if (msgs.HasErrors())
-                        // {
-                        //     currentRegistrant.ParentRegistrantId = parent1Reg.ID;
-                        //     currentRegistrant.Save();
-                        // }
                     }
                     
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
@@ -312,6 +308,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         [HttpPost]
         public ActionResult Register(QuestionAnswerResponse json)
         {
+            var msgs = new SystemMessages();
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
@@ -320,9 +317,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
-                
-                var msgs = new SystemMessages();
-                
+
                 if (json.esignature.IsEmpty())
                     msgs.Add("E-signature is required", MessageType.UserError);
                 
@@ -336,30 +331,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
                 
-                // (submittedRecord ?? student).AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
-
-                /*if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
-                {
-                    submittedRecord = studentRegistrant.SubmitRecordToAccount(
-                        participationObject.OwnerAccount,
-                        currentUser,
-                        msgs);
-                }
-                else
-                {
-                    submittedRecord = currentRegistrant.SubmitRecordToAccount(
-                        participationObject.OwnerAccount,
-                        currentUser,
-                        msgs);
-                }*/
-
-                return null;
+                return Json(
+                    new ApiResponse(msgs,registration.ID),
+                    JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                throw;
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
             }
         }
 
