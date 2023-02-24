@@ -49,6 +49,7 @@ namespace AfterSchoolLibrary.Integrations
             catch (Exception ex)
             {
                 messages.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+                Helpers.Utilities.SystemErrorLog(ex);
             }
 
             var status = candidateId is null || backgroundCheckUrl is null
@@ -123,6 +124,7 @@ namespace AfterSchoolLibrary.Integrations
             catch (Exception ex)
             {
                 msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+                Helpers.Utilities.SystemErrorLog(ex);
             }
             
         }
