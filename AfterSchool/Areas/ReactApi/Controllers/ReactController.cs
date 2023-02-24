@@ -283,10 +283,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     }
                 });
 
-                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group) && currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
+                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group))
                 {
-                    RegistrationCommon.MapStudentAnswersToParent1(studentRegistrant, parentRegistrant, questions, currentUser, msgs);
-                    RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                    if(currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
+                    {
+                        RegistrationCommon.MapStudentAnswersToParent1(studentRegistrant, parentRegistrant, questions, currentUser, msgs);
+                        RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                    }
+
+                    SessionVariables.CurrentRegistrant = (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant : currentRegistrant);
+
                 }
                 
                 return Json(
