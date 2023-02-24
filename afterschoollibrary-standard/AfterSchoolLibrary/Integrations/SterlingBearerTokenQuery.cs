@@ -25,7 +25,6 @@ namespace AfterSchoolLibrary.Integrations
 
         public async Task<SterlingToken> GetAsync(SterlingCredentials credentials)
         {
-            var msgs = new SystemMessages();
             var request = new HttpRequest
             {
                 Url = $"{credentials.Endpoint}/v2/oauth",
@@ -37,12 +36,8 @@ namespace AfterSchoolLibrary.Integrations
             {
                 {"grant_type", "client_credentials"},
             });
-            
-            Helpers.Utilities.SystemLog(request.ToString());
 
             var response = await httpClient.ExecuteAsync(request);
-            
-            Helpers.Utilities.SystemLog(response.ToString());
 
             if (response.StatusCode != 200)
                 throw new Exception($"Sterling token request failed with status code {response.StatusCode}; body: {response.Body}");
