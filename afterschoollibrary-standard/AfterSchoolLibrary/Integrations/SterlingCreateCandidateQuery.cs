@@ -76,7 +76,10 @@ namespace AfterSchoolLibrary.Integrations
             Helpers.Utilities.SystemLog(response.ToString());
 
             if (response.StatusCode == 404 || response.StatusCode == 400)
-                throw new Exception($"Sterling candidate request failed with status code {response.StatusCode}; body: {response.Body}");
+            {
+                return null;
+                Helpers.Utilities.SystemLog(response.ToString());
+            }
             
             JArray responseBody = JArray.Parse(response.Body);
 
