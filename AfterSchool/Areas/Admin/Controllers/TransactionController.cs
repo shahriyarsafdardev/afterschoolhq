@@ -11,7 +11,8 @@ namespace AfterSchool.Areas.Admin.Controllers
 {
     public class TransactionController : BaseLoggedInController
     {
-        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool })
+        // This needs refactoring.. 
+        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool, AccountType.School})
         {
 
         }
@@ -203,10 +204,13 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Refund(string id, string request, string refundcc, string refundcf, PaymentSourceType? paymentsource)
         {
             var msgs = new SystemMessages();
-
+            // What about security concerns when new record has to be created?
+            // var currentAccount = SessionVariables.CurrentAccount.IsActivityProvider;
+            // Using session variables in some way.
             if (id.IsGuid())
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+                paymentsource = transaction.PaymentSourceTypeId;
                 Transaction refund = new Transaction();
                 
                 if (request.IsNotEmpty())

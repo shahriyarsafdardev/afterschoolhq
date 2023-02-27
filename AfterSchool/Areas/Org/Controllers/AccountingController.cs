@@ -443,7 +443,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested,
                         refundRequest.Amount.ToCurrency(), refundRequest, msgs);
-                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+                    return new JsonResult {Data = new {status = "ok", uid = refundRequest.Uid}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
 
