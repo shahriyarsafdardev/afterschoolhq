@@ -843,6 +843,11 @@ namespace AfterSchoolLibrary.Helpers
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", ""},
                 {"RegistrationTable", registrationTable},
+                {"ActivityName", participationObject.Name},
+                {"YourRecepitText", ""},
+                {"StripeNote", "" },
+                {"SubscriptionDetails", ""},
+                {"PaymentPlanDetails", ""},
             };
 
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";

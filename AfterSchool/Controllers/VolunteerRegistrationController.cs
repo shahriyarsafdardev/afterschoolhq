@@ -579,7 +579,7 @@ namespace AfterSchool.Controllers
             
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
-            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
+            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, false, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);

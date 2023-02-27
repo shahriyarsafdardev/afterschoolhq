@@ -952,7 +952,15 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetBackgroundSearchedRegistrant(AccountHostId, registrantPersonType, search, start, length);
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetBackgroundSearchedRegistrant(AccountHostId, registrantPersonType, searchCriteria, start, length);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -961,7 +969,16 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            var sql = GetBackgroundSearchedRegistrantCount(AccountHostId, registrantPersonType, search);
+            
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetBackgroundSearchedRegistrantCount(AccountHostId, registrantPersonType, searchCriteria);
 
             return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
@@ -1040,7 +1057,7 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
         
-        private static string GetBackgroundSearchedRegistrant(int Id, RegistrantPersonType personType, string search, int? start, int? length)
+        private static string GetBackgroundSearchedRegistrant(int Id, RegistrantPersonType personType, DatabaseCriteria search, int? start, int? length)
         {
             var persontTypeId = (int) personType;
             var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
@@ -1065,7 +1082,7 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
         
-        private static string GetBackgroundSearchedRegistrantCount(int Id, RegistrantPersonType personType, string search)
+        private static string GetBackgroundSearchedRegistrantCount(int Id, RegistrantPersonType personType, DatabaseCriteria search)
         {
             var persontTypeId = (int) personType;
             var sql = $@"select count(distinct masterReg.WebUserId)

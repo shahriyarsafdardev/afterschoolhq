@@ -1,6 +1,6 @@
 ﻿<div>
 
-<p> Hello @Model.FirstName <br/></p>
+<p> Hello @Model.FirstName,<br/></p>
 
 <p>Thank you for taking the first step in becoming a volunteer for @Model.Name! <br/>
 We are working with <a href='https://www.sterlingcheck.com/services/candidate-hub/' target=_blank >Sterling</a>

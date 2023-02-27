@@ -226,12 +226,15 @@ namespace AfterSchoolLibrary.Models
             return ID.HasValue ? Load(ID.Value, msgs, dc) : null;
         }
 
-        public static List<BackgroundCheck> LoadByWebUserId(int webUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<BackgroundCheck> LoadByWebUserId(int webUserId, bool getAll, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserId);
-            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            
+            if(!getAll)
+                dq.Criterias.Add(ObjectMap["IsActive"], true);
+            
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         

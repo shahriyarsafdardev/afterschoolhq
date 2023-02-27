@@ -99,6 +99,9 @@ namespace AfterSchool.Areas.District.Controllers
             
             var backgroundViewModel = new List<BackgroundViewModel>();
             var msgs = new SystemMessages();
+            
+            HandleTempMessages(msgs);
+            
             var currentAccount = SessionVariables.CurrentAccount;
             var count = Registrant.GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search, msgs);
             var registeredVolunteerRegistrants = Registrant.LoadABackgroundMasterRegistrantsByAccountHostAndPersonType(currentAccount.ID.Value, RegistrantPersonType.Volunteer, search, start, length, msgs);
@@ -107,7 +110,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value).LastOrDefault();
+                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, false).LastOrDefault();
                     
                     if(backgroundCheck.IsNotEmpty())
                         backgroundViewModel.Add(BackgroundAssembler.BackgroundAssemblerResult(registrant, backgroundCheck));
@@ -339,12 +342,12 @@ namespace AfterSchool.Areas.District.Controllers
                 msgs,
                 null);
 
-            if (msgs.HasErrors())
+            if (msgs.HasNoErrors())
             {
                 msgs.Add("Email will be sent shortly",MessageType.Success);
             }
             
-            HandleTempMessages(msgs);
+            SetTempMessages(msgs);
             
             return RedirectToAction("Index" , new {search,type});
         }
@@ -370,7 +373,7 @@ namespace AfterSchool.Areas.District.Controllers
             if (registration.IsEmpty())
                 return;
 
-            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, msgs).LastOrDefault();
+            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, false, msgs).LastOrDefault();
 
             var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId(registrant.WebUserId.Value, msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
