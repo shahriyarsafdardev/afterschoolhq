@@ -331,6 +331,37 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
                 
+                if(participationObject.IsFree)
+                {
+                    var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
+                    var datesToRemove = new List<DateTime>();
+
+                    selectedDates?.ForEach(date =>
+                    {
+                        if (currentRegistrant.IsReservedForDate(participationObject, date, null))
+                            datesToRemove.Add(date);
+                    });
+
+                    datesToRemove.ForEach(date => selectedDates.Remove(date));
+
+                    if (msgs.HasNoErrors())
+                        AccountService.ProcessRegistrationWithoutPayment(
+                            new CheckoutObject
+                            {
+                                BillingAccount = participationObject.OwnerAccount,
+                                PayingAccount = currentAccount,
+                                NumberOfSeats = 1,
+                                ParticipationObject = participationObject,
+                                Registration = registration,
+                                MasterRegistrant = currentRegistrant,
+                                SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                                SelectedDates = selectedDates,
+                            },
+                            true,
+                            SessionVariables.CurrentUser,
+                            msgs);
+                }
+                
                 return Json(
                     new ApiResponse(msgs,registration.ID),
                     JsonRequestBehavior.AllowGet);
