@@ -172,6 +172,44 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 
+                qvms.ForEach(qvm =>
+                {
+                    if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+
+                    switch (qvm.Question.QuestionDataTypeId)
+                    {
+                        case QuestionDataType.RegistrantMobilePhone:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                        case QuestionDataType.RegistrantEmail:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                            break;
+                        case QuestionDataType.Parent1Email:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                            break;
+                        case QuestionDataType.Parent1Phone1:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                        case QuestionDataType.Parent1WorkPhone:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                        case QuestionDataType.Parent2Email:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                            break;
+                        case QuestionDataType.Parent2WorkPhone:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                    }
+                });
+                
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName).Value;
