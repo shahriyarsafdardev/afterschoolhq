@@ -1,7 +1,9 @@
 import React from 'react';
 import { useRoutes } from 'react-router-dom';
-import { ThemeProvider } from '@material-ui/core/styles';
+import { SnackbarProvider } from 'notistack';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { ThemeProvider } from '@material-ui/core/styles';
+
 import Home from './pages/registration/Home';
 import theme from './theme/theme';
 
@@ -22,7 +24,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router />
+      <SnackbarProvider maxSnack={3}>
+        <Router />
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

@@ -7,12 +7,13 @@ import schoolField from 'constants/schoolField';
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
   initialState: {
-    questions: [],
-    questionsGroups: [],
-    answeredQuestions: [],
+    msgs: [],
     activity: {},
+    questions: [],
     loading: true,
-    registrationId: null
+    questionsGroups: [],
+    registrationId: null,
+    answeredQuestions: []
   },
   reducers: {
     loadingFormData: state => {
@@ -25,57 +26,70 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload }) => {
-      const eSignatureSection = ConfirmRegistrationSection();
-      state.questions = [
-        ...payload.FormDto.formQuestion,
-        ...eSignatureSection.questions,
-        schoolField
-      ];
-      state.questionsGroups = [
-        ...payload.FormDto.formQuestionGroup,
-        ...eSignatureSection.questionsGroups
-      ];
-      state.answeredQuestions = payload.FormDto.formQuestionAnswer;
-      state.activity = payload.activityDto;
+      if (!payload) return;
+      const { questions, questionsGroups } = ConfirmRegistrationSection();
+      const { FormDto, activityDto } = payload;
+      const { formQuestion, formQuestionGroup, formQuestionAnswer } = FormDto;
+
+      state.questions = [...formQuestion, ...questions, schoolField];
+      state.questionsGroups = [...formQuestionGroup, ...questionsGroups];
+      state.answeredQuestions = formQuestionAnswer;
+      state.activity = activityDto;
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
+    },
+    setMsgs: (state, { payload }) => {
+      state.msgs = payload;
     }
   }
 });
 
 export const useRegistrationActions = () => {
-  const { actions } = RegistrationSlice;
+  const {
+    formDataLoaded,
+    loadingFormData,
+    setFormData,
+    setMsgs,
+    setRegistrationId,
+    submitFormSection
+  } = RegistrationSlice.actions;
   const dispatch = useDispatch();
 
   const loadFormData = async () => {
-    dispatch(actions.loadingFormData());
-    const formData = await RegistrationRepository.getFormData();
-    dispatch(actions.setFormData(formData.obj));
-    dispatch(actions.formDataLoaded());
+    dispatch(loadingFormData());
+    const { obj, msgs } = await RegistrationRepository.getFormData();
+
+    dispatch(setFormData(obj));
+    dispatch(setMsgs(msgs));
+    dispatch(formDataLoaded());
   };
 
-  const submitFormSection = async (formSectionSubmitObject, lastSection) => {
+  const submitFormSectionData = async (formSectionSubmitObject, lastSection) => {
     const { answers, answerQuery } = formSectionSubmitObject;
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = { answers: new URLSearchParams(answersQuery).toString(), groupId };
 
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
-      dispatch(actions.loadingFormData());
-      RegistrationRepository.register({ ...params, eSignature }).then(res => {
-        dispatch(actions.setRegistrationId(res.data.obj));
-        dispatch(actions.formDataLoaded());
+      dispatch(loadingFormData());
+      RegistrationRepository.register({ ...params, eSignature }).then(({ data: { obj, msgs } }) => {
+        dispatch(setRegistrationId(obj));
+        dispatch(setMsgs(msgs));
+        dispatch(formDataLoaded());
       });
-    } else await RegistrationRepository.submitFormSection(params);
+    } else
+      await RegistrationRepository.submitFormSection(params).then(({ data: { msgs } }) =>
+        dispatch(setMsgs(msgs))
+      );
 
-    dispatch(actions.submitFormSection(answers));
+    dispatch(submitFormSection(answers));
   };
 
-  return { loadFormData, submitFormSection };
+  return { loadFormData, submitFormSectionData };
 };
 
 export default RegistrationSlice;
