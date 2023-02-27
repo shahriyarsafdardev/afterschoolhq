@@ -110,7 +110,7 @@ namespace AfterSchool.Areas.District.Controllers
             {
                 foreach (var registrant in registeredVolunteerRegistrants)
                 {
-                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, false).LastOrDefault();
+                    var backgroundCheck = Model.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, true).LastOrDefault();
                     
                     if(backgroundCheck.IsNotEmpty())
                         backgroundViewModel.Add(BackgroundAssembler.BackgroundAssemblerResult(registrant, backgroundCheck));
@@ -373,7 +373,7 @@ namespace AfterSchool.Areas.District.Controllers
             if (registration.IsEmpty())
                 return;
 
-            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, false, msgs).LastOrDefault();
+            var backgroundCheck = AfterSchoolLibrary.Models.BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, true, msgs).LastOrDefault();
 
             var volunteerApprovalStatus = VolunteerApproval.LoadByWebUserId(registrant.WebUserId.Value, msgs).FirstOrDefault()?.ApprovalStatusId;
             ViewBag.Registrant = registrant;
