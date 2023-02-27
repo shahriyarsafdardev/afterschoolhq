@@ -2,7 +2,7 @@ import Validations from 'constants/regex';
 import questionType from 'constants/questionType';
 
 export default class RegistrationService {
-  constructor(questions = [], answeredQuestions = [], currentQuestions = []) {
+  constructor(questions = [], currentQuestions = [], answeredQuestions = []) {
     this.questions = questions;
     this.answeredQuestions = answeredQuestions;
     this.currentQuestions = currentQuestions;

@@ -8,7 +8,7 @@ axios.interceptors.response.use(
   response => {
     const { msgs } = response.data;
     if (msgs?.length && msgs[0].IsError) {
-      if (msgs[0].Text === 'Unauthorized') {
+      if (msgs.find(msg => msg.Text === 'Unauthorized')) {
         alert(msgs[0].Text); // TODO: For testing purpose/phase
         navigateTo('/login');
       }

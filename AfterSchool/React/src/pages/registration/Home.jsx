@@ -1,9 +1,10 @@
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
-import { TextField, ProgressBar, NavBar, Loader, CheckBox, ApiTextField } from 'components';
+import { NavBar, Loader, CheckBox, TextField, ProgressBar, ApiTextField } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useRegistration } from 'redux/hooks/index';
 import questionType from 'constants/questionType';
@@ -12,42 +13,44 @@ import useStyles from './styles';
 import utils from 'utils';
 import {
   DateQuestion,
-  DropdownQuestion,
   RadioQuestion,
-  TextAreaQuestion
+  TextAreaQuestion,
+  DropdownQuestion
 } from 'components/Questions';
 
 export default function Home() {
   const classes = useStyles();
   const { loadUser } = useUser();
+  const { scrollToTop, redirect } = utils;
+  const { enqueueSnackbar } = useSnackbar();
+  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
   const {
+    msgs,
     loading,
     questions,
+    loadFormData,
+    registrationId,
     questionsGroups,
     answeredQuestions,
-    loadFormData,
-    submitFormSection,
-    registrationId,
+    submitFormSectionData,
     activity: { IsFree, RegistrantType }
   } = useRegistration();
-  const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
 
+  const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
-  const totalGroups = questionsGroups?.length || 1;
   const registrationService = new RegistrationService(
     questions,
-    answeredQuestions,
-    currentQuestions
+    currentQuestions,
+    answeredQuestions
   );
   const {
-    initialValues,
     validator,
-    formSectionSubmitObject,
+    initialValues,
+    saveButtonText,
     groupedQuestions,
-    saveButtonText
+    formSectionSubmitObject
   } = registrationService;
 
   const handleSection = action => {
@@ -61,6 +64,10 @@ export default function Home() {
   };
 
   useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
+
+  useEffect(() => {
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
@@ -69,13 +76,13 @@ export default function Home() {
 
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
-      await submitFormSection(formSectionSubmitObject(values, activeGroupId), lastSection);
+      await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), lastSection);
+      enqueueSnackbar('Submitted.', { variant: 'success' });
       if (!lastSection) handleSection('next');
       resetForm();
     }
@@ -130,7 +137,7 @@ export default function Home() {
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
         <Box className={classes.home}>
-          {loading ? (
+          {loading || msgs.length ? (
             <Loader />
           ) : (
             <>
