@@ -1072,9 +1072,12 @@ namespace AfterSchoolLibrary.Models
                     from accountrelationship
                     where hostaccountid = {Id}
                 ) and
-                submittedReg.PersonTypeId = {persontTypeId} and
-                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
-                and bg.IsActive = 1
+                submittedReg.PersonTypeId = {persontTypeId}";
+            
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+            
+            sql += @$"and bg.IsActive = 1
                 order by masterReg.webuserid
                 offset {start} rows
                 fetch next {length} rows only";
@@ -1097,9 +1100,12 @@ namespace AfterSchoolLibrary.Models
                     from accountrelationship
                     where hostaccountid = {Id}
                 ) and
-                submittedReg.PersonTypeId = {persontTypeId} and
-                (submittedReg.FirstName like '%{search}%' or submittedReg.lastName like '%{search}%')
-                and bg.IsActive = 1";
+                submittedReg.PersonTypeId = {persontTypeId}";
+            
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+            
+            sql += @$"and bg.IsActive = 1";;
 
             return sql;
         }

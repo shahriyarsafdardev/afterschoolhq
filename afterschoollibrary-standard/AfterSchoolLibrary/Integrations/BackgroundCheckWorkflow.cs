@@ -89,7 +89,7 @@ namespace AfterSchoolLibrary.Integrations
                     foreach (var volunteerApproval in volunteerApprovals)
                     {
                         var webUser = WebUser.Load(volunteerApproval.WebUserId.Value, msgs);
-                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, true, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, null, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
                         var token = await tokenQuery.GetAsync(credentials);
 
