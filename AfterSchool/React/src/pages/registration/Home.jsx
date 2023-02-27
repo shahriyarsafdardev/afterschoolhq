@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
@@ -38,6 +38,7 @@ export default function Home() {
 
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
+  const [saveDisabled, setSaveDisabled] = useState(false);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const registrationService = new RegistrationService(
@@ -81,6 +82,7 @@ export default function Home() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
+      setSaveDisabled(true);
       await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), lastSection);
       enqueueSnackbar('Submitted.', { variant: 'success' });
       if (!lastSection) handleSection('next');
@@ -101,6 +103,7 @@ export default function Home() {
   }, [questionsGroups.length]);
 
   useEffect(() => {
+    setSaveDisabled(false);
     if (questions)
       setCurrentQuestions(groupedQuestions(questionsGroups[activeGroup]?.QuestionGroupDataTypeId));
     scrollToTop();
@@ -137,7 +140,7 @@ export default function Home() {
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
         <Box className={classes.home}>
-          {loading || msgs.length ? (
+          {loading ? (
             <Loader />
           ) : (
             <>
@@ -184,8 +187,15 @@ export default function Home() {
                           className={classes.saveButton}
                           variant="contained"
                           type="submit"
+                          disabled={saveDisabled}
                         >
-                          {saveButtonText(lastSection, RegistrantType, IsFree)}
+                          {saveDisabled ? (
+                            <>
+                              {'Loading . . .'} <CircularProgress size={'20px'} />
+                            </>
+                          ) : (
+                            saveButtonText(lastSection, RegistrantType, IsFree)
+                          )}
                         </Button>
                       </Box>
                     </Box>

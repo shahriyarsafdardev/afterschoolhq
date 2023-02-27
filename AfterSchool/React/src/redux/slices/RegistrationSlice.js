@@ -25,13 +25,11 @@ const RegistrationSlice = createSlice({
     formDataLoadingFailed: state => {
       state.loading = false;
     },
-    setFormData: (state, { payload }) => {
-      if (!payload) return;
+    setFormData: (state, { payload: { FormDto, activityDto } }) => {
       const { questions, questionsGroups } = ConfirmRegistrationSection();
-      const { FormDto, activityDto } = payload;
       const { formQuestion, formQuestionGroup, formQuestionAnswer } = FormDto;
 
-      state.questions = [...formQuestion, ...questions, schoolField];
+      state.questions = [...formQuestion, ...questions, schoolField(activityDto.RegistrantType)];
       state.questionsGroups = [...formQuestionGroup, ...questionsGroups];
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -62,14 +60,12 @@ export const useRegistrationActions = () => {
   const loadFormData = async () => {
     dispatch(loadingFormData());
     const { obj, msgs } = await RegistrationRepository.getFormData();
-
-    dispatch(setFormData(obj));
+    if (obj) dispatch(setFormData(obj));
     dispatch(setMsgs(msgs));
     dispatch(formDataLoaded());
   };
 
-  const submitFormSectionData = async (formSectionSubmitObject, lastSection) => {
-    const { answers, answerQuery } = formSectionSubmitObject;
+  const submitFormSectionData = async ({ answers, answerQuery }, lastSection) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = { answers: new URLSearchParams(answersQuery).toString(), groupId };
 
