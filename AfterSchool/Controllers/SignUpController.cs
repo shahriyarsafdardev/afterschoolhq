@@ -299,6 +299,11 @@ namespace AfterSchool.Controllers
                         }
                         else
                         {
+                            var trialDaysOverride = new int?();
+
+                            if (invitingAccount.InviteCodeToShare.ToString() == ConfigurationManager.AppSettings["ISYPInviteCodeToShare"])
+                                trialDaysOverride = ($"{DateTime.UtcNow.Year}/08/01".ToDateTime() - DateTime.UtcNow.Date).Days;
+
                             if (model.PackageUid.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
                             {
                                 var package = Package.LoadByUid(model.PackageUid.ToGuid(), amsgs, adc);
@@ -322,6 +327,7 @@ namespace AfterSchool.Controllers
                                     phone: model.Phone,
                                     accountType: model.OrgType.HasValue ? model.OrgType.Value : AccountType.NotSet,
                                     signUpTypeId: model.SignupType,
+                                    trialDaysOverride: trialDaysOverride,
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc: adc);

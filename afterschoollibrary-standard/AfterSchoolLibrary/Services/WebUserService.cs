@@ -871,7 +871,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
-            SignUpType signUpTypeId,
+            SignUpType signUpTypeId,int? trialDaysOverride,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
@@ -880,7 +880,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+                account.SetDefaultAccountPackage(trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;
@@ -888,7 +888,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
             Package package,
-            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, int? trialDaysOverride, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
@@ -896,7 +896,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, loggedInUser, msgs, dc);
+                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;

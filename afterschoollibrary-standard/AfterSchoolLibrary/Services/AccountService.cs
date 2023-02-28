@@ -2430,12 +2430,19 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
+
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return account.SetDefaultAccountPackage(null, loggedInUser, msgs, dc);
+        }
+
+        public static AccountPackage SetDefaultAccountPackage(this Account account, int? trialDaysOverride, WebUser loggedInUser,
+        SystemMessages msgs, DatabaseConnection dc = null)
+        {
             var package = PackageService.GetDefaultCustomerPackage(msgs);
 
-            return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
+            return account.AddPackage(package.ID.Value, BillingPeriodType.Month, trialDaysOverride, loggedInUser, msgs, dc);
         }
 
         public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null,
@@ -2602,7 +2609,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static AccountPackage AddFirstPackage(this Account account, int packageId,
-            BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs,
+            BillingPeriodType billingPeriodType, SignUpType signUpType, int? trialDaysOverride, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             Package package = null;
@@ -2615,6 +2622,9 @@ namespace AfterSchoolLibrary.Services
                 {
                     package = Package.Load(packageId, amsgs, adc);
                     var trialDayCount = package.GetFeature(FeatureType.TrialDays, amsgs, adc).GetMaxValue().ToInteger();
+
+                    if (trialDaysOverride.HasValue)
+                        trialDayCount = trialDaysOverride.Value;
 
                     var priceId = billingPeriodType == BillingPeriodType.Month
                         ? package.StripePricePerMonthId
@@ -2668,6 +2678,13 @@ namespace AfterSchoolLibrary.Services
 
         public static AccountPackage AddPackage(this Account account, int packageId,
             BillingPeriodType billingPeriodType, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return account.AddPackage(packageId, billingPeriodType, null, loggedInUser, msgs, dc);
+        }
+
+        public static AccountPackage AddPackage(this Account account, int packageId,
+            BillingPeriodType billingPeriodType, int? trialDayOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2742,6 +2759,9 @@ namespace AfterSchoolLibrary.Services
                                     if (subscription.IsNotEmpty() && subscription.Status == "active")
                                         newap.StripeSubscriptionId = subscription.Id;
                                 }
+
+                                if (trialDayOverride.HasValue)
+                                    trialDayCount = trialDayOverride.Value;
 
                                 // set trial end date if there are still trial days
                                 if (trialDayCount > 0)
@@ -3128,18 +3148,14 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static bool CheckIfIsypAccount(Account account, SystemMessages msgs)
+        public static bool CheckIfIsypAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (account.ID == null)
-            {
                 return false;
-            }
 
-            var accountRelationships = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs);
+            var accountRelationships = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs, dc);
             if (!accountRelationships.IsNotEmpty() || accountRelationships.Count == 0)
-            {
                 return false;
-            }
 
             return accountRelationships
                 .Where(ar => ar.HostAccountId != null)

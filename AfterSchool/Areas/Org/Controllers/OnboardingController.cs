@@ -578,7 +578,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             HandleTempMessages(msgs);
 
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
+            ViewBag.IsIsypAccount = currentAccount.CheckIfIsypAccount(msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
