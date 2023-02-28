@@ -176,8 +176,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 qvms.ForEach(qvm =>
                 {
-                    if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
-                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+                    // if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    //     msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
 
                     switch (qvm.Question.QuestionDataTypeId)
                     {
@@ -197,7 +197,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                                 msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                             break;
-                        case QuestionDataType.Parent1WorkPhone:
+                        case QuestionDataType.Parent1MobilePhone:
                             if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                                 msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                             break;
@@ -205,7 +205,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                                 msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
                             break;
-                        case QuestionDataType.Parent2WorkPhone:
+                        case QuestionDataType.Parent2MobilePhone:
                             if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                                 msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                             break;
