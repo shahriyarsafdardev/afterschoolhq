@@ -88,6 +88,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                              Options = question.Options,
                              IsRequired = question.IsRequired,
                              DispalayOrder = question.DisplayOrder,
+                             IsActive = question.IsActive,
+                             IsDeleted = question.IsDeleted,
                              QuestionTypeId = question.QuestionTypeId,
                              QuestionDataTypeId = question.QuestionDataTypeId,
                              FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
@@ -470,6 +472,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string Options { get; set; }
             public bool IsRequired { get; set; }
             public int? DispalayOrder { get; set; }
+            public bool IsActive { get; set; }
+            public bool IsDeleted { get; set; }
             public QuestionType QuestionTypeId { get; set; }
             public QuestionDataType QuestionDataTypeId { get; set; }
             public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
