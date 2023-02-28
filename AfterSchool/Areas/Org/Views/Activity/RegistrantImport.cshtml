@@ -71,11 +71,12 @@
                                                 case RegistrationAssignmentType.ReservedPendingBackgroundCheck:
                                                 case RegistrationAssignmentType.Declined:
                                                 case RegistrationAssignmentType.Invited:
+                                                case RegistrationAssignmentType.ReservedPendingParentalConsent:
                                                     continue;
 
                                             }
 
-                                            if (!(Model.ActivityTypeId == ActivityType.VolunteerOpportunity && assignmenttype == RegistrationAssignmentType.ReservedPendingParentalConsent))
+                                            if (Model.ActivityTypeId != ActivityType.VolunteerOpportunity)
                                             {
                                                 <option value="@((int)assignmenttype)" @(selectedAssignmentType == assignmenttype ? "selected=\"selected\"" : "")>
                                                     @assignmenttype.ToString().SplitByUpperCase()

@@ -3509,7 +3509,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
                     //volunteer 
                     if(participationObject.ActivityType == ActivityType.VolunteerOpportunity)
-                        DoRowValidationVolunteerReport(questions, headers, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
+                        DoRowValidationVolunteerImport(questions, headers, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
                     else
                         DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
                     
@@ -3664,7 +3664,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        private void DoRowValidationVolunteerReport(List<FormQuestion> questions, List<string> headers,
+        private void DoRowValidationVolunteerImport(List<FormQuestion> questions, List<string> headers,
             List<List<string>> rows, List<List<ImportField>> validatedRows, bool ignoreRequiredFields, bool validatePhoneNumbers,
             ParticipationObject participationObject, SystemMessages msgs)
         {
@@ -3731,9 +3731,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (field.IsNotBlank() && question.IsPhoneDataType() && !field.IsPhone())
                                 validatedField.Messages.Add("Phone must be a valid phone number", validatePhoneNumbers ? MessageType.UserError : MessageType.Warning);
-
-                            /*if (createParentAccounts && i == parentPhoneIndex && field.IsNotBlank() && WebUser.ExistsByPhone(field, msgs))
-                                validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);*/
 
                             if ((volunteerFirstNameIndex == i || volunteerLastNameIndex == i) && possibleDuplicate)
                                 validatedField.Messages.Add("Another volunteer with this name is already registered for this activity", MessageType.Warning);
