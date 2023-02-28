@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -579,7 +579,7 @@ namespace AfterSchool.Controllers
             
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
-            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
+            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, true, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
@@ -626,15 +626,16 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, msgs);
+                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, participationObject, msgs);
             }
 
             return msgs;
         }
         
-        private void SendLinkToVolunteer(string link, WebUser webUser, SystemMessages msgs)
+        private void SendLinkToVolunteer(string link, WebUser webUser, ParticipationObject participationObject, SystemMessages msgs)
         {
-            EmailHelper.InitiateBackgroundCheckMail(webUser, link, msgs);
+            //Add Model
+            EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, link, msgs);
         }
         
     }

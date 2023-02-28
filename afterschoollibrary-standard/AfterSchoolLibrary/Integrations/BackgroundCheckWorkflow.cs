@@ -89,13 +89,13 @@ namespace AfterSchoolLibrary.Integrations
                     foreach (var volunteerApproval in volunteerApprovals)
                     {
                         var webUser = WebUser.Load(volunteerApproval.WebUserId.Value, msgs);
-                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, msgs).FirstOrDefault();
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, null, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
                         var token = await tokenQuery.GetAsync(credentials);
 
                         var candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
 
-                        if (candidateId.IsNotEmpty())
+                        if (candidateId.IsNotEmpty() && backgroundCheck.IsActive)
                         {
 
                             var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
