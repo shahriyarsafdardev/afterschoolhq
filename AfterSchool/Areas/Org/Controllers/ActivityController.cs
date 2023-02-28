@@ -3748,10 +3748,10 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
                                 validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
                             
-                            if (field.In(volunteerEmails))
+                            if (field.In(volunteerEmails, StringComparer.OrdinalIgnoreCase))
                                 validatedField.Messages.Add("This email is a duplicate of another volunteer email in this import.", MessageType.Warning);
                             
-                            if (!volunteerEmails.Contains(field))
+                            if (!volunteerEmails.Contains(field, StringComparer.OrdinalIgnoreCase))
                                 volunteerEmails.Add(field);
 
                             break;
@@ -3885,12 +3885,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                 /*if (WebUser.ExistsByEmail(field, msgs))
                                     validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);*/
 
-                                if (field.In(parent1Emails))
-                                    validatedField.Messages.Add(
-                                        "This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account",
-                                        MessageType.Warning);
+                                if (field.In(parent1Emails, StringComparer.OrdinalIgnoreCase))
+                                    validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
 
-                                if (!parent1Emails.Contains(field))
+                                if (!parent1Emails.Contains(field, StringComparer.OrdinalIgnoreCase))
                                     parent1Emails.Add(field);
                             }
 
@@ -4321,7 +4319,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var createNewStudentRecord = true;
 
             // if parent account wasn't created during this import
-            if (!parent1Emails.Contains(parentEmail))
+            if (!parent1Emails.Contains(parentEmail, StringComparer.OrdinalIgnoreCase))
             {
                 parentUser = WebUser.LoadByEmail(parentEmail, amsgs, adc);
 
@@ -4389,7 +4387,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (amsgs.HasNoErrors())
                         parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, enableTextMessaging, amsgs, adc);
 
-                    if (!parent1Emails.Contains(parentEmail))
+                    if (!parent1Emails.Contains(parentEmail, StringComparer.OrdinalIgnoreCase))
                         parent1Emails.Add(parentEmail);
                 }
             }

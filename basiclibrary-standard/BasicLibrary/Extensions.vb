@@ -41,6 +41,16 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function [In](ByVal aObject As String, ByVal list As IEnumerable(Of String), Optional ByVal comparer As StringComparer = Nothing) As Boolean
+
+        If comparer.IsEmpty Then
+            comparer = StringComparer.CurrentCultureIgnoreCase
+        End If
+
+        Return list.Contains(aObject, comparer)
+    End Function
+
+    <Extension>
     Public Function [In](Of T)(ByVal aObject As T, ByVal list As IEnumerable(Of T)) As Boolean
         Return list.Contains(aObject)
     End Function
