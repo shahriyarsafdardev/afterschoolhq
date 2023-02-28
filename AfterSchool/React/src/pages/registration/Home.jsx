@@ -1,6 +1,7 @@
 import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
@@ -38,8 +39,9 @@ export default function Home() {
 
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
-  const [saveDisabled, setSaveDisabled] = useState(false);
   const [activeGroupId, setActiveGroupId] = useState(0);
+  const [saveDisabled, setSaveDisabled] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const registrationService = new RegistrationService(
     questions,
@@ -57,9 +59,11 @@ export default function Home() {
   const handleSection = action => {
     if (action === 'next') {
       setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
+      setSearchParams(`section=${questionsGroups[activeGroup + 1].Name}`);
       setActiveGroup(activeGroup + 1);
     } else if (action === 'previous') {
       setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
+      setSearchParams(`section=${questionsGroups[activeGroup - 1].Name}`);
       setActiveGroup(activeGroup - 1);
     }
   };
@@ -103,8 +107,23 @@ export default function Home() {
   }, [questionsGroups.length]);
 
   useEffect(() => {
+    if (questions.length) {
+      let QuestionGroupDataTypeId = '';
+      if (searchParams.get('section')) {
+        const groupIndex = questionsGroups.findIndex(
+          section => section.Name === searchParams.get('section')
+        );
+        if (groupIndex < 0) return setSearchParams(`section=${questionsGroups[activeGroup].Name}`);
+        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
+        setActiveGroupId(QuestionGroupDataTypeId);
+        setActiveGroup(groupIndex);
+      } else setSearchParams(`section=${questionsGroups[activeGroup].Name}`);
+    }
+  }, [questions.length, searchParams.get('section')]);
+
+  useEffect(() => {
     setSaveDisabled(false);
-    if (questions)
+    if (questions.length)
       setCurrentQuestions(groupedQuestions(questionsGroups[activeGroup]?.QuestionGroupDataTypeId));
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);

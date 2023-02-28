@@ -1,8 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import RegistrationRepository from 'repository/RegistrationRepository';
-import ConfirmRegistrationSection from 'constants/eSignatureSection';
+import { responseMapper } from './helper';
+import { createSlice } from '@reduxjs/toolkit';
 import schoolField from 'constants/schoolField';
+import ConfirmRegistrationSection from 'constants/eSignatureSection';
+import RegistrationRepository from 'repository/RegistrationRepository';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
@@ -27,10 +28,16 @@ const RegistrationSlice = createSlice({
     },
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
       const { questions, questionsGroups } = ConfirmRegistrationSection();
-      const { formQuestion, formQuestionGroup, formQuestionAnswer } = FormDto;
+      const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
+        FormDto
+      );
 
-      state.questions = [...formQuestion, ...questions, schoolField(activityDto.RegistrantType)];
-      state.questionsGroups = [...formQuestionGroup, ...questionsGroups];
+      state.questions = [
+        ...questions,
+        ...formQuestionUpdated,
+        schoolField(activityDto.RegistrantType)
+      ];
+      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
