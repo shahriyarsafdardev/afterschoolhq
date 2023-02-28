@@ -350,7 +350,7 @@
                                 Manual
                             </button>*@
                             <button onclick="manualRefund('@transaction.Uid'); showModal('modal-process-refund'); requestRefund('@transaction.Uid',
-                             @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
+                             @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"), @((int)transaction.PaymentSourceTypeId))"
                                     class="md-trigger btn btn-sm btn-default">
                                     Refund
                             </button>
@@ -463,7 +463,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" onclick="showModal('modal-manual-refund')" data-dismiss="modal" class="btn btn-default md-close">Record Manual Refund</button>
-            <button type="button" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
+            <button type="button" id="btn-stripe-payment" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
         </div>
     </div>
 </div>
@@ -630,7 +630,7 @@
 
     }
 
-    function refundTransaction(transactionUid,amount,uid) {
+function refundTransaction(transactionUid,amount,uid) {
         let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?amount='+amount+'&request=' + uid;
         $.get(
             url,
