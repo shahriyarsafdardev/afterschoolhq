@@ -196,8 +196,11 @@
   <data name="Refund_Denied" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\refund-denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Refund_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>emailtemplates\refund-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Refund_Parent_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\refund-parent-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Refund_Provider_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+      <value>emailtemplates\refund-provider-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Refund_Requested" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\refund-requested.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

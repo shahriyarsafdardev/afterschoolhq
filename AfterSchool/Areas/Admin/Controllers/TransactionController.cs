@@ -12,7 +12,7 @@ namespace AfterSchool.Areas.Admin.Controllers
     public class TransactionController : BaseLoggedInController
     {
         // This needs refactoring.. 
-        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool, AccountType.School})
+        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool })
         {
 
         }

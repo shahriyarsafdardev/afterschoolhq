@@ -521,6 +521,54 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
+        
+        [HttpGet]
+        public ActionResult Refund(string id, string request)
+        {
+            var msgs = new SystemMessages();
+            if (id.IsGuid())
+            {
+                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+                PaymentSourceType? paymentsource = transaction.PaymentSourceTypeId;
+                Transaction refund = new Transaction();
+                
+                if (request.IsNotEmpty())
+                {
+                    if (request.IsGuid())
+                    {
+                        var refundRequest = RefundRequest.LoadByUid(request.ToGuid(), msgs);
+                        
+                        if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
+                            refund = refundRequest.ApproveAndProcessRequest(
+                                true, 
+                                false, 
+                                false,
+                                paymentsource.Value,
+                                SessionVariables.CurrentUser, 
+                                msgs);
+                    }
+                    else
+                        msgs.Add("Invalid Request", MessageType.UserError);
+                }
+                else
+                {
+                    if (transaction.IsNotEmpty() && !transaction.HasRefunds())
+                        refund = transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
+                    else
+                        msgs.Add("Invalid Request", MessageType.UserError);
+                }
+
+                if (msgs.HasNoErrors())
+                {
+                    SessionVariables.WebSession.LogRefundCompleted(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Refunded, refund.Amount.ToCurrency(), transaction, msgs);
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+                }
+                    
+            }
+
+
+            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+        }
 
         #endregion
 

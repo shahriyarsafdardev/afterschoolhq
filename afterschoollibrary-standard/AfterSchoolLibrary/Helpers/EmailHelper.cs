@@ -1875,33 +1875,41 @@ namespace AfterSchoolLibrary.Helpers
         public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var requester = request.GetCreator(msgs, dc);
+            var parentFirstName = refund.GetBillerAccount(msgs).GetAccountOwner(msgs);
+            var providerFirstName = refund.GetPayerAccount(msgs).GetAccountOwner(msgs);
+            var activityName = refund.Description.Substring(0, refund.Description.LastIndexOf(' ')).TrimEnd();
 
             var model = new NameValueCollection
             {
-                {"FirstName", requester.FirstName},
-                {"ProductName", Utilities.AppName()},
+                {"ParentName", parentFirstName.FirstName},
+                {"ProviderName", providerFirstName.FirstName},
                 {"RefundAmount", refund.Amount.ToCurrency()},
-                {"SupportEmail", Email.AppSupportEmailAddress},
+                {"ActivityName", activityName},
             };
+            
+            SendRefundProcessedEmail(model, msgs, false, parentFirstName.Email); // To Parent
+            SendRefundProcessedEmail(model, msgs, true, providerFirstName.Email);  // To Provider
+        }
 
+        private static void SendRefundProcessedEmail(NameValueCollection model, SystemMessages msgs, bool isSendToProvider, string email)
+        {
             var body = ProcessTemplate(
-                EmailTemplates.Refund_Processed,
+                isSendToProvider ? EmailTemplates.Refund_Provider_Processed : EmailTemplates.Refund_Parent_Processed,
                 model,
                 "refund_processed-1.0.1",
                 msgs
             );
 
-            var subject = "Your refund request has been approved and processed";
+            var subject = "Refund Processed";
 
             var mailMsgs = SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
+                new EmailAddress(email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId());
 
-            Utilities.SystemErrorLog(mailMsgs);
+            Utilities.SystemErrorLog(mailMsgs);   
         }
 
         public static void SendRefundRequestDeniedByProvider(RefundRequest request, WebUser loggedInUser,

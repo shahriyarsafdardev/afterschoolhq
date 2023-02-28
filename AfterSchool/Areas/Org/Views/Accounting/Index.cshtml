@@ -350,7 +350,7 @@
                                 Manual
                             </button>*@
                             <button onclick="manualRefund('@transaction.Uid'); showModal('modal-process-refund'); requestRefund('@transaction.Uid',
-                             @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
+                             @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"), @((int)transaction.PaymentSourceTypeId))"
                                     class="md-trigger btn btn-sm btn-default">
                                     Refund
                             </button>
@@ -463,7 +463,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" onclick="showModal('modal-manual-refund')" data-dismiss="modal" class="btn btn-default md-close">Record Manual Refund</button>
-            <button type="button" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
+            <button type="button" id="btn-stripe-payment" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
         </div>
     </div>
 </div>
@@ -568,12 +568,14 @@
 
     }
 
-    function requestRefund(uid, maxAmount) {
+    function requestRefund(uid, maxAmount, paymentType) {
         $('#refund-request-transaction-uid').val(uid);
         $('#refund-request-max-amount').val(maxAmount);
         $('.refund-request-max-amount').html(maxAmount);
         $('#refund-request-amount').attr('max', maxAmount);
         $('#refund-request-amount').val(maxAmount);
+        let btnStripe = $('#btn-stripe-payment');
+        paymentType !== 1 ? btnStripe.prop('disabled',true) : btnStripe.prop('disabled',false); 
     }
 
     function canProcessRequest() {
@@ -626,11 +628,11 @@
     }
 
     function refundTransaction(transactionUid,uid) {
-        var url = '@Url.Action("refund", "transaction", new { Area = "Admin" })/' + transactionUid + '?request=' + uid + '&refundcc=0&refundcf=0';
+        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?request=' + uid;
         $.get(
             url,
             function (data) {
-                if (data && data.status == 'ok') {
+                if (data && data.status === 'ok') {
                     Notifications.showMessage('Success', 'Transaction has been refunded', true);
                     setTimeout(function () { location.reload() }, 500);
                 } else {

@@ -106,10 +106,10 @@
                                                 @:Pending
                                                 break;
                                             case RefundRequestStatus.ApprovedByAfterSchoolHQ:
-                                            case RefundRequestStatus.ApprovedManualRefund:
                                                 @:Approved
                                                 break;
                                             case RefundRequestStatus.Completed:
+                                            case RefundRequestStatus.ApprovedManualRefund:
                                                 @:Completed
                                                 break;
                                             case RefundRequestStatus.DeniedByAfterSchoolHQ:
@@ -121,7 +121,12 @@
                                     <td>
                                         @if (request.RefundRequestStatusId == RefundRequestStatus.RequestedByParent)
                                         {
-                                            <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-approve" onclick="approve('@request.Uid')" data-modal="modal-confirm-approve">
+                                            <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-approve" 
+                                                    onclick="approve('@transaction.Uid','@request.Uid'); manualRefund('@transaction.Uid'); 
+                                                    showModal('modal-process-refund'); 
+                                                    requestRefund('@transaction.Uid',
+                                                    @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"),
+                                                    @((int) transaction.PaymentSourceTypeId))">
                                                 Approve
                                             </button>
                                             <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-deny" onclick="deny('@request.Uid')" data-modal="modal-confirm-deny">
@@ -145,7 +150,7 @@
     </div>
 </div>
 
-<div id="modal-confirm-approve" class="md-modal colored-header custom-width md-effect-9">
+@*<div id="modal-confirm-approve" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
@@ -162,7 +167,84 @@
             <button type="button" class="btn btn-default" id="btn-approve-confirm-manual" onclick="confirmApproveManual()" title="Approve refund other than the way payment was made (AfterSchool HQ will NOT process the refund)">Approve Manual Refund &raquo;</button>
         </div>
     </div>
+</div>*@
+
+<div id="modal-process-refund" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Process Refund</h3>
+        </div>
+        <div class="modal-body form text-center">
+            <p>Refunds via Stripe will send the registrant's refund back to their original payment method.</p>
+            <br/>
+            <p>Manual refunds are handled outside of the AfterSchool HQ platform (i.e. cash, check, PayPal, Venmo, etc.).</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="showModal('modal-manual-refund')" data-dismiss="modal" class="btn btn-default md-close">Record Manual Refund</button>
+            <button type="button" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
+        </div>
+    </div>
 </div>
+
+<div id="modal-stripe-refund" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Submit Refund</h3>
+        </div>
+        <div class="modal-body form">
+            <p class="text-center">Refunds will send the registrant's refund back to their original payment method. You cannot refund more than their original 
+                payment amount.</p>
+            <br/>
+            <div class="form-group">
+                <input type="number" id="refund-request-amount" class="form-control" required="required" max="" min="1" step=".01"/>
+                <p class="text-muted text-small" id="stripe-refund-notes">Refund Amount<span class="stripe-refund-max-amount"></span></p>
+            </div>
+            <div class="form-group">
+                <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()"/>
+                <p class="text-muted text-small" id="stripe-refund-reason-notes">Refund Reason</p>
+            </div>
+            <input type="hidden" id="refund-request-transaction-uid" value=""/>
+            <input type="hidden" id="refund-request-max-amount" value=""/>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" class="btn btn-default" id="btn-approve-confirm" onclick="confirmApprove()">Submit Refund</button>
+        </div>
+    </div>
+</div>          
+
+<div id="modal-manual-refund" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Enter Manual Refund</h3>
+        </div>
+        <div class="modal-body form">
+            <p class="text-center">Manual refunds are handled outside of the AfterSchool HQ platform (i.e. cash, check, PayPal, Venmo, etc.).</p>      
+            <br/>
+            <div class="form-group">
+                <input type="number" id="manual-refund-amount" class="form-control" required="required" max="" min="1" step=".01"/>
+                <p class="text-muted text-small" id="manual-refund-notes">Refund Amount<span class="stripe-refund-max-amount"></span></p>
+            </div>
+            <input type="hidden" id="manual-refund-transaction-uid" value=""/>
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <button type="button" class="btn btn-default" id="btn-approve-confirm-manual" onclick="confirmApproveManual()">Record Manual Refund</button>
+        </div>
+    </div>
+</div>
+
 
 <div id="modal-confirm-deny" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
@@ -190,29 +272,36 @@
 
 <script>
 
-    let uid = '';
+    let uid,transactionUid = '';
 
-    function approve(request) {
+    function approve(trans_Uid,request) {
         uid = request;
+        transactionUid = trans_Uid;
     }
 
     function confirmApprove() {
-        $.get('@Url.Action("approverefundrequest", "accounting")?uid=' + uid, function (data) {
-
-            if (data && data.status == 'ok') {
-                Notifications.showMessage('Success', 'The refund request has been approved', true);
-                setTimeout(function () { location.reload() }, 500);
-            } else {
-                Notifications.showErrors(data.messages);
+        refundTransaction(transactionUid,uid);
+    }
+    
+    function refundTransaction(transactionUid,uid) {
+        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?request=' + uid;
+        $.get(
+            url,
+            function (data) {
+                if (data && data.status === 'ok') {
+                    Notifications.showMessage('Success', 'Transaction has been refunded', true);
+                    setTimeout(function () { location.reload() }, 500);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
             }
-
-        });
+        );
     }
 
     function confirmApproveManual() {
         $.get('@Url.Action("approvemanualrefundrequest", "accounting")?uid=' + uid, function (data) {
 
-            if (data && data.status == 'ok') {
+            if (data && data.status === 'ok') {
                 Notifications.showMessage('Success', 'The refund request has been approved', true);
                 setTimeout(function () { location.reload() }, 500);
             } else {
@@ -266,6 +355,30 @@
         $('#btn-deny-confirm').prop('disabled', false);
         $('#deny-reason-notes').removeClass('text-danger');
         return true;
+    }
+    
+    function manualRefund(uid) {
+        $('#manual-refund-transaction-uid').val(uid);
+    }
+    
+    function requestRefund(uid, maxAmount, paymentType) {
+        $('#refund-request-transaction-uid').val(uid);
+        $('#refund-request-max-amount').val(maxAmount);
+        $('.refund-request-max-amount').html(maxAmount);
+        $('#refund-request-amount').attr('max', maxAmount);
+        $('#refund-request-amount').val(maxAmount);
+        let btnStripe = $('#btn-stripe-payment');
+        paymentType !== 1 ? btnStripe.prop('disabled',true) : btnStripe.prop('disabled',false); 
+    }
+    
+    function enableRequestRefundButton() {
+        $('#btn-request-refund').prop('disabled', false);
+        $('#refund-request-reason-notes').removeClass('text-danger');
+    }
+        
+    function showModal(showModal)
+    {
+        $(showModal).modal('show');
     }
 
 </script>
