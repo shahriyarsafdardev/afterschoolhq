@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Models;
@@ -908,6 +909,9 @@ namespace AfterSchool.Controllers
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
 
+                if(account.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                    return RedirectToAction("getstartedAllAge", "account", new {area = "", regaccount = account.Uid});
+                
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
