@@ -28,7 +28,6 @@
             {"ParticipationObject", participationObject},
             {"isDuringProfileSetup", isDuringProfileSetup},
             {"CleverSsoEnabled", cleverSsoEnabled},
-            {"IsAccountScreen", true},
         });
 }
 
@@ -39,7 +38,6 @@
         new ViewDataDictionary
         {
             {"hidebuttons", true},
-            {"IsAccountScreen", true},
         });
 }
 
@@ -54,61 +52,61 @@
                 <div>
                     <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
-                            @if (showStep1)
-                            {
-                                <div class="row" id="email-check-container">
+                        @if (showStep1)
+                        {
+                            <div class="row" id="email-check-container">
 
-                                    <div>
-                                        <p class="text-center reg-login new-account">
-                                            Please enter your email to get started.
-                                        </p>
+                                <div>
+                                    <p class="text-center reg-login new-account">
+                                        Please enter your email to get started.
+                                    </p>
 
-                                    </div>
-
-                                    <div class="form-group">
-                                        <div class="col-md-3 control-label">
-                                            <label for="email-check">
-                                                Email <span class='text-danger'>*</span>
-                                            </label>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <input type="email"
-                                                   id="email-check"
-                                                   name="email-check"
-                                                   class="form-control"
-                                                   onfocus="this.select()"
-                                                   required="required"
-                                                   value=""
-                                                   data-test="register-email"/>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 col-md-offset-3">
-                                        <div class="padding-v-20">
-                                            <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="checkRegistrantEmail()">Next &raquo;</button>
-                                            <button type="button" id="btn-parent-signup" class="btn btn-register-primary btn-lg hidden" onclick="signupAsParent()">Sign Up as Parent</button>
-                                            <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
-                                        </div>
-                                    </div>
-                                    <div class="clearfix"></div>
-
-                                    <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
-                                        <div role="alert" class="alert alert-success alert-icon">
-                                            <div class="icon">
-                                                <span class="s7-check-circle"></span>
-                                            </div>
-                                            <div class="message">
-                                                <p class="text-center text-medium-small">
-                                                    We have sent you an email in order to complete your account and register.<br/>
-                                                    If you do not receive an email, check your spam box. If you still cannot find it, please contact us at <a href="@Email.AppSupportEmailAddress">@Email.AppSupportEmailAddress</a>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="clearfix"></div>
                                 </div>
-                            }
+
+                                <div class="form-group">
+                                    <div class="col-md-3 control-label">
+                                        <label for="email-check">
+                                            Email <span class='text-danger'>*</span>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="email"
+                                               id="email-check"
+                                               name="email-check"
+                                               class="form-control"
+                                               onfocus="this.select()"
+                                               required="required"
+                                               value=""
+                                               data-test="register-email"/>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="padding-v-20">
+                                        <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="checkRegistrantEmail()">Next &raquo;</button>
+                                        <button type="button" id="btn-parent-signup" class="btn btn-register-primary btn-lg hidden" onclick="signupAsParent()">Sign Up as Parent</button>
+                                        <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+
+                                <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center text-medium-small">
+                                                We have sent you an email in order to complete your account and register.<br/>
+                                                If you do not receive an email, check your spam box. If you still cannot find it, please contact us at <a href="@Email.AppSupportEmailAddress">@Email.AppSupportEmailAddress</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="clearfix"></div>
+                            </div>
+                        }
 
                         <div id="account-registration" class="@(showStep1 ? "hide" : "")">
 
@@ -173,35 +171,6 @@
                                         <input type="password" class="form-control" id="password2" name="password2"/>
                                     </div>
                                 </div>
-                                
-                                <div class="form-group new-account">
-                                    <label for="accountType" class="control-label col-md-3">
-                                        Account Type <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <div class="am-radio inline">
-                                            <input type="radio" id="parent" name="optionSelected" value="1"/>
-                                            <label for="parent">I am parent or gaurdian registering for my child</label>
-                                        </div>
-                                        <div class="am-radio">
-                                            <input type="radio" id="student" name="optionSelected" value="2"/>
-                                            <label for="student">I am registering myself(student or adult registrant)</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group new-account hidden" id="birthdate">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Birthdate <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                            <input type="text" class="form-control" name="birthdate" onfocus="this.select()" data-type="date" />
-                                        </div>
-                                    </div>
-                                </div>
-                                
                                 if (Utilities.IsProduction)
                                 {
                                     <div class="row padding-v-20">
@@ -263,17 +232,6 @@
             $('#btn-create-account').html('Saving...');
             $('#btn-create-account').prop('disabled', true);
         });
-        
-        $("input[type='radio']").click(function(){
-            var radioValue = $("input[name='optionSelected']:checked").attr("id");
-            if(radioValue === 'student'){
-                $('#birthdate').removeClass("hidden");
-            }
-            else 
-            {
-                $('#birthdate').addClass("hidden");
-            }
-        });
     });
 
     function sendAccountConfirmation(email) {
@@ -322,7 +280,12 @@
                         sendAccountConfirmation(email);
                     }
                     else if (!data.isInUse && !data.isRegistered) {
-                        showSignUpForm(email);
+                        if (@Json.Encode(isStudentRegistrationEnabled)) {
+                           showStudentRegistration();
+                        }
+                        else {
+                            showSignUpForm(email);
+                        }
                     }
                 } else {
                     hideLoader();
