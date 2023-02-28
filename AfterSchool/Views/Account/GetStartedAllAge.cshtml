@@ -52,7 +52,7 @@
                     <p style="font-weight: bold">Sign Up / Sign In</p>
                 </div>
                 <div>
-                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstarted", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstartedAllAge", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
 
                             @if (showStep1)
                             {

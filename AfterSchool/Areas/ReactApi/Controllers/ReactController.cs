@@ -403,7 +403,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 }
                 
                 return Json(
-                    new ApiResponse(msgs,registration.ID),
+                    new ApiResponse(msgs,registration.Uid),
                     JsonRequestBehavior.AllowGet);
 
             }
