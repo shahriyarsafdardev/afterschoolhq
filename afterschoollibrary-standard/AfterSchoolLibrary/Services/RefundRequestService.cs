@@ -116,8 +116,8 @@ namespace AfterSchoolLibrary.Services
         {
             request.UpdateStatus(RefundRequestStatus.ApprovedByProvider, reason, loggedInuser, msgs, dc);
 
-            if (msgs.HasNoErrors())
-                Helpers.EmailHelper.SendRefundRequestToSupport(request, loggedInuser, msgs, dc);
+            // if (msgs.HasNoErrors())
+                // Helpers.EmailHelper.SendRefundRequestToSupport(request, loggedInuser, msgs, dc);
         }
 
         public static void ApproveRequestAsAHQ(this RefundRequest request, string reason, WebUser loggedInuser, SystemMessages msgs, DatabaseConnection dc = null)

@@ -1828,18 +1828,18 @@ namespace AfterSchoolLibrary.Helpers
             );
 
             // CC Support Team
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                $"BCC: {subject}",
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            ));
+            // mailMsgs.AddRange(SendGridHelper.SendMail(
+            //     Email.SendGridNoReplyEmailAddress(),
+            //     Email.SendGridSupportEmailAddress,
+            //     $"BCC: {subject}",
+            //     body,
+            //     emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            // ));
 
             Utilities.SystemErrorLog(mailMsgs);
         }
 
-        public static void SendRefundRequestToSupport(RefundRequest request, WebUser loggedInUser, SystemMessages msgs,
+        /*public static void SendRefundRequestToSupport(RefundRequest request, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             var model = new NameValueCollection
@@ -1870,7 +1870,7 @@ namespace AfterSchoolLibrary.Helpers
             );
 
             Utilities.SystemErrorLog(mailMsgs);
-        }
+        }*/
 
         public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
@@ -1946,14 +1946,14 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
 
-            // CC Support Team
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                $"CC: {subject}",
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            ));
+            // // CC Support Team
+            // mailMsgs.AddRange(SendGridHelper.SendMail(
+            //     Email.SendGridNoReplyEmailAddress(),
+            //     Email.SendGridSupportEmailAddress,
+            //     $"CC: {subject}",
+            //     body,
+            //     emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            // ));
 
             Utilities.SystemErrorLog(mailMsgs);
         }
