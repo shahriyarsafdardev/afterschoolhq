@@ -4257,7 +4257,6 @@ namespace AfterSchool.Areas.Org.Controllers
                             field = Utilities.GetKeyValuePairs(field).ToJSON();
 
                         submittedRecord.AddOrUpdateAnswer(field,question, registration?.ID, currentUser, amsgs, adc);
-                        registrant.AddOrUpdateAnswer(field,question,currentUser, amsgs, adc);
                     }
                 }
             }
