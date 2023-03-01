@@ -316,6 +316,7 @@ namespace AfterSchool.Controllers
                                         package: package,
                                         signUpTypeId: model.SignupType,
                                         billingPeriodType: model.SubscriptionPeriod.ParseEnum<BillingPeriodType>(),
+                                        trialDaysOverride: trialDaysOverride,
                                         loggedInUser: user,
                                         msgs: amsgs,
                                         dc: adc);
