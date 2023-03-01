@@ -43,6 +43,7 @@ export default function Home() {
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
+  const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
@@ -81,20 +82,25 @@ export default function Home() {
 
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
-      await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), lastSection);
-      enqueueSnackbar('Submitted.', { variant: 'success' });
+      if (!isEmpty || dirty) {
+        await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), lastSection);
+        enqueueSnackbar('Submitted.', { variant: 'success' });
+      }
       if (!lastSection) handleSection('next');
       resetForm();
     }
   });
 
-  const { handleSubmit } = formik;
+  const { handleSubmit, dirty, values } = formik;
+  const isEmpty = !Object.values(values).some(x => x !== '');
+  const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
     loadUser();
@@ -180,7 +186,7 @@ export default function Home() {
                       Please enter your information below to register
                     </Typography>
                     <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
-                      {questionsGroups[activeGroup].Name}
+                      {Name}
                     </Typography>
                     <Grid
                       container
@@ -213,7 +219,7 @@ export default function Home() {
                               {'Loading . . .'} <CircularProgress size={'20px'} />
                             </>
                           ) : (
-                            saveButtonText(lastSection, RegistrantType, IsFree)
+                            saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
                           )}
                         </Button>
                       </Box>

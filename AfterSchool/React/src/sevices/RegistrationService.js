@@ -73,8 +73,10 @@ export default class RegistrationService {
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
   };
 
-  saveButtonText = (lastSection, RegistrantType, IsFree) =>
-    lastSection
+  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) =>
+    skipAble
+      ? 'Skip'
+      : lastSection
       ? RegistrantType === 'Parent'
         ? IsFree
           ? 'Confirm Registration'
@@ -91,7 +93,7 @@ export default class RegistrationService {
   };
 
   answerObject = (key, values) => {
-    if (!values[key]) return undefined;
+    if (values[key] === null) return undefined;
 
     const question = this.questionObjectFindById(key);
 

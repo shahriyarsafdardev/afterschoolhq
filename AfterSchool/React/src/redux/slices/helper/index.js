@@ -6,10 +6,11 @@ export const responseMapper = ({ formQuestion, formQuestionGroup, formQuestionAn
 
   formQuestionGroup.forEach(section => {
     const sectionQuestions = registrationService.groupedQuestions(section.QuestionGroupDataTypeId);
+    const sectionSkipAble = sectionQuestions.every(q => !q.IsRequired);
 
     if (!sectionQuestions.every(({ IsDeleted, IsActive }) => IsDeleted || IsActive)) {
       formQuestionUpdated = [...formQuestionUpdated, ...sectionQuestions];
-      formQuestionGroupUpdated.push(section);
+      formQuestionGroupUpdated.push({ ...section, sectionSkipAble });
     }
   });
 
