@@ -83,9 +83,12 @@ export default class RegistrationService {
       : 'Save & Continue';
 
   //Private methods, only being called within the class
-  submittedAnswer = (id, text) =>
-    this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
-      ?.Text || '';
+  submittedAnswer = (id, text) => {
+    const answer =
+      this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
+        ?.Text || '';
+    return answer === 'null' ? '' : answer; //TODO:Some fields from backend have null in string, till those are fixed
+  };
 
   answerObject = (key, values) => {
     if (!values[key]) return undefined;
