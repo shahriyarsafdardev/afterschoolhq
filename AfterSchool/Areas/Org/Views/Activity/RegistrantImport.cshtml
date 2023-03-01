@@ -63,25 +63,12 @@
                                             id="assignmenttype"
                                             class="form-control">
 
-                                        @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                        @foreach (var assignmenttype in Model.GetRegistrationAssignmentTypes())
                                         {
-                                            switch (assignmenttype)
-                                            {
-                                                case RegistrationAssignmentType.NotSet:
-                                                case RegistrationAssignmentType.ReservedPendingBackgroundCheck:
-                                                case RegistrationAssignmentType.Declined:
-                                                case RegistrationAssignmentType.Invited:
-                                                case RegistrationAssignmentType.ReservedPendingParentalConsent:
-                                                    continue;
-
-                                            }
-
-                                            if (Model.ActivityTypeId != ActivityType.VolunteerOpportunity)
-                                            {
-                                                <option value="@((int)assignmenttype)" @(selectedAssignmentType == assignmenttype ? "selected=\"selected\"" : "")>
-                                                    @assignmenttype.ToString().SplitByUpperCase()
-                                                </option>
-                                            }
+    
+                                            <option value="@((int)assignmenttype)" @(selectedAssignmentType == assignmenttype ? "selected=\"selected\"" : "")>
+                                                @assignmenttype.ToString().SplitByUpperCase()
+                                            </option>
                                         }
 
                                     </select>
