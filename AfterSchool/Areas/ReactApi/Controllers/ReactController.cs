@@ -226,6 +226,13 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
+                    //if for student-school
+
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
+                    {
+                        studentRegistrant.SchoolLocationId = null;
+                    }
+                    
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                     {
                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
@@ -252,7 +259,13 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 {
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
+
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation && currentRegistrant.IsEmpty())
+                    {
+                        currentRegistrant.SchoolLocationId = null;
+                    }
+
+                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                     {
                         var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: currentUser,
