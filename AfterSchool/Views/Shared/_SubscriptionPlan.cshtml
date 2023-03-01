@@ -147,15 +147,12 @@
                     <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Day of month for period start</span>
                         <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
-                            @foreach (var item in days)
-                            {
-                                if (item.IsOnOrBefore(DateTime.UtcNow))
+                            @{
+                                var date = DateTime.Now.AddDays(-30);
+                                for (var d = 0; d<=60; d++)
                                 {
-                                    <option value="@item.ToShortDateString()" style="color: #ccc;" disabled="disabled">@(item.ToString("MMMM dd"))</option>
-                                }
-                                else
-                                {
-                                    <option value="@item.ToShortDateString()">@(item.ToString("MMMM dd"))</option>
+                                    <option class="@(d == 30 ? "btn-primary text-white" : "")" 
+                                            value="@date.AddDays(d).ToShortDateString()">@(date.AddDays(d).ToString("MMMM dd"))</option>
                                 }
                             }
                         </select>
@@ -276,11 +273,11 @@
             success: function (data) {
                 if (data && data.success === true) {
                     let startDateFormatted = data.startDateFormatted;
-                    let endDateFormatted = data.endDateFormatted;
-                    $('#subscriptionStartDate').val(startDateFormatted);
-                    $('#subscriptionEndDate').val(endDateFormatted);
+                    let endDateFormatted = data.endDateFormatted;               
                     if ($('.periodstartdate').attr('date-loaded') === 'false')
                     {
+                       $('#subscriptionStartDate').val(startDateFormatted);
+                       $('#subscriptionEndDate').val(endDateFormatted); 
                        $('.periodstartdate').html(startDateFormatted);
                        $('.periodstartdate').attr('date-loaded', 'true');
                     }
@@ -313,7 +310,7 @@
     function getFormattedDateString(dateObj, dayNames)
     {
         let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        let date = dateObj.getDate() < 10 ? "0" + dateObj.getDate() : dateObj.getDate();
+        let date = dateObj.getDate();
         return dayNames[dateObj.getDay()] + ', ' + monthNames[dateObj.getMonth()] + ' ' + date + ', ' + dateObj.getFullYear();
     }
     
