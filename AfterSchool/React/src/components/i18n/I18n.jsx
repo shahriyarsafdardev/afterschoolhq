@@ -18,19 +18,38 @@ function I18n() {
     setTouched(true);
   };
 
-  useEffect(() => {
-    function updateGoogleTranslateElement() {
-      const element = document.getElementById('google_translate_element');
-      if (element) {
-        const select = element.querySelector('select');
-        if (select) {
-          select.value = selectedLanguage;
-          select.dispatchEvent(new Event('change'));
+  function updateGoogleTranslateElement() {
+    const element = document.getElementById('google_translate_element');
+    if (element) {
+      const select = element.querySelector('select');
+      if (select && selectedLanguage) {
+        localStorage.setItem('languageSelected', selectedLanguage);
+        select.value = selectedLanguage;
+        select.dispatchEvent(new Event('change'));
 
-          if (touched && selectedLanguage === 'en') window.location.reload(false);
-        }
+        if (touched && selectedLanguage === 'en') window.location.reload(false);
       }
     }
+  }
+
+  const lang = {
+    en: 'English',
+    es: 'Español',
+    fr: 'Français',
+    ht: 'Kreyòl ayisyen',
+    sw: 'Kiswahili'
+  };
+
+  useEffect(() => {
+    const selectedLang = localStorage.getItem('languageSelected');
+    if (selectedLang && (selectedLang === 'null' || selectedLang === selectedLanguage)) return;
+
+    setSelectedLanguageName(lang[selectedLang]);
+    setSelectedLanguage(selectedLang);
+    updateGoogleTranslateElement();
+  }, []);
+
+  useEffect(() => {
     updateGoogleTranslateElement();
   }, [selectedLanguage, selectedLanguageName]);
 
