@@ -563,6 +563,7 @@
                 $("#container-subscription-week").addClass("hide");
                 $("#subscriptionperiodstartmonthday").prop('required', true);
                 $("#subscriptionperiodstartweekday").prop('required', false);
+                $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
                 LoadEndDate();
                 setPeriodStartDate();
             } else if ($('#subscriptionplanperiod').val() == "3") {
@@ -570,6 +571,7 @@
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
                 $("#subscriptionperiodstartmonthday").prop('required', false);
+                $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
                 LoadEndDate();
                 setPeriodStartDate();
             } else {
@@ -577,6 +579,7 @@
                 hideWeekMonthContainers();
             }
         } else {
+            $('.periodstartdate').attr('date-loaded','false');
             clearSubscriptionPaymentHiddenInputs();
             hideWeekMonthContainers();
         }
