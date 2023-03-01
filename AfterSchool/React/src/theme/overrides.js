@@ -13,8 +13,8 @@ export default {
   },
   MuiOutlinedInput: {
     root: {
-      '&.Mui-error': {
-        BackgroundColor: '#d32f2f'
+      '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+        borderColor: '#d32f2f'
       }
     }
   }
