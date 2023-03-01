@@ -1,15 +1,15 @@
 import cs from 'classnames';
 import useStyles from './styles';
 import CheckBox from 'components/CheckBox';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
 
 function ApiTextField({ formik, question }) {
   const inputRef = useRef();
   const classes = useStyles();
-  const [disabled, setDisable] = useState(false);
-  const { touched, errors, setFieldValue } = formik;
+  const [disabled, setDisable] = useState(true);
+  const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text, IsRequired: required = false } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
@@ -19,6 +19,12 @@ function ApiTextField({ formik, question }) {
     const [place] = inputRef.current.getPlaces();
     if (place) setFieldValue(ID, place.formatted_address);
   };
+
+  useEffect(() => {
+    if (!values[11111] && disabled) return setDisable(false);
+    setDisable(true);
+    setFieldValue(ID, '');
+  }, [values[11111]]);
 
   return (
     <>
@@ -59,6 +65,7 @@ function ApiTextField({ formik, question }) {
         <CheckBox
           question={{
             ...question,
+            ID: 11111,
             Text: 'I can’t find my child’s school or my child is homeschooled'
           }}
           formik={formik}
