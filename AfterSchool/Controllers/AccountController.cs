@@ -1890,6 +1890,10 @@ namespace AfterSchool.Controllers
                     : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
+
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+            
             return View(result);
         }
 
