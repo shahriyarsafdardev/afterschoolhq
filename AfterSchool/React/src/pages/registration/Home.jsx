@@ -5,7 +5,15 @@ import { useSearchParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
-import { NavBar, Loader, CheckBox, TextField, ProgressBar, ApiTextField } from 'components';
+import {
+  NavBar,
+  Loader,
+  CheckBox,
+  TextField,
+  SchoolField,
+  ProgressBar,
+  ApiTextField
+} from 'components';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useRegistration } from 'redux/hooks/index';
 import questionType from 'constants/questionType';
@@ -27,12 +35,14 @@ export default function Home() {
   const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
   const {
     msgs,
+    school,
     loading,
     questions,
     loadFormData,
     registrationId,
     questionsGroups,
     answeredQuestions,
+    setSchoolFieldValue,
     submitFormSectionData,
     activity: { IsFree, RegistrantType }
   } = useRegistration();
@@ -90,7 +100,17 @@ export default function Home() {
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty) {
-        await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), lastSection);
+        let schoolLocationID = undefined;
+        if (Name === 'Student Information' && RegistrantType !== 'Adult') {
+          await setSchoolFieldValue(school, true).then(res => {
+            schoolLocationID = res;
+          });
+        }
+        await submitFormSectionData(
+          formSectionSubmitObject(values, activeGroupId),
+          lastSection,
+          schoolLocationID
+        );
         enqueueSnackbar('Submitted.', { variant: 'success' });
       }
       if (!lastSection) handleSection('next');
@@ -139,7 +159,9 @@ export default function Home() {
 
     switch (QuestionTypeId) {
       case questionType.text:
-        return ['School', 'Street Address'].includes(currentQuestion.Text) ? (
+        return 'School' === currentQuestion.Text ? (
+          <SchoolField question={currentQuestion} formik={formik} />
+        ) : 'Street Address' === currentQuestion.Text ? (
           <ApiTextField question={currentQuestion} formik={formik} />
         ) : (
           <TextField question={currentQuestion} formik={formik} />

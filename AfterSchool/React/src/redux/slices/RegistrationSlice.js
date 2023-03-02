@@ -9,6 +9,7 @@ const RegistrationSlice = createSlice({
   name: 'registrationSlice',
   initialState: {
     msgs: [],
+    school: {},
     activity: {},
     questions: [],
     loading: true,
@@ -47,6 +48,9 @@ const RegistrationSlice = createSlice({
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
     },
+    setSchool: (state, { payload }) => {
+      state.school = payload;
+    },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
     }
@@ -55,12 +59,13 @@ const RegistrationSlice = createSlice({
 
 export const useRegistrationActions = () => {
   const {
+    setMsgs,
+    setSchool,
+    setFormData,
     formDataLoaded,
     loadingFormData,
-    setFormData,
-    setMsgs,
-    setRegistrationId,
-    submitFormSection
+    submitFormSection,
+    setRegistrationId
   } = RegistrationSlice.actions;
   const dispatch = useDispatch();
 
@@ -72,9 +77,13 @@ export const useRegistrationActions = () => {
     dispatch(formDataLoaded());
   };
 
-  const submitFormSectionData = async ({ answers, answerQuery }, lastSection) => {
+  const submitFormSectionData = async ({ answers, answerQuery }, lastSection, schoolLocationID) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
-    const params = { answers: new URLSearchParams(answersQuery).toString(), groupId };
+    const params = {
+      groupId,
+      schoolLocationID,
+      answers: new URLSearchParams(answersQuery).toString()
+    };
 
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
@@ -92,7 +101,16 @@ export const useRegistrationActions = () => {
     dispatch(submitFormSection(answers));
   };
 
-  return { loadFormData, submitFormSectionData };
+  const setSchoolFieldValue = (school, submit) => {
+    if (!submit) return dispatch(setSchool(school));
+
+    return RegistrationRepository.submitSchoolData(school).then(({ data: { obj } }) => {
+      dispatch(setSchool({ ...school, id: obj }));
+      return obj;
+    });
+  };
+
+  return { loadFormData, submitFormSectionData, setSchoolFieldValue };
 };
 
 export default RegistrationSlice;

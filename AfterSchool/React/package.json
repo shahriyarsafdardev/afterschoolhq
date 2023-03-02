@@ -4,9 +4,10 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
+    "lint": "eslint src/**/*.js src/**/*.jsx",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules\\.bin\\webpack --mode development --watch",
-    "lint": "eslint src/**/*.js src/**/*.jsx"
+    "build": "node_modules\\.bin\\webpack --mode production",
+    "start": "node_modules\\.bin\\webpack --mode development --watch"
   },
   "author": "",
   "license": "ISC",
