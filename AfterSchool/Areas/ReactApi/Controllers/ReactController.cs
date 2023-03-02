@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -87,7 +88,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                              Description = question.Description,
                              Options = question.Options,
                              IsRequired = question.IsRequired,
-                             DispalayOrder = question.DisplayOrder,
+                             DisplayOrder = question.DisplayOrder,
                              IsActive = question.IsActive,
                              IsDeleted = question.IsDeleted,
                              QuestionTypeId = question.QuestionTypeId,
@@ -104,7 +105,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         {
                             FormId = questionGroup.FormId,
                             Name = questionGroup.Name,
-                            DispalayOrder = questionGroup.DisplayOrder,
+                            DisplayOrder = questionGroup.DisplayOrder,
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
@@ -224,15 +225,11 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var parent2Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
                 var parent2Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
 
+                if (json.schoolLocationID.IsNotEmpty())
+                    studentRegistrant.SchoolLocationId = json.schoolLocationID;
+
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
-                    //if for student-school
-
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
-                    {
-                        studentRegistrant.SchoolLocationId = null;
-                    }
-                    
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                     {
                         var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
@@ -259,13 +256,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 {
-
-                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.PersonalInformation && currentRegistrant.IsEmpty())
-                    {
-                        currentRegistrant.SchoolLocationId = null;
-                    }
-
-                if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
+                    if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                     {
                         var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                             registrantOwner: currentUser,
@@ -341,7 +332,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     }
 
                     SessionVariables.CurrentRegistrant = (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant : currentRegistrant);
-
                 }
                 
                 return Json(
@@ -428,6 +418,81 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+        
+        public ActionResult CreateOrUpdateFromGoogle(LocationDto json)
+        {
+            var msgs = new SystemMessages();
+            
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+                
+                var location = Location.LoadByGooglePlaceId(json.googlePlaceId, msgs);
+
+                if (location.IsEmpty())
+                    location = new Location()
+                    {
+                        GooglePlaceId = json.googlePlaceId,
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = currentUser?.ID,
+                    };
+
+                if (json.locationName.IsEmpty())
+                    msgs.Add("Location Name is required", MessageType.UserError);
+
+                if (json.city.IsEmpty())
+                    msgs.Add("Location City is required", MessageType.UserError);
+
+                if (json.state.IsEmpty())
+                    msgs.Add("Location State is required", MessageType.UserError);
+
+                if (json.country.IsEmpty())
+                    msgs.Add("Location Country is required", MessageType.UserError);
+
+                if (msgs.HasNoErrors())
+                {
+                    location.Name = json.locationName;
+                    location.StreetNumber = json.streetNumber;
+                    location.StreetName = json.streetName;
+                    location.Address1 = $"{json.streetNumber} {json.streetName}";
+                    location.Address2 = json.address2;
+                    location.Neighborhood = json.neighborhood;
+                    location.City = json.city;
+                    location.County = json.county;
+                    location.State = json.state;
+                    location.PostalCode = json.postalCode;
+                    location.Country = json.country;
+                    location.Latitude = json.latitude;
+                    location.Longitude = json.longitude;
+                    location.LastModifiedDate = DateTime.UtcNow;
+                    location.LastModifiedBy = currentUser?.ID;
+
+                    //..co-ordiantes can be negative
+                    if (json.longitude.IsNotEmpty() && json.latitude.IsNotEmpty())
+                    {
+                        var distance = DistanceAlgorithm.DistanceBetweenPlaces(Convert.ToDouble(json.longitude), Convert.ToDouble(json.latitude), 0, 0);
+                        if (distance.IsNotEmpty())
+                            location.DistanceFromOrigin = Convert.ToDecimal(distance);
+                    }
+                
+                    msgs.AddRange(location.Save());
+                }
+                
+                return Json(
+                    new ApiResponse(msgs,location.ID),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
 
 
         public class ApiResponse
@@ -484,7 +549,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public string Description { get; set; }
             public string Options { get; set; }
             public bool IsRequired { get; set; }
-            public int? DispalayOrder { get; set; }
+            public int? DisplayOrder { get; set; }
             public bool IsActive { get; set; }
             public bool IsDeleted { get; set; }
             public QuestionType QuestionTypeId { get; set; }
@@ -504,7 +569,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         {
             public int? FormId { get; set; }
             public string Name { get; set; }
-            public int? DispalayOrder { get; set; }
+            public int? DisplayOrder { get; set; }
             public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
         }
 
@@ -514,6 +579,25 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             
             public string esignature { get; set; }
             public string answers { get; set; }
+            
+            public int? schoolLocationID { get; set; }
+        }
+        
+        public class LocationDto
+        {
+            public string locationName { get; set; }
+            public string streetNumber { get; set; }
+            public string streetName { get; set; }
+            public string address2 { get; set; }
+            public string neighborhood { get; set; }
+            public string city { get; set; }
+            public string county { get; set; }
+            public string state { get; set; }
+            public string postalCode { get; set; }
+            public string country { get; set; }
+            public string googlePlaceId { get; set; }
+            public decimal? latitude { get; set; }
+            public decimal? longitude { get; set; }
         }
         
     }
