@@ -13,7 +13,7 @@ export default class RegistrationService {
       .filter(
         question => question.FormQuestionGroupQuestionGroupDataTypeId === QuestionGroupDataTypeId
       )
-      .sort((q1, q2) => q1.DispalayOrder - q2.DispalayOrder);
+      .sort((q1, q2) => q1.DisplayOrder - q2.DisplayOrder);
   };
 
   initialValues = () => {

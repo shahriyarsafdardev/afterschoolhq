@@ -5,7 +5,7 @@ export default registrantType => {
     Text: 'School',
     IsRequired: false,
     FormQuestionGroupQuestionGroupDataTypeId: 2,
-    DispalayOrder: 20,
+    DisplayOrder: 20,
     QuestionTypeId: 1,
     FormQuestionGroupId: 2,
     Description: null,
