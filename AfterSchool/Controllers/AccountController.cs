@@ -296,7 +296,7 @@ namespace AfterSchool.Controllers
         }
         
         [HttpPost]
-        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications, int optionSelected , DateTime birthdate)
+        public ActionResult GetStarted(string regaccount, string password1, string password2, string agree, string textnotifications)
         {
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
@@ -602,16 +602,17 @@ namespace AfterSchool.Controllers
                             if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                             {
                                 var studentReg = account.CreateParentOrStudentRegistrant(
-                                    registrantOwner: currentUser,
-                                    canBeAccessedBy: currentUser.AsList(),
+                                    registrantOwner: user,
+                                    canBeAccessedBy: user.AsList(),
                                     registrantType: RegistrantType.Individual,
                                     isMaster: true,
                                     isParentOrGuardian: false,
                                     allowTextMessages: false,
                                     schoolLocationId: null,
                                     profileStatus: RegistrantProfileStatus.Started,
-                                    loggedInUser: currentUser,
-                                    msgs: msgs);
+                                    loggedInUser: user,
+                                    msgs: amsgs,
+                                    dc:adc);
 
                                 // studentReg.ParentRegistrantId = registrant.ID;
                                 // studentReg.Save(adc);
