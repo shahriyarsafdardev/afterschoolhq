@@ -62,6 +62,6 @@ jobs:
           artifactName: AfterSchoolHQ-Pipeline-Artifact
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(System.DefaultWorkingDirectory)/React'
+          SourceFolder: '$(System.DefaultWorkingDirectory)/AfterSchool/React'
           Contents: '**'
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
