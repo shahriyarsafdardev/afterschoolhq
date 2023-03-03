@@ -27,7 +27,7 @@ jobs:
       - task: Npm@1
         inputs:
           command: 'custom'
-          workingDir: '\React\'
+          workingDir: 'AfterSchool/React'
           customCommand: 'run build'
       - task: NuGetToolInstaller@1
         displayName: Use NuGet
