@@ -28,7 +28,7 @@ function CheckBoxList({ formik, question }) {
   };
 
   useEffect(() => {
-    if (checkBoxListValue === undefined) {
+    if (checkBoxListValue === undefined || !checkBoxListValue.length) {
       if (['undefined'].includes(typeof values[ID]) || !values[ID]) setCheckBoxListValue([]);
       else {
         const obj = JSON.parse(values[ID]);
