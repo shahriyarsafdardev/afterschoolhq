@@ -941,6 +941,9 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register", "account", new {area = "", regaccount = account.Uid});
             }
 
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+                    
             return RedirectToAction("registerstudent", "account", new {area = "", regaccount = account.Uid});
         }
 
