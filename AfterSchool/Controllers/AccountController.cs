@@ -460,7 +460,8 @@ namespace AfterSchool.Controllers
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            var qvms = allQuestionsForQuestionGroup.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
+            var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
+            //var qvms = allQuestionsForQuestionGroup.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             
             qvms.ForEach(qvm =>
             {
@@ -542,7 +543,7 @@ namespace AfterSchool.Controllers
                 (
                     (amsgs, adc) =>
                     {
-                        user = WebUserService.CreateNewWithOptionalPhone(
+                        /*user = WebUserService.CreateNewWithOptionalPhone(
                             firstName.Value,
                             lastName.Value,
                             email.Value.Trim(),
@@ -552,7 +553,18 @@ namespace AfterSchool.Controllers
                             true,
                             false,
                             textnotifications.IfBlank("0").ToBoolean(),
-                            null,
+                            currentUser,
+                            amsgs,
+                            adc);*/
+                        
+                        user = RegistrationCommon.CreateOrUpdateUser(
+                            currentUser,
+                            firstName.Value.Trim(),
+                            lastName.Value.Trim(),
+                            email.Value.Trim(),
+                            phone.Value.Trim(),
+                            password1,
+                            textnotifications.IfBlank("0").ToBoolean(),
                             amsgs,
                             adc);
 
@@ -632,7 +644,7 @@ namespace AfterSchool.Controllers
             }
             
             if(msgs.HasNoErrors())
-                return Redirect("ReactApp");
+                return Redirect("~/ReactApp");
             
             Account registrationAccount = null;
             
@@ -1878,6 +1890,10 @@ namespace AfterSchool.Controllers
                     : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
+
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+            
             return View(result);
         }
 

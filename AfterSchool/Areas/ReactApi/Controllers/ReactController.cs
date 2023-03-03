@@ -325,12 +325,19 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                 if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group))
                 {
+                    currentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, msgs);
+                    
                     if(currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
                     {
+                        studentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, msgs);
+                        
                         RegistrationCommon.MapStudentAnswersToParent1(studentRegistrant, parentRegistrant, questions, currentUser, msgs);
-                        RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                        
+                        if(parent2Registrant.IsNotEmpty())
+                            RegistrationCommon.MapStudentAnswersToParent2(studentRegistrant, parent2Registrant, questions, currentUser, msgs);
+                        
                     }
-
+                    
                     SessionVariables.CurrentRegistrant = (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant : currentRegistrant);
                 }
                 

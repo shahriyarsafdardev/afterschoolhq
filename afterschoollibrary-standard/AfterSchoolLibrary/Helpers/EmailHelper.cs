@@ -1341,7 +1341,7 @@ namespace AfterSchoolLibrary.Helpers
                 stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges " + (hasSubscriptionPlan && hasPaymentPlan ? "subscription fees and payment plans" : hasSubscriptionPlan ? "subscription fees" : "payment plans") + " as a separate transaction.</p><br/>";
             var model = new NameValueCollection
             {
-                {"FirstName", isParentCopy ? purchaser.FirstName : loggedInUser.FirstName},
+                {"FirstName", isParentCopy ? purchaser?.FirstName : loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", loginLink},
                 {"ActivityName", participationObject.Name},
