@@ -172,23 +172,39 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var activity = participationObject.GetActivity();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                Registrant studentReg = null;
                 
-                var studentReg = currentAccount.CreateParentOrStudentRegistrant(
-                    registrantOwner: currentUser,
-                    canBeAccessedBy: currentUser.AsList(),
-                    registrantType: RegistrantType.Individual,
-                    isMaster: true,
-                    isParentOrGuardian: false,
-                    allowTextMessages: false,
-                    schoolLocationId: null,
-                    profileStatus: RegistrantProfileStatus.Started,
-                    loggedInUser: currentUser,
-                    msgs: msgs);
+                Database.ExecuteTransaction
+                (
+                    (amsgs, adc) =>
+                    {
+                        studentReg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: amsgs,
+                            dc : adc);
+                        
+                        RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
                 
-                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, msgs,new DatabaseConnection());
-                
-                if(parent2Registrant.IsNotEmpty())
-                    RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, msgs,new DatabaseConnection());
+                        if(parent2Registrant.IsNotEmpty())
+                            RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                    },
+                    smsgs =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        SessionVariables.CurrentRegistrant = studentReg;
+                    },
+                    fmsgs => msgs.AddRange(fmsgs),
+                    emsgs => throw new Exception(emsgs.ToString())
+                );
                 
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
@@ -275,8 +291,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var currentStudentRegistrant = SessionVariables.CurrentRegistrant;
                 //var currentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
-                var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
+                var currentRegistrant = (json.newChild == 1 ? SessionVariables.CurrentRegistrant : currentUser.GetAllRegistrants().FirstOrDefault());
                 var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
@@ -345,7 +362,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 if (json.schoolLocationID.IsNotEmpty())
                     studentRegistrant.SchoolLocationId = json.schoolLocationID;
 
-                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent && json.newChild != 1)
                 {
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                     {
@@ -371,7 +388,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     }
                 }
                 
-                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
+                if (currentRegistrant.PersonTypeId == RegistrantPersonType.Student && json.newChild != 1)
                 {
                     if (Convert.ToInt32(group) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                     {
@@ -440,7 +457,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     }
                 });
 
-                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group))
+                if ((int)questionGroups.LastOrDefault().QuestionGroupDataTypeId == Convert.ToInt32(group) && json.newChild != 1)
                 {
                     currentRegistrant.SetProfileAsCompleted(SessionVariables.CurrentUser, msgs);
                     

@@ -703,7 +703,7 @@ namespace AfterSchool.Controllers
             }
         }
 
-        public static void MapParent1AnswersToStudent(Registrant parentRegistrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc)
+        public static void MapParent1AnswersToStudent(Registrant parentRegistrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // copy parent answers to student for home address, emergency contacts
             parentRegistrant.GetAnswers(msgs, dc)
