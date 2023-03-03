@@ -127,10 +127,9 @@ export default function Home() {
           lastSection,
           schoolLocationID,
           searchParams.get('newChild')
-        );
+        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
       if (!lastSection && !msgs.length) {
-        enqueueSnackbar('Submitted.', { variant: 'success' });
         handleSection('next');
         resetForm();
       } else setSaveDisabled(false);
