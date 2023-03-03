@@ -20,7 +20,7 @@ function CheckBox({ formik, question }) {
           <FormControlLabel
             control={
               <Checkbox
-                checked={values[ID]}
+                checked={!!values[ID]}
                 classes={{
                   checked: classes.checked,
                   root: classes.root
