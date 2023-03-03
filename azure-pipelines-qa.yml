@@ -60,3 +60,8 @@ jobs:
         inputs:
           path: $(Pipeline.Workspace)\publish
           artifactName: AfterSchoolHQ-Pipeline-Artifact
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: 'React'
+          Contents: '**'
+          TargetFolder: 'AfterSchool'
