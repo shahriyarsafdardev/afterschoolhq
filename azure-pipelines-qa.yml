@@ -55,11 +55,6 @@ jobs:
             !**\obj\**
           codeCoverageEnabled: false
           publishRunAttachments: false
-      - task: CopyFiles@2
-        inputs:
-          SourceFolder: '$(System.DefaultWorkingDirectory)/AfterSchool/React'
-          Contents: '**'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
       - task: PublishPipelineArtifact@1
         displayName: Publish Pipeline Artifact
         inputs:
