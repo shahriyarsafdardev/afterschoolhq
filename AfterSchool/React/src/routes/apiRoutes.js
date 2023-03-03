@@ -5,5 +5,6 @@ export default {
   paymentScreenPath: uId => `/account/payment/${uId}`,
   submitFormDataAPI: 'ReactApi/React/AddUpdateAnswers',
   SchoolAPI: 'ReactApi/React/CreateOrUpdateFromGoogle',
-  thankyouScreenPath: uId => `/account/thankyou/${uId}`
+  thankyouScreenPath: uId => `/account/thankyou/${uId}`,
+  getNewChildFormDataAPI: 'ReactApi/React/GetNewChildForm'
 };

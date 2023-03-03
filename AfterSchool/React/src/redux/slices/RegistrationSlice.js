@@ -69,18 +69,24 @@ export const useRegistrationActions = () => {
   } = RegistrationSlice.actions;
   const dispatch = useDispatch();
 
-  const loadFormData = async () => {
+  const loadFormData = async (newChild = '0') => {
     dispatch(loadingFormData());
-    await RegistrationRepository.getFormData().then(({ obj, msgs }) => {
+    await RegistrationRepository.getFormData(newChild).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
 
-  const submitFormSectionData = async ({ answers, answerQuery }, lastSection, schoolLocationID) => {
+  const submitFormSectionData = async (
+    { answers, answerQuery },
+    lastSection,
+    schoolLocationID,
+    newChild
+  ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = {
+      newChild,
       groupId,
       schoolLocationID,
       answers: new URLSearchParams(answersQuery).toString()

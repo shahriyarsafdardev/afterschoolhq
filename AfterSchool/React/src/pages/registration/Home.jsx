@@ -68,14 +68,21 @@ export default function Home() {
     formSectionSubmitObject
   } = registrationService;
 
+  const buildQueryParams = (index = activeGroup) => {
+    const newChild = searchParams.get('newChild');
+    let paramsQuery = `section=${questionsGroups[index].Name}`;
+    if (newChild) paramsQuery += `&newChild=${newChild}`;
+    return paramsQuery;
+  };
+
   const handleSection = action => {
     if (action === 'next') {
       setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
-      setSearchParams(`section=${questionsGroups[activeGroup + 1].Name}`);
+      setSearchParams(buildQueryParams(activeGroup + 1));
       setActiveGroup(activeGroup + 1);
     } else if (action === 'previous') {
       setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
-      setSearchParams(`section=${questionsGroups[activeGroup - 1].Name}`);
+      setSearchParams(buildQueryParams(activeGroup - 1));
       setActiveGroup(activeGroup - 1);
     }
   };
@@ -117,7 +124,8 @@ export default function Home() {
         await submitFormSectionData(
           formSectionSubmitObject(values, lastSection - 1 === activeGroup ? -1 : activeGroupId),
           lastSection,
-          schoolLocationID
+          schoolLocationID,
+          searchParams.get('newChild')
         );
       }
       if (!lastSection && !msgs.length) {
@@ -134,8 +142,8 @@ export default function Home() {
 
   useEffect(() => {
     loadUser();
-    loadFormData();
-  }, []);
+    loadFormData(searchParams.get('newChild'));
+  }, [searchParams.get('newChild')]);
 
   useEffect(() => {
     if (questionsGroups.length)
@@ -145,15 +153,16 @@ export default function Home() {
   useEffect(() => {
     if (questions.length) {
       let QuestionGroupDataTypeId = '';
+      const paramsQuery = buildQueryParams();
       if (searchParams.get('section')) {
         const groupIndex = questionsGroups.findIndex(
           section => section.Name === searchParams.get('section')
         );
-        if (groupIndex < 0) return setSearchParams(`section=${questionsGroups[activeGroup].Name}`);
+        if (groupIndex < 0) return setSearchParams(paramsQuery);
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-      } else setSearchParams(`section=${questionsGroups[activeGroup].Name}`);
+      } else setSearchParams(paramsQuery);
     }
   }, [questions.length, searchParams.get('section')]);
 
