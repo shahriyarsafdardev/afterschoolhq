@@ -98,6 +98,7 @@ export default function Home() {
   const handleRedirection = () =>
     redirect(IsFree ? thankyouScreenPath(registrationId) : paymentScreenPath(registrationId));
 
+  const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
 
@@ -107,7 +108,7 @@ export default function Home() {
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
-      if (!isEmpty || dirty || lastSection - 1 === activeGroup) {
+      if (!isEmpty || dirty || secondLastSection) {
         let [schoolLocationID, errors] = [null, null];
         if (
           Name === 'Student Information' &&
@@ -122,7 +123,7 @@ export default function Home() {
         }
 
         await submitFormSectionData(
-          formSectionSubmitObject(values, lastSection - 1 === activeGroup ? -1 : activeGroupId),
+          formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
           searchParams.get('newChild')
