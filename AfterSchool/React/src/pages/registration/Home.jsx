@@ -12,6 +12,7 @@ import {
   TextField,
   SchoolField,
   ProgressBar,
+  CheckBoxList,
   ApiTextField
 } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
@@ -99,22 +100,24 @@ export default function Home() {
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
-      if (!isEmpty || dirty) {
+      if (!isEmpty || dirty || lastSection - 1 === activeGroup) {
         let schoolLocationID = undefined;
         if (Name === 'Student Information' && RegistrantType !== 'Adult') {
           await setSchoolFieldValue(school, true).then(res => {
             schoolLocationID = res;
           });
         }
+
         await submitFormSectionData(
-          formSectionSubmitObject(values, activeGroupId),
+          formSectionSubmitObject(values, lastSection - 1 === activeGroup ? -1 : activeGroupId),
           lastSection,
           schoolLocationID
         );
-        enqueueSnackbar('Submitted.', { variant: 'success' });
       }
-      if (!lastSection) handleSection('next');
-      resetForm();
+      if (!lastSection && !msgs.length) {
+        handleSection('next');
+        resetForm();
+      } else enqueueSnackbar('Submitted.', { variant: 'success' });
     }
   });
 
@@ -174,6 +177,8 @@ export default function Home() {
         return <DropdownQuestion question={currentQuestion} formik={formik} />;
       case questionType.radioList:
         return <RadioQuestion question={currentQuestion} formik={formik} />;
+      case questionType.checkBoxList:
+        return <CheckBoxList question={currentQuestion} formik={formik} />;
       case questionType.textArea:
         return <TextAreaQuestion question={currentQuestion} formik={formik} />;
       case questionType.checkBox:

@@ -89,7 +89,7 @@ export default class RegistrationService {
     const answer =
       this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
         ?.Text || '';
-    return answer === 'null' ? '' : answer; //TODO:Some fields from backend have null in string, till those are fixed
+    return answer === 'null' ? '' : answer;
   };
 
   answerObject = (key, values) => {
