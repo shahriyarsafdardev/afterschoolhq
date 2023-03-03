@@ -113,10 +113,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant.ID.Value : currentRegistrant.ID.Value)))
                 {
-                    if (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent &&
-                        questionAnswer.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation)
-                        questionAnswer.QuestionText = "";
-                    
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
                         {
