@@ -16,6 +16,19 @@ jobs:
     steps:
       - checkout: self
         clean: true
+      - task: NodeTool@0
+        inputs:
+          versionSource: 'spec'
+          versionSpec: '16.0'
+      - task: Npm@1
+        inputs:
+          command: 'install'
+          workingDir: '\React\'
+      - task: Npm@1
+        inputs:
+          command: 'custom'
+          workingDir: '\React\'
+          customCommand: 'run build'
       - task: NuGetToolInstaller@1
         displayName: Use NuGet
         inputs:
