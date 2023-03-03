@@ -2541,7 +2541,7 @@
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
     <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
     <Content Include="reactapp\Index.html" />
-    <Content Include="React\**" CopyToPublishDirectory="PreserveNewest"/>
+    <Content Include="React\**" CopyToPublishDirectory="PreserveNewest" Exclude="React\node_modules\**" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
