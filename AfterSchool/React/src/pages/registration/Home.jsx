@@ -101,11 +101,17 @@ export default function Home() {
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty || lastSection - 1 === activeGroup) {
-        let schoolLocationID = undefined;
-        if (Name === 'Student Information' && RegistrantType !== 'Adult') {
-          await setSchoolFieldValue(school, true).then(res => {
-            schoolLocationID = res;
+        let [schoolLocationID, errors] = [null, null];
+        if (
+          Name === 'Student Information' &&
+          RegistrantType !== 'Adult' &&
+          !['', undefined].includes(school.locationName)
+        ) {
+          await setSchoolFieldValue(school, true).then(({ obj, msgs }) => {
+            schoolLocationID = obj;
+            errors = msgs;
           });
+          if (errors.length) return setSaveDisabled(false);
         }
 
         await submitFormSectionData(
@@ -115,9 +121,10 @@ export default function Home() {
         );
       }
       if (!lastSection && !msgs.length) {
+        enqueueSnackbar('Submitted.', { variant: 'success' });
         handleSection('next');
         resetForm();
-      } else enqueueSnackbar('Submitted.', { variant: 'success' });
+      } else setSaveDisabled(false);
     }
   });
 

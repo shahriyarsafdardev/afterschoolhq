@@ -71,10 +71,11 @@ export const useRegistrationActions = () => {
 
   const loadFormData = async () => {
     dispatch(loadingFormData());
-    const { obj, msgs } = await RegistrationRepository.getFormData();
-    if (obj) dispatch(setFormData(obj));
-    dispatch(setMsgs(msgs));
-    dispatch(formDataLoaded());
+    await RegistrationRepository.getFormData().then(({ obj, msgs }) => {
+      if (obj) dispatch(setFormData(obj));
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) dispatch(formDataLoaded());
+    });
   };
 
   const submitFormSectionData = async ({ answers, answerQuery }, lastSection, schoolLocationID) => {
@@ -104,9 +105,10 @@ export const useRegistrationActions = () => {
   const setSchoolFieldValue = (school, submit) => {
     if (!submit) return dispatch(setSchool(school));
 
-    return RegistrationRepository.submitSchoolData(school).then(({ data: { obj } }) => {
+    return RegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
+      dispatch(setMsgs(msgs));
       dispatch(setSchool({ ...school, id: obj }));
-      return obj;
+      return { obj, msgs };
     });
   };
 
