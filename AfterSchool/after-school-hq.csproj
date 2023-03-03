@@ -1478,8 +1478,6 @@
     <Content Include="privacy.html" />
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
-    <Content Include="React\src\App.js" />
-    <Content Include="React\src\index.js" />
     <Content Include="referral-program.html" />
     <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
@@ -2039,7 +2037,6 @@
     <Content Include="Areas\Org\Views\Activity\AttendanceReport.cshtml" />
     <Content Include="Areas\Org\Views\Form\Report.cshtml" />
     <Content Include="Areas\Org\Views\Activity\RegistrantImport.cshtml" />
-    <Content Include="React\babel.config.json" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -2576,7 +2573,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\index.d.ts" />
-    <Content Include="React\webpack.config.js" />
+    <!-- <Content Include="React\webpack.config.js" /> -->
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
