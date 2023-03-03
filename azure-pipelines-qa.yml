@@ -23,7 +23,7 @@ jobs:
       - task: Npm@1
         inputs:
           command: 'install'
-          workingDir: 'afterschoolhq\AfterSchool\React\'
+          workingDir: $(Build.SourcesDirectory)/React'
       - task: Npm@1
         inputs:
           command: 'custom'
