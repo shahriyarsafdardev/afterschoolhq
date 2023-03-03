@@ -12,7 +12,7 @@ function SchoolField({ formik, question }) {
   const [schoolValue, setSchoolValue] = useState('');
   const [disabled, setDisable] = useState(true);
   const { school, setSchoolFieldValue } = useRegistration();
-  const { values } = formik;
+  const { ID, values } = formik;
   const { Text, IsRequired: required = false } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
@@ -104,11 +104,11 @@ function SchoolField({ formik, question }) {
     setSchoolValue(school.formatted_address);
   }, []);
   useEffect(() => {
-    if (!values[11111] && disabled) return setDisable(false);
+    if (!values[ID] && disabled) return setDisable(false);
     setDisable(true);
     setSchoolValue('');
     setSchoolFieldValue({ locationName: '' }, false);
-  }, [values[11111]]);
+  }, [values[ID]]);
 
   return (
     <>
@@ -148,7 +148,6 @@ function SchoolField({ formik, question }) {
         <CheckBox
           question={{
             ...question,
-            ID: 11111,
             Text: 'I can’t find my child’s school or my child is homeschooled'
           }}
           formik={formik}
