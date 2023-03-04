@@ -22,6 +22,25 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = SessionVariables.AccountPackage;
 
+            //ISYP Directory Check
+            var hasNoPaymentMethod = !currentAccount.HasDefaultPaymentMethod.HasValue || !currentAccount.HasDefaultPaymentMethod.Value;
+            if (currentAccount.IsInIsypDirectory(msgs) && !accountPackage.IsDuringTrial && hasNoPaymentMethod && accountPackage.IsFree)
+            {
+                if (currentAccount.StripeCustomerId.IsEmpty())
+                    currentAccount.CreateStripeCustomer(
+                        AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount,
+                        currentAccount.GetAccountOwner(),
+                        msgs);
+
+                SessionVariables.AccountPackage = accountPackage = currentAccount.SwitchPackagesWithStripe(
+                    Package.LoadByIsDefaultCustomerPackage(true),
+                    BillingPeriodType.Month,
+                    false,
+                    accountPackage.StripeSubscriptionId,
+                    $"{DateTime.UtcNow.Year}/08/01".ToDateTime(),
+                    currentUser,
+                    msgs);
+            }
 
             // only redirect if onboarding steps haven't been acknowledged
             if (currentAccount.CanReceivePaymentDeposits() &&
@@ -37,36 +56,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (!currentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
                 return RedirectToAction("getstartedpayments", "account");
-
-            /*
-             * probably not necessary, everybody that works with a new account doesn't need payments setup
-            if (currentAccount.IsNewProviderForOtherAccounts())
-                return RedirectToAction("getstartedpayments", "account");
-            */
-
-            var hasNoPaymentMethod = !currentAccount.HasDefaultPaymentMethod.HasValue || !currentAccount.HasDefaultPaymentMethod.Value;
-            if (true || (currentAccount.IsInIsypDirectory(msgs) && !accountPackage.IsDuringTrial && hasNoPaymentMethod && accountPackage.IsFree))
-            {
-                if (currentAccount.StripeCustomerId.IsEmpty())
-                    currentAccount.CreateStripeCustomer(
-                        AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount, 
-                        currentAccount.GetAccountOwner(), 
-                        msgs);
-
-                if (accountPackage.StripeSubscriptionId.IsEmpty())
-                    currentAccount.SetDefaultAccountPackage(
-                        ($"{DateTime.UtcNow.Year}/08/01".ToDateTime() - DateTime.UtcNow.Date).Days, 
-                        currentUser, 
-                        msgs);
-                else
-                    currentAccount.SwitchPackagesWithStripe(
-                        Package.LoadByIsDefaultCustomerPackage(true),
-                        BillingPeriodType.Month,
-                        false,
-                        accountPackage.StripeSubscriptionId,
-                        currentUser,
-                        msgs);
-            }
 
             if (currentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
                 (currentAccount.AccountTypeId != AccountType.School || currentAccount.GetExternalLeagueInviteCount() == 0))

@@ -1389,6 +1389,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 BillingPeriodType.Month,
                 true,
                 accountPackage.StripeSubscriptionId,
+                null,
                 currentUser,
                 msgs
             );
@@ -1523,6 +1524,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 (BillingPeriodType) period.ToInteger(),
                                 true,
                                 accountPackage.StripeSubscriptionId,
+                                null,
                                 currentUser,
                                 amsgs,
                                 adc
@@ -1534,7 +1536,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                 null, 
                                 null, 
                                 null, 
-                                StripeHelper.ReferralCouponId, amsgs);
+                                StripeHelper.ReferralCouponId, 
+                                amsgs);
                     }
 
                     // check if finally added payment

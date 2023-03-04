@@ -1697,6 +1697,7 @@ namespace AfterSchoolLibrary.Services
                             packageFromStripe,
                             stripePlan.Interval.ToEnum<BillingPeriodType>(),
                             stripeSubscription.Id,
+                            null,
                             loggedInUser,
                             amsgs,
                             adc);
@@ -2480,9 +2481,8 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
-            bool keepTrialDays,
-            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, bool keepTrialDays,
+            string stripeSubscriptionId, DateTime? newTrialEndDateOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             AccountPackage newAccountPackage = null;
@@ -2491,14 +2491,21 @@ namespace AfterSchoolLibrary.Services
                 action: (amsgs, adc) =>
                 {
                     var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
+                    var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
+
                     amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
+
+                    if (stripeSubscriptionId.IsNotEmpty())
+                        stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
 
                     newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                         account.ID.Value,
                         newPackage,
                         billingPeriodTypeId,
-                        stripeSubscriptionId,
+                        null,
                         accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                        newTrialEndDateOverride,
                         loggedInUser,
                         amsgs,
                         adc);
@@ -2506,9 +2513,7 @@ namespace AfterSchoolLibrary.Services
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
 
-                    var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
                     var hasNewBillingPeriodType = accountPackageToRemove.BillingPeriodTypeId != newAccountPackage.BillingPeriodTypeId;
-                    var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
                     var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
@@ -2516,13 +2521,11 @@ namespace AfterSchoolLibrary.Services
                         defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
 
-                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);                    
-
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
                         account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
-                        trialEndDate,
+                        newTrialEndDate,
                         referrerCouponId,
                         defaultPaymentMethod,
                         null,
@@ -2540,7 +2543,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
-            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+            string stripeSubscriptionId, DateTime? newTrialEndDateOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var accountPackageToRemove = account.GetActiveAccountPackage(msgs, dc);
@@ -2552,6 +2555,7 @@ namespace AfterSchoolLibrary.Services
                 billingPeriodTypeId,
                 stripeSubscriptionId,
                 accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                newTrialEndDateOverride,
                 loggedInUser,
                 msgs,
                 dc);
