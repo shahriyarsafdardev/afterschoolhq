@@ -660,7 +660,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
             }
 
-            ViewBag.IsIsypAccount = AccountService.IsInIsypDirectory(currentAccount, msgs);
+            ViewBag.IsIsypAccount = currentAccount.IsInIsypDirectory(msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(currentAccount);

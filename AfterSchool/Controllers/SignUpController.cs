@@ -301,7 +301,7 @@ namespace AfterSchool.Controllers
                         {
                             var trialDaysOverride = new int?();
 
-                            if (invitingAccount.InviteCodeToShare.ToString() == ConfigurationManager.AppSettings["ISYPInviteCodeToShare"])
+                            if (invitingAccount.IsNotEmpty() && invitingAccount.InviteCodeToShare.ToString() == ConfigurationManager.AppSettings["ISYPInviteCodeToShare"])
                                 trialDaysOverride = ($"{DateTime.UtcNow.Year}/08/01".ToDateTime() - DateTime.UtcNow.Date).Days;
 
                             if (model.PackageUid.IsGuid() && model.SubscriptionPeriod.IsNotEmpty())
