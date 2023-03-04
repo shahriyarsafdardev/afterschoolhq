@@ -810,17 +810,17 @@ namespace AfterSchool.Controllers
         public static void MapParent1AllAnswersToStudent(Registrant parentRegistrant, Registrant student, List<FormQuestion> allQuestions, WebUser currentUser, SystemMessages msgs, DatabaseConnection dc)
         {
             // copy parent answers to student for home address, emergency contacts
-            parentRegistrant.GetAnswers(msgs, dc)
-                .ToList()
-                .ForEach(answer =>
-                {
-                    student.AddOrUpdateAnswer(
-                        answer.Text.IfEmpty("").Trim(),
-                        answer.ToFormQuestion(msgs: msgs, dc: dc),
-                        currentUser,
-                        msgs,
-                        dc);
-                });
+            // parentRegistrant.GetAnswers(msgs, dc)
+            //     .ToList()
+            //     .ForEach(answer =>
+            //     {
+            //         student.AddOrUpdateAnswer(
+            //             answer.Text.IfEmpty("").Trim(),
+            //             answer.ToFormQuestion(msgs: msgs, dc: dc),
+            //             currentUser,
+            //             msgs,
+            //             dc);
+            //     });
 
             foreach (var key in Parent1InfoToMainRegistrantMap.Keys)
                 student.MapAndAddAnswer(

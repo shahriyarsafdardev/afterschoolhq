@@ -1068,7 +1068,7 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/reactapp/?newchild=1");
+                return Redirect("~/reactapp/?newChild=1");
 
             var msgs = new SystemMessages();
             var adminAccountForm = FormService.GetAdministratorAccountStudentForm(msgs);
