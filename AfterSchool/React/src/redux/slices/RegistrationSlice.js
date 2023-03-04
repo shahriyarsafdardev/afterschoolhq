@@ -13,6 +13,7 @@ const RegistrationSlice = createSlice({
     activity: {},
     questions: [],
     loading: true,
+    noSchool: true,
     questionsGroups: [],
     registrationId: null,
     answeredQuestions: []
@@ -48,8 +49,9 @@ const RegistrationSlice = createSlice({
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
     },
-    setSchool: (state, { payload }) => {
-      state.school = payload;
+    setSchool: (state, { payload: { school, noSchool } }) => {
+      state.school = school;
+      state.noSchool = noSchool;
     },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
@@ -108,12 +110,12 @@ export const useRegistrationActions = () => {
     dispatch(submitFormSection(answers));
   };
 
-  const setSchoolFieldValue = (school, submit) => {
-    if (!submit) return dispatch(setSchool(school));
+  const setSchoolFieldValue = ({ school, noSchool }, submit) => {
+    if (!submit) return dispatch(setSchool({ school, noSchool }));
 
     return RegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
       dispatch(setMsgs(msgs));
-      dispatch(setSchool({ ...school, id: obj }));
+      dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
       return { obj, msgs };
     });
   };

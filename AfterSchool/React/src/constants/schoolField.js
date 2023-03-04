@@ -1,7 +1,7 @@
 export default registrantType => {
   if (registrantType === 'Adult') return {};
   return {
-    ID: 11111,
+    ID: 99999,
     Text: 'School',
     IsRequired: false,
     FormQuestionGroupQuestionGroupDataTypeId: 2,
@@ -10,6 +10,6 @@ export default registrantType => {
     FormQuestionGroupId: 2,
     Description: null,
     Options: null,
-    QuestionDataTypeId: 11111
+    QuestionDataTypeId: 99999
   };
 };

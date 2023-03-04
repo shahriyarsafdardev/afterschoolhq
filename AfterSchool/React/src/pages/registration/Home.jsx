@@ -115,7 +115,7 @@ export default function Home() {
           RegistrantType !== 'Adult' &&
           !['', undefined].includes(school.locationName)
         ) {
-          await setSchoolFieldValue(school, true).then(({ obj, msgs }) => {
+          await setSchoolFieldValue({ school, noSchool: false }, true).then(({ obj, msgs }) => {
             schoolLocationID = obj;
             errors = msgs;
           });

@@ -1,18 +1,16 @@
 import cs from 'classnames';
 import useStyles from './styles';
-import CheckBox from 'components/CheckBox';
+import SimpleCheckBox from 'components/SimpleCheckBox';
 import { useRegistration } from 'redux/hooks';
 import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
 
-function SchoolField({ formik, question }) {
+function SchoolField({ question }) {
   const inputRef = useRef();
   const classes = useStyles();
   const [schoolValue, setSchoolValue] = useState('');
-  const [disabled, setDisable] = useState(true);
-  const { school, setSchoolFieldValue } = useRegistration();
-  const { ID, values } = formik;
+  const { school, noSchool, setSchoolFieldValue } = useRegistration();
   const { Text, IsRequired: required = false } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
@@ -92,23 +90,20 @@ function SchoolField({ formik, question }) {
       formatted_address: place.formatted_address
     };
   };
+
   const handlePlaceChanged = () => {
     const [place] = inputRef.current.getPlaces();
     if (place) {
       setSchoolValue(place.formatted_address);
-      setSchoolFieldValue(locationObject(place), false);
+      setSchoolFieldValue({ school: locationObject(place), noSchool: false }, false);
     }
   };
+
   const changeHandler = event => setSchoolValue(event.target.value);
+
   useEffect(() => {
     setSchoolValue(school.formatted_address);
-  }, []);
-  useEffect(() => {
-    if (!values[ID] && disabled) return setDisable(false);
-    setDisable(true);
-    setSchoolValue('');
-    setSchoolFieldValue({ locationName: '' }, false);
-  }, [values[ID]]);
+  }, [school?.formatted_address]);
 
   return (
     <>
@@ -138,19 +133,23 @@ function SchoolField({ formik, question }) {
                 type="text"
                 className={cs('form-control', classes.formControlClass)}
                 placeholder={`Enter your ${Text}`}
-                disabled={disabled}
+                disabled={noSchool}
               />
             </StandaloneSearchBox>
           </LoadScript>
         </Grid>
       </Grid>
       {Text === 'School' && (
-        <CheckBox
+        <SimpleCheckBox
           question={{
             ...question,
+            ID: 11111,
             Text: 'I can’t find my child’s school or my child is homeschooled'
           }}
-          formik={formik}
+          value={noSchool}
+          setValue={value => {
+            setSchoolFieldValue({ school: {}, noSchool: value }, false);
+          }}
         />
       )}
     </>
