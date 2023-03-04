@@ -80,8 +80,7 @@ namespace AfterSchoolLibrary.Services
                 StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
                     subscriptionId: accountPackage.StripeSubscriptionId,
                     priceId: null,
-                    billingCycleAnchorNow: null,
-                    billingCycleAnchorUnchanged: null,
+                    billingCycleAnchor: null,
                     trialEndDate: newTrialEndDate,
                     prorate: null,
                     couponId: null,

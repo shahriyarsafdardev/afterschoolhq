@@ -1528,8 +1528,13 @@ namespace AfterSchool.Areas.Org.Controllers
                                 adc
                             );
                         else if (currentAccount.ReferrerAccountId.HasValue)
-                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(accountPackage.StripeSubscriptionId, null,
-                                null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
+                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
+                                accountPackage.StripeSubscriptionId, 
+                                null,
+                                null, 
+                                null, 
+                                null, 
+                                StripeHelper.ReferralCouponId, amsgs);
                     }
 
                     // check if finally added payment

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -2500,30 +2500,28 @@ namespace AfterSchoolLibrary.Services
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
 
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                    var hasNewBillingPeriodType = accountPackageToRemove.BillingPeriodTypeId != newAccountPackage.BillingPeriodTypeId;
                     var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
-
-                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
-
+                    var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
                     if (!accountPackageToRemove.IsDuringTrial)
                         defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
 
+                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);                    
+
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
                         account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
                         trialEndDate,
-                        account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
+                        referrerCouponId,
                         defaultPaymentMethod,
                         null,
                         amsgs);
 
                     newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
-
-                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(newAccountPackage.StripeSubscriptionId, null,
-                        null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
                 },
                 onSuccess: smsgs => msgs.AddRange(smsgs),
                 onFailure: fmsgs => msgs.AddRange(fmsgs),
