@@ -3148,7 +3148,7 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static bool CheckIfIsypAccount(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        public static bool IsInIsypDirectory(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (account.ID == null)
                 return false;

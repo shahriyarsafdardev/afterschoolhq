@@ -1,6 +1,7 @@
 using System;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 
@@ -38,10 +39,34 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("getstartedpayments", "account");
 
             /*
-             * probably not necessary, every body that works with a new account doesn't need payments setup
+             * probably not necessary, everybody that works with a new account doesn't need payments setup
             if (currentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
             */
+
+            var hasNoPaymentMethod = !currentAccount.HasDefaultPaymentMethod.HasValue || !currentAccount.HasDefaultPaymentMethod.Value;
+            if (true || (currentAccount.IsInIsypDirectory(msgs) && !accountPackage.IsDuringTrial && hasNoPaymentMethod && accountPackage.IsFree))
+            {
+                if (currentAccount.StripeCustomerId.IsEmpty())
+                    currentAccount.CreateStripeCustomer(
+                        AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount, 
+                        currentAccount.GetAccountOwner(), 
+                        msgs);
+
+                if (accountPackage.StripeSubscriptionId.IsEmpty())
+                    currentAccount.SetDefaultAccountPackage(
+                        ($"{DateTime.UtcNow.Year}/08/01".ToDateTime() - DateTime.UtcNow.Date).Days, 
+                        currentUser, 
+                        msgs);
+                else
+                    currentAccount.SwitchPackagesWithStripe(
+                        Package.LoadByIsDefaultCustomerPackage(true),
+                        BillingPeriodType.Month,
+                        false,
+                        accountPackage.StripeSubscriptionId,
+                        currentUser,
+                        msgs);
+            }
 
             if (currentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&
                 (currentAccount.AccountTypeId != AccountType.School || currentAccount.GetExternalLeagueInviteCount() == 0))

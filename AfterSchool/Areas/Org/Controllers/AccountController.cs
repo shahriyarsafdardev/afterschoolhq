@@ -1037,7 +1037,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
             ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
+            ViewBag.IsIsypAccount = AccountService.IsInIsypDirectory(account, msgs);
 
             return profile;
         }

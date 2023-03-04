@@ -578,7 +578,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             HandleTempMessages(msgs);
 
-            ViewBag.IsIsypAccount = currentAccount.CheckIfIsypAccount(msgs);
+            ViewBag.IsIsypAccount = currentAccount.IsInIsypDirectory(msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
@@ -660,7 +660,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
             }
 
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
+            ViewBag.IsIsypAccount = AccountService.IsInIsypDirectory(currentAccount, msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(currentAccount);
