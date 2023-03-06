@@ -609,7 +609,9 @@ namespace AfterSchool.Controllers
                             
                             if (amsgs.HasNoErrors())
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
-                            
+
+                            SessionVariables.CurrentRegistrant = registrant;
+
                             if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                             {
                                 var studentReg = account.CreateParentOrStudentRegistrant(
@@ -625,6 +627,8 @@ namespace AfterSchool.Controllers
                                     msgs: amsgs,
                                     dc:adc);
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
+
+                                SessionVariables.CurrentRegistrant = studentReg;
                             }
                         }
                     },
