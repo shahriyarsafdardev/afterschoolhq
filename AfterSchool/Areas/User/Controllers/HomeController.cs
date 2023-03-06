@@ -17,7 +17,8 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Index()
         {
             var msgs = new SystemMessages();
-            var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
+            //var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
+            var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
             var registrants = SessionVariables.CurrentUser.GetStudentRegistrants(msgs);
 
             if (registrants.All(registrant => registrant.ID != masterRegistrant.ID) && masterRegistrant.IsNotEmpty())

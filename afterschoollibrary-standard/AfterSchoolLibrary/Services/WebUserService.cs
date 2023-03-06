@@ -333,7 +333,7 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
                 .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
-                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student || registrant.PersonTypeId == RegistrantPersonType.Adult)
                 .ToList();
         }
 
@@ -715,7 +715,7 @@ namespace AfterSchoolLibrary.Services
                             canBeAccessedBy: user.AsList(),
                             registrantType: RegistrantType.Individual,
                             isMaster: true,
-                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent ? true : false,
+                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent || registrantPersonType == RegistrantPersonType.Adult,
                             allowTextMessages: false,
                             schoolLocationId: null,
                             profileStatus: RegistrantProfileStatus.Started,

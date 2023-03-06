@@ -1,4 +1,5 @@
-﻿@model List<Registrant>
+﻿@using AfterSchoolLibrary.Enums
+@model List<Registrant>
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Select Student";
@@ -37,8 +38,8 @@
     {
         Html.RenderPartial("~/Views/Shared/Registration/_SelectStudentCard.cshtml", registrant);
     }
-
-    @{ Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
+    @if(Model[0]?.PersonTypeId != RegistrantPersonType.Adult)
+        { Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
 
 </div>
 
