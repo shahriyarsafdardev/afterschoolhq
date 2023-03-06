@@ -715,7 +715,7 @@ namespace AfterSchoolLibrary.Services
                             canBeAccessedBy: user.AsList(),
                             registrantType: RegistrantType.Individual,
                             isMaster: true,
-                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent,
+                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent, // || registrantPersonType == RegistrantPersonType.Adult,
                             allowTextMessages: false,
                             schoolLocationId: null,
                             profileStatus: RegistrantProfileStatus.Started,

@@ -608,9 +608,7 @@ namespace AfterSchool.Controllers
                             );
                             
                             if (amsgs.HasNoErrors())
-                            {
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
-                            }
                             
                             if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                             {
@@ -626,7 +624,6 @@ namespace AfterSchool.Controllers
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc:adc);
-
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                             }
                         }
