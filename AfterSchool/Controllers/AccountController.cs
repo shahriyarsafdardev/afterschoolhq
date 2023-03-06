@@ -196,7 +196,7 @@ namespace AfterSchool.Controllers
                     if (hasCompletedParentProfile)
                         return RedirectToAction("select");
                 }
-                else if (masterRegistrant.IsStudent)
+                else if (masterRegistrant.IsStudent || masterRegistrant.IsAdult)
                 {
                     SessionVariables.CurrentRegistrant = masterRegistrant;
                     return RedirectToAction("register");
@@ -1859,6 +1859,10 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
@@ -1895,9 +1899,6 @@ namespace AfterSchool.Controllers
                     : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
-
-            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/ReactApp?section=Confirm Registration");
             
             return View(result);
         }
