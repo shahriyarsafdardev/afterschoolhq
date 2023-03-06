@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 
 namespace AfterSchoolLibrary
@@ -138,6 +137,19 @@ namespace AfterSchoolLibrary
 
             if (endDateTime < startDateTime)
                 msgs.Add("Please ensure start date, start time is earlier than the corresponding end date, end time", MessageType.UserError);
+        }
+        
+        public static int DateDiffInYears(this DateTime date1, DateTime date2)
+        {
+            DateTime zeroTime = new DateTime(1, 1, 1);
+
+            DateTime a = date1;
+            DateTime b = date2;
+
+            TimeSpan span = b - a;
+            // Because we start at year 1 for the Gregorian
+            // calendar, we must subtract a year here.
+            return (zeroTime + span).Year - 1;
         }
     }
 

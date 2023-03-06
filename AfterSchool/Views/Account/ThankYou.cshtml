@@ -85,7 +85,7 @@
                     {
                         <hr/>
 
-                        if (registrant.PersonTypeId != RegistrantPersonType.Adult)
+                        if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                         {
                             Html.RenderPartial(
                                 "~/Views/Shared/Registration/_RegisterButton.cshtml",
