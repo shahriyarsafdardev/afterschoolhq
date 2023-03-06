@@ -1053,18 +1053,12 @@ namespace AfterSchoolLibrary.Helpers
             var hasPaymentPlan = paymentPlan.IsNotEmpty();
             var hasSubscriptionPlan = subscription.IsNotEmpty();
             var hasPostPayPlan = postPayPlan.IsNotEmpty();
-            var splitCostEvenly = subscription?.SplitCostEvenly ?? false;
-            var regFinalized = participationObject.RegistrationFinalized;
             var registrationTable = "";
             var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
             var showTable = false;
 
-            if (splitCostEvenly && regFinalized)
-                totalCost = checkoutObject.GetSubscriptionCostTodayWithFees(msgs, dc);
-
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
-            if ((isCompletelyFree || !isRegFree || hasPaymentPlan || hasPostPayPlan) &&
-                (!splitCostEvenly || !regFinalized))
+            if (isCompletelyFree || !isRegFree || hasPaymentPlan || hasPostPayPlan)
             {
                 if (checkoutObject.IsFree)
                 {
@@ -1164,7 +1158,7 @@ namespace AfterSchoolLibrary.Helpers
             // and is not finalized if it is split evenly
 
             // add subscription block 
-            if (hasSubscriptionPlan && (!splitCostEvenly || regFinalized))
+            if (hasSubscriptionPlan)
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
                 var subscriptionStartsToday =
@@ -1199,7 +1193,7 @@ namespace AfterSchoolLibrary.Helpers
                         $"<p style='float:left;padding-bottom:15px;width:100%;'><span>{ccSubscriptionTitle}</span>" +
                         $"<span style='float:right;margin-right:48px;'>{ccSubscriptionFee.ToCurrency()}</span></p>";
 
-                if (isRegFree || (splitCostEvenly && regFinalized))
+                if (isRegFree)
                     ccFee = checkoutObject.GetSubscriptionCostTodayCreditCardFee(msgs, dc).ToCurrency();
                 else
                     ccFee = (checkoutObject.GetTotalCreditCardFeesToday(msgs, dc) - checkoutObject.GetSubscriptionCostTodayCreditCardFee()).ToCurrency();  // ccFee of subscription from table Credit Card Fee
@@ -1235,6 +1229,7 @@ namespace AfterSchoolLibrary.Helpers
                         msgs);
                 }
             }
+
             // add payment-plan block 
             if (hasPaymentPlan)
             {
