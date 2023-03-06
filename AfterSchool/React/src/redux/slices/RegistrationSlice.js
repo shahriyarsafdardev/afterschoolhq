@@ -120,7 +120,11 @@ export const useRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue };
+  const clearMessages = () => {
+    dispatch(setMsgs([]));
+  };
+
+  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages };
 };
 
 export default RegistrationSlice;

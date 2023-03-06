@@ -73,16 +73,25 @@ export default class RegistrationService {
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
   };
 
-  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) =>
-    skipAble
-      ? 'Skip'
-      : lastSection
-      ? RegistrantType === 'Parent'
-        ? IsFree
-          ? 'Confirm Registration'
-          : 'E-Sign and Continue to Payment '
-        : 'Confirm'
-      : 'Save & Continue';
+  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) => {
+    let buttonText = '';
+    if (skipAble) {
+      buttonText = 'Skip';
+    } else if (lastSection) {
+      if (RegistrantType === 'Parent') {
+        if (IsFree) {
+          buttonText = 'Confirm Registration';
+        } else {
+          buttonText = 'E-Sign and Continue to Payment';
+        }
+      } else {
+        buttonText = 'Confirm';
+      }
+    } else {
+      buttonText = 'Save & Continue';
+    }
+    return buttonText;
+  };
 
   //Private methods, only being called within the class
   submittedAnswer = (id, text) => {

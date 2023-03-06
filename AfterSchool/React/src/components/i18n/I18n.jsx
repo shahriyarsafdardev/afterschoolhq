@@ -23,7 +23,7 @@ function I18n() {
     if (element) {
       const select = element.querySelector('select');
       if (select && selectedLanguage) {
-        // localStorage.setItem('languageSelected', selectedLanguage);
+        localStorage.setItem('languageSelected', selectedLanguage);
         select.value = selectedLanguage;
         select.dispatchEvent(new Event('change'));
 
@@ -39,14 +39,15 @@ function I18n() {
     ht: 'Kreyòl ayisyen',
     sw: 'Kiswahili'
   };
-  //TODO: Language persistence between MVC and ReactApp is turned off for the time being
-  //   useEffect(() => {
-  //     const selectedLang = localStorage.getItem('languageSelected');
-  //     if (selectedLang || selectedLang === 'null' || selectedLang === selectedLanguage) return;
-  //     setSelectedLanguageName(lang[selectedLang]);
-  //     setSelectedLanguage(selectedLang);
-  //     updateGoogleTranslateElement();
-  //   }, []);
+
+  useEffect(() => {
+    const selectedLang = localStorage.getItem('languageSelected');
+    if (selectedLang && selectedLang !== 'null' && selectedLang !== selectedLanguage) {
+      setSelectedLanguageName(lang[selectedLang]);
+      setSelectedLanguage(selectedLang);
+      updateGoogleTranslateElement();
+    }
+  }, []);
 
   useEffect(() => {
     updateGoogleTranslateElement();

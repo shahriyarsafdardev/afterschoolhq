@@ -45,6 +45,7 @@ export default function Home() {
     answeredQuestions,
     setSchoolFieldValue,
     submitFormSectionData,
+    clearMessages,
     activity: { IsFree, RegistrantType }
   } = useRegistration();
 
@@ -84,6 +85,7 @@ export default function Home() {
       setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
       setSearchParams(buildQueryParams(activeGroup - 1));
       setActiveGroup(activeGroup - 1);
+      clearMessages();
     }
   };
 
@@ -181,7 +183,11 @@ export default function Home() {
         return 'School' === currentQuestion.Text ? (
           <SchoolField question={currentQuestion} formik={formik} />
         ) : 'Street Address' === currentQuestion.Text ? (
-          <ApiTextField question={currentQuestion} formik={formik} />
+          <ApiTextField
+            question={currentQuestion}
+            formik={formik}
+            currentQuestions={currentQuestions}
+          />
         ) : (
           <TextField question={currentQuestion} formik={formik} />
         );
@@ -256,6 +262,7 @@ export default function Home() {
                           variant="contained"
                           type="submit"
                           disabled={saveDisabled}
+                          key={activeGroup}
                         >
                           {saveDisabled ? (
                             <>
