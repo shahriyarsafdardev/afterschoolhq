@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using AfterSchool.Assemblers;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
@@ -443,7 +444,7 @@ namespace AfterSchool.Controllers
 
             if (birthdate.IsNotEmpty())
             {
-                if (DateTime.UtcNow.Year - birthdate.Value.Year >= 18)
+                if (DateTime.UtcNow.Date.DateDiffInYears(birthdate.Value) >= 18)
                 {
                     registrantPersonType = RegistrantPersonType.Adult;
                     userType = UserType.Adult;
@@ -462,7 +463,6 @@ namespace AfterSchool.Controllers
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
             var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
-            //var qvms = allQuestionsForQuestionGroup.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             
             qvms.ForEach(qvm =>
             {
@@ -627,9 +627,6 @@ namespace AfterSchool.Controllers
                                     msgs: amsgs,
                                     dc:adc);
 
-                                // studentReg.ParentRegistrantId = registrant.ID;
-                                // studentReg.Save(adc);
-                                
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                             }
                         }

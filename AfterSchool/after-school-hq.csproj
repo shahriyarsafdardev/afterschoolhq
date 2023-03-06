@@ -2553,7 +2553,6 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
-    <Folder Include="React\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

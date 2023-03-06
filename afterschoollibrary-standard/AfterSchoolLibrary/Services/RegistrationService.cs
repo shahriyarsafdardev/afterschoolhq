@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Services
             //var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
             var masterRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && (masterRegistrant.PersonTypeId == RegistrantPersonType.Student || masterRegistrant.PersonTypeId == RegistrantPersonType.Adult))
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }
@@ -134,8 +134,9 @@ namespace AfterSchoolLibrary.Services
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
-                var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() ||
-                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId);
+                var isStudentOrTeacherRegistering = (masterRegistrant.IsEmpty() ||
+                                                     (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
+                                                    masterRegistrant.PersonTypeId != RegistrantPersonType.Adult;
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
