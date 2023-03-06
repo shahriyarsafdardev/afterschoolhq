@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         account = AccountService.CreateNew(
-                            orgName: $"{user.LastName}" + (registrantPersonType != RegistrantPersonType.Adult ? " Family" : ""),
+                            orgName: registrantPersonType == RegistrantPersonType.Parent ? $"{user.LastName} Family" : $"{user.DisplayName}",
                             email: user.Email,
                             phone: user.Phone,
                             isActive: true,

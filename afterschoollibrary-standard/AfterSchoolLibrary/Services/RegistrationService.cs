@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary.Services
 
             // this is the email that is sent to parents if the main registrant is the student
             // ** PARENT EMAIL if student is registering
-            if (masterRegistrant.IsNotEmpty() && masterRegistrant.IsStudent)
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.IsStudent && masterRegistrant.GetParentOrGuardian(msgs, dc).IsNotEmpty())
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }

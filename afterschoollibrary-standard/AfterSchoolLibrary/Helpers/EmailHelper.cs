@@ -1267,7 +1267,7 @@ namespace AfterSchoolLibrary.Helpers
             var registrationDetails = "Login to your account to view more details about this registration.";
             var loginLink = Utilities.LoginUrl();
 
-            if (isParentCopy)
+            if (isParentCopy && parentOrGuardian.IsNotEmpty())
             {
                 var parentUser = parentOrGuardian.GetOwner(msgs, dc);
                 if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)

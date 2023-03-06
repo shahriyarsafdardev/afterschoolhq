@@ -369,35 +369,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
+                    {                
                         if (currentUserPersonType == RegistrantPersonType.Parent && json.newChild != 1)
-                        {
-                            if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
-                            {
-                                var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
-                                    registrantOwner: null,
-                                    canBeAccessedBy: currentUser.AsList(),
-                                    registrantType: RegistrantType.Individual,
-                                    isMaster: true,
-                                    isParentOrGuardian: true,
-                                    allowTextMessages: true,
-                                    schoolLocationId: null,
-                                    profileStatus: RegistrantProfileStatus.Started,
-                                    loggedInUser: currentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-
-                                parent2Reg.FirstName = parent2FirstName;
-                                parent2Reg.LastName = parent2LastName;
-                                parent2Reg.MiddleName = parent2MiddleName;
-                                parent2Reg.Email = parent2Email;
-                                parent2Reg.Phone = parent2Phone;
-
-                                amsgs.AddRange(parent2Reg.Save(adc));
-                            }
-                        }
-                
-                        if (currentUserPersonType == RegistrantPersonType.Student && json.newChild != 1)
                         {
                             if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                             {
@@ -464,16 +437,14 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                             if (json.newChild != -1)
                             {
-                                if(currentRegistrant.PersonTypeId != RegistrantPersonType.Adult)
+                                if(currentUserPersonType == RegistrantPersonType.Parent)
                                 {                        
                                     if(parentRegistrant.IsNotEmpty())
                                         RegistrationCommon.MapStudentAnswersToParent1(currentRegistrant, parentRegistrant, questions, currentUser, amsgs, adc);
 
                                     if (parent2Registrant.IsNotEmpty())
                                         RegistrationCommon.MapStudentAnswersToParent2(currentRegistrant, parent2Registrant, questions, currentUser, amsgs, adc);
-                                }
-                    
-                                // SessionVariables.CurrentRegistrant = (currentRegistrant.PersonTypeId == RegistrantPersonType.Parent ? studentRegistrant : currentRegistrant);
+                                }                  
                             }
                         }
 

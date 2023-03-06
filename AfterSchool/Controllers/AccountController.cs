@@ -612,7 +612,7 @@ namespace AfterSchool.Controllers
 
                             SessionVariables.CurrentRegistrant = registrant;
 
-                            if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                            if (registrant.IsParentOrGuardian)
                             {
                                 var studentReg = account.CreateParentOrStudentRegistrant(
                                     registrantOwner: user,
