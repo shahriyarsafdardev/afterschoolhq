@@ -37,9 +37,10 @@ namespace AfterSchoolLibrary.Services
 
             // if the person registering is the student
             // TODO: Handle better if provider on the backend is registering the student
-            var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            //var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            var masterRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
+            if (masterRegistrant.IsNotEmpty() && (masterRegistrant.PersonTypeId == RegistrantPersonType.Student || masterRegistrant.PersonTypeId == RegistrantPersonType.Adult))
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }
