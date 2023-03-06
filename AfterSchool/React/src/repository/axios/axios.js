@@ -2,23 +2,18 @@ import axios from 'axios';
 import utils from 'utils';
 
 const { navigateTo } = utils;
-// axios.defaults.baseURL = 'http://localhost:54849/';
-axios.defaults.baseURL = 'https://qa.afterschoolhq.com/';
+axios.defaults.baseURL = window.location.origin;
 
 axios.interceptors.response.use(
   response => {
     const { msgs } = response.data;
-    if (msgs?.length && msgs[0].IsError) {
-      if (msgs.find(msg => msg.Text === 'Unauthorized')) {
-        navigateTo('/login');
-      }
-    }
+    if (msgs?.length && msgs[0].IsError)
+      if (msgs.find(msg => msg.Text === 'Unauthorized')) navigateTo('/login');
+
     return response;
   },
   error => {
-    if (error.response?.status === 404) {
-      navigateTo('/login');
-    }
+    if (error.response?.status === 404) navigateTo('/login');
 
     return Promise.reject(error);
   }
