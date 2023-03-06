@@ -695,7 +695,7 @@ namespace AfterSchoolLibrary.Services
                             phone: user.Phone,
                             isActive: true,
                             accountType: AccountType.Registrant,
-                            accountOwner: userType == UserType.Owner ? user : null,
+                            accountOwner: user,
                             packageId: null,
                             packageBillingPeriod: null,
                             timeZone: null,
