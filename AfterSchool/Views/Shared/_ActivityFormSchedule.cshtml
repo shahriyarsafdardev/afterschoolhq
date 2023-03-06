@@ -13,6 +13,7 @@
     var forceNonRepeating = false;
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
     var isDisabled = ViewData["isDisabled"]?.ToString().AsBool() ?? false;
+    var paymentType = ViewData["PaymentStartType"] ?? PlanPaymentStartType.WhenActivityStarts;
 
     if (isContinuousEnrollmentEnabled)
     {
@@ -153,7 +154,7 @@
                             }
                         </div>
                     </div>
-                    @if (isDisabled)
+                    @if (isDisabled && (PlanPaymentStartType)paymentType == PlanPaymentStartType.WhenActivityStarts)
                     {
                         <div class="row">
                             <div class="col-sm-3"></div>
