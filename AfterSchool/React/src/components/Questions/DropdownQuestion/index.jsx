@@ -13,9 +13,7 @@ function DropdownQuestion({ question, formik }) {
 
   const handleChange = ({ target: { value } }) => {
     const selectedOption = options.find(option => option.value === value);
-    if (selectedOption) {
-      setFieldValue(ID, JSON.stringify([selectedOption]));
-    }
+    setFieldValue(ID, selectedOption ? JSON.stringify([selectedOption]) : '');
   };
 
   const value = values[ID] && values[ID] != 'null' ? JSON.parse(values[ID])[0]?.value : 'Select';
@@ -51,7 +49,9 @@ function DropdownQuestion({ question, formik }) {
                     getContentAnchorEl: null
                   }}
                 >
-                  <MenuItem value="Select">Select</MenuItem>
+                  <MenuItem key="Select" value="Select">
+                    Select
+                  </MenuItem>
                   {options.length &&
                     options.map(option => (
                       <MenuItem
