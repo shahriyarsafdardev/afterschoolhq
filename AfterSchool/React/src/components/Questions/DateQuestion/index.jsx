@@ -32,13 +32,14 @@ function DateQuestion({ question, formik }) {
           <div className={classes.datePicker} ref={datePicker}>
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <KeyboardDatePicker
+                maxDate={new Date()}
                 InputProps={{ readOnly: true }}
                 autoFocus
                 variant="inline"
                 format="MM/DD/YYYY"
                 margin="normal"
                 id="date-picker-inline"
-                value={values[ID] || new Date()}
+                value={values[ID] || null}
                 onError={handleError}
                 onChange={handleDateChange}
                 autoOk

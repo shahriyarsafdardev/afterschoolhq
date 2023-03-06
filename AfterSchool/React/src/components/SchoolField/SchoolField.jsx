@@ -94,7 +94,7 @@ function SchoolField({ question }) {
   const handlePlaceChanged = () => {
     const [place] = inputRef.current.getPlaces();
     if (place) {
-      setSchoolValue(place.formatted_address);
+      setSchoolValue(place.name);
       setSchoolFieldValue({ school: locationObject(place), noSchool: false }, false);
     }
   };
@@ -102,8 +102,8 @@ function SchoolField({ question }) {
   const changeHandler = event => setSchoolValue(event.target.value);
 
   useEffect(() => {
-    setSchoolValue(school.formatted_address);
-  }, [school?.formatted_address]);
+    setSchoolValue(school.locationName);
+  }, [school?.name]);
 
   return (
     <>

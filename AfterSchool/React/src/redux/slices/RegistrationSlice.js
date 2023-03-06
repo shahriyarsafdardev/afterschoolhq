@@ -100,7 +100,6 @@ export const useRegistrationActions = () => {
       RegistrationRepository.register({ ...params, eSignature }).then(({ data: { obj, msgs } }) => {
         dispatch(setRegistrationId(obj));
         dispatch(setMsgs(msgs));
-        dispatch(formDataLoaded());
       });
     } else
       await RegistrationRepository.submitFormSection(params).then(({ data: { msgs } }) =>

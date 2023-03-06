@@ -1,4 +1,9 @@
 export default {
+  MuiSelect: {
+    root: {
+      textAlign: 'left'
+    }
+  },
   MuiButton: {
     root: {
       borderRadius: '6px'

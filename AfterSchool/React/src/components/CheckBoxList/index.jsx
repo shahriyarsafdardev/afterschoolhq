@@ -16,11 +16,9 @@ function CheckBoxList({ formik, question }) {
   const options = Options.split(',').map(option => ({ key: option, value: option }));
 
   const updateSelectedValues = value => {
-    if (isChecked(checkBoxListValue, value)) {
+    if (isChecked(checkBoxListValue, value))
       setCheckBoxListValue(checkBoxListValue.filter(option => option.value !== value));
-    } else {
-      setCheckBoxListValue([...checkBoxListValue, { key: value, value }]);
-    }
+    else setCheckBoxListValue([...checkBoxListValue, { key: value, value }]);
   };
 
   const handleCheck = ({ target: { value } }) => {
