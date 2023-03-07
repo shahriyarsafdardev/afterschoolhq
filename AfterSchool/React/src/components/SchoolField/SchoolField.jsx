@@ -81,12 +81,13 @@ export const locationObject = place => {
   };
 };
 
-function SchoolField({ question }) {
+function SchoolField({ question, formik }) {
   const inputRef = useRef();
   const classes = useStyles();
+  const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
+  const { ID, Text, IsRequired: required = false } = question;
   const { school, noSchool, setSchoolFieldValue } = useRegistration();
-  const { Text, IsRequired: required = false } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
@@ -95,6 +96,7 @@ function SchoolField({ question }) {
     const [place] = inputRef.current.getPlaces();
     if (place) {
       setSchoolValue(place.name);
+      setFieldValue(ID, place.name);
       setSchoolFieldValue({ school: locationObject(place), noSchool: false }, false);
     }
   };
@@ -103,7 +105,7 @@ function SchoolField({ question }) {
 
   useEffect(() => {
     setSchoolValue(school.locationName);
-  }, [school?.name]);
+  }, [school?.locationName]);
 
   return (
     <>
@@ -128,6 +130,9 @@ function SchoolField({ question }) {
               <MuiTextField
                 variant="outlined"
                 fullWidth
+                {...formik.getFieldProps(question.ID)}
+                helperText={touched[ID] && errors[ID]}
+                error={touched[ID] && errors[ID]}
                 onChange={changeHandler}
                 value={schoolValue}
                 type="text"
@@ -139,20 +144,19 @@ function SchoolField({ question }) {
           </LoadScript>
         </Grid>
       </Grid>
-      {Text === 'School' && (
-        <SimpleCheckBox
-          question={{
-            ...question,
-            ID: 11111,
-            Text: 'I can’t find my child’s school or my child is homeschooled'
-          }}
-          value={noSchool}
-          setValue={value => {
-            setSchoolFieldValue({ school: {}, noSchool: value }, false);
-            setSchoolValue('');
-          }}
-        />
-      )}
+      <SimpleCheckBox
+        question={{
+          ...question,
+          ID: 11111,
+          Text: 'I can’t find my child’s school or my child is homeschooled'
+        }}
+        value={noSchool}
+        setValue={value => {
+          setSchoolFieldValue({ school: {}, noSchool: value }, false);
+          setFieldValue(ID, value ? 'School Not Found' : '');
+          setSchoolValue('');
+        }}
+      />
     </>
   );
 }
