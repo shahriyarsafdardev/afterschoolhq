@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "after-school-hq", "AfterSchool\after-school-hq.csproj", "{6B30D4AE-258E-4AC7-98EF-B1A5EB7A479A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -17,16 +17,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5E3F12CC-F9FA-40C0-A931-A7777FAFAD04}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		azure-pipelines-qa.yml = azure-pipelines-qa.yml
+		azure-pipelines.yml = azure-pipelines.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "after-school-hq.Tests", "after-school-hq.Tests\after-school-hq.Tests.csproj", "{F658A307-5357-4358-BAD0-F57C61204032}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "after-school-hq.Tests", "after-school-hq.Tests\after-school-hq.Tests.csproj", "{F658A307-5357-4358-BAD0-F57C61204032}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterSchoolLibrary.Tests", "AfterSchoolLibrary.Tests\AfterSchoolLibrary.Tests.csproj", "{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterSchoolLibrary.Tests", "AfterSchoolLibrary.Tests\AfterSchoolLibrary.Tests.csproj", "{4A60A832-A5B4-4CBB-9E2B-2ED2B3676EA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emmersion.InfluxDB", "Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj", "{ADF12B53-03CE-4060-A61F-9880AC6CB15E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Emmersion.InfluxDB", "Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj", "{ADF12B53-03CE-4060-A61F-9880AC6CB15E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfterSchoolAdHoc", "AfterSchoolAdHoc\AfterSchoolAdHoc.csproj", "{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterSchoolAdHoc", "AfterSchoolAdHoc\AfterSchoolAdHoc.csproj", "{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
