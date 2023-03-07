@@ -1597,10 +1597,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs,
-            DatabaseConnection dc = null)
+        public static void ClearStripeCustomerId(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.StripeCustomerId = customer.Id;
+            account.SetStripeCustomer(null, msgs, dc);
+        }
+
+        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeCustomerId = customer?.Id;
             msgs.AddRange(account.Save(dc: dc));
         }
 
@@ -1635,6 +1639,7 @@ namespace AfterSchoolLibrary.Services
                 null,
                 metadata,
                 msgs);
+
             account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
