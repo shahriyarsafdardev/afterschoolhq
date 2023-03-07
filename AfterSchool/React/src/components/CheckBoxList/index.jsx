@@ -8,7 +8,7 @@ function CheckBoxList({ formik, question }) {
   const classes = useStyles();
   const { values, setFieldValue } = formik;
   const { ID, Options, Text: title, isRequired } = question;
-  const [checkBoxListValue, setCheckBoxListValue] = useState(undefined);
+  const [checkBoxListValue, setCheckBoxListValue] = useState([]);
 
   const isChecked = (arr, value) => {
     return arr.some(option => option.value === value);
@@ -26,16 +26,17 @@ function CheckBoxList({ formik, question }) {
   };
 
   useEffect(() => {
-    if (checkBoxListValue === undefined || !checkBoxListValue.length) {
-      if (['undefined'].includes(typeof values[ID]) || !values[ID]) setCheckBoxListValue([]);
-      else {
-        const obj = JSON.parse(values[ID]);
-        setCheckBoxListValue(obj[0] instanceof Array ? obj[0] : obj);
-      }
+    if (values[ID]) {
+      const obj = JSON.parse(values[ID]);
+      setCheckBoxListValue(obj[0] instanceof Array ? obj[0] : obj);
     }
   }, [values[ID]]);
 
-  useEffect(() => setFieldValue(ID, JSON.stringify(checkBoxListValue)), [checkBoxListValue]);
+  useEffect(() => {
+    const value = checkBoxListValue.length ? JSON.stringify(checkBoxListValue) : '';
+    setFieldValue(ID, value);
+  }, [checkBoxListValue]);
+
   if (!checkBoxListValue) return <div></div>;
 
   return (
