@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         account = AccountService.CreateNew(
-                            orgName: $"{user.LastName}" + (registrantPersonType != RegistrantPersonType.Adult ? " Family" : ""),
+                            orgName: registrantPersonType == RegistrantPersonType.Parent ? $"{user.LastName} Family" : $"{user.DisplayName}",
                             email: user.Email,
                             phone: user.Phone,
                             isActive: true,
@@ -715,7 +715,7 @@ namespace AfterSchoolLibrary.Services
                             canBeAccessedBy: user.AsList(),
                             registrantType: RegistrantType.Individual,
                             isMaster: true,
-                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent,
+                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent, // || registrantPersonType == RegistrantPersonType.Adult,
                             allowTextMessages: false,
                             schoolLocationId: null,
                             profileStatus: RegistrantProfileStatus.Started,

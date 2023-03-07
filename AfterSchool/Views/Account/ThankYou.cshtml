@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Enums
+@using AfterSchoolLibrary.Enums
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model AfterSchool.Assemblers.ThankYouResult
 @{
@@ -85,7 +85,7 @@
                     {
                         <hr/>
 
-                        if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                        if (registrant.IsParentOrGuardian)
                         {
                             Html.RenderPartial(
                                 "~/Views/Shared/Registration/_RegisterButton.cshtml",

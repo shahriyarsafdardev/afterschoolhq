@@ -143,10 +143,7 @@ namespace AfterSchoolLibrary
         {
             DateTime zeroTime = new DateTime(1, 1, 1);
 
-            DateTime a = date1;
-            DateTime b = date2;
-
-            TimeSpan span = b - a;
+            TimeSpan span = date1.IsBefore(date2) ? date2 - date1 : date1 - date2;
             // Because we start at year 1 for the Gregorian
             // calendar, we must subtract a year here.
             return (zeroTime + span).Year - 1;

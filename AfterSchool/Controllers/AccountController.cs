@@ -196,7 +196,7 @@ namespace AfterSchool.Controllers
                     if (hasCompletedParentProfile)
                         return RedirectToAction("select");
                 }
-                else if (masterRegistrant.IsStudent)
+                else if (masterRegistrant.IsStudent || masterRegistrant.IsAdult)
                 {
                     SessionVariables.CurrentRegistrant = masterRegistrant;
                     return RedirectToAction("register");
@@ -608,11 +608,11 @@ namespace AfterSchool.Controllers
                             );
                             
                             if (amsgs.HasNoErrors())
-                            {
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
-                            }
-                            
-                            if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+
+                            SessionVariables.CurrentRegistrant = registrant;
+
+                            if (registrant.IsParentOrGuardian)
                             {
                                 var studentReg = account.CreateParentOrStudentRegistrant(
                                     registrantOwner: user,
@@ -626,8 +626,9 @@ namespace AfterSchool.Controllers
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc:adc);
-
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
+
+                                SessionVariables.CurrentRegistrant = studentReg;
                             }
                         }
                     },
@@ -1858,6 +1859,10 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
@@ -1894,9 +1899,6 @@ namespace AfterSchool.Controllers
                     : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, questions, currentRegistrant);
-
-            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/ReactApp?section=Confirm Registration");
             
             return View(result);
         }

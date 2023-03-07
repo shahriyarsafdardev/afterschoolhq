@@ -454,8 +454,9 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsVolunteer => PersonTypeId == RegistrantPersonType.Volunteer;
 
-
         public bool IsStudent => PersonTypeId == RegistrantPersonType.Student;
+
+        public bool IsAdult => PersonTypeId == RegistrantPersonType.Adult;
 
         public string Name => BuildDisplayName(FirstName, LastName);
 

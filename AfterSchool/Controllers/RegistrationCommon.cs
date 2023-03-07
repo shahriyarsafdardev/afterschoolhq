@@ -74,7 +74,7 @@ namespace AfterSchool.Controllers
                     dc);
             }
 
-            var user = SessionVariables.CurrentUser;
+            var user = SessionVariables.CurrentUser; // this seems weird, why not just use `currentUser`
             user.Phone = phone.Trim();
             user.AllowTextMessages = allowTextMessages;
             user.LastModifiedBy = currentUser.ID;

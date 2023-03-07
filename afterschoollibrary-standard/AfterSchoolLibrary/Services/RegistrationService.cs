@@ -40,7 +40,9 @@ namespace AfterSchoolLibrary.Services
             //var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
             var masterRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
+            // this is the email that is sent to parents if the main registrant is the student
+            // ** PARENT EMAIL if student is registering
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.IsStudent && masterRegistrant.GetParentOrGuardian(msgs, dc).IsNotEmpty())
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }
@@ -135,7 +137,7 @@ namespace AfterSchoolLibrary.Services
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
                 var isStudentOrTeacherRegistering = (masterRegistrant.IsEmpty() ||
-                                                     (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
+                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
                                                     masterRegistrant.PersonTypeId != RegistrantPersonType.Adult;
 
                 // if the person registering is the student
