@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -901,6 +901,9 @@ namespace AfterSchool.Controllers
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
 
+                if(account.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                    return RedirectToAction("getstartedAllAge", "account", new {area = "", regaccount = account.Uid});
+                
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
@@ -930,6 +933,9 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register", "account", new {area = "", regaccount = account.Uid});
             }
 
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+                    
             return RedirectToAction("registerstudent", "account", new {area = "", regaccount = account.Uid});
         }
 

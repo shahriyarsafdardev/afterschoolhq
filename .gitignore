@@ -59,3 +59,5 @@ Thumbs.db
 .idea
 *.bak
 *.user
+node_modules
+dist

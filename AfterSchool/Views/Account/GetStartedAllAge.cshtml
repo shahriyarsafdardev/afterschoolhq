@@ -1,0 +1,368 @@
+@using Email = AfterSchoolLibrary.Helpers.Email
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@model AfterSchool.Controllers.AccountController.GetStartedResult
+@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Get Started";
+    var msgs = Model.Messages;
+    var participationObject = Model.ParticipationObject;
+    var registrationAccount = Model.RegistrationAccount;
+    var currentUser = SessionVariables.CurrentUser;
+    var savedEmail = Model.FormQuestionViewModels.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail)?.Value;
+    var showStep1 = currentUser.IsEmpty() && savedEmail.IsBlank();
+    var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
+    var isStudentRegistrationEnabled = Model.StudentRegistrationEnabled;
+    var cleverSsoEnabled = Model.CleverSsoEnabled;
+}
+
+@{
+    Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_AccountTopBar.cshtml",
+        SessionVariables.RegistrationStartPageAccount ?? registrationAccount,
+        new ViewDataDictionary
+        {
+            {"ParticipationObject", participationObject},
+            {"isDuringProfileSetup", isDuringProfileSetup},
+            {"CleverSsoEnabled", cleverSsoEnabled},
+            {"IsAccountScreen", true},
+        });
+}
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_RegistrationHeader.cshtml",
+        new RegistrationHeaderViewModel(participationObject, true),
+        new ViewDataDictionary
+        {
+            {"hidebuttons", true},
+            {"IsAccountScreen", true},
+        });
+}
+
+<div>
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-body">
+
+                <div class="text-center reg-instructions">
+                    <p style="font-weight: bold">Sign Up / Sign In</p>
+                </div>
+                <div>
+                    <form class="form-horizontal" id="signup-form" method="post" action="@Url.Action("getstartedAllAge", "account")" onkeydown="return checkAndPostSignupForm(event, '@Json.Encode(showStep1)')">
+
+                            @if (showStep1)
+                            {
+                                <div class="row" id="email-check-container">
+
+                                    <div>
+                                        <p class="text-center reg-login new-account">
+                                            Please enter your email to get started.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-3 control-label">
+                                            <label for="email-check">
+                                                Email <span class='text-danger'>*</span>
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="email"
+                                                   id="email-check"
+                                                   name="email-check"
+                                                   class="form-control"
+                                                   onfocus="this.select()"
+                                                   required="required"
+                                                   value=""
+                                                   data-test="register-email"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="padding-v-20">
+                                            <button type="button" id="btn-check-email" class="btn btn-register-primary btn-lg" onclick="checkRegistrantEmail()">Next &raquo;</button>
+                                            <button type="button" id="btn-parent-signup" class="btn btn-register-primary btn-lg hidden" onclick="signupAsParent()">Sign Up as Parent</button>
+                                            <button type="button" id="btn-student-signup" class="btn btn-register-primary btn-lg hidden" style="background-color: #fff; color: #00ae85; border: 2px solid;" onclick="return studentSignup(event)">Sign Up As Student</button>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+
+                                    <div class="col-md-6 col-md-offset-3 hide" id="account-confirmation-text">
+                                        <div role="alert" class="alert alert-success alert-icon">
+                                            <div class="icon">
+                                                <span class="s7-check-circle"></span>
+                                            </div>
+                                            <div class="message">
+                                                <p class="text-center text-medium-small">
+                                                    We have sent you an email in order to complete your account and register.<br/>
+                                                    If you do not receive an email, check your spam box. If you still cannot find it, please contact us at <a href="@Email.AppSupportEmailAddress">@Email.AppSupportEmailAddress</a>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="clearfix"></div>
+                                </div>
+                            }
+
+                        <div id="account-registration" class="@(showStep1 ? "hide" : "")">
+
+                            <div class="row">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div role="alert" class="alert alert-success alert-icon">
+                                        <div class="icon">
+                                            <span class="s7-check-circle"></span>
+                                        </div>
+                                        <div class="message">
+                                            <p class="text-center reg-login new-account">
+                                                @if (currentUser.IsNotEmpty())
+                                                {
+                                                    @:Please finalize your family account setup to begin registration.
+                                                }
+                                                else
+                                                {   
+                                                    @:Please enter your info below to begin registration.
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth))
+                            {
+                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && qvm.Question.IsRequired)
+                                {
+                                    qvm.Question.IsRequired = false;
+                                }
+
+                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
+                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
+                                {
+                                    <div class="row">
+                                        <div class="col-md-6 col-md-offset-3">
+                                            <div class="am-checkbox text-center">
+                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "")/>
+                                                <label for="textnotifications">
+                                                    I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
+                                                    Notifications may include information about attendance, reminders, and other important information.
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                            @if (currentUser.IsEmpty())
+                            {
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password1" name="password1"/>
+                                    </div>
+                                </div>
+
+                                <div class="form-group new-account">
+                                    <label for="password1" class="control-label col-md-3">
+                                        Verify Password <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <input type="password" class="form-control" id="password2" name="password2"/>
+                                    </div>
+                                </div>
+
+                                <div class="form-group new-account">
+                                    <label for="accountType" class="control-label col-md-3">
+                                        Account Type <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="col-md-6">
+                                        <div class="am-radio inline">
+                                            <input type="radio" id="parent" name="optionSelected" value="1"/>
+                                            <label for="parent">I am parent or gaurdian registering for my child</label>
+                                        </div>
+                                        <div class="am-radio">
+                                            <input type="radio" id="student" name="optionSelected" value="2"/>
+                                            <label for="student">I am registering myself (student or adult registrant)</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group new-account hidden" id="birthdate">
+                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", Model.FormQuestionViewModels.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth)); }
+                                </div>
+                                
+                                if (Utilities.IsProduction)
+                                {
+                                    <div class="row padding-v-20">
+                                        <div class="form-group text-center">
+                                            @{
+                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <div class="am-checkbox text-center">
+                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "")/>
+                                        <label for="agree">
+                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row padding-v-20">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="padding-v-20 text-center">
+                                <a href="javascript:history.go(-1)" class="text-muted">&laquo; Back</a>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (participationObject.IsActivityGroup() && participationObject.GetActivityGroup().ActivityGroupTypeId == ActivityGroupType.Session)
+{
+    Html.RenderPartial(
+        "~/Views/Shared/Registration/_BrowseCart.cshtml",
+        participationObject,
+        new ViewDataDictionary
+        {
+            {"IsDuringCheckout", true},
+        });
+}
+
+<script>
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#signup-form').submit(function () {
+            $('#btn-create-account').html('Saving...');
+            $('#btn-create-account').prop('disabled', true);
+        });
+        
+        $("input[type='radio']").click(function(){
+            var radioValue = $("input[name='optionSelected']:checked").attr("id");
+            if(radioValue === 'student'){
+                $('#birthdate').removeClass("hidden");
+            }
+            else 
+            {
+                $('#birthdate').addClass("hidden");
+            }
+        });
+    });
+
+    function sendAccountConfirmation(email) {
+        $.get(
+            '/services/sendaccountconfirmationemail?email=' + encodeURIComponent(email) + '&redirecturl=@(Server.UrlEncode(participationObject.GetRegistrationPageUrl()))',
+            function (data) {
+                if (data && data.status === 'ok') {
+                    $('#account-confirmation-text').removeClass('hide');
+                    $('#btn-check-email').addClass('hide');
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
+    function checkRegistrantEmail() {
+        showLoader();
+        let email = $('#email-check').val();
+        let btnCheckEmail = $('#btn-check-email');
+        let originalBtnText = btnCheckEmail.html();
+
+        btnCheckEmail.html('Checking...');
+
+        $.get(
+            '/services/checkaccountstatus?email=' + encodeURIComponent(email),
+            function (data) {
+                if (data && data.status === 'ok') {
+                    hideLoader();
+                    if (data.isRegistered) {
+                        // show login form
+
+                        btnCheckEmail.html('Logging In...');
+
+                        setTimeout(function () {
+                            $('#modal-login').addClass('md-show');
+                            $('#lm-login-username').val(email);
+
+                            setTimeout(function () {
+                                $('#lm-login-password').focus();
+                            }, 500);
+                        }, 1000);
+
+                    } else if (data.isInUse) {
+                        // send email
+                        sendAccountConfirmation(email);
+                    }
+                    else if (!data.isInUse && !data.isRegistered) {
+                        showSignUpForm(email);
+                    }
+                } else {
+                    hideLoader();
+                    btnCheckEmail.html(originalBtnText);
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
+    }
+
+    function signupAsParent() {
+        showLoader();
+        showSignUpForm($('#email-check').val());
+    }
+
+    function studentSignup(event) {
+        event.preventDefault();
+        showLoader();
+        let url = '@Url.Action("StudentRegistration", "Account", new {regaccount = Request["regaccount"]})';
+        localStorage.setItem('studentRegisterEmail', $("#email-check").val());
+        window.location.href = url;
+    }
+
+    function checkAndPostSignupForm(event, isFirstStep) {
+        if (isFirstStep && event.keyCode === 13) {
+            event.preventDefault();
+            $('#btn-check-email').click();
+            return false;
+        }
+    }
+
+    function showSignUpForm(email) {
+        // show sign up form
+        $('#account-registration').removeClass('hide');
+        $('#email-check-container').addClass('hide');
+        $('#@Model.FormQuestionViewModels.Find(qvm => qvm.Question.QuestionTypeId == QuestionType.Email).Id').val(email);
+        hideLoader();
+    }
+
+    function showStudentRegistration() {
+        $('#btn-check-email').addClass("hidden");
+        $('#btn-parent-signup').removeClass('hidden');
+        $('#btn-student-signup').removeClass('hidden');
+        $('#email-check').attr('disabled', 'disabled');
+    }
+</script>

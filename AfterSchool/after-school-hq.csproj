@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props" Condition="Exists('..\packages\Microsoft.CodeCoverage.16.2.0\build\netstandard1.0\Microsoft.CodeCoverage.props')" />
@@ -626,6 +627,8 @@
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\Org\Models\ReportResults.cs" />
+    <Compile Include="Areas\ReactApi\Controllers\ReactController.cs" />
+    <Compile Include="Areas\ReactApi\ReactApiAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
@@ -1511,6 +1514,7 @@
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
+    <Content Include="Views\Account\GetStartedAllAge.cshtml" />
     <Content Include="Views\VolunteerRegistration\BackgroundCheck.cshtml" />
     <Content Include="wooten-center.html" />
     <Content Include="Assets\bootstrap3-wysiwyg\bootstrap3-wysihtml5.all.min.js" />
@@ -2562,6 +2566,8 @@
     <Content Include="Views\Shared\_DirectoryHeader.cshtml" />
     <Content Include="Views\Shared\_DirectoryLoadScript.cshtml" />
     <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
+    <Content Include="reactapp\Index.html" />
+    <Content Include="React\**" CopyToPublishDirectory="PreserveNewest" Exclude="React\node_modules\**" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
@@ -2593,6 +2599,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\index.d.ts" />
+    <!-- <Content Include="React\webpack.config.js" /> -->
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

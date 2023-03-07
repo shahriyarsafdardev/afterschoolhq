@@ -40,4 +40,5 @@ public enum FeatureType
     AllowRegistrantImport = 39,
     AdvancedReports = 40,
     LimitInstructorRegistrantView = 41,
+    AllAgeRegistration = 42
 }

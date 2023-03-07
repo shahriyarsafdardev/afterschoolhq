@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -3750,6 +3750,17 @@ namespace AfterSchoolLibrary.Services
                 .OrderBy(registrant => registrant.DisplayName)
                 .ToList();
         }
+        
+        public static Registrant GetRegistrantByRegistrantPersonType(this Account account, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
+                .Where(registrant => registrant.PersonTypeId == registrantPersonType)
+                .OrderBy(registrant => registrant.ID)
+                .FirstOrDefault();
+        }
+
+        
 
         /// <summary>
         ///     Create basic registrant/student record for an account user, not attached to an account, so it's attached to the
@@ -3783,6 +3794,39 @@ namespace AfterSchoolLibrary.Services
                 SchoolLocationId = schoolLocationId,
                 ProfileStatusId = profileStatus,
                 PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                IsDeleted = false,
+            };
+            msgs.AddRange(registrant.Save(dc));
+
+            if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, msgs, dc);
+
+            return registrant;
+        }
+        
+        public static Registrant CreateRegistrant(this Account account, WebUser registrantOwner,
+            List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian,
+            bool allowTextMessages, int? schoolLocationId, RegistrantProfileStatus profileStatus, WebUser loggedInUser, RegistrantPersonType registrantPersonType,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var registrant = new Registrant
+            {
+                RegistrantTypeId = registrantType,
+                IsMaster = isMaster,
+                IsContactOnly = isParentOrGuardian,
+                IsParentOrGuardian = isParentOrGuardian,
+                WebUserId = registrantOwner?.ID,
+                AccountId = account.ID,
+                AllowTextMessages = allowTextMessages,
+                SchoolLocationId = schoolLocationId,
+                ProfileStatusId = profileStatus,
+                PersonTypeId = registrantPersonType,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -3836,6 +3880,55 @@ namespace AfterSchoolLibrary.Services
                         Email = email,
                         IsDeleted = false,
                         PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
+                    };
+                    amsgs.AddRange(registrant.Save(adc));
+
+                    if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                        registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return registrant;
+        }
+        
+        public static Registrant CreateParentOrStudentorAdultRegistrant(this Account account, string firstName, string lastName, string email,
+            WebUser registrantOwner, List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster,
+            bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId,
+            RegistrantProfileStatus profileStatus, WebUser loggedInUser, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            Registrant registrant = null;
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    registrant = new Registrant
+                    {
+                        RegistrantTypeId = registrantType,
+                        IsMaster = isMaster,
+                        IsContactOnly = isParentOrGuardian,
+                        IsParentOrGuardian = isParentOrGuardian,
+                        WebUserId = registrantOwner?.ID,
+                        AccountId = account.ID,
+                        AllowTextMessages = allowTextMessages,
+                        SchoolLocationId = schoolLocationId,
+                        ProfileStatusId = profileStatus,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                        FirstName = firstName,
+                        LastName = lastName,
+                        Email = email,
+                        IsDeleted = false,
+                        PersonTypeId = registrantPersonType,
                     };
                     amsgs.AddRange(registrant.Save(adc));
 

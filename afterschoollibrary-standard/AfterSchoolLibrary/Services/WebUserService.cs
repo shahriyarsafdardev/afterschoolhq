@@ -320,6 +320,12 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student},
                 true, false, msgs, dc).FirstOrDefault();
         }
+        
+        public static Registrant GetMasterParentOrStudentOrAdultRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student, RegistrantPersonType.Adult},
+                true, false, msgs, dc).FirstOrDefault();
+        }
 
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -332,7 +338,7 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
                 .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
-                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student || registrant.PersonTypeId == RegistrantPersonType.Adult)
                 .ToList();
         }
 
@@ -675,6 +681,59 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
+            return account;
+        }
+        
+        public static Account AddNewParentOrStudentRegistrantOrAdultAccount(this WebUser user, UserType userType, WebUser loggedInUser, RegistrantPersonType registrantPersonType,int? locationId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = user.GetRegistrantAccount(msgs, dc);
+
+            if(account.IsEmpty())
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        account = AccountService.CreateNew(
+                            orgName: registrantPersonType == RegistrantPersonType.Parent ? $"{user.LastName} Family" : $"{user.DisplayName}",
+                            email: user.Email,
+                            phone: user.Phone,
+                            isActive: true,
+                            accountType: AccountType.Registrant,
+                            accountOwner: user,
+                            packageId: null,
+                            packageBillingPeriod: null,
+                            timeZone: null,
+                            createWithStripe: true,
+                            stripeAccountType: StripeAccountType.ConnectAccount,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                        account.CreateParentOrStudentorAdultRegistrant(
+                            firstName: user.FirstName,
+                            lastName: user.LastName,
+                            email: user.Email,
+                            registrantOwner: user,
+                            canBeAccessedBy: user.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent, // || registrantPersonType == RegistrantPersonType.Adult,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: user,
+                            registrantPersonType: registrantPersonType,
+                            msgs: amsgs,
+                            dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                    dc: dc
+                );
 
             return account;
         }
