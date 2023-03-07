@@ -59,7 +59,7 @@ namespace AfterSchool.Controllers
         {
             if (currentUser.IsEmpty())
             {
-                return WebUserService.CreateNew(
+                return WebUserService.CreateNewWithOptionalPhone(
                     firstName,
                     lastName,
                     email.Trim(),

@@ -136,6 +136,11 @@
 
                             @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide))
                             {
+                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && qvm.Question.IsRequired)
+                                {
+                                    qvm.Question.IsRequired = false;
+                                }
+
                                 Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
 
                                 if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)

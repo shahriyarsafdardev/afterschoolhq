@@ -494,7 +494,7 @@ namespace AfterSchool.Controllers
 
             qvms.ForEach(qvm =>
             {
-                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty() && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone)
                     msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
 
                 switch (qvm.Question.QuestionDataTypeId)
@@ -1861,7 +1861,7 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/ReactApp"); //?section=Confirm Registration
+                return Redirect("~/ReactApp?section=Confirm Registration");
 
             var currentRegistrant = SessionVariables.CurrentRegistrant;
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
