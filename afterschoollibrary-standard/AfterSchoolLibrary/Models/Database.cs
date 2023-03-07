@@ -98,6 +98,10 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Create(dc);
             BackgroundCheck.Create(dc);
             ProviderJotFormSubmission.Create(dc);
+            AvailableTag.Create(dc);
+            AssignedTag.Create(dc);
+            VolunteerApproval.Create(dc);
+            VolunteerTask.Create(dc);
 
             return msgs;
         }
@@ -188,6 +192,10 @@ namespace AfterSchoolLibrary.Models
             BillingPortalConfiguration.Alter(dc);
             BackgroundCheck.Alter(dc);
             ProviderJotFormSubmission.Alter(dc);
+            AvailableTag.Alter(dc);
+            AssignedTag.Alter(dc);
+            VolunteerApproval.Alter(dc);
+            VolunteerTask.Alter(dc);
 
             return msgs;
         }
@@ -1201,7 +1209,10 @@ namespace AfterSchoolLibrary.Models
                 "CREATE INDEX IX_RegistrantInviteCode_Code_IsDeleted ON [RegistrantInviteCode] (IsDeleted,Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_RegistrantInviteCode_Code ON [RegistrantInviteCode] (Code)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_ProviderJotFormSubmission_SubmissionId ON [ProviderJotFormSubmission] (SubmissionId)"));
-
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AvailableTag_Tag_AccountId ON [AvailableTag] (Tag,AccountId)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AvailableTag_Tag_AccountId_ObjectType ON [AvailableTag] (Tag,AccountId,ObjectType)"));
+            msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_AssignedTag_Tag_ObjectId_ObjectType ON [AssignedTag] (Tag,ObjectId,ObjectType)"));
+            
 
             return msgs;
         }
@@ -1288,6 +1299,10 @@ namespace AfterSchoolLibrary.Models
             Migration_20230101_AddFormIsArchivedDefault.Do(amsgs, adc);
             Migration_20230116_FixAlWootenImportData.Do(amsgs, adc);
             Migration_20220106_AddRegistrantSchoolLocationIdIndex.Do(amsgs, adc);
+            Migration_20230213_UpdateRegistrationIsDeletedColumn.Do(amsgs, adc);
+            Migration_20230214_IncreaseActivityVirtualLocationInfoColumnSize.Do(amsgs, adc);
+            Migration_20230215_UpdateActivityIsFeaturedColumn.Do(amsgs, adc);
+
         }
 
         public static DatabaseConnection StartTransaction()

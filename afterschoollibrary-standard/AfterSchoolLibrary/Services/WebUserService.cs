@@ -103,6 +103,11 @@ namespace AfterSchoolLibrary.Services
         {
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer);
         }
+        
+        public static bool HasVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer) != null ? true : false;
+        }
 
         public static bool HasRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -925,7 +930,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
-            SignUpType signUpTypeId,
+            SignUpType signUpTypeId,int? trialDaysOverride,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
@@ -934,7 +939,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+                account.SetDefaultAccountPackage(trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;
@@ -942,7 +947,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
             Package package,
-            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, int? trialDaysOverride, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
@@ -950,7 +955,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, loggedInUser, msgs, dc);
+                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;
@@ -1054,29 +1059,16 @@ namespace AfterSchoolLibrary.Services
             string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {                                   
+        
+            
+            user = SaveWebUser(user, firstName, lastName, email, password, phone, loggedInUser, msgs, dc);
+            
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    user.FirstName = firstName;
-                    user.LastName = lastName;
-                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
-                    user.IsRegistered = true;
-                    user.IsActive = true;
-                    user.Password = EncryptPassword(password);
-                    user.LastModifiedDate = DateTime.UtcNow;
-                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                    user.Phone = phone;
-
-                    if (user.Email.IsSameAs(email))
-                        user.VerifiedAccount = true;
-                    else
-                        user.Email = email;
-
-                    amsgs.AddRange(user.Save(adc));
-
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
 
                     // Registrant accounts don't need a package
@@ -1105,6 +1097,40 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+        
+        public static WebUser SaveWebUser(this WebUser user, string firstName, string lastName,
+            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            //WebUser user = null;
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = EncryptPassword(password);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
+                    if (user.Email.IsSameAs(email))
+                        user.VerifiedAccount = true;
+                    else
+                        user.Email = email;
+                    amsgs.AddRange(user.Save(adc));
+                }
+            );
+            return user;
+        }
+
+        public static bool HasBackgroundCheck(this WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BackgroundCheck.HasBackgroundCheck((int)webUser.ID, msgs, dc);
         }
 
         /// <summary>

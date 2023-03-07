@@ -26,10 +26,7 @@
   </p>
 
   <p>
-    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
-  </p>
-
-  <p>
+  <br/>
     Thanks!<br />
     @Model.ProductName
   </p>

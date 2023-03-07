@@ -1485,9 +1485,13 @@ namespace AfterSchoolLibrary.Services
                 LastUpdated = DateTime.UtcNow,
                 ESignatureUserAgent = userAgent,
                 ESignatureIPAddress = ipAddress,
+                IsDeleted = false
             };
             msgs.AddRange(reg.Save(dc));
-
+            
+            if (registrant.FirstName.IsNotEmpty() && registrant.LastName.IsNotEmpty() && registrant.Email.IsNotEmpty())
+                reg.FindAndSetFirstRegistration(registrant.FirstName, registrant.LastName, registrant.Email, msgs, dc);
+            
             return reg;
         }
 

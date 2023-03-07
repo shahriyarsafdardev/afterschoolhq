@@ -1,7 +1,9 @@
 using System;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Emmersion.Http;
 using Newtonsoft.Json;
+using SendGrid.Helpers.Mail.Model;
 
 namespace AfterSchoolLibrary.Integrations
 {
@@ -37,11 +39,16 @@ namespace AfterSchoolLibrary.Integrations
                 PackageId = credentials.PackageId,
                 AccountId = credentials.AccountId,
                 Invite = new SterlingScreeningInviteRequest {Method = "link"},
+                Callback = new SterlingScreeningCallBackUri {uri = $"https://{Helpers.Utilities.HostName}/WebHooks/Sterling/Update"}
             };
             request.Body = jsonSerializer.Serialize(sterlingRequest);
+            
+            Helpers.Utilities.SystemLog(request.ToString());
 
             var response = await httpClient.ExecuteAsync(request);
-
+            
+            Helpers.Utilities.SystemLog(response.ToString());
+            
             if (response.StatusCode != 201)
                 throw new Exception($"Sterling screening request failed with status code {response.StatusCode}; body: {response.Body}");
 
@@ -63,12 +70,19 @@ namespace AfterSchoolLibrary.Integrations
 
         [JsonProperty(PropertyName = "invite")]
         public SterlingScreeningInviteRequest Invite { get; set; }
+        public SterlingScreeningCallBackUri Callback { get; set; }
     }
 
     public class SterlingScreeningInviteRequest
     {
         [JsonProperty(PropertyName = "method")]
         public string Method { get; set; }
+    }
+    
+    public class SterlingScreeningCallBackUri
+    {
+        [JsonProperty(PropertyName = "uri")]
+        public string uri { get; set; }
     }
 
     public class SterlingScreeningResponse
