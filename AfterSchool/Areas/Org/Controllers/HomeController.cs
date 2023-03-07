@@ -31,6 +31,13 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (isBeforeSummer && !accountPackage.IsDuringTrial && hasNoPaymentMethod && accountPackage.IsFree)
                 {
+                    if (currentAccount.StripeCustomerId.IsNotEmpty())
+                    {
+                        var stripeCustomer = currentAccount.GetStripeCustomer(AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount, msgs);
+                        if (stripeCustomer.IsEmpty())
+                            currentAccount.ClearStripeCustomerId(msgs);
+                    }
+
                     if (currentAccount.StripeCustomerId.IsEmpty())
                         currentAccount.CreateStripeCustomer(
                             AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount,
