@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BasicLibrary;
@@ -46,7 +46,25 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.StudentId,
             };
         }
-        
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInAllAgeSignUpPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+                QuestionDataType.StudentId,
+            };
+        }
+
         public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInAdultPanel()
         {
             return new List<QuestionGroupDataType>

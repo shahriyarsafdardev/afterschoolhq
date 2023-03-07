@@ -281,7 +281,7 @@ namespace AfterSchool.Controllers
 
             var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
+            var result = getStartedAssembler.AssembleGetStartedAllAgeResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             return View(result);
@@ -436,15 +436,24 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetStartedAllAge(string regaccount, string password1, string password2, string agree, string textnotifications, string optionSelected,  DateTime? birthdate)
+        public ActionResult GetStartedAllAge(string regaccount, string password1, string password2, string agree, string textnotifications, string optionSelected)
         {
 
             RegistrantPersonType registrantPersonType = RegistrantPersonType.Parent;
             UserType userType = UserType.Owner;
+            
+            var msgs = new SystemMessages();
+            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var currentUser = SessionVariables.CurrentUser;
 
-            if (birthdate.IsNotEmpty())
+            var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
+            var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
+            var qvms = getStartedAssembler.FilterAndTransformQuestionsForAllAgeRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
+            var birthdate = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value;
+
+            if (birthdate.IsDate())
             {
-                if (DateTime.UtcNow.Date.DateDiffInYears(birthdate.Value) >= 18)
+                if (DateTime.UtcNow.Date.DateDiffInYears(birthdate.ToDateTime()) >= 18)
                 {
                     registrantPersonType = RegistrantPersonType.Adult;
                     userType = UserType.Adult;
@@ -455,18 +464,12 @@ namespace AfterSchool.Controllers
                     userType = UserType.Student;
                 }
             }
-            
-            var msgs = new SystemMessages();
-            var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var currentUser = SessionVariables.CurrentUser;
 
-            var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
-            var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
-            var qvms = getStartedAssembler.FilterAndTransformQuestionsForParentRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
-            
             qvms.ForEach(qvm =>
             {
-                if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                if (qvm.Question.IsRequired && qvm.Value.IsEmpty() && 
+                        qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone && 
+                        qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth)
                     msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
 
                 switch (qvm.Question.QuestionDataTypeId)
@@ -492,20 +495,6 @@ namespace AfterSchool.Controllers
                 }
             }
 
-            qvms.ForEach(qvm =>
-            {
-                if (qvm.Question.IsRequired && qvm.Value.IsEmpty() && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantMobilePhone)
-                    msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
-
-                switch (qvm.Question.QuestionDataTypeId)
-                {
-                    case QuestionDataType.RegistrantMobilePhone:
-                        if (qvm.Value.IsNotEmpty() && !qvm.Value.Trim().IsRegExMatch(Utilities.PhoneRegEx))
-                            msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
-                        break;
-                }
-            });
-
             if (currentUser.IsEmpty())
             {
                 if (password1.IsEmpty())
@@ -519,7 +508,7 @@ namespace AfterSchool.Controllers
                 if(optionSelected.IsEmpty())
                     msgs.Add("Select Registrant Type", MessageType.UserError);
                 if(optionSelected == "2" && birthdate.IsEmpty())
-                    msgs.Add("Birthdate is requirerd", MessageType.UserError);
+                    msgs.Add("Birthdate is required", MessageType.UserError);
                 if (LibraryUtilities.IsProduction)
                     msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
             }
@@ -536,6 +525,9 @@ namespace AfterSchool.Controllers
                 var phone = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
 
+                if (phone.Value.IsEmpty())
+                    textnotifications = "";
+
                 WebUser user = null;
                 Account account = null;
                 Registrant registrant = null;
@@ -543,21 +535,7 @@ namespace AfterSchool.Controllers
                 Database.ExecuteTransaction
                 (
                     (amsgs, adc) =>
-                    {
-                        /*user = WebUserService.CreateNewWithOptionalPhone(
-                            firstName.Value,
-                            lastName.Value,
-                            email.Value.Trim(),
-                            phone.Value.Trim(),
-                            password1,
-                            true,
-                            true,
-                            false,
-                            textnotifications.IfBlank("0").ToBoolean(),
-                            currentUser,
-                            amsgs,
-                            adc);*/
-                        
+                    {   
                         user = RegistrationCommon.CreateOrUpdateUser(
                             currentUser,
                             firstName.Value.Trim(),
@@ -651,7 +629,7 @@ namespace AfterSchool.Controllers
                 registrationAccount = Account.LoadByUid(regaccount.ToGuid(), msgs);
             var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var isAllowedToRegisterSelf = DetermineIfStudentIsAllowedToRegisterSelf(participationObject, msgs);
-            var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
+            var result = getStartedAssembler.AssembleGetStartedAllAgeResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
             return View(result);

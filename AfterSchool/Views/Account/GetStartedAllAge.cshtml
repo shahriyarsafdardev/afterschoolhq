@@ -134,7 +134,7 @@
                                 </div>
                             </div>
 
-                            @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide))
+                            @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth))
                             {
                                 if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && qvm.Question.IsRequired)
                                 {
@@ -178,7 +178,7 @@
                                         <input type="password" class="form-control" id="password2" name="password2"/>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group new-account">
                                     <label for="accountType" class="control-label col-md-3">
                                         Account Type <span class="text-danger">*</span>
@@ -194,17 +194,9 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="form-group new-account hidden" id="birthdate">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Birthdate <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
-                                            <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
-                                            <input type="text" class="form-control" name="birthdate" onfocus="this.select()" data-type="date" />
-                                        </div>
-                                    </div>
+                                    @{ Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", Model.FormQuestionViewModels.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth)); }
                                 </div>
                                 
                                 if (Utilities.IsProduction)
