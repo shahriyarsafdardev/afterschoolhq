@@ -13,7 +13,7 @@ const RegistrationSlice = createSlice({
     activity: {},
     questions: [],
     loading: true,
-    noSchool: true,
+    noSchool: false,
     questionsGroups: [],
     registrationId: null,
     answeredQuestions: []

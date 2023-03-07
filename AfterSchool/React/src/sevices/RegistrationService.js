@@ -51,7 +51,8 @@ export default class RegistrationService {
   };
 
   formSectionSubmitObject = (values, activeGroupId) => {
-    const [answerQuery, answers, keys, answerCompiled] = [{}, [], Object.keys(values), []];
+    const filteredValues = Object.keys(values).filter(key => key !== 99999); //SchoolField value is removed from query string as it is being sent separately
+    const [answerQuery, answers, keys, answerCompiled] = [{}, [], filteredValues, []];
 
     const getQuestionID = answer =>
       this.questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
