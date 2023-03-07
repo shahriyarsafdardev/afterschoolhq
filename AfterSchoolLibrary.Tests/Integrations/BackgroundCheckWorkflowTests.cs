@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
         private const int AccountId = 13;
         private const int WebUserId = 7;
         private Mock<IBackgroundCheckRepository> backgroundCheckRepository;
-        private Mock<ISterlingCreateCandidateQuery> createCandidateQuery;
+        private Mock<ISterlingCandidateQuery> createCandidateQuery;
         private Mock<ISterlingCreateScreeningQuery> createScreeningQuery;
         private SterlingCredentials credentials;
         private SystemMessages messages;
@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Tests.Integrations
         {
             credentials = new SterlingCredentials("endpoint", "clientId", "clientSecret", "packageId", "accountId");
             tokenQuery = new Mock<ISterlingBearerTokenQuery>();
-            createCandidateQuery = new Mock<ISterlingCreateCandidateQuery>();
+            createCandidateQuery = new Mock<ISterlingCandidateQuery>();
             createScreeningQuery = new Mock<ISterlingCreateScreeningQuery>();
             backgroundCheckRepository = new Mock<IBackgroundCheckRepository>();
             workflow = new BackgroundCheckWorkflow(credentials, tokenQuery.Object, createCandidateQuery.Object, createScreeningQuery.Object,

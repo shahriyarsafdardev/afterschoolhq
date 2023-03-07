@@ -47,7 +47,6 @@ namespace AfterSchoolLibrary.Helpers
                     amsgs.AddRange(AdditionalData(adc));
 
                     Database.RunMigrations(amsgs, adc);
-
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)

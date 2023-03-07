@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Web.Mvc;
 using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 
@@ -21,6 +22,31 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = SessionVariables.AccountPackage;
 
+            //ISYP Directory Check
+            if (currentAccount.IsInIsypDirectory(msgs))
+            {
+                var hasNoPaymentMethod = !currentAccount.HasDefaultPaymentMethod.HasValue || !currentAccount.HasDefaultPaymentMethod.Value;
+                var summerTrialEndDate = $"{DateTime.UtcNow.Year}/08/01".ToDateTime();
+                var isBeforeSummer = DateTime.UtcNow.IsBefore(summerTrialEndDate);
+
+                if (isBeforeSummer && !accountPackage.IsDuringTrial && hasNoPaymentMethod && accountPackage.IsFree)
+                {
+                    if (currentAccount.StripeCustomerId.IsEmpty())
+                        currentAccount.CreateStripeCustomer(
+                            AfterSchoolLibrary.Billing.StripeAccountType.SubscriberAccount,
+                            currentAccount.GetAccountOwner(msgs),
+                            msgs);
+
+                    SessionVariables.AccountPackage = accountPackage = currentAccount.SwitchPackagesWithStripe(
+                        Package.LoadByIsDefaultCustomerPackage(true, msgs),
+                        BillingPeriodType.Month,
+                        false,
+                        accountPackage.StripeSubscriptionId,
+                        summerTrialEndDate,
+                        currentUser,
+                        msgs);
+                }
+            }
 
             // only redirect if onboarding steps haven't been acknowledged
             if (currentAccount.CanReceivePaymentDeposits() &&
@@ -35,9 +61,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("selectplan", "account");
 
             if (!currentAccount.CanReceivePaymentDeposits() && SessionVariables.AccountUserType == UserType.Treasurer)
-                return RedirectToAction("getstartedpayments", "account");
-
-            if (currentAccount.IsNewProviderForOtherAccounts())
                 return RedirectToAction("getstartedpayments", "account");
 
             if (currentAccount.GetActivityCount(SessionVariables.AccountUserType, SessionVariables.CurrentUser, null, null, null, null, null) == 0 &&

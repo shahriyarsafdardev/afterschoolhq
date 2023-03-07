@@ -133,8 +133,13 @@
                 <p>
                     @Model.OwnerAccount.Name
                 </p>
-                <h3>
-                    <strong title="@Model.Name">@Model.Name</strong>
+                <h3 style="float: left; width: 100%;">
+                    <strong style="float: left; padding-right: 5px;" title="@Model.Name">@Model.Name  </strong>
+                    @if (Model.GetActivity()?.IsFeatured ?? false)
+                    {
+                        <span class="featuredActivity btn-primary btn-sm border-success"><i class="s7-star-filled"></i> Featured Activity</span>
+                    }
+
                     @if (!Model.ObjectID.HasValue)
                     {
                         <span class="badge badge-danger">DEMO</span>

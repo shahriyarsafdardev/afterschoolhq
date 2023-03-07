@@ -18,6 +18,7 @@
     <Compile Remove="RecurrenceType.cs" />
     <Compile Remove="Services\PaymentPlanService.cs" />
     <Compile Remove="Services\RegistrantPaymentPlanService.cs" />
+    <Compile Remove="Services\AvailableTagService.cs" />
   </ItemGroup>
 
   <ItemGroup>
