@@ -303,12 +303,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 //var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
-                NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+                var collection = HttpUtility.ParseQueryString(json.answers);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 
-                qvms.ForEach(qvm =>
+                qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
                     // if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
                     //     msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
@@ -373,7 +373,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     {                
                         if (currentUserPersonType == RegistrantPersonType.Parent && json.newChild != 1)
                         {
-                            if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
+                            if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                             {
                                 var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                                     registrantOwner: currentUser,
@@ -397,7 +397,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 amsgs.AddRange(parent1Reg.Save(adc));
                             }
                     
-                            if (Convert.ToInt32(json.groupid) == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
+                            if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                             {
                                 var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
                                     registrantOwner: null,
@@ -432,7 +432,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 adc);
                         });
 
-                        if (Convert.ToInt32(json.groupid) == -1)
+                        if (json.groupid.ToInteger() == -1)
                         {
                             currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
 
