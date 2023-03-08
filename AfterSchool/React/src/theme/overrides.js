@@ -1,4 +1,18 @@
 export default {
+  MuiLink: {
+    underlineHover: {
+      textDecoration: 'underline',
+      '&.MuiLink-underlineHover:hover': {
+        textDecoration: 'none'
+      }
+    }
+  },
+  MuiTypography: {
+    root: {
+      color: '#555555',
+      maxWidth: '500px'
+    }
+  },
   MuiSelect: {
     root: {
       textAlign: 'left'
@@ -7,6 +21,11 @@ export default {
   MuiButton: {
     root: {
       borderRadius: '6px'
+      //   minHeight: '52px'
+      //   minWidth: '200px'
+    },
+    containedPrimary: {
+      color: '#ffffff'
     }
   },
   MuiFormHelperText: {
