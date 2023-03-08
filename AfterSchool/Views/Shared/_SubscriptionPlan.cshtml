@@ -151,8 +151,10 @@
                                 var date = DateTime.Now.AddDays(-30);
                                 for (var d = 0; d<=60; d++)
                                 {
-                                    <option class="@(d == 30 ? "btn-primary text-white" : "")" 
-                                            value="@date.AddDays(d).ToShortDateString()">@(date.AddDays(d).ToString("MMMM dd"))</option>
+                                    <option class="@(d == 30 ? "btn-primary text-white" : "")"
+                                            value="@date.AddDays(d).ToShortDateString()" id="@(d == 31 ? "selected" : "")">
+                                        @(date.AddDays(d).ToString("MMMM dd"))
+                                    </option>
                                 }
                             }
                         </select>
@@ -251,7 +253,7 @@
             if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
                 $('#subscriptionperiodstartmonthday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
             } else {
-                $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("option:not([disabled]):eq(0)").val());
+                $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("#selected").val());
             }
         } else if (billingTypeId === "3") { //weekly
             let weekDay = '@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.DayOfWeek : DayOfWeek.Sunday)'
