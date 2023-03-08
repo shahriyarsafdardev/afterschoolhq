@@ -54,6 +54,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var currentUserRegistrant = Registrant.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, msgs, null).FirstOrDefault();
                 var currentRegistrant = SessionVariables.CurrentRegistrant;
                 Registrant parentRegistrant = null;
 
@@ -137,7 +138,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Name = activity.Name,
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
-                        RegistrantType = currentRegistrant.PersonTypeId.ToString()
+                        RegistrantType = currentUserRegistrant.PersonTypeId.ToString()
                     }
                 };
                 
