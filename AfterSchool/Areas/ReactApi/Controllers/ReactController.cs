@@ -64,7 +64,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 // var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
                 
                 if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized");
+                    throw new Exception("Unauthorized User");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var activity = participationObject.GetActivity();
