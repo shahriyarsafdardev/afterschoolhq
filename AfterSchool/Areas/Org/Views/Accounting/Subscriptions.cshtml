@@ -76,8 +76,7 @@
                                 var billingPeriodTypeId = plan.BillingPeriodTypeId;
                                 var payments = plan.GetPayments();
                                 var nextPaymentDate = "-";
-                                var amount = plan.TotalPaidWithFees;
-                                var endDate = "-";
+                                var endDate = plan.DateCancelled.ToShortDateString("-");;
 
                                 if (billingPeriodTypeId == BillingPeriodType.NotSet)
                                 {
@@ -94,30 +93,6 @@
                                     {
                                         nextPaymentDate = plan.StartDate.Value.ToShortDateString();
                                     }
-                                }
-
-                                if (amount == 0)
-                                {
-                                    if (payments.Any())
-                                    {
-                                        amount = payments.Last().GetTransaction().Amount.Value;
-                                    }
-                                    else
-                                    {
-                                        amount = originalPlan.CostPerPeriod.Value;
-                                    }
-                                }
-
-                                if (originalPlan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                                {
-                                    if (payments.Count == plan.TotalPeriods)
-                                    {
-                                        endDate = plan.GetLastPaymentDate().ToShortDateString();
-                                    }
-                                }
-                                else
-                                {
-                                    endDate = plan.DateCancelled.ToShortDateString("-");
                                 }
 
                                 <tr>

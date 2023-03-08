@@ -366,6 +366,9 @@ namespace AfterSchool.Areas.Org.Controllers
                         account: currentAccount,
                         msgs: msgs);
                 }
+                else
+                    msgs.Add("Registrant not found", MessageType.UserError);
+                
             }
 
             ViewBag.Messages = msgs;
