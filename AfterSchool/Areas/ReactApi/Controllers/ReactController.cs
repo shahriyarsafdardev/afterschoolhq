@@ -141,6 +141,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
                         findAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         activityUrl = activity.ShortHomePageUrl,
+                        registerForNewChildUrl = participationObject.GetRegistrationPageUrl()
                     }
                 };
                 
