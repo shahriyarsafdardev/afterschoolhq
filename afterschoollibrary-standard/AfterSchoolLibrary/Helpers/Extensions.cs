@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -21,6 +21,15 @@ namespace AfterSchoolLibrary
             var valueBytes = Convert.FromBase64String(value);
             return Encoding.UTF8.GetString(valueBytes);
         }
+        public static Dictionary<string, string> ToStringDictionary(this List<AfterSchoolLibrary.Helpers.KeyValuePair> keyValuePairs)
+        {
+            var dict = new Dictionary<string, string>();
+
+            foreach (var keyValuePair in keyValuePairs)
+                dict.Add(keyValuePair.key, keyValuePair.value);
+
+            return dict;
+        }
 
         public static Lob.Models.AccountType ToLobAccountType(this LegalEntityType legalEntityType)
         {
@@ -28,35 +37,6 @@ namespace AfterSchoolLibrary
                 return Lob.Models.AccountType.Company;
 
             return Lob.Models.AccountType.Individual;
-        }
-
-        public static string GetDescription(this StripeVerificationFailedCode stripeVerificationFailedCode)
-        {
-            switch (stripeVerificationFailedCode)
-            {
-                case StripeVerificationFailedCode.FailedKeyedIdentity:
-                    return "the supplied identity information could not be verified";
-                case StripeVerificationFailedCode.FailedOther:
-                    return "verification failed";
-                case StripeVerificationFailedCode.ScanCorrupt:
-                    return "the supplied ID image is corrupt";
-                case StripeVerificationFailedCode.ScanFailedGrayscale:
-                    return "the supplied ID image is not in color";
-                case StripeVerificationFailedCode.ScanFailedOther:
-                    return "the scan failed for an unknown reason, please retry";
-                case StripeVerificationFailedCode.ScanIDCountryNotSupported:
-                    return "the supplied ID type is not supported (e.g., is not government-issued";
-                case StripeVerificationFailedCode.ScanNameMismatch:
-                    return "the name on the ID does not match the name on the account";
-                case StripeVerificationFailedCode.ScanNotReadable:
-                    return "the supplied ID image is not readable (e.g., too blurry or dark)";
-                case StripeVerificationFailedCode.ScanNotUploaded:
-                    return "no ID scan was uploaded";
-                case StripeVerificationFailedCode.ScanFailedTestMode:
-                    return "verification failed - test mode";
-            }
-
-            return "unknown";
         }
 
         public static DayOfWeek ToDayOfWeek(this DayOfWeekASL day)
@@ -120,6 +100,11 @@ namespace AfterSchoolLibrary
             return objectType;
         }
 
+        public static bool IsJson(this string text)
+        {
+            return Helpers.Utilities.IsAlreadyJsonString(text);
+        }
+
         public static TValue GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
         {
             return dictionary.TryGetValue(key, out var ret) ? ret : default;
@@ -152,6 +137,13 @@ namespace AfterSchoolLibrary
 
             if (endDateTime < startDateTime)
                 msgs.Add("Please ensure start date, start time is earlier than the corresponding end date, end time", MessageType.UserError);
+        }
+        
+        public static int DateDiffInYears(this DateTime date1, DateTime date2)
+        {
+            DateTime zeroTime = new DateTime(1, 1, 1);
+            TimeSpan span = date1.IsBefore(date2) ? date2 - date1 : date1 - date2;
+            return (zeroTime + span).Year - 1;
         }
     }
 

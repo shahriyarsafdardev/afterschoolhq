@@ -467,32 +467,19 @@ namespace AfterSchoolLibrary.Services
                 ParticipationObjectType.Activity, false, msgs, dc);
         }
 
-        public static Activity CopyWithRegistrants(this Activity activity, string newName, bool useSameForm,
-            int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return activity.Copy(newName, useSameForm, true, true, true, loggedInUserId, msgs, dc);
-        }
-
         public static Activity Copy(this Activity activity, string newName, bool useSameForm, int loggedInUserId,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, true, true, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, true, true, loggedInUserId, msgs, dc);
         }
 
         public static Activity CopyWithoutSchedule(this Activity activity, string newName, bool useSameForm,
             int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return activity.Copy(newName, useSameForm, false, true, false, loggedInUserId, msgs, dc);
+            return activity.Copy(newName, useSameForm, true, false, loggedInUserId, msgs, dc);
         }
 
-        public static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeSignUpPeriods,
-            bool includeSchedule, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            return activity.Copy(newName, useSameForm, false, includeSignUpPeriods, includeSchedule, loggedInUserId,
-                msgs, dc);
-        }
-
-        internal static Activity Copy(this Activity activity, string newName, bool useSameForm, bool includeRegistrants,
+        internal static Activity Copy(this Activity activity, string newName, bool useSameForm,
             bool includeSignUpPeriods, bool includeSchedule, int loggedInUserId, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
@@ -522,12 +509,13 @@ namespace AfterSchoolLibrary.Services
                     {
                         //get form and use the same form
                         var formToUse = activity.GetActiveForm(amsgs, adc);
-                        if (formToUse.IsEmpty())
+                        if (formToUse.IsEmpty() || formToUse.IsArchived)
                             formToUse = account.GetDefaultStudentForm(msgs, adc);
 
                         copy.AddFormAndActivate(formToUse, loggedInUserId, false, amsgs, dc: adc);
                     }
-                    //copy form completely
+                    //  copy form completely
+                    // this code should never be used any more
                     else
                     {
                         Form formToCopy = null;
@@ -546,13 +534,12 @@ namespace AfterSchoolLibrary.Services
                         .ForEach(member => member.Copy(copy.ID.Value, loggedInUserId, amsgs, adc));
 
                     if (!WebUser.Load(loggedInUserId, amsgs, adc).HasAccessToActivity(copy, amsgs, adc))
-                    {
                         copy.AddTeamMember(loggedInUserId, true, loggedInUserId, amsgs, adc);
-                    }
 
                     if (includeSignUpPeriods)
                     {
                         var activePeriod = activity.GetActiveRegistrationPeriod(amsgs, adc);
+
                         if (activePeriod.IsNotEmpty())
                         {
                             //copy registration period if doesn't have activity groups
@@ -604,46 +591,6 @@ namespace AfterSchoolLibrary.Services
                     var oldPostPayPlan = activity.GetPostPayPlan(amsgs, adc);
                     if (oldPostPayPlan.IsNotEmpty())
                         oldPostPayPlan.Copy(copy.ID.Value, loggedInUserId, amsgs, adc);
-
-                    //if (includeRegistrants)
-                    //{
-                    //    // need a new registration
-                    //    var registrantActivities = activity.GetRegistrantActivities(amsgs, adc);
-
-                    //    registrantActivities.ForEach(registrantActivity => {
-
-                    //        var registrant = registrantActivity.ToRegistrant();
-
-                    //        // copies with no esignature because the parent isn't really signing. 
-                    //        // TODO: Need to get it, request esignature from parent?
-                    //        var newRegistration = registrant.AddRegistration(
-                    //            account.ID.Value,
-                    //            copy.ActivityGroupId,
-                    //            copy.AccountActivityGroupId,
-                    //            null,
-                    //            RegistrationCompletionStatus.RequiresParentSignature,
-                    //            loggedInUserId,
-                    //            amsgs,
-                    //            adc);
-
-                    //        var newRegistrantActivity = new RegistrantActivity()
-                    //        {
-                    //            ActivityGroupId = activity.ActivityGroupId,
-                    //            //ActivityId = copy.ID,
-                    //            CreateDate = DateTime.UtcNow,
-                    //            CreatedBy = loggedInUserId,
-                    //            LastModifiedBy = loggedInUserId,
-                    //            LastModifiedDate = DateTime.UtcNow,
-                    //            PreferenceNumber = registrantActivity.PreferenceNumber,
-                    //            RegistrantId = registrantActivity.RegistrantId,
-                    //            SeatIndex = registrantActivity.SeatIndex,
-                    //            RegistrationId = newRegistration.ID
-                    //        };
-                    //        amsgs.AddRange(newRegistrantActivity.Save(adc));
-
-                    //        // TODO: probably should notify parents that they've been added
-                    //    });
-                    //}
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -1058,7 +1005,7 @@ namespace AfterSchoolLibrary.Services
 
             if (cutoffHours.IsNotEmpty() && cutoffHours.IsNumber())
                 activity.RegistrationCutoffHours = cutoffHours.ToString().ToInteger();
-            
+
             if (strictgenderrestrictions.IsNumber())
                 activity.IsGenderEnforced = strictgenderrestrictions.ToString().ToBoolean();
 
@@ -1282,6 +1229,17 @@ namespace AfterSchoolLibrary.Services
             }
 
             return activity;
+        }
+
+        public static SystemMessages SetIsFeatured(this Activity activity, bool isFeatured, int loggedInUserId, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if ((bool) msgs?.HasErrors())
+                return new SystemMessages();
+            activity.IsFeatured = isFeatured;
+            activity.LastModifiedBy = loggedInUserId;
+            activity.LastModifiedDate = DateTime.UtcNow;
+            return activity.Save(dc);
         }
 
         private static SystemMessages SetupInstructor(this Activity activity, Account account, string instructor,
@@ -2310,7 +2268,12 @@ namespace AfterSchoolLibrary.Services
         public static List<Form> GetForms(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return ActivityForm.LoadByActivityId(activity.ID.Value, dc: dc).Select(x => x.GetForm()).ToList();
+            var activityForms = ActivityForm.LoadByActivityId(activity.ID.Value, msgs, dc);
+
+            if (activityForms.Count > 0)
+                return activityForms.Select(x => x.GetForm(msgs, dc)).ToList();
+
+            return new List<Form>();
         }
 
         public static Form GetActiveForm(this Activity activity, SystemMessages msgs = null,
@@ -2889,18 +2852,18 @@ namespace AfterSchoolLibrary.Services
 
             var schedule = activity.GetSchedule(msgs, dc);
             var upcomingInstance = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault();
-            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth.Day, schedule, upcomingInstance,
+            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, upcomingInstance,
                 DateTime.UtcNow);
         }
 
         internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
-            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, int dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
             DateTime utcNow)
         {
             if (!activityHasSchedule)
                 return (null, null);
 
-            var startDate = schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
+            var startDate = dayOfMonth; // schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
             var paymentEnd = schedule.EndDate.Value;
 
             switch (billingPeriodType)
@@ -2915,8 +2878,8 @@ namespace AfterSchoolLibrary.Services
                 }
                 case BillingPeriodType.Month:
                 {
-                    var startingDay = new DateTime(startDate.Year, startDate.Month, dayOfMonth);
-                    var paymentStart = startingDay.IsAfter(utcNow) ? startingDay : utcNow;
+                    // var startingDay = new DateTime(startDate.Year, startDate.Month, startDate.Day);
+                    var paymentStart = new DateTime(startDate.Year, startDate.Month, startDate.Day); //startingDay.IsAfter(utcNow) ? startingDay : utcNow;
                     return (paymentStart, paymentEnd);
                 }
                 default:

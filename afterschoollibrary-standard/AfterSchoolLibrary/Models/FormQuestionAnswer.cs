@@ -26,6 +26,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["FormQuestionId"].Value = value;
         }
 
+        public int? OldFormQuestionId
+        {
+            get => (int?) MDV["OldFormQuestionId"].Value;
+            set => MDV["OldFormQuestionId"].Value = value;
+        }
+
         public int? RegistrantId
         {
             get => (int?) MDV["RegistrantId"].Value;
@@ -93,6 +99,10 @@ namespace AfterSchoolLibrary.Models
         public int? FormQuestionGroupDisplayOrder => (int?) MDV["FormQuestionGroupDisplayOrder"].Value;
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId => (QuestionGroupDataType) MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value;
         public int? RegistrationAccountId => (int?) MDV["RegistrationAccountId"].Value;
+        public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
+        public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
+        public string RegistrantEmail => (string) MDV["RegistrantEmail"].Value;
+        public int? RegistrantFirstRegistrantId => (int?) MDV["RegistrantFirstRegistrantId"].Value;
 
 
         public FormQuestionAnswer()
@@ -110,6 +120,7 @@ namespace AfterSchoolLibrary.Models
                 var className = typeof(FormQuestionAnswer).Name;
                 _dp = get_BaseObjectMap(className);
                 _dp.Add(className, "FormQuestionId", SqlDbType.Int);
+                _dp.Add(className, "OldFormQuestionId", SqlDbType.Int);
                 _dp.Add(className, "RegistrantId", SqlDbType.Int);
                 _dp.Add(className, "ActivityId", SqlDbType.Int);
                 _dp.Add(className, "SurveyResponseId", SqlDbType.Int);
@@ -130,6 +141,10 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
                     "FormQuestionGroup");
                 _dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", SqlDbType.Int, "Registration");
+                _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantLastName", typeof(Registrant).Name, "LastName", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantEmail", typeof(Registrant).Name, "Email", SqlDbType.NVarChar, "Registrant");
+                _dp.Add(className, "RegistrantFirstRegistrantId", typeof(Registrant).Name, "FirstRegistrantId", SqlDbType.Int, "Registrant");
 
                 return _dp;
             }
@@ -149,6 +164,7 @@ namespace AfterSchoolLibrary.Models
                 var dq = get_DatabaseQuery(ObjectMap, typeof(FormQuestionAnswer).Name);
                 dq.Joins.Add(FormQuestion.ObjectMap["ID"], ObjectMap["FormQuestionId"], DatabaseJoinTypeEnum.LeftOuterJoin, "FormQuestion");
                 dq.Joins.Add(Registration.ObjectMap["ID"], ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.LeftOuterJoin, "Registration");
+                dq.Joins.Add(Registrant.ObjectMap["ID"], ObjectMap["RegistrantId"], DatabaseJoinTypeEnum.LeftOuterJoin, "Registrant");
                 dq.Joins.Add(SurveyResponse.ObjectMap["ID"], ObjectMap["SurveyResponseId"], DatabaseJoinTypeEnum.LeftOuterJoin, "SurveyResponse");
                 dq.Joins.Add(FormQuestionGroup.ObjectMap["ID"], FormQuestion.ObjectMap["FormQuestionGroupId"], DatabaseJoinTypeEnum.LeftOuterJoin,
                     "FormQuestionGroup");
@@ -216,6 +232,10 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters();
+            dps.Add(ObjectMap["OldFormQuestionId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
             dps.Add(ObjectMap["RegistrantId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
@@ -265,6 +285,38 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static bool ExistsByRegistrantId(int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            return dq.GetCount() > 0;
+        }
+
+        public static List<FormQuestionAnswer> LoadByRegistrantIds(IEnumerable<int> RegistrantIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<FormQuestionAnswer> LoadBySurveyResponseIds(IEnumerable<int> SurveyResponseIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<FormQuestionAnswer> LoadByFormId(int FormId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["FormQuestionFormId"], FormId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -342,6 +394,7 @@ namespace AfterSchoolLibrary.Models
         {
             if (loadFromDb)
                 return FormQuestion.Load(FormQuestionId.Value, msgs, dc);
+
             return new FormQuestion
             {
                 ID = FormQuestionId,

@@ -36,7 +36,7 @@
           <SQLDebugging>False</SQLDebugging>
           <ExternalProgram>
           </ExternalProgram>
-          <StartExternalURL>http://localhost:54849/login</StartExternalURL>
+          <StartExternalURL>http://localhost:54849</StartExternalURL>
           <StartCmdLineArguments>
           </StartCmdLineArguments>
           <StartWorkingDirectory>

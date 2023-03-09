@@ -253,6 +253,7 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["RegistrationId"], RegistrationId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
@@ -274,7 +275,7 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static RegistrantActivity LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static RegistrantActivity LoadByParticipationObjectByRegistrant(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, SystemMessages msgs = null, DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
@@ -314,6 +315,16 @@ namespace AfterSchoolLibrary.Models
                 RegistrantTypeId = RegistrantRegistrantTypeId,
                 FirstRegistrantId = RegistrantFirstRegistrantId
             };
+        }
+        public static bool ExistsByParticipationObjectByRegistrantName(int participationObjectId, ParticipationObjectType participationObjectType, string firstName, string lastName, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int) participationObjectType);
+            dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName);
+            dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName);
+            return dq.GetCount() > 0;
         }
 
         public static List<RegistrantActivity> LoadByParticipationObject(int participationObjectId, ParticipationObjectType participationObjectType, int? start, int? length, DatabaseConnection dc = null)
@@ -505,6 +516,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

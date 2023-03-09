@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
@@ -12,6 +14,8 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public List<RegistrantActivity> RegistrantActivities { get; set; }
         public Account CurrentAccount { get; set; }
         public WebUser CurrentUser { get; set; }
+
+        public UserType AccountUserType { get; set; }
         public RegistrationAssignmentType AssignmentType { get; set; }
         public AccountPackage AccountPackage { get; set; }
         public bool IsReadOnlySeatStatus { get; set; }
@@ -30,7 +34,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
     {
         public RegistrantsResult AssembleRegistrantsResult(AfterSchoolLibrary.Models.Activity activity, List<RegistrantActivity> registrantActivities,
             Account currentAccount, WebUser currentUser, RegistrationAssignmentType assignmentType, AccountPackage accountPackage, bool isReadOnlySeatStatus,
-            ActivitySchedule activitySchedule, UserType userType, bool userIsActivityLeader, SystemMessages messages)
+            ActivitySchedule activitySchedule, UserType userType, bool userIsActivityLeader, SystemMessages messages, string date = null)
         {
             var registrantCount = registrantActivities.Count(x => x.AssignmentTypeId.In(AfterSchoolLibrary.Models.Registration.ReservedStatuses));
             var waitingListCount = registrantActivities.Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
@@ -60,6 +64,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 DeclinedCount = declinedCount,
                 PendingBackgroundCheckCount = pendingBackgroundCheckCount,
                 Messages = messages,
+                AccountUserType = userType,
             };
         }
     }

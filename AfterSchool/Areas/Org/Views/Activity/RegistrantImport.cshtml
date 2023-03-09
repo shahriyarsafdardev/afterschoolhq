@@ -1,0 +1,246 @@
+@model Activity
+@{
+    ViewBag.Title = Model.AccountName;
+    SystemMessages msgs = (SystemMessages)ViewBag.Messages;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentUser = SessionVariables.CurrentUser;
+    var anyErrors = false;
+    var createAccounts = ((string)ViewBag.CreateAccounts).IsBoolean();
+    var selectedAssignmentType = (RegistrationAssignmentType)ViewBag.SelectedAssignmentType;
+    var ignoreRequiredFields = (bool)ViewBag.IgnoreRequiredFields;
+}
+
+@{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+        {
+            Activity = Model,
+            IsActivityLeader = (bool?)ViewData["IsActivityLeader"],
+            IsFullScreen = (bool?)ViewData["IsFullScreen"],
+            AccountPackage = accountPackage,
+            CurrentAccount = currentAccount,
+            CurrentUser = currentUser,
+        }); }
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", $"{Model.Name} - {UILabel.RegistrantLabel(Model.ActivityTypeId)} Detail", new ViewDataDictionary
+                {
+                  {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(Model.ActivityTypeId)},
+              }); }
+        </div>
+        <div class="panel-body">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @if (ViewBag.Step == 1)
+                    {
+                        <a href="@Url.Action("getimportsample", "activity", new { id = Model.Uid })" target="_blank" class="btn btn-default pull-right"><i class="s7-download"></i> Download Sample</a>
+                    }
+                    Step @ViewBag.Step: @ViewBag.StepLabel
+                </div>
+                <div class="panel-body">
+
+                    @if (ViewBag.Step == 1)
+                    {
+                        <form method="post" action="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Registration Data File (.csv only)</label>
+                                <div class="col-md-6">
+                                    <input type="file" name="importfile" id="importfile" class="form-control" required />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Seat Assignment Type</label>
+                                <div class="col-md-6">
+                                    <select name="assignmenttype"
+                                            id="assignmenttype"
+                                            class="form-control">
+
+                                        @foreach (var assignmenttype in Enum.GetValues(typeof(RegistrationAssignmentType)).Cast<RegistrationAssignmentType>())
+                                        {
+                                            switch (assignmenttype)
+                                            {
+                                                case RegistrationAssignmentType.NotSet:
+                                                case RegistrationAssignmentType.ReservedPendingBackgroundCheck:
+                                                case RegistrationAssignmentType.Declined:
+                                                case RegistrationAssignmentType.Invited:
+                                                    continue;
+
+                                            }
+
+                                            <option value="@((int)assignmenttype)" @(selectedAssignmentType == assignmenttype ? "selected=\"selected\"" : "")>
+                                                @assignmenttype.ToString().SplitByUpperCase()
+                                            </option>
+                                        }
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="createaccounts" name="createaccounts" class="form-control" value="1" onclick="createaccountsClick()" />
+                                            <label for="createaccounts">
+                                                Create parent accounts upon import?
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="enabletextmessages" name="enabletextmessages" class="form-control" value="1" disabled="disabled" />
+                                            <label for="enabletextmessages">
+                                                Enable Parents to receive text messages
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="ignoreRequiredFields" name="ignoreRequiredFields" class="form-control" value="1" />
+                                            <label for="ignoreRequiredFields">
+                                                Ignore required fields
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox">
+                                            <input type="checkbox" id="validatephonenumbers" name="validatephonenumbers" class="form-control" value="1" checked="checked" />
+                                            <label for="validatephonenumbers">
+                                                Validate Phone Numbers
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-6 col-md-offset-3">
+                                    <button type="submit" class="btn btn-primary">Upload &amp; Review</button>
+                                    <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Back to List</a>
+                                </div>
+                            </div>
+
+                        </form>
+                    }
+                    else if (ViewBag.Step == 2)
+                    {
+                        var headers = (List<string>)ViewBag.Headers;
+                        var rows = (List<List<AfterSchool.Models.ImportField>>)ViewBag.Rows;
+                        var rowCount = 0;
+
+                        <p class="text-medium-small">Below is a table of the registration data that will be imported. Please review the results and confirm or cancel to make adjustments to your file and re-upload.</p>
+
+                        <p>&nbsp;</p>
+
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-striped">
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    @foreach (var header in headers)
+                                    {
+                                        <th>@header</th>
+                                    }
+                                </tr>
+                                @foreach (var row in rows)
+                                {
+                                    rowCount++;
+
+                                    if (!anyErrors && row.Any(x => x.Messages.HasErrors()))
+                                    {
+                                        anyErrors = true;
+                                    }
+
+                                    <tr>
+                                        <td>@(rowCount)</td>
+                                        <td>
+                                            @if (row.Any(x => x.Messages.HasErrors()))
+                                            {
+                                                <i class="s7-attention icon-large text-danger" data-toggle="popover" data-trigger="hover" data-content="This row has errors and cannot be imported" data-placement="top"></i>
+                                            }
+                                            else if (row.Any(x => x.Messages.Has(MessageType.Warning)))
+                                            {
+                                                <i class="s7-attention icon-large text-warning" data-toggle="popover" data-trigger="hover" data-content="This row has warnings for you to review" data-placement="top"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="s7-check-circle icon-large text-success" data-toggle="popover" data-trigger="hover" data-content="This row has no errors or warnings and is ready to import" data-placement="top"></i>
+                                            }
+                                        </td>
+                                        @foreach (var field in row)
+                                        {
+                                            var iconColor = field.Messages.HasErrors() ? "text-danger" : "text-warning";
+
+                                            <td>
+                                                @field.Value
+                                                @if (field.Messages.HasErrors() || field.Messages.Has(MessageType.Warning))
+                                                {
+                                                    <strong><i class="s7-attention icon-medium @iconColor" data-toggle="popover" data-trigger="hover" data-content="@field.Messages.RenderMessageList(MessageOutputType.Text)" data-placement="top"></i></strong>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+
+                        <form method="post" 
+                              action="@Url.Action("registrantimport", "activity", new { id = Model.Uid, createaccounts = ViewBag.CreateAccounts, assignmenttype = (int)selectedAssignmentType, enabletextmessages = ViewBag.EnableTextMessages })" 
+                              class="form-horizontal">
+
+                            <textarea name="csv" id="csv" class="hidden">@ViewBag.Csv</textarea>
+
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary btn-lg pull-right" @(anyErrors ? "disabled=\"disabled\"" : "" )>Import Registration Data &raquo;</button>
+                                    <a href="@Url.Action("registrantimport", "activity", new { id = Model.Uid })" class="btn btn-default">&laquo; Cancel &amp; Re-Upload</a>
+                                </div>
+                            </div>
+
+                        </form>
+
+                    }
+                    else if (ViewBag.Step == 3)
+                    {
+                        if (msgs.HasNoErrors())
+                        {
+                            <p class="text-medium-small">Your data has been imported successfully.</p>
+                            <p>
+                                <a href="@Url.Action("registrants", "activity", new { id = Model.Uid })" class="btn btn-primary btn-lg">View Registration Data &raquo;</a>
+                            </p>
+                        }
+                        else
+                        {
+                            <p>An error occurred. We'll try to figure out what is going on :-(</p>
+                        }
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+<script>
+    function createaccountsClick() {
+        if ($('#createaccounts').is(':checked')) {
+            $('#enabletextmessages').prop('disabled', false);
+        } else {
+            $('#enabletextmessages').prop('disabled', true);
+        }
+    }
+</script>

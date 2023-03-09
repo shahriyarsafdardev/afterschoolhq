@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -357,7 +357,7 @@ namespace AfterSchool.Areas.District.Controllers
 
             ViewBag.Messages = new SystemMessages();
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms(null).Where(x => !x.IsArchived || league.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Grades = GradeLevel.Load();
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
 
@@ -415,7 +415,7 @@ namespace AfterSchool.Areas.District.Controllers
             };
 
             var filteredParams = Request.Params.Filter("schedulerepeat-");
-            var days = Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
+            var days = AfterSchool.Models.ActivityScheduleUI.PrepDaysOfWeek(filteredParams);
 
             if (!isongoing.IsBoolean())
                 inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate, enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
@@ -455,17 +455,18 @@ namespace AfterSchool.Areas.District.Controllers
 
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
-            ViewBag.Forms = SessionVariables.CurrentAccount.GetForms();
+            ViewBag.Forms = currentAccount.GetForms(null).Where(x => !x.IsArchived || league.FormId == x.ID).OrderBy(x => x.Name).ToList();
             ViewBag.Grades = GradeLevel.Load();
             LoadEditScheduleViewBag(league, league.ActivityScheduleId.ToString());
-            ViewBag.Teams = league.GetLeagueTeams(SessionVariables.CurrentAccount, AccountType.School.AsList());
+            ViewBag.Teams = league.GetLeagueTeams(currentAccount, AccountType.School.AsList());
 
             return View(league);
         }
 
         private List<Account> LoadInviteSchoolViewBag(ActivityGroup activityGroup, SystemMessages msgs)
         {
-            var schools = SessionVariables.CurrentAccount.GetVisitorAccounts(AccountType.School.AsList(), msgs);
+            var currentAccount = SessionVariables.CurrentAccount;
+            var schools = currentAccount.GetVisitorAccounts(AccountType.School.AsList(), msgs);
             var accountActivityGroups = AccountActivityGroup.LoadByActivityGroupId(activityGroup.ID.Value, msgs);
             var accountIds = accountActivityGroups.Select(a => a.AccountId.Value);
             

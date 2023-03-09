@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -38,7 +38,8 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, DateTime? startDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, 
+            DateTime? startDate, DateTime? trialEndDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountPackage = new AccountPackage
             {
@@ -54,7 +55,9 @@ namespace AfterSchoolLibrary.Services
                     ? package.Price
                     : package.PricePerYear,
                 StripeSubscriptionId = stripeSubscriptionId,
-                StartDate = startDate
+                StartDate = startDate,
+                TrialEndDate = trialEndDate,
+                TrialStartDate = trialEndDate.HasValue ? DateTime.UtcNow : new DateTime?()
             };
 
             msgs.AddRange(accountPackage.Save(dc));
@@ -66,15 +69,22 @@ namespace AfterSchoolLibrary.Services
 
         public static void UpdateTrialDaysWithStripe(this AccountPackage accountPackage, int trialDays, SystemMessages msgs, DatabaseConnection dc = null)
         {
+            var newTrialEndDate = accountPackage.TrialStartDate.Value.AddDays(trialDays);
+
+            if (newTrialEndDate.IsBefore(DateTime.UtcNow))
+            {
+                msgs.Add("Trial days not updated because the trial end date would still be in the past", MessageType.Notice);
+                return;
+            }
+
             accountPackage.UpdateTrialDays(trialDays, msgs, dc);
 
             if (msgs.HasNoErrors())
                 StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
                     subscriptionId: accountPackage.StripeSubscriptionId,
                     priceId: null,
-                    billingCycleAnchorNow: null,
-                    billingCycleAnchorUnchanged: null,
-                    trialEndDate: accountPackage.TrialStartDate.Value.AddDays(trialDays),
+                    billingCycleAnchor: null,
+                    trialEndDate: newTrialEndDate,
                     prorate: null,
                     couponId: null,
                     msgs: msgs);

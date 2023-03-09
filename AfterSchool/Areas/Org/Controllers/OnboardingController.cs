@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
@@ -578,7 +578,7 @@ namespace AfterSchool.Areas.Org.Controllers
             
             HandleTempMessages(msgs);
 
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
+            ViewBag.IsIsypAccount = currentAccount.IsInIsypDirectory(msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Profile = currentAccount.GetOrCreateAccountProfile(SessionVariables.CurrentUser, msgs);
@@ -660,7 +660,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("Done", new {accounttype = currentAccount.AccountTypeId.ToString()});
             }
 
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(currentAccount, msgs);
+            ViewBag.IsIsypAccount = currentAccount.IsInIsypDirectory(msgs);
             ViewBag.Messages = msgs;
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             return View(currentAccount);
@@ -722,6 +722,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult FreeTrial()
         {
             var account = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+
+            ViewBag.SignedUpForDefaultPackage = SessionVariables.AccountPackage.GetPackage(msgs).IsDefaultCustomerPackage;
             return View(account);
         }
     }

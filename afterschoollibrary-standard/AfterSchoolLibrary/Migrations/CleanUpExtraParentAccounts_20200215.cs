@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -76,7 +76,7 @@ namespace AfterSchoolLibrary.Migrations
 
                                         if (lastCompletedRegistrant.IsNotEmpty() && firstMasterRegistrant.LastModifiedDate.Value.IsBefore(lastCompletedRegistrant.LastModifiedDate.Value))
                                         {
-                                            lastCompletedRegistrant.CopyAnswersTo(firstMasterRegistrant, null, user, amsgs, adc);
+                                            lastCompletedRegistrant.CopyAnswersTo(firstMasterRegistrant, null, null, user, amsgs, adc);
                                             firstMasterRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Completed, user, amsgs, adc);
                                         }
 

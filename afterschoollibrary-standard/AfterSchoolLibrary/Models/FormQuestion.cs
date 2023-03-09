@@ -98,6 +98,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["Options"].Value = value;
         }
 
+        public string OptionsJson
+        {
+            get => (string) MDV["OptionsJson"].Value;
+            set => MDV["OptionsJson"].Value = value;
+        }
+
         public string Link
         {
             get => (string) MDV["Link"].Value;
@@ -162,6 +168,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "IsLocked", SqlDbType.Bit);
                 _dp.Add(className, "IsAnswerDescriptionEnabled", SqlDbType.Bit);
                 _dp.Add(className, "Options", SqlDbType.NVarChar, "1000");
+                _dp.Add(className, "OptionsJson", SqlDbType.NVarChar, "4000");
                 _dp.Add(className, "Link", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "DependsOnQuestionId", SqlDbType.Int);
                 _dp.Add(className, "DependsOnValues", SqlDbType.NVarChar, "400");
@@ -300,6 +307,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["Options"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["OptionsJson"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters();

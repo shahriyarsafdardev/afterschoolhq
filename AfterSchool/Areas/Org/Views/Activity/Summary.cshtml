@@ -1,4 +1,4 @@
-﻿@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
+@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
 @{
     var participationObject = Model.ParticipationObject;
     var msgs = Model.Messages;
@@ -166,7 +166,7 @@
                                     {
                                         IsCheckoutCost = false,
                                         ParticipationObject = participationObject,
-                                    }, new ViewDataDictionary{{"CurrentAccount", currentAccount}});
+                                    }, new ViewDataDictionary{{"CurrentAccount", currentAccount},{ "isActivityLeader", isActivityLeader}});
                                 }
                                 else
                                 {
@@ -229,8 +229,5 @@
             resize: true,
             barColors: ['#3d3c3c']
         });
-    });
-
-    
-
+    });    
 </script>

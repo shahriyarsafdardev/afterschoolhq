@@ -1,4 +1,4 @@
-﻿Imports System.ComponentModel
+Imports System.ComponentModel
 Imports System.Runtime.CompilerServices
 Imports System.Reflection
 Imports System.Web
@@ -507,6 +507,11 @@ Public Module Extensions
     <Extension()>
     Public Function AddWeeks(ByVal aDateTime As Date, ByVal weeks As Integer) As Date
         Return aDateTime.AddDays(weeks * 7)
+    End Function
+
+    <Extension()>
+    Public Function AddBiWeeks(ByVal aDateTime As Date, ByVal weeks As Integer) As Date
+        Return aDateTime.AddDays(weeks * 14)
     End Function
 
     <Extension()>
@@ -1072,9 +1077,9 @@ Public Module Extensions
     Public Function ToBoolean(ByVal aString As String) As Boolean
         Try
             Select Case aString.ToLower
-                Case "1", "y", "yes", "true"
+                Case "1", "y", "yes", "true", "t"
                     Return True
-                Case "0", "n", "no", "false"
+                Case "0", "n", "no", "false", "f"
                     Return False
             End Select
         Catch ex As Exception

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -174,6 +174,7 @@ namespace AfterSchool.Controllers
                 ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
                     .Where(po =>
                         po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                    .OrderByDescending(x => x.IsFeatured)
                     .ToList();
                 ViewBag.Locations = account.GetAllAvailableLocations(msgs);
                 ViewBag.AccountProperties = account.GetAccountProperties(
@@ -203,27 +204,17 @@ namespace AfterSchool.Controllers
 
         private List<ParticipationObject> GetParticipationObjects(Account account, SystemMessages msgs)
         {
-            var participationObjects = new List<ParticipationObject>();
-            participationObjects.AddRange(account.GetAllPublishedParticipationObjects(msgs));
-
+            var participationObjects = account.GetAllPublishedParticipationObjects(msgs);
             return participationObjects
                 .Where(po => (!po.IsActivity() || !po.GetActivity().ActivityGroupId.HasValue) && !po.IsInviteOnly)
-                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                 .ToList();
         }
 
         private List<ParticipationObject> GetBrowseActivitiesParticipationObjects(Account account, SystemMessages msgs)
         {
-            var participationObjects = new List<ParticipationObject>();
-            participationObjects.AddRange(account.GetAllPublishedParticipationObjects(msgs));
-
+            var participationObjects = account.GetAllPublishedParticipationObjects(msgs);
             return participationObjects
                 .Where(ShouldDisplayOnBrowseActivities)
-                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                 .ToList();
         }
 
@@ -240,9 +231,6 @@ namespace AfterSchool.Controllers
 
             return participationObjects
                 .Where(po => po.IsActivity() && po.GetActivity().ActivityTypeId == ActivityType.VolunteerOpportunity && !po.IsInviteOnly)
-                .OrderBy(po => po.RegistrationPeriod.IsClosed(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.WillOpen(account, msgs))
-                .ThenBy(po => po.RegistrationPeriod.IsOpen(account, msgs))
                 .ToList();
         }
 
@@ -342,9 +330,14 @@ namespace AfterSchool.Controllers
                 locations.AddRange(participationObjects.Where(po => po.Location.IsNotEmpty())
                     .Select(po => po.Location));
 
-                registrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs)).ToList();
-                registrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs)).ToList();
-                registrationClosed = participationObjects.Where(po => po.NotIn(registrationWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs)).ToList();
+                registrationOpened = participationObjects.Where(po => po.RegistrationPeriod.IsOpen(account, msgs))
+                    .OrderByDescending(x => x.IsFeatured)
+                    .ThenBy(x => x.Name).ToList();
+                registrationWillOpen = participationObjects.Where(po => po.RegistrationPeriod.WillOpen(account, msgs))
+                    .OrderByDescending(x => x.IsFeatured)
+                    .ThenBy(x => x.Name).ToList();
+                registrationClosed = participationObjects.Where(po => po.NotIn(registrationWillOpen) && po.RegistrationPeriod.IsClosed(account, msgs))
+                    .OrderByDescending(x => x.IsFeatured).ThenBy(x => x.Name).ToList();
 
                 featuredProviders = account.GetApprovedVisitorAccounts(msgs);
             }
@@ -908,6 +901,9 @@ namespace AfterSchool.Controllers
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
 
+                if(account.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                    return RedirectToAction("getstartedAllAge", "account", new {area = "", regaccount = account.Uid});
+                
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
             }
 
@@ -937,6 +933,9 @@ namespace AfterSchool.Controllers
                 return RedirectToAction("register", "account", new {area = "", regaccount = account.Uid});
             }
 
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect("~/ReactApp?section=Confirm Registration");
+                    
             return RedirectToAction("registerstudent", "account", new {area = "", regaccount = account.Uid});
         }
 

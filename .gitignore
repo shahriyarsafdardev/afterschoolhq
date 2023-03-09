@@ -58,3 +58,6 @@ Thumbs.db
 # User-specific stuff
 .idea
 *.bak
+*.user
+node_modules
+dist

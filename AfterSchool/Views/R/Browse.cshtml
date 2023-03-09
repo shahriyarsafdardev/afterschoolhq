@@ -21,7 +21,37 @@
            { "LoginReturnUrl", Model.Account.HomePageUrl },
            { "CleverSsoEnabled", cleverSsoEnabled },
            { "session", session }
-       }); }
+       }); 
+    }
+
+<style>
+    @@media screen and (min-width: 768px) {
+        .reg-header {
+            margin-bottom: 0px;
+            float: left;
+            width: 100%;
+        }
+
+        .filter-bar {
+            float: left;
+            width: 100%;
+        }
+
+        .reg-container {
+            float: left;
+        }
+
+        .margin-10 {
+            float: left;
+        }
+    }
+
+    @@media screen and (min-width: 992px) {
+        .reg-container {
+            margin-bottom: 0px !important;
+        }
+    }
+</style>
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
@@ -30,7 +60,8 @@
        new RegistrationHeaderViewModel(
            Model.Account,
            accountProfile,
-           session)); }
+           session)); 
+    }
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_FirstTimeInformation.cshtml", Model.Account); }
 

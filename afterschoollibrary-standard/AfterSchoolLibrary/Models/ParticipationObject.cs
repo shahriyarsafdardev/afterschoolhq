@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -100,6 +99,7 @@ namespace AfterSchoolLibrary.Models
         public int? RegistrationCutoffHours { get; set; }
         public bool IsContinuousEnrollmentEnabled { get; set; }
         public bool IsGenderEnforced { get; set; }
+        public bool IsFeatured { get; set; }
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -160,6 +160,7 @@ namespace AfterSchoolLibrary.Models
             RegistrationCutoffHours = activity.RegistrationCutoffHours;
             IsContinuousEnrollmentEnabled = activity.IsContinuousEnrollment;
             IsGenderEnforced = activity.IsGenderEnforced;
+            IsFeatured = activity.IsFeatured;
 
             if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
             {
@@ -192,8 +193,8 @@ namespace AfterSchoolLibrary.Models
                 SubscriptionPlans = activity.GetActiveSubscriptionPlans(msgs, dc);
                 PostPayPlans = activity.GetActivePostPayPlans(msgs, dc);
                 IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0 && PostPayPlans.Count == 0;
-                StartDate = activity.GetFirstDate(msgs, dc);
-                EndDate = activity.GetLastDate(msgs, dc);
+                StartDate = Schedule?.StartDate ?? activity.GetFirstDate(msgs, dc);
+                EndDate = Schedule?.EndDate ?? activity.GetLastDate(msgs, dc);
             }
         }
 
@@ -227,6 +228,7 @@ namespace AfterSchoolLibrary.Models
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = activityGroup.IsPublished;
             IsGenderEnforced = false;
+            IsFeatured = false;
 
             if (loadAllDetails)
             {
@@ -240,8 +242,8 @@ namespace AfterSchoolLibrary.Models
                 PaymentPlans = activityGroup.GetPaymentPlans(msgs, dc);
                 SubscriptionPlans = activityGroup.GetSubscriptionPlans(msgs, dc);
                 IsFree = IsRegistrationFree && SubscriptionPlans.Count == 0 && PaymentPlans.Count == 0;
-                StartDate = activityGroup.GetFirstDate(msgs, dc);
-                EndDate = activityGroup.GetLastDate(msgs, dc);
+                StartDate = Schedule?.StartDate ?? activityGroup.GetFirstDate(msgs, dc);
+                EndDate = Schedule?.EndDate ?? activityGroup.GetLastDate(msgs, dc);
             }
         }
 
@@ -272,6 +274,7 @@ namespace AfterSchoolLibrary.Models
             LastModifiedDate = activityGroup.LastModifiedDate;
             IsPublished = aag.IsPublished;
             IsGenderEnforced = false;
+            IsFeatured = false;
 
             if (loadAllDetails)
             {
@@ -287,7 +290,7 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        public bool AcceptsGenderType (GenderType? gender)
+        public bool AcceptsGenderType(GenderType? gender)
         {
             return gender switch
             {
@@ -545,7 +548,7 @@ namespace AfterSchoolLibrary.Models
                 return IsGradeInRange(registrantGradeLevelAnswer.Text, msgs, dc);
             return false;
         }
-        
+
         public bool IsGradeInRange(string answer, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!MinGradeId.HasValue && !MaxGradeId.HasValue)
@@ -1212,7 +1215,7 @@ namespace AfterSchoolLibrary.Models
                 Uid = Guid.NewGuid(),
             };
 
-            var reg = new Regex(BasicLibrary.Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            var reg = new Regex(Utilities.UrlFriendlyRegEx, RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var schedule = ActivitySchedule.GetNewDefaultSchedule(generateDates: true);
             var currentAccount = account;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,6 +102,11 @@ namespace AfterSchoolLibrary.Services
         public static Account GetVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer);
+        }
+        
+        public static bool HasVolunteerAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.GetAccounts(msgs, dc).FirstOrDefault(account => account.AccountTypeId == AccountType.Volunteer) != null ? true : false;
         }
 
         public static bool HasRegistrantAccount(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -315,6 +320,12 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student},
                 true, false, msgs, dc).FirstOrDefault();
         }
+        
+        public static Registrant GetMasterParentOrStudentOrAdultRegistrant(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserId(user.ID.Value, new List<RegistrantPersonType>() {RegistrantPersonType.Parent, RegistrantPersonType.Student, RegistrantPersonType.Adult},
+                true, false, msgs, dc).FirstOrDefault();
+        }
 
         public static List<Registrant> GetAllRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -327,7 +338,7 @@ namespace AfterSchoolLibrary.Services
         {
             return RegistrantWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs, dc)
                 .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
-                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student)
+                .Where(registrant => registrant.PersonTypeId == RegistrantPersonType.Student || registrant.PersonTypeId == RegistrantPersonType.Adult)
                 .ToList();
         }
 
@@ -466,7 +477,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                     HowHearAboutUs = howHearAboutUs,
                 };
 
@@ -509,7 +520,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())
@@ -551,7 +562,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())
@@ -595,7 +606,7 @@ namespace AfterSchoolLibrary.Services
                     CreatedBy = loggedInUser?.ID.IfEmpty(0),
                     LastModifiedDate = DateTime.UtcNow,
                     LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                    Username = GenerateUsername(firstName, lastName),
+                    Username = GenerateUsername(firstName, lastName, msgs, dc),
                 };
 
                 if (password.IsNotEmpty())
@@ -670,6 +681,59 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+
+            return account;
+        }
+        
+        public static Account AddNewParentOrStudentRegistrantOrAdultAccount(this WebUser user, UserType userType, WebUser loggedInUser, RegistrantPersonType registrantPersonType,int? locationId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var account = user.GetRegistrantAccount(msgs, dc);
+
+            if(account.IsEmpty())
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        account = AccountService.CreateNew(
+                            orgName: registrantPersonType == RegistrantPersonType.Parent ? $"{user.LastName} Family" : $"{user.DisplayName}",
+                            email: user.Email,
+                            phone: user.Phone,
+                            isActive: true,
+                            accountType: AccountType.Registrant,
+                            accountOwner: user,
+                            packageId: null,
+                            packageBillingPeriod: null,
+                            timeZone: null,
+                            createWithStripe: true,
+                            stripeAccountType: StripeAccountType.ConnectAccount,
+                            loggedInUser: loggedInUser,
+                            msgs: amsgs,
+                            dc: adc);
+
+                        user.AddAccount(account, userType, loggedInUser, amsgs, adc);
+
+                        account.CreateParentOrStudentorAdultRegistrant(
+                            firstName: user.FirstName,
+                            lastName: user.LastName,
+                            email: user.Email,
+                            registrantOwner: user,
+                            canBeAccessedBy: user.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: registrantPersonType == RegistrantPersonType.Parent, // || registrantPersonType == RegistrantPersonType.Adult,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: user,
+                            registrantPersonType: registrantPersonType,
+                            msgs: amsgs,
+                            dc: adc);
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                    dc: dc
+                );
 
             return account;
         }
@@ -866,7 +930,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Account AddNewAccountWithDefaultPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
-            SignUpType signUpTypeId,
+            SignUpType signUpTypeId,int? trialDaysOverride,
             WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
@@ -875,7 +939,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.SetDefaultAccountPackage(loggedInUser, msgs, dc);
+                account.SetDefaultAccountPackage(trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;
@@ -883,7 +947,7 @@ namespace AfterSchoolLibrary.Services
 
         public static Account AddNewAccountWithPackageWithStripe(this WebUser accountOwner, string orgName, string phone, AccountType accountType,
             Package package,
-            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            BillingPeriodType billingPeriodType, SignUpType signUpTypeId, int? trialDaysOverride, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var account = AddNewAccount(accountOwner, orgName, phone, true, accountType, null, null, null,
                 signUpTypeId, loggedInUser, msgs, dc);
@@ -891,7 +955,7 @@ namespace AfterSchoolLibrary.Services
             if (account.IsNotEmpty())
             {
                 account.CreateStripeCustomer(StripeAccountType.SubscriberAccount, accountOwner, msgs, dc);
-                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, loggedInUser, msgs, dc);
+                account.AddFirstPackage(package.ID.Value, billingPeriodType, signUpTypeId, trialDaysOverride, loggedInUser, msgs, dc);
             }
 
             return account;
@@ -994,30 +1058,17 @@ namespace AfterSchoolLibrary.Services
         public static void CompleteSignUp(this WebUser user, Account account, string firstName, string lastName,
             string email, string password,string phone, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
-        {
+        {                                   
+        
+            
+            user = SaveWebUser(user, firstName, lastName, email, password, phone, loggedInUser, msgs, dc);
+            
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    user.FirstName = firstName;
-                    user.LastName = lastName;
-                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
-                    user.IsRegistered = true;
-                    user.IsActive = true;
-                    user.Password = EncryptPassword(password);
-                    user.LastModifiedDate = DateTime.UtcNow;
-                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
-                    user.Phone = phone;
-
-                    if (user.Email.IsSameAs(email))
-                        user.VerifiedAccount = true;
-                    else
-                        user.Email = email;
-
-                    amsgs.AddRange(user.Save(adc));
-
                     user.ActivateForAccount(account, loggedInUser, amsgs, adc);
 
                     // Registrant accounts don't need a package
@@ -1027,7 +1078,7 @@ namespace AfterSchoolLibrary.Services
                             account.SetDefaultAccountPackage(loggedInUser, amsgs, adc);
 
                         if (account.StripeCustomerId.IsEmpty())
-                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, dc));
+                            amsgs.AddRange(account.SaveWithStripe(StripeAccountType.SubscriberAccount, adc));
                     }
                     else
                     {
@@ -1047,6 +1098,40 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
         }
+        
+        public static WebUser SaveWebUser(this WebUser user, string firstName, string lastName,
+            string email, string password, string phone, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            //WebUser user = null;
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    user.Username = GenerateUsername(user.FirstName, user.LastName, amsgs, adc);
+                    user.IsRegistered = true;
+                    user.IsActive = true;
+                    user.Password = EncryptPassword(password);
+                    user.LastModifiedDate = DateTime.UtcNow;
+                    user.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+                    user.Phone = phone;
+                    if (user.Email.IsSameAs(email))
+                        user.VerifiedAccount = true;
+                    else
+                        user.Email = email;
+                    amsgs.AddRange(user.Save(adc));
+                }
+            );
+            return user;
+        }
+
+        public static bool HasBackgroundCheck(this WebUser webUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return BackgroundCheck.HasBackgroundCheck((int)webUser.ID, msgs, dc);
+        }
 
         /// <summary>
         ///     Change the AccountWebUser record to be active. If it's not active user can't login
@@ -1065,7 +1150,7 @@ namespace AfterSchoolLibrary.Services
             var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
 
             if (awu.IsNotEmpty())
-                msgs.AddRange(awu.Activate(loggedInUser, msgs, dc));
+                msgs.AddRange(awu.Activate(loggedInUser, dc));
             else
                 msgs.Add("User not valid for account", MessageType.UserError);
         }

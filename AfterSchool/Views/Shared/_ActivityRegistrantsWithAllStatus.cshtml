@@ -1,4 +1,4 @@
-﻿@using Email = AfterSchoolLibrary.Helpers.Email
+@using Email = AfterSchoolLibrary.Helpers.Email
 @model List<RegistrantActivity>
 @{
     var account = (Account) ViewData["Account"];
@@ -17,6 +17,7 @@
     var declined = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.Declined).ToList();
     var reservedPendingBackgroundCheck = Model.Where(m => m.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck).ToList();
     var isVolunteer = activity.ActivityTypeId == ActivityType.VolunteerOpportunity;
+    var canViewRegistrantData = ViewData["canViewRegistrantData"].IsNotEmpty() ? ViewData["canViewRegistrantData"].ToString().ToBoolean() : true;
 }
 
 <div class="clearfix"></div>
@@ -31,7 +32,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.ReservedPendingPayment},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -48,7 +50,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.ReservedPendingParentalConsent},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -67,7 +70,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.Reserved},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -82,7 +86,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.Reserved},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -102,7 +107,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.WaitingList},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -117,7 +123,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.WaitingList},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -135,7 +142,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.Invited},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -152,7 +160,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.Applied},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -169,7 +178,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.Declined},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -186,7 +196,8 @@
             {"EditAction", editaction},
             {"EditController", editcontroller},
             {"HeaderTitle", RegistrationAssignmentType.ReservedPendingBackgroundCheck},
-            {"IsReadOnly", isReadOnlySeatStatus},
+            {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+            {"CanViewRegistrantData", canViewRegistrantData },
         }
         );
 }
@@ -205,7 +216,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -220,7 +232,8 @@
                 {"EditAction", editaction},
                 {"EditController", editcontroller},
                 {"HeaderTitle", RegistrationAssignmentType.Withdrawn},
-                {"IsReadOnly", isReadOnlySeatStatus},
+                {"IsReadOnly", isReadOnlySeatStatus || !canViewRegistrantData},
+                {"CanViewRegistrantData", canViewRegistrantData },
             }
             );
     }
@@ -341,7 +354,7 @@
                         message: `Error sending payment reminder email to ${registrantName}. Please <a href="mailto:@Email.AppSupportEmailAddress" class="white">contact support</a>.`
                     });
                 }
-                $(obj).html('Send Invoice');
+                $(obj).html('Send Payment Link');
                 $(obj).prop('disabled', false);
             }
         );

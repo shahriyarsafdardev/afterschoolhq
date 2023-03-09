@@ -1,4 +1,5 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Configuration;
 using System.Linq;
 using System.Web;
@@ -140,18 +141,32 @@ namespace AfterSchool.Models
 
         public static string GetFormattedAnswer(string text)
         {
-            if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
-                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text).FirstOrDefault()?.value;
+            try
+            {
+                if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
+                    return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text).FirstOrDefault()?.value;
 
-            return text;
+                return text;
+            }
+            catch
+            {
+                return "** ERROR RETRIEVING DATA **";
+            }
         }
 
         public static string GetFormattedAnswerForArray(string text)
         {
-            if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
-                return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(", ");
+            try
+            {
+                if (text.IsNotEmpty() && AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(text))
+                    return AfterSchoolLibrary.Helpers.Utilities.GetKeyValuePairs(text)?.Select(m => m.value)?.ToStringList(", ");
 
-            return text;
+                return text;
+            }
+            catch
+            {
+                return "** ERROR RETRIEVING DATA **";
+            }
         }
 
         public static bool CheckAllowTextMessage(WebUser currentUser)

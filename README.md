@@ -8,6 +8,7 @@
 - Visual Studio
 - .NET Standard SDK
 - .NET Core 2.0
+- Node 16
 
 ## SQL Server Installation and Setup
 
@@ -28,6 +29,27 @@
 
 - Open a bash terminal in the root project directory and run `docker-compose up -d`.
 - Move bash terminal to `/scripts` directory and run `./initialize-sqlserver.sh`.
+
+### React setup
+
+- Get inside the `AfterSchool-HQ\afterschoolhq\AfterSchool\React` directory with `cmd/terminal`.
+- Run following commands inside the React directory:
+```
+npm install
+```
+- Webpacker will compile react app code when you run the following command
+```
+npm run start
+```
+##### ONLY WHEN UPDATING REACT CODE (In Development)
+Above command will provide a script like below:
+```
+<script id="__bs_script__">//<![CDATA[
+    document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.27.11'><\/script>".replace("HOST", location.hostname));
+//]]></script>
+```
+
+Add that script in the `reactapp/index.html` file, just before closing of the `</body>` tag. It will watch the React app code for any change and if any change occurs webpacker will recompile the code to reflect those changes. So, you don't have to re-run webpacker manually every time you make any change to React app code.
 
 ## Configure Local Connection Details
 
