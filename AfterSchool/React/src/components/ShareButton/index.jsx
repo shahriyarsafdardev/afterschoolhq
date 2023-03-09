@@ -1,34 +1,35 @@
 import React from 'react';
 import { Box, Typography } from '@material-ui/core';
-import CopyUrl from 'assets/icon-ios7-world-outline.svg';
-import Icon from '@material-ui/core/Icon';
+
 import useStyles from './styles';
+import apiRoutes from 'routes/apiRoutes';
+import Icon from '@material-ui/core/Icon';
+import facebookIcon from 'assets/social-facebook.svg';
+import twitterIcon from 'assets/social-twitter-outline-1.svg';
 
 function ShareButton(props) {
   const classes = useStyles();
-  const { acticityUrl, activityName, appName, site } = props;
+  const { facebookShareUrl, twitterShareUrl } = apiRoutes;
+  const { activityUrl, activityName, appName = 'AfterSchool HQ', site } = props;
 
-  const facecbookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-    acticityUrl
-  )}&quote=${encodeURIComponent('textToShare')}`;
-
-  const twitterShareUrl = `http://twitter.com/share?text=${encodeURIComponent(
-    `Check out ${activityName} on ${appName}`
-  )}&url=${encodeURIComponent(acticityUrl)}&hashtags=Education,AfterschoolActivities,AfterSchoolHQ`;
-
-  const handleClick = () => {
-    let shareUrl = '';
-    if (site === 'Facebook') shareUrl = facecbookShareUrl;
-    else if (site === 'Twitter') shareUrl = twitterShareUrl;
-
-    // window.open(shareUrl, '_blank', 'noopener noreferrer');
-    window.open(shareUrl, 'FacebookShareDialog', 'width=626,height=436,top=200,left=200');
+  const siteData = {
+    Facebook: {
+      shareUrl: facebookShareUrl(activityUrl),
+      icon: facebookIcon
+    },
+    Twitter: {
+      shareUrl: twitterShareUrl(activityName, appName, activityUrl),
+      icon: twitterIcon
+    }
   };
+
+  const { shareUrl, icon } = siteData[site];
+  const handleClick = () => window.open(shareUrl, '_blank', 'noopener noreferrer');
 
   return (
     <Box className={classes.shareBox} onClick={handleClick}>
       <Icon className={classes.icon}>
-        <img className={classes.icon} src={CopyUrl} />
+        <img className={classes.icon} src={icon} />
       </Icon>
       <Typography>{site}</Typography>
     </Box>

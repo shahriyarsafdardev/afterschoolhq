@@ -33,11 +33,12 @@ export default function Home() {
   const classes = useStyles();
   const { loadUser } = useUser();
   const { scrollToTop, redirect } = utils;
+  const { paymentScreenPath } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
-  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
   const {
     msgs,
     school,
+    loaded,
     loading,
     questions,
     loadFormData,
@@ -54,6 +55,7 @@ export default function Home() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
@@ -98,8 +100,13 @@ export default function Home() {
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
-  const handleRedirection = () =>
-    redirect(IsFree ? thankyouScreenPath(registrationId) : paymentScreenPath(registrationId));
+  const handleRedirection = () => {
+    if (IsFree) {
+      loaded();
+      setShowThankYou(true);
+      setSearchParams('screen=ThankYou');
+    } else redirect(paymentScreenPath(registrationId));
+  };
 
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
@@ -165,7 +172,11 @@ export default function Home() {
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-      } else setSearchParams(paramsQuery);
+        if (showThankYou) setShowThankYou(false);
+      } else {
+        if (searchParams.get('screen')) setShowThankYou(true);
+        else setSearchParams(paramsQuery);
+      }
     }
   }, [questions.length, searchParams.get('section')]);
 
@@ -220,8 +231,9 @@ export default function Home() {
           ) : (
             <>
               <NavBar />
-              <ThankYouSection />
-              {false && (
+              {showThankYou ? (
+                <ThankYouSection />
+              ) : (
                 <Box className={classes.outerWrapper}>
                   <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
                   <Box className={classes.formWrapper}>

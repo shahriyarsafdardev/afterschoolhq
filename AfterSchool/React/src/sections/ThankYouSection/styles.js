@@ -26,7 +26,7 @@ export default makeStyles(theme => ({
   shareBoxesWrapper: {
     width: '700px',
     display: 'flex',
-    maxWidth: '750px',
+    maxWidth: '90%',
     minHeight: '200px',
     marginTop: '30px',
     borderRadius: '6px',

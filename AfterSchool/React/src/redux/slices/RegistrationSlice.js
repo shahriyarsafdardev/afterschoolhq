@@ -71,6 +71,8 @@ export const useRegistrationActions = () => {
   } = RegistrationSlice.actions;
   const dispatch = useDispatch();
 
+  const loaded = () => dispatch(formDataLoaded());
+
   const loadFormData = async (newChild = '0') => {
     dispatch(loadingFormData());
     await RegistrationRepository.getFormData(newChild).then(({ obj, msgs }) => {
@@ -123,7 +125,7 @@ export const useRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages };
+  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded };
 };
 
 export default RegistrationSlice;

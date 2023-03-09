@@ -9,8 +9,7 @@ export default {
   },
   MuiTypography: {
     root: {
-      color: '#555555',
-      maxWidth: '500px'
+      color: '#555555'
     }
   },
   MuiSelect: {
