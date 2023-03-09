@@ -1181,7 +1181,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
 
                     ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
-                    showTable = true;
+                    showTable = !isPayingLater;
                 }
             }
 
