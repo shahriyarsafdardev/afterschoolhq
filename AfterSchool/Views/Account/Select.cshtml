@@ -38,8 +38,8 @@
     {
         Html.RenderPartial("~/Views/Shared/Registration/_SelectStudentCard.cshtml", registrant);
     }
-    @if(Model[0]?.PersonTypeId == RegistrantPersonType.Parent)
-        { Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
+
+    @{ Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
 
 </div>
 
