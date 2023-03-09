@@ -1,7 +1,8 @@
-@model ParticipationObjectViewModel
+﻿@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.FirstOrDefault();
+    var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
     <span>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
@@ -23,7 +24,7 @@
 
         @if (subscriptionPlan.StartDate.HasValue)
         {
-            if (subscriptionPlan.StartDate == DateTime.UtcNow)
+            if (subscriptionPlan.StartDate == accountTodayDate.Date)
             {
                 <span>starting <strong>today</strong></span>
             }
@@ -38,7 +39,6 @@
         }
         else if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
         {
-            var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
             if (Model.ParticipationObject.StartDate.HasValue && Model.ParticipationObject.StartDate.Value.Date.IsAfter(accountTodayDate.Date))
             {
                 <span>starting on <strong>@Model.ParticipationObject.StartDate.ToShortDateString()</strong></span>
