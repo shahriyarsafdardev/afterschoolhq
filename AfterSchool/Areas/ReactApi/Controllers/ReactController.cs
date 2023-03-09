@@ -139,8 +139,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
-                        findAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
-                        activityUrl = activity.ShortHomePageUrl,
+                        FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                        ActivityUrl = activity.ShortHomePageUrl,
+                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl()
                     }
                 };
                 
