@@ -76,7 +76,7 @@
                                 var billingPeriodTypeId = plan.BillingPeriodTypeId;
                                 var payments = plan.GetPayments();
                                 var nextPaymentDate = "-";
-                                var endDate = plan.DateCancelled.ToShortDateString("-") ?? plan.GetLastPaymentDate().ToShortDateString("-");
+                                var endDate = (plan.DateCancelled ?? plan.GetLastPaymentDate()).ToShortDateString("-");
 
                                 if (billingPeriodTypeId == BillingPeriodType.NotSet)
                                 {
