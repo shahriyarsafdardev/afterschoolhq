@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Ajax.Utilities
+@using ServiceStack.Text
 @model List<Account>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -56,7 +57,7 @@ PageEvent.add(PageEvent.AFTER_INIT, function () {
     
     $(".assignedTags").on('beforeItemAdd', function(event) {
         
-        var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJSON())');
+        var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJson())');
         
         if(!availableTags.includes(event.item)) {
              event.cancel = true;
