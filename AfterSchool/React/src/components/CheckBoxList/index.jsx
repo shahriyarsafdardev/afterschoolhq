@@ -13,7 +13,10 @@ function CheckBoxList({ formik, question }) {
   const isChecked = (arr, value) => {
     return arr.some(option => option.value === value);
   };
-  const options = Options.split(',').map(option => ({ key: option, value: option }));
+  const options = Options.split(',').map(option => {
+    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+    return { key, value };
+  });
 
   const updateSelectedValues = value => {
     if (isChecked(checkBoxListValue, value))

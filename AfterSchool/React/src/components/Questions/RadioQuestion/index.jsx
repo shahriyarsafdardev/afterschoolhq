@@ -9,7 +9,10 @@ function RadioQuestion({ question, formik }) {
   const classes = useStyles();
   const { ID, Options, Text: title, IsRequired: isRequired = false } = question;
   const { touched, values, errors, setFieldValue } = formik;
-  const options = Options.split(',').map(option => ({ key: option, value: option }));
+  const options = Options.split(',').map(option => {
+    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+    return { key, value };
+  });
 
   const handleRadioChange = ({ target: { value } }) => {
     setFieldValue(ID, JSON.stringify([{ key: value, value }]));
