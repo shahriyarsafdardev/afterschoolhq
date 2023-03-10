@@ -79,19 +79,16 @@ namespace AfterSchoolLibrary.Services
 
         public static DateTime? GetLastPaymentDate(this RegistrantSubscriptionPlan rsp)
         {
-            switch(rsp.BillingPeriodTypeId)
+            if (!rsp.TotalPeriods.HasValue) 
+                return new DateTime?();
+            return rsp.BillingPeriodTypeId switch
             {
-                case BillingPeriodType.Day:
-                    return rsp.StartDate.Value.AddDays(rsp.TotalPeriods.Value);
-                case BillingPeriodType.Month:
-                    return rsp.StartDate.Value.AddMonths(rsp.TotalPeriods.Value);
-                case BillingPeriodType.Week:
-                    return rsp.StartDate.Value.AddWeeks(rsp.TotalPeriods.Value);
-                case BillingPeriodType.Year:
-                    return rsp.StartDate.Value.AddYears(rsp.TotalPeriods.Value);
-            }
-
-            return new DateTime?();
+                BillingPeriodType.Day => rsp.StartDate.Value.AddDays(rsp.TotalPeriods.Value),
+                BillingPeriodType.Month => rsp.StartDate.Value.AddMonths(rsp.TotalPeriods.Value),
+                BillingPeriodType.Week => rsp.StartDate.Value.AddWeeks(rsp.TotalPeriods.Value),
+                BillingPeriodType.Year => rsp.StartDate.Value.AddYears(rsp.TotalPeriods.Value),
+                _ => new DateTime?()
+            };
         }
 
         public static DateTime? GetValidUntilDate(this RegistrantSubscriptionPlan rsp, SystemMessages msgs = null, DatabaseConnection dc = null)
