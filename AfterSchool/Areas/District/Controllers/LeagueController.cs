@@ -475,7 +475,7 @@ namespace AfterSchool.Areas.District.Controllers
             var invitedSchools = new List<Account>();
 
             ViewBag.CurrentSchools = invitedSchools;
-            ViewBag.SchoolsPerColumn = (schools.Count / 3) > (schools.Count % 3) ? (schools.Count / 3) : (schools.Count % 3);
+            ViewBag.SchoolsPerColumn = Math.Ceiling(schools.Count.ToDecimal() / 3M);
             ViewBag.SchoolsToInvite = notInivitedSchools;
             ViewBag.RegistrationWindow = activityGroup.GetCurrentOrNextRegistrationPeriod(msgs);
 
