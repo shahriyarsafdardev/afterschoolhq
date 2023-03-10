@@ -1,8 +1,7 @@
-@model ParticipationObjectViewModel
+﻿@model ParticipationObjectViewModel
 
 @{
     var currentAccount = (Account) ViewData["CurrentAccount"];
-    var isActivityLeader = (bool)ViewData["isActivityLeader"];
 
     var youOrProvider = Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().ProviderAccountId.HasValue && Model.ParticipationObject.GetActivity().ProviderAccountId != currentAccount?.ID ? Model.ParticipationObject.GetActivity().GetProvider().Name : "you";
 }
@@ -36,7 +35,7 @@
             }
             
             <strong>
-                @((Model.ParticipationObject.Cost - Model.ParticipationObject.GetConvenienceFee()).ToCurrency())
+                @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost)
             </strong>
             
             @if (!Model.ParticipationObject.SubscriptionPlans.Any())
@@ -57,5 +56,5 @@
         </span>
     }    
 
-    @{ Html.RenderPartial("ParticipationObject/_SubscriptionPlan", Model,new ViewDataDictionary { { "isActivityLeader", isActivityLeader } }); }
+    @{ Html.RenderPartial("ParticipationObject/_SubscriptionPlan", Model); }
 </p>

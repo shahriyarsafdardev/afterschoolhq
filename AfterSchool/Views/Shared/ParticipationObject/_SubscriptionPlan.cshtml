@@ -1,19 +1,11 @@
-@model ParticipationObjectViewModel
+﻿@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.First();
     <span>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
-            var isActivityLeader = (bool) (ViewData["isActivityLeader"] ?? false);
-            if (!isActivityLeader)
-            {
-                <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today plus</span>
-            }
-            else
-            {
-                <span>plus</span>
-            }
+            <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today plus</span>
         }
 
         @if (subscriptionPlan.SplitCostEvenly)
