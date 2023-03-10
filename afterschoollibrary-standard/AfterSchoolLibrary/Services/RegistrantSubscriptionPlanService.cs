@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BasicLibrary;
@@ -81,6 +81,7 @@ namespace AfterSchoolLibrary.Services
         {
             if (!rsp.TotalPeriods.HasValue) 
                 return new DateTime?();
+
             return rsp.BillingPeriodTypeId switch
             {
                 BillingPeriodType.Day => rsp.StartDate.Value.AddDays(rsp.TotalPeriods.Value),
