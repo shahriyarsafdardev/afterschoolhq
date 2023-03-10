@@ -182,8 +182,10 @@ export default function Home() {
 
   useEffect(() => {
     setSaveDisabled(false);
-    if (questions.length)
-      setCurrentQuestions(groupedQuestions(questionsGroups[activeGroup]?.QuestionGroupDataTypeId));
+    if (questions.length) {
+      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
+      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
+    }
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 

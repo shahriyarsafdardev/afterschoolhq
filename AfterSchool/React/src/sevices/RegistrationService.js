@@ -8,10 +8,12 @@ export default class RegistrationService {
     this.currentQuestions = currentQuestions;
   }
 
-  groupedQuestions = QuestionGroupDataTypeId => {
+  groupedQuestions = (QuestionGroupDataTypeId, GroupTitle) => {
     return this.questions
       .filter(
-        question => question.FormQuestionGroupQuestionGroupDataTypeId === QuestionGroupDataTypeId
+        question =>
+          question.FormQuestionGroupQuestionGroupDataTypeId === QuestionGroupDataTypeId &&
+          question.GroupTitle === GroupTitle
       )
       .sort((q1, q2) => q1.DisplayOrder - q2.DisplayOrder);
   };
