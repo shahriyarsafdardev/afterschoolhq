@@ -396,20 +396,6 @@
         $('#fee-asf').html(0);
         $('#fee-asf-text').html('$0');
     }
-    
-    function updatePaymentButtonText(val)
-    {
-        if (val === "")
-        {
-            $('.payment-plan-text').addClass(' hide');
-            $('.pay-button-amount').removeClass('hide');
-        }
-        else 
-        {
-            $('.payment-plan-text').removeClass('hide');
-            $('.pay-button-amount').addClass(' hide');
-        }
-    }
 </script>
 
 <script>
@@ -420,7 +406,6 @@
 
             let paymentPlanId = $(this).attr('id').split('-')[1];
 
-            updatePaymentButtonText($(this).val());
             updatePaymentFees(paymentPlanId);
             updatePaymentFeesAch();
             updatePaymentOptionCost(paymentPlanId);
