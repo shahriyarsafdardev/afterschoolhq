@@ -1,11 +1,10 @@
 export default registrantType => {
   if (registrantType === 'Adult') return {};
-  const IsRequired = registrantType === 'Student';
   return {
     ID: 99999,
     GroupTitle: 'Student Information',
     Text: 'School',
-    IsRequired,
+    IsRequired: true,
     FormQuestionGroupQuestionGroupDataTypeId: 2,
     DisplayOrder: 20,
     QuestionTypeId: 1,
