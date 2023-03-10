@@ -53,20 +53,30 @@ export default class RegistrationService {
   };
 
   formSectionSubmitObject = (values, activeGroupId) => {
-    const [answerQuery, answers, keys, answerCompiled] = [{}, [], Object.keys(values), []];
+    const filteredValues = Object.keys(values).filter(key => key !== 99999); //SchoolField value is removed from query string as it is being sent separately
+    const [answerQuery, answers, keys, answerCompiled] = [{}, [], filteredValues, []];
 
     const getQuestionID = answer =>
-      this.questions.find(q => q.QuestionDataTypeId === answer.QuestionDataTypeId)?.ID || 0;
+      this.questions.find(
+        q => q.QuestionDataTypeId === answer.QuestionDataTypeId && q.Text === answer.QuestionText
+      )?.ID;
 
     function addToAnswerQuery(ID, text) {
       answerQuery[`question-${ID}`] = text;
     }
 
     function composeAnswers(answer, ID) {
-      if (!answer || answerCompiled.includes(answer.QuestionDataTypeId)) return;
-      answers.push(answer);
-      addToAnswerQuery(ID, answer.Text);
-      answerCompiled.push(answer.QuestionDataTypeId);
+      const alreadyAnswered = answerCompiled.find(
+        ans =>
+          ans.QuestionDataTypeId === answer.QuestionDataTypeId &&
+          ans.QuestionText === answer.QuestionText
+      );
+
+      if (answer && !alreadyAnswered) {
+        answers.push(answer);
+        addToAnswerQuery(ID, answer.Text);
+        answerCompiled.push(answer);
+      }
     }
 
     keys.forEach(key => composeAnswers(this.answerObject(key, values), key));
