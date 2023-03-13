@@ -6,13 +6,13 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.ReactApi.Controllers
 {
@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult GetForm()
+        public ActionResult GetForm(int? id)
         {
             var msgs = new SystemMessages();
             try
@@ -68,9 +68,10 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized User");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var activity = participationObject.GetActivity();
-                var questions = participationObject.Form.GetAllQuestions(msgs);
-                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                var form = (id.IsEmpty() ? participationObject.Form : FormService.GetAdministratorAccountStudentForm(msgs));
+                var activity = participationObject?.GetActivity();
+                var questions = form.GetAllQuestions(msgs);
+                var questionGroups = form.GetQuestionGroups(msgs);
                 
                 if (currentRegistrant.IsAdult)
                 {
@@ -118,7 +119,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((id.IsEmpty() ? currentRegistrant.ID.Value : Registrant.LoadByUid(id.ToGuid(), msgs).ID.Value)))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -159,125 +160,90 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
 
-        [HttpGet]
-        public ActionResult GetNewChildForm()
+        [HttpPost]
+        public ActionResult UpdateProfile(QuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
+            Registrant registrant = null;
+
             try
             {
-                var currentUser = SessionVariables.CurrentUser;
-                
-                if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized");
-                
-                var currentAccount = SessionVariables.CurrentAccount;
-                var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
-                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var activity = participationObject.GetActivity();
-                var questions = participationObject.Form.GetAllQuestions(msgs);
-                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                Registrant studentReg = null;
-                
-                Database.ExecuteTransaction
-                (
-                    (amsgs, adc) =>
-                    {
-                        studentReg = currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: currentUser,
-                            canBeAccessedBy: currentUser.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
-                            loggedInUser: currentUser,
-                            msgs: amsgs,
-                            dc : adc);
-                        
-                        if(parentRegistrant.IsNotEmpty())
-                            RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                
-                        if(parent2Registrant.IsNotEmpty())
-                            RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                    },
-                    smsgs =>
-                    {
-                        msgs.AddRange(smsgs);
+                var form = FormService.GetAdministratorAccountStudentForm(msgs);
+                var questions = form.GetAllQuestions(msgs);
+                var collection = HttpUtility.ParseQueryString(json.answers);
 
-                        SessionVariables.CurrentRegistrant = studentReg;
-                    },
-                    fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => throw new Exception(emsgs.ToString())
-                );
-                
-                var formQuestionDtoList = new List<FormQuestionDto>();
-                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
-                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
 
-                foreach (var question in questions)
+                qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
-                foreach (var questionGroup in questionGroups)
-                {
-                    formQuestionGroupDtoList.Add(
-                        new FormQuestionGroupDto()
-                        {
-                            FormId = questionGroup.FormId,
-                            Name = questionGroup.Name,
-                            DisplayOrder = questionGroup.DisplayOrder,
-                            QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
-                        }
-                    );
-                }
-                
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(studentReg.ID.Value))
-                {
-                    formQuestionAnswerDtoList.Add(
-                        new FormQuestionAnswerDto()
-                        {
-                            FormQuestionId = questionAnswer.FormQuestionId,
-                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
-                        }
-                    );
-                }
+                    // if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                    //     msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
 
-                dynamic response = new
-                {
-                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
-                    activityDto = new
+                    switch (qvm.Question.QuestionDataTypeId)
                     {
-                        Name = activity.Name,
-                        Organization = activity.AccountName,
-                        IsFree = participationObject.IsFree,
-                        RegistrantType = RegistrantPersonType.Parent
+                        case QuestionDataType.RegistrantMobilePhone:
+                        case QuestionDataType.RegistrantDoctorPhone:
+                        case QuestionDataType.RegistrantHomePhone:
+                        case QuestionDataType.RegistrantWorkPhone:
+                        case QuestionDataType.RegistrantPhone1:
+                        case QuestionDataType.RegistrantPhone2:
+                        case QuestionDataType.Parent1Phone1:
+                        case QuestionDataType.Parent2Phone1:
+                        case QuestionDataType.Parent1Phone2:
+                        case QuestionDataType.Parent2Phone2:
+                        case QuestionDataType.Parent1MobilePhone:
+                        case QuestionDataType.Parent2MobilePhone:
+                        case QuestionDataType.Parent1WorkPhone:
+                        case QuestionDataType.Parent2WorkPhone:
+                        case QuestionDataType.Parent1HomePhone:
+                        case QuestionDataType.Parent2HomePhone:
+                        case QuestionDataType.EmergencyContact1Phone:
+                        case QuestionDataType.EmergencyContact2Phone:
+                        case QuestionDataType.EmergencyContact3Phone:
+                        case QuestionDataType.EmergencyContact1Phone2:
+                        case QuestionDataType.EmergencyContact2Phone2:
+                        case QuestionDataType.EmergencyContact3Phone2:
+                        case QuestionDataType.EmergencyContact1Phone3:
+                        case QuestionDataType.EmergencyContact2Phone3:
+                        case QuestionDataType.EmergencyContact3Phone3:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                        case QuestionDataType.RegistrantEmail:
+                        case QuestionDataType.Parent1Email:
+                        case QuestionDataType.Parent2Email:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                            break;
                     }
-                };
-                
+                });
+
+                if (json.registrantId.IsNotEmpty())
+                {
+                    registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            qvms.ForEach(qvm =>
+                            {
+                                registrant.AddOrUpdateAnswer(
+                                    answerText: qvm.Value.IfEmpty("").Trim(),
+                                    question: qvm.Question,
+                                    loggedInUser: SessionVariables.CurrentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+                            });
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                }
+
                 return Json(
-                    new ApiResponse(msgs,response),
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -288,7 +254,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-
+        
         [HttpPost]
         public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
         {
@@ -454,8 +420,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 }                  
                             }
                         }
-
-
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -619,7 +583,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
 
-
         public class ApiResponse
         {
             public SystemMessages msgs { get; set; }
@@ -710,6 +673,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public int? schoolLocationID { get; set; }
             
             public int? newChild { get; set; }
+            public int? registrantId { get; set; }
         }
         
         public class LocationDto
