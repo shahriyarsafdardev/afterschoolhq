@@ -4,6 +4,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var availableTags = (List<AvailableTag>)ViewBag.AvailableTags;
+    var paging = (PagingModel)ViewBag.PagingModel;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -22,7 +23,7 @@
         </div>
 
         <div class="panel-body">
-            
+
             <table class="table">
                 <tr>
                     <th>School</th>
@@ -35,15 +36,27 @@
                     {
                         <tr>
                             <td>@activity.Name</td>
-                            <td><a href="@activity.HomePageUrl" target="_blank" >@activity.HomePageUrl</a></td>
+                            <td><a href="@activity.HomePageUrl" target="_blank">@activity.HomePageUrl</a></td>
                             <td>
                                 <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">
-                                <input type="hidden" id="@activity.ID"/>
+                                <input type="hidden" id="@activity.ID" />
                             </td>
                         </tr>
                     }
                 }
             </table>
+
+            @{Html.RenderPartial(
+                        "~/Views/Shared/_Paging.cshtml",
+                        paging,
+                        new ViewDataDictionary()
+                        {
+                        { "id", "" },
+                        { "action", "activity" },
+                        { "controller", "tag" }
+                    }
+                    );
+            }
 
         </div>
     </div>

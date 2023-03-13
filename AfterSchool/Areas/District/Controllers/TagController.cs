@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using AfterSchool.Models;
@@ -87,22 +88,55 @@ namespace AfterSchool.Areas.District.Controllers
             return View(schools);
         }
         
-        public ActionResult Activity()
+        public ActionResult Activity(string pn, string rpp, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
             var currentAccount = SessionVariables.CurrentAccount;
             var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Activity, msgs);
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var activities = new List<Activity>();
+            var allActivities = new List<Activity>();
             foreach (var school in schools)
             {
                  var schoolActivities = school.GetAllActivitiesForAccount(msgs);
-                 activities.AddRange(schoolActivities);
+                allActivities.AddRange(schoolActivities);
             }
+
+            var totalActivityCount = allActivities.Count;
+
+            var activities = new List<Activity>();
             
+            var startIndex = (pageNumber * recordsPerPage) - recordsPerPage;
+            var endIndex = startIndex + recordsPerPage;
+
+            for (int i = startIndex; i < endIndex && i < totalActivityCount; i++)
+            {
+                activities.Add(allActivities[i]);
+            }
+
+            var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
+
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
-            
+
+            ViewBag.PagingModel = new PagingModel
+            {
+                TotalCount = totalActivityCount,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
+
             return View(activities);
         }
 
