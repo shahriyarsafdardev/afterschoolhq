@@ -68,10 +68,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized User");
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var form = (id.IsEmpty() ? participationObject.Form : FormService.GetAdministratorAccountStudentForm(msgs));
+                var form = participationObject.Form;
                 var activity = participationObject?.GetActivity();
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
+                
+                
                 
                 if (currentRegistrant.IsAdult)
                 {
@@ -119,7 +121,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId((id.IsEmpty() ? currentRegistrant.ID.Value : Registrant.LoadByUid(id.ToGuid(), msgs).ID.Value)))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -160,6 +162,118 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult GetRegistrantForm(int id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            try
+            {
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+                
+                var registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+                var form = FormService.GetAdministratorAccountStudentForm(msgs);
+                var questions = form.GetAllQuestions(msgs);
+                var questionGroups = form.GetQuestionGroups(msgs);
+
+                if (registrant.PersonTypeId == RegistrantPersonType.Student)
+                {
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
+                    ).ToList();
+                    
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
+                }
+                
+                if (registrant.PersonTypeId == RegistrantPersonType.Adult)
+                {
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
+                    ).ToList();
+                    
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
+                }
+                
+                if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                {
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())
+                    ).ToList();
+
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())).ToList();
+                }
+                
+                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
+
+                foreach (var question in questions)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                             ID = question.ID.Value,
+                             FormQuestionGroupId = question.FormQuestionGroupId,
+                             Text = question.Text,
+                             Description = question.Description,
+                             GroupTitle = question.FormQuestionGroupName,
+                             Options = question.Options,
+                             IsRequired = question.IsRequired,
+                             DisplayOrder = question.DisplayOrder,
+                             IsActive = question.IsActive,
+                             IsDeleted = question.IsDeleted,
+                             QuestionTypeId = question.QuestionTypeId,
+                             QuestionDataTypeId = question.QuestionDataTypeId,
+                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+                
+                foreach (var questionGroup in questionGroups)
+                {
+                    formQuestionGroupDtoList.Add(
+                        new FormQuestionGroupDto()
+                        {
+                            FormId = questionGroup.FormId,
+                            Name = questionGroup.Name,
+                            DisplayOrder = questionGroup.DisplayOrder,
+                            QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                        }
+                    );
+                }
+                
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(registrant.ID.Value))
+                {
+                    formQuestionAnswerDtoList.Add(
+                        new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText,
+                            Text = questionAnswer.Text
+                        }
+                    );
+                }
+
+                dynamic response = new
+                {
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList)
+                };
+                
+                return Json(
+                    new ApiResponse(msgs,response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
         [HttpPost]
         public ActionResult UpdateProfile(QuestionAnswerResponse json)
         {
