@@ -205,7 +205,7 @@
                 @if (Model.StartDate.HasValue)
                 {
                     <span>
-                        <b>@(Model.ActivityType == ActivityType.VolunteerOpportunity && Model.Schedule.RepeatsWeekly ? "Start Date" : "Date")</b>: @Model.StartDate.ToShortDateString() @Model.StartDate.ToShortTimeString()
+                        <b>Start Date</b>: @Model.StartDate.ToShortDateString()
                     </span>
                     <br/>
                 }
