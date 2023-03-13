@@ -2,7 +2,7 @@
 
 @{
     var currentAccount = (Account) ViewData["CurrentAccount"];
-    var isActivityLeader = (bool)ViewData["isActivityLeader"];
+    var isActivityLeader = (bool?)ViewData["isActivityLeader"] ?? false;
 
     var youOrProvider = Model.ParticipationObject.IsActivity() && Model.ParticipationObject.GetActivity().ProviderAccountId.HasValue && Model.ParticipationObject.GetActivity().ProviderAccountId != currentAccount?.ID ? Model.ParticipationObject.GetActivity().GetProvider().Name : "you";
 }
