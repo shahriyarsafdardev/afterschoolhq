@@ -161,7 +161,7 @@ namespace AfterSchool.Models
 
         public static string PrintRegistrationPeriod(ParticipationObject participationObject)
         {
-            if (!participationObject.RegistrationPeriod.IsNotEmpty()) 
+            if (participationObject.RegistrationPeriod.IsEmpty()) 
                 return "Registration is closed";
             
             var account = participationObject.OwnerAccount;
@@ -170,8 +170,9 @@ namespace AfterSchool.Models
                 return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
             if (participationObject.RegistrationPeriod.IsOpen(account))
             {
-                return participationObject.IsContinuousEnrollmentEnabled ? "<span style=\"display:inline-block;\">Registration will remain open</span>" 
-                    : $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
+                if (participationObject.IsContinuousEnrollmentEnabled)
+                    return "<span style=\"display:inline-block;\">Registration will remain open</span>";
+                return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
             }
             return "Registration is closed";
         }
