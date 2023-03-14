@@ -890,7 +890,8 @@ namespace AfterSchoolLibrary.Models
               ) and
               school.accounttypeid = 2 AND
               school.isdeleted = 0 AND
-              school.istest = 0
+              school.istest = 0 AND
+              activity.id is not null
               order by activity.CreateDate";
             
             if(OrderBy == 0)
@@ -918,7 +919,8 @@ namespace AfterSchoolLibrary.Models
               ) and
               school.accounttypeid = 2 AND
               school.isdeleted = 0 AND
-              school.istest = 0";
+              school.istest = 0 AND
+              activity.id is not null";
 
             return sql;
         }
