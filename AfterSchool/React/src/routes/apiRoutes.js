@@ -2,12 +2,17 @@ export default {
   RegisterAPI: 'ReactApi/React/Register',
   getFormDataAPI: 'ReactApi/React/GetForm',
   currentUserAPI: 'ReactApi/React/GetCurrentUser',
-  accountUrl: `${window.location.origin}/User/home`,
-  paymentScreenPath: uId => `/account/payment/${uId}`,
   submitFormDataAPI: 'ReactApi/React/AddUpdateAnswers',
   SchoolAPI: 'ReactApi/React/CreateOrUpdateFromGoogle',
-  thankyouScreenPath: uId => `/account/thankyou/${uId}`,
+  updateProfileFormDataAPI: 'ReactApi/React/UpdateProfile',
   getNewChildFormDataAPI: 'ReactApi/React/GetNewChildForm',
+  getProfileFormDataAPI: id => `ReactApi/React/GetRegistrantForm/${id}`,
+
+  paymentScreenPath: uId => `/account/payment/${uId}`,
+  thankyouScreenPath: uId => `/account/thankyou/${uId}`,
+
+  familyUrl: '/User/family',
+  accountUrl: `${window.location.origin}/User/home`,
   facebookShareUrl: (activityUrl, textToShare = '') =>
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       activityUrl

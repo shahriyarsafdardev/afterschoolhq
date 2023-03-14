@@ -6,7 +6,6 @@ import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
 import {
-  NavBar,
   Loader,
   CheckBox,
   TextField,
@@ -151,7 +150,6 @@ export default function Home() {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadUser();
     loadFormData(searchParams.get('newChild'));
   }, [searchParams.get('newChild')]);
 
@@ -226,78 +224,68 @@ export default function Home() {
 
   return (
     <FormikProvider value={formik}>
-      <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-        <Box className={classes.home}>
-          {loading ? (
-            <Loader />
-          ) : (
-            <>
-              <NavBar />
-              {showThankYou ? (
-                <ThankYouSection />
-              ) : (
-                <Box className={classes.outerWrapper}>
-                  <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
-                  <Box className={classes.formWrapper}>
-                    <Box className={classes.formInnerWrapper}>
-                      <Typography
-                        style={{
-                          paddingTop: '30px',
-                          fontSize: 18,
-                          color: '#555555'
-                        }}
-                        variant="h6"
-                        color="secondary"
-                      >
-                        Please enter your information below to register
-                      </Typography>
-                      <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
-                        {Name}
-                      </Typography>
-                      <Grid
-                        container
-                        className={cs(classes.justifyContentCenter, classes.leftPadding)}
-                      >
-                        <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                          {currentQuestions?.map(question => showQuestion(question))}
-                        </Grid>
-                      </Grid>
-                      <Box className={classes.buttonOuterWrapper}>
-                        <Box className={classes.buttonWrapper}>
-                          <Button
-                            color="primary"
-                            variant="outlined"
-                            className={classes.backButton}
-                            disabled={!activeGroup > 0}
-                            onClick={() => handleSection('previous')}
-                          >
-                            Back
-                          </Button>
-                          <Button
-                            color="primary"
-                            className={classes.saveButton}
-                            variant="contained"
-                            type="submit"
-                            disabled={saveDisabled}
-                            key={activeGroup}
-                          >
-                            {saveDisabled ? (
-                              <>
-                                {'Loading . . .'} <CircularProgress size={'20px'} />
-                              </>
-                            ) : (
-                              saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
-                            )}
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
+      <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
+        {loading ? (
+          <Loader />
+        ) : showThankYou ? (
+          <ThankYouSection />
+        ) : (
+          <Box className={classes.outerWrapper}>
+            <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
+            <Box className={classes.formWrapper}>
+              <Box className={classes.formInnerWrapper}>
+                <Typography
+                  style={{
+                    paddingTop: '30px',
+                    fontSize: 18,
+                    color: '#555555'
+                  }}
+                  variant="h6"
+                  color="secondary"
+                >
+                  Please enter your information below to register
+                </Typography>
+                <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
+                  {Name}
+                </Typography>
+                <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
+                  <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
+                    {currentQuestions?.map(question => showQuestion(question))}
+                  </Grid>
+                </Grid>
+                <Box className={classes.buttonOuterWrapper}>
+                  <Box className={classes.buttonWrapper}>
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      className={classes.backButton}
+                      disabled={!activeGroup > 0}
+                      onClick={() => handleSection('previous')}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      color="primary"
+                      className={classes.saveButton}
+                      variant="contained"
+                      type="submit"
+                      disabled={saveDisabled}
+                      key={activeGroup}
+                    >
+                      {saveDisabled ? (
+                        <>
+                          {'Loading . . .'} <CircularProgress size={'20px'} />
+                        </>
+                      ) : (
+                        saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
+                      )}
+                    </Button>
                   </Box>
                 </Box>
-              )}
-            </>
-          )}
-        </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
       </Form>
     </FormikProvider>
   );

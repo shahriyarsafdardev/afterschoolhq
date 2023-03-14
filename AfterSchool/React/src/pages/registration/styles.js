@@ -1,6 +1,9 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
+  form: {
+    height: '100vh'
+  },
   home: {
     height: '100vh'
   },
