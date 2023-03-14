@@ -201,7 +201,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())
                     ).ToList();
 
-                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())).ToList();
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel()) &&
+                    x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())
+                    ).ToList();
                 }
                 
                 var formQuestionDtoList = new List<FormQuestionDto>();
@@ -284,6 +286,24 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
+                
+                if (registrant.PersonTypeId == RegistrantPersonType.Student)
+                {
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
+                    ).ToList();
+                }
+                
+                if (registrant.PersonTypeId == RegistrantPersonType.Adult)
+                {
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
+                }
+                
+                if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                {
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel()) &&
+                    x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
+                }
+                
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
