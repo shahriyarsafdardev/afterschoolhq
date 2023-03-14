@@ -212,6 +212,16 @@ export default function UpdateProfile() {
           <Loader />
         ) : (
           <Box className={classes.outerWrapper}>
+            <Box className={classes.exitButtonWrapper}>
+              <Button
+                color="primary"
+                variant="outlined"
+                className={classes.backButton}
+                onClick={() => handleRedirection()}
+              >
+                Exit
+              </Button>
+            </Box>
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>

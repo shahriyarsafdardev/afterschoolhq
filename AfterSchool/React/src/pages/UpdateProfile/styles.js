@@ -1,6 +1,10 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
+  exitButtonWrapper: {
+    display: 'flex',
+    justifyContent: 'flex-end'
+  },
   form: {
     height: '105vh'
   },
@@ -83,7 +87,6 @@ export default makeStyles(theme => ({
   outerWrapper: {
     minHeight: '100%',
     position: 'relative',
-    marginTop: '-28px',
     background: '#ffffff',
     borderRadius: '20px',
     border: '1px solid #f9f9f9',
