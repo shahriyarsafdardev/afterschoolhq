@@ -201,7 +201,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())
                     ).ToList();
 
-                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel()) &&
+                    questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel()) &&
                     x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())
                     ).ToList();
                 }
@@ -258,9 +258,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
+                var registrantType = registrant.PersonTypeId.ToString();
+
                 dynamic response = new
                 {
-                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList)
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    registrantType
                 };
                 
                 return Json(
@@ -284,8 +287,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
             try
             {
+                var currentAccount = SessionVariables.CurrentAccount;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
+                
+                registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
                 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
                 {
@@ -321,16 +328,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         case QuestionDataType.RegistrantWorkPhone:
                         case QuestionDataType.RegistrantPhone1:
                         case QuestionDataType.RegistrantPhone2:
-                        case QuestionDataType.Parent1Phone1:
-                        case QuestionDataType.Parent2Phone1:
-                        case QuestionDataType.Parent1Phone2:
-                        case QuestionDataType.Parent2Phone2:
-                        case QuestionDataType.Parent1MobilePhone:
-                        case QuestionDataType.Parent2MobilePhone:
-                        case QuestionDataType.Parent1WorkPhone:
-                        case QuestionDataType.Parent2WorkPhone:
-                        case QuestionDataType.Parent1HomePhone:
-                        case QuestionDataType.Parent2HomePhone:
                         case QuestionDataType.EmergencyContact1Phone:
                         case QuestionDataType.EmergencyContact2Phone:
                         case QuestionDataType.EmergencyContact3Phone:
@@ -340,7 +337,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         case QuestionDataType.EmergencyContact1Phone3:
                         case QuestionDataType.EmergencyContact2Phone3:
                         case QuestionDataType.EmergencyContact3Phone3:
-                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.Contains("null") && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
                                 msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
                             break;
                         case QuestionDataType.RegistrantEmail:
@@ -351,30 +348,83 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             break;
                     }
                 });
-
-                if (json.registrantId.IsNotEmpty())
-                {
-                    registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
-
+                if(msgs.HasNoErrors())
                     Database.ExecuteTransaction
-                    (
-                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                        {
-                            qvms.ForEach(qvm =>
+                        (
+                            action: (SystemMessages amsgs, DatabaseConnection adc) =>
                             {
-                                registrant.AddOrUpdateAnswer(
-                                    answerText: qvm.Value.IfEmpty("").Trim(),
-                                    question: qvm.Question,
-                                    loggedInUser: SessionVariables.CurrentUser,
-                                    msgs: amsgs,
-                                    dc: adc);
-                            });
-                        },
-                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
-                    );
-                }
+                                qvms.ForEach(qvm =>
+                                {
+                                    registrant.AddOrUpdateAnswer(
+                                        answerText: qvm.Value.IfEmpty("").Trim(),
+                                        question: qvm.Question,
+                                        loggedInUser: SessionVariables.CurrentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                });
+
+                                if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                                {
+                                    var parent1Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                                    {
+                                        {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent1FirstName},
+                                        {QuestionDataType.RegistrantLastName, QuestionDataType.Parent1LastName},
+                                        {QuestionDataType.RegistrantEmail, QuestionDataType.Parent1Email},
+                                        {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent1HomePhone},
+                                        {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
+                                        {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
+                                    };
+                                    
+                                    var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                                    {
+                                        {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent2FirstName},
+                                        {QuestionDataType.RegistrantLastName, QuestionDataType.Parent2LastName},
+                                        {QuestionDataType.RegistrantEmail, QuestionDataType.Parent2Email},
+                                        {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent2HomePhone},
+                                        {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent2MobilePhone},
+                                        {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
+                                    };
+
+                                    var children = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, adc);
+
+                                    children.ForEach(child =>
+                                    {
+                                        if (registrant.ID == parent2Registrant.ID)
+                                        {
+                                            foreach (var key in parent2Map.Keys)
+                                            {
+                                                child.MapAndAddAnswer(
+                                                    form.GetAllQuestions(),
+                                                    registrant,
+                                                    key,
+                                                    parent1Map[key],
+                                                    SessionVariables.CurrentUser,
+                                                    amsgs,
+                                                    adc);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (var key in parent1Map.Keys)
+                                            {
+                                                child.MapAndAddAnswer(
+                                                    form.GetAllQuestions(),
+                                                    registrant,
+                                                    key,
+                                                    parent1Map[key],
+                                                    SessionVariables.CurrentUser,
+                                                    amsgs,
+                                                    adc);
+                                            }
+                                        }
+                                    });
+                                }
+                                
+                            },
+                            onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                            onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                            onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                        );
 
                 return Json(
                     new ApiResponse(msgs, null),
