@@ -122,19 +122,6 @@ namespace AfterSchool.Areas.District.Controllers
                 ViewBag.SelectedDateOrderType = dateOrderType;
             }
 
-            //if (dateOrderType == 0)
-            //{
-            //    allActivities = allActivities.OrderByDescending(x => x.CreateDate).ToList();
-            //    ViewBag.SelectedDateOrderType = "Newest";
-            //}
-
-            //if (dateOrderType == 1)
-            //{
-            //    allActivities = (List<Activity>) allActivities.OrderBy(x => x.CreateDate).ToList();
-            //    ViewBag.SelectedDateOrderType = "Oldest";
-            //}
-
-
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;

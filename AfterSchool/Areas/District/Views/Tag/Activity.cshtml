@@ -22,8 +22,8 @@
             <h2><i class="s7-gleam"></i> Activity</h2>
             <div class="pull-right">
                 <select name="dateOrderType" id="dateOrderType" class="form-control">
-                    <option value="0">Newest</option>
-                    <option value="1">Oldest</option>
+                    <option value="0" @(selectedDateOrderType == 0 ? "selected" : "")>Newest</option>
+                    <option value="1"@(selectedDateOrderType == 1 ? "selected" : "")>Oldest</option>
                 </select>
             </div>
             <div class="clearfix"></div>
@@ -65,15 +65,16 @@
             </table>
 
             @{Html.RenderPartial(
-                            "~/Views/Shared/_Paging.cshtml",
-                            paging,
-                            new ViewDataDictionary()
-                            {
-                                { "id", "" },
-                                { "action", "activity" },
-                                { "controller", "tag" },
-                        }
-                        );
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                        { "id", "" },
+                        { "action", "activity" },
+                        { "controller", "tag" },
+                        { "querystring", $"dateOrderType={Request["dateOrderType"]}" }
+                    }
+                );
             }
 
         </div>
