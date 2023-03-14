@@ -4,7 +4,7 @@ import { Box, Button, Link, Typography, Icon } from '@material-ui/core';
 
 import utils from 'utils';
 import useStyles from './styles';
-import apiRoutes from 'routes/apiRoutes';
+import apiRoutes from 'routes';
 import ShareButton from 'components/ShareButton';
 import { useUser, useRegistration } from 'redux/hooks';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';

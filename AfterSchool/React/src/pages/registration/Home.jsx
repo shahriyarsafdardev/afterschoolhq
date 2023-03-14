@@ -18,7 +18,7 @@ import { ThankYouSection } from 'sections';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useRegistration } from 'redux/hooks/index';
 import questionType from 'constants/questionType';
-import apiRoutes from 'routes/apiRoutes';
+import apiRoutes from 'routes';
 import useStyles from './styles';
 import utils from 'utils';
 import {

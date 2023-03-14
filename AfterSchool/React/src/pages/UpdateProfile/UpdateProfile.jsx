@@ -14,11 +14,10 @@ import {
   CheckBoxList,
   ApiTextField
 } from 'components';
-import { ThankYouSection } from 'sections';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useProfile } from 'redux/hooks/index';
 import questionType from 'constants/questionType';
-import apiRoutes from 'routes/apiRoutes';
+import apiRoutes from 'routes';
 import useStyles from './styles';
 import utils from 'utils';
 import {
@@ -211,8 +210,6 @@ export default function UpdateProfile() {
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
         {loading ? (
           <Loader />
-        ) : showThankYou ? (
-          <ThankYouSection />
         ) : (
           <Box className={classes.outerWrapper}>
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />

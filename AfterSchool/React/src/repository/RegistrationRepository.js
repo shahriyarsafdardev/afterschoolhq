@@ -1,5 +1,5 @@
 import axios from './axios/axios';
-import ApiRoutes from 'routes/apiRoutes';
+import ApiRoutes from 'routes';
 
 export default {
   submitFormSection: params => axios.post(ApiRoutes.submitFormDataAPI, params).then(res => res),

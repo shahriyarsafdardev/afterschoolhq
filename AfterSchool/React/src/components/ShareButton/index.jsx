@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@material-ui/core';
 
 import useStyles from './styles';
-import apiRoutes from 'routes/apiRoutes';
+import apiRoutes from 'routes';
 import Icon from '@material-ui/core/Icon';
 import facebookIcon from 'assets/social-facebook.svg';
 import twitterIcon from 'assets/social-twitter-outline-1.svg';
