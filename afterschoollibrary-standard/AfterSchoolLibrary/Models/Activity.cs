@@ -473,6 +473,13 @@ namespace AfterSchoolLibrary.Models
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
+        
+        public static dynamic LoadOdynamicbject(DataRow row)
+        {
+            dynamic obj = new dynamic();
+            obj.LoadObjectValues(ObjectMap, row);
+            return obj;
+        }
 
         protected static DatabaseQuery DatabaseQuery
         {
@@ -505,23 +512,28 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Activity> LoadByAccountIds(List<Account> accounts, int? start, int? length, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<dynamic> LoadByDistrict(Account account, int orderBy, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
-            dq.SelectRange.Start = start;
-            dq.SelectRange.Length = length;
-            dq.OrderBys.Add("CreateDate", orderByDirection);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            // dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
+            // dq.SelectRange.Start = start;
+            // dq.SelectRange.Length = length;
+            // dq.OrderBys.Add("CreateDate", orderByDirection);
+            
+            var sql = GetAllActivitiesByDistrict(account.ID.Value,orderBy, start, length);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountByAccountIds(List<Account> accounts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountByDistrict(Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
-            return dq.GetCount(msgs);
+            // dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
+            // return dq.GetCount(msgs);
+            
+            var sql = GetAllActivitiesByDistrictCount(account.ID.Value);
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
 
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -866,6 +878,57 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        private static string GetAllActivitiesByDistrict(int hostAccountId, int OrderBy, int? start, int? length)
+        {
+            var sql = $@"select
+	            school.name as ,
+	            activity.*
+            from
+	            account school left outer join
+	            [location] activitylocation on school.id = activitylocation.HostAccountId left outer join
+	            activity on activity.locationid = activitylocation.id left outer join
+	            account provider on activity.AccountId = provider.ID
+            where
+	            school.id in (
+                select visitoraccountid
+                from accountrelationship
+                where hostaccountid = {hostAccountId}
+              ) and
+              school.accounttypeid = 2 AND
+              school.isdeleted = 0 AND
+              school.istest = 0
+              order by activity.CreateDate";
+            
+            if(OrderBy == 0)
+                sql += $" desc offset {start} rows fetch next {length} rows only";
+            
+            if(OrderBy == 1)
+                sql += $" asc offset {start} rows fetch next {length} rows only";
+
+            return sql;
+        }
+        
+        private static string GetAllActivitiesByDistrictCount(int hostAccountId)
+        {
+            var sql = $@"select Count(distinct activity.id)
+            from
+	            account school left outer join
+	            [location] activitylocation on school.id = activitylocation.HostAccountId left outer join
+	            activity on activity.locationid = activitylocation.id left outer join
+	            account provider on activity.AccountId = provider.ID
+            where
+	            school.id in (
+                select visitoraccountid
+                from accountrelationship
+                where hostaccountid = {hostAccountId}
+              ) and
+              school.accounttypeid = 2 AND
+              school.isdeleted = 0 AND
+              school.istest = 0";
+
+            return sql;
         }
 
         #endregion

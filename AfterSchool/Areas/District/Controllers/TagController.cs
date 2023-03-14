@@ -106,13 +106,14 @@ namespace AfterSchool.Areas.District.Controllers
 
             var currentAccount = SessionVariables.CurrentAccount;
             var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Activity, msgs);
-            var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var count = AfterSchoolLibrary.Models.Activity.GetCountByAccountIds(schools, msgs);
-            List<Activity> allActivities = new List<Activity>();
+            //var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
+            var count = AfterSchoolLibrary.Models.Activity.GetCountByDistrict(currentAccount, msgs);
+            var allActivities  = AfterSchoolLibrary.Models.Activity.LoadByDistrict(currentAccount, dateOrderType, start, length, msgs);
+            /*List<Activity> allActivities = new List<Activity>();
 
             if (dateOrderType == 0)
             {
-                allActivities = AfterSchoolLibrary.Models.Activity.LoadByAccountIds(schools, start, length, OrderByDirectionEnum.Descending, msgs);
+                allActivities = AfterSchoolLibrary.Models.Activity.LoadByDistrict(currentAccount, dateOrderType, start, length, msgs);
                 ViewBag.SelectedDateOrderType = dateOrderType;
             }
 
@@ -120,12 +121,13 @@ namespace AfterSchool.Areas.District.Controllers
             {
                  allActivities = AfterSchoolLibrary.Models.Activity.LoadByAccountIds(schools, start, length, OrderByDirectionEnum.Ascending, msgs);
                 ViewBag.SelectedDateOrderType = dateOrderType;
-            }
+            }*/
 
             var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
+            ViewBag.SelectedDateOrderType = dateOrderType;
 
             ViewBag.PagingModel = new PagingModel
             {
