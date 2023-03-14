@@ -258,9 +258,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
+                var registrantType = registrant.PersonTypeId.ToString();
+
                 dynamic response = new
                 {
-                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList)
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    registrantType
                 };
                 
                 return Json(
@@ -284,10 +287,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
             try
             {
+                var currentAccount = SessionVariables.CurrentAccount;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
                 
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
                 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
                 {
@@ -369,21 +374,48 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                         {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
                                         {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
                                     };
+                                    
+                                    var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
+                                    {
+                                        {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent2FirstName},
+                                        {QuestionDataType.RegistrantLastName, QuestionDataType.Parent2LastName},
+                                        {QuestionDataType.RegistrantEmail, QuestionDataType.Parent2Email},
+                                        {QuestionDataType.RegistrantHomePhone, QuestionDataType.Parent2HomePhone},
+                                        {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent2MobilePhone},
+                                        {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
+                                    };
 
                                     var children = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, adc);
 
                                     children.ForEach(child =>
                                     {
-                                        foreach (var key in parent1Map.Keys)
+                                        if (registrant.ID == parent2Registrant.ID)
                                         {
-                                            child.MapAndAddAnswer(
-                                                questions,
-                                                registrant,
-                                                key,
-                                                parent1Map[key],
-                                                SessionVariables.CurrentUser,
-                                                amsgs,
-                                                adc);
+                                            foreach (var key in parent2Map.Keys)
+                                            {
+                                                child.MapAndAddAnswer(
+                                                    form.GetAllQuestions(),
+                                                    registrant,
+                                                    key,
+                                                    parent1Map[key],
+                                                    SessionVariables.CurrentUser,
+                                                    amsgs,
+                                                    adc);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (var key in parent1Map.Keys)
+                                            {
+                                                child.MapAndAddAnswer(
+                                                    form.GetAllQuestions(),
+                                                    registrant,
+                                                    key,
+                                                    parent1Map[key],
+                                                    SessionVariables.CurrentUser,
+                                                    amsgs,
+                                                    adc);
+                                            }
                                         }
                                     });
                                 }
