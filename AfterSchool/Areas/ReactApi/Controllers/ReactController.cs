@@ -163,7 +163,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetRegistrantForm(int id)
+        public ActionResult GetRegistrantForm(string id)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
@@ -807,7 +807,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             public int? schoolLocationID { get; set; }
             
             public int? newChild { get; set; }
-            public int? registrantId { get; set; }
+            public string registrantId { get; set; }
         }
         
         public class LocationDto
