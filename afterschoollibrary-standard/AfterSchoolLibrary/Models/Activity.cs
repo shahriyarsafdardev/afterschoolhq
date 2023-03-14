@@ -505,6 +505,25 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Activity> LoadByAccountIds(List<Account> accounts, int? start, int? length, OrderByDirectionEnum orderByDirection, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+            dq.OrderBys.Add("CreateDate", orderByDirection);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByAccountIds(List<Account> accounts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
+            return dq.GetCount(msgs);
+        }
+
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

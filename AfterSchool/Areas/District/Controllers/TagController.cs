@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -7,6 +7,8 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
+using BCrypt.Net;
 
 namespace AfterSchool.Areas.District.Controllers
 {
@@ -88,7 +90,7 @@ namespace AfterSchool.Areas.District.Controllers
             return View(schools);
         }
         
-        public ActionResult Activity(string pn, string rpp, SystemMessages msgs = null)
+        public ActionResult Activity(string pn, string rpp, int dateOrderType = 0, SystemMessages msgs = null)
         {
             var pageNumber = 1;
             var recordsPerPage = 10;
@@ -105,39 +107,48 @@ namespace AfterSchool.Areas.District.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Activity, msgs);
             var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var allActivities = new List<Activity>();
-            foreach (var school in schools)
+            var count = AfterSchoolLibrary.Models.Activity.GetCountByAccountIds(schools, msgs);
+            List<Activity> allActivities = new List<Activity>();
+
+            if (dateOrderType == 0)
             {
-                 var schoolActivities = school.GetAllActivitiesForAccount(msgs);
-                allActivities.AddRange(schoolActivities);
+                allActivities = AfterSchoolLibrary.Models.Activity.LoadByAccountIds(schools, start, length, OrderByDirectionEnum.Descending, msgs);
+                ViewBag.SelectedDateOrderType = dateOrderType;
             }
 
-            var totalActivityCount = allActivities.Count;
-
-            var activities = new List<Activity>();
-            
-            var startIndex = (pageNumber * recordsPerPage) - recordsPerPage;
-            var endIndex = startIndex + recordsPerPage;
-
-            for (int i = startIndex; i < endIndex && i < totalActivityCount; i++)
+            if (dateOrderType == 1)
             {
-                activities.Add(allActivities[i]);
+                 allActivities = AfterSchoolLibrary.Models.Activity.LoadByAccountIds(schools, start, length, OrderByDirectionEnum.Ascending, msgs);
+                ViewBag.SelectedDateOrderType = dateOrderType;
             }
 
-            var totalPages = Math.Ceiling(totalActivityCount.ToDouble() / recordsPerPage).ToInteger();
+            //if (dateOrderType == 0)
+            //{
+            //    allActivities = allActivities.OrderByDescending(x => x.CreateDate).ToList();
+            //    ViewBag.SelectedDateOrderType = "Newest";
+            //}
+
+            //if (dateOrderType == 1)
+            //{
+            //    allActivities = (List<Activity>) allActivities.OrderBy(x => x.CreateDate).ToList();
+            //    ViewBag.SelectedDateOrderType = "Oldest";
+            //}
+
+
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
 
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
 
             ViewBag.PagingModel = new PagingModel
             {
-                TotalCount = totalActivityCount,
+                TotalCount = count,
                 PageNumber = pageNumber,
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages,
             };
 
-            return View(activities);
+            return View(allActivities);
         }
 
         public bool AddRemoveAssignedTag(string tag, int objectID, int objectType, string operation)
