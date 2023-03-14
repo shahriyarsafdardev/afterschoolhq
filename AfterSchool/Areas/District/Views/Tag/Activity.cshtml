@@ -34,7 +34,7 @@
             <table class="table">
                 <tr>
                     <th>Activity</th>
-                    <th>Location Offered</th>
+                    <th>School Name</th>
                     <th>Created Date</th>
                     <th>Tag</th>
                     <th>Link</th>
@@ -45,7 +45,7 @@
                     {
                         <tr>
                             <td>@activity.Name</td>
-                            <td>@SessionVariables.CurrentAccount.Name</td>
+                            <td>@activity.SchoolName</td>
                             <td>@activity.CreateDate.ToShortDateString()</td>
                             <td>
                                 <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">

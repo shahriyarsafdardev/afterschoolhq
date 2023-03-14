@@ -375,6 +375,12 @@ namespace AfterSchoolLibrary.Models
             get => (bool) MDV["IsFeatured"].Value;
             set => MDV["IsFeatured"].Value = value;
         }
+        
+        public string SchoolName
+        {
+            get => (string) MDV["SchoolName"].Value;
+            set => MDV["SchoolName"].Value = value;
+        }
 
         public Activity()
         {
@@ -462,6 +468,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", SqlDbType.UniqueIdentifier, "ActivityGroup");
                 _dp.Add(className, "IsGenderEnforced", SqlDbType.Bit);
                 _dp.Add(className, "IsFeatured", SqlDbType.Bit);
+                _dp.Add(className, "SchoolName", SqlDbType.NVarChar, "100");
 
                 return _dp;
             }
@@ -470,13 +477,6 @@ namespace AfterSchoolLibrary.Models
         public static Activity LoadObject(DataRow row)
         {
             var obj = new Activity();
-            obj.LoadObjectValues(ObjectMap, row);
-            return obj;
-        }
-        
-        public static dynamic LoadOdynamicbject(DataRow row)
-        {
-            dynamic obj = new dynamic();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
@@ -512,15 +512,10 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<dynamic> LoadByDistrict(Account account, int orderBy, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> LoadByDistrict(Account account, int orderBy, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            // dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
-            // dq.SelectRange.Start = start;
-            // dq.SelectRange.Length = length;
-            // dq.OrderBys.Add("CreateDate", orderByDirection);
-            
             var sql = GetAllActivitiesByDistrict(account.ID.Value,orderBy, start, length);
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
@@ -529,9 +524,6 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            // dq.Criterias.Add(ObjectMap["AccountID"], accounts.Select(x => x.ID.Value).ToList(), DatabaseCriteriaOperatorEnum.In);
-            // return dq.GetCount(msgs);
-            
             var sql = GetAllActivitiesByDistrictCount(account.ID.Value);
             return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
@@ -883,7 +875,7 @@ namespace AfterSchoolLibrary.Models
         private static string GetAllActivitiesByDistrict(int hostAccountId, int OrderBy, int? start, int? length)
         {
             var sql = $@"select
-	            school.name as ,
+	            school.name as SchoolName,
 	            activity.*
             from
 	            account school left outer join
