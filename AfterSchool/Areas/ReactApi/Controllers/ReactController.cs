@@ -345,6 +345,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                              FormQuestionGroupId = question.FormQuestionGroupId,
                              Text = question.Text,
                              Description = question.Description,
+                             GroupTitle = question.FormQuestionGroupName,
                              Options = question.Options,
                              IsRequired = question.IsRequired,
                              DisplayOrder = question.DisplayOrder,
