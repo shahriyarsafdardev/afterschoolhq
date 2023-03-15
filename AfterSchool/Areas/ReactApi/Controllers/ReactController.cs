@@ -292,6 +292,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var questions = form.GetAllQuestions(msgs);
                 
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+                Registrant studentNonMasterRegistrant = null;
+                Registrant copyChild = null;
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
                 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
@@ -362,6 +364,20 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                         msgs: amsgs,
                                         dc: adc);
                                 });
+                                
+                                if (registrant.PersonTypeId == RegistrantPersonType.Student)
+                                {
+                                    studentNonMasterRegistrant = Registrant.LoadByWebUserIdByIsMasterByIsDeleted(registrant.WebUserId.Value, false, false).FirstOrDefault();
+                                    qvms.ForEach(qvm =>
+                                    {
+                                        studentNonMasterRegistrant.AddOrUpdateAnswer(
+                                            answerText: qvm.Value.IfEmpty("").Trim(),
+                                            question: qvm.Question,
+                                            loggedInUser: SessionVariables.CurrentUser,
+                                            msgs: amsgs,
+                                            dc: adc);
+                                    });
+                                }
 
                                 if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                                 {
@@ -397,10 +413,23 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                                     form.GetAllQuestions(),
                                                     registrant,
                                                     key,
-                                                    parent1Map[key],
+                                                    parent2Map[key],
                                                     SessionVariables.CurrentUser,
                                                     amsgs,
                                                     adc);
+                                                
+                                                copyChild = Registrant.LoadByWebUserIdByIsMasterByIsDeleted(child.WebUserId.Value, false, false).FirstOrDefault();
+                                                if (copyChild != null)
+                                                {
+                                                    copyChild.MapAndAddAnswer(
+                                                        form.GetAllQuestions(),
+                                                        registrant,
+                                                        key,
+                                                        parent2Map[key],
+                                                        SessionVariables.CurrentUser,
+                                                        amsgs,
+                                                        adc);
+                                                }
                                             }
                                         }
                                         else
@@ -415,6 +444,18 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                                     SessionVariables.CurrentUser,
                                                     amsgs,
                                                     adc);
+                                                copyChild = Registrant.LoadByWebUserIdByIsMasterByIsDeleted(child.WebUserId.Value, false, false).FirstOrDefault();
+                                                if (copyChild != null)
+                                                {
+                                                    copyChild.MapAndAddAnswer(
+                                                        form.GetAllQuestions(),
+                                                        registrant,
+                                                        key,
+                                                        parent1Map[key],
+                                                        SessionVariables.CurrentUser,
+                                                        amsgs,
+                                                        adc);
+                                                }
                                             }
                                         }
                                     });

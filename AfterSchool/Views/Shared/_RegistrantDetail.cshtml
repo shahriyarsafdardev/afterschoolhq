@@ -1,6 +1,7 @@
 @model RegistrantActivity
 @{
-    var answers = Model.GetAnswers();
+    var registrant = Registrant.Load(Model.RegistrantId.Value);
+    var answers = registrant.GetAnswers();
     var account = SessionVariables.CurrentAccount;
     var backToListAction = ViewData["BackToListAction"].ToString();
     var backToListController = ViewData["BackToListController"].ToString();
