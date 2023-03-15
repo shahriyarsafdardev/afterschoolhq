@@ -1,12 +1,12 @@
 import React from 'react';
-import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
+import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 
 function CheckBox({ formik, question }) {
   const classes = useStyles();
   const { ID, Text: title } = question;
-  const { values, setFieldValue } = formik;
+  const { values, setFieldValue, errors, touched } = formik;
 
   const handleCheck = ({ target: { checked } }) => {
     setFieldValue(ID, checked ? 1 : 0);
@@ -43,6 +43,13 @@ function CheckBox({ formik, question }) {
             onChange={handleCheck}
           />
         </div>
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText className={classes.maxWidth} error>
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
       </Grid>
     </Grid>
   );

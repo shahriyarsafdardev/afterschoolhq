@@ -1,4 +1,4 @@
-import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
+import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material-ui/core';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import React, { useState, useEffect } from 'react';
 import CheckIcon from '@material-ui/icons/Check';
@@ -6,8 +6,8 @@ import useStyles from './styles';
 
 function CheckBoxList({ formik, question }) {
   const classes = useStyles();
-  const { values, setFieldValue } = formik;
-  const { ID, Options, Text: title, isRequired } = question;
+  const { values, setFieldValue, touched, errors } = formik;
+  const { ID, Options, Text: title, IsRequired } = question;
   const [checkBoxListValue, setCheckBoxListValue] = useState([]);
 
   const isChecked = (arr, value) => {
@@ -43,7 +43,7 @@ function CheckBoxList({ formik, question }) {
   if (!checkBoxListValue) return <div></div>;
 
   return (
-    <FieldWrapper label={title} isRequired={isRequired}>
+    <FieldWrapper label={title} isRequired={IsRequired}>
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <div className={classes.checkboxWrapper}>
           <>
@@ -80,6 +80,13 @@ function CheckBoxList({ formik, question }) {
           </>
         </div>
       </Grid>
+      {touched[ID] && errors[ID] && (
+        <Box className={classes.flexCenter}>
+          <FormHelperText className={classes.maxWidth} error>
+            {errors[ID]}
+          </FormHelperText>
+        </Box>
+      )}
     </FieldWrapper>
   );
 }

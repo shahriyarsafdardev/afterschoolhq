@@ -54,5 +54,13 @@ export default makeStyles(theme => ({
       width: '100%',
       minHeight: '40px'
     }
+  },
+  flexCenter: {
+    display: 'flex',
+    paddingLeft: 20
+  },
+  maxWidth: {
+    width: '100%',
+    maxWidth: 500
   }
 }));

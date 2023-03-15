@@ -72,14 +72,14 @@ function DropdownQuestion({ question, formik }) {
             </div>
           </div>
         </div>
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText className={classes.maxWidth} error>
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
       </FieldWrapper>
-      {touched[ID] && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.maxWidth} error>
-            {errors[ID]}
-          </FormHelperText>
-        </Box>
-      )}
     </>
   );
 }

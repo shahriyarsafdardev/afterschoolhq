@@ -8,8 +8,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'wrap',
     borderRadius: 12,
     marginLeft: '14px',
-    overflowWrap: 'anywhere',
-    justifyContent: 'center'
+    overflowWrap: 'anywhere'
   },
   formControlLabelRoot: {
     margin: '10px 0px',
@@ -56,6 +55,14 @@ const useStyles = makeStyles(theme => ({
       flexDirection: 'column',
       justifyContent: 'flex-start'
     }
+  },
+  flexCenter: {
+    display: 'flex',
+    paddingLeft: 25
+  },
+  maxWidth: {
+    width: '100%',
+    maxWidth: 500
   }
 }));
 
