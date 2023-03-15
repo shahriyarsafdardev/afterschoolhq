@@ -1798,6 +1798,7 @@ namespace AfterSchool.Controllers
             ViewBag.Messages = msgs;
             ViewBag.ParticipationObject = RegistrationCommon.GetParticipationObjectFromCart();
             ViewBag.SelectedDates = RegistrationCommon.GetSelectedDatesFromCart();
+            ViewBag.MasterRegistrant = masterRegistrant;
 
             return View(students);
         }
