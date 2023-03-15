@@ -591,6 +591,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         if (json.groupid.ToInteger() == -1)
                         {
                             currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
+                            parentRegistrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
+                            parent2Registrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
 
                             if (json.newChild != -1)
                             {
