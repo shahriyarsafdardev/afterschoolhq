@@ -1,8 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
-import schoolField from 'constants/schoolField';
-import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import ProfileRepository from 'repository/ProfileRepository';
 
 const ProfileSlice = createSlice({
@@ -28,23 +26,14 @@ const ProfileSlice = createSlice({
     formDataLoadingFailed: state => {
       state.loading = false;
     },
-    setFormData: (state, { payload: { FormDto, activityDto } }) => {
-      //   const { questions, questionsGroups } = ConfirmRegistrationSection();
+    setFormData: (state, { payload: { FormDto } }) => {
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto
       );
 
-      state.questions = [
-        // ...questions,
-        ...formQuestionUpdated
-        // schoolField(activityDto.RegistrantType)
-      ];
-      state.questionsGroups = [
-        ...formQuestionGroupUpdated
-        // ...questionsGroups
-      ];
+      state.questions = [...formQuestionUpdated];
+      state.questionsGroups = [...formQuestionGroupUpdated];
       state.answeredQuestions = formQuestionAnswer;
-      //   state.activity = activityDto;
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
@@ -69,46 +58,29 @@ export const useProfileActions = () => {
     setFormData,
     formDataLoaded,
     loadingFormData,
-    submitFormSection,
-    setRegistrationId
+    submitFormSection
   } = ProfileSlice.actions;
   const dispatch = useDispatch();
 
   const loaded = () => dispatch(formDataLoaded());
 
-  const loadFormData = async (newChild = '0', UserUid) => {
+  const loadFormData = async UserUid => {
     dispatch(loadingFormData());
-    await ProfileRepository.getFormData(newChild, UserUid).then(({ obj, msgs }) => {
+    await ProfileRepository.getFormData(UserUid).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
 
-  const submitFormSectionData = async (
-    { answers, answerQuery },
-    lastSection,
-    schoolLocationID,
-    newChild,
-    UserUid
-  ) => {
+  const submitFormSectionData = async ({ answers, answerQuery }, UserUid) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = {
-      newChild,
       groupId,
-      schoolLocationID,
       answers: new URLSearchParams(answersQuery).toString(),
       registrantId: UserUid
     };
 
-    // if (lastSection) {
-    //   const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
-    //   dispatch(loadingFormData());
-    //   ProfileRepository.register({ ...params, eSignature }).then(({ data: { obj, msgs } }) => {
-    //     dispatch(setRegistrationId(obj));
-    //     dispatch(setMsgs(msgs));
-    //   });
-    // } else
     await ProfileRepository.submitFormSection(params).then(({ data: { msgs } }) =>
       dispatch(setMsgs(msgs))
     );

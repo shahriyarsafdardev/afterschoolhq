@@ -49,12 +49,11 @@ export default function UpdateProfile() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
-  const [showThankYou, setShowThankYou] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const userUid = window.location.pathname.split('/')[3];
 
-  const { sectionSkipAble, Name } = questionsGroups?.length ? questionsGroups[activeGroup] : {};
+  const { Name } = questionsGroups?.length ? questionsGroups[activeGroup] : {};
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
@@ -67,12 +66,7 @@ export default function UpdateProfile() {
     formSectionSubmitObject
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) => {
-    const newChild = searchParams.get('newChild');
-    let paramsQuery = `section=${questionsGroups[index].Name}`;
-    if (newChild) paramsQuery += `&newChild=${newChild}`;
-    return paramsQuery;
-  };
+  const buildQueryParams = (index = activeGroup) => `section=${questionsGroups[index].Name}`;
 
   const handleSection = action => {
     if (action === 'next') {
@@ -96,7 +90,6 @@ export default function UpdateProfile() {
     redirect(familyUrl);
   };
 
-  const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
 
@@ -105,36 +98,30 @@ export default function UpdateProfile() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
-      if (!isEmpty || dirty || secondLastSection) {
+      if (dirty) {
         setSaveDisabled(true);
-        let [schoolLocationID, errors] = [null, null];
 
         await submitFormSectionData(
           formSectionSubmitObject(values, activeGroupId),
-          lastSection,
-          schoolLocationID,
-          searchParams.get('newChild'),
           userUid
-        ).then(() => {
-          enqueueSnackbar('Submitted.', { variant: 'success' });
-          if (lastSection && !msgs.length) handleRedirection();
-        });
+        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
-      if (!lastSection && !msgs.length) {
-        handleSection('next');
-        resetForm();
-      } else setSaveDisabled(false);
+      if (!msgs.length) {
+        if (!lastSection) {
+          handleSection('next');
+          resetForm();
+        } else handleRedirection();
+      }
+      setSaveDisabled(false);
     }
   });
 
-  const { handleSubmit, dirty, values } = formik;
-  const isEmpty = !Object.values(values).some(x => x !== '');
-  const skipAble = sectionSkipAble && isEmpty && !dirty;
+  const { handleSubmit, dirty } = formik;
 
   useEffect(() => {
     loadUser();
-    loadFormData(searchParams.get('newChild'), userUid);
-  }, [searchParams.get('newChild'), userUid]);
+    loadFormData(userUid);
+  }, [userUid]);
 
   useEffect(() => {
     if (questionsGroups?.length)
@@ -153,11 +140,7 @@ export default function UpdateProfile() {
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-        if (showThankYou) setShowThankYou(false);
-      } else {
-        if (searchParams.get('screen')) setShowThankYou(true);
-        else setSearchParams(paramsQuery);
-      }
+      } else setSearchParams(paramsQuery);
     }
   }, [questions?.length, searchParams.get('section')]);
 
@@ -267,8 +250,10 @@ export default function UpdateProfile() {
                         <>
                           {'Loading . . .'} <CircularProgress size={'20px'} />
                         </>
-                      ) : (
+                      ) : dirty ? (
                         'Save'
+                      ) : (
+                        'Skip'
                       )}
                     </Button>
                   </Box>
