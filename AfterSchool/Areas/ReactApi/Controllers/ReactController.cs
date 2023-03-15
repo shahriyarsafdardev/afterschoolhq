@@ -519,7 +519,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                                     children.ForEach(child =>
                                     {
-                                        if (registrant.ID == parent2Registrant.ID)
+                                        if (registrant.ID == parent2Registrant?.ID)
                                         {
                                             foreach (var key in parent2Map.Keys)
                                             {
