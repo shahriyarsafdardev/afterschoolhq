@@ -13,6 +13,7 @@ export default {
 
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
+  registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   facebookShareUrl: (activityUrl, textToShare = '') =>
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       activityUrl

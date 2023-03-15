@@ -12,7 +12,7 @@ import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 function ThankYouSection() {
   const classes = useStyles();
   const { navigateTo } = utils;
-  const { accountUrl } = apiRoutes;
+  const { accountUrl, registerForNewChildUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
@@ -21,14 +21,35 @@ function ThankYouSection() {
   } = useUser();
 
   const {
+    questions,
+    answeredQuestions,
     activity: {
-      activityUrl,
+      ActivityUrl: activityUrl,
       RegistrantType,
       Name: activityName,
-      findAnotherActivityUrl,
-      RegisterForNewChildUrl
+      FindAnotherActivityUrl: findAnotherActivityUrl
     }
   } = useRegistration();
+
+  const getFirstName = () => {
+    if (RegistrantType !== 'Parent') return firstName;
+
+    const question = questions.filter(
+      question =>
+        question.FormQuestionGroupQuestionGroupDataTypeId === 2 &&
+        question.GroupTitle === 'Student Information' &&
+        question.QuestionDataTypeId === 1
+    )[0];
+
+    const submittedAnswer = (id, text) => {
+      const answer =
+        answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)?.Text ||
+        '';
+      return answer === 'null' ? '' : answer;
+    };
+
+    return submittedAnswer(question.QuestionDataTypeId, question.Text);
+  };
 
   useEffect(() => {
     //Restrict user not to go back
@@ -68,7 +89,7 @@ function ThankYouSection() {
       <Box className={classes.thankYouWrapper}>
         <Typography variant="h4">Thank You!</Typography>
         <Typography variant="body1">
-          <b>{firstName}</b> has been registered for <b>{activityName}</b>
+          <b>{getFirstName()}</b> has been registered for <b>{activityName}</b>
         </Typography>
         <Box>
           <Button
@@ -91,7 +112,7 @@ function ThankYouSection() {
         </Box>
 
         {RegistrantType === 'Parent' && (
-          <Link href={RegisterForNewChildUrl} className={classes.link} variant="body1">
+          <Link href={registerForNewChildUrl} className={classes.link} variant="body1">
             Register for New Child
           </Link>
         )}
