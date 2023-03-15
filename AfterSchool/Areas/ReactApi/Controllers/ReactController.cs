@@ -279,6 +279,135 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
+        [HttpGet]
+        public ActionResult GetNewChildForm()
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+                
+                var currentAccount = SessionVariables.CurrentAccount;
+                var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var activity = participationObject.GetActivity();
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                Registrant studentReg = null;
+                
+                Database.ExecuteTransaction
+                (
+                    (amsgs, adc) =>
+                    {
+                        studentReg = currentAccount.CreateParentOrStudentRegistrant(
+                            registrantOwner: currentUser,
+                            canBeAccessedBy: currentUser.AsList(),
+                            registrantType: RegistrantType.Individual,
+                            isMaster: true,
+                            isParentOrGuardian: false,
+                            allowTextMessages: false,
+                            schoolLocationId: null,
+                            profileStatus: RegistrantProfileStatus.Started,
+                            loggedInUser: currentUser,
+                            msgs: amsgs,
+                            dc : adc);
+                        
+                        if(parentRegistrant.IsNotEmpty())
+                            RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                
+                        if(parent2Registrant.IsNotEmpty())
+                            RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                    },
+                    smsgs =>
+                    {
+                        msgs.AddRange(smsgs);
+
+                        SessionVariables.CurrentRegistrant = studentReg;
+                    },
+                    fmsgs => msgs.AddRange(fmsgs),
+                    emsgs => throw new Exception(emsgs.ToString())
+                );
+                
+                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
+
+                foreach (var question in questions)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                             ID = question.ID.Value,
+                             FormQuestionGroupId = question.FormQuestionGroupId,
+                             Text = question.Text,
+                             Description = question.Description,
+                             Options = question.Options,
+                             IsRequired = question.IsRequired,
+                             DisplayOrder = question.DisplayOrder,
+                             IsActive = question.IsActive,
+                             IsDeleted = question.IsDeleted,
+                             QuestionTypeId = question.QuestionTypeId,
+                             QuestionDataTypeId = question.QuestionDataTypeId,
+                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+                
+                foreach (var questionGroup in questionGroups)
+                {
+                    formQuestionGroupDtoList.Add(
+                        new FormQuestionGroupDto()
+                        {
+                            FormId = questionGroup.FormId,
+                            Name = questionGroup.Name,
+                            DisplayOrder = questionGroup.DisplayOrder,
+                            QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                        }
+                    );
+                }
+                
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(studentReg.ID.Value))
+                {
+                    formQuestionAnswerDtoList.Add(
+                        new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText,
+                            Text = questionAnswer.Text
+                        }
+                    );
+                }
+
+                dynamic response = new
+                {
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    activityDto = new
+                    {
+                        Name = activity.Name,
+                        Organization = activity.AccountName,
+                        IsFree = participationObject.IsFree,
+                        RegistrantType = RegistrantPersonType.Parent
+                    }
+                };
+                
+                return Json(
+                    new ApiResponse(msgs,response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
         [HttpPost]
         public ActionResult UpdateProfile(QuestionAnswerResponse json)
         {
