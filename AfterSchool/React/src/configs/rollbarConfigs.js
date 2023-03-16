@@ -1,5 +1,5 @@
 const rollbarConfig = {
-  accessToken: 'ROLLBAR_CLIENT_KEY',
-  environment: 'local'
+  accessToken: process.env.ROLLBAR_CLIENT_KEY,
+  environment: process.env.ENVIRONMENT
 };
 export default rollbarConfig;
