@@ -1,4 +1,5 @@
 const path = require('path');
+const Dotenv = require('dotenv-webpack');
 const WebpackNotifierPlugin = require('webpack-notifier');
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
@@ -31,7 +32,13 @@ module.exports = {
     ]
   },
   devtool: 'inline-source-map',
-  plugins: [new WebpackNotifierPlugin(), new BrowserSyncPlugin()],
+  plugins: [
+    new WebpackNotifierPlugin(),
+    new BrowserSyncPlugin(),
+    new Dotenv({
+      path: '.env'
+    })
+  ],
   resolve: {
     extensions: ['', '.js', '.jsx'],
     modules: [path.resolve('./src'), 'node_modules']

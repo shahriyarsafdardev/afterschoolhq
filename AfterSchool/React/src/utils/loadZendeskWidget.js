@@ -1,4 +1,7 @@
-function loadZendeskWidget(zendeskScriptUrl, zendeskHost) {
+function loadZendeskWidget(
+  zendeskScriptUrl = 'https://assets.zendesk.com/embeddable_framework/main.js',
+  zendeskHost = 'afterschoolhq.zendesk.com'
+) {
   return new Promise((resolve, reject) => {
     window.zEmbed ||
       (function(e, t) {
