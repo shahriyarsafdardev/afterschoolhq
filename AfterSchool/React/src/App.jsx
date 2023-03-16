@@ -3,10 +3,12 @@ import { useRoutes } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
+import { Provider, ErrorBoundary } from '@rollbar/react';
 
 import UpdateProfile from 'pages/UpdateProfile/UpdateProfile';
-import Wrapper from 'pages/Wrapper/Wrapper';
+import RollbarConfig from 'configs/rollbarConfigs';
 import Home from './pages/registration/Home';
+import Wrapper from 'pages/Wrapper/Wrapper';
 import theme from './theme/theme';
 
 function App() {
@@ -29,12 +31,16 @@ function App() {
     ]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-        <Router />
-      </SnackbarProvider>
-    </ThemeProvider>
+    <Provider config={RollbarConfig}>
+      <ErrorBoundary>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+            <Router />
+          </SnackbarProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    </Provider>
   );
 }
 export default App;
