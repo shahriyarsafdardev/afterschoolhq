@@ -375,6 +375,12 @@ namespace AfterSchoolLibrary.Models
             get => (bool) MDV["IsFeatured"].Value;
             set => MDV["IsFeatured"].Value = value;
         }
+        
+        public string SchoolName
+        {
+            get => (string) MDV["SchoolName"].Value;
+            set => MDV["SchoolName"].Value = value;
+        }
 
         public Activity()
         {
@@ -462,6 +468,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ActivityGroupUid", typeof(ActivityGroup).Name, "Uid", SqlDbType.UniqueIdentifier, "ActivityGroup");
                 _dp.Add(className, "IsGenderEnforced", SqlDbType.Bit);
                 _dp.Add(className, "IsFeatured", SqlDbType.Bit);
+                _dp.Add(className, "SchoolName", SqlDbType.NVarChar, "100");
 
                 return _dp;
             }
@@ -503,6 +510,22 @@ namespace AfterSchoolLibrary.Models
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Activity> LoadByDistrict(Account account, int orderBy, int start, int length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetAllActivitiesByDistrict(account.ID.Value,orderBy, start, length);
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByDistrict(Account account, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetAllActivitiesByDistrictCount(account.ID.Value);
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
 
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -847,6 +870,59 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        private static string GetAllActivitiesByDistrict(int hostAccountId, int OrderBy, int? start, int? length)
+        {
+            var sql = $@"select
+	            school.name as SchoolName,
+	            activity.*
+            from
+	            account school left outer join
+	            [location] activitylocation on school.id = activitylocation.HostAccountId left outer join
+	            activity on activity.locationid = activitylocation.id left outer join
+	            account provider on activity.AccountId = provider.ID
+            where
+	            school.id in (
+                select visitoraccountid
+                from accountrelationship
+                where hostaccountid = {hostAccountId}
+              ) and
+              school.accounttypeid = 2 AND
+              school.isdeleted = 0 AND
+              school.istest = 0 AND
+              activity.id is not null
+              order by activity.CreateDate";
+            
+            if(OrderBy == 0)
+                sql += $" desc offset {start} rows fetch next {length} rows only";
+            
+            if(OrderBy == 1)
+                sql += $" asc offset {start} rows fetch next {length} rows only";
+
+            return sql;
+        }
+        
+        private static string GetAllActivitiesByDistrictCount(int hostAccountId)
+        {
+            var sql = $@"select Count(distinct activity.id)
+            from
+	            account school left outer join
+	            [location] activitylocation on school.id = activitylocation.HostAccountId left outer join
+	            activity on activity.locationid = activitylocation.id left outer join
+	            account provider on activity.AccountId = provider.ID
+            where
+	            school.id in (
+                select visitoraccountid
+                from accountrelationship
+                where hostaccountid = {hostAccountId}
+              ) and
+              school.accounttypeid = 2 AND
+              school.isdeleted = 0 AND
+              school.istest = 0 AND
+              activity.id is not null";
+
+            return sql;
         }
 
         #endregion

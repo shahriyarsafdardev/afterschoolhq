@@ -1,8 +1,11 @@
-﻿@using Microsoft.Ajax.Utilities
+@using Microsoft.Ajax.Utilities
+@using ServiceStack.Text
 @model List<Activity>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var availableTags = (List<AvailableTag>)ViewBag.AvailableTags;
+    var selectedDateOrderType = ViewBag.SelectedDateOrderType;
+    var paging = (PagingModel)ViewBag.PagingModel;
 }
 
 @{Html.RenderPartial("DistrictHeader");}
@@ -17,16 +20,25 @@
         
         <div class="panel-heading">
             <h2><i class="s7-gleam"></i> Activity</h2>
+            <div class="pull-right">
+                <select name="dateOrderType" id="dateOrderType" class="form-control">
+                    <option value="0" @(selectedDateOrderType == 0 ? "selected" : "")>Newest</option>
+                    <option value="1"@(selectedDateOrderType == 1 ? "selected" : "")>Oldest</option>
+                </select>
+            </div>
             <div class="clearfix"></div>
         </div>
 
         <div class="panel-body">
-            
+
             <table class="table">
                 <tr>
-                    <th>School</th>
-                    <th>Link</th>
+                    <th>Activity</th>
+                    <th>School Name</th>
+                    <th>Provider Name</th>
+                    <th>Created Date</th>
                     <th>Tag</th>
+                    <th>Link</th>
                 </tr>
                 @if (Model.Count > 0)
                 {
@@ -34,15 +46,38 @@
                     {
                         <tr>
                             <td>@activity.Name</td>
-                            <td><a href="@activity.HomePageUrl" target="_blank" >@activity.HomePageUrl</a></td>
+                            <td>@activity.SchoolName</td>
+                            <td>@activity.GetAccount().Name</td>
+                            <td>@activity.CreateDate.ToShortDateString()</td>
                             <td>
                                 <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)activity.ID, (int)ObjectType.Activity).Select(x => x.Tag).ToStringList(","))">
-                                <input type="hidden" id="@activity.ID"/>
+                                <input type="hidden" id="@activity.ID" />
+                            </td>
+                            <td>
+                                <span onclick="WebPage.copySelection('@activity.HomePageUrl', 'URL has been copied')" title="Copy Url">
+                                    <i class="s7-copy-file icon-large text-success pointer"></i>
+                                </span>
+                                <a href="@activity.HomePageUrl" target="_blank" title="View Page">
+                                    <i class="s7-link icon-large"></i>
+                                </a>
                             </td>
                         </tr>
                     }
                 }
             </table>
+
+            @{Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                        { "id", "" },
+                        { "action", "activity" },
+                        { "controller", "tag" },
+                        { "querystring", $"dateOrderType={Request["dateOrderType"]}" }
+                    }
+                );
+            }
 
         </div>
     </div>
@@ -52,13 +87,13 @@
 
 
 <script>
-    
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        
+
         $(".assignedTags").on('beforeItemAdd', function(event) {
-            
-            var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJSON())');
-            
+
+            var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJson())');
+
             if(!availableTags.includes(event.item)) {
                  event.cancel = true;
             }
@@ -67,28 +102,32 @@
                var tag = event.item;
                var objectId = $(this).next().attr("id");
                var objectType = '@((int)ObjectType.Activity)';
-                 
+
                $.get(
               '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=add',
               function (data) {});
-                 
+
             }
-            
+
         });
-        
+
         $(".assignedTags").on('beforeItemRemove', function(event) {
-                        
+
              var tag = event.item;
              var objectId = $(this).next().attr("id");
              var objectType = '@((int)ObjectType.Activity)';
-             
+
              $.get(
              '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=remove',
              function (data) {});
-            
+
         });
-        
-    }); 
-    
+
+        $('#dateOrderType').on('change', function() {
+            location.href = '@Url.Action("Activity","Tag")?dateOrderType=' + this.value + '&pn=' +@paging.PageNumber+'&rpp=' +@paging.RecordsPerPage+'';
+        });
+
+    });
+
 </script>
     

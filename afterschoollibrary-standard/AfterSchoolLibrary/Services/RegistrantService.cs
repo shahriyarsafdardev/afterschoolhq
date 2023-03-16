@@ -780,7 +780,7 @@ namespace AfterSchoolLibrary.Services
             return RegistrantSubscriptionPlan.LoadByRegistrantId(registrant.ID.Value, msgs, dc);
         }
 
-        public static bool CancelSubcriptionIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+        public static bool CancelPlanIfExists(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
             WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: Has to be a better way
@@ -791,10 +791,9 @@ namespace AfterSchoolLibrary.Services
             foreach (var rsp in rsps.Where(rsp => !rsp.DateCancelled.HasValue))
             {
                 var plan = rsp.GetSubscriptionPlan(msgs, dc);
-                var isSubscription = plan.PlanTypeId == SubscriptionPlanType.Subscription;
 
-                if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType && isSubscription)
-                    return plan.CancelSubscription(rsp, plan.GetAccount(msgs, dc), loggedInUser, msgs, dc);
+                if (plan.ParticipationObjectId == participationObjectId && plan.ParticipationObjectTypeId == participationObjectType)
+                    return plan.CancelPlan(rsp, plan.GetAccount(msgs, dc), loggedInUser, msgs, dc);
             }
 
             return false;
@@ -1420,7 +1419,7 @@ namespace AfterSchoolLibrary.Services
 
                     // cancel subscription if it has one
                     if (msgs.HasNoErrors() && isCancelPayment)
-                        registrant.CancelSubcriptionIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
+                        registrant.CancelPlanIfExists(participationObjectId, participationObjectType, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {

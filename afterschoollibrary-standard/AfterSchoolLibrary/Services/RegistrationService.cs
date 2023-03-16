@@ -139,7 +139,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var isStudentOrTeacherRegistering = (masterRegistrant.IsEmpty() ||
                                                     (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
-                                                    masterRegistrant.PersonTypeId != RegistrantPersonType.Adult;
+                                                    masterRegistrant?.PersonTypeId != RegistrantPersonType.Adult;
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
