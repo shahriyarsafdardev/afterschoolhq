@@ -379,7 +379,6 @@ namespace AfterSchoolLibrary.Models
         public string SchoolName
         {
             get => (string) MDV["SchoolName"].Value;
-            set => MDV["SchoolName"].Value = value;
         }
 
         public Activity()
@@ -759,6 +758,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["IsFeatured"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["SchoolName"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 
