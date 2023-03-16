@@ -8,6 +8,7 @@ import { Provider, ErrorBoundary } from '@rollbar/react';
 import UpdateProfile from 'pages/UpdateProfile/UpdateProfile';
 import loadZendeskWidget from 'utils/loadZendeskWidget';
 import RollbarConfig from 'configs/rollbarConfigs';
+import loadSmartlook from 'utils/loadSmartlook';
 import Home from './pages/registration/Home';
 import Wrapper from 'pages/Wrapper/Wrapper';
 import theme from './theme/theme';
@@ -36,6 +37,10 @@ function App() {
       'https://assets.zendesk.com/embeddable_framework/main.js',
       'afterschoolhq.zendesk.com'
     );
+    loadSmartlook('smartlookKey', document).then(smartlook => {
+      // You can now use the smartlook object here
+      smartlook;
+    });
   }, []);
   return (
     <Provider config={RollbarConfig}>
