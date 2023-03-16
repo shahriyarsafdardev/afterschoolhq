@@ -33,11 +33,8 @@ function App() {
     ]);
 
   useEffect(() => {
-    loadZendeskWidget(
-      'https://assets.zendesk.com/embeddable_framework/main.js',
-      'afterschoolhq.zendesk.com'
-    );
-    loadSmartlook('smartlookKey', document).then(smartlook => {
+    loadZendeskWidget();
+    loadSmartlook().then(smartlook => {
       // You can now use the smartlook object here
       smartlook;
     });

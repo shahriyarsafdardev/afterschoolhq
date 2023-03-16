@@ -1,4 +1,4 @@
-function loadSmartlook(smartlookKey, documentObject) {
+function loadSmartlook(smartlookKey = process.env.SmartlookKey, documentObject = document) {
   return new Promise((resolve, reject) => {
     window.smartlook =
       window.smartlook ||
