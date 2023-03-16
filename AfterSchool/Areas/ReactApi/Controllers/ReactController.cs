@@ -527,7 +527,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                                     form.GetAllQuestions(),
                                                     registrant,
                                                     key,
-                                                    parent1Map[key],
+                                                    parent2Map[key],
                                                     SessionVariables.CurrentUser,
                                                     amsgs,
                                                     adc);
@@ -888,6 +888,40 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 return Json(
                     new ApiResponse(msgs,location.ID),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        public ActionResult ThankYou()
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var activity = participationObject?.GetActivity();
+                
+                dynamic response = new
+                {
+                    activityDto = new
+                    {
+                        ActivityName = activity.Name,
+                        Organization = activity.AccountName,
+                        RegistrantFirstName = currentRegistrant.FirstName,
+                        FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                        ActivityUrl = activity.ShortHomePageUrl,
+                    }
+                };
+                
+                return Json(
+                    new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
