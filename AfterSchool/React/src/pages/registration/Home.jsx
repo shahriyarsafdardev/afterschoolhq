@@ -32,7 +32,7 @@ export default function Home() {
   const classes = useStyles();
   const { loadUser } = useUser();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath } = apiRoutes;
+  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
@@ -101,9 +101,11 @@ export default function Home() {
 
   const handleRedirection = () => {
     if (IsFree) {
-      loaded();
-      setShowThankYou(true);
-      setSearchParams('screen=ThankYou');
+      //   loaded();
+      //   setShowThankYou(true);
+      //   setSearchParams('screen=ThankYou');
+      // TODO: Turned off ReactApp ThankYou page for now.
+      redirect(thankyouScreenPath(registrationId));
     } else redirect(paymentScreenPath(registrationId));
   };
 
@@ -170,10 +172,11 @@ export default function Home() {
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-        if (showThankYou) setShowThankYou(false);
+        // if (showThankYou) setShowThankYou(false); //TODO: Turned off ReactApp ThankYou page for now.
       } else {
-        if (searchParams.get('screen')) setShowThankYou(true);
-        else setSearchParams(paramsQuery);
+        // if (searchParams.get('screen')) setShowThankYou(true); //TODO: Turned off ReactApp ThankYou page for now.
+        // else
+        setSearchParams(paramsQuery);
       }
     }
   }, [questions.length, searchParams.get('section')]);
