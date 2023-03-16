@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRoutes } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -6,6 +6,7 @@ import { ThemeProvider } from '@material-ui/core/styles';
 import { Provider, ErrorBoundary } from '@rollbar/react';
 
 import UpdateProfile from 'pages/UpdateProfile/UpdateProfile';
+import loadZendeskWidget from 'utils/loadZendeskWidget';
 import RollbarConfig from 'configs/rollbarConfigs';
 import Home from './pages/registration/Home';
 import Wrapper from 'pages/Wrapper/Wrapper';
@@ -30,6 +31,12 @@ function App() {
       }
     ]);
 
+  useEffect(() => {
+    loadZendeskWidget(
+      'https://assets.zendesk.com/embeddable_framework/main.js',
+      'afterschoolhq.zendesk.com'
+    );
+  }, []);
   return (
     <Provider config={RollbarConfig}>
       <ErrorBoundary>
