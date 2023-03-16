@@ -186,7 +186,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             isParentOrGuardian: false,
                             allowTextMessages: false,
                             schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.Started,
+                            profileStatus: RegistrantProfileStatus.NotSet,
                             loggedInUser: currentUser,
                             msgs: amsgs,
                             dc : adc);
