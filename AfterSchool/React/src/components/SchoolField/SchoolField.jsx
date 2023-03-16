@@ -117,7 +117,7 @@ function SchoolField({ question, formik }) {
           </Typography>
         </Grid>
         <Grid xs={12} md={8} item className={classes.textFieldGrid}>
-          <LoadScript googleMapsApiKey={process.env.GoogleMapsApiKey} libraries={['places']}>
+          <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={['places']}>
             <StandaloneSearchBox
               onLoad={ref => {
                 inputRef.current = ref;
