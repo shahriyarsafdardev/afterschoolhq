@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
+using BCrypt.Net;
 
 namespace AfterSchool.Areas.District.Controllers
 {
@@ -87,23 +90,40 @@ namespace AfterSchool.Areas.District.Controllers
             return View(schools);
         }
         
-        public ActionResult Activity()
+        public ActionResult Activity(string pn, string rpp, int dateOrderType = 0, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            var pageNumber = 1;
+            var recordsPerPage = 10;
+
+            if (pn.IsNumber() && pn.ToInteger() > 0)
+                pageNumber = pn.ToInteger();
+
+            if (rpp.IsNumber() && rpp.ToInteger() > 0)
+                recordsPerPage = rpp.ToInteger();
+
+            var start = recordsPerPage * (pageNumber - 1);
+            var length = recordsPerPage;
+
             var currentAccount = SessionVariables.CurrentAccount;
             var availableTags = AvailableTag.LoadByAccountIdByObjectType(currentAccount.ID.Value ,(int) ObjectType.Activity, msgs);
-            var schools = currentAccount.GetVisitorAccounts(new List<AccountType>() {AccountType.School} , msgs);
-            var activities = new List<Activity>();
-            foreach (var school in schools)
-            {
-                 var schoolActivities = school.GetAllActivitiesForAccount(msgs);
-                 activities.AddRange(schoolActivities);
-            }
-            
+            var count = AfterSchoolLibrary.Models.Activity.GetCountByDistrict(currentAccount, msgs);
+            var allActivities  = AfterSchoolLibrary.Models.Activity.LoadByDistrict(currentAccount, dateOrderType, start, length, msgs);
+
+            var totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+
             ViewBag.Messages = msgs;
             ViewBag.AvailableTags = availableTags;
-            
-            return View(activities);
+            ViewBag.SelectedDateOrderType = dateOrderType;
+
+            ViewBag.PagingModel = new PagingModel
+            {
+                TotalCount = count,
+                PageNumber = pageNumber,
+                RecordsPerPage = recordsPerPage,
+                TotalPages = totalPages,
+            };
+
+            return View(allActivities);
         }
 
         public bool AddRemoveAssignedTag(string tag, int objectID, int objectType, string operation)
