@@ -2973,12 +2973,12 @@ namespace AfterSchool.Areas.Org.Controllers
                                 PostPayPlan = postPayPlan,
                             };
 
-                            if (msgs.HasNoErrors())
-                                AccountService.ProcessPayment(
-                                    checkoutObject,
-                                    isAttendanceCharge: true,
-                                    loggedInUser: currentUser,
-                                    msgs: msgs);
+                            // if (msgs.HasNoErrors())
+                            //     AccountService.ProcessPayment(
+                            //         checkoutObject,
+                            //         isAttendanceCharge: true,
+                            //         loggedInUser: currentUser,
+                            //         msgs: msgs);
                         }
 
                         if (msgs.HasNoErrors())

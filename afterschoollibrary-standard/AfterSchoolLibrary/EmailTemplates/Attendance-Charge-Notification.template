@@ -1,0 +1,19 @@
+﻿<div>
+  <p>Hello @Model.FirstName,</p>
+    <br/>
+  <p>
+      <u>@Model.ActivityContactName</u> has marked you as <strong>present</strong> in <u>@Model.ActivityName</u> for @Model.AttendanceDate. 
+      @Model.ChargeDescription. If you believe this is an error, please contact the provider.
+  </p>
+    <br/>
+    
+  @Model.RegistrationTable
+  
+  <p>
+    <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
+  </p>
+  
+  <p>
+    If you have any questions or concerns, please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (@Model.ActivityContactEmail).
+  </p>
+</div>
