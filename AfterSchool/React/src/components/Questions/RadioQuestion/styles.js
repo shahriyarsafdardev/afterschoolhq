@@ -4,7 +4,6 @@ const useStyles = makeStyles(() => ({
   radioGroupWrapper: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     maxWidth: 540
@@ -22,8 +21,7 @@ const useStyles = makeStyles(() => ({
   },
   flexCenter: {
     display: 'flex',
-    justifyContent: 'center',
-    paddingLeft: 50
+    paddingLeft: 25
   },
   maxWidth: {
     width: '100%',

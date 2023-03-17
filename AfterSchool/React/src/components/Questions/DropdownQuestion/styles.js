@@ -66,8 +66,7 @@ const useStyles = makeStyles(theme => ({
   },
   flexCenter: {
     display: 'flex',
-    justifyContent: 'center',
-    paddingLeft: 50
+    paddingLeft: 25
   },
   maxWidth: {
     width: '100%',

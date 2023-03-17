@@ -9,7 +9,10 @@ function DropdownQuestion({ question, formik }) {
   const { touched, values, errors, setFieldValue } = formik;
 
   const { ID, Options, Text: title, IsRequired: isRequired = false } = question;
-  const options = Options.split(',').map(option => ({ key: option, value: option }));
+  const options = Options.split(',').map(option => {
+    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+    return { key, value };
+  });
 
   const handleChange = ({ target: { value } }) => {
     const selectedOption = options.find(option => option.value === value);
@@ -69,14 +72,14 @@ function DropdownQuestion({ question, formik }) {
             </div>
           </div>
         </div>
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText className={classes.maxWidth} error>
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
       </FieldWrapper>
-      {touched[ID] && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.maxWidth} error>
-            {errors[ID]}
-          </FormHelperText>
-        </Box>
-      )}
     </>
   );
 }

@@ -6,7 +6,6 @@ import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
 import {
-  NavBar,
   Loader,
   CheckBox,
   TextField,
@@ -15,10 +14,11 @@ import {
   CheckBoxList,
   ApiTextField
 } from 'components';
+import { ThankYouSection } from 'sections';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useRegistration } from 'redux/hooks/index';
 import questionType from 'constants/questionType';
-import apiRoutes from 'routes/apiRoutes';
+import apiRoutes from 'routes';
 import useStyles from './styles';
 import utils from 'utils';
 import {
@@ -32,11 +32,12 @@ export default function Home() {
   const classes = useStyles();
   const { loadUser } = useUser();
   const { scrollToTop, redirect } = utils;
-  const { enqueueSnackbar } = useSnackbar();
   const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
+  const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
     school,
+    loaded,
     loading,
     questions,
     loadFormData,
@@ -53,6 +54,7 @@ export default function Home() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
@@ -97,8 +99,15 @@ export default function Home() {
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
-  const handleRedirection = () =>
-    redirect(IsFree ? thankyouScreenPath(registrationId) : paymentScreenPath(registrationId));
+  const handleRedirection = () => {
+    if (IsFree) {
+      //   loaded();
+      //   setShowThankYou(true);
+      //   setSearchParams('screen=ThankYou');
+      // TODO: Turned off ReactApp ThankYou page for now.
+      redirect(thankyouScreenPath(registrationId));
+    } else redirect(paymentScreenPath(registrationId));
+  };
 
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
@@ -143,7 +152,6 @@ export default function Home() {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadUser();
     loadFormData(searchParams.get('newChild'));
   }, [searchParams.get('newChild')]);
 
@@ -164,14 +172,21 @@ export default function Home() {
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-      } else setSearchParams(paramsQuery);
+        // if (showThankYou) setShowThankYou(false); //TODO: Turned off ReactApp ThankYou page for now.
+      } else {
+        // if (searchParams.get('screen')) setShowThankYou(true); //TODO: Turned off ReactApp ThankYou page for now.
+        // else
+        setSearchParams(paramsQuery);
+      }
     }
   }, [questions.length, searchParams.get('section')]);
 
   useEffect(() => {
     setSaveDisabled(false);
-    if (questions.length)
-      setCurrentQuestions(groupedQuestions(questionsGroups[activeGroup]?.QuestionGroupDataTypeId));
+    if (questions.length) {
+      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
+      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
+    }
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
@@ -212,74 +227,68 @@ export default function Home() {
 
   return (
     <FormikProvider value={formik}>
-      <Form autoComplete="off" noValidate onSubmit={handleSubmit}>
-        <Box className={classes.home}>
-          {loading ? (
-            <Loader />
-          ) : (
-            <>
-              <NavBar />
-              <Box className={classes.outerWrapper}>
-                <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
-                <Box className={classes.formWrapper}>
-                  <Box className={classes.formInnerWrapper}>
-                    <Typography
-                      style={{
-                        paddingTop: '30px',
-                        fontSize: 18,
-                        color: '#555555'
-                      }}
-                      variant="h6"
-                      color="secondary"
+      <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
+        {loading ? (
+          <Loader />
+        ) : showThankYou ? (
+          <ThankYouSection />
+        ) : (
+          <Box className={classes.outerWrapper}>
+            <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
+            <Box className={classes.formWrapper}>
+              <Box className={classes.formInnerWrapper}>
+                <Typography
+                  style={{
+                    paddingTop: '30px',
+                    fontSize: 18,
+                    color: '#555555'
+                  }}
+                  variant="h6"
+                  color="secondary"
+                >
+                  Please enter your information below to register
+                </Typography>
+                <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
+                  {Name}
+                </Typography>
+                <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
+                  <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
+                    {currentQuestions?.map(question => showQuestion(question))}
+                  </Grid>
+                </Grid>
+                <Box className={classes.buttonOuterWrapper}>
+                  <Box className={classes.buttonWrapper}>
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      className={classes.backButton}
+                      disabled={!activeGroup > 0}
+                      onClick={() => handleSection('previous')}
                     >
-                      Please enter your information below to register
-                    </Typography>
-                    <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
-                      {Name}
-                    </Typography>
-                    <Grid
-                      container
-                      className={cs(classes.justifyContentCenter, classes.leftPadding)}
+                      Back
+                    </Button>
+                    <Button
+                      color="primary"
+                      className={classes.saveButton}
+                      variant="contained"
+                      type="submit"
+                      disabled={saveDisabled}
+                      key={activeGroup}
                     >
-                      <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                        {currentQuestions?.map(question => showQuestion(question))}
-                      </Grid>
-                    </Grid>
-                    <Box className={classes.buttonOuterWrapper}>
-                      <Box className={classes.buttonWrapper}>
-                        <Button
-                          color="primary"
-                          variant="outlined"
-                          className={classes.backButton}
-                          disabled={!activeGroup > 0}
-                          onClick={() => handleSection('previous')}
-                        >
-                          Back
-                        </Button>
-                        <Button
-                          color="primary"
-                          className={classes.saveButton}
-                          variant="contained"
-                          type="submit"
-                          disabled={saveDisabled}
-                          key={activeGroup}
-                        >
-                          {saveDisabled ? (
-                            <>
-                              {'Loading . . .'} <CircularProgress size={'20px'} />
-                            </>
-                          ) : (
-                            saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
-                          )}
-                        </Button>
-                      </Box>
-                    </Box>
+                      {saveDisabled ? (
+                        <>
+                          {'Loading . . .'} <CircularProgress size={'20px'} />
+                        </>
+                      ) : (
+                        saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
+                      )}
+                    </Button>
                   </Box>
                 </Box>
               </Box>
-            </>
-          )}
-        </Box>
+            </Box>
+          </Box>
+        )}
       </Form>
     </FormikProvider>
   );

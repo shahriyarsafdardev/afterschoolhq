@@ -32,5 +32,8 @@ export default {
     secondary: '#494949',
     hint: '#B2B2B4',
     disabled: '#F2F2F5'
+  },
+  gray: {
+    primary: '#555555'
   }
 };

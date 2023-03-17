@@ -75,6 +75,32 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataType.Parent2Information
             };
         }
+        
+        public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInParentPanel()
+        {
+            return new List<QuestionGroupDataType>
+            {
+                QuestionGroupDataType.Parent1Address,
+                QuestionGroupDataType.Parent1Information,
+                QuestionGroupDataType.Parent2Address,
+                QuestionGroupDataType.Parent2Information,
+                QuestionGroupDataType.EmergencyContact1,
+                QuestionGroupDataType.EmergencyContact2,
+                QuestionGroupDataType.EmergencyContact3,
+                QuestionGroupDataType.HealthInformation
+            };
+        }
+        
+        public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInStudentPanel()
+        {
+            return new List<QuestionGroupDataType>
+            {
+                QuestionGroupDataType.Parent1Address,
+                QuestionGroupDataType.Parent1Information,
+                QuestionGroupDataType.Parent2Address,
+                QuestionGroupDataType.Parent2Information
+            };
+        }
 
         public static List<QuestionDataType> QuestionsToNotIncludeInVolunteerPanel()
         {

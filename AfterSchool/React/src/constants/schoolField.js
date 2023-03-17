@@ -2,8 +2,9 @@ export default registrantType => {
   if (registrantType === 'Adult') return {};
   return {
     ID: 99999,
+    GroupTitle: 'Student Information',
     Text: 'School',
-    IsRequired: false,
+    IsRequired: true,
     FormQuestionGroupQuestionGroupDataTypeId: 2,
     DisplayOrder: 20,
     QuestionTypeId: 1,

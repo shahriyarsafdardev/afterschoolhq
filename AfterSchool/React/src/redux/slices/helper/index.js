@@ -6,7 +6,8 @@ export const responseMapper = ({ formQuestion, formQuestionGroup, formQuestionAn
   let [formQuestionUpdated, formQuestionGroupUpdated] = [[], []];
 
   formQuestionGroup.forEach(section => {
-    const sectionQuestions = registrationService.groupedQuestions(section.QuestionGroupDataTypeId);
+    const { QuestionGroupDataTypeId, Name } = section;
+    const sectionQuestions = registrationService.groupedQuestions(QuestionGroupDataTypeId, Name);
     const sectionSkipAble = sectionQuestions.every(q => !q.IsRequired);
 
     if (sectionQuestions.length) {

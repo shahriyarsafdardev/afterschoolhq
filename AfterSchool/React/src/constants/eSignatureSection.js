@@ -6,25 +6,27 @@ export default (isParent = true) => {
   };
   const question = isParent
     ? {
-        Description: null,
-        FormQuestionGroupId: 91,
-        FormQuestionGroupQuestionGroupDataTypeId: null,
         ID: 6799,
-        IsRequired: true,
         Options: null,
-        QuestionDataTypeId: 999,
+        IsRequired: true,
+        Description: null,
         QuestionTypeId: 1,
-        Text: 'E-Signature'
+        Text: 'E-Signature',
+        QuestionDataTypeId: 999,
+        FormQuestionGroupId: 91,
+        GroupTitle: 'Confirm Registration',
+        FormQuestionGroupQuestionGroupDataTypeId: null
       }
     : {
-        Description: null,
-        FormQuestionGroupId: 91,
-        FormQuestionGroupQuestionGroupDataTypeId: null,
         ID: 6799,
-        IsRequired: true,
         Options: null,
-        QuestionDataTypeId: 999,
+        IsRequired: true,
+        Description: null,
         QuestionTypeId: 5,
+        FormQuestionGroupId: 91,
+        QuestionDataTypeId: 999,
+        GroupTitle: 'Confirm Registration',
+        FormQuestionGroupQuestionGroupDataTypeId: null,
         Text:
           "I confirm that I have entered both my information and my parent's information correctly and I intend to participate in Junior Leaders Club - 2nd Session."
       };

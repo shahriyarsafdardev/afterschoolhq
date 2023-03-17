@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Select Student";
     var msgs = (SystemMessages)ViewBag.Messages;
+    var masterRegistrant = (Registrant) ViewBag.MasterRegistrant;
     var participationObject = (ParticipationObject)ViewBag.ParticipationObject;
 }
 
@@ -41,8 +42,9 @@
             Html.RenderPartial("~/Views/Shared/Registration/_SelectStudentCard.cshtml", registrant);
         }
     }
-
-    @{ Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
+    
+    @if(masterRegistrant.IsParentOrGuardian)
+        { Html.RenderPartial("~/Views/Shared/Registration/_NewStudentCard.cshtml"); }
 
 </div>
 
