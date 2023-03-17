@@ -431,7 +431,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 amsgs,
                                 adc);
                         });
-
+                        
+                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
+                        {
+                            currentRegistrant.ProfileStatusId = RegistrantProfileStatus.Started;
+                        }
+                        
                         if (json.groupid.ToInteger() == -1)
                         {
                             currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
