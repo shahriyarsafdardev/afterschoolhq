@@ -328,6 +328,21 @@ namespace AfterSchoolLibrary.Models
             return "";
         }
 
+        public string GetShortHomePageUrl(bool isAfterSchool = true)
+        {
+            switch (ObjectType)
+            {
+                case ParticipationObjectType.Activity:
+                    return ActivityService.BuildShortHomePageUrl(OwnerAccount.UniqueName, ActivityType.Value, UniqueName);
+                case ParticipationObjectType.ActivityGroup:
+                    return ((ActivityGroup) Object).GetShortHomePageUrl(isAfterSchool);
+                case ParticipationObjectType.AccountActivityGroup:
+                    return ((AccountActivityGroup) Object).GetHomePageUrl(isAfterSchool);
+            }
+
+            return "";
+        }
+
         public string GetBrowseUrl(bool isAfterSchool = true)
         {
             switch (ObjectType)

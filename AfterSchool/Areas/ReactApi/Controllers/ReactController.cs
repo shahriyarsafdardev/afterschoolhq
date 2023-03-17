@@ -69,11 +69,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var form = participationObject.Form;
-                var activity = participationObject?.GetActivity();
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
-                
-                
                 
                 if (currentRegistrant.IsAdult)
                 {
@@ -139,12 +136,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
                     activityDto = new
                     {
-                        Name = activity.Name,
-                        Organization = activity.AccountName,
+                        Name = participationObject.Name,
+                        Organization = participationObject.OwnerAccount.Name,
                         IsFree = participationObject.IsFree,
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
-                        ActivityUrl = activity.ShortHomePageUrl,
+                        ActivityUrl = participationObject.GetShortHomePageUrl(),
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl()
                     }
                 };
