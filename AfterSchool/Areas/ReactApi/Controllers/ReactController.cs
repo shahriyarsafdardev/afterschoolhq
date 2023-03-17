@@ -54,19 +54,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                var currentUserRegistrant = Registrant.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, msgs, null).FirstOrDefault();
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentRegistrant = SessionVariables.CurrentRegistrant;
                 Registrant parentRegistrant = null;
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
-
-                // var currentRegistrant = currentUser.GetAllRegistrants().FirstOrDefault();
-                // var studentRegistrant = currentAccount.GetStudentRegistrants(msgs).FirstOrDefault();
-                
-                if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized User");
-                
+                                
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
