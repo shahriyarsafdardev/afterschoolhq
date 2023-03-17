@@ -2,7 +2,7 @@
   <p>Hello @Model.FirstName,</p>
     <br/>
   <p>
-      <u>@Model.ActivityContactName</u> has marked you as <strong>present</strong> in <u>@Model.ActivityName</u> for @Model.AttendanceDate. 
+      <u>@Model.ActivityContactName</u> has marked @Model.StudentName as <strong>present</strong> in <u>@Model.ActivityName</u> for @Model.AttendanceDate. 
       @Model.ChargeDescription. If you believe this is an error, please contact the provider.
   </p>
     <br/>

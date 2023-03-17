@@ -1485,67 +1485,6 @@ namespace AfterSchoolLibrary.Helpers
                     {"TotalCharge", totalCharge.ToCurrency()},
                     {"CouponDiscount", totalDiscount.ToCurrency()},
                 };
-                
-                // add attendance row
-                var chargeFeeModel = new NameValueCollection
-                {
-                    {"Description", $"{activity.Name.ToProperCase()}"},
-                    {"Quantity", "1"},
-                    {"Cost", costPerClass.ToCurrency()},
-                    {"AdditionalDetails", "Attendance-Based Charge"},
-                };
-
-                var receiptAttendanceRows = ProcessTemplate(
-                    EmailTemplates.Registration_Confirmation_Rows,
-                    chargeFeeModel,
-                    "Registration_Confirmation_Rows",
-                    msgs);
-
-                var registrationTable = ProcessTemplate(
-                    EmailTemplates.Registration_Confirmation_Table,
-                    new NameValueCollection
-                    {
-                        {"AmountDueOrPaid", "Total Paid Today"},
-                        {"TotalCost", costPerClass.ToCurrency()},
-                        {"BodyRows", receiptAttendanceRows},
-                        {"CreditCardFee", "$1.50"},
-                    },
-                    "Registration_Confirmation_Table-1.0",
-                    msgs);
-
-                var chargeDesc = "Your payment method on file has been charged.";
-                
-                var model = new NameValueCollection
-                {
-                    {"FirstName", loggedInUser.FirstName},
-                    {"ActivityContactEmail", loggedInUser.Email},
-                    {"ActivityContactPhone", loggedInUser.Phone},
-                    {"ActivityContactName", loggedInUser.FullName},
-                    {"LoginLink", Utilities.LoginUrl()},
-                    {"AttendanceDate", attendance.Date.ToLongDateString()},
-                    {"RegistrationTable", registrationTable},
-                    {"RegistrationDetails", "Login to your account to view more details about this payment."},
-                    {"ActivityName", activity.Name.ToProperCase()},
-                    {"ChargeDescription", chargeDesc},
-                };
-                
-                var subject = $"Attendance Charged for {activity.Name}";
-                var body = ProcessTemplate(
-                    EmailTemplates.Attendance_Charge_Notification,
-                    model,
-                    "Attendance_Charge_Notification-1.1",
-                    msgs);
-
-                // SEND EMAILS
-                var mailMsgs = new SystemMessages();
-
-                // Send email to parent for attendance charge
-                mailMsgs.AddRange(SendGridHelper.SendMail(
-                    Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                    new EmailAddress(account.Email),
-                    subject,
-                    body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
 
                 receiptRows += ProcessTemplate(
                     EmailTemplates.Attendance_Charge_Confirmation_Rows,
@@ -1605,7 +1544,7 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage,
-            WebUser loggedInUser, bool sendBcc, SystemMessages msgs, bool isAttendanceCharge = false,
+            WebUser loggedInUser, bool sendBcc, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
@@ -1624,10 +1563,6 @@ namespace AfterSchoolLibrary.Helpers
             var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var quantity = checkoutObject.Quantity.HasValue ? checkoutObject.Quantity.Value.ToString() : "1";
             var description = $"Payment to {billingAccount.Name}";
-
-            if (checkoutObject.Quantity.HasValue && isAttendanceCharge)
-                description =
-                    $"Payment to {billingAccount.Name} ({(totalCost / checkoutObject.Quantity.Value).ToCurrency()} per {checkoutObject.PostPayPlan.BillingPeriodTypeId.ToString().ToLower()})";
 
             var receiptRows = "";
 
@@ -1754,8 +1689,89 @@ namespace AfterSchoolLibrary.Helpers
                         body,
                         emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
             }
+            
+            
 
             msgs.AddRange(mailMsgs);
+        }
+
+        public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, DateTime? attendancesDate, string registrantName, 
+            int attendanceDaysToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+
+            var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
+            var purchaserAccount = checkoutObject.PayingAccount.GetAccountOwner();
+            var billingAccount = checkoutObject.BillingAccount.GetAccountOwner();
+            var attendanceDate = attendancesDate?.ToLongDateString() ?? "today" ;
+            var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
+            var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var participationObject = checkoutObject.ParticipationObject;
+            var studentName = registrantName;
+                var chargeFeeModel = new NameValueCollection
+                {
+                    {"Description", $"{participationObject.Name.ToProperCase()}"},
+                    {"Quantity", "1"},
+                    {"Cost", attendanceDaysToCharge > 0 ? totalCost.ToCurrency() : "$0.00"},
+                    {"AdditionalDetails", "Attendance-Based Charge"},
+                };
+
+                var receiptAttendanceRows = ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Rows,
+                    chargeFeeModel,
+                    "Registration_Confirmation_Rows",
+                    msgs);
+
+                var registrationTable = ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Table,
+                    new NameValueCollection
+                    {
+                        {"AmountDueOrPaid", "Total Paid Today"},
+                        {"TotalCost", attendanceDaysToCharge > 0 ? totalCostWithFees.ToCurrency() : "$0.00"},
+                        {"BodyRows", receiptAttendanceRows},
+                        {"CreditCardFee", attendanceDaysToCharge > 0 ? totalCreditCardFees.ToCurrency() : "$0.00"},
+                    },
+                    "Registration_Confirmation_Table-1.0",
+                    msgs);
+
+                var chargeDesc = attendanceDaysToCharge > 0 ? "Your payment method on file has been charged" : 
+                    "You have prepaid for this session so your payment method has not been changed";
+                
+                var model = new NameValueCollection
+                {
+                    {"FirstName", purchaserAccount.FirstName},
+                    {"StudentName", studentName},
+                    {"ActivityContactEmail", billingAccount.Email},
+                    {"ActivityContactPhone", billingAccount.Phone},
+                    {"ActivityContactName", billingAccount.FirstName},
+                    {"LoginLink", Utilities.LoginUrl()},
+                    {"AttendanceDate", attendanceDate},
+                    {"RegistrationTable", registrationTable},
+                    {"RegistrationDetails", "Login to your account to view more details about this payment."},
+                    {"ActivityName", participationObject.Name.ToProperCase()},
+                    {"ChargeDescription", chargeDesc},
+                };
+                
+                var subject = $"Attendance Charged for {participationObject.Name}";
+                var body = ProcessTemplate(
+                    EmailTemplates.Attendance_Charge_Notification,
+                    model,
+                    "Attendance_Charge_Notification-1.1",
+                    msgs);
+
+                // SEND EMAILS
+                var mailMsgs = new SystemMessages();
+
+                // Send email to parent for attendance charge
+                mailMsgs.AddRange(SendGridHelper.SendMail(
+                    Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                    new EmailAddress(purchaserAccount.Email),
+                    subject,
+                    body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+                msgs.AddRange(mailMsgs);
         }
 
         public static SystemMessages SendPasswordReset(WebUser user, PasswordResetToken token, bool isAfterSchool)

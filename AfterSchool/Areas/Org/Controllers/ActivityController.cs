@@ -2922,66 +2922,66 @@ namespace AfterSchool.Areas.Org.Controllers
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
                         CheckoutObject checkoutObject = null;
                         var coupon = CouponService.GetCoupon(registration, msgs);
+                        
+                        BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                        CreditCardPurchaseObject creditCardPurchaseObject = null;
 
-                        if (attendanceDaysToCharge > 0)
+                        if (registration.PaymentTypeId == PaymentType.ACH)
+                            bankAccountPurchaseObject = new BankAccountPurchaseObject
+                            { StripeSourceId = registration.StripeSourceId };
+                        else
+                            creditCardPurchaseObject = new CreditCardPurchaseObject
+                            { StripeSourceId = registration.StripeSourceId };
+
+                        var overrideAmount = costPerAttendance * attendanceDaysToCharge;
+
+                        if (postPayPlan.IsNotEmpty())
                         {
-                            BankAccountPurchaseObject bankAccountPurchaseObject = null;
-                            CreditCardPurchaseObject creditCardPurchaseObject = null;
-
-                            if (registration.PaymentTypeId == PaymentType.ACH)
-                                bankAccountPurchaseObject = new BankAccountPurchaseObject
-                                { StripeSourceId = registration.StripeSourceId };
-                            else
-                                creditCardPurchaseObject = new CreditCardPurchaseObject
-                                { StripeSourceId = registration.StripeSourceId };
-
-                            var overrideAmount = costPerAttendance * attendanceDaysToCharge;
-
-                            if (postPayPlan.IsNotEmpty())
-                            {
-                                //.. if post pay plan, then we will have coupon value in registration to discount.
-                                var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue
-                                    ? registration.CouponValue.Value
-                                    : 0);
-                                overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
-                            }
-
-                            checkoutObject = new CheckoutObject
-                            {
-                                Coupon = coupon,
-                                OverrideAmount = overrideAmount,
-                                ConvenienceFeeOverrideAmount =
-                                    registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
-                                PaymentTypeFeeOverrideAmount =
-                                    registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
-                                PayingAccount = masterRegistrantAccount,
-                                BillingAccount = activity.GetAccount(msgs),
-                                CreditCardPurchaseObject = creditCardPurchaseObject,
-                                BankAccountPurchaseObject = bankAccountPurchaseObject,
-                                PaymentType = bankAccountPurchaseObject.IsNotEmpty()
-                                    ? PaymentType.ACH
-                                    : PaymentType.CreditCard,
-                                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                                ConvenienceFeePayer = convenienceFeePayer,
-                                CreditCardFeePayer = paymentTypeFeePayer,
-                                MasterRegistrant = masterRegistrant,
-                                Description = description,
-                                SavePaymentInfo = false,
-                                ParticipationObject = activity.GetParticipationObject(msgs),
-                                Quantity = attendanceDaysToCharge,
-                                Registration = registration,
-                                PostPayPlan = postPayPlan,
-                            };
-
-                            // if (msgs.HasNoErrors())
-                            //     AccountService.ProcessPayment(
-                            //         checkoutObject,
-                            //         isAttendanceCharge: true,
-                            //         loggedInUser: currentUser,
-                            //         msgs: msgs);
+                            //.. if post pay plan, then we will have coupon value in registration to discount.
+                            var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue
+                                ? registration.CouponValue.Value
+                                : 0);
+                            overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
                         }
 
-                        if (msgs.HasNoErrors())
+                        checkoutObject = new CheckoutObject
+                        {
+                            Coupon = coupon,
+                            OverrideAmount = overrideAmount,
+                            ConvenienceFeeOverrideAmount =
+                                registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
+                            PaymentTypeFeeOverrideAmount =
+                                registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
+                            PayingAccount = masterRegistrantAccount,
+                            BillingAccount = activity.GetAccount(msgs),
+                            CreditCardPurchaseObject = creditCardPurchaseObject,
+                            BankAccountPurchaseObject = bankAccountPurchaseObject,
+                            PaymentType = bankAccountPurchaseObject.IsNotEmpty()
+                                ? PaymentType.ACH
+                                : PaymentType.CreditCard,
+                            PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                            ConvenienceFeePayer = convenienceFeePayer,
+                            CreditCardFeePayer = paymentTypeFeePayer,
+                            MasterRegistrant = masterRegistrant,
+                            Description = description,
+                            SavePaymentInfo = false,
+                            ParticipationObject = activity.GetParticipationObject(msgs),
+                            Quantity = attendanceDaysToCharge,
+                            Registration = registration,
+                            PostPayPlan = postPayPlan,
+                        };
+
+                            if (msgs.HasNoErrors())
+                                AccountService.ProcessPayment(
+                                    checkoutObject,
+                                    loggedInUser: currentUser,
+                                    isAttendanceCharge: true,
+                                    attendanceDaysToCharge,
+                                    selectedAttendances.FirstOrDefault()?.Date,
+                                    registrantActivity.RegistrantName,
+                                    msgs: msgs);
+                            
+                            if (msgs.HasNoErrors())
                             raAttendances.ForEach(raAttendance =>
                             {
                                 var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
