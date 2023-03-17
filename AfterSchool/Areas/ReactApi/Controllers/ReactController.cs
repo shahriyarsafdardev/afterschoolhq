@@ -421,7 +421,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 amsgs.AddRange(parent2Reg.Save(adc));
                             }
                         }
-                
+                        
+                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
+                        {
+                            currentRegistrant.ProfileStatusId = RegistrantProfileStatus.Started;
+                        }
+                        
                         qvms.ForEach(qvm =>
                         {                            
                             currentRegistrant.AddOrUpdateAnswer(
@@ -431,12 +436,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 amsgs,
                                 adc);
                         });
-                        
-                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
-                        {
-                            currentRegistrant.ProfileStatusId = RegistrantProfileStatus.Started;
-                        }
-                        
+
                         if (json.groupid.ToInteger() == -1)
                         {
                             currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
