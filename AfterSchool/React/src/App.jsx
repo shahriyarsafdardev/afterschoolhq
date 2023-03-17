@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import TagManager from 'react-gtm-module';
 import { useRoutes } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { Provider, ErrorBoundary } from '@rollbar/react';
 
+import GoogleTagManagerConfig from 'configs/googleTagManagerConfigs';
 import UpdateProfile from 'pages/UpdateProfile/UpdateProfile';
 import loadZendeskWidget from 'utils/loadZendeskWidget';
 import RollbarConfig from 'configs/rollbarConfigs';
@@ -33,6 +35,7 @@ function App() {
     ]);
 
   useEffect(() => {
+    TagManager.initialize(GoogleTagManagerConfig);
     loadZendeskWidget();
     loadSmartlook().then(smartlook => {
       // You can now use the smartlook object here
