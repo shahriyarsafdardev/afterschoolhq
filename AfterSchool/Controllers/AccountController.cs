@@ -600,7 +600,7 @@ namespace AfterSchool.Controllers
                                     isParentOrGuardian: false,
                                     allowTextMessages: false,
                                     schoolLocationId: null,
-                                    profileStatus: RegistrantProfileStatus.Started,
+                                    profileStatus: RegistrantProfileStatus.NotSet,
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc:adc);

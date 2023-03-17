@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.User.Controllers
             var msgs = new SystemMessages();
             var registrants = SessionVariables.CurrentUser.GetAllRegistrants(msgs);
 
-            return View(registrants.Where(x => !x.IsVolunteer).ToList());
+            return View(registrants.Where(x => !x.IsVolunteer && x.ProfileStatusId != RegistrantProfileStatus.NotSet).ToList());
         }
 
         [HttpGet]
