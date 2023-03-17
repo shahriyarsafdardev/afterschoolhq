@@ -887,17 +887,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentRegistrant = SessionVariables.CurrentRegistrant;
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var activity = participationObject?.GetActivity();
                 
                 dynamic response = new
                 {
                     activityDto = new
                     {
-                        ActivityName = activity.Name,
-                        Organization = activity.AccountName,
+                        ActivityName = participationObject.Name,
+                        Organization = participationObject.OwnerAccount.Name,
                         RegistrantFirstName = currentRegistrant.FirstName,
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
-                        ActivityUrl = activity.ShortHomePageUrl,
+                        ActivityUrl = participationObject.GetShortHomePageUrl()
                     }
                 };
                 
