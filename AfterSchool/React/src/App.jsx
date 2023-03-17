@@ -1,18 +1,16 @@
 import React, { useEffect } from 'react';
-import TagManager from 'react-gtm-module';
 import { useRoutes } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { Provider, ErrorBoundary } from '@rollbar/react';
 
-import GoogleTagManagerConfig from 'configs/googleTagManagerConfigs';
 import UpdateProfile from 'pages/UpdateProfile/UpdateProfile';
 import loadZendeskWidget from 'utils/loadZendeskWidget';
 import RollbarConfig from 'configs/rollbarConfigs';
-import loadSmartlook from 'utils/loadSmartlook';
 import Home from './pages/registration/Home';
 import Wrapper from 'pages/Wrapper/Wrapper';
+import InitAnalytics from 'analytics';
 import theme from './theme/theme';
 
 function App() {
@@ -35,13 +33,11 @@ function App() {
     ]);
 
   useEffect(() => {
-    TagManager.initialize(GoogleTagManagerConfig);
+    if (process.env.ENVIRONMENT === 'Development') return;
+    InitAnalytics();
     loadZendeskWidget();
-    loadSmartlook().then(smartlook => {
-      // You can now use the smartlook object here
-      smartlook;
-    });
   }, []);
+
   return (
     <Provider config={RollbarConfig}>
       <ErrorBoundary>
