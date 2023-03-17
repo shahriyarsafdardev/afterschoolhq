@@ -179,18 +179,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     ).ToList();
                     
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
-                }
-                
-                if (registrant.PersonTypeId == RegistrantPersonType.Adult)
+                }                
+                else if (registrant.PersonTypeId == RegistrantPersonType.Adult)
                 {
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
                     ).ToList();
                     
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
-                }
-                
-                if (registrant.PersonTypeId == RegistrantPersonType.Parent)
+                }                
+                else if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel())
@@ -238,9 +236,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
-                }
-                
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(registrant.ID.Value))
+                }                                
+
+                foreach (var questionAnswer in registrant.GetAnswers(msgs))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -366,7 +364,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(studentReg.ID.Value))
+                foreach (var questionAnswer in studentReg.GetAnswers(msgs))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -413,6 +411,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentAccount = SessionVariables.CurrentAccount;
+                var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
                 
@@ -420,21 +419,15 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
                 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
-                {
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
-                    ).ToList();
-                }
-                
-                if (registrant.PersonTypeId == RegistrantPersonType.Adult)
-                {
+                    ).ToList();  
+
+                else if (registrant.PersonTypeId == RegistrantPersonType.Adult)
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
-                }
-                
-                if (registrant.PersonTypeId == RegistrantPersonType.Parent)
-                {
+
+                else if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel()) &&
                     x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
-                }
                 
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
@@ -473,6 +466,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             break;
                     }
                 });
+
                 if(msgs.HasNoErrors())
                     Database.ExecuteTransaction
                         (
@@ -483,7 +477,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                     registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
-                                        loggedInUser: SessionVariables.CurrentUser,
+                                        loggedInUser: currentUser,
                                         msgs: amsgs,
                                         dc: adc);
                                 });
@@ -510,14 +504,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                         {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
                                     };
 
-                                    var children = SessionVariables.CurrentAccount.GetStudentRegistrants(msgs, adc);
+                                    var children = currentAccount.GetStudentRegistrants(msgs, adc);
 
                                     children.ForEach(child =>
                                     {
                                         if (registrant.ID == parent2Registrant?.ID)
-                                        {
                                             foreach (var key in parent2Map.Keys)
-                                            {
                                                 child.MapAndAddAnswer(
                                                     form.GetAllQuestions(),
                                                     registrant,
@@ -526,12 +518,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                                     SessionVariables.CurrentUser,
                                                     amsgs,
                                                     adc);
-                                            }
-                                        }
                                         else
-                                        {
                                             foreach (var key in parent1Map.Keys)
-                                            {
                                                 child.MapAndAddAnswer(
                                                     form.GetAllQuestions(),
                                                     registrant,
@@ -540,8 +528,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                                     SessionVariables.CurrentUser,
                                                     amsgs,
                                                     adc);
-                                            }
-                                        }
                                     });
                                 }
                                 
