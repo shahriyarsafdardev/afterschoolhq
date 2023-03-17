@@ -424,7 +424,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         
                         if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
                         {
-                            currentRegistrant.ProfileStatusId = RegistrantProfileStatus.Started;
+                            currentRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Started, currentUser, amsgs, adc);
                         }
                         
                         qvms.ForEach(qvm =>
