@@ -1007,7 +1007,9 @@ namespace AfterSchoolLibrary.Helpers
             var additionalDetails = "";
             var subscriptionDetails = "";
             var paymentPlanDetails = "";
+            var allowPayLaterDetails = "";
             var stripeNote = "";
+            var yourRecepitText = "Your payment receipt is below.";
 
             switch (mainRA.AssignmentTypeId)
             {
@@ -1061,6 +1063,8 @@ namespace AfterSchoolLibrary.Helpers
             var registrationTable = "";
             var totalCost = checkoutObject.GetTotalCostToPurchaseTodayWithFees(msgs, dc);
             var showTable = false;
+            var isPayingLater = participationObject.IsNotEmpty() && participationObject.AllowToPayLater 
+                                                                 && mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment;
 
             // show this if no subscription plan, if there's a reg fee or there's a payment plan
             if (isCompletelyFree || !isRegFree || hasPaymentPlan || hasPostPayPlan)
@@ -1084,6 +1088,13 @@ namespace AfterSchoolLibrary.Helpers
 
                     additionalDetails =
                         $"{todayOrLater} plus {paymentPlan.GetTotalCostWithConvenienceFee(billingAccount, msgs, dc).ToCurrency()} for {paymentPlan.TotalPeriods.Value - 1} {paymentPlan.BillingPeriodTypeId.ToString().ToLower()}(s)";
+                }
+                else if (isPayingLater)
+                {
+                    var providerContactName = participationObject.ContactName.IfBlank(billingAccount.Name);
+                    var regCost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
+                    allowPayLaterDetails = 
+                        $"You have elected to pay the {regCost} registration fee later. {providerContactName} will reach out to you with more information on how to make that payment.";
                 }
                 else
                 {
@@ -1152,7 +1163,7 @@ namespace AfterSchoolLibrary.Helpers
                     {
                         cost = checkoutObject.GetRegistrationCostWithConvenienceFee(msgs, dc).ToCurrency();
                         additionalDetails = "Registration Fee";
-
+                        
                         // add registration fee row
                         var registrationFeeModel = new NameValueCollection
                         {
@@ -1170,7 +1181,7 @@ namespace AfterSchoolLibrary.Helpers
                     }
 
                     ccFee = checkoutObject.GetTotalCreditCardFeesToday(msgs, dc).ToCurrency();
-                    showTable = true;
+                    showTable = !isPayingLater;
                 }
             }
 
@@ -1183,7 +1194,7 @@ namespace AfterSchoolLibrary.Helpers
             // and is not finalized if it is split evenly
 
             // add subscription block 
-            if (hasSubscriptionPlan)
+            if (hasSubscriptionPlan && !isPayingLater)
             {
                 var startDate = submittedRecord.GetPlanStartDate(subscription, participationObject, msgs, dc);
                 var subscriptionStartsToday =
@@ -1254,9 +1265,8 @@ namespace AfterSchoolLibrary.Helpers
                         msgs);
                 }
             }
-
             // add payment-plan block 
-            if (hasPaymentPlan)
+            if (hasPaymentPlan && !isPayingLater)
             {
                 var ccPaymentPlanFee = checkoutObject.GetPaymentPlanCostTodayCreditCardFee(msgs, dc); //Credit Card Fee for Payment Plan
                 var ccPaymentPlanTitle = "Credit Card Fee";
@@ -1357,8 +1367,12 @@ namespace AfterSchoolLibrary.Helpers
             if (subscription.IsNotEmpty() && subscription.SplitCostEvenly && !participationObject.RegistrationFinalized)
                 splitPaymentSubscriptionInfo =
                     $"<p>Once all students are registered and registration is finalized for {participationObject.Name}, you will receive an email with the final amount to pay.</p>";
-            if (hasSubscriptionPlan || hasPaymentPlan)
+            if (!isPayingLater && (hasSubscriptionPlan || hasPaymentPlan))
                 stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges " + (hasSubscriptionPlan && hasPaymentPlan ? "subscription fees and payment plans" : hasSubscriptionPlan ? "subscription fees" : "payment plans") + " as a separate transaction.</p><br/>";
+            
+            if(isRegFree || (participationObject.IsNotEmpty() && participationObject.AllowToPayLater && mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment))
+                yourRecepitText = "";
+            
             var model = new NameValueCollection
             {
                 {"FirstName", isParentCopy ? purchaser?.FirstName : loggedInUser.FirstName},
@@ -1379,7 +1393,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
                 {"RegistrationTable", registrationTable},
-                {"YourRecepitText", isRegFree ? "" : "Your payment receipt is below."},
+                {"YourRecepitText", yourRecepitText},
+                {"AllowPayLaterDetails", allowPayLaterDetails},
             };
 
             var subject = $"{participationObject.Name} registration for {masterRegistrant.FirstName}";
