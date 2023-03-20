@@ -1219,7 +1219,6 @@ namespace AfterSchoolLibrary.Models
 
         public static void RunMigrations(SystemMessages amsgs, DatabaseConnection adc)
         {
-            Migration_20230320_LockDOBAndGender.Do(amsgs,adc);
             UpdateRegistrantSubscriptionPlans_20190821.Do(amsgs, adc);
             InvalidateRegistrantAccounts_20190721.Do(amsgs, adc);
             UpdateRegistrantAccess_20190721.Do(amsgs, adc);
@@ -1303,7 +1302,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230213_UpdateRegistrationIsDeletedColumn.Do(amsgs, adc);
             Migration_20230214_IncreaseActivityVirtualLocationInfoColumnSize.Do(amsgs, adc);
             Migration_20230215_UpdateActivityIsFeaturedColumn.Do(amsgs, adc);
-
+            Migration_20230320_LockDOBAndGender.Do(amsgs,adc);
         }
 
         public static DatabaseConnection StartTransaction()
