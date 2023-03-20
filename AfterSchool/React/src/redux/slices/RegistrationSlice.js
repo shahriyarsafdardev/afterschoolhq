@@ -31,7 +31,8 @@ const RegistrationSlice = createSlice({
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
-        FormDto
+        FormDto,
+        activityDto.RegistrantType
       );
 
       state.questions = [
