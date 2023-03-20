@@ -908,7 +908,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Organization = participationObject.OwnerAccount.Name,
                         RegistrantFirstName = registrant.FirstName,
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
-                        ActivityUrl = participationObject.GetShortHomePageUrl()
+                        ActivityUrl = participationObject.GetShortHomePageUrl(),
+                        isParent = registrant.IsParentOrGuardian
                     }
                 };
                 
