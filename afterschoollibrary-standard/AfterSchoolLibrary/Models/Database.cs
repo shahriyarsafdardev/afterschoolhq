@@ -1219,6 +1219,7 @@ namespace AfterSchoolLibrary.Models
 
         public static void RunMigrations(SystemMessages amsgs, DatabaseConnection adc)
         {
+            Migration_20230320_LockDOBAndGender.Do(amsgs,adc);
             UpdateRegistrantSubscriptionPlans_20190821.Do(amsgs, adc);
             InvalidateRegistrantAccounts_20190721.Do(amsgs, adc);
             UpdateRegistrantAccess_20190721.Do(amsgs, adc);
