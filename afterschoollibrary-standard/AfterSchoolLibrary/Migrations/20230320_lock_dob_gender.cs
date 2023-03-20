@@ -16,13 +16,12 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    using (var connection = new SqlConnection(adc.ConnectionString))
-                    {
-                        connection.Execute(@"update fq set fq.IsRequired = 1 , fq.IsLocked = 1
-                                                from FormQuestion fq
-                                                inner join Form f on fq.FormId = f.ID
-                                                where QuestionDataTypeId in (4 , 45) and f.FormTypeId = 1;");
-                    }
+                    var dq = new DatabaseQuery();
+                    dq.Connection = adc;
+                    amsgs.AddRange(dq.ExecuteSql(@"update fq set fq.IsRequired = 1 , fq.IsLocked = 1
+                    from FormQuestion fq
+                        inner join Form f on fq.FormId = f.ID
+                    where QuestionDataTypeId in (4 , 45) and f.FormTypeId = 1"));
                 },
                 uniqueIdenfier: "Migration_20230320_LockDOBAndGender",
                 msgs: msgs,
