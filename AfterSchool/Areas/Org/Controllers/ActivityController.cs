@@ -2970,16 +2970,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             Registration = registration,
                             PostPayPlan = postPayPlan,
                         };
-
-                            if (msgs.HasNoErrors())
-                                AccountService.ProcessPayment(
-                                    checkoutObject,
-                                    loggedInUser: currentUser,
-                                    isAttendanceCharge: true,
-                                    attendanceDaysToCharge,
-                                    selectedAttendances.FirstOrDefault()?.Date,
-                                    registrantActivity.RegistrantName,
-                                    msgs: msgs);
+ 
                             
                             if (msgs.HasNoErrors())
                             raAttendances.ForEach(raAttendance =>
@@ -2989,6 +2980,16 @@ namespace AfterSchool.Areas.Org.Controllers
                                         registrantActivity.GetRegistrant(msgs).ID.Value,
                                         msgs)
                                     .FirstOrDefault();
+                                
+                                if(attendanceRegistrant != null && attendanceRegistrant.NumberPresent > 0)
+                                    AccountService.ProcessPayment(
+                                        checkoutObject,
+                                        currentUser,
+                                        true,
+                                        attendanceDaysToCharge,
+                                        selectedAttendances.FirstOrDefault()?.Date,
+                                        registrantActivity.RegistrantName,
+                                        msgs);
 
                                 // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
                                 if (attendanceRegistrant.IsNotEmpty()
