@@ -8,7 +8,7 @@ import MenuPopover from 'components/MenuPopover/MenuPopover';
 import I18n from 'components/i18n/I18n';
 import useStyles from './styles';
 
-import { useRegistration } from 'redux/hooks';
+import { useRegistration, useThankYou } from 'redux/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -30,12 +30,16 @@ export default function NavBar() {
   const menuRef = useRef(null);
   const classes = useStyles();
   const { loading, activity } = useRegistration();
+  const {
+    data: { ActivityName, Organization },
+    loading: isLoading
+  } = useThankYou();
 
   return (
     <>
       <HeaderStyle className={classes.headerWrapper}>
         <Button size="large" variant="text" target="_blank">
-          {activity.Organization}
+          {activity.Organization || Organization}
         </Button>
         <Box className={classes.outerOption}>
           <I18n />
@@ -84,10 +88,12 @@ export default function NavBar() {
         </Box>
       </HeaderStyle>
 
-      {!loading && (
+      {(!loading || !isLoading) && (
         <Box className={classes.navImage}>
-          <Typography className={classes.activityName}>{activity.Name}</Typography>
-          <Typography className={classes.organizationName}>{activity.Organization}</Typography>
+          <Typography className={classes.activityName}>{activity.Name || ActivityName}</Typography>
+          <Typography className={classes.organizationName}>
+            {activity.Organization || Organization}
+          </Typography>
         </Box>
       )}
     </>
