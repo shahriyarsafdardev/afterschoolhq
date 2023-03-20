@@ -30,6 +30,11 @@ function ThankYouSection() {
 
   useEffect(() => {
     loadThankYouScreenData(window.location.pathname.split('/')[4]);
+    //Restrict user not to go back
+    window.history.pushState(null, '', window.location.href);
+    window.onpopstate = function() {
+      window.history.pushState(null, '', window.location.href);
+    };
   }, []);
 
   const copyToClipBoard = async copyMe => {
