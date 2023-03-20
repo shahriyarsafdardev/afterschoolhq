@@ -18,10 +18,13 @@ namespace AfterSchoolLibrary.Migrations
                 {
                     using (var connection = new SqlConnection(adc.ConnectionString))
                     {
-                        connection.Execute(@"insert into FeatureFlag (FlagName, IsEnabled) values ('forms-reporting', 0)");
+                        connection.Execute(@"update fq set fq.IsRequired = 1 , fq.IsLocked = 1
+                                                from FormQuestion fq
+                                                inner join Form f on fq.FormId = f.ID
+                                                where QuestionDataTypeId in (4 , 45) and f.FormTypeId = 1;");
                     }
                 },
-                uniqueIdenfier: "Migration_20221225_AddFormsReportingFeatureFlag",
+                uniqueIdenfier: "Migration_20230320_LockDOBAndGender",
                 msgs: msgs,
                 dc: dc
             );
