@@ -911,13 +911,20 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
-        public ActionResult ThankYou()
+        public ActionResult ThankYou(string id)
         {
+            var currentUser = SessionVariables.CurrentUser;
+                
+            if (currentUser.IsEmpty())
+                throw new Exception("Unauthorized");
+            
             var msgs = new SystemMessages();
             try
             {
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                RegistrationCommon.ResetRegistrationSession();
+                var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+                var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+                var registrant = registration.GetRegistrant(msgs);
                 
                 dynamic response = new
                 {
@@ -925,7 +932,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     {
                         ActivityName = participationObject.Name,
                         Organization = participationObject.OwnerAccount.Name,
-                        RegistrantFirstName = currentRegistrant.FirstName,
+                        RegistrantFirstName = registrant.FirstName,
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl()
                     }
