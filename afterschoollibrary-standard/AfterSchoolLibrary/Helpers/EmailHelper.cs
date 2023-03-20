@@ -1875,20 +1875,28 @@ namespace AfterSchoolLibrary.Helpers
         public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var parentFirstName = refund.GetBillerAccount(msgs).GetAccountOwner(msgs);
-            var providerFirstName = refund.GetPayerAccount(msgs).GetAccountOwner(msgs);
+            var parentAccountOwner = refund.GetBillerAccount(msgs).GetAccountOwner(msgs);
+            var providerAccount = refund.GetPayerAccount(msgs);
+            var providerAccountOwner = providerAccount.GetAccountOwner(msgs);
+            var isAfterSchool = refund.GetPayerAccount(msgs).IsAfterSchool;
             var activityName = refund.Description.Substring(0, refund.Description.LastIndexOf(' ')).TrimEnd();
 
             var model = new NameValueCollection
             {
-                {"ParentName", parentFirstName.FirstName},
-                {"ProviderName", providerFirstName.FirstName},
+                {"ParentName", parentAccountOwner.FirstName},
+                {"ProviderName", providerAccountOwner.FirstName},
                 {"RefundAmount", refund.Amount.ToCurrency()},
                 {"ActivityName", activityName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"ActivityContactEmail", providerAccountOwner.Email},
+                {"ActivityContactPhone", providerAccountOwner.Phone},
+                {"ActivityContactName", providerAccountOwner.FirstName},
+                {"BillerAccountName", providerAccount.Name},
+                {"BillerAccountLink", providerAccount.HomePageUrl},
             };
             
-            SendRefundProcessedEmail(model, msgs, false, parentFirstName.Email); // To Parent
-            SendRefundProcessedEmail(model, msgs, true, providerFirstName.Email);  // To Provider
+            SendRefundProcessedEmail(model, msgs, false, parentAccountOwner.Email); // To Parent
+            SendRefundProcessedEmail(model, msgs, true, providerAccountOwner.Email);  // To Provider
         }
 
         private static void SendRefundProcessedEmail(NameValueCollection model, SystemMessages msgs, bool isSendToProvider, string email)

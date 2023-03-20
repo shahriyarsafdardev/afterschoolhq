@@ -4,4 +4,9 @@
   <p>
     You have just processed a refund for @Model.RefundAmount to @Model.ParentName for @Model.ActivityName.
   </p>
+  <br>
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
 </div>

@@ -782,10 +782,10 @@ namespace AfterSchoolLibrary.Services
             return transaction.Refund(refundAmount, false, null, null, PaymentSourceType.ManualProvider, loggedInUser, msgs, dc);
         }
 
-        public static Transaction RefundPayerFullAmount(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction RefundPayerFullAmount(this Transaction transaction, decimal amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return transaction.Refund(
-                transaction.GetPayerAmount(),
+                amount,
                 true,
                 transaction.GetConvenienceFeesChargedToPayer(),
                 transaction.GetPaymentTypeFeesChargedToPayer(),

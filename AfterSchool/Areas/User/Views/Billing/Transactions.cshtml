@@ -238,6 +238,9 @@
         $('#refund-reason').blur(function () {
             canProcessRequest();
         });
+        $("#refund-request-amount").on('change', function(e){
+           this.value = Math.min(this.value, $("#refund-request-amount").attr('max'));
+        });
     });
 
     function requestRefund(uid, maxAmount) {

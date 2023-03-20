@@ -46,7 +46,7 @@ namespace AfterSchoolLibrary.Services
             return request.GetTransaction(msgs, dc).IsAmountRefundable(request.Amount.Value, true, msgs, dc);
         }
 
-        public static Transaction ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, decimal amount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transaction = request.GetTransaction(msgs, dc);
             Transaction refund = new Transaction();
@@ -56,34 +56,37 @@ namespace AfterSchoolLibrary.Services
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        var refundAmount = request.Amount.Value;
-                        var convenienceFee = new decimal?();
-                        var paymentTypeFee = new decimal?();
-
-                        if (allowFullRefundAmount && refundAmount <= transaction.GetBillerAmount(amsgs, adc))
+                        if (request?.Amount != null)
                         {
-                            if (refundCCFees)
+                            var refundAmount = amount;
+                            var convenienceFee = new decimal?();
+                            var paymentTypeFee = new decimal?();
+
+                            if (allowFullRefundAmount && refundAmount <= transaction.GetBillerAmount(amsgs, adc))
                             {
-                                paymentTypeFee = transaction.PaymentTypeFeeCharged;
-                                refundAmount += transaction.GetPaymentTypeFeesChargedToPayer();
+                                if (refundCCFees)
+                                {
+                                    paymentTypeFee = transaction.PaymentTypeFeeCharged;
+                                    refundAmount += transaction.GetPaymentTypeFeesChargedToPayer();
+                                }
+
+                                if (refundConvenienceFees)
+                                {
+                                    convenienceFee = transaction.ConvenienceFeeCharged;
+                                    refundAmount += transaction.GetConvenienceFeesChargedToPayer();
+                                }
                             }
 
-                            if (refundConvenienceFees)
-                            {
-                                convenienceFee = transaction.ConvenienceFeeCharged;
-                                refundAmount += transaction.GetConvenienceFeesChargedToPayer();
-                            }
+                            refund = transaction.Refund(
+                                refundAmount, 
+                                allowFullRefundAmount, 
+                                convenienceFee,
+                                paymentTypeFee,
+                                paymentSourceType, 
+                                loggedInUser, 
+                                amsgs, 
+                                adc);
                         }
-
-                        refund = transaction.Refund(
-                                        refundAmount, 
-                                        allowFullRefundAmount, 
-                                        convenienceFee,
-                                        paymentTypeFee,
-                                        paymentSourceType, 
-                                        loggedInUser, 
-                                        amsgs, 
-                                        adc);
 
                         if (msgs.HasNoErrors())
                             request.MarkAsCompleted(refund, loggedInUser, amsgs, adc);

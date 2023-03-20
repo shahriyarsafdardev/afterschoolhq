@@ -226,6 +226,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 true, 
                                 refundCreditFees, 
                                 refundConvenienceFees,
+                                0,
                                 paymentsource.Value,
                                 SessionVariables.CurrentUser, 
                                 msgs);
@@ -236,7 +237,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        refund = transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
+                        refund = transaction.RefundPayerFullAmount(0, SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }

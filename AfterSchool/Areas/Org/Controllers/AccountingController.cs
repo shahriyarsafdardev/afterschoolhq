@@ -523,10 +523,10 @@ namespace AfterSchool.Areas.Org.Controllers
         }
         
         [HttpGet]
-        public ActionResult Refund(string id, string request)
+        public ActionResult Refund(string id, string amount, string request)
         {
             var msgs = new SystemMessages();
-            if (id.IsGuid())
+            if (id.IsGuid() && amount.IsNumber() && amount.ToDecimal() > 0)
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
                 PaymentSourceType? paymentsource = transaction.PaymentSourceTypeId;
@@ -543,6 +543,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 true, 
                                 false, 
                                 false,
+                                amount.ToDecimal(),
                                 paymentsource.Value,
                                 SessionVariables.CurrentUser, 
                                 msgs);
@@ -553,7 +554,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        refund = transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
+                        refund = transaction.RefundPayerFullAmount(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }

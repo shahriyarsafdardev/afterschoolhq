@@ -216,7 +216,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" class="btn btn-default" id="btn-approve-confirm" onclick="confirmApprove()">Submit Refund</button>
+            <button type="button" class="btn btn-primary" id="btn-approve-confirm" onclick="confirmApprove()">Submit Refund</button>
         </div>
     </div>
 </div>          
@@ -240,7 +240,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" class="btn btn-default" id="btn-approve-confirm-manual" onclick="confirmApproveManual()">Record Manual Refund</button>
+            <button type="button" class="btn btn-primary" id="btn-approve-confirm-manual" onclick="confirmApproveManual()">Record Manual Refund</button>
         </div>
     </div>
 </div>
@@ -284,7 +284,8 @@
     }
     
     function refundTransaction(transactionUid,uid) {
-        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?request=' + uid;
+        const amount = $('#refund-request-amount').val();
+        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?amount=' + amount +'&request=' + uid;
         $.get(
             url,
             function (data) {
@@ -314,6 +315,9 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#deny-reason').blur(function () {
             canProcessDenial();
+        });
+        $("#refund-request-amount").on('change', function(e){
+           this.value = Math.min(this.value, $("#refund-request-amount").attr('max'));
         });
     });
 
