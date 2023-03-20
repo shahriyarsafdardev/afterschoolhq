@@ -896,6 +896,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 RegistrationCommon.ResetRegistrationSession();
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
@@ -909,7 +910,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         RegistrantFirstName = registrant.FirstName,
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
-                        isParent = registrant.IsParentOrGuardian
+                        isParent = currentUserRegistrant.IsParentOrGuardian
                     }
                 };
                 
