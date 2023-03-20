@@ -640,7 +640,7 @@ namespace AfterSchoolLibrary.Services
 
                 // no need for UTC since it just calculates based on the passed in start date time
                 else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -670,7 +670,7 @@ namespace AfterSchoolLibrary.Services
                     endDate = plan.GetSubscriptionEndDate(participationObject);
 
                 if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -702,7 +702,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
+        public static DateTime? GetPaymentPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
         {
             if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
                 return null;
