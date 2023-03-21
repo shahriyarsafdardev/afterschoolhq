@@ -2753,8 +2753,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
 
                                 if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() &&
-                                    !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs) &&
-                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID) && attendanceRegistrant.NumberPresent > 0)
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
                         });
