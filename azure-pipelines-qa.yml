@@ -24,7 +24,7 @@ jobs:
         inputs:
           command: 'install'
           workingDir: 'AfterSchool/React'
-      - script: |
+      - bash: |
           cd AfterSchool/React
           echo ENVIRONMENT=($(ENVIRONMENT)) >> .env
           echo SMART_LOOK_KEY=($(SMART_LOOK_KEY)) >> .env
@@ -32,7 +32,7 @@ jobs:
           echo ROLLBAR_CLIENT_KEY=($(ROLLBAR_CLIENT_KEY)) >> .env
           echo GTM_ID=($(GTM_ID)) >> .env
           echo "this is smart look key ($(SMART_LOOK_KEY))"
-          echo ${SMART_LOOK_KEY}
+          echo ${{SMART_LOOK_KEY}}
         displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
