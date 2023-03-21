@@ -1744,7 +1744,7 @@ namespace AfterSchoolLibrary.Helpers
 
             var chargeDesc = attendanceDaysToCharge > 0
                 ? "Your payment method on file has been charged"
-                : "You have prepaid for this session so your payment method has not been changed";
+                : "You have pre-paid for this session so your payment method has not been charged";
 
             var model = new NameValueCollection
             {
