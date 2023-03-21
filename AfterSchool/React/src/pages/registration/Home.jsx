@@ -22,6 +22,7 @@ import apiRoutes from 'routes';
 import useStyles from './styles';
 import utils from 'utils';
 import {
+  FileUpload,
   DateQuestion,
   RadioQuestion,
   TextAreaQuestion,
@@ -220,6 +221,8 @@ export default function Home() {
         return <TextAreaQuestion question={currentQuestion} formik={formik} />;
       case questionType.checkBox:
         return <CheckBox question={currentQuestion} formik={formik} />;
+      case questionType.fileUpload:
+        return <FileUpload question={currentQuestion} formik={formik} />;
       default:
         return <TextField question={currentQuestion} formik={formik} />;
     }
