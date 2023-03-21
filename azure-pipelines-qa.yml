@@ -24,7 +24,7 @@ jobs:
         inputs:
           command: 'install'
           workingDir: 'AfterSchool/React'
-      - bash: |
+      - script: |
           cd AfterSchool/React
           echo ENVIRONMENT=($(ENVIRONMENT)) >> .env
           echo SMART_LOOK_KEY=($(SMART_LOOK_KEY)) >> .env
