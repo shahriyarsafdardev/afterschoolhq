@@ -32,6 +32,7 @@ jobs:
           echo "ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY)" >> .env
           echo "GTM_ID=$(GTM_ID)" >> .env
           echo $(SMART_LOOK_KEY)
+          cat .env
         displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
