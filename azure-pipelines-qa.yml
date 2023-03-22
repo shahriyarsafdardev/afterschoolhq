@@ -23,14 +23,16 @@ jobs:
           echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
           echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
           echo GTM_ID=$(GtmID) >> .env
-          echo "Google API Secret: $(Environment)"
+          echo $(SMART_LOOK_KEY)
+          echo $(SMART_LOOK_KEYS)
+          echo $(GTM_ID)
           cat .env
         env:
           Environment: $(ENVIRONMENT)
-          SmartLookKey: $(SMART_LOOK_KEY)
-          GoogleMapsApiKey: $(GOOGLE_MAPS_API_KEY)
-          RollbarClientKey: $(ROLLBAR_CLIENT_KEY)
-          GtmID: $(GTM_ID)
+          SMART_LOOK_KEY: $(SMART_LOOK_KEY)
+          GOOGLE_MAPS_API_KEY: $(GOOGLE_MAPS_API_KEY)
+          ROLLBAR_CLIENT_KEY: $(ROLLBAR_CLIENT_KEY)
+          GTM_ID: $(GTM_ID)
         displayName: 'Set environment variables'
       - task: NodeTool@0
         inputs:
