@@ -19,10 +19,10 @@ jobs:
       - script: |
           cd AfterSchool/React
           echo ENVIRONMENT=$(ENVIRONMENT) >> .env
-          echo SMART_LOOK_KEY=$(SmartLookKey) >> .env
-          echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
-          echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
-          echo GTM_ID=$(GtmID) >> .env
+          echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
+          echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
+          echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
+          echo GTM_ID=$(GTM_ID) >> .env
           cat .env
         displayName: 'Set environment variables'
       - task: NodeTool@0
