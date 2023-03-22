@@ -1,6 +1,4 @@
 variables:
-  - name: smartLookKey
-    value: $(SMART_LOOK_KEY)
   - name: BuildParameters.solution
     value: AfterSchoolHQ - Darye.sln
 trigger: none
@@ -18,6 +16,23 @@ jobs:
     steps:
       - checkout: self
         clean: true
+      - script: |
+          cd AfterSchool/React
+          echo ENVIRONMENT=$(Environment) >> .env
+          echo SMART_LOOK_KEY=$(SmartLookKey) >> .env
+          echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
+          echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
+          echo GTM_ID=$(GtmID) >> .env
+          echo $(SmartLookKey)
+          echo $(GtmID)
+          cat .env
+        env:
+          Environment: $(ENVIRONMENT)
+          SmartLookKey: $(SMART_LOOK_KEY)
+          GoogleMapsApiKey: $(GOOGLE_MAPS_API_KEY)
+          RollbarClientKey: $(ROLLBAR_CLIENT_KEY)
+          GtmID: $(GTM_ID)
+        displayName: 'Set environment variables'
       - task: NodeTool@0
         inputs:
           versionSource: 'spec'
@@ -26,24 +41,6 @@ jobs:
         inputs:
           command: 'install'
           workingDir: 'AfterSchool/React'
-      - script: |
-          cd AfterSchool/React
-          echo ENVIRONMENT=$env:ENVIRONMENT >> .env
-          echo SMART_LOOK_KEY=$env:SMART_LOOK_KEY >> .env
-          echo GOOGLE_MAPS_API_KEY=$env:GOOGLE_MAPS_API_KEY >> .env
-          echo ROLLBAR_CLIENT_KEY=$env:ROLLBAR_CLIENT_KEY >> .env
-          echo GTM_ID=$env:GTM_ID >> .env
-          echo $env:SMART_LOOK_KEY
-          echo $(smartLookKey)
-          echo $(SMART_LOOK_KEY1)
-          cat .env
-        env:
-          ENVIRONMENT: $(ENVIRONMENT)
-          SMART_LOOK_KEY1: $(SMART_LOOK_KEY)
-          GOOGLE_MAPS_API_KEY: $(GOOGLE_MAPS_API_KEY)
-          ROLLBAR_CLIENT_KEY: $(ROLLBAR_CLIENT_KEY)
-          GTM_ID: $(GTM_ID)
-        displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
           command: 'custom'
