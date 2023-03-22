@@ -17,9 +17,10 @@ jobs:
       - checkout: self
         clean: true
       - powershell: |
+          $smartLookKey = (Get-Item -Path "VariableGroupVariable(SMART_LOOK_KEY)").Value
           Write-Host "Writing secret variable to .env file"
-          Write-Host "SMART_LOOK_KEY: $(SMART_LOOK_KEY)"
-          Write-Output "SMART_LOOK_KEY=$(SMART_LOOK_KEY)" >> .env
+          Write-Host "smartLookKey: $smartLookKey"
+          Write-Output "SMART_LOOK_KEY=$smartLookKey" >> .env
           cat .env
         env:
           Environment: $(ENVIRONMENT)
