@@ -1,4 +1,6 @@
 variables:
+  - name: smartLookKey
+    value: $(SMART_LOOK_KEY)
   - name: BuildParameters.solution
     value: AfterSchoolHQ - Darye.sln
 trigger: none
@@ -32,7 +34,7 @@ jobs:
           echo ROLLBAR_CLIENT_KEY=$env:ROLLBAR_CLIENT_KEY >> .env
           echo GTM_ID=$env:GTM_ID >> .env
           echo $env:SMART_LOOK_KEY
-          echo $SMART_LOOK_KEY1
+          echo $(smartLookKey)
           cat .env
         env:
           ENVIRONMENT: $(ENVIRONMENT)
