@@ -18,7 +18,7 @@ jobs:
         clean: true
       - script: |
           cd AfterSchool/React
-          echo ENVIRONMENT=$(Environment) >> .env
+          echo "ENVIRONMENT=$(Environment)" >> .env
           echo SMART_LOOK_KEY=$(SmartLookKey) >> .env
           echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
           echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
