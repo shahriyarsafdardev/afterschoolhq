@@ -35,6 +35,7 @@ jobs:
           echo GTM_ID=$env:GTM_ID >> .env
           echo $env:SMART_LOOK_KEY
           echo $(smartLookKey)
+          echo $(SMART_LOOK_KEY1)
           cat .env
         env:
           ENVIRONMENT: $(ENVIRONMENT)
