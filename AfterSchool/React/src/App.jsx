@@ -12,8 +12,10 @@ import Home from './pages/registration/Home';
 import Wrapper from 'pages/Wrapper/Wrapper';
 import InitAnalytics from 'analytics';
 import theme from './theme/theme';
+import utils from 'utils';
 
 function App() {
+  const { getEnv } = utils;
   const Router = () =>
     useRoutes([
       {
@@ -33,7 +35,7 @@ function App() {
     ]);
 
   useEffect(() => {
-    if (process.env.ENVIRONMENT === 'Development') return;
+    if (getEnv() === 'Local') return;
     InitAnalytics();
     loadZendeskWidget();
   }, []);

@@ -1,5 +1,8 @@
+import utils from 'utils';
+const { getEnv } = utils;
+
 const rollbarConfig = {
   accessToken: process.env.ROLLBAR_CLIENT_KEY,
-  environment: process.env.ENVIRONMENT
+  environment: getEnv()
 };
 export default rollbarConfig;
