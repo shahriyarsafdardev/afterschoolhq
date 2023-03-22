@@ -23,8 +23,7 @@ jobs:
           echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
           echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
           echo GTM_ID=$(GtmID) >> .env
-          echo $(SmartLookKey)
-          echo $(GtmID)
+          echo "Google API Secret: $(Environment)"
           cat .env
         env:
           Environment: $(ENVIRONMENT)
