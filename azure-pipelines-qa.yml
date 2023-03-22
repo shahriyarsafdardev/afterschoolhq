@@ -16,14 +16,14 @@ jobs:
     steps:
       - checkout: self
         clean: true
-      - task: NodeTool@0
-        inputs:
-          versionSource: 'spec'
-          versionSpec: '16.0'
-      - task: Npm@1
-        inputs:
-          command: 'install'
-          workingDir: 'AfterSchool/React'
+      # - task: NodeTool@0
+      #   inputs:
+      #     versionSource: 'spec'
+      #     versionSpec: '16.0'
+      # - task: Npm@1
+      #   inputs:
+      #     command: 'install'
+      #     workingDir: 'AfterSchool/React'
       - script: |
           cd AfterSchool/React
           echo "ENVIRONMENT=$(ENVIRONMENT)" >> .env
@@ -31,7 +31,7 @@ jobs:
           echo "GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY)" >> .env
           echo "ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY)" >> .env
           echo "GTM_ID=$(GTM_ID)" >> .env
-          echo "$(SMART_LOOK_KEY)"
+          echo $(SMART_LOOK_KEY)
         displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
