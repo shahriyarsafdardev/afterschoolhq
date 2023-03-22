@@ -16,6 +16,12 @@ jobs:
     steps:
       - checkout: self
         clean: true
+      - powershell: |
+          Write-Host "Writing secret variable to .env file"
+          Write-Host "SMART_LOOK_KEY: $(SMART_LOOK_KEY)"
+          Write-Output "SMART_LOOK_KEY=$(SMART_LOOK_KEY)" >> .env
+          cat .env
+        displayName: 'Write secret variable to .env file'
       - script: |
           cd AfterSchool/React
           echo "ENVIRONMENT=$(Environment)" >> .env
