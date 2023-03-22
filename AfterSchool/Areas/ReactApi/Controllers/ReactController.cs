@@ -638,7 +638,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {                
-                        if (currentUserPersonType == RegistrantPersonType.Parent && json.newChild != 1)
+                        if (currentUserPersonType != RegistrantPersonType.Adult && json.newChild != 1)
                         {
                             if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
                             {
