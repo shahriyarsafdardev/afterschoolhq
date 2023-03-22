@@ -32,7 +32,7 @@ jobs:
           echo ROLLBAR_CLIENT_KEY=$env:ROLLBAR_CLIENT_KEY >> .env
           echo GTM_ID=$env:GTM_ID >> .env
           echo $env:SMART_LOOK_KEY
-          echo SMART_LOOK_KEY1
+          echo $SMART_LOOK_KEY1
           cat .env
         env:
           ENVIRONMENT: $(ENVIRONMENT)
