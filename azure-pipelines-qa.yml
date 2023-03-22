@@ -26,12 +26,12 @@ jobs:
           workingDir: 'AfterSchool/React'
       - script: |
           cd AfterSchool/React
-          echo ENVIRONMENT=$(ENVIRONMENT) >> .env
-          echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
-          echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
-          echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
-          echo GTM_ID=$(GTM_ID) >> .env
-          echo $(SMART_LOOK_KEY)
+          echo ENVIRONMENT=$env:ENVIRONMENT >> .env
+          echo SMART_LOOK_KEY=$env:SMART_LOOK_KEY >> .env
+          echo GOOGLE_MAPS_API_KEY=$env:GOOGLE_MAPS_API_KEY >> .env
+          echo ROLLBAR_CLIENT_KEY=$env:ROLLBAR_CLIENT_KEY >> .env
+          echo GTM_ID=$env:GTM_ID >> .env
+          echo $env:SMART_LOOK_KEY
           cat .env
         env:
           ENVIRONMENT: $(ENVIRONMENT)
