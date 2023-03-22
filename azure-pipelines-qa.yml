@@ -21,6 +21,12 @@ jobs:
           Write-Host "SMART_LOOK_KEY: $(SMART_LOOK_KEY)"
           Write-Output "SMART_LOOK_KEY=$(SMART_LOOK_KEY)" >> .env
           cat .env
+        env:
+          Environment: $(ENVIRONMENT)
+          SMART_LOOK_KEY: $(SMART_LOOK_KEY)
+          GOOGLE_MAPS_API_KEY: $(GOOGLE_MAPS_API_KEY)
+          ROLLBAR_CLIENT_KEY: $(ROLLBAR_CLIENT_KEY)
+          GTM_ID: $(GTM_ID)
         displayName: 'Write secret variable to .env file'
       - script: |
           cd AfterSchool/React
