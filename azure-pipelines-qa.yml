@@ -16,36 +16,14 @@ jobs:
     steps:
       - checkout: self
         clean: true
-      - powershell: |
-          $smartLookKey = (Get-Item -Path "VariableGroupVariable(SMART_LOOK_KEY)").Value
-          Write-Host "Writing secret variable to .env file"
-          Write-Host "smartLookKey: $smartLookKey"
-          Write-Output "SMART_LOOK_KEY=$smartLookKey" >> .env
-          cat .env
-        env:
-          Environment: $(ENVIRONMENT)
-          SMART_LOOK_KEY: $(SMART_LOOK_KEY)
-          GOOGLE_MAPS_API_KEY: $(GOOGLE_MAPS_API_KEY)
-          ROLLBAR_CLIENT_KEY: $(ROLLBAR_CLIENT_KEY)
-          GTM_ID: $(GTM_ID)
-        displayName: 'Write secret variable to .env file'
       - script: |
           cd AfterSchool/React
-          echo "ENVIRONMENT=$(Environment)" >> .env
+          echo ENVIRONMENT=$(ENVIRONMENT) >> .env
           echo SMART_LOOK_KEY=$(SmartLookKey) >> .env
           echo GOOGLE_MAPS_API_KEY=$(GoogleMapsApiKey) >> .env
           echo ROLLBAR_CLIENT_KEY=$(RollbarClientKey) >> .env
           echo GTM_ID=$(GtmID) >> .env
-          echo $(SMART_LOOK_KEY)
-          echo $(SMART_LOOK_KEYS)
-          echo $(GTM_ID)
           cat .env
-        env:
-          Environment: $(ENVIRONMENT)
-          SMART_LOOK_KEY: $(SMART_LOOK_KEY)
-          GOOGLE_MAPS_API_KEY: $(GOOGLE_MAPS_API_KEY)
-          ROLLBAR_CLIENT_KEY: $(ROLLBAR_CLIENT_KEY)
-          GTM_ID: $(GTM_ID)
         displayName: 'Set environment variables'
       - task: NodeTool@0
         inputs:
