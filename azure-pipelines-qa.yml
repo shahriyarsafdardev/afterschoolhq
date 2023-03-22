@@ -16,14 +16,14 @@ jobs:
     steps:
       - checkout: self
         clean: true
-      # - task: NodeTool@0
-      #   inputs:
-      #     versionSource: 'spec'
-      #     versionSpec: '16.0'
-      # - task: Npm@1
-      #   inputs:
-      #     command: 'install'
-      #     workingDir: 'AfterSchool/React'
+      - task: NodeTool@0
+        inputs:
+          versionSource: 'spec'
+          versionSpec: '16.0'
+      - task: Npm@1
+        inputs:
+          command: 'install'
+          workingDir: 'AfterSchool/React'
       - script: |
           cd AfterSchool/React
           echo "ENVIRONMENT=$(ENVIRONMENT)" >> .env
