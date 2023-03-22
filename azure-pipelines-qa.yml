@@ -33,6 +33,8 @@ jobs:
           echo "GTM_ID=$(GTM_ID)" >> .env
           echo $(SMART_LOOK_KEY)
           cat .env
+        env:
+          SMART_LOOK_KEY: $(SMART_LOOK_KEY)
         displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
