@@ -26,11 +26,12 @@ jobs:
           workingDir: 'AfterSchool/React'
       - script: |
           cd AfterSchool/React
-          echo ENVIRONMENT=$(ENVIRONMENT) >> .env
-          echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
-          echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
-          echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
-          echo GTM_ID=$(GTM_ID) >> .env
+          echo "ENVIRONMENT=$(ENVIRONMENT)" >> .env
+          echo "SMART_LOOK_KEY=$(SMART_LOOK_KEY)" >> .env
+          echo "GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY)" >> .env
+          echo "ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY)" >> .env
+          echo "GTM_ID=$(GTM_ID)" >> .env
+          echo "$(SMART_LOOK_KEY)"
         displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
