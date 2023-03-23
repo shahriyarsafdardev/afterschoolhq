@@ -200,11 +200,11 @@ else
                         }
 
                         var startToday = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout || planStartDate.IsOnOrBefore(today);
-
+                        var cost = plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency();
                         <div class="am-radio">
                             <input type="radio" name="paymentoption" id="paymentoption-@plan.ID" class="payment-option-radio" value="@plan.ID" onclick="return loadCouponContainers()"/>
                             <label for="paymentoption-@plan.ID">
-                                Pay <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency()</strong>
+                                Pay <strong>@cost</strong>
 
                                 @Html.Raw(startToday ? "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>")
 
@@ -236,8 +236,12 @@ else
                             <span id="payment-plan-asf-@plan.ID" class="hide">0</span>
                             <span id="payment-plan-ccf-@plan.ID" class="hide">@plan.GetCreditCardFee(paymentAccount)</span>
                         </div>
+                        <p class="text-medium-small payment-plan-text hide">
+                            <br/>
+                            Your first payment plan installment of <strong>@cost</strong> will be automatically deducted @Html.Raw(startToday ? 
+                            "<strong>today</strong>" : $"on <strong>{planStartDate.ToLongDateString()}</strong>") from the payment method provided.
+                        </p>
                     }
-
                     <hr/>
                 </div>
             </div>
