@@ -541,7 +541,7 @@
     
     function addOrRemoveClass(elem1, elem2)
     {
-        if ($('#subscriptionplanperiod').val() == "1" || $('#subscriptionplanperiod').val() == "3")
+        if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Month) || parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Week))
         {
             $(elem1).addClass(' hide');
             $(elem2).removeClass('hide');
@@ -557,8 +557,8 @@
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
-        if ($('#subscriptionPaymentStartType').val() == "3") {
-            if ($('#subscriptionplanperiod').val() == "1") {
+        if (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) {
+            if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Month)) {
                 Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-week").addClass("hide");
                 $("#subscriptionperiodstartmonthday").prop('required', true);
@@ -566,7 +566,7 @@
                 $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
                 LoadEndDate();
                 setPeriodStartDate();
-            } else if ($('#subscriptionplanperiod').val() == "3") {
+            } else if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Week)) {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
@@ -583,14 +583,14 @@
             clearSubscriptionPaymentHiddenInputs();
             hideWeekMonthContainers();
         }
-        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true' && $('#subscriptionPaymentStartType').val() !== "1")
+        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true' && parseInt($('#subscriptionPaymentStartType').val()) !== @((int)PlanPaymentStartType.WhenActivityStarts))
         {
-            ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : 
+            (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : 
             addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
         }
-        else if ($('.is-schedule-ongoing').html().toLowerCase() === 'false' && $('#subscriptionPaymentStartType').val() !== "2")
+        else if ($('.is-schedule-ongoing').html().toLowerCase() === 'false' && parseInt($('#subscriptionPaymentStartType').val()) !== @((int)PlanPaymentStartType.OnCheckout))
         {
-            ($('#subscriptionPaymentStartType').val() === "3") ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : 
+            (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : 
             addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
         }
         else
