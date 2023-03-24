@@ -3540,26 +3540,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = TrimOptions.Trim;
-
-                LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
-
-                SystemMessages amsgs = new SystemMessages();
-                DatabaseConnection adc = new DatabaseConnection();
-
-
-                //if (participationObject.ActivityType.Value.ToString() == "VolunteerOpportunity")
-                //{
-                //    Registrant registrant = null;
-                //    Registration registration = null;
-                //    var x = 2;
-                //    if (!CreateVolunteerAndLoadDataDuringImport(registrant, registration, activity, headers, questions, rows, reader, ref participationObject))
-                //        x = 1;
-
-                //    SaveAnswersToRegistrantsDuringImport(headers, questions, reader, currentUser, amsgs, adc);
-
-                //}
-                
-                reader.Configuration.TrimOptions = CsvHelper.Configuration.TrimOptions.Trim;
                 
                 Database.ExecuteTransaction(
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
