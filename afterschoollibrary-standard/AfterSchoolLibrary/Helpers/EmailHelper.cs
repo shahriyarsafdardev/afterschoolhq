@@ -1417,7 +1417,7 @@ namespace AfterSchoolLibrary.Helpers
             if (!isPayingLater && (hasSubscriptionPlan || hasPaymentPlan))
                 stripeNote = "<p style='font-size:12px;'>Please note: Stripe charges " + (hasSubscriptionPlan && hasPaymentPlan ? "subscription fees and payment plans" : hasSubscriptionPlan ? "subscription fees" : "payment plans") + " as a separate transaction.</p><br/>";
             
-            if(isRegFree || (participationObject.IsNotEmpty() && participationObject.AllowToPayLater && mainRA.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment))
+            if(isRegFree || (bool)participationObject?.AllowToPayLater || postPayPlan?.NumberOfPeriodsPrePaid == 0)
                 yourRecepitText = "";
             
             var model = new NameValueCollection
@@ -1441,8 +1441,6 @@ namespace AfterSchoolLibrary.Helpers
                 {"PhysicalInfo", physicalInfo},
                 {"SplitPaymentSubscriptionInfo", splitPaymentSubscriptionInfo},
                 {"RegistrationTable", registrationTable},
-                {"YourRecepitText", isRegFree && hasPostPayPlan && postPayPlan.NumberOfPeriodsPrePaid == 0 ? 
-                    "" : "Your payment receipt is below."},
                 {"YourRecepitText", yourRecepitText},
                 {"AllowPayLaterDetails", allowPayLaterDetails},
             };
