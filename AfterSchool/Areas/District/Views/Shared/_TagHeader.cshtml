@@ -1,0 +1,17 @@
+﻿@{
+    var actionName = ViewContext.RouteData.Values["action"].ToString().ToLower();
+}
+
+<div class="btn-toolbar">
+    <div class="btn-group hidden-xs">
+        <a href="@Url.Action("school", "tag")" class="btn btn-alt6@(actionName == "school" ? "-active" : "")">
+            <i class="s7-study"></i> School
+        </a>
+        <a href="@Url.Action("activity", "tag")" class="btn btn-alt6@(actionName == "activity" ? "-active" : "")">
+            <i class="s7-gleam"></i> Activity
+        </a>
+        <a href="@Url.Action("Index", "tag")" class="btn btn-alt6@(actionName == "index" ? "-active" : "")">
+            <i class="s7-ticket"></i> Tag Management
+        </a>
+    </div>
+</div>

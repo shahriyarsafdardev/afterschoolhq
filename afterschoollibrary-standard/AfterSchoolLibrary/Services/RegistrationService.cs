@@ -37,9 +37,12 @@ namespace AfterSchoolLibrary.Services
 
             // if the person registering is the student
             // TODO: Handle better if provider on the backend is registering the student
-            var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            //var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            var masterRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
+            // this is the email that is sent to parents if the main registrant is the student
+            // ** PARENT EMAIL if student is registering
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.IsStudent && masterRegistrant.GetParentOrGuardian(msgs, dc).IsNotEmpty())
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }
@@ -64,7 +67,8 @@ namespace AfterSchoolLibrary.Services
                     registration.GetRegistrant(amsgs, adc).DeleteWithRelatedRecords(amsgs, adc);
                     registration.DeleteSessionActions(amsgs, adc);
                     registration.DeleteAnswers(amsgs, adc);
-                    amsgs.AddRange(registration.Delete(adc));
+                    registration.IsDeleted = true;
+                    amsgs.AddRange(registration.Save(adc));
                     registration.UpdateRelatedRegistrationsAfterDelete(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -133,8 +137,9 @@ namespace AfterSchoolLibrary.Services
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
-                var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() ||
-                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId);
+                var isStudentOrTeacherRegistering = (masterRegistrant.IsEmpty() ||
+                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
+                                                    masterRegistrant?.PersonTypeId != RegistrantPersonType.Adult;
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
@@ -342,7 +347,26 @@ namespace AfterSchoolLibrary.Services
 
             EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
         }
+        public static void EmailCsvReportDistrict(int accountId, string searchText, string uiActivityLabel, string emails, string subject, string body, int type,
+            SystemMessages msgs , DatabaseConnection dc = null)
+        {
+            var account = Account.Load(accountId, msgs, dc);
 
+            var csvByteData = GetCsvByteArrayDistrict(account, searchText,type, msgs, dc);
+
+            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename("Volunteer Report"), msgs, csvByteData);
+        }
+        
+        public static byte[] GetCsvByteArrayDistrict(Account account, string searchText,int type, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var registrations = Registration.SearchDistrict((int)account.ID, searchText, type, msgs, dc);
+
+            var csvText = ExportCsvText(registrations, account, RegistrationReportType.Detailed, RegistrationStatus.NotSet, new List<int>(), ParticipationObjectType.Activity, null, true, msgs,
+                dc);
+
+            return Encoding.UTF8.GetBytes(csvText);
+        }
+        
         public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
             RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
@@ -357,6 +381,7 @@ namespace AfterSchoolLibrary.Services
 
             return Encoding.UTF8.GetBytes(csvText);
         }
+        
 
         private static void EmailCsv(Account account, string emails, string subject, string body,
             string uiActivityLabel, string filename, SystemMessages msgs, byte[] byteData)
@@ -1145,6 +1170,14 @@ namespace AfterSchoolLibrary.Services
                 return Purchase.Load(registration.PurchaseId.Value, msgs, dc);
 
             return null;
+        }
+        
+        public static List<Registration> GetRelatedRegistrationsDistrict(this Registration registration,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var registrations = Registration.GetRelatedRegistrationByRegistrantId((int)registration.RegistrantId, msgs, dc);
+            
+            return registrations.Where(x => x.ID != registration.ID).ToList();
         }
 
         public static List<Registration> GetRelatedRegistrations(this Registration registration,

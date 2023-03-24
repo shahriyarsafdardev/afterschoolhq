@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -1597,10 +1597,14 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs,
-            DatabaseConnection dc = null)
+        public static void ClearStripeCustomerId(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            account.StripeCustomerId = customer.Id;
+            account.SetStripeCustomer(null, msgs, dc);
+        }
+
+        private static void SetStripeCustomer(this Account account, Customer customer, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            account.StripeCustomerId = customer?.Id;
             msgs.AddRange(account.Save(dc: dc));
         }
 
@@ -1635,6 +1639,7 @@ namespace AfterSchoolLibrary.Services
                 null,
                 metadata,
                 msgs);
+
             account.SetStripeCustomer(customer, msgs, dc);
 
             return customer;
@@ -1697,6 +1702,7 @@ namespace AfterSchoolLibrary.Services
                             packageFromStripe,
                             stripePlan.Interval.ToEnum<BillingPeriodType>(),
                             stripeSubscription.Id,
+                            null,
                             loggedInUser,
                             amsgs,
                             adc);
@@ -2430,12 +2436,19 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
+
         public static AccountPackage SetDefaultAccountPackage(this Account account, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
+            return account.SetDefaultAccountPackage(null, loggedInUser, msgs, dc);
+        }
+
+        public static AccountPackage SetDefaultAccountPackage(this Account account, int? trialDaysOverride, WebUser loggedInUser,
+        SystemMessages msgs, DatabaseConnection dc = null)
+        {
             var package = PackageService.GetDefaultCustomerPackage(msgs);
 
-            return account.AddPackage(package.ID.Value, BillingPeriodType.Month, loggedInUser, msgs, dc);
+            return account.AddPackage(package.ID.Value, BillingPeriodType.Month, trialDaysOverride, loggedInUser, msgs, dc);
         }
 
         public static Location GetDefaultLocation(this Account account, SystemMessages msgs = null,
@@ -2473,9 +2486,8 @@ namespace AfterSchoolLibrary.Services
             return uniqueName;
         }
 
-        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
-            bool keepTrialDays,
-            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+        public static AccountPackage SwitchPackagesWithStripe(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId, bool keepTrialDays,
+            string stripeSubscriptionId, DateTime? newTrialEndDateOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             AccountPackage newAccountPackage = null;
@@ -2484,14 +2496,21 @@ namespace AfterSchoolLibrary.Services
                 action: (amsgs, adc) =>
                 {
                     var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
+                    var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
+                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
+
                     amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
+
+                    if (stripeSubscriptionId.IsNotEmpty())
+                        stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
 
                     newAccountPackage = AccountPackageService.CreateNewAccountPackage(
                         account.ID.Value,
                         newPackage,
                         billingPeriodTypeId,
-                        stripeSubscriptionId,
+                        null,
                         accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                        newTrialEndDateOverride,
                         loggedInUser,
                         amsgs,
                         adc);
@@ -2499,11 +2518,8 @@ namespace AfterSchoolLibrary.Services
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
 
-                    var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                    var trialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : new DateTime?();
-
-                    stripeHelper.CancelSubscription(stripeSubscriptionId, false, amsgs);
-
+                    var hasNewBillingPeriodType = accountPackageToRemove.BillingPeriodTypeId != newAccountPackage.BillingPeriodTypeId;
+                    var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
                     if (!accountPackageToRemove.IsDuringTrial)
@@ -2514,16 +2530,13 @@ namespace AfterSchoolLibrary.Services
                         account.StripeCustomerId,
                         billingPeriodTypeId == BillingPeriodType.Month ? newPackage.StripePricePerMonthId : newPackage.StripePricePerYearId,
                         null,
-                        trialEndDate,
-                        account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
+                        newTrialEndDate,
+                        referrerCouponId,
                         defaultPaymentMethod,
                         null,
                         amsgs);
 
                     newAccountPackage.UpdateStripeSubscriptionId(newStripeSubscription.Id, amsgs, adc);
-
-                    StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(newAccountPackage.StripeSubscriptionId, null,
-                        null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
                 },
                 onSuccess: smsgs => msgs.AddRange(smsgs),
                 onFailure: fmsgs => msgs.AddRange(fmsgs),
@@ -2535,7 +2548,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static AccountPackage SwitchPackages(this Account account, Package newPackage, BillingPeriodType billingPeriodTypeId,
-            string stripeSubscriptionId, WebUser loggedInUser, SystemMessages msgs = null,
+            string stripeSubscriptionId, DateTime? newTrialEndDateOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var accountPackageToRemove = account.GetActiveAccountPackage(msgs, dc);
@@ -2547,6 +2560,7 @@ namespace AfterSchoolLibrary.Services
                 billingPeriodTypeId,
                 stripeSubscriptionId,
                 accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                newTrialEndDateOverride,
                 loggedInUser,
                 msgs,
                 dc);
@@ -2604,7 +2618,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static AccountPackage AddFirstPackage(this Account account, int packageId,
-            BillingPeriodType billingPeriodType, SignUpType signUpType, WebUser loggedInUser, SystemMessages msgs,
+            BillingPeriodType billingPeriodType, SignUpType signUpType, int? trialDaysOverride, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             Package package = null;
@@ -2617,6 +2631,9 @@ namespace AfterSchoolLibrary.Services
                 {
                     package = Package.Load(packageId, amsgs, adc);
                     var trialDayCount = package.GetFeature(FeatureType.TrialDays, amsgs, adc).GetMaxValue().ToInteger();
+
+                    if (trialDaysOverride.HasValue)
+                        trialDayCount = trialDaysOverride.Value;
 
                     var priceId = billingPeriodType == BillingPeriodType.Month
                         ? package.StripePricePerMonthId
@@ -2670,6 +2687,13 @@ namespace AfterSchoolLibrary.Services
 
         public static AccountPackage AddPackage(this Account account, int packageId,
             BillingPeriodType billingPeriodType, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return account.AddPackage(packageId, billingPeriodType, null, loggedInUser, msgs, dc);
+        }
+
+        public static AccountPackage AddPackage(this Account account, int packageId,
+            BillingPeriodType billingPeriodType, int? trialDayOverride, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -2744,6 +2768,9 @@ namespace AfterSchoolLibrary.Services
                                     if (subscription.IsNotEmpty() && subscription.Status == "active")
                                         newap.StripeSubscriptionId = subscription.Id;
                                 }
+
+                                if (trialDayOverride.HasValue)
+                                    trialDayCount = trialDayOverride.Value;
 
                                 // set trial end date if there are still trial days
                                 if (trialDayCount > 0)
@@ -2904,7 +2931,8 @@ namespace AfterSchoolLibrary.Services
 
         public static Account CreateNewGhostAccount(string orgName, AccountType accountType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc)
         {
-            return CreateNew(orgName, null, null, false, accountType, null, null, null, null,
+
+            return CreateNew(orgName, null, null, false, accountType, null, null, null, null, 
                 loggedInUser, false, msgs, dc);
         }
 
@@ -2923,7 +2951,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
                 SignUpType.NotSet, loggedInUser, msgs, dc);
         }
 
@@ -2933,7 +2961,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc)
         {
             return CreateNew(orgName, email, phone, isActive, accountType, accountOwner, packageId,
-                packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true,
+                    packageBillingPeriod, timeZone, createWithStripe, StripeAccountType.SubscriberAccount, true, 
                 signUpTypeId, loggedInUser, msgs, dc);
         }
 
@@ -3129,18 +3157,14 @@ namespace AfterSchoolLibrary.Services
                 .ToList();
         }
 
-        public static bool CheckIfIsypAccount(Account account, SystemMessages msgs)
+        public static bool IsInIsypDirectory(this Account account, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (account.ID == null)
-            {
                 return false;
-            }
 
-            var accountRelationships = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs);
+            var accountRelationships = AccountRelationship.LoadByVisitorAccountId(account.ID.Value, msgs, dc);
             if (!accountRelationships.IsNotEmpty() || accountRelationships.Count == 0)
-            {
                 return false;
-            }
 
             return accountRelationships
                 .Where(ar => ar.HostAccountId != null)
@@ -3726,6 +3750,17 @@ namespace AfterSchoolLibrary.Services
                 .OrderBy(registrant => registrant.DisplayName)
                 .ToList();
         }
+        
+        public static Registrant GetRegistrantByRegistrantPersonType(this Account account, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, msgs, dc)
+                .Where(registrant => registrant.PersonTypeId == registrantPersonType)
+                .OrderBy(registrant => registrant.ID)
+                .FirstOrDefault();
+        }
+
+        
 
         /// <summary>
         ///     Create basic registrant/student record for an account user, not attached to an account, so it's attached to the
@@ -3759,6 +3794,39 @@ namespace AfterSchoolLibrary.Services
                 SchoolLocationId = schoolLocationId,
                 ProfileStatusId = profileStatus,
                 PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
+                CreateDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                IsDeleted = false,
+            };
+            msgs.AddRange(registrant.Save(dc));
+
+            if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, msgs, dc);
+
+            return registrant;
+        }
+        
+        public static Registrant CreateRegistrant(this Account account, WebUser registrantOwner,
+            List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster, bool isParentOrGuardian,
+            bool allowTextMessages, int? schoolLocationId, RegistrantProfileStatus profileStatus, WebUser loggedInUser, RegistrantPersonType registrantPersonType,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            var registrant = new Registrant
+            {
+                RegistrantTypeId = registrantType,
+                IsMaster = isMaster,
+                IsContactOnly = isParentOrGuardian,
+                IsParentOrGuardian = isParentOrGuardian,
+                WebUserId = registrantOwner?.ID,
+                AccountId = account.ID,
+                AllowTextMessages = allowTextMessages,
+                SchoolLocationId = schoolLocationId,
+                ProfileStatusId = profileStatus,
+                PersonTypeId = registrantPersonType,
                 CreateDate = DateTime.UtcNow,
                 LastModifiedDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -3812,6 +3880,55 @@ namespace AfterSchoolLibrary.Services
                         Email = email,
                         IsDeleted = false,
                         PersonTypeId = isParentOrGuardian ? RegistrantPersonType.Parent : RegistrantPersonType.Student,
+                    };
+                    amsgs.AddRange(registrant.Save(adc));
+
+                    if (canBeAccessedBy.IsNotEmpty() && canBeAccessedBy.Count > 0)
+                        registrant.AddUsersWithAccess(canBeAccessedBy, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+
+            return registrant;
+        }
+        
+        public static Registrant CreateParentOrStudentorAdultRegistrant(this Account account, string firstName, string lastName, string email,
+            WebUser registrantOwner, List<WebUser> canBeAccessedBy, RegistrantType registrantType, bool isMaster,
+            bool isParentOrGuardian, bool allowTextMessages, int? schoolLocationId,
+            RegistrantProfileStatus profileStatus, WebUser loggedInUser, RegistrantPersonType registrantPersonType, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            Registrant registrant = null;
+
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    registrant = new Registrant
+                    {
+                        RegistrantTypeId = registrantType,
+                        IsMaster = isMaster,
+                        IsContactOnly = isParentOrGuardian,
+                        IsParentOrGuardian = isParentOrGuardian,
+                        WebUserId = registrantOwner?.ID,
+                        AccountId = account.ID,
+                        AllowTextMessages = allowTextMessages,
+                        SchoolLocationId = schoolLocationId,
+                        ProfileStatusId = profileStatus,
+                        CreateDate = DateTime.UtcNow,
+                        LastModifiedDate = DateTime.UtcNow,
+                        CreatedBy = loggedInUser?.ID.IfEmpty(0),
+                        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
+                        FirstName = firstName,
+                        LastName = lastName,
+                        Email = email,
+                        IsDeleted = false,
+                        PersonTypeId = registrantPersonType,
                     };
                     amsgs.AddRange(registrant.Save(adc));
 
@@ -4652,6 +4769,7 @@ namespace AfterSchoolLibrary.Services
 
                     if (sendConfirmationEmail)
                         checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
@@ -5103,7 +5221,7 @@ namespace AfterSchoolLibrary.Services
                         msgs: msgs, dc: dc);
             }
         }
-
+        
         #endregion
 
         #region Coupons

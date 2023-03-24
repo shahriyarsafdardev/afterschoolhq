@@ -14,11 +14,11 @@ namespace AfterSchool.Areas.WebHooks
 
         public override void RegisterArea(AreaRegistrationContext context) 
         {
-            //context.MapRoute(
-            //    "WebHooks_default",
-            //    "WebHooks/{controller}/{action}/{id}/{id2}",
-            //    new { action = "Index", id = UrlParameter.Optional, id2 = UrlParameter.Optional }
-            //);
+            // context.MapRoute(
+            //     "WebHooks_default",
+            //     "WebHooks/{controller}/{action}/{id}",
+            //     new { action = "Index", id = UrlParameter.Optional}
+            // );
         }
     }
 }

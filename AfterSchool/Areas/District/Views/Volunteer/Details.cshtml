@@ -1,0 +1,269 @@
+@using AfterSchoolLibrary.Enums
+@model Registration
+@{
+    var msgs = (SystemMessages) ViewBag.Messages;
+    var registrant = (Registrant) ViewBag.Registrant;
+    var account = (Account) ViewBag.Account;
+    var answers = (List<FormQuestionAnswer>) ViewBag.Answers;
+    var registrations = (List<Registration>) ViewBag.Registrations;
+    var selectedRegistration = (Registration) ViewBag.SelectedRegistration;
+    var type = (ApprovalStatus)ViewBag.SelectedType;
+    var backgroundCheck = (BackgroundCheck)ViewBag.BackgroundCheck;
+}
+
+<style>
+    
+    .input-group
+    {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        align-items: flex-start;
+    }
+    
+    .searchActivitiesBtn
+    {
+        color: black;
+    }
+    
+    small
+    {
+        font-size: 76%;
+        color: grey;
+    }
+    
+    .pull-left , .pull-right > button
+    {
+        width: 100px;
+    }
+    
+    .date
+    {
+        display: table;
+    }
+    
+</style>
+
+@{Html.RenderPartial("DistrictHeader");}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("_VolunteerHeader");}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-id"></i>
+            <span>@UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity) Detail</span>
+        </div>
+        <div class="panel-body no-padding">
+
+            <div class="col-md-10 col-md-offset-1 no-padding">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                         
+                        <div class="pull-right">
+                            <select name="r" id="r" class="form-control" onchange="registrationChange(this.value)">
+                                @foreach (var registration in registrations)
+                                {
+                                    <option value="@registration.RegistrantId"
+                                            @(registration.RegistrantId == selectedRegistration.RegistrantId ? "selected=\"selected\"" : "")>
+                                        Registration - @account.ConvertToAccountTimeZone(registration.CreateDate.Value).ToShortDateTimeString()
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-lg-2 pull-right" onchange="volunteerStatusChange()">
+                            <select name="type" id="type" class="form-control" @(backgroundCheck.BackgroundCheckResultId == SterlingBackgroundCheckResult.Pending ? "disabled" : "")>
+                                @foreach (var status in Enum.GetValues(typeof(ApprovalStatus)).Cast<ApprovalStatus>().Except(ApprovalStatus.Requested.AsList()).Except(ApprovalStatus.All.AsList()))
+                                {
+                                    <option @(status == type ? "selected" : "") value="@((int) status)">
+                                        @status
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        
+                        @registrant.Name
+                    </div>
+                    <div class="panel-body no-padding">
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                
+                                Registration Data
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tr>
+                                            <td class="text-right" width="33%">Registration Date/Time</td>
+                                            <td>@account.ConvertToAccountTimeZone(selectedRegistration.CreateDate.Value).ToLongDateTimeString()</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="33%" class="text-right">E-Signature</td>
+                                            <td>@selectedRegistration.ESignature</td>
+                                        </tr>
+                                        @if (selectedRegistration.ESignatureIPAddress.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">IP Address</td>
+                                                <td>@selectedRegistration.ESignatureIPAddress</td>
+                                            </tr>
+                                        }
+                                        @if (selectedRegistration.ESignatureUserAgent.IsNotEmpty())
+                                        {
+                                            <tr>
+                                                <td width="33%" class="text-right">Browser Info</td>
+                                                <td>@selectedRegistration.ESignatureUserAgent</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+
+                                @{ Html.RenderPartial("~/Views/Shared/Registrant/_Answers.cshtml", answers); }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-confirm" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Approve Applicant Without Background Check
+            </h3>
+        </div>
+        <div class="modal-body ">
+            <div class="modal-text">
+                
+            </div>
+            
+            <div class="modal-form">
+                <form action="@Url.Action("AddRemoveApproval" , "Volunteer")" method="post">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label class="reason">Approval Reason</label>
+                            <input id="name" name="reason" type="text" class="form-control" placeholder="Reason" required>
+                            <input type="hidden" name="returnUrl" value="@Request.Url.AbsoluteUri"/>
+                            <input type="hidden" class="webUserIDs" name="webUserIDs" value="@registrant.WebUserId"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label class="expiration-date">Background Check Expiration Date</label>
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input type="text" class="form-control" onfocus="this.select()" placeholder="Expiration Date" required data-type="date" name="expirationDate" />
+                                <span class="input-group-addon btn btn-default"><i class="icon-th s7-date"></i></span>
+                            </div>
+                            <input type="hidden" id="operation" name="operation"/>
+                            <small class="note"></small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-default searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right confirm">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Approve
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function registrationChange(id){
+        let link = '@Url.Action("Details", "Volunteer", new {id = "ID"})?r=' + id + '&returnUrl=@Request["returnurl"]';
+        link = link.replace("ID", id);
+        location.href = link;
+    }
+    
+    function volunteerStatusChange(){
+        
+        var operation = '';
+        
+        if ($('#type').find(":selected").val() == '@((int)ApprovalStatus.Approved)')
+        {
+            operation = 'approve';
+        }
+        
+        if ($('#type').find(":selected").val() == '@((int)ApprovalStatus.Denied)')
+        {
+            operation = 'reject';
+        }
+        
+        if (operation !== '')
+        {
+        if (operation === 'approve')
+                {
+                    $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve');
+                    $('.modal-text').html("<p class='text-center' ><strong>Approving this applicatant will allow them to bypass backgroundcheck process.<br>Please select the reason for approving this applicant</strong></p>");
+                    $('.reason').text('Approval Reason').css('color', '#00c5a3');
+                    $('.expiration-date').text('Background Check Expiration Date').css('color', '#00c5a3');
+                    $('.modal-confirm').children('.modal-header').css('color','#00c5a3');
+                    $('#modal-confirm').children().children().first().text('Approve Volunteer Without Background Check');
+                    $('#modal-confirm').children().children().first().css("background-color", "#00c5a3'");
+                    $('#modal-confirm').children().children().first().css("font-size", "20px");
+                    $('.note').text('Standard background check are available for one year. Please set an expiratrion date.');
+                }
+                
+                if (operation === 'reject')
+                {
+                   $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+                   $('.modal-text').html("<p class='text-center'><strong>Please select the reason for denying this applicant</strong></p>");
+                   $('.reason').text('Denial Reason').css('color', '#ed4b4b'); 
+                   $('.expiration-date').text('Denial Expiration Date').css('color', '#ed4b4b');
+                   $('#modal-confirm').children().children().first().text('Deny Volunteer Without Background Check').css("background-color", "#ed4b4b").css("font-size", "20px");
+                   $('.note').text('Select the date when this applicant is elegible to re-ply');
+                }
+                
+                $('#operation').val(operation);
+                        
+                $('#modal-confirm').addClass('md-show');
+        }
+        else
+        {
+            $("#type option:selected").removeAttr("selected");
+            
+            $("#type option[value='@((int)type)']").prop('selected', true);
+        }
+        
+    }
+    
+    function closeModal()
+    {        
+        $("#type option:selected").removeAttr("selected");
+                    
+        $("#type option[value='@((int)type)']").prop('selected', true);
+        
+        $('#modal-confirm').removeClass('md-show');
+        $(':input','.modal-form').val('');
+    }
+    
+</script>

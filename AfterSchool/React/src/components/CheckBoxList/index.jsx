@@ -1,0 +1,94 @@
+import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material-ui/core';
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import React, { useState, useEffect } from 'react';
+import CheckIcon from '@material-ui/icons/Check';
+import useStyles from './styles';
+
+function CheckBoxList({ formik, question }) {
+  const classes = useStyles();
+  const { values, setFieldValue, touched, errors } = formik;
+  const { ID, Options, Text: title, IsRequired } = question;
+  const [checkBoxListValue, setCheckBoxListValue] = useState([]);
+
+  const isChecked = (arr, value) => {
+    return arr.some(option => option.value === value);
+  };
+  const options = Options.split(',').map(option => {
+    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+    return { key, value };
+  });
+
+  const updateSelectedValues = value => {
+    if (isChecked(checkBoxListValue, value))
+      setCheckBoxListValue(checkBoxListValue.filter(option => option.value !== value));
+    else setCheckBoxListValue([...checkBoxListValue, { key: value, value }]);
+  };
+
+  const handleCheck = ({ target: { value } }) => {
+    updateSelectedValues(value);
+  };
+
+  useEffect(() => {
+    if (values[ID]) {
+      const obj = JSON.parse(values[ID]);
+      setCheckBoxListValue(obj[0] instanceof Array ? obj[0] : obj);
+    }
+  }, [values[ID]]);
+
+  useEffect(() => {
+    const value = checkBoxListValue.length ? JSON.stringify(checkBoxListValue) : '';
+    setFieldValue(ID, value);
+  }, [checkBoxListValue]);
+
+  if (!checkBoxListValue) return <div></div>;
+
+  return (
+    <FieldWrapper label={title} isRequired={IsRequired}>
+      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+        <div className={classes.checkboxWrapper}>
+          <>
+            {options.length &&
+              options.map(({ key, value }) => (
+                <FormControlLabel
+                  key={key}
+                  control={
+                    <Checkbox
+                      checked={checkBoxListValue ? isChecked(checkBoxListValue, value) : false}
+                      value={value}
+                      onChange={handleCheck}
+                      classes={{
+                        checked: classes.checked,
+                        root: classes.root
+                      }}
+                      checkedIcon={
+                        <CheckIcon
+                          style={{
+                            height: '18px',
+                            width: '18px'
+                          }}
+                        />
+                      }
+                      IconStyle={{ fill: 'black' }}
+                    />
+                  }
+                  label={value}
+                  classes={{
+                    root: classes.formControlLabelRoot
+                  }}
+                />
+              ))}
+          </>
+        </div>
+      </Grid>
+      {touched[ID] && errors[ID] && (
+        <Box className={classes.flexCenter}>
+          <FormHelperText className={classes.maxWidth} error>
+            {errors[ID]}
+          </FormHelperText>
+        </Box>
+      )}
+    </FieldWrapper>
+  );
+}
+
+export default CheckBoxList;

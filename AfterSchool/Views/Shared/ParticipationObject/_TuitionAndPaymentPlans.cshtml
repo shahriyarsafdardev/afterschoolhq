@@ -1,4 +1,7 @@
-﻿@model ParticipationObjectViewModel
+@model ParticipationObjectViewModel
+@{
+    var paymentPlan = Model.ParticipationObject.PaymentPlans.FirstOrDefault();
+} 
 <p>
     Registration Fee payment options:
     <ul>
@@ -16,9 +19,25 @@
                 @ParticipationObjectUI.PrintPlanFee(plan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)
 
                 @if (plan.TotalPeriods > 1)
-                {    
+                {
                     <span>every</span>
                     @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() @(plan.ID != Model.ParticipationObject.PaymentPlans.Last().ID ? ", or " : "")
+                }
+                @if (paymentPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    <span> starting <strong>today</strong></span>
+                }
+                else if (paymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && !paymentPlan.StartDate.HasValue)
+                {
+                    var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+                    if (Model.ParticipationObject.StartDate.HasValue && Model.ParticipationObject.StartDate.Value.Date.IsAfter(accountTodayDate.Date))
+                    {
+                        <span>starting on <strong>@Model.ParticipationObject.StartDate.ToShortDateString()</strong></span>
+                    }
+                    else
+                    {
+                        <span>starting <strong>today</strong></span>
+                    }
                 }
             </li>
         }
