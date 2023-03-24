@@ -36,7 +36,8 @@
             }
             
             <strong>
-                @((Model.ParticipationObject.Cost - Model.ParticipationObject.GetConvenienceFee()).ToCurrency())
+                @((isActivityLeader ? Model.ParticipationObject.Cost - Model.ParticipationObject.GetConvenienceFee() : 
+                    Model.ParticipationObject.Cost).ToCurrency())
             </strong>
             
             @if (!Model.ParticipationObject.SubscriptionPlans.Any())
