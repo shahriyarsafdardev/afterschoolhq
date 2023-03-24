@@ -80,16 +80,19 @@ export const useProfileActions = () => {
     });
   };
 
-  const submitFormSectionData = async ({ answers, answerQuery }, UserUid, schoolLocationID) => {
+  const submitFormSectionData = async (
+    { answers, answerQuery, formData },
+    UserUid,
+    schoolLocationID
+  ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
-    const params = {
-      groupId,
-      schoolLocationID,
-      answers: new URLSearchParams(answersQuery).toString(),
-      registrantId: UserUid
-    };
 
-    await ProfileRepository.submitFormSection(params).then(({ data: { msgs } }) =>
+    formData.append('groupId', groupId);
+    formData.append('answers', new URLSearchParams(answersQuery).toString());
+    formData.append('registrantId', UserUid);
+    formData.append('schoolLocationID', schoolLocationID);
+
+    await ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
       dispatch(setMsgs(msgs))
     );
 

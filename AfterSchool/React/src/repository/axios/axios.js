@@ -25,7 +25,11 @@ export default {
     return response;
   },
   post: async (url, params) => {
-    const response = await axios.post(url, params);
+    const response = await axios.post(url, params, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return response;
   }
 };

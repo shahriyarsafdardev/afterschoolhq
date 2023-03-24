@@ -1,14 +1,17 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Button, Typography, Box } from '@material-ui/core';
+import { Button, Typography, Box, FormHelperText } from '@material-ui/core';
 
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
 const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequired } }) => {
   const classes = useStyles();
   const uploadInputRef = useRef();
   const [fileName, setFileName] = useState('');
   const [uploadedFile, setUploadedFile] = useState('');
+  const [uploadedStatus, setUploadedStatus] = useState(null);
   const { touched, values, errors, setFieldValue } = formik;
 
   const handleClick = () => {
@@ -20,14 +23,24 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
 
   const handleUploadChange = event => {
     const file = event.target.files[0];
-    setUploadedFile(file);
-    setFileName(file.name);
+    if (file && file.size <= MAX_FILE_SIZE) {
+      setFieldValue(ID, file);
+      setUploadedFile(file);
+      setFileName(file.name);
+      setUploadedStatus('SUCCESS');
+    } else {
+      setUploadedStatus('FAILED');
+    }
   };
 
   useEffect(() => {
     setUploadedFile('');
-    setFileName('');
+    setFileName(values[ID]?.name || '');
   }, []);
+
+  useEffect(() => {
+    setFileName(values[ID]?.name || '');
+  }, [values[ID]]);
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
@@ -47,10 +60,10 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
           onChange={handleUploadChange}
         />
       </div>
-      {touched[ID] && errors[ID] && (
+      {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
         <Box className={classes.flexCenter}>
           <FormHelperText className={classes.maxWidth} error>
-            {errors[ID]}
+            {errors[ID] || 'File size cannot be greater than 5MB'}
           </FormHelperText>
         </Box>
       )}
