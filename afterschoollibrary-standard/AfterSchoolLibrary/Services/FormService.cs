@@ -1322,7 +1322,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.RegistrantDateOfBirth,
                 IsRequired = true,
-                IsLocked = true
+                IsLocked = false
             });
             qhs.Add(new QuestionHolder
             {
@@ -1344,7 +1344,7 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataTypeId = QuestionDataType.RegistrantGender,
                 Options = RegistrantGender,
                 IsRequired = true,
-                IsLocked = true
+                IsLocked = false
             });
             qhs.Add(new QuestionHolder
             {
