@@ -208,17 +208,6 @@ export default function UpdateProfile() {
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>
-                <Typography
-                  style={{
-                    paddingTop: '30px',
-                    fontSize: 18,
-                    color: '#555555'
-                  }}
-                  variant="h6"
-                  color="secondary"
-                >
-                  Please enter your information below to register
-                </Typography>
                 <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
                   {Name}
                 </Typography>
