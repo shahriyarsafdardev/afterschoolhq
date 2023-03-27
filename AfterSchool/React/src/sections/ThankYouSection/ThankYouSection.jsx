@@ -17,7 +17,14 @@ function ThankYouSection() {
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
   const {
-    data: { ActivityName, RegistrantFirstName, FindAnotherActivityUrl, ActivityUrl, isParent },
+    data: {
+      isParent,
+      ActivityUrl,
+      ActivityName,
+      RegistrantFirstName,
+      FindAnotherActivityUrl,
+      RegisterForNewChildUrl
+    },
     loadThankYouScreenData
   } = useThankYou();
 
@@ -78,7 +85,7 @@ function ThankYouSection() {
         </Box>
 
         {isParent && (
-          <Link href={registerForNewChildUrl} className={classes.link} variant="body1">
+          <Link href={RegisterForNewChildUrl} className={classes.link} variant="body1">
             Register for New Child
           </Link>
         )}
