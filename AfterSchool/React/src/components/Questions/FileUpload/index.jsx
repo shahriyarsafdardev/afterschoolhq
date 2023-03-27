@@ -54,7 +54,7 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
         </Box>
         <input
           type="file"
-          accept="*/*"
+          accept=".pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3"
           ref={uploadInputRef}
           className={classes.inputFile}
           onChange={handleUploadChange}
