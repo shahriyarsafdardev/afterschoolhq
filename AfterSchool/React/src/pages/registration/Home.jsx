@@ -82,8 +82,11 @@ export default function Home() {
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsFree) navigate(`/reactapp/registration/thankyou/${registrationId}`);
-    else redirect(paymentScreenPath(registrationId));
+    if (IsFree) {
+      const thankyouUrl = `/reactapp/registration/thankyou/${registrationId}`;
+      window.history.pushState(null, '', thankyouUrl);
+      navigate(thankyouUrl);
+    } else redirect(paymentScreenPath(registrationId));
   };
 
   const secondLastSection = activeGroup === totalGroups - 2;
