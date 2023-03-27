@@ -19,6 +19,13 @@ jobs:
     steps:
       - checkout: self
         clean: true
+      - script: |
+          cd AfterSchool/React
+          echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
+          echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
+          echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
+          echo GTM_ID=$(GTM_ID) >> .env
+        displayName: 'Set environment variables'
       - task: NodeTool@0
         inputs:
           versionSource: 'spec'
