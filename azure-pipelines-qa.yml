@@ -18,24 +18,24 @@ jobs:
         clean: true
       - task: NodeTool@0
         inputs:
-          versionSource: "spec"
-          versionSpec: "16.0"
+          versionSource: 'spec'
+          versionSpec: '16.0'
       - script: |
           cd AfterSchool/React
           echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
           echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
           echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
           echo GTM_ID=$(GTM_ID) >> .env
-        displayName: "Set environment variables"
+        displayName: 'Set environment variables'
       - task: Npm@1
         inputs:
-          command: "install"
-          workingDir: "AfterSchool/React"
+          command: 'install'
+          workingDir: 'AfterSchool/React'
       - task: Npm@1
         inputs:
-          command: "custom"
-          workingDir: "AfterSchool/React"
-          customCommand: "run build"
+          command: 'custom'
+          workingDir: 'AfterSchool/React'
+          customCommand: 'run build'
       - task: NuGetToolInstaller@1
         displayName: Use NuGet
         inputs:
@@ -56,9 +56,9 @@ jobs:
         inputs:
           testAssemblyVer2: >-
             **\*.Tests.dll
-
+            
             !**\*TestAdapter.dll
-
+            
             !**\obj\**
           codeCoverageEnabled: false
           publishRunAttachments: false
@@ -67,4 +67,4 @@ jobs:
         inputs:
           path: $(Pipeline.Workspace)\publish
           artifactName: AfterSchoolHQ-Pipeline-Artifact
-
+      
