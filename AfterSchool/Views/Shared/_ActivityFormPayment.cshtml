@@ -157,8 +157,12 @@
 
 <div class="panel-heading">
     Payment Plan Options
+    <div class="row panel-subheading fontSize12">
+        <div class="col-sm-12">
+            <p class="text-muted margin-bottom-zero">Payment plans are used to break up the registration fee into monthly payments.</p>
+        </div>
+    </div>
 </div>
-
 <div class="panel-body">
 
     <div class="form-group">
@@ -273,12 +277,6 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-sm-3"></div>
-            <div class="col-sm-9">
-                <p class="text-muted padding-v-10">Payment plans are used to break up the registration fee into monthly payments.</p>
-            </div>
-        </div>
     </div>
 
 </div>
@@ -293,6 +291,11 @@
 
 <div class="panel-heading">
     Attendance-Based Billing Options
+    <div class="row panel-subheading fontSize12">
+        <div class="col-sm-12">
+            <p class="text-muted margin-bottom-zero">Attendance-based billing options are used to allow parents to pay based on attendance.</p>
+        </div>
+    </div>
 </div>
 
 <div class="panel-body">
@@ -386,13 +389,6 @@
                 </div>
             </div>
             <div class="clearfix"></div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-3"></div>
-            <div class="col-sm-9">
-                <p class="text-muted padding-v-10">Attendance-based billing options are used to allow parents to pay based on attendance.</p>
-            </div>
         </div>
     </div>
 
@@ -549,6 +545,22 @@
             @:disableAll();
         }
     });
+    
+    function addOrRemoveClass(elem1, elem2)
+    {
+        if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Month) || parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Week))
+        {
+            $(elem1).addClass(' hide');
+            $(elem2).removeClass('hide');
+        }
+    }
+    function hideSubscriptionPaymentTypeContent()
+    {
+        $('.not-ongoing-activity-start').addClass(' hide');
+        $('.not-ongoing-period-start').addClass(' hide');
+        $('.is-ongoing-period-start').addClass(' hide');
+        $('.is-ongoing-checkout').addClass(' hide');   
+    }
 
     function disableSubscriptionOrPaymentPlan(plan1, plan2) {
         if(plan1.is(':checked') && plan2.is(':checked')) {   
@@ -563,31 +575,51 @@
 
     function toggleSubscriptionPeriodWeek() {
         //.. if payment start == onPeriodStart and billing type is every month or week
-        if ($('#subscriptionPaymentStartType').val() == "3") {
-            if ($('#subscriptionplanperiod').val() == "1") {
+        if (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) {
+            if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Month)) {
                 Array.from($("#container-subscription-month, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-week").addClass("hide");
                 $("#subscriptionperiodstartmonthday").prop('required', true);
                 $("#subscriptionperiodstartweekday").prop('required', false);
+                $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
                 LoadEndDate();
-            } else if ($('#subscriptionplanperiod').val() == "3") {
+                setPeriodStartDate();
+            } else if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Week)) {
                 Array.from($("#container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).removeClass("hide") });
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
                 $("#subscriptionperiodstartmonthday").prop('required', false);
+                $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
                 LoadEndDate();
+                setPeriodStartDate();
             } else {
                 clearSubscriptionPaymentHiddenInputs();
                 hideWeekMonthContainers();
             }
         } else {
+            $('.periodstartdate').attr('date-loaded','false');
             clearSubscriptionPaymentHiddenInputs();
             hideWeekMonthContainers();
+        }
+        if ($('.is-schedule-ongoing').html().toLowerCase() === 'true' && parseInt($('#subscriptionPaymentStartType').val()) !== @((int)PlanPaymentStartType.WhenActivityStarts))
+        {
+            (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) ? addOrRemoveClass($('.is-ongoing-checkout'), $('.is-ongoing-period-start')) : 
+            addOrRemoveClass($('.is-ongoing-period-start'), $('.is-ongoing-checkout'));
+        }
+        else if ($('.is-schedule-ongoing').html().toLowerCase() === 'false' && parseInt($('#subscriptionPaymentStartType').val()) !== @((int)PlanPaymentStartType.OnCheckout))
+        {
+            (parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart)) ? addOrRemoveClass($('.not-ongoing-activity-start'), $('.not-ongoing-period-start')) : 
+            addOrRemoveClass($('.not-ongoing-period-start'), $('.not-ongoing-activity-start'));
+        }
+        else
+        {
+            hideSubscriptionPaymentTypeContent();
         }
     }
 
     function hideWeekMonthContainers() {
         Array.from($("#container-subscription-month, #container-subscription-week, #container-subscription-enddate-label")).forEach(elem => { $(elem).addClass("hide") });
+        hideSubscriptionPaymentTypeContent();
         $("#subscriptionperiodstartweekday").prop('required', false);
         $("#subscriptionperiodstartmonthday").prop('required', false);
     }

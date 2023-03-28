@@ -16,6 +16,16 @@
 
 <div class="panel-heading">
     Subscription Options
+    <div class="row panel-subheading fontSize12">
+        <div class="col-sm-12">
+            <p class="text-muted margin-bottom-zero">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
+
+            @if (!Model.HasSchedule)
+            {
+                <p class="text-muted margin-bottom-zero">Want more subscription options, please add a schedule.</p>
+            }
+        </div>
+    </div>
 </div>
 
 <div class="panel-body">
@@ -140,25 +150,40 @@
                     <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
                         <span class="input-group-addon">Day of month for period start</span>
                         <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
-                            @foreach (var item in days)
-                            {
-                                if (item.IsOnOrBefore(DateTime.UtcNow))
+                            @{
+                                var date = DateTime.Now.AddDays(-30);
+                                for (var d = 0; d<=60; d++)
                                 {
-                                    <option value="@item.ToShortDateString()" style="color: #ccc;" disabled="disabled">@(item.ToString("MMMM dd"))</option>
-                                }
-                                else
-                                {
-                                    <option value="@item.ToShortDateString()">@(item.ToString("MMMM dd"))</option>
+                                    <option class="@(d == 30 ? "btn-primary text-white" : "")"
+                                            value="@date.AddDays(d).ToShortDateString()" id="@(d == 31 ? "selected" : "")">
+                                        @(date.AddDays(d).ToString("MMMM dd"))
+                                    </option>
                                 }
                             }
                         </select>
                     </div>
 
-                    <p id="container-subscription-enddate-label" class="text-muted text-medium-small hide">
+                    <p id="container-subscription-enddate-label hide" class="text-muted text-medium-small hide">
                         <span>
                             As per the activity schedule and subscription configuration, <strong id="calculatedEnddate"></strong>.
                         </span>
                     </p>
+                    <span class="is-schedule-ongoing hide">@schedule.IsOngoing</span>
+                    if (schedule.IsOngoing)
+                    {
+                        <p class="text-muted text-medium-small is-ongoing-checkout">Payment will start at the time of checkout and will continue until cancelled.</p>
+                        <p class="text-muted text-medium-small is-ongoing-period-start hide">Payment will start on 
+                            <b class="periodstartdate" date-loaded="false"></b> and will continue until cancelled.</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-medium-small not-ongoing-activity-start">Payment will start on <b>@schedule.StartDate.ToLongDateString()</b> 
+                            or will be prorated for the date of registration, and the last payment will be taken out on 
+                            <b>@schedule.EndDate.ToLongDateString()</b>.</p>
+                        <p class="text-muted text-medium-small not-ongoing-period-start hide">Payment will start on 
+                            <b class="periodstartdate" date-loaded="false"></b> or will be prorated for the date of registration, and the last payment will be 
+                            taken out on <b class="scheduleenddate"></b>.</p>
+                    }
                     <p class="text-muted text-medium-small">
                         If a registrant joins in the middle of an activity, AfterSchool HQ will pro-rate the cost at the time of registration.
                     </p>
@@ -185,19 +210,6 @@
                     </div>*@
                 }
 
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-3"></div>
-            <div class="col-sm-9">
-                <br/>
-                <p class="text-muted">Subscriptions are used to bill users at specified intervals for ongoing participation.</p>
-
-                @if (!Model.HasSchedule)
-                {
-                    <p class="text-muted">Want more subscription options, please add a schedule.</p>
-                }
             </div>
         </div>
     </div>
@@ -244,7 +256,7 @@
             if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
                 $('#subscriptionperiodstartmonthday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
             } else {
-                $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("option:not([disabled]):eq(0)").val());
+                $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("#selected").val());
             }
         } else if (billingTypeId === "3") { //weekly
             let weekDay = '@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.DayOfWeek : DayOfWeek.Sunday)'
@@ -266,9 +278,15 @@
             success: function (data) {
                 if (data && data.success === true) {
                     let startDateFormatted = data.startDateFormatted;
-                    let endDateFormatted = data.endDateFormatted;
-                    $('#subscriptionStartDate').val(startDateFormatted);
-                    $('#subscriptionEndDate').val(endDateFormatted);
+                    let endDateFormatted = data.endDateFormatted;               
+                    if ($('.periodstartdate').attr('date-loaded') === 'false')
+                    {
+                       $('#subscriptionStartDate').val(startDateFormatted);
+                       $('#subscriptionEndDate').val(endDateFormatted); 
+                       $('.periodstartdate').html(startDateFormatted);
+                       $('.periodstartdate').attr('date-loaded', 'true');
+                    }
+                    $('.scheduleenddate').html(endDateFormatted);
                     endDateInput.html(`payment will start on ${startDateFormatted} and it will end on ${endDateFormatted}`);
                     return false;
                 } else {
@@ -276,6 +294,49 @@
                 }
             }
         });
+    }
+    function setPeriodStartDate()
+    {
+        let dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if ($('#subscriptionplanperiod').val() === '1')
+        {
+            let dateObj = new Date($("#subscriptionperiodstartmonthday").val());
+            $('.periodstartdate').html(getFormattedDateString(dateObj, dayNames));
+        }
+        else
+        {
+            let currentWeekDay = $("#subscriptionperiodstartweekday").val();
+            let currentDate = getWeeklyCurrentDate(dayNames, currentWeekDay);
+            $('.periodstartdate').html(getFormattedDateString(currentDate, dayNames));
+        }
+        showPeriodStartContent();
+    }
+    
+    function getFormattedDateString(dateObj, dayNames)
+    {
+        let monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        let date = dateObj.getDate();
+        return dayNames[dateObj.getDay()] + ', ' + monthNames[dateObj.getMonth()] + ' ' + date + ', ' + dateObj.getFullYear();
+    }
+    
+    function getWeeklyCurrentDate(dayNames, currentWeekDay)
+    {
+        let weekDates = {};
+        for (let i=0; i<7; i++)
+        {
+            let dateObj = new Date();
+            let dayOfWeek = dateObj.getDay();
+            let dayNo = dayOfWeek + i > 6 ? (dayOfWeek + i) - 7 : dayOfWeek + i;
+            dateObj.setDate(dateObj.getDate() + i);
+            weekDates[dayNames[dayNo]] = dateObj;
+        }
+        return weekDates[currentWeekDay];
+    }
+    
+    function showPeriodStartContent()
+    {
+        $('.is-schedule-ongoing').html().toLowerCase() === 'true' ? $(".is-ongoing-period-start").removeClass('hide') : 
+        $(".not-ongoing-period-start").removeClass('hide');
     }
 
 </script>
