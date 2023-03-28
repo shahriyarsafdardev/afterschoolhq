@@ -34,7 +34,8 @@ const RegistrationSlice = createSlice({
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
         activityDto.RegistrantType,
-        activityDto.IsGradeRestricted
+        activityDto.IsGradeRestricted,
+        activityDto.IsAgeRestricted
       );
 
       state.questions = [
