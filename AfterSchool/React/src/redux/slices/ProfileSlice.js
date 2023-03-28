@@ -26,9 +26,10 @@ const ProfileSlice = createSlice({
     formDataLoadingFailed: state => {
       state.loading = false;
     },
-    setFormData: (state, { payload: { FormDto } }) => {
+    setFormData: (state, { payload: { FormDto, registrantType } }) => {
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
-        FormDto
+        FormDto,
+        registrantType
       );
 
       state.questions = [...formQuestionUpdated];

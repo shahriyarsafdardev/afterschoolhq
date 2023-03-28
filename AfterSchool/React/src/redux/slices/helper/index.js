@@ -1,6 +1,7 @@
 import RegistrationService from 'sevices/RegistrationService';
 
-export const responseMapper = ({ formQuestion, formQuestionGroup, formQuestionAnswer }) => {
+export const responseMapper = (formData, registrantType, IsGradeRestricted = false) => {
+  const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive }) => !(IsDeleted || !IsActive));
   const registrationService = new RegistrationService(filteredQs);
   let [formQuestionUpdated, formQuestionGroupUpdated] = [[], []];
@@ -9,6 +10,14 @@ export const responseMapper = ({ formQuestion, formQuestionGroup, formQuestionAn
     const { QuestionGroupDataTypeId, Name } = section;
     const sectionQuestions = registrationService.groupedQuestions(QuestionGroupDataTypeId, Name);
     const sectionSkipAble = sectionQuestions.every(q => !q.IsRequired);
+
+    if (IsGradeRestricted) {
+      const isStudentInfoSection = QuestionGroupDataTypeId === 2;
+      if (registrantType !== 'Adult' && isStudentInfoSection) {
+        const gradeIndex = sectionQuestions.findIndex(q => q.Text === 'Grade');
+        sectionQuestions[gradeIndex].IsRequired = true;
+      }
+    }
 
     if (sectionQuestions.length) {
       formQuestionUpdated = [...formQuestionUpdated, ...sectionQuestions];
