@@ -185,11 +185,11 @@
                                     </label>
                                     <div class="col-md-6">
                                         <div class="am-radio inline">
-                                            <input @(participationObject.AgeStart.Value <= 18 ? "disabled" : "") type="radio" id="parent" name="optionSelected" value="1"/>
+                                            <input @(participationObject.AgeStart == 18 ? "disabled" : "") type="radio" id="parent" name="optionSelected" value="1"/>
                                             <label for="parent">I am parent or guardian registering for my child</label>
                                         </div>
                                         <div class="am-radio">
-                                            <input @(( ((participationObject.AgeStart.Value >= 0 && participationObject.AgeEnd.Value <= 18) || participationObject.RestrictByGrade())  
+                                            <input @(( ((participationObject.AgeStart >= 0 && participationObject.AgeEnd <= 18) || participationObject.RestrictByGrade())  
                                                        && !participationObject.GetActivity().IsStudentAllowedToRegister) 
                                                        ? "disabled" : "") 
                                                 type="radio" id="student" name="optionSelected" value="2"/>
