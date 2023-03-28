@@ -400,6 +400,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent,
+                        IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false)
                     }
