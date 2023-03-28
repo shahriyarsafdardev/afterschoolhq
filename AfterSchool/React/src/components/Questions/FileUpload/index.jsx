@@ -63,7 +63,7 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
       {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
         <Box className={classes.flexCenter}>
           <FormHelperText className={classes.maxWidth} error>
-            {errors[ID] || 'File size cannot be greater than 5MB'}
+            {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
           </FormHelperText>
         </Box>
       )}
