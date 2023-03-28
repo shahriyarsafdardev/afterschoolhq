@@ -921,6 +921,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             var msgs = new SystemMessages();
             try
             {
+                RegistrationCommon.ResetRegistrationSession();
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
