@@ -10,14 +10,10 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
   const classes = useStyles();
   const uploadInputRef = useRef();
   const [fileName, setFileName] = useState('');
-  const [uploadedFile, setUploadedFile] = useState('');
   const [uploadedStatus, setUploadedStatus] = useState(null);
   const { touched, values, errors, setFieldValue } = formik;
 
   const handleClick = () => {
-    setFileName('');
-    setUploadedFile('');
-    uploadInputRef.current.value = '';
     uploadInputRef.current.click();
   };
 
@@ -25,7 +21,6 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
     const file = event.target.files[0];
     if (file && file.size <= MAX_FILE_SIZE) {
       setFieldValue(ID, file);
-      setUploadedFile(file);
       setFileName(file.name);
       setUploadedStatus('SUCCESS');
     } else {
@@ -33,13 +28,17 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
     }
   };
 
+  const parseFileName = () => {
+    if (typeof values[ID] === 'string') return values[ID].split('/').at(-1);
+  };
+  const getFileName = () => values[ID]?.name || parseFileName() || '';
+
   useEffect(() => {
-    setUploadedFile('');
-    setFileName(values[ID]?.name || '');
+    setFileName(getFileName());
   }, []);
 
   useEffect(() => {
-    setFileName(values[ID]?.name || '');
+    setFileName(getFileName());
   }, [values[ID]]);
 
   return (
@@ -48,7 +47,7 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
         <div>Supported file types are .pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3</div>
         <Box className={classes.uploadButtonWrapper}>
           <Button className={classes.uploadButton} onClick={handleClick}>
-            {uploadedFile ? 'Discard & Upload New File' : 'Upload File'}
+            {fileName ? 'Discard & Upload New File' : 'Upload File'}
           </Button>
           {fileName && <Typography>{fileName}</Typography>}
         </Box>

@@ -1,23 +1,30 @@
 import { makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) => ({
-uploadButtonWrapper:{
-    display:'flex',
-    flexDirection:'row',
-    alignItems:'center',
+const useStyles = makeStyles(theme => ({
+  uploadButtonWrapper: {
+    display: 'flex',
     maxWidth: '90%',
-    justifyContent: 'space-between'
-},
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'start',
+      flexDirection: 'column'
+    }
+  },
   photoWrapper: {
-    textAlign:'initial',
-    maxWidth: '540px',
+    height: '90px',
     width: '100%',
     marginLeft: 12,
-    paddingBottom: 15,
     display: 'flex',
+    maxWidth: '540px',
+    paddingBottom: 15,
+    textAlign: 'initial',
     flexDirection: 'column',
+    justifyContent: 'space-evenly',
     [theme.breakpoints.down('sm')]: {
       width: '100%',
+      height: '120px'
     }
   },
   uploadButton: {
@@ -31,11 +38,11 @@ uploadButtonWrapper:{
     minWidth: 265,
     width: 'fit-content',
     [theme.breakpoints.down('xs')]: {
-      fontSize: 14,
-    },
+      fontSize: 14
+    }
   },
   inputFile: {
-    display: 'none',
+    display: 'none'
   },
   flexCenter: {
     display: 'flex',
