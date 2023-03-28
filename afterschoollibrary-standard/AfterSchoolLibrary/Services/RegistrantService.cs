@@ -1448,13 +1448,13 @@ namespace AfterSchoolLibrary.Services
         }
         
         public static void ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
-            WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, Account account, bool requirePayment, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc); // Need to look into this, why it is picking all
             var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && 
                                       item.ParticipationObjectTypeId == participationObjectType);
-
+            var newRegistrationAssignment = RegistrationAssignmentType.ReservedPendingPayment;
             if (ra.IsEmpty())
             {
                 msgs.Add("Registration not found", MessageType.Notice);
@@ -1474,19 +1474,22 @@ namespace AfterSchoolLibrary.Services
                 return;
             }
 
+            if (!requirePayment || activity.IsFree)
+                newRegistrationAssignment = RegistrationAssignmentType.Reserved;
+            
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, amsgs, adc);
+                    ra.ChangeSeatAssignment(newRegistrationAssignment, loggedInUser, amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
 
-                    // Notify Provider
-                    // var participationObject = ra.GetParticipationObject(msgs, dc);
-                    // EmailHelper.SendReEnrollConfirmation(registrant, participationObject, loggedInUser, isParent, isCancelPayment, msgs);
+                    // Notify Parent
+                    var participationObject = ra.GetParticipationObject(msgs, dc);
+                    EmailHelper.SendReEnrollConfirmation(registrant, masterRegistrant, ra.GetRegistration(), participationObject, loggedInUser, requirePayment);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),

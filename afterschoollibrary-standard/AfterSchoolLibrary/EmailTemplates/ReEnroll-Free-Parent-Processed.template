@@ -1,0 +1,20 @@
+﻿<div>
+  <p>Hello @Model.ParentName,</p>
+
+  <p>
+    @Model.ProviderName has re-enrolled @Model.StudentName in @Model.ActivityName. No further action is needed. 
+  </p>  
+  <br/>  
+  <p> 
+    If you have any additional questions, please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+  
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+  <br>
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>

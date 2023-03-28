@@ -193,6 +193,12 @@
   <data name="Publish_Request" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\publish-request.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ReEnroll_Free_Parent_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+      <value>emailtemplates\reenroll-free-parent-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ReEnroll_Parent_Processed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+      <value>emailtemplates\reenroll-parent-processed.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Refund_Denied" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\refund-denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

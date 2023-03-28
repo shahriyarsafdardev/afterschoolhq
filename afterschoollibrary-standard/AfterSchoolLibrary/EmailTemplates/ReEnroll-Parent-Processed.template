@@ -1,0 +1,26 @@
+﻿<div>
+  <p>Hello @Model.ParentName,</p>
+
+  <p>
+    @Model.ProviderName has re-enrolled @Model.StudentName in @Model.ActivityName. @Model.StudentName is marked reserved pending payment. 
+  </p>  
+  <br/>  
+  <p>  
+    You have previously paid this provider @Model.Cost for this activity. @Model.ProviderName is charging you @Model.Cost to re-enroll. CLick "Pay Now" below to make your payment.
+  </p>
+  <br/>
+  @Model.PayNowLink
+  <br/>
+  <p> 
+    If you believe this is an error, please contact @Model.ActivityContactName either by phone (@Model.ActivityContactPhone) or email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+  
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+  <br>
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>
