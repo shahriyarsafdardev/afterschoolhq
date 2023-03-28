@@ -1446,6 +1446,53 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
         }
+        
+        public static void ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+            WebUser loggedInUser, Account account, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+            var ras = registrant.GetRegistrantActivities(msgs, dc); // Need to look into this, why it is picking all
+            var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && 
+                                      item.ParticipationObjectTypeId == participationObjectType);
+
+            if (ra.IsEmpty())
+            {
+                msgs.Add("Registration not found", MessageType.Notice);
+                return;
+            }
+
+            var activity = ra.GetActivity(msgs, dc);
+            var hasAccessToActivity = activity.IsNotEmpty()
+                ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty()
+                : false;
+
+            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc)
+                && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
+                && !hasAccessToActivity)
+            {
+                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
+                return;
+            }
+
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    ra.ChangeSeatAssignment(RegistrationAssignmentType.ReservedPendingPayment, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    // Notify Provider
+                    // var participationObject = ra.GetParticipationObject(msgs, dc);
+                    // EmailHelper.SendReEnrollConfirmation(registrant, participationObject, loggedInUser, isParent, isCancelPayment, msgs);
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+        }
 
         public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId,
             int? periodId, RegistrationCompletionStatus completionStatus, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
