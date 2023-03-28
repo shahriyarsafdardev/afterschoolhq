@@ -1408,6 +1408,63 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }
+        
+        public static SystemMessages SendReEnrollConfirmation(Registrant registrant, Registrant masterRegistrant, Registration registration, ParticipationObject participationObject, WebUser loggedInUser, 
+            bool requirePayment, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var purchaserAccount = masterRegistrant?.GetAccount(msgs);
+            var isAfterSchool = purchaserAccount.IsAfterSchool;
+            var purchaser = purchaserAccount.GetAccountOwner();
+            var billingAccount = participationObject.OwnerAccount;
+            var billingAccountOwner = billingAccount.GetAccountOwner();
+
+            var model = new NameValueCollection
+            {
+                {"ParentName", purchaser.FirstName},
+                {"ProviderName", billingAccountOwner.FullName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"PayNowLink", registration.GetPaymentUrl},
+                {"Cost", participationObject.Cost.ToCurrency()},
+                {"ActivityName", participationObject.Name},
+                {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                {"BillerAccountName", billingAccount.Name},
+                {"BillerAccountLink", billingAccount.HomePageUrl},
+                {"StudentName", registrant.FullName},
+            };
+
+            var subject = $"Re-Enrollment for {participationObject.Name}";
+            var body = ProcessTemplate(
+                requirePayment ? EmailTemplates.ReEnroll_Parent_Processed : EmailTemplates.ReEnroll_Free_Parent_Processed,
+                model,
+                "ReEnroll_Confirmation-1.0",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send email to registerer
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(purchaser.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            // Send email to provider as cc
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(billingAccountOwner.Email),
+                "ReEnrollment CC: " + subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
 
         public static SystemMessages SendReEnrollConfirmation(Registrant masterRegistrant, RegistrantActivity ra,
             ParticipationObject participationObject, bool requirePayment, DatabaseConnection dc = null)

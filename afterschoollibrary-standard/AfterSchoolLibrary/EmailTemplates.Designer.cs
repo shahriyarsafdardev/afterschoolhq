@@ -370,6 +370,9 @@ namespace AfterSchoolLibrary {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Refund_Provider_Processed {
             get {
                 object obj = ResourceManager.GetObject("Refund_Provider_Processed", resourceCulture);

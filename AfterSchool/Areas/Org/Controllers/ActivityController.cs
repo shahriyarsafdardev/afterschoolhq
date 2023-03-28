@@ -449,7 +449,6 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string participationObjectType)
         {
-            // Need to check if activity is free or paid if free then move to Reserved (requirePayment)
             // Need to refactor error and success messages for modal to display
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -468,6 +467,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObjectType: (ParticipationObjectType) Enum.Parse(typeof(ParticipationObjectType), participationObjectType),
                     loggedInUser: SessionVariables.CurrentUser,
                     account: currentAccount,
+                    requirePayment: requirePayment,
                     msgs: msgs);
             }
 
