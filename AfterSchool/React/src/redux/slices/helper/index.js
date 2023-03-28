@@ -11,7 +11,7 @@ export const responseMapper = (formData, registrantType) => {
     const sectionQuestions = registrationService.groupedQuestions(QuestionGroupDataTypeId, Name);
     const sectionSkipAble = sectionQuestions.every(q => !q.IsRequired);
 
-    const isStudentInfoSection = QuestionGroupDataTypeId === 2 && Name === 'Student Information';
+    const isStudentInfoSection = QuestionGroupDataTypeId === 2;
     if (registrantType !== 'Adult' && isStudentInfoSection) {
       const gradeIndex = sectionQuestions.findIndex(q => q.Text === 'Grade');
       sectionQuestions[gradeIndex].IsRequired = true;
