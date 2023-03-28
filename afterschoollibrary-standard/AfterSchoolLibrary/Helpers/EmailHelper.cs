@@ -1417,7 +1417,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"StudentName", registrantName},
             };
 
-            var subject = $"Re-Enrollment for {participationObject.Name}";
+            var subject = $"{registrantName} is re-enrolled into {participationObject.Name}";
             var body = ProcessTemplate(
                 requirePayment ? EmailTemplates.ReEnroll_Parent_Processed : EmailTemplates.ReEnroll_Free_Parent_Processed,
                 model,

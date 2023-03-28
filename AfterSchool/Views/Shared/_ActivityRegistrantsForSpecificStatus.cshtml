@@ -160,7 +160,7 @@
                                 @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
                                 {
                                     <button type="button" class="btn btn-primary searchActivitiesBtn"
-                                            onclick="showModal(@(!activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"));
+                                            onclick="showModal(@(activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"));
                                             setModalAttributes('@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()', 
                                             '@ra.ParticipationObjectTypeId.ToString()')">
                                         Re-Enroll
