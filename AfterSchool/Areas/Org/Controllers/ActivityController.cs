@@ -449,20 +449,21 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string participationObjectType)
         {
-            // Need to refactor error and success messages for modal to display
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            var activityName = "";
+            var newRegistrationStatus = "";
             if (currentAccount.IsEmpty())
-                return Json(new {success = false, status = "error"}, JsonRequestBehavior.AllowGet);
+                return Json(new {success = false, status = "error", data = "Account not found."}, JsonRequestBehavior.AllowGet);
 
             if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || participationObjectType.IsEmpty())
-                return Json(new {success = false, status = "error"}, JsonRequestBehavior.AllowGet);
+                return Json(new {success = false, status = "error", data = "Registrant on this Activity not found."}, JsonRequestBehavior.AllowGet);
 
             var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
 
             if (registrant.IsNotEmpty())
             {
-                registrant.ReEnrollCurrentRegistrant(
+                (activityName,newRegistrationStatus) = registrant.ReEnrollCurrentRegistrant(
                     participationObjectId: participationObjectId.ToInteger(),
                     participationObjectType: (ParticipationObjectType) Enum.Parse(typeof(ParticipationObjectType), participationObjectType),
                     loggedInUser: SessionVariables.CurrentUser,
@@ -473,13 +474,14 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var registrantName = registrant.Name;
-                var successMessage = new SystemMessage($"{registrantName} ReEnrolled successfully.", MessageType.Success);
-                return Json(new {success = true, status = "ok", data = successMessage.Text.ToList()}, JsonRequestBehavior.AllowGet);
+                var successMessage = new SystemMessage($"{registrant.Name} has been re-enrolled in {activityName}. Their status will now be {newRegistrationStatus}.", 
+                    MessageType.Success);
+                return Json(new {success = true, status = "ok", data = successMessage.Text}, JsonRequestBehavior.AllowGet);
             }
 
             // something went wrong, error occured
-            return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
+            var dataString = msgs.ToList().Aggregate("", (current, msg) => current + (msg.Text + ". "));
+            return Json(new {success = false, status = "error", data = dataString},
                 JsonRequestBehavior.AllowGet);
         }
 
