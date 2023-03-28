@@ -1447,7 +1447,7 @@ namespace AfterSchoolLibrary.Services
             );
         }
         
-        public static void ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+        public static (string,string) ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
             WebUser loggedInUser, Account account, bool requirePayment, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
@@ -1457,8 +1457,8 @@ namespace AfterSchoolLibrary.Services
             var newRegistrationAssignment = RegistrationAssignmentType.ReservedPendingPayment;
             if (ra.IsEmpty())
             {
-                msgs.Add("Registration not found", MessageType.Notice);
-                return;
+                msgs.Add("Registration not found", MessageType.Error);
+                return ("","");
             }
 
             var activity = ra.GetActivity(msgs, dc);
@@ -1470,8 +1470,8 @@ namespace AfterSchoolLibrary.Services
                 && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
                 && !hasAccessToActivity)
             {
-                msgs.Add("You don't have permission to modify this registration", MessageType.UserError);
-                return;
+                msgs.Add("You don't have permission to modify this registration", MessageType.Error);
+                return ("","");
             }
 
             if (!requirePayment || activity.IsFree)
@@ -1489,12 +1489,13 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Parent
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    EmailHelper.SendReEnrollConfirmation(registrant, masterRegistrant, ra.GetRegistration(), participationObject, loggedInUser, requirePayment);
+                    EmailHelper.SendReEnrollConfirmation(masterRegistrant, ra, participationObject, requirePayment);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+            return (activity.Name, ra.AssignmentTypeId.ToString());
         }
 
         public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId,

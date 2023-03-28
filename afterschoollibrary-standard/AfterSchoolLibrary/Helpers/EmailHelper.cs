@@ -1388,9 +1388,9 @@ namespace AfterSchoolLibrary.Helpers
 
             return msgs;
         }
-        
-        public static SystemMessages SendReEnrollConfirmation(Registrant registrant, Registrant masterRegistrant, Registration registration, ParticipationObject participationObject, WebUser loggedInUser, 
-            bool requirePayment, DatabaseConnection dc = null)
+
+        public static SystemMessages SendReEnrollConfirmation(Registrant masterRegistrant, RegistrantActivity ra,
+            ParticipationObject participationObject, bool requirePayment, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var purchaserAccount = masterRegistrant?.GetAccount(msgs);
@@ -1398,11 +1398,13 @@ namespace AfterSchoolLibrary.Helpers
             var purchaser = purchaserAccount.GetAccountOwner();
             var billingAccount = participationObject.OwnerAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner();
+            var registration = ra.GetRegistration();
+            var registrantName = ra.RegistrantName;
 
             var model = new NameValueCollection
             {
                 {"ParentName", purchaser.FirstName},
-                {"ProviderName", billingAccountOwner.FullName},
+                {"ProviderName", billingAccountOwner.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"PayNowLink", registration.GetPaymentUrl},
                 {"Cost", participationObject.Cost.ToCurrency()},
@@ -1412,7 +1414,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
-                {"StudentName", registrant.FullName},
+                {"StudentName", registrantName},
             };
 
             var subject = $"Re-Enrollment for {participationObject.Name}";
