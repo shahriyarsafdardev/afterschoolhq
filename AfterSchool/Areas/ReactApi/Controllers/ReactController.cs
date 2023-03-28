@@ -721,23 +721,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                     adc);
                             }
                         });
+                        
+                        RegistrationCommon.AddCustomQuestions(
+                            qvms,
+                            currentRegistrant,
+                            null,
+                            currentUser,
+                            Request,
+                            amsgs, adc);
 
                         if (json.groupid.ToInteger() == -1)
                         {
-                            qvms.ForEach(qvm =>
-                            {
-                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
-                                {
-                                    RegistrationCommon.AddCustomQuestions(
-                                        qvms,
-                                        currentRegistrant,
-                                        null,
-                                        currentUser,
-                                        Request,
-                                        amsgs, adc);
-                                }
-                            });
-
                             currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
                             parentRegistrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
                             parent2Registrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
