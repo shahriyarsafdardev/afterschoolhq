@@ -1,6 +1,6 @@
 import RegistrationService from 'sevices/RegistrationService';
 
-export const responseMapper = (formData, registrantType) => {
+export const responseMapper = (formData, registrantType, IsGradeRestricted = false) => {
   const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive }) => !(IsDeleted || !IsActive));
   const registrationService = new RegistrationService(filteredQs);
@@ -11,10 +11,12 @@ export const responseMapper = (formData, registrantType) => {
     const sectionQuestions = registrationService.groupedQuestions(QuestionGroupDataTypeId, Name);
     const sectionSkipAble = sectionQuestions.every(q => !q.IsRequired);
 
-    const isStudentInfoSection = QuestionGroupDataTypeId === 2;
-    if (registrantType !== 'Adult' && isStudentInfoSection) {
-      const gradeIndex = sectionQuestions.findIndex(q => q.Text === 'Grade');
-      sectionQuestions[gradeIndex].IsRequired = true;
+    if (IsGradeRestricted) {
+      const isStudentInfoSection = QuestionGroupDataTypeId === 2;
+      if (registrantType !== 'Adult' && isStudentInfoSection) {
+        const gradeIndex = sectionQuestions.findIndex(q => q.Text === 'Grade');
+        sectionQuestions[gradeIndex].IsRequired = true;
+      }
     }
 
     if (sectionQuestions.length) {
