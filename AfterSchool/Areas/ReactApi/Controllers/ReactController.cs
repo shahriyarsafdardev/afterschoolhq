@@ -292,36 +292,44 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var activity = participationObject.GetActivity();
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                var currentRegistrant = SessionVariables.CurrentRegistrant;
                 Registrant studentReg = null;
                 
                 Database.ExecuteTransaction
                 (
                     (amsgs, adc) =>
                     {
-                        studentReg = currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: null,
-                            canBeAccessedBy: currentUser.AsList(),
-                            registrantType: RegistrantType.Individual,
-                            isMaster: true,
-                            isParentOrGuardian: false,
-                            allowTextMessages: false,
-                            schoolLocationId: null,
-                            profileStatus: RegistrantProfileStatus.NotSet,
-                            loggedInUser: currentUser,
-                            msgs: amsgs,
-                            dc : adc);
+                        if (currentRegistrant.IsEmpty())
+                        {
+                            studentReg = currentAccount.CreateParentOrStudentRegistrant(
+                                registrantOwner: null,
+                                canBeAccessedBy: currentUser.AsList(),
+                                registrantType: RegistrantType.Individual,
+                                isMaster: true,
+                                isParentOrGuardian: false,
+                                allowTextMessages: false,
+                                schoolLocationId: null,
+                                profileStatus: RegistrantProfileStatus.NotSet,
+                                loggedInUser: currentUser,
+                                msgs: amsgs,
+                                dc : adc);
                         
-                        if(parentRegistrant.IsNotEmpty())
-                            RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                            if(parentRegistrant.IsNotEmpty())
+                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
                 
-                        if(parent2Registrant.IsNotEmpty())
-                            RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                            if(parent2Registrant.IsNotEmpty())
+                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                        }
                     },
                     smsgs =>
                     {
                         msgs.AddRange(smsgs);
 
-                        SessionVariables.CurrentRegistrant = studentReg;
+                        if (studentReg.IsNotEmpty())
+                        {
+                            SessionVariables.CurrentRegistrant = studentReg;
+                            currentRegistrant = studentReg;
+                        }
                     },
                     fmsgs => msgs.AddRange(fmsgs),
                     emsgs => throw new Exception(emsgs.ToString())
@@ -366,7 +374,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in studentReg.GetAnswers(msgs))
+                foreach (var questionAnswer in currentRegistrant?.GetAnswers(msgs))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -388,7 +396,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent,
-                        SchoolLocation = studentReg.GetSchoolLocation(msgs)
+                        SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs)
                     }
                 };
                 
