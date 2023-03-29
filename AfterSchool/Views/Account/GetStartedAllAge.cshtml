@@ -189,7 +189,7 @@
                                             <label for="parent">I am parent or guardian registering for my child</label>
                                         </div>
                                         <div class="am-radio">
-                                            <input @(( ((participationObject.AgeStart >= 0 && participationObject.AgeEnd <= 18) || participationObject.RestrictByGrade())  
+                                            <input @(( ((participationObject.AgeStart >= 0 && participationObject.AgeEnd <= 17) || participationObject.RestrictByGrade())  
                                                        && !participationObject.GetActivity().IsStudentAllowedToRegister) 
                                                        ? "disabled" : "") 
                                                 type="radio" id="student" name="optionSelected" value="2"/>
