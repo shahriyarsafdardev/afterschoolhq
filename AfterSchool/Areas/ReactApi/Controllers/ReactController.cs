@@ -254,11 +254,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 }
 
                 var registrantType = registrant.PersonTypeId.ToString();
+                var SchoolLocation = registrant.GetSchoolLocation(msgs);
 
                 dynamic response = new
                 {
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
-                    registrantType
+                    registrantType,SchoolLocation
                 };
                 
                 return Json(
