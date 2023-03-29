@@ -104,8 +104,9 @@ function SchoolField({ question, formik }) {
   const changeHandler = event => setSchoolValue(event.target.value);
 
   useEffect(() => {
-    setSchoolValue(school.locationName);
-  }, [school?.locationName]);
+    setSchoolValue(school?.locationName || school?.Name);
+    setFieldValue(ID, school?.locationName || school?.Name || (noSchool ? 'School Not Found' : ''));
+  }, [school?.locationName, school?.Name]);
 
   return (
     <>
