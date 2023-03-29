@@ -141,7 +141,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
-                        IsGradeRestricted = participationObject.RestrictByGrade()
+                        IsGradeRestricted = participationObject.RestrictByGrade(),
+                        SchoolLocation = currentRegistrant.GetSchoolLocation(msgs)
                     }
                 };
                 
