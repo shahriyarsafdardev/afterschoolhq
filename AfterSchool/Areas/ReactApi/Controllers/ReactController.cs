@@ -386,7 +386,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         Name = activity.Name,
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
-                        RegistrantType = RegistrantPersonType.Parent
+                        RegistrantType = RegistrantPersonType.Parent,
+                        SchoolLocation = studentReg.GetSchoolLocation(msgs)
                     }
                 };
                 
