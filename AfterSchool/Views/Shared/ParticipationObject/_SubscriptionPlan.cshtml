@@ -8,19 +8,9 @@
             var isActivityLeader = (bool) (ViewData["isActivityLeader"] ?? false);
             if (!isActivityLeader)
             {
-                <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today plus</span>
+                <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today </span>
             }
-            else
-            {
-                <span>plus</span>
-            }
-        }
-
-        @if (subscriptionPlan.SplitCostEvenly)
-        {
-            <span>
-                a fee to be determined after all students are registered
-            </span>
+            <span>plus</span>
         }
         else
         {
