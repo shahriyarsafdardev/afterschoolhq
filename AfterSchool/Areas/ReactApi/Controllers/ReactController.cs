@@ -479,7 +479,10 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     }
                 });
 
-                if(msgs.HasNoErrors())
+                if (json.schoolLocationID.IsNotEmpty() && registrant.IsStudent)
+                    registrant.SchoolLocationId = json.schoolLocationID;
+
+                if (msgs.HasNoErrors())
                     Database.ExecuteTransaction
                         (
                             action: (SystemMessages amsgs, DatabaseConnection adc) =>

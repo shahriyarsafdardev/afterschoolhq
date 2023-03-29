@@ -1,6 +1,8 @@
+import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+import schoolField from 'constants/schoolField';
 import ProfileRepository from 'repository/ProfileRepository';
 
 const ProfileSlice = createSlice({
@@ -12,6 +14,7 @@ const ProfileSlice = createSlice({
     questions: [],
     loading: true,
     noSchool: false,
+    RegistrantType: '',
     questionsGroups: [],
     registrationId: null,
     answeredQuestions: []
@@ -26,15 +29,18 @@ const ProfileSlice = createSlice({
     formDataLoadingFailed: state => {
       state.loading = false;
     },
-    setFormData: (state, { payload: { FormDto, registrantType } }) => {
+    setFormData: (state, { payload: { FormDto, registrantType, SchoolLocation } }) => {
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
         registrantType
       );
 
-      state.questions = [...formQuestionUpdated];
+      state.questions = [...formQuestionUpdated, schoolField(registrantType)];
       state.questionsGroups = [...formQuestionGroupUpdated];
       state.answeredQuestions = formQuestionAnswer;
+      state.school = SchoolLocation || {};
+      state.noSchool = isEmpty(SchoolLocation) ? true : false;
+      state.RegistrantType = registrantType;
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
@@ -74,10 +80,11 @@ export const useProfileActions = () => {
     });
   };
 
-  const submitFormSectionData = async ({ answers, answerQuery }, UserUid) => {
+  const submitFormSectionData = async ({ answers, answerQuery }, UserUid, schoolLocationID) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
     const params = {
       groupId,
+      schoolLocationID,
       answers: new URLSearchParams(answersQuery).toString(),
       registrantId: UserUid
     };
