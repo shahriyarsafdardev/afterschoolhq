@@ -1681,7 +1681,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"AmountDueOrPaid", "Amount Paid"},
                 {"TotalCost", totalCostWithFees.ToCurrency()},
                 {"RegistrationTable", registrationTable},
-                {"CustomMessage", "Thank you for registering"},
+                {"CustomMessage", customMessage ?? "Thank you for registering"},
                 {"CreditCardFee", checkoutObject.PaymentTypeFeeOverrideAmount.ToCurrency()},
                 {"RegistrationDetails", "Login to your account to view more details about this payment."},
                 {"SubscriptionDetails", ""},
