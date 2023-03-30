@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using RestSharp.Extensions;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -590,7 +589,7 @@ namespace AfterSchoolLibrary.Models
         {
             var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text;
 
-            if (!registrantDOB.HasValue())
+            if (!registrantDOB.IsDate())
                 return false;
             
             return IsAgeInRange(registrantDOB.ToDateTime(), msgs);
