@@ -587,9 +587,12 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsStudentAgeInRange(Registrant registrant, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text.ToDateTime();
+            var registrantDOB = registrant.GetAnswer(QuestionDataType.RegistrantDateOfBirth, msgs, dc)?.Text;
 
-            return IsAgeInRange(registrantDOB, msgs);
+            if (!registrantDOB.IsDate())
+                return false;
+            
+            return IsAgeInRange(registrantDOB.ToDateTime(), msgs);
         }
 
         public bool IsAgeInRange(DateTime? dateOfBirth, SystemMessages msgs = null)
