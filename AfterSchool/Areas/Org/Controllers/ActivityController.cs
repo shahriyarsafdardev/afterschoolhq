@@ -2739,7 +2739,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (postPayPlan.BillingPeriodTypeId)
                 {
                     case BillingPeriodType.Day:
-
                         attendancesToCharge = attendances.FindAll(attendance =>
                         {
                             var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity,
@@ -2751,11 +2750,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         }).ToList();
 
                         registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
-
                         break;
-
                     case BillingPeriodType.Week:
-
                         attendances.ForEach(attendance =>
                         {
                             var currentWeekPresent = currentAccount.GetAttendanceRegistrantByDateRange(
@@ -2774,12 +2770,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
-                                var currentUser = SessionVariables.CurrentUser;
                                 var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity,
                                     attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
 
-                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() &&
-                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID) && attendanceRegistrant.NumberPresent > 0)
+                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() && 
+                                    attendancesToCharge.All(item => item.ID != firstAttendanceOfWeek.ID) && attendanceRegistrant.NumberPresent > 0)
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
                         });
@@ -2923,7 +2918,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentAccount,
                     registrantActivities,
                     selectedAttendances,
-                    billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                    billingPeriodType ?? BillingPeriodType.NotSet,
                     msgs);
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
@@ -2931,8 +2926,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     // one person multiple attendance dates
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
-                    var costPerAttendance =
-                        registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+                    var costPerAttendance = registration.CostPerClass ?? 0;
 
                     if (costPerAttendance > 0)
                     {
@@ -2945,8 +2939,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         var paymentTypeFeePayer = registration.GetPaymentTypeFeePayer(msgs);
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
-                        CheckoutObject checkoutObject = null;
-                        var coupon = CouponService.GetCoupon(registration, msgs);
+                        var coupon = registration.GetCoupon(msgs);
                         
                         BankAccountPurchaseObject bankAccountPurchaseObject = null;
                         CreditCardPurchaseObject creditCardPurchaseObject = null;
@@ -2963,13 +2956,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (postPayPlan.IsNotEmpty())
                         {
                             //.. if post pay plan, then we will have coupon value in registration to discount.
-                            var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue
-                                ? registration.CouponValue.Value
-                                : 0);
-                            overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
+                            overrideAmount = (costPerAttendance - (registration.CouponValue ?? 0)) * attendanceDaysToCharge;
                         }
 
-                        checkoutObject = new CheckoutObject
+                        var checkoutObject = new CheckoutObject
                         {
                             Coupon = coupon,
                             OverrideAmount = overrideAmount,
@@ -2981,9 +2971,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             BillingAccount = activity.GetAccount(msgs),
                             CreditCardPurchaseObject = creditCardPurchaseObject,
                             BankAccountPurchaseObject = bankAccountPurchaseObject,
-                            PaymentType = bankAccountPurchaseObject.IsNotEmpty()
-                                ? PaymentType.ACH
-                                : PaymentType.CreditCard,
+                            PaymentType = registration.PaymentTypeId,
                             PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                             ConvenienceFeePayer = convenienceFeePayer,
                             CreditCardFeePayer = paymentTypeFeePayer,
@@ -2995,64 +2983,43 @@ namespace AfterSchool.Areas.Org.Controllers
                             Registration = registration,
                             PostPayPlan = postPayPlan,
                         };
- 
-                        var isEmailAlreadySent = false;
-
-                            if (msgs.HasNoErrors())
-                            raAttendances.ForEach(raAttendance =>
-                            {
-                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
-                                        raAttendance.ID.Value,
-                                        registrantActivity.GetRegistrant(msgs).ID.Value,
-                                        msgs)
-                                    .FirstOrDefault();
-
-                                if (attendanceRegistrant != null && attendanceRegistrant.NumberPresent > 0 && !isEmailAlreadySent)
-                                {
-                                    var attendanceDateString = raAttendance.Date.ToLongDateString();
-                                    
-                                    for (var i = 1; i < raAttendances.Count; i++)
-                                    {
-                                        attendanceDateString += ", " + raAttendances[i].Date.ToLongDateString();
-                                    }
-                                        
-                                    AccountService.ProcessPayment(
-                                        checkoutObject,
-                                        currentUser,
-                                        true,
-                                        attendanceDaysToCharge,
-                                        attendanceDateString,
-                                        registrantActivity.RegistrantName,
-                                        msgs);
-                                    
-                                    isEmailAlreadySent = true;
-                                }
-
-                                // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
-                                if (attendanceRegistrant.IsNotEmpty()
-                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)
-                                    && (checkoutObject?.Transaction).IsNotEmpty()
-                                    && !attendanceRegistrant.IsAlreadyBilled)
-                                {
-                                    attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-
-                                    attendanceRegistrant
-                                        .GetAttendanceRegistrantsInSameBillingPeriod(postPayPlan.BillingPeriodTypeId,
-                                            msgs)
-                                        .ForEach(ar =>
-                                        {
-                                            ar.TransactionId = checkoutObject.Transaction.ID.Value;
-                                            msgs.AddRange(ar.Save());
-                                        });
-
-                                    msgs.AddRange(attendanceRegistrant.Save());
-                                }
-                            });
-
-                        if (msgs.HasErrors())
+                        
+                        if (msgs.HasNoErrors() && raAttendances.Count > 0)
                         {
+                            var raAttendance =  raAttendances.FirstOrDefault();
+                            // set first attendance date by default if multiple no need to show that
+                            var attendanceDateString = raAttendances.Count > 1 ? "" : " for " + raAttendance!.Date.ToLongDateString(); 
+                           
+                            // Send email to registrant
+                            AccountService.ProcessPayment(
+                                checkoutObject,
+                                currentUser,
+                                true,
+                                attendanceDaysToCharge,
+                                attendanceDateString,
+                                registrantActivity.RegistrantName,
+                                msgs);
+                            
+                            // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
+                            var attendanceRegistrants = AttendanceRegistrant.LoadByRegistrantId(
+                                    registrantActivity.GetRegistrant(msgs).ID.Value,
+                                    msgs)
+                                .ToList();
+                            
+                            foreach (var attendanceRegistrant in attendanceRegistrants.Where(attendanceRegistrant => attendanceRegistrant.IsNotEmpty()
+                                         && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)
+                                         && (checkoutObject.Transaction).IsNotEmpty()
+                                         && !attendanceRegistrant.IsAlreadyBilled && attendanceRegistrant.NumberPresent > 0))
+                            {
+                                attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+                                msgs.AddRange(attendanceRegistrant.Save());
+                            }
+                        }
+                        else if(msgs.HasErrors()) 
+                        { 
                             msg =
-                                $"An error occured while charging some parents, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
+                                $"An error occured while charging some parents, some parents may have already been processed and you will still receive a " +
+                                $"summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
                             break;
                         }
                     }
@@ -3072,11 +3039,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
                 var registrantsBilledPerAttendance = GetNumberOfRegistrantsBilledPerAttendance(
                     selectedAttendances,
-                    billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                    billingPeriodType ?? BillingPeriodType.NotSet,
                     msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
-                var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
-                var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
+                var costPerClass = objRegistration.CostPerClass ?? 0;
+                var couponValue = objRegistration.CouponValue ?? 0;
 
                 if (registrantsBilledPerAttendance.Count > 0)
                     EmailHelper.SendAttendanceChargeConfirmation(registrantsBilledPerAttendance, activity, costPerClass,

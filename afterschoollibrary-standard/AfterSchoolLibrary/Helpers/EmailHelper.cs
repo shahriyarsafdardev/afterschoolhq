@@ -1564,18 +1564,13 @@ namespace AfterSchoolLibrary.Helpers
                 "Attendance_Charge_Confirmation-1.1",
                 msgs);
 
-            // SEND EMAILS
-            var mailMsgs = new SystemMessages();
-
             // Send email to activity account
-            mailMsgs.AddRange(SendGridHelper.SendMail(
+            msgs.AddRange(SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(account.Email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
-
-            msgs.AddRange(mailMsgs);
         }
 
         public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage,
@@ -1799,7 +1794,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Notification,
                 model,
-                "Attendance_Charge_Notification-1.1",
+                "Attendance_Charge_Notification-1.2",
                 msgs);
 
             // SEND EMAILS
