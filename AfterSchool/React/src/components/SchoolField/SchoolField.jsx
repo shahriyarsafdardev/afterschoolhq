@@ -1,7 +1,7 @@
 import cs from 'classnames';
 import useStyles from './styles';
 import SimpleCheckBox from 'components/SimpleCheckBox';
-import { useRegistration } from 'redux/hooks';
+import { useRegistration, useProfile } from 'redux/hooks';
 import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
@@ -81,13 +81,13 @@ export const locationObject = place => {
   };
 };
 
-function SchoolField({ question, formik }) {
+function SchoolField({ question, formik, isUpdating = false }) {
   const inputRef = useRef();
   const classes = useStyles();
   const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
   const { ID, Text, IsRequired: required = false } = question;
-  const { school, noSchool, setSchoolFieldValue } = useRegistration();
+  const { school, noSchool, setSchoolFieldValue } = isUpdating ? useProfile() : useRegistration();
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
@@ -104,8 +104,9 @@ function SchoolField({ question, formik }) {
   const changeHandler = event => setSchoolValue(event.target.value);
 
   useEffect(() => {
-    setSchoolValue(school.locationName);
-  }, [school?.locationName]);
+    setSchoolValue(school?.locationName || school?.Name);
+    setFieldValue(ID, school?.locationName || school?.Name || (noSchool ? 'School Not Found' : ''));
+  }, [school?.locationName, school?.Name]);
 
   return (
     <>

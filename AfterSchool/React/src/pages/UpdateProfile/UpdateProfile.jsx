@@ -36,12 +36,15 @@ export default function UpdateProfile() {
   const {
     msgs,
     loaded,
+    school,
     loading,
     questions,
     loadFormData,
     clearMessages,
+    RegistrantType,
     questionsGroups,
     answeredQuestions,
+    setSchoolFieldValue,
     submitFormSectionData
   } = useProfile();
 
@@ -101,9 +104,23 @@ export default function UpdateProfile() {
       if (dirty) {
         setSaveDisabled(true);
 
+        let [schoolLocationID, errors] = [null, null];
+        if (
+          Name === 'Student Information' &&
+          RegistrantType !== 'Adult' &&
+          !['', undefined].includes(school.locationName)
+        ) {
+          await setSchoolFieldValue({ school, noSchool: false }, true).then(({ obj, msgs }) => {
+            schoolLocationID = obj;
+            errors = msgs;
+          });
+          if (errors.length) return setSaveDisabled(false);
+        }
+
         await submitFormSectionData(
           formSectionSubmitObject(values, activeGroupId),
-          userUid
+          userUid,
+          schoolLocationID
         ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
       if (!msgs.length) {
@@ -159,7 +176,7 @@ export default function UpdateProfile() {
     switch (QuestionTypeId) {
       case questionType.text:
         return 'School' === currentQuestion.Text ? (
-          <SchoolField question={currentQuestion} formik={formik} />
+          <SchoolField question={currentQuestion} formik={formik} isUpdating={true} />
         ) : 'Street Address' === currentQuestion.Text ? (
           <ApiTextField
             question={currentQuestion}
