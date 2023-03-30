@@ -593,7 +593,7 @@ namespace AfterSchool.Controllers
                             if (registrant.IsParentOrGuardian)
                             {
                                 var studentReg = account.CreateParentOrStudentRegistrant(
-                                    registrantOwner: user,
+                                    registrantOwner: null,
                                     canBeAccessedBy: user.AsList(),
                                     registrantType: RegistrantType.Individual,
                                     isMaster: true,

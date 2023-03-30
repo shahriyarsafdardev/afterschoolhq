@@ -298,7 +298,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     (amsgs, adc) =>
                     {
                         studentReg = currentAccount.CreateParentOrStudentRegistrant(
-                            registrantOwner: currentUser,
+                            registrantOwner: null,
                             canBeAccessedBy: currentUser.AsList(),
                             registrantType: RegistrantType.Individual,
                             isMaster: true,
