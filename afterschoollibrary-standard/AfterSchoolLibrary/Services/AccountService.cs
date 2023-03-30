@@ -4866,8 +4866,8 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false,
-            int attendanceDaysToCharge = 0, DateTime? attendanceDate = null, string registrantName = "", SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, 
+            int attendanceDaysToCharge = 0, string attendanceDate = "", string registrantName = "", SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (

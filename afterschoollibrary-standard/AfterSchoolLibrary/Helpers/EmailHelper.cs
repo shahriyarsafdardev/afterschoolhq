@@ -1730,7 +1730,7 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
-        public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, DateTime? attendancesDate, string registrantName, 
+        public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, string attendancesDate, string registrantName, 
             int attendanceDaysToCharge, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
@@ -1738,7 +1738,7 @@ namespace AfterSchoolLibrary.Helpers
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount.GetAccountOwner();
             var billingAccount = checkoutObject.BillingAccount.GetAccountOwner();
-            var attendanceDate = attendancesDate?.ToLongDateString() ?? "today";
+            var attendanceDate = attendancesDate;
             var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
             var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
@@ -1751,7 +1751,7 @@ namespace AfterSchoolLibrary.Helpers
                 var chargeFeeModel = new NameValueCollection
                 {
                     {"Description", $"{participationObject.Name.ToProperCase()}"},
-                    {"Quantity", "1"},
+                    {"Quantity", attendanceDaysToCharge.ToString()},
                     {"Cost", totalCost.ToCurrency()},
                     {"AdditionalDetails", "Attendance-Based Charge"},
                 };

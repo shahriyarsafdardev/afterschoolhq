@@ -2779,8 +2779,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
 
                                 if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() &&
-                                    !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs) &&
-                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID) && attendanceRegistrant.NumberPresent > 0)
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
                         });
@@ -2997,7 +2996,8 @@ namespace AfterSchool.Areas.Org.Controllers
                             PostPayPlan = postPayPlan,
                         };
  
-                            
+                        var isEmailAlreadySent = false;
+
                             if (msgs.HasNoErrors())
                             raAttendances.ForEach(raAttendance =>
                             {
@@ -3006,16 +3006,27 @@ namespace AfterSchool.Areas.Org.Controllers
                                         registrantActivity.GetRegistrant(msgs).ID.Value,
                                         msgs)
                                     .FirstOrDefault();
-                                
-                                if(attendanceRegistrant != null && attendanceRegistrant.NumberPresent > 0)
+
+                                if (attendanceRegistrant != null && attendanceRegistrant.NumberPresent > 0 && !isEmailAlreadySent)
+                                {
+                                    var attendanceDateString = raAttendance.Date.ToLongDateString();
+                                    
+                                    for (var i = 1; i < raAttendances.Count; i++)
+                                    {
+                                        attendanceDateString += ", " + raAttendances[i].Date.ToLongDateString();
+                                    }
+                                        
                                     AccountService.ProcessPayment(
                                         checkoutObject,
                                         currentUser,
                                         true,
                                         attendanceDaysToCharge,
-                                        selectedAttendances.FirstOrDefault()?.Date,
+                                        attendanceDateString,
                                         registrantActivity.RegistrantName,
                                         msgs);
+                                    
+                                    isEmailAlreadySent = true;
+                                }
 
                                 // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
                                 if (attendanceRegistrant.IsNotEmpty()
