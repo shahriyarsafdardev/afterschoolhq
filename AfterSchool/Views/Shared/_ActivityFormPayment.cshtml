@@ -51,7 +51,7 @@
                     <label for="do-parents-pay-no">No</label>
                 </div>
                 <div class="am-radio inline">
-                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required/>
+                    <input type="radio" class="form-control" name="doparentspay" id="do-parents-pay-yes" required @(Model.IsFree ? "" : "checked=\"checked\"")/>
                     <label for="do-parents-pay-yes">Yes</label>
                 </div>
             </div>
