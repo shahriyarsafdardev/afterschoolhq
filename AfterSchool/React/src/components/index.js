@@ -6,3 +6,4 @@ export { default as TextField } from './TextField/TextField';
 export { default as ProgressBar } from './ProgressBar/ProgressBar';
 export { default as SchoolField } from './SchoolField/SchoolField';
 export { default as ApiTextField } from './ApiTextField/ApiTextField';
+export { default as ShowQuestion } from './ShowQuestion/ShowQuestion';

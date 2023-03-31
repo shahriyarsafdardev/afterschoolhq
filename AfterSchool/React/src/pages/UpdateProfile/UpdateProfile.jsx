@@ -5,33 +5,18 @@ import { useSearchParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
-import {
-  Loader,
-  CheckBox,
-  TextField,
-  SchoolField,
-  ProgressBar,
-  CheckBoxList,
-  ApiTextField
-} from 'components';
+import { Loader, ProgressBar, ShowQuestion } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
 import { useUser, useProfile } from 'redux/hooks/index';
-import questionType from 'constants/questionType';
-import apiRoutes from 'routes';
 import useStyles from './styles';
+import apiRoutes from 'routes';
 import utils from 'utils';
-import {
-  DateQuestion,
-  RadioQuestion,
-  TextAreaQuestion,
-  DropdownQuestion
-} from 'components/Questions';
 
 export default function UpdateProfile() {
   const classes = useStyles();
   const { loadUser } = useUser();
-  const { scrollToTop, redirect } = utils;
   const { familyUrl } = apiRoutes;
+  const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
@@ -170,41 +155,6 @@ export default function UpdateProfile() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
-  const showQuestion = currentQuestion => {
-    const { QuestionTypeId } = currentQuestion;
-
-    switch (QuestionTypeId) {
-      case questionType.text:
-        return 'School' === currentQuestion.Text ? (
-          <SchoolField question={currentQuestion} formik={formik} isUpdating={true} />
-        ) : 'Street Address' === currentQuestion.Text ? (
-          <ApiTextField
-            question={currentQuestion}
-            formik={formik}
-            currentQuestions={currentQuestions}
-          />
-        ) : (
-          <TextField question={currentQuestion} formik={formik} />
-        );
-      case questionType.email:
-        return <TextField question={currentQuestion} formik={formik} />;
-      case questionType.date:
-        return <DateQuestion question={currentQuestion} formik={formik} />;
-      case questionType.dropdown:
-        return <DropdownQuestion question={currentQuestion} formik={formik} />;
-      case questionType.radioList:
-        return <RadioQuestion question={currentQuestion} formik={formik} />;
-      case questionType.checkBoxList:
-        return <CheckBoxList question={currentQuestion} formik={formik} />;
-      case questionType.textArea:
-        return <TextAreaQuestion question={currentQuestion} formik={formik} />;
-      case questionType.checkBox:
-        return <CheckBox question={currentQuestion} formik={formik} />;
-      default:
-        return <TextField question={currentQuestion} formik={formik} />;
-    }
-  };
-
   return (
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
@@ -230,7 +180,14 @@ export default function UpdateProfile() {
                 </Typography>
                 <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
                   <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                    {currentQuestions?.map(question => showQuestion(question))}
+                    {currentQuestions?.map(question =>
+                      ShowQuestion({
+                        currentQuestion: question,
+                        formik,
+                        currentQuestions,
+                        isUpdating: true
+                      })
+                    )}
                   </Grid>
                 </Grid>
                 <Box className={classes.buttonOuterWrapper}>

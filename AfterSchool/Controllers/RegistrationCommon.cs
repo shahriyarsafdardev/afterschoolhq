@@ -419,7 +419,7 @@ namespace AfterSchool.Controllers
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,
                                     qvm.Question,
-                                    registration.ID,
+                                    registration?.ID,
                                     currentUser,
                                     msgs,
                                     dc);

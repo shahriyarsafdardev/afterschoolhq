@@ -55,6 +55,7 @@ export default class RegistrationService {
   formSectionSubmitObject = (values, activeGroupId) => {
     const filteredValues = Object.keys(values).filter(key => key !== 99999); //SchoolField value is removed from query string as it is being sent separately
     const [answerQuery, answers, keys, answerCompiled] = [{}, [], filteredValues, []];
+    const formData = new FormData();
 
     const getQuestionID = answer =>
       this.questions.find(
@@ -63,6 +64,9 @@ export default class RegistrationService {
 
     function addToAnswerQuery(ID, text) {
       answerQuery[`question-${ID}`] = text;
+    }
+    function addInFiles(ID, answer) {
+      formData.append(`question-${ID}`, answer.Text);
     }
 
     function composeAnswers(answer, ID) {
@@ -73,8 +77,13 @@ export default class RegistrationService {
       );
 
       if (answer && !alreadyAnswered) {
-        answers.push(answer);
-        addToAnswerQuery(ID, answer.Text);
+        if (answer.QuestionTypeId === questionType.fileUpload) {
+          addInFiles(ID, answer);
+          answers.push({ ...answer, Text: { name: answer.Text.name } });
+        } else {
+          addToAnswerQuery(ID, answer.Text);
+          answers.push(answer);
+        }
         answerCompiled.push(answer);
       }
     }
@@ -82,7 +91,7 @@ export default class RegistrationService {
     keys.forEach(key => composeAnswers(this.answerObject(key, values), key));
 
     this.answeredQuestions.forEach(answer => composeAnswers(answer, getQuestionID(answer)));
-    return { answers, answerQuery: { answerQuery, groupId: activeGroupId } };
+    return { answers, answerQuery: { answerQuery, groupId: activeGroupId }, formData };
   };
 
   saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) => {
@@ -120,6 +129,7 @@ export default class RegistrationService {
 
     return {
       QuestionDataTypeId: question.QuestionDataTypeId,
+      QuestionTypeId: question.QuestionTypeId,
       QuestionText: question.Text,
       Text: values[key]
     };

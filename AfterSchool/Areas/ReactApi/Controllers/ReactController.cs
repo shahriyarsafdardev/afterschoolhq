@@ -710,14 +710,25 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         }
                         
                         qvms.ForEach(qvm =>
-                        {                            
-                            currentRegistrant.AddOrUpdateAnswer(
-                                qvm.Value.IfEmpty("").Trim(),
-                                qvm.Question,
-                                currentUser,
-                                amsgs,
-                                adc);
+                        {
+                            if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
+                            {
+                                currentRegistrant.AddOrUpdateAnswer(
+                                    qvm.Value.IfEmpty("").Trim(),
+                                    qvm.Question,
+                                    currentUser,
+                                    amsgs,
+                                    adc);
+                            }
                         });
+                        
+                        RegistrationCommon.AddCustomQuestions(
+                            qvms,
+                            currentRegistrant,
+                            null,
+                            currentUser,
+                            Request,
+                            amsgs, adc);
 
                         if (json.groupid.ToInteger() == -1)
                         {
