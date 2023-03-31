@@ -14,7 +14,7 @@
         else
         {
             <span>
-                <strong>@((subscriptionPlan.CostPerPeriod - (Model.IsCheckoutCost ? 0 : Model.ParticipationObject.GetPostPayConvenienceFee())).ToCurrency())</strong>
+                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
                 every
                 <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
