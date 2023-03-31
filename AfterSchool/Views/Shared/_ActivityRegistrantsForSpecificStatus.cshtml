@@ -162,7 +162,7 @@
                                     <button type="button" class="btn btn-primary searchActivitiesBtn"
                                             onclick="showModal(@(activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"));
                                             setModalAttributes('@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()', 
-                                            '@ra.ParticipationObjectTypeId.ToString()')">
+                                            '@ra.ParticipationObjectTypeId.ToString()', '@ra.RegistrantName')">
                                         Re-Enroll
                                     </button>
                                 }
@@ -234,10 +234,32 @@
             </button>
             <h3 class="modal-title">Re-enrollment Confirmation</h3>
         </div>
-        <div id="modal-attributes" class="modal-body form text-center" data-ruid="" data-aid="" data-atype="">
-            <p>Taco Turner has previously paid <strong>$150.00</strong> for <strong>My First Business</strong>. Do you want to send a payment link for a
-                registration fee of <strong>$150.00</strong>?</p>
-            <br/>
+        <div id="modal-attributes" class="modal-body form text-center" data-ruid="" data-aid="" data-atype="" >
+            <p>
+                @{
+                    decimal costToDiplay = 0;
+                    var registrationSubscriptionText = "";
+                    var isRegFree = participationObject.IsRegistrationFree;
+                    if (!isRegFree)
+                    {
+                        costToDiplay = participationObject.Cost ?? 0;
+                        registrationSubscriptionText = $"a registration fee of <strong>{costToDiplay.ToCurrency()}</strong>";
+                    }
+                    if (activity.HasSubscriptionPlan())
+                    {
+                        var subscriptionPlan = activity.GetSubscriptionPlan();
+                        costToDiplay += subscriptionPlan.CostPerPeriod ?? 0;
+                        registrationSubscriptionText += 
+                            $"{(!isRegFree ? " plus a" : "a")} {subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()}ly " +
+                            $"subscription charge of <strong>{subscriptionPlan.CostPerPeriod.ToCurrency()}</strong>";
+                    }
+                    <span class="registrantName">Taco Turner</span>
+                    <span>
+                        has previously paid <strong>@costToDiplay.ToCurrency()</strong> for
+                        <strong>@participationObject.Name</strong>. Do you want to send a payment link for @Html.Raw(registrationSubscriptionText)?
+                    </span>
+                }
+            </p>
             <p class="fontSize12"><strong>NOTE:</strong> Refunds will not happen automatically and can be handled via the Accounting page.</p>
         </div>
         <div class="modal-footer textCenterImportant">
@@ -255,7 +277,7 @@
             <h3 class="modal-title">Re-enrollment Confirmation</h3>
         </div>
         <div class="modal-body form text-center">
-            <p>Do you want to re-enroll Taco Turner in <strong>My First Business</strong>.</p>
+            <p>Do you want to re-enroll <span class="registrantName">Taco Turner</span> in <strong>@participationObject.Name</strong>.</p>
         </div>
         <div class="modal-footer textCenterImportant">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -304,15 +326,15 @@
             }
         });
     }
-    function setModalAttributes(ruid,aid,atype)
+    function setModalAttributes(ruid,aid,atype,rname)
     {
+        $(".registrantName").html(rname);
         $("#modal-attributes").attr('data-ruid',ruid);
         $("#modal-attributes").attr('data-aid',aid);
-        $("#modal-attributes").attr('data-atype',atype);
+        $("#modal-attributes").attr('data-atype',atype);    
     }
     function showModal(modal)
     {
-       
        $(modal).modal('show');
     }
     function displayResponse(data, isError)
