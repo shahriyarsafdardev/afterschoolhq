@@ -129,7 +129,6 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             var sql = $@"select * from VolunteerApproval va
-                         inner join  backgroundcheck bg on bg.webuserid = va.webuserid
                          where DATEDIFF(day, GETDATE(), CONVERT(DATE, va.ExpirationDate)) <= 30 and va.IsActive = 1";
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
