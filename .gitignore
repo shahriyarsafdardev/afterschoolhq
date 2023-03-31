@@ -61,3 +61,4 @@ Thumbs.db
 *.user
 node_modules
 dist
+.env
