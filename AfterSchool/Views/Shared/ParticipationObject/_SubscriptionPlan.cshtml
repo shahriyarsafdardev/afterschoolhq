@@ -1,12 +1,11 @@
-@model ParticipationObjectViewModel
+﻿@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.First();
     <span>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
-            var isActivityLeader = (bool) (ViewData["isActivityLeader"] ?? false);
-            if (!isActivityLeader)
+            if (Model.IsCheckoutCost)
             {
                 <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today </span>
             }
@@ -15,7 +14,7 @@
         else
         {
             <span>
-                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
+                <strong>@((subscriptionPlan.CostPerPeriod - (Model.IsCheckoutCost ? 0 : Model.ParticipationObject.GetPostPayConvenienceFee())).ToCurrency())</strong>
                 every
                 <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
