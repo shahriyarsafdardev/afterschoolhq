@@ -1244,18 +1244,22 @@ namespace AfterSchoolLibrary.Services
             {
                 if ((registrationId.HasValue || registrant.IsMaster) && questionId.HasValue && registrant.ID.HasValue)
                     if (registrant.IsMaster)
+                    {
                         answer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(
                             RegistrantId: registrant.ID.Value,
                             FormQuestionId: questionId.Value,
                             msgs: msgs,
                             dc: dc);
+                    }
                     else
+                    {
                         answer = FormQuestionAnswer.LoadByRegistrantIdByFormQuestionIdByRegistrationId(
                             RegistrantId: registrant.ID.Value,
                             FormQuestionId: questionId.Value,
                             RegistrationId: registrationId.Value,
                             msgs: msgs,
                             dc: dc);
+                    }
                     
             }
             else
