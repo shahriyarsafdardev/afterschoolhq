@@ -301,6 +301,7 @@ namespace AfterSchool.Areas.District.Controllers
                                 reason,
                                 expirationDate,
                                 currentUser,
+                                DateTime.UtcNow,
                                 amsgs,adc
                             );
                         }

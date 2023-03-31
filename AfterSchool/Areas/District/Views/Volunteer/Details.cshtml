@@ -77,7 +77,7 @@
                         </div>
 
                         <div class="col-lg-2 pull-right" onchange="volunteerStatusChange()">
-                            <select name="type" id="type" class="form-control" @(backgroundCheck.BackgroundCheckResultId == SterlingBackgroundCheckResult.Pending ? "disabled" : "")>
+                            <select name="type" id="type" class="form-control" @(backgroundCheck?.BackgroundCheckResultId == SterlingBackgroundCheckResult.Pending ? "disabled" : "")>
                                 @foreach (var status in Enum.GetValues(typeof(ApprovalStatus)).Cast<ApprovalStatus>().Except(ApprovalStatus.Requested.AsList()).Except(ApprovalStatus.All.AsList()))
                                 {
                                     <option @(status == type ? "selected" : "") value="@((int) status)">

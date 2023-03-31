@@ -15,6 +15,7 @@ namespace AfterSchool.Areas.District.Models
         public int? VolunteerApprovalId { get; set; }
         public ApprovalStatus ApprovalStatus { get; set; }
         public DateTime? ExpirationDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
     }
     public class VolunteerAssembler
     {
@@ -30,7 +31,8 @@ namespace AfterSchool.Areas.District.Models
                 Phone = registrant.Phone,
                 Email = registrant.Email,
                 ApprovalStatus = volunteerApproval.IsNotEmpty() ? volunteerApproval.ApprovalStatusId : ApprovalStatus.NotSet,
-                ExpirationDate = volunteerApproval?.ExpirationDate
+                ExpirationDate = volunteerApproval?.ExpirationDate,
+                CreatedDate = volunteerApproval?.CreateDate
             };
         }
     }

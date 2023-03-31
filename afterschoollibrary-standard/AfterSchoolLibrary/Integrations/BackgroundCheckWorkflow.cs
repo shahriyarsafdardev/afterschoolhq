@@ -122,6 +122,8 @@ namespace AfterSchoolLibrary.Integrations
 
                         if (candidateId.IsEmpty() && backgroundCheck.IsEmpty())
                         {
+                            candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
+                            
                             var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
                             
                             var newBackgroundCheck = new BackgroundCheck
@@ -142,8 +144,8 @@ namespace AfterSchoolLibrary.Integrations
                             if (msgs.HasNoErrors())
                                 msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
                             
-                            if(msgs.HasNoErrors())
-                                EmailHelper.InitiateBackgroundCheckMail(webUser, null, backgroundCheckUrl, msgs);
+                            // if(msgs.HasNoErrors())
+                            //     EmailHelper.InitiateBackgroundCheckMail(webUser, null, backgroundCheckUrl, msgs);
                         }
                         
                     }
