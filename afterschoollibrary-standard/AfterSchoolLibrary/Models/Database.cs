@@ -1303,6 +1303,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230214_IncreaseActivityVirtualLocationInfoColumnSize.Do(amsgs, adc);
             Migration_20230215_UpdateActivityIsFeaturedColumn.Do(amsgs, adc);
             Migration_20230327_AddDefaultStudentForm.Do(amsgs,adc);
+            Migration_20230403_DefaultStudentFormMiddleNameStudentId.Do(amsgs,adc);
         }
 
         public static DatabaseConnection StartTransaction()
