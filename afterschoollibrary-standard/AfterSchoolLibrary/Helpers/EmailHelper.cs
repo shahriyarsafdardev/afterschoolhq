@@ -1400,6 +1400,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccountOwner = billingAccount.GetAccountOwner();
             var registration = ra.GetRegistration();
             var registrantName = ra.RegistrantName;
+            var registrantEmail = ra.RegistrantEmail;
 
             var model = new NameValueCollection
             {
@@ -1427,13 +1428,16 @@ namespace AfterSchoolLibrary.Helpers
             // SEND EMAILS
             var mailMsgs = new SystemMessages();
 
-            // Send email to registerer
-            mailMsgs.AddRange(SendGridHelper.SendMail(
+            // Send emails to student and parent if have different emails
+            var emails = new List<string>() {purchaser.Email};
+            if(!emails.Contains(registrantEmail) && registrantEmail.IsNotEmpty()) emails.Add(registrantEmail);
+            
+            emails.ForEach(email => mailMsgs.AddRange(SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(purchaser.Email),
+                new EmailAddress(email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool))));
 
             // Send email to provider as cc
             mailMsgs.AddRange(SendGridHelper.SendMail(
