@@ -1263,12 +1263,12 @@ namespace AfterSchoolLibrary.Services
             qhs.Add(new QuestionHolder
             {
                 Text = "Middle Name",
-                IsActive = true,
+                IsActive = false,
                 IsRequired = false,
                 QuestionTypeId = QuestionType.TextBox,
                 QuestionGroupDataTypeId = groupType,
                 GroupName = groupLabel,
-                IsLocked = true,
+                IsLocked = false,
                 QuestionDataTypeId = QuestionDataType.RegistrantMiddleName,
             });
             qhs.Add(new QuestionHolder
@@ -1411,6 +1411,7 @@ namespace AfterSchoolLibrary.Services
                 GroupName = groupLabel,
                 QuestionGroupDataTypeId = groupType,
                 QuestionDataTypeId = QuestionDataType.StudentId,
+                IsLocked = false
             });
 
             return qhs;
