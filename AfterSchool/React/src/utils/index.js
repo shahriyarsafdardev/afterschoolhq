@@ -1,4 +1,5 @@
 export default {
+  pathWithOrigin: path => `${window.location.origin}${path}`,
   navigateTo: path => {
     window.location.href = path;
   },
