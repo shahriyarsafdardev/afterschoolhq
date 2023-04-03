@@ -4088,20 +4088,40 @@ namespace AfterSchool.Areas.Org.Controllers
             period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
             participationObject = activity.GetParticipationObject(amsgs, adc);
 
-            user = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
-                null,
-                volunteerFirstName,
-                volunteerLastName,
-                volunteerEmail,
-                phone.IsPhone() ? phone : "",
-                Guid.NewGuid().ToString().MaxChars(8), //setting temp password
-                true,
-                amsgs,
-                adc);
+            bool isAlreadyRegistered = WebUser.ExistsByEmail(volunteerEmail, amsgs, adc);
 
-            if (amsgs.HasNoErrors() && user.IsNotEmpty())
+            if (isAlreadyRegistered)
             {
-                account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
+                user = WebUser.LoadByEmail(volunteerEmail, amsgs, adc);
+                
+                if(amsgs.HasNoErrors() && user.IsNotEmpty())
+                    account = user.GetVolunteerAccount(amsgs, adc);
+
+                if (amsgs.HasNoErrors() && account.IsEmpty())
+                    account = user.AddNewVolunteerAccount(
+                        UserType.Owner,
+                        true,
+                        user,
+                        amsgs,
+                        adc);
+            }
+            else
+            {
+                user = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                    null,
+                    volunteerFirstName,
+                    volunteerLastName,
+                    volunteerEmail,
+                    phone.IsPhone() ? phone : "",
+                    Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+                    true,
+                    amsgs,
+                    adc);
+
+                if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                {
+                    account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
+                }
             }
 
             if (amsgs.HasNoErrors())
