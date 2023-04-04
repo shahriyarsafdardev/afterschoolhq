@@ -20,8 +20,12 @@ function Router() {
       element: <Wrapper />,
       children: [
         {
-          path: 'reactapp',
+          path: 'reactapp/registration/:accountName/:activityName/:regUid',
           element: <Home />
+        },
+        {
+          path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
+          element: <Home newChild={true} />
         },
         {
           path: 'reactapp/registration/thankyou/:registrationId',
