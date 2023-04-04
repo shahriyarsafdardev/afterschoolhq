@@ -445,6 +445,10 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
+            
+            WebUser user = null;
+            Account account = null;
+            Registrant registrant = null;
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -527,10 +531,6 @@ namespace AfterSchool.Controllers
 
                 if (phone.Value.IsEmpty())
                     textnotifications = "";
-
-                WebUser user = null;
-                Account account = null;
-                Registrant registrant = null;
 
                 Database.ExecuteTransaction
                 (
@@ -621,7 +621,7 @@ namespace AfterSchool.Controllers
             }
             
             if(msgs.HasNoErrors())
-                return Redirect("~/ReactApp");
+                return Redirect($"~/ReactApp/{registrant.ID.Value}");
             
             Account registrationAccount = null;
             
