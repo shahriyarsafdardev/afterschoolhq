@@ -5,8 +5,7 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
   const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
   const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44 };
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive, QuestionDataTypeId }) => {
-    if ((IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth)||
-        (IsGradeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.grade))
+    if (IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth)
       return true;
 
     return !(IsDeleted || !IsActive);
@@ -18,7 +17,7 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
     const gradeIndex = sectionQuestions.findIndex(q => q.QuestionDataTypeId === questionDataTypeId);
     if (gradeIndex !== -1) {
       sectionQuestions[gradeIndex].IsRequired = true;
-      if (Object.values(restrictedQuestionsDataTypeIds).includes(questionDataTypeId))
+      if (questionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth)
         sectionQuestions[gradeIndex].IsActive = true;
     }
   };
