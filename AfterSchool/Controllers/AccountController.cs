@@ -621,7 +621,7 @@ namespace AfterSchool.Controllers
             }
             
             if(msgs.HasNoErrors())
-                return Redirect($"~/ReactApp/{registrant.ID.Value}");
+                return Redirect($"~/ReactApp/registration/{participationObject.UniqueName}/{participationObject.GetActivity().UniqueName}/{registrant.Uid}");
             
             Account registrationAccount = null;
             
