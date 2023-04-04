@@ -2,6 +2,7 @@ export default {
   RegisterAPI: 'ReactApi/React/Register',
   getFormDataAPI: 'ReactApi/React/GetForm',
   currentUserAPI: 'ReactApi/React/GetCurrentUser',
+  ThankYouAPI: id => `ReactApi/React/ThankYou/${id}`,
   submitFormDataAPI: 'ReactApi/React/AddUpdateAnswers',
   SchoolAPI: 'ReactApi/React/CreateOrUpdateFromGoogle',
   updateProfileFormDataAPI: 'ReactApi/React/UpdateProfile',

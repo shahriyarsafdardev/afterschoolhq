@@ -1,28 +1,26 @@
 import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
 import { Loader, ProgressBar, ShowQuestion } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
-import { useUser, useRegistration } from 'redux/hooks/index';
-import { ThankYouSection } from 'sections';
+import { useRegistration } from 'redux/hooks/index';
 import useStyles from './styles';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
 export default function Home() {
   const classes = useStyles();
-  const { loadUser } = useUser();
+  const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouScreenPath } = apiRoutes;
+  const { paymentScreenPath } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
     school,
-    loaded,
     loading,
     questions,
     loadFormData,
@@ -39,7 +37,6 @@ export default function Home() {
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
-  const [showThankYou, setShowThankYou] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
@@ -86,11 +83,9 @@ export default function Home() {
 
   const handleRedirection = () => {
     if (IsFree) {
-      //   loaded();
-      //   setShowThankYou(true);
-      //   setSearchParams('screen=ThankYou');
-      // TODO: Turned off ReactApp ThankYou page for now.
-      redirect(thankyouScreenPath(registrationId));
+      const thankyouUrl = `/reactapp/registration/thankyou/${registrationId}`;
+      window.history.pushState(null, '', thankyouUrl);
+      navigate(thankyouUrl);
     } else redirect(paymentScreenPath(registrationId));
   };
 
@@ -157,12 +152,7 @@ export default function Home() {
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
-        // if (showThankYou) setShowThankYou(false); //TODO: Turned off ReactApp ThankYou page for now.
-      } else {
-        // if (searchParams.get('screen')) setShowThankYou(true); //TODO: Turned off ReactApp ThankYou page for now.
-        // else
-        setSearchParams(paramsQuery);
-      }
+      } else setSearchParams(paramsQuery);
     }
   }, [questions.length, searchParams.get('section')]);
 
@@ -180,8 +170,6 @@ export default function Home() {
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
         {loading ? (
           <Loader />
-        ) : showThankYou ? (
-          <ThankYouSection />
         ) : (
           <Box className={classes.outerWrapper}>
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />

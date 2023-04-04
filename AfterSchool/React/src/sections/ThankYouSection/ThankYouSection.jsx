@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Link, Typography, Icon } from '@material-ui/core';
 
 import utils from 'utils';
-import useStyles from './styles';
 import apiRoutes from 'routes';
+import useStyles from './styles';
+import { useThankYou } from 'redux/hooks';
 import ShareButton from 'components/ShareButton';
-import { useUser, useRegistration } from 'redux/hooks';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 
 function ThankYouSection() {
@@ -17,46 +17,19 @@ function ThankYouSection() {
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
   const {
-    user: { firstName }
-  } = useUser();
-
-  const {
-    questions,
-    answeredQuestions,
-    activity: {
-      ActivityUrl: activityUrl,
-      RegistrantType,
-      Name: activityName,
-      FindAnotherActivityUrl: findAnotherActivityUrl
-    }
-  } = useRegistration();
-
-  const getFirstName = () => {
-    if (RegistrantType !== 'Parent') return firstName;
-
-    const question = questions.filter(
-      question =>
-        question.FormQuestionGroupQuestionGroupDataTypeId === 2 &&
-        question.GroupTitle === 'Student Information' &&
-        question.QuestionDataTypeId === 1
-    )[0];
-
-    const submittedAnswer = (id, text) => {
-      const answer =
-        answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)?.Text ||
-        '';
-      return answer === 'null' ? '' : answer;
-    };
-
-    return submittedAnswer(question.QuestionDataTypeId, question.Text);
-  };
+    data: {
+      isParent,
+      ActivityUrl,
+      ActivityName,
+      RegistrantFirstName,
+      FindAnotherActivityUrl,
+      RegisterForNewChildUrl
+    },
+    loadThankYouScreenData
+  } = useThankYou();
 
   useEffect(() => {
-    //Restrict user not to go back
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function() {
-      window.history.pushState(null, '', window.location.href);
-    };
+    loadThankYouScreenData(window.location.pathname.split('/')[4]);
   }, []);
 
   const copyToClipBoard = async copyMe => {
@@ -71,7 +44,7 @@ function ThankYouSection() {
   };
 
   const CopyButton = () => (
-    <Box onClick={() => copyToClipBoard(activityUrl)} className={classes.shareBox} title="Copy URL">
+    <Box onClick={() => copyToClipBoard(ActivityUrl)} className={classes.shareBox} title="Copy URL">
       <Icon className={classes.icon}>
         <img className={classes.icon} src={CopyUrlIcon} />
       </Icon>
@@ -81,7 +54,7 @@ function ThankYouSection() {
 
   const ShareButtons = () =>
     ['Facebook', 'Twitter'].map(site => (
-      <ShareButton key={site} site={site} activityName={activityName} activityUrl={activityUrl} />
+      <ShareButton key={site} site={site} activityName={ActivityName} activityUrl={ActivityUrl} />
     ));
 
   return (
@@ -89,14 +62,14 @@ function ThankYouSection() {
       <Box className={classes.thankYouWrapper}>
         <Typography variant="h4">Thank You!</Typography>
         <Typography variant="body1">
-          <b>{getFirstName()}</b> has been registered for <b>{activityName}</b>
+          <b>{RegistrantFirstName}</b> has been registered for <b>{ActivityName}</b>
         </Typography>
         <Box>
           <Button
             color="primary"
             variant="outlined"
             className={classes.anotherActivityButton}
-            onClick={() => navigateTo(findAnotherActivityUrl)}
+            onClick={() => navigateTo(FindAnotherActivityUrl)}
           >
             Find Another Activity
           </Button>
@@ -111,15 +84,15 @@ function ThankYouSection() {
           </Button>
         </Box>
 
-        {RegistrantType === 'Parent' && (
-          <Link href={registerForNewChildUrl} className={classes.link} variant="body1">
+        {isParent && (
+          <Link href={RegisterForNewChildUrl} className={classes.link} variant="body1">
             Register for New Child
           </Link>
         )}
       </Box>
       <Box className={classes.shareBoxesWrapper}>
         <Typography variant="body1" style={{ padding: '0px 10px' }}>
-          Share <b>{activityName}</b> with your friends and family via link, Twitter, or Facebook!
+          Share <b>{ActivityName}</b> with your friends and family via link, Twitter, or Facebook!
         </Typography>
         <Box className={classes.ShareButtonsWrapper}>
           <CopyButton />

@@ -10,6 +10,7 @@ import loadZendeskWidget from 'utils/loadZendeskWidget';
 import RollbarConfig from 'configs/rollbarConfigs';
 import Home from './pages/registration/Home';
 import Wrapper from 'pages/Wrapper/Wrapper';
+import { ThankYouSection } from 'sections';
 import InitAnalytics from 'analytics';
 import theme from './theme/theme';
 import utils from 'utils';
@@ -25,6 +26,10 @@ function App() {
           {
             path: 'reactapp',
             element: <Home />
+          },
+          {
+            path: 'reactapp/registration/thankyou/:registrationId',
+            element: <ThankYouSection />
           }
         ]
       },
