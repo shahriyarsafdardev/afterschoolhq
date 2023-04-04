@@ -3562,23 +3562,40 @@ namespace AfterSchool.Areas.Org.Controllers
 
                             if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                             {
-                                WebUser user = null;
-                                Account account = null;
-                                Registrant registrant = null;
-                                Registration registration = null;
-                                Registrant submittedRecord = null;
-                                RegistrationPeriod period = null;
-                                ParticipationObject participationObject = null;
+                                if (reader.GetField<String>(headers.IndexOf("Import Data - Volunteer Status")).Contains("Approved"))
+                                {
+                                    WebUser user = null;
+                                    Account account = null;
+                                    Registrant registrant = null;
+                                    Registration registration = null;
+                                    Registrant submittedRecord = null;
+                                    RegistrationPeriod period = null;
+                                    ParticipationObject participationObject = null;
 
-                                if (!CreateVolunteerAndLoadDataDuringImport(ref registrant,ref registration,ref account,ref user, activity, headers, questions, rows, reader,
-                                        ref participationObject,ref submittedRecord,ref period, currentUser, amsgs, adc))
-                                    continue;
+                                    if (!CreateVolunteerAndLoadDataDuringImport(ref registrant,ref registration,ref account,ref user, activity, headers, questions, rows, reader,
+                                            ref participationObject,ref submittedRecord,ref period, currentUser, amsgs, adc))
+                                        continue;
 
-                                SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
-                                
-                                CompleteVolunteerRegistration(account, user, registrant, ref registration, ref submittedRecord,
-                                    period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
-                                
+                                    SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
+                                    
+                                    CompleteVolunteerRegistration(account, user, registrant, ref registration, ref submittedRecord,
+                                        period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
+
+                                    if (amsgs.HasNoErrors())
+                                    {
+                                        var approvalDate = reader.GetField<DateTime>(headers.IndexOf("Import Data - Date Reviewed"));
+                                        
+                                        VolunteerApprovalService.CreateNewApproval(user.ID.Value,
+                                            currentAccount.FiscalAccountId,
+                                            ApprovalStatus.Approved,
+                                            "Approved",
+                                            approvalDate.AddYears(1),
+                                            currentUser,
+                                            approvalDate,
+                                            amsgs,adc
+                                        );
+                                    }
+                                }
                             }
                             else
                             {

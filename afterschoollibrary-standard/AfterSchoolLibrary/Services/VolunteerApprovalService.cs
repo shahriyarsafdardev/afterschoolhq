@@ -7,8 +7,8 @@ namespace AfterSchoolLibrary.Services
 {
     public class VolunteerApprovalService
     {
-        public static VolunteerApproval CreateNewApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate ,WebUser loggedInUser ,SystemMessages msgs,
-            DatabaseConnection dc = null)
+        public static VolunteerApproval CreateNewApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate 
+            ,WebUser loggedInUser, DateTime CreateDate, SystemMessages msgs, DatabaseConnection dc = null)
         {
 
             var previousApproval = VolunteerApproval.LoadByWebUserId((int) webUserId, msgs, dc);
@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Services
             volunteerApproval.ApprovalStatusId = approvalStatus;
             volunteerApproval.Reason = reason;
             volunteerApproval.ExpirationDate = expirationDate;
-            volunteerApproval.CreateDate = DateTime.UtcNow;
+            volunteerApproval.CreateDate = CreateDate;
             volunteerApproval.CreatedBy = loggedInUser?.ID;
             volunteerApproval.LastModifiedBy = loggedInUser?.ID;
             volunteerApproval.LastModifiedDate = DateTime.UtcNow;
