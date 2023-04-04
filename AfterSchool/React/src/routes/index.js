@@ -1,12 +1,14 @@
 export default {
   RegisterAPI: 'ReactApi/React/Register',
-  getFormDataAPI: 'ReactApi/React/GetForm',
+  getFormDataAPI: (accountName, activityName, registrantUid) =>
+    `ReactApi/React/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   currentUserAPI: 'ReactApi/React/GetCurrentUser',
   ThankYouAPI: id => `ReactApi/React/ThankYou/${id}`,
   submitFormDataAPI: 'ReactApi/React/AddUpdateAnswers',
   SchoolAPI: 'ReactApi/React/CreateOrUpdateFromGoogle',
   updateProfileFormDataAPI: 'ReactApi/React/UpdateProfile',
-  getNewChildFormDataAPI: 'ReactApi/React/GetNewChildForm',
+  getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
+    `ReactApi/React/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getProfileFormDataAPI: id => `ReactApi/React/GetRegistrantForm/${id}`,
 
   paymentScreenPath: uId => `/account/payment/${uId}`,

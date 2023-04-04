@@ -79,9 +79,14 @@ export const useRegistrationActions = () => {
 
   const loaded = () => dispatch(formDataLoaded());
 
-  const loadFormData = async (newChild = '0') => {
+  const loadFormData = async (newChild = false, accountName, activityName, registrantUid) => {
     dispatch(loadingFormData());
-    await RegistrationRepository.getFormData(newChild).then(({ obj, msgs }) => {
+    await RegistrationRepository.getFormData(
+      newChild,
+      accountName,
+      activityName,
+      registrantUid
+    ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());

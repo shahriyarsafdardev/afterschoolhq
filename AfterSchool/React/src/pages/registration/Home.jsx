@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import cs from 'classnames';
 
@@ -12,7 +12,7 @@ import useStyles from './styles';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
-export default function Home() {
+export default function Home({ newChild = false }) {
   const classes = useStyles();
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
@@ -38,6 +38,7 @@ export default function Home() {
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { accountName, activityName, regUid } = useParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
   const registrationService = new RegistrationService(
@@ -53,12 +54,7 @@ export default function Home() {
     formSectionSubmitObject
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) => {
-    const newChild = searchParams.get('newChild');
-    let paramsQuery = `section=${questionsGroups[index].Name}`;
-    if (newChild) paramsQuery += `&newChild=${newChild}`;
-    return paramsQuery;
-  };
+  const buildQueryParams = (index = activeGroup) => `section=${questionsGroups[index].Name}`;
 
   const handleSection = action => {
     if (action === 'next') {
@@ -117,7 +113,7 @@ export default function Home() {
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
-          searchParams.get('newChild')
+          newChild ? 1 : 0
         ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
       if (!lastSection && !msgs.length) {
@@ -126,14 +122,13 @@ export default function Home() {
       } else setSaveDisabled(false);
     }
   });
-
   const { handleSubmit, dirty, values } = formik;
   const isEmpty = !Object.values(values).some(x => x !== '');
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(searchParams.get('newChild'));
-  }, [searchParams.get('newChild')]);
+    loadFormData(newChild, accountName, activityName, regUid);
+  }, [newChild, accountName, activityName]);
 
   useEffect(() => {
     if (questionsGroups.length)

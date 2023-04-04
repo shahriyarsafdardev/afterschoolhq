@@ -20,8 +20,16 @@ function Router() {
       element: <Wrapper />,
       children: [
         {
-          path: 'reactapp',
+          path: 'reactapp/registration/:accountName/:activityName/:regUid',
           element: <Home />
+        },
+        {
+          path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
+          element: <Home newChild={true} />
+        },
+        {
+          path: 'reactapp/registration/thankyou/:registrationId',
+          element: <ThankYouSection />
         }
       ]
     },
@@ -45,5 +53,6 @@ const RedirectToExternal = () => {
 const Home = Loadable(lazy(() => import('pages/registration/Home')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
+const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 
 export default Router;
