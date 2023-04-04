@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult GetForm(int registrantId)
+        public ActionResult GetForm(string accountName, string activityName, string registrantUid)
         {
             var msgs = new SystemMessages();
             try
@@ -59,13 +59,15 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized User");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
                 Registrant parentRegistrant = null;
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
                                 
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var participationObject = activity.GetParticipationObject(msgs);
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
