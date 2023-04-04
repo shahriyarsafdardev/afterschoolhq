@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult GetForm(int? id)
+        public ActionResult GetForm(int registrantId)
         {
             var msgs = new SystemMessages();
             try
