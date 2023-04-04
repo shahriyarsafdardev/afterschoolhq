@@ -11,31 +11,27 @@
             }
             <span>plus</span>
         }
-        else
+        <span>
+        <strong>@((subscriptionPlan.CostPerPeriod - (Model.IsCheckoutCost ? 0 :
+                    subscriptionPlan.GetConvenienceFee(Model.ParticipationObject.OwnerAccount))).ToCurrency())</strong>
+        every
+        <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+
+        @if (subscriptionPlan.StartDate.HasValue)
         {
-            <span>
-                <strong>@((subscriptionPlan.CostPerPeriod - (Model.IsCheckoutCost ? 0 :
-                            subscriptionPlan.GetConvenienceFee(Model.ParticipationObject.OwnerAccount))).ToCurrency())</strong>
-                every
-                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
-
-                @if (subscriptionPlan.StartDate.HasValue)
-                {
-                    <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
-                }
-
-                @if (subscriptionPlan.EndDate.HasValue)
-                {
-                    if (subscriptionPlan.StartDate.HasValue)
-                    {
-                        <span> and </span>
-                    }
-
-                    <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
-                }
-
-            </span>
+            <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
         }
+
+        @if (subscriptionPlan.EndDate.HasValue)
+        {
+            if (subscriptionPlan.StartDate.HasValue)
+            {
+                <span> and </span>
+            }
+
+            <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
+        }
+        </span>
 
         @if (subscriptionPlan.RegFeeAsDownPayment && !Model.ParticipationObject.IsRegistrationFree)
         {
