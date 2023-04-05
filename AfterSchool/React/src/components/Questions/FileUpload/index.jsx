@@ -4,7 +4,7 @@ import { Button, Typography, Box, FormHelperText } from '@material-ui/core';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB in bytes
 
 const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequired } }) => {
   const classes = useStyles();
@@ -62,7 +62,7 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
       {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
         <Box className={classes.flexCenter}>
           <FormHelperText className={classes.maxWidth} error>
-            {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
+            {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 20MB' : errors[ID]}
           </FormHelperText>
         </Box>
       )}
