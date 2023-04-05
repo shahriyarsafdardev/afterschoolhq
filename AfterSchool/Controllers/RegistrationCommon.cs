@@ -424,7 +424,7 @@ namespace AfterSchool.Controllers
                                     msgs,
                                     dc);
                             else
-                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                                msgs.Add("Upload a file less than or equal to 20 megabytes", MessageType.UserError);
                         }
                     }
                     else
