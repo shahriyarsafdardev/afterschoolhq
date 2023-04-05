@@ -449,6 +449,7 @@ namespace AfterSchool.Controllers
             WebUser user = null;
             Account account = null;
             Registrant registrant = null;
+            Registrant studentReg = null;
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -592,7 +593,7 @@ namespace AfterSchool.Controllers
 
                             if (registrant.IsParentOrGuardian)
                             {
-                                var studentReg = account.CreateParentOrStudentRegistrant(
+                                studentReg = account.CreateParentOrStudentRegistrant(
                                     registrantOwner: null,
                                     canBeAccessedBy: user.AsList(),
                                     registrantType: RegistrantType.Individual,
@@ -621,7 +622,7 @@ namespace AfterSchool.Controllers
             }
             
             if(msgs.HasNoErrors())
-                return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{registrant.Uid}");
+                return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrantPersonType == RegistrantPersonType.Parent ? studentReg.Uid : registrant.Uid)}");
             
             Account registrationAccount = null;
             
