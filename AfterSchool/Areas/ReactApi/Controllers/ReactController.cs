@@ -146,7 +146,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
-                        IsGenderRestricted = participationObject.IsGenderEnforced
+                        IsGenderRestricted = participationObject.IsGenderEnforced,
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false
                     }
                 };
                 
