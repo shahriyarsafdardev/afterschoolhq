@@ -145,7 +145,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false)
+                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false
                     }
                 };
                 
