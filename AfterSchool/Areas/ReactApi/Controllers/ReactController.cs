@@ -417,7 +417,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsFree = participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent,
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false)
+                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false
                     }
                 };
                 
