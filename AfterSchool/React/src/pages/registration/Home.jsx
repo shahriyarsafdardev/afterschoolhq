@@ -80,7 +80,6 @@ export default function Home({ newChild = false }) {
   const handleRedirection = () => {
     if (IsFree) {
       const thankyouUrl = `/reactapp/registration/thankyou/${registrationId}`;
-      window.history.pushState(null, '', thankyouUrl);
       navigate(thankyouUrl);
     } else redirect(paymentScreenPath(registrationId));
   };
@@ -113,7 +112,10 @@ export default function Home({ newChild = false }) {
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
-          newChild ? 1 : 0
+          newChild ? 1 : 0,
+          accountName,
+          activityName,
+          regUid
         ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
       if (!lastSection && !msgs.length) {

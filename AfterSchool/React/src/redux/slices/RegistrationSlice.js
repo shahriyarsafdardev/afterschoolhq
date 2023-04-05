@@ -1,3 +1,5 @@
+import utils from 'utils';
+import Routes from 'routes';
 import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
@@ -30,6 +32,8 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
+      if (activityDto.RegistrationIsCompleted) return utils.navigateTo(Routes.accountUrl);
+
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
@@ -90,7 +94,7 @@ export const useRegistrationActions = () => {
     ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
-      if (!msgs.length) dispatch(formDataLoaded());
+      if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) dispatch(formDataLoaded());
     });
   };
 
@@ -98,12 +102,18 @@ export const useRegistrationActions = () => {
     { answers, answerQuery, formData },
     lastSection,
     schoolLocationID,
-    newChild
+    newChild,
+    accountName,
+    activityName,
+    regUid
   ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
-    formData.append('newChild', newChild);
     formData.append('groupId', groupId);
+    formData.append('newChild', newChild);
+    formData.append('registrantUid', regUid);
+    formData.append('accountName', accountName);
+    formData.append('activityName', activityName);
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
