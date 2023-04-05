@@ -2137,13 +2137,12 @@ namespace AfterSchool.Controllers
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
-            var hasWithdrawn = currentRegistrant.HasWithdrawn(participationObject, msgs);
 
-            // Sophie is gonna make designs for this
-            // Condition initially which was here: registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn
-            
-            /*if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
-                return RedirectToAction("thankyou", new {id = registration.Uid});*/
+            if (currentRegistrant.HasWithdrawn(participationObject, msgs))
+            {
+                ViewBag.ProviderEmail = participationObject.OwnerAccount.Email;
+                return View("AlreadyWithdrawn");
+            }
 
             if (msgs.HasErrors())
                 return View("Payment");

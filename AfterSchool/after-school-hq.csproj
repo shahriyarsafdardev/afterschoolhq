@@ -1539,6 +1539,7 @@
     <Content Include="tos.html" />
     <Content Include="UnsupportedBrowser.html" />
     <Content Include="404.html" />
+    <Content Include="Views\Account\AlreadyWithdrawn.cshtml" />
     <Content Include="Views\Account\GetStartedAllAge.cshtml" />
     <Content Include="Views\VolunteerRegistration\BackgroundCheck.cshtml" />
     <Content Include="wooten-center.html" />
