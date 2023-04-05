@@ -322,6 +322,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         smsgs =>
                         {
                             msgs.AddRange(smsgs);
+                            SessionVariables.CurrentRegistrant = studentReg;
                         },
                         fmsgs => msgs.AddRange(fmsgs),
                         emsgs => throw new Exception(emsgs.ToString())
