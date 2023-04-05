@@ -278,33 +278,26 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpGet]
-        public ActionResult GetNewChildForm()
+        public ActionResult CreateChildRegistrant(string accountName, string activityName)
         {
             var msgs = new SystemMessages();
+
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                
-                if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized");
-                
                 var currentAccount = SessionVariables.CurrentAccount;
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var activity = participationObject.GetActivity();
-                var questions = participationObject.Form.GetAllQuestions(msgs);
-                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var participationObject = activity.GetParticipationObject(msgs);
                 Registrant studentReg = null;
                 
                 Database.ExecuteTransaction
-                (
-                    (amsgs, adc) =>
-                    {
-                        if (currentRegistrant.IsEmpty())
+                    (
+                        (amsgs, adc) =>
                         {
                             studentReg = currentAccount.CreateParentOrStudentRegistrant(
                                 registrantOwner: null,
@@ -318,28 +311,50 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc : adc);
-                        
+                            
                             if(parentRegistrant.IsNotEmpty())
                                 RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                
+                    
                             if(parent2Registrant.IsNotEmpty())
                                 RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                        }
-                    },
-                    smsgs =>
-                    {
-                        msgs.AddRange(smsgs);
-
-                        if (studentReg.IsNotEmpty())
+                        },
+                        smsgs =>
                         {
-                            SessionVariables.CurrentRegistrant = studentReg;
-                            currentRegistrant = studentReg;
-                        }
-                    },
-                    fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => throw new Exception(emsgs.ToString())
-                );
+                            msgs.AddRange(smsgs);
+                        },
+                        fmsgs => msgs.AddRange(fmsgs),
+                        emsgs => throw new Exception(emsgs.ToString())
+                    );
                 
+                return Redirect($"~/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
+        }
+        
+        [HttpGet]
+        public ActionResult GetNewChildForm(string accountName, string activityName, string registrantUid)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+                
+                var currentAccount = SessionVariables.CurrentAccount;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var participationObject = activity.GetParticipationObject(msgs);
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
