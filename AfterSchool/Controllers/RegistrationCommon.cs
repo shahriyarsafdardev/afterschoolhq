@@ -414,7 +414,7 @@ namespace AfterSchool.Controllers
                             var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
                             //5 MB = 5242880 Bytes
                             //File uploaded here should be less than of 5MB
-                            if (currentFileSizeInBytes <= 5242880)
+                            if (currentFileSizeInBytes <= 20971520)
                                 submittedRecord.AddOrUpdateAnswer(
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,
