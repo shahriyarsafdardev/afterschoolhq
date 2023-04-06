@@ -328,11 +328,13 @@ namespace AfterSchoolLibrary.Models
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["DisplayOrder"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            
+            // Do we need here? I belive not but what's the harm in asking
 
 
             return msgs;
         }
-
+        
         public FormQuestion Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Load(ID.Value, msgs, dc);
@@ -343,6 +345,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -352,6 +355,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormId);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -360,6 +364,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -370,6 +375,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -431,6 +437,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -440,6 +447,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormIds, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -448,6 +456,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -489,6 +498,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], questionDataTypeIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
