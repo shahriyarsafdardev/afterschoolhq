@@ -148,7 +148,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         IsGenderRestricted = participationObject.IsGenderEnforced,
                         RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
-                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs)
+                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                        RegistrationUid = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault()?.Uid
                     }
                 };
                 
