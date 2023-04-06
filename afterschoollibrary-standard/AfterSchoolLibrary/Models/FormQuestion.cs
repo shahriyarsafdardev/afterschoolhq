@@ -329,12 +329,9 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["DisplayOrder"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
             
-            // Do we need here? I belive not but what's the harm in asking
-
-
             return msgs;
         }
-        
+
         public FormQuestion Reload(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Load(ID.Value, msgs, dc);
