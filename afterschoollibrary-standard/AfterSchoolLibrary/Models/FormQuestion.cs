@@ -483,6 +483,7 @@ namespace AfterSchoolLibrary.Models
                 Text = Text,
                 IsActive = IsActive,
                 IsLocked = IsLocked,
+                IsDeleted = IsDeleted,
                 QuestionDataTypeId = QuestionDataTypeId,
             };
 
