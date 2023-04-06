@@ -16,7 +16,7 @@ export default function Home({ newChild = false }) {
   const classes = useStyles();
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath } = apiRoutes;
+  const { paymentScreenPath, thankyouUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
@@ -78,10 +78,8 @@ export default function Home({ newChild = false }) {
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsFree) {
-      const thankyouUrl = `/reactapp/registration/thankyou/${registrationId}`;
-      navigate(thankyouUrl);
-    } else redirect(paymentScreenPath(registrationId));
+    if (IsFree) navigate(thankyouUrl(registrationId));
+    else redirect(paymentScreenPath(registrationId));
   };
 
   const secondLastSection = activeGroup === totalGroups - 2;

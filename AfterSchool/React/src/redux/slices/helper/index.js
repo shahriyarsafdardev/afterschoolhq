@@ -1,3 +1,5 @@
+import utils from 'utils';
+import Routes from 'routes';
 import RegistrationService from 'sevices/RegistrationService';
 
 export const responseMapper = (formData, registrantType, ...restrictions) => {
@@ -42,4 +44,20 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
   });
 
   return { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer };
+};
+
+export const handleRedirection = ({
+  CanAccess,
+  RegistrantType,
+  RegistrationUid,
+  RegisterForNewChildUrl,
+  RegistrationIsCompleted
+}) => {
+  const { navigateTo } = utils;
+
+  if (!CanAccess) navigateTo('/login');
+  else if (RegistrationIsCompleted) {
+    if (RegistrantType === 'Parent') navigateTo(RegisterForNewChildUrl);
+    else navigateTo(Routes.thankyouUrl(RegistrationUid));
+  }
 };

@@ -1,10 +1,9 @@
-import utils from 'utils';
-import Routes from 'routes';
 import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+
 import schoolField from 'constants/schoolField';
+import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import RegistrationRepository from 'repository/RegistrationRepository';
 
@@ -32,24 +31,30 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
-      if (activityDto.RegistrationIsCompleted) return utils.navigateTo(Routes.accountUrl);
+      const {
+        CanAccess,
+        RegistrantType,
+        SchoolLocation,
+        IsAgeRestricted,
+        IsGradeRestricted,
+        RegistrationIsCompleted
+      } = activityDto;
+
+      const isProhibited = RegistrationIsCompleted || !CanAccess;
+      if (isProhibited) return handleRedirection(activityDto);
 
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
-        activityDto.RegistrantType,
-        activityDto.IsGradeRestricted,
-        activityDto.IsAgeRestricted
+        RegistrantType,
+        IsGradeRestricted,
+        IsAgeRestricted
       );
 
-      state.questions = [
-        ...questions,
-        ...formQuestionUpdated,
-        schoolField(activityDto.RegistrantType)
-      ];
+      state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
       state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
-      state.school = activityDto.SchoolLocation || {};
-      state.noSchool = isEmpty(activityDto.SchoolLocation) ? true : false;
+      state.school = SchoolLocation || {};
+      state.noSchool = isEmpty(SchoolLocation) ? true : false;
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
