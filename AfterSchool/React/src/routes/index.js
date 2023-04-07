@@ -17,6 +17,7 @@ export default {
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
+  paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,
   facebookShareUrl: (activityUrl, textToShare = '') =>
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(

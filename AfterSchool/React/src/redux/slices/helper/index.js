@@ -61,17 +61,27 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
 };
 
 export const handleRedirection = ({
+  IsFree,
   CanAccess,
+  IsAlreadyPaid,
   RegistrantType,
   RegistrationUid,
   RegisterForNewChildUrl,
   RegistrationIsCompleted
 }) => {
-  const { navigateTo } = utils;
+  const { navigateTo, redirect } = utils;
 
   if (!CanAccess) navigateTo('/login');
   else if (RegistrationIsCompleted) {
-    if (RegistrantType === 'Parent') navigateTo(RegisterForNewChildUrl);
-    else navigateTo(Routes.thankyouUrl(RegistrationUid));
+    if (RegistrantType === 'Parent') {
+      navigateTo(RegisterForNewChildUrl);
+    } else {
+      if (IsFree) {
+        navigateTo(Routes.thankyouUrl(RegistrationUid));
+      } else {
+        if (IsAlreadyPaid) navigateTo(Routes.paymentUrl(RegistrationUid));
+        else redirect(Routes.paymentScreenPath(RegistrationUid));
+      }
+    }
   }
 };

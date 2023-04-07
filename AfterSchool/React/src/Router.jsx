@@ -30,6 +30,10 @@ function Router() {
         {
           path: 'reactapp/registration/thankyou/:registrationId',
           element: <ThankYouSection />
+        },
+        {
+          path: 'reactapp/registration/payment/:registrationId',
+          element: <AlreadyPaidSection />
         }
       ]
     },
@@ -54,5 +58,8 @@ const Home = Loadable(lazy(() => import('pages/registration/Home')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
+const AlreadyPaidSection = Loadable(
+  lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
+);
 
 export default Router;
