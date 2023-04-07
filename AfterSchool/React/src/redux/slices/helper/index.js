@@ -1,15 +1,20 @@
 import RegistrationService from 'sevices/RegistrationService';
 
 export const responseMapper = (formData, registrantType, ...restrictions) => {
-  const [IsGradeRestricted = false, IsAgeRestricted = false] = restrictions;
+  const [
+    IsGradeRestricted = false,
+    IsAgeRestricted = false,
+    IsGenderRestricted = false
+  ] = restrictions;
   const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
-  const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44 };
+  const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive, QuestionDataTypeId }) => {
-    if (
+    const isRestrictedEnforcedQuestion =
       (IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth) ||
-      (IsGradeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.grade)
-    )
-      return true;
+      (IsGradeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.grade) ||
+      (IsGenderRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.gender);
+
+    if (isRestrictedEnforcedQuestion) return true;
 
     return !(IsDeleted || !IsActive);
   });
@@ -39,6 +44,9 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
 
       if (IsAgeRestricted)
         restrictTheQuestion(sectionQuestions, restrictedQuestionsDataTypeIds.dateOfBirth);
+
+      if (IsGenderRestricted)
+        restrictTheQuestion(sectionQuestions, restrictedQuestionsDataTypeIds.gender);
     }
 
     if (sectionQuestions.length) {
