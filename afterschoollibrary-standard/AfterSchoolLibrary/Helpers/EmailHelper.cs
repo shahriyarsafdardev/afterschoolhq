@@ -1885,7 +1885,7 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
             
-            var subject = "ACTION REQUIRED: Complete Volunteer Background Check for [Opportunity]";
+            var subject = $"ACTION REQUIRED: Complete Volunteer Background Check for {participationObject.Name}";
             
             var mailMsgs = SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),

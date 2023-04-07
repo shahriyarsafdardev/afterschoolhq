@@ -9,19 +9,22 @@ to conduct a background check as part of the onboarding process.
 
 <p>
 The link below will take you to Sterling's secure portal where you can begin the background check process.
-We encourage you to read the information provided regarding privacy and security.<br/><br/></p>
+We encourage you to read the information provided regarding privacy and security.<br/><br/>
+</p>
+
+<p>
+Please note: only the opportunity provider will have access to the contents of your 
+background check - AfterSchool HQ will not have access to, view, or store this 
+information at any time.<br/><br/>
+</p>
 
 <p>
 Once the background check is complete, you will receive an email letting you know the results.<br/><br/>
 </p>
 
 <p>
-<a href='@Model.Link' target=_blank >Link</a><br/><br/>
-</p>
-
-<p>
-If the link above doesn't work, please copy and paste it into your browser.<br/><br/>
-</p>
+<a href='@Model.Link' target=_blank >Click here to begin background check </a><br/><br/>
+</p>    
 
 <p>
 If you have any questions about the background check process, please visit Sterling's <a href='https://mybackgroundcheck.sterlingcheck.com/' target=_blank >candidate information page</a>
