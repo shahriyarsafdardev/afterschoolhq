@@ -143,7 +143,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false)
+                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
+                        IsGenderRestricted = participationObject.IsGenderEnforced
                     }
                 };
                 
@@ -260,7 +261,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 dynamic response = new
                 {
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
-                    registrantType,SchoolLocation
+                    registrantType,SchoolLocation,
                 };
                 
                 return Json(
@@ -400,7 +401,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         RegistrantType = RegistrantPersonType.Parent,
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false)
+                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
+                        IsGenderRestricted = participationObject.IsGenderEnforced
                     }
                 };
                 
