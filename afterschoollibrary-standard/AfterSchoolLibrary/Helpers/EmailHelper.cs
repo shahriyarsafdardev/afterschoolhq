@@ -250,6 +250,26 @@ namespace AfterSchoolLibrary.Helpers
             }
             else
             {
+                var lastPara = "";
+                if (registrant.GetRegistrantActivity(participationObject, msgs).HasPaymentPlan(true, msgs))
+                {
+                    if (isProviderCancelled)
+                        lastPara = "Additional payments remaining on your payment plan with " +
+                                   participationObject?.Provider?.Name +
+                                   " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='" +
+                                   Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
+                    else
+                        lastPara =
+                            "The payment plan associated with this activity has not been cancelled and will continue for " +
+                            payments?.Count() +
+                            " payments. If you believe this is an error, please contact the provider.";
+                }
+
+                model.Add(new NameValueCollection
+                {
+                    {"LastParagraph", lastPara},
+                });
+
                 body = ProcessTemplate(
                     EmailTemplates.Registration_Withdrawal,
                     model,
@@ -2178,17 +2198,13 @@ namespace AfterSchoolLibrary.Helpers
             else
                 activityName = plan.GetActivityGroup().Name;
 
-            var billingAccount = plan.GetAccount().GetAccountOwner();
-
             var model = new NameValueCollection
             {
                 {"FirstName", user.FirstName},
-                {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"AccountName", account.Name},
                 {"Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly"},
                 {"PaymentAmount", plan.CostPerPeriod.ToCurrency()},
                 {"ActivityName", activityName},
-                {"SupportEmail", Email.AppSupportEmailAddress},
                 {"LoginLink", $"{Email.BaseUrl()}login"},
             };
 
@@ -2199,16 +2215,19 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var subject = $"Your payment failed for {activityName}";
-            var emails = new List<string> { user.Email, billingAccount.Email };
-            emails.ForEach(email =>
-                msgs.AddRange(SendGridHelper.SendMail(
-                    Email.SendGridNoReplyEmailAddress(),
-                    new EmailAddress(email),
-                    email.Equals(billingAccount.Email) ? $"Payment CC: {subject}" : subject,
-                    body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()
-                )));
+            var subject = $"Your payment failed for ${activityName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(user.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
+                ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
+                replyTo: new EmailAddress(Email.AppSupportEmailAddress)
+            );
+
+            msgs.AddRange(mailMsgs);
             return msgs;
         }
 
