@@ -73,15 +73,15 @@ export const handleRedirection = ({
 
   if (!CanAccess) navigateTo('/login');
   else if (RegistrationIsCompleted) {
-    if (RegistrantType === 'Parent') {
-      navigateTo(RegisterForNewChildUrl);
-    } else {
-      if (IsFree) {
-        navigateTo(Routes.thankyouUrl(RegistrationUid));
+    if (IsFree) {
+      if (RegistrantType === 'Parent') {
+        navigateTo(RegisterForNewChildUrl);
       } else {
-        if (IsAlreadyPaid) navigateTo(Routes.paymentUrl(RegistrationUid));
-        else redirect(Routes.paymentScreenPath(RegistrationUid));
+        navigateTo(Routes.thankyouUrl(RegistrationUid));
       }
+    } else {
+      if (IsAlreadyPaid) navigateTo(Routes.paymentUrl(RegistrationUid));
+      else redirect(Routes.paymentScreenPath(RegistrationUid));
     }
   }
 };
