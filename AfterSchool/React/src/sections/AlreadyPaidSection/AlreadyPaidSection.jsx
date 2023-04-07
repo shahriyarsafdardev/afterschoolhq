@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Box, Button, Link, Typography } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
+import { Box, Button, Link, Typography } from '@material-ui/core';
 
 import utils from 'utils';
 import apiRoutes from 'routes';
 import useStyles from './styles';
+import { Loader } from 'components';
 import { useThankYou } from 'redux/hooks';
 
 function AlreadyPaidSection() {
@@ -14,6 +15,7 @@ function AlreadyPaidSection() {
   const { registrationId } = useParams();
 
   const {
+    loading,
     data: {
       AmountPaid,
       ActivityName,
@@ -28,6 +30,8 @@ function AlreadyPaidSection() {
   useEffect(() => {
     loadThankYouScreenData(registrationId);
   }, []);
+
+  if (loading) return <Loader />;
 
   return (
     <Box className={classes.wrapper}>
