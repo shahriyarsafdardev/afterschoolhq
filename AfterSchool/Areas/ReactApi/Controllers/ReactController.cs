@@ -63,6 +63,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
                 var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
                 Registrant parentRegistrant = null;
+                Registration registration = null;
+                RegistrantActivity registrantActivity = null;
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
@@ -131,6 +133,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
+
                 dynamic response = new
                 {
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
@@ -149,7 +154,8 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsGenderRestricted = participationObject.IsGenderEnforced,
                         RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
-                        RegistrationUid = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault()?.Uid
+                        RegistrationUid = registration?.Uid,
+                        IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                     }
                 };
                 
@@ -967,6 +973,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
+                RegistrantActivity registrantActivity = registration?.GetRegistrantActivity(participationObject);
                 
                 dynamic response = new
                 {
@@ -978,7 +985,10 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         isParent = currentUserRegistrant.IsParentOrGuardian,
-                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl()
+                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
+                        AmountPaid = registrantActivity?.GetAmountPaid(msgs),
+                        ProviderEmail = participationObject.OwnerAccount.Email,
+                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
                     }
                 };
                 
