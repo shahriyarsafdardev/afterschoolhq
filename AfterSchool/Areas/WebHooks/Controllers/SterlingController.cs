@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs
                         );
                     
-                    if(responseBody.result == "Review")
+                    if(responseBody.result == "Consider")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId, 
                             TaskStatus.ReviewBackground, 
                             ApplicationStatus.FailedBackgroundCheck, 
