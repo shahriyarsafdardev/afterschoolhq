@@ -364,6 +364,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
                 var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                Registration registration = null;
 
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
@@ -416,6 +417,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         }
                     );
                 }
+                
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
 
                 dynamic response = new
                 {
@@ -430,7 +434,10 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         IsGenderRestricted = participationObject.IsGenderEnforced,
-                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
+                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                        RegistrationUid = registration?.Uid,
+                        IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                     }
                 };
                 
