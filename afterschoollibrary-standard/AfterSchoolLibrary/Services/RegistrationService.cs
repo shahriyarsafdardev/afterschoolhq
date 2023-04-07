@@ -882,7 +882,7 @@ namespace AfterSchoolLibrary.Services
             var paidFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
             var hasSubscription = submittedRecord.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
 
-            return paidFee && hasSubscription;
+            return paidFee || hasSubscription;
         }
 
         public static List<Registration> GetCurrentRelatedRegistrations(this Registration registration,
