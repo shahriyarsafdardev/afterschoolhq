@@ -395,6 +395,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment,
                 RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.WaitingList,
             });
         }
 

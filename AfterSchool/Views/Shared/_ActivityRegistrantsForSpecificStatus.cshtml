@@ -180,7 +180,7 @@
                                     if (ra.IsSendInvoiceEnabled() &&
                                         Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) &&
                                         participationObject.IsNotFreeAndCanAcceptPayments &&
-                                        amountPaid == 0 && registrant.ParentRegistrantId.HasValue && !isReadOnly)
+                                        registrant.ParentRegistrantId.HasValue && !isReadOnly)
                                     {
                                         var showButton = true;
 
@@ -277,7 +277,7 @@
             <h3 class="modal-title">Re-enrollment Confirmation</h3>
         </div>
         <div class="modal-body form text-center">
-            <p>Do you want to re-enroll <span class="registrantName">Taco Turner</span> in <strong>@participationObject.Name</strong>.</p>
+            <p>Do you want to re-enroll <span class="registrantName">Taco Turner</span> in <strong>@participationObject.Name</strong>?</p>
         </div>
         <div class="modal-footer textCenterImportant">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>

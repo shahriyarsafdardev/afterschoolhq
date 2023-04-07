@@ -139,7 +139,8 @@
                                     Withdraw
                                 </button>
                             }
-                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && participationObject.IsNotFreeAndCanAcceptPayments && ra.GetAmountPaid() == 0 && ra.GetRegistrant().ParentRegistrantId.HasValue)
+                            @if (ra.IsSendInvoiceEnabled() && Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView) && 
+                                 participationObject.IsNotFreeAndCanAcceptPayments && ra.GetRegistrant().ParentRegistrantId.HasValue)
                             {
                                 var showButton = true;
 
