@@ -1726,28 +1726,34 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, string attendancesDate, string registrantName, 
-            int attendanceDaysToCharge, SystemMessages msgs, DatabaseConnection dc = null)
+            int attendanceDaysToCharge, int remainingPrepayments, int usedPrepayments, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount.GetAccountOwner();
-            var billingAccount = checkoutObject.BillingAccount.GetAccountOwner();
-            var attendanceDate = attendancesDate;
-            var totalCostWithFees = checkoutObject.GetStripeAmount(msgs, dc);
-            var totalCost = totalCostWithFees - checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var billingAccount = checkoutObject.BillingAccount.GetAccountOwner(); 
             var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
+            var postPayPlan = checkoutObject.PostPayPlan;
+            var billingPeriodType = postPayPlan.BillingPeriodTypeId.ToString().ToLower();
+            var numberOfPeriodsPrepayment = postPayPlan.NumberOfPeriodsPrePaid;
             var participationObject = checkoutObject.ParticipationObject;
-            var studentName = registrantName;
             var registrationTable = "";
+            var chargeDesc = "";
+            
+            if (remainingPrepayments > 1)
+                billingPeriodType += 's';
             
             if (attendanceDaysToCharge > 0)
             {
+                var totalQuantityToCharge = attendanceDaysToCharge + usedPrepayments;
+                var cost =  totalQuantityToCharge * postPayPlan.CostPerPeriod;
+                var totalCostWithFees = cost + totalCreditCardFees - usedPrepayments * postPayPlan.CostPerPeriod;
                 var chargeFeeModel = new NameValueCollection
                 {
                     {"Description", $"{participationObject.Name.ToProperCase()}"},
-                    {"Quantity", attendanceDaysToCharge.ToString()},
-                    {"Cost", totalCost.ToCurrency()},
+                    {"Quantity", totalQuantityToCharge.ToString()},
+                    {"Cost", cost.ToCurrency()},
                     {"AdditionalDetails", "Attendance-Based Charge"},
                 };
 
@@ -1756,6 +1762,23 @@ namespace AfterSchoolLibrary.Helpers
                     chargeFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
+
+                if (usedPrepayments > 0)
+                {
+                    chargeFeeModel = new NameValueCollection()
+                    {
+                        {"Description", "Pre-Payment"},
+                        {"Quantity", usedPrepayments.ToString()},
+                        {"Cost", $"-{(usedPrepayments * postPayPlan.CostPerPeriod).ToCurrency()}"},
+                        {"AdditionalDetails", ""},
+                    };
+                    receiptAttendanceRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        chargeFeeModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+                    chargeDesc = $"You have used all {numberOfPeriodsPrepayment} {billingPeriodType} of prepayment, so ";
+                }
 
                 registrationTable = ProcessTemplate(
                     EmailTemplates.Registration_Confirmation_Table,
@@ -1768,22 +1791,24 @@ namespace AfterSchoolLibrary.Helpers
                     },
                     "Registration_Confirmation_Table-1.0",
                     msgs);
+                
+                chargeDesc += (chargeDesc.IsNotEmpty() ? "your" : "Your") + " payment method on file has been charged";
             }
-            
-
-            var chargeDesc = attendanceDaysToCharge > 0
-                ? "Your payment method on file has been charged"
-                : "You have pre-paid for this session so your payment method has not been charged";
+            else
+            {
+                chargeDesc = "You have pre-paid for this session so your payment method has not been charged.";
+                chargeDesc += remainingPrepayments > 0 ? $" You have {remainingPrepayments} pre-paid {billingPeriodType} remaining" : "";
+            }
 
             var model = new NameValueCollection
             {
                 {"FirstName", purchaserAccount.FirstName},
-                {"StudentName", studentName},
+                {"StudentName", registrantName},
                 {"ActivityContactEmail", billingAccount.Email},
                 {"ActivityContactPhone", billingAccount.Phone},
                 {"ActivityContactName", billingAccount.FirstName},
                 {"LoginLink", Utilities.LoginUrl()},
-                {"AttendanceDate", attendanceDate},
+                {"AttendanceDate", attendancesDate},
                 {"RegistrationTable", attendanceDaysToCharge > 0 ? registrationTable : ""},
                 {"RegistrationDetails", "Login to your account to view more details about this payment."},
                 {"ActivityName", participationObject.Name.ToProperCase()},

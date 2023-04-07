@@ -2939,6 +2939,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         var paymentTypeFeePayer = registration.GetPaymentTypeFeePayer(msgs);
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
+                        var remainingPrepayments = Math.Max(0, availablePrePayments.Count - raAttendances.Count);
+                        var usedPrepayments = raAttendances.Count - attendanceDaysToCharge;
                         var coupon = registration.GetCoupon(msgs);
                         
                         BankAccountPurchaseObject bankAccountPurchaseObject = null;
@@ -2996,6 +2998,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                 currentUser,
                                 true,
                                 attendanceDaysToCharge,
+                                remainingPrepayments,
+                                usedPrepayments,
                                 attendanceDateString,
                                 registrantActivity.RegistrantName,
                                 msgs);
