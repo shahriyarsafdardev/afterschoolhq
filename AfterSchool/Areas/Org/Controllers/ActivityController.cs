@@ -2990,8 +2990,21 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             var raAttendance =  raAttendances.FirstOrDefault();
                             // set first attendance date by default if multiple no need to show that
-                            var attendanceDateString = raAttendances.Count > 1 ? "" : " for " + raAttendance!.Date.ToLongDateString(); 
-                           
+                            string attendanceDateText,datesList = "";
+                            if (raAttendances.Count > 1)
+                            {
+                                attendanceDateText = " for the below dates";
+                                datesList = raAttendances.Aggregate("<div style='color: #494949;font-size: 12px;float: left; padding-left: 15px;'>",
+                                    (current, date) => current +
+                                                       (billingPeriodType == BillingPeriodType.Week ? date.Date?.ToLongDateString() + " - " + 
+                                                            date.Date?.AddDays(6).ToLongDateString() : date.Date?.ToLongDateString()) + "<br>");
+                                datesList += "</div>";
+                            }
+                            else
+                            {
+                                attendanceDateText = " for " + raAttendance!.Date.ToLongDateString();
+                            }
+
                             // Send email to registrant
                             AccountService.ProcessPayment(
                                 checkoutObject,
@@ -3000,7 +3013,8 @@ namespace AfterSchool.Areas.Org.Controllers
                                 attendanceDaysToCharge,
                                 remainingPrepayments,
                                 usedPrepayments,
-                                attendanceDateString,
+                                attendanceDateText,
+                                datesList,
                                 registrantActivity.RegistrantName,
                                 msgs);
                             

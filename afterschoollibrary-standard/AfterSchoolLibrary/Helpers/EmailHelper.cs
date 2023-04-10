@@ -1725,8 +1725,8 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
         }
 
-        public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, string attendancesDate, string registrantName, 
-            int attendanceDaysToCharge, int remainingPrepayments, int usedPrepayments, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendAttendanceChargedConfirmationToParent(CheckoutObject checkoutObject, string attendanceDateText, string datesList, 
+            string registrantName, int attendanceDaysToCharge, int remainingPrepayments, int usedPrepayments, SystemMessages msgs, DatabaseConnection dc = null)
         {
             msgs = msgs ?? new SystemMessages();
 
@@ -1762,7 +1762,21 @@ namespace AfterSchoolLibrary.Helpers
                     chargeFeeModel,
                     "Registration_Confirmation_Rows",
                     msgs);
-
+                if (datesList.IsNotEmpty())
+                {
+                    chargeFeeModel = new NameValueCollection()
+                    {
+                        {"Description", $"{datesList}"},
+                        {"Quantity", ""},
+                        {"Cost", ""},
+                        {"AdditionalDetails", ""},
+                    };
+                    receiptAttendanceRows += ProcessTemplate(
+                        EmailTemplates.Registration_Confirmation_Rows,
+                        chargeFeeModel,
+                        "Registration_Confirmation_Rows",
+                        msgs);
+                }
                 if (usedPrepayments > 0)
                 {
                     chargeFeeModel = new NameValueCollection()
@@ -1796,7 +1810,7 @@ namespace AfterSchoolLibrary.Helpers
             }
             else
             {
-                chargeDesc = "You have pre-paid for this session so your payment method has not been charged.";
+                chargeDesc = "You have pre-paid for this session so your payment method has not been charged";
                 chargeDesc += remainingPrepayments > 0 ? $" You have {remainingPrepayments} pre-paid {billingPeriodType} remaining" : "";
             }
 
@@ -1808,7 +1822,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityContactPhone", billingAccount.Phone},
                 {"ActivityContactName", billingAccount.FirstName},
                 {"LoginLink", Utilities.LoginUrl()},
-                {"AttendanceDate", attendancesDate},
+                {"AttendanceDate", attendanceDateText},
                 {"RegistrationTable", attendanceDaysToCharge > 0 ? registrationTable : ""},
                 {"RegistrationDetails", "Login to your account to view more details about this payment."},
                 {"ActivityName", participationObject.Name.ToProperCase()},
@@ -1819,7 +1833,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Notification,
                 model,
-                "Attendance_Charge_Notification-1.2",
+                "Attendance_Charge_Notification-1.5",
                 msgs);
 
             // SEND EMAILS

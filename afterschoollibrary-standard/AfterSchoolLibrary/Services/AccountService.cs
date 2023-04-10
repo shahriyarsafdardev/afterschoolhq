@@ -4867,8 +4867,8 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, 
-            int attendanceDaysToCharge = 0, int remainingPrepayments = 0, int usedPrepayments = 0, string attendanceDate = "", string registrantName = "", 
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+            int attendanceDaysToCharge = 0, int remainingPrepayments = 0, int usedPrepayments = 0, string attendanceDateText = "", 
+            string datesList = "", string registrantName = "", SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
@@ -4889,7 +4889,7 @@ namespace AfterSchoolLibrary.Services
                     if (!isAttendanceCharge)
                         EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                     else
-                        EmailHelper.SendAttendanceChargedConfirmationToParent(checkoutObject, attendanceDate, registrantName, attendanceDaysToCharge, 
+                        EmailHelper.SendAttendanceChargedConfirmationToParent(checkoutObject, attendanceDateText, datesList, registrantName, attendanceDaysToCharge, 
                             remainingPrepayments, usedPrepayments, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
