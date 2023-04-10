@@ -5,7 +5,10 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
   const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
   const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44 };
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive, QuestionDataTypeId }) => {
-    if (IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth)
+    if (
+      (IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth) ||
+      (IsGradeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.grade)
+    )
       return true;
 
     return !(IsDeleted || !IsActive);
@@ -13,11 +16,11 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
   const registrationService = new RegistrationService(filteredQs);
   let [formQuestionUpdated, formQuestionGroupUpdated] = [[], []];
 
-  const restrictTheQuestion = (sectionQuestions, questionDataTypeId) => {
+  const restrictTheQuestion = (sectionQuestions, questionDataTypeId, IsRequired = true) => {
     const gradeIndex = sectionQuestions.findIndex(q => q.QuestionDataTypeId === questionDataTypeId);
     if (gradeIndex !== -1) {
-      sectionQuestions[gradeIndex].IsRequired = true;
-      if (questionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth)
+      sectionQuestions[gradeIndex].IsRequired = IsRequired;
+      if (Object.values(restrictedQuestionsDataTypeIds).includes(questionDataTypeId))
         sectionQuestions[gradeIndex].IsActive = true;
     }
   };
@@ -29,8 +32,11 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
     const isStudentInfoSection = QuestionGroupDataTypeId === 2;
 
     if (isStudentInfoSection) {
-      if (registrantType !== 'Adult' && IsGradeRestricted)
+      if (IsGradeRestricted)
         restrictTheQuestion(sectionQuestions, restrictedQuestionsDataTypeIds.grade);
+      else if (registrantType === 'Adult')
+        restrictTheQuestion(sectionQuestions, restrictedQuestionsDataTypeIds.grade, false);
+
       if (IsAgeRestricted)
         restrictTheQuestion(sectionQuestions, restrictedQuestionsDataTypeIds.dateOfBirth);
     }
