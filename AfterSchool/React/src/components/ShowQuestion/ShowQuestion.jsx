@@ -1,4 +1,5 @@
 import React from 'react';
+import questionType from 'constants/questionType';
 
 import {
   FileUpload,
@@ -7,8 +8,14 @@ import {
   TextAreaQuestion,
   DropdownQuestion
 } from 'components/Questions';
-import questionType from 'constants/questionType';
-import { CheckBox, TextField, SchoolField, CheckBoxList, ApiTextField } from 'components';
+import {
+  CheckBox,
+  TextBlock,
+  TextField,
+  SchoolField,
+  CheckBoxList,
+  ApiTextField
+} from 'components';
 
 function ShowQuestion({ currentQuestion, formik, currentQuestions, isUpdating }) {
   const { QuestionTypeId } = currentQuestion;
@@ -42,6 +49,8 @@ function ShowQuestion({ currentQuestion, formik, currentQuestions, isUpdating })
       return <CheckBox question={currentQuestion} formik={formik} />;
     case questionType.fileUpload:
       return <FileUpload question={currentQuestion} formik={formik} />;
+    case questionType.textBlock:
+      return <TextBlock question={currentQuestion} />;
     default:
       return <TextField question={currentQuestion} formik={formik} />;
   }
