@@ -35,7 +35,8 @@ const RegistrationSlice = createSlice({
         FormDto,
         activityDto.RegistrantType,
         activityDto.IsGradeRestricted,
-        activityDto.IsAgeRestricted
+        activityDto.IsAgeRestricted,
+        activityDto.IsGenderRestricted
       );
 
       state.questions = [
