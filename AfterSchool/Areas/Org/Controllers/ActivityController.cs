@@ -434,7 +434,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var successMessage = new SystemMessage($"{registrant.Name} has been re-enrolled in {activityName}. Their status will now be {newRegistrationStatus.SplitByUpperCase()}.", 
+                var successMessage = new SystemMessage($"{registrant.Name} has been re-enrolled in {activityName}. Their status will now be " +
+                                                       $"<b>{newRegistrationStatus.SplitByUpperCase()}</b>.", 
                     MessageType.Success);
                 return Json(new {success = true, status = "ok", data = successMessage.Text}, JsonRequestBehavior.AllowGet);
             }

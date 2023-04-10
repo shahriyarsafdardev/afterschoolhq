@@ -263,8 +263,8 @@
             <p class="fontSize12"><strong>NOTE:</strong> Refunds will not happen automatically and can be handled via the Accounting page.</p>
         </div>
         <div class="modal-footer textCenterImportant">
-            <button type="button" onclick="reEnrollRegistrant(false)" data-dismiss="modal" class="btn btn-dark md-close">Re-enroll Without Charge</button>
-            <button type="button" onclick="reEnrollRegistrant(true)" data-dismiss="modal" class="btn btn-default md-close">Re-enroll With Charge</button>
+            <button type="button" onclick="reEnrollRegistrant(false)" class="btn btn-dark">Re-enroll Without Charge</button>
+            <button type="button" onclick="reEnrollRegistrant(true)" class="btn btn-default">Re-enroll With Charge</button>
         </div>
     </div>
 </div>
@@ -281,7 +281,7 @@
         </div>
         <div class="modal-footer textCenterImportant">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" data-dismiss="modal" onclick="reEnrollRegistrant(false)" class="btn btn-default">Confirm Re-enrollment</button>
+            <button type="button" onclick="reEnrollRegistrant(false)" class="btn btn-default">Confirm Re-enrollment</button>
         </div>
     </div>
 </div>
@@ -337,6 +337,10 @@
     {
        $(modal).modal('show');
     }
+    function hideModal(modal)
+    {
+       $(modal).modal('hide');
+    }
     function displayResponse(data, isError)
     {
         let beforeText = "";
@@ -352,6 +356,8 @@
             displayMessage.attr('success','false');
             refundNote.addClass(' hide');
         }
+        hideModal("modal-process-re-enrollment");        
+        hideModal("modal-process-free-re-enrollment");
         displayMessage.html(beforeText + data);
         showModal("modal-display-response");
     }
