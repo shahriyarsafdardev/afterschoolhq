@@ -51,7 +51,7 @@ function AlreadyPaidSection() {
             variant="outlined"
             className={classes.anotherActivityButton}
             rel="noopener noreferrer"
-            href={`mailto:${ProviderEmail}`}
+            href={`mailto:${ProviderEmail}?subject=Inquiry About ${ActivityName}`}
           >
             Email Provider
           </Button>
