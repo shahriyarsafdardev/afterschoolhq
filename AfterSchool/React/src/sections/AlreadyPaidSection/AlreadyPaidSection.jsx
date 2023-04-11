@@ -32,8 +32,7 @@ function AlreadyPaidSection() {
         <Typography variant="h4">Payment Already Submitted</Typography>
         <Typography variant="h6" className={classes.fontWeight500}>
           You have already paid <b>${AmountPaid}</b> to <b>{Organization}</b> for{' '}
-          <b>{ActivityName}</b> and have a current status of <b>{RegistrationStatus}</b>. Are you
-          sure you want to continue to payment?
+          <b>{ActivityName}</b> and have a current status of <b>{RegistrationStatus}</b>.
         </Typography>
         <Typography variant="h6" className={classes.fontWeight500}>
           If you have any questions or believe this is an error, please contact the provider.
@@ -53,15 +52,11 @@ function AlreadyPaidSection() {
             className={classes.viewAccountButton}
             variant="contained"
             type="submit"
-            onClick={() => navigateTo(paymentScreenPath(registrationId))}
+            onClick={() => navigateTo(accountUrl)}
           >
-            Continue to Payment
+            Return to Account
           </Button>
         </Box>
-
-        <Link href={accountUrl} className={classes.link} variant="body1">
-          Return to Account
-        </Link>
       </Box>
     </Box>
   );
