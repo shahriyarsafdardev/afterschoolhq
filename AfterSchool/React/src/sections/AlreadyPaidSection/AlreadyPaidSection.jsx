@@ -11,19 +11,12 @@ import { useThankYou } from 'redux/hooks';
 function AlreadyPaidSection() {
   const classes = useStyles();
   const { navigateTo } = utils;
-  const { paymentScreenPath } = apiRoutes;
+  const { paymentScreenPath, accountUrl } = apiRoutes;
   const { registrationId } = useParams();
 
   const {
     loading,
-    data: {
-      AmountPaid,
-      ActivityName,
-      Organization,
-      ProviderEmail,
-      RegistrationStatus,
-      RegisterForNewChildUrl
-    },
+    data: { AmountPaid, ActivityName, Organization, ProviderEmail, RegistrationStatus },
     loadThankYouScreenData
   } = useThankYou();
 
@@ -66,7 +59,7 @@ function AlreadyPaidSection() {
           </Button>
         </Box>
 
-        <Link href={RegisterForNewChildUrl} className={classes.link} variant="body1">
+        <Link href={accountUrl} className={classes.link} variant="body1">
           Return to Account
         </Link>
       </Box>

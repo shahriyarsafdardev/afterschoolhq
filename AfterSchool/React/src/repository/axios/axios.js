@@ -3,6 +3,11 @@ import utils from 'utils';
 
 const { navigateTo } = utils;
 axios.defaults.baseURL = window.location.origin;
+axios.defaults.headers = {
+  'Cache-Control': 'no-cache',
+  Pragma: 'no-cache',
+  Expires: '0'
+};
 
 axios.interceptors.response.use(
   response => {
