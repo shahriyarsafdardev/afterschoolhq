@@ -8,7 +8,7 @@
     <br/>
     
   @Model.RegistrationTable
-  
+  @Model.DatesList
   <p>
     <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
   </p>

@@ -2994,7 +2994,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             if (raAttendances.Count > 1)
                             {
                                 attendanceDateText = " for the below dates";
-                                datesList = raAttendances.Aggregate("<div style='color: #494949;font-size: 12px;float: left; padding-left: 15px;'>",
+                                datesList = raAttendances.Aggregate("<div style='color: #494949;font-size: 12px;float: left; padding-left: 15px; width:100%; padding-bottom: 10px'>",
                                     (current, date) => current +
                                                        (billingPeriodType == BillingPeriodType.Week ? date.Date?.ToLongDateString() + " - " + 
                                                             date.Date?.AddDays(6).ToLongDateString() : date.Date?.ToLongDateString()) + "<br>");

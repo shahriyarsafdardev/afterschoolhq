@@ -1776,6 +1776,7 @@ namespace AfterSchoolLibrary.Helpers
                         chargeFeeModel,
                         "Registration_Confirmation_Rows",
                         msgs);
+                    datesList = "";
                 }
                 if (usedPrepayments > 0)
                 {
@@ -1811,7 +1812,11 @@ namespace AfterSchoolLibrary.Helpers
             else
             {
                 chargeDesc = "You have pre-paid for this session so your payment method has not been charged";
-                chargeDesc += remainingPrepayments > 0 ? $" You have {remainingPrepayments} pre-paid {billingPeriodType} remaining" : "";
+                chargeDesc += remainingPrepayments > 0 ? $". You have {remainingPrepayments} pre-paid {billingPeriodType} remaining" : "";
+                if (datesList.IsNotEmpty())
+                {
+                    datesList = datesList.Insert(0, "Attendance was taken for the following dates:<br><br>");
+                }
             }
 
             var model = new NameValueCollection
@@ -1827,13 +1832,14 @@ namespace AfterSchoolLibrary.Helpers
                 {"RegistrationDetails", "Login to your account to view more details about this payment."},
                 {"ActivityName", participationObject.Name.ToProperCase()},
                 {"ChargeDescription", chargeDesc},
+                {"DatesList", datesList},
             };
 
             var subject = $"Attendance Charged for {participationObject.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Attendance_Charge_Notification,
                 model,
-                "Attendance_Charge_Notification-1.5",
+                "Attendance_Charge_Notification-1.6",
                 msgs);
 
             // SEND EMAILS
