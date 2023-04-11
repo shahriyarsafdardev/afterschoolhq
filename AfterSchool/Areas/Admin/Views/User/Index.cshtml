@@ -1,7 +1,10 @@
-﻿@model List<WebUser>
+@model List<WebUser>
 @{
     ViewBag.Title = "Users";
+    var msgs = (SystemMessages)ViewBag.Messages;
 }
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <div class="page-head">
     <h2>Users</h2>
@@ -28,14 +31,14 @@
             </div>
 
             @{ Html.RenderPartial(
-              "~/Views/Shared/_Users.cshtml",
-              Model,
-              new ViewDataDictionary()
-              {
+               "~/Views/Shared/_Users.cshtml",
+               Model,
+               new ViewDataDictionary()
+               {
                     { "AccountId", ViewBag.AccountId },
                     { "ReturnUrl", ViewBag.ReturnUrl } ,
                     { "PagingModel", ViewBag.PagingModel }
-            });
+         });
             }
         </div>
     </div>
