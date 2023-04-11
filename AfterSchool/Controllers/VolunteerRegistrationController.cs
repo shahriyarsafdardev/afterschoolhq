@@ -104,6 +104,10 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
+            
+            WebUser user = null;
+            Account account = null;
+            Registrant registrant = null;
 
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
@@ -156,10 +160,6 @@ namespace AfterSchool.Controllers
                 var email = qvms.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
                 var phone = qvms.First(qvm =>
                     qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone);
-
-                WebUser user = null;
-                Account account = null;
-                Registrant registrant = null;
 
                 Database.ExecuteTransaction
                 (
@@ -217,8 +217,11 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            if (msgs.HasNoErrors())
-                return RedirectToAction("AddHomeAddress");
+            // if (msgs.HasNoErrors())
+            //     return RedirectToAction("AddHomeAddress");
+            
+            if(msgs.HasNoErrors())
+                return Redirect($"~/ReactApp/volunteer-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrant.Uid)}");
 
             var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid(), msgs) : null;
             var questions = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);
