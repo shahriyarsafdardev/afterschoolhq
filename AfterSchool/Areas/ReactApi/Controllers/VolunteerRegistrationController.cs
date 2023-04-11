@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.ReactApi.Models;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
+using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -20,6 +23,15 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 {
     public class VolunteerRegistrationController : BaseController
     {
+        private readonly IBackgroundCheckWorkflow backgroundCheckWorkflow;
+        private readonly IFeatureFlagRepository featureFlagRepository;
+
+        public VolunteerRegistrationController(IFeatureFlagRepository featureFlagRepository, IBackgroundCheckWorkflow backgroundCheckWorkflow)
+        {
+            this.featureFlagRepository = featureFlagRepository;
+            this.backgroundCheckWorkflow = backgroundCheckWorkflow;
+        }
+        
         [HttpGet]
         public ActionResult GetForm(string accountName, string activityName, string registrantUid)
         {
@@ -248,7 +260,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
-        public ActionResult Register(QuestionAnswerResponse json)
+        public async Task<ActionResult> Register(QuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
             try
@@ -268,18 +280,26 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
+                
+                var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) currentUser.ID, true, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
+                
+                if(backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckResultId == SterlingBackgroundCheckResult.Cancelled)
+                    throw new Exception("Background Check has been failed");
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-                //var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
-                
-                SessionVariables.CurrentRegistrant = currentRegistrant;
-                var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
+                var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
 
                 if (msgs.HasNoErrors())
-                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
-                
-                if (msgs.HasNoErrors())
                     currentRegistrant.SetProfileAsCompleted(currentUser, msgs);
+                
+                if (msgs.HasNoErrors() && registration != null)
+                {
+                    if (msgs.HasNoErrors())
+                        ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
+
+                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
+                        await InitateBackgroundCheck(currentUser, participationObject, msgs);
+                }
                 
                 return Json(
                     new ApiResponse(msgs,registration.Uid),
@@ -321,5 +341,24 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 !currentRegistrant.IsReservedForDate(participationObject, date, null)
             ).ToList();
         }
+        
+        private async Task<SystemMessages> InitateBackgroundCheck(WebUser webUser,ParticipationObject participationObject,SystemMessages msgs)
+        {
+            if (msgs.HasErrors() || !featureFlagRepository.IsEnabled("background-check")) return null;
+            var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, (int) participationObject.OwnerAccount.FiscalAccountId, msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, participationObject, msgs);
+            }
+
+            return msgs;
+        }
+        
+        private void SendLinkToVolunteer(string link, WebUser webUser, ParticipationObject participationObject, SystemMessages msgs)
+        {
+            EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, link, msgs);
+        }
+        
     }
 }
