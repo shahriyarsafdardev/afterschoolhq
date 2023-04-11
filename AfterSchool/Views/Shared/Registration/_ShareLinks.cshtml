@@ -73,7 +73,7 @@
             $('#share-more').click(function () {
                 navigator.share({
                     title: htmlDecode('@shareObject'),
-                    url: htmlDecode('@shareUrl'),
+                    url: '@shareUrl',
                     text: htmlDecode('Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()')
                 }).then(() => {
                     console.log('Thanks for sharing!');
