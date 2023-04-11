@@ -270,43 +270,16 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-                var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
+                //var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
+                
+                SessionVariables.CurrentRegistrant = currentRegistrant;
+                var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
                 if (msgs.HasNoErrors())
-                {
-                    currentRegistrant.SetProfileAsCompleted(currentUser, msgs);
-                }
+                    ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
                 
-                if(participationObject.IsFree)
-                {
-                    var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
-                    var datesToRemove = new List<DateTime>();
-
-                    selectedDates?.ForEach(date =>
-                    {
-                        if (currentRegistrant.IsReservedForDate(participationObject, date, null))
-                            datesToRemove.Add(date);
-                    });
-
-                    datesToRemove.ForEach(date => selectedDates.Remove(date));
-
-                    if (msgs.HasNoErrors())
-                        AccountService.ProcessRegistrationWithoutPayment(
-                            new CheckoutObject
-                            {
-                                BillingAccount = participationObject.OwnerAccount,
-                                PayingAccount = currentAccount,
-                                NumberOfSeats = 1,
-                                ParticipationObject = participationObject,
-                                Registration = registration,
-                                MasterRegistrant = currentRegistrant,
-                                SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
-                                SelectedDates = selectedDates,
-                            },
-                            true,
-                            SessionVariables.CurrentUser,
-                            msgs);
-                }
+                if (msgs.HasNoErrors())
+                    currentRegistrant.SetProfileAsCompleted(currentUser, msgs);
                 
                 return Json(
                     new ApiResponse(msgs,registration.Uid),
@@ -322,5 +295,31 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
+        private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
+            SystemMessages msgs)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var selectedDates = GatherAvailableSelectedDates(currentRegistrant, participationObject);
+            AccountService.ProcessRegistrationWithoutPayment(
+                new CheckoutObject
+                {
+                    BillingAccount = participationObject.OwnerAccount,
+                    PayingAccount = currentAccount,
+                    NumberOfSeats = 1,
+                    ParticipationObject = participationObject,
+                    Registration = registration,
+                    MasterRegistrant = currentRegistrant,
+                    SubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault(),
+                    SelectedDates = selectedDates,
+                },
+                true, SessionVariables.CurrentUser, msgs);
+        }
+        
+        private static List<DateTime> GatherAvailableSelectedDates(Registrant currentRegistrant, ParticipationObject participationObject)
+        {
+            return RegistrationCommon.GetSelectedDatesFromCart()?.Where(date =>
+                !currentRegistrant.IsReservedForDate(participationObject, date, null)
+            ).ToList();
+        }
     }
 }
