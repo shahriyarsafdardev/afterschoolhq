@@ -628,6 +628,15 @@
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\Org\Models\ReportResults.cs" />
     <Compile Include="Areas\ReactApi\Controllers\ReactController.cs" />
+    <Compile Include="Areas\ReactApi\Controllers\VolunteerRegistrationController.cs" />
+    <Compile Include="Areas\ReactApi\Models\ApiResponse.cs" />
+    <Compile Include="Areas\ReactApi\Models\FormDto.cs" />
+    <Compile Include="Areas\ReactApi\Models\FormQuestionAnswerDto.cs" />
+    <Compile Include="Areas\ReactApi\Models\FormQuestionDto.cs" />
+    <Compile Include="Areas\ReactApi\Models\FormQuestionGroupDto.cs" />
+    <Compile Include="Areas\ReactApi\Models\LocationDto.cs" />
+    <Compile Include="Areas\ReactApi\Models\QuestionAnswerResponse.cs" />
+    <Compile Include="Areas\ReactApi\Models\WebUserDto.cs" />
     <Compile Include="Areas\ReactApi\ReactApiAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />

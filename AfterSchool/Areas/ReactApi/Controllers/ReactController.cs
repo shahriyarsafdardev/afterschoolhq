@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using AfterSchool.Areas.ReactApi.Models;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
@@ -958,116 +959,5 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-
-        public class ApiResponse
-        {
-            public SystemMessages msgs { get; set; }
-            public dynamic obj { get; set; }
-
-            public ApiResponse(SystemMessages msgs, dynamic obj)
-            {
-                this.msgs = msgs;
-                this.obj = obj;
-            }
-        }
-
-        public class WebUserDto
-        {
-            public string firstName { get; set; }
-            public string lastName { get; set; }
-            public string email { get; set; }
-            public string phone { get; set; }
-            public string userName { get; set; }
-
-            public WebUserDto(WebUser currentUser)
-            {
-                this.firstName = currentUser.FirstName;
-                this.lastName = currentUser.LastName;
-                this.email = currentUser.Email;
-                this.phone = currentUser.Phone;
-                this.userName = currentUser.Username;
-            }
-            
-        }
-        
-        public class FormDto
-        {
-            public List<FormQuestionDto> formQuestion { get; set; }
-            public List<FormQuestionGroupDto> formQuestionGroup { get; set; }
-            public List<FormQuestionAnswerDto> formQuestionAnswer { get; set; }
-
-            public FormDto(List<FormQuestionDto> formQuestion, List<FormQuestionGroupDto> formQuestionGroup, List<FormQuestionAnswerDto> formQuestionAnswer)
-            {
-                this.formQuestion = formQuestion;
-                this.formQuestionGroup = formQuestionGroup;
-                this.formQuestionAnswer = formQuestionAnswer;
-            }
-            
-        }
-
-        public class FormQuestionDto
-        {
-            public int ID { get; set; }
-            public int? FormQuestionGroupId { get; set; }
-            public string Text { get; set; }
-            public string Description { get; set; }
-            
-            public string GroupTitle { get; set; }
-            public string Options { get; set; }
-            public bool IsRequired { get; set; }
-            public int? DisplayOrder { get; set; }
-            public bool IsActive { get; set; }
-            public bool IsDeleted { get; set; }
-            public QuestionType QuestionTypeId { get; set; }
-            public QuestionDataType QuestionDataTypeId { get; set; }
-            public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
-        }
-        
-        public class FormQuestionAnswerDto
-        {
-            public int? FormQuestionId { get; set; }
-            public int QuestionDataTypeId { get; set; }
-            public string QuestionText { get; set; }
-            public string Text { get; set; }
-        }
-        
-        public class FormQuestionGroupDto
-        {
-            public int? FormId { get; set; }
-            public string Name { get; set; }
-            public int? DisplayOrder { get; set; }
-            public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
-        }
-
-        public class QuestionAnswerResponse
-        {
-            public string groupid { get; set; }
-            
-            public string esignature { get; set; }
-            public string answers { get; set; }
-            
-            public int? schoolLocationID { get; set; }
-            
-            public int? newChild { get; set; }
-            public string registrantId { get; set; }
-        }
-        
-        public class LocationDto
-        {
-            public string locationName { get; set; }
-            public string streetNumber { get; set; }
-            public string streetName { get; set; }
-            public string address2 { get; set; }
-            public string neighborhood { get; set; }
-            public string city { get; set; }
-            public string county { get; set; }
-            public string state { get; set; }
-            public string postalCode { get; set; }
-            public string country { get; set; }
-            public string googlePlaceId { get; set; }
-            public decimal? latitude { get; set; }
-            public decimal? longitude { get; set; }
-        }
-        
     }
 }
