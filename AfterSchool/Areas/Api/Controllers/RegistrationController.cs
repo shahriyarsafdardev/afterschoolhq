@@ -14,7 +14,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
-namespace AfterSchool.Areas.ReactApi.Controllers
+namespace AfterSchool.Areas.Api.Controllers
 {
     public class ReactController : BaseController
     {
