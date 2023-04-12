@@ -315,6 +315,51 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
+        public ActionResult ThankYou(string id)
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            
+            if (currentUser.IsEmpty())
+                throw new Exception("Unauthorized");
+            
+            var msgs = new SystemMessages();
+            
+            try
+            {
+                RegistrationCommon.ResetRegistrationSession();
+
+                var registration = Registration.LoadByUid(id.ToGuid(), msgs);
+                var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+                var registrant = registration.GetRegistrant(msgs);
+                
+                RegistrantActivity registrantActivity = registration?.GetRegistrantActivity(participationObject);
+                
+                dynamic response = new
+                {
+                    activityDto = new
+                    {
+                        ActivityName = participationObject.Name,
+                        Organization = participationObject.OwnerAccount.Name,
+                        RegistrantFirstName = registrant.FirstName,
+                        FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                        ActivityUrl = participationObject.GetShortHomePageUrl(),
+                        ProviderEmail = participationObject.OwnerAccount.Email,
+                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
+                    }
+                };
+                return Json(
+                    new ApiResponse(msgs,response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
         private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
             SystemMessages msgs)
         {
