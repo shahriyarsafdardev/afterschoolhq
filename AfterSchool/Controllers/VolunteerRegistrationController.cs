@@ -216,12 +216,12 @@ namespace AfterSchool.Controllers
                     LibraryUtilities.SystemErrorLog
                 );
             }
-
-            // if (msgs.HasNoErrors())
-            //     return RedirectToAction("AddHomeAddress");
             
-            if(msgs.HasNoErrors())
+            if(msgs.HasNoErrors() && participationObject.OwnerAccount.HasFeature(FeatureType.AllAgeRegistration))
                 return Redirect($"~/ReactApp/volunteer-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrant.Uid)}");
+            
+            if (msgs.HasNoErrors())
+                return RedirectToAction("AddHomeAddress");
 
             var registrationAccount = regaccount.IsGuid() ? Account.LoadByUid(regaccount.ToGuid(), msgs) : null;
             var questions = RegistrationCommon.GetAllDefaultVolunteerPersonalInformationQuestions(msgs);

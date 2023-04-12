@@ -28,7 +28,7 @@
             </li>*@
 
             <li class="@(controller == "profile" ? "active" : "")">
-                <a href="@Url.Action("EditPersonal", "profile", new {id = SessionVariables.CurrentUser.GetMasterVolunteerRegistrant().Uid})">
+                <a href="reactapp/updatevolunteerprofile/@SessionVariables.CurrentUser.GetMasterVolunteerRegistrant().Uid">
                     <i class="icon s7-user"></i><span>Volunteer Profile</span>
                 </a>
             </li>
