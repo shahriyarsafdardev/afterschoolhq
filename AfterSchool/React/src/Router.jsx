@@ -32,6 +32,14 @@ function Router() {
           element: <ThankYouSection />
         },
         {
+          path: 'reactapp/volunteer-registration/thankyou/:registrationId',
+          element: <ThankYouSection volunteerRegistration={true} />
+        },
+        {
+          path: 'reactapp/volunteer-registration/:accountName/:activityName/:regUid',
+          element: <VolunteerRegistration />
+        },
+        {
           path: 'reactapp/registration/payment/:registrationId',
           element: <AlreadyPaidSection />
         }
@@ -40,6 +48,10 @@ function Router() {
     {
       path: '/reactapp/updateprofile/:id',
       element: <UpdateProfile />
+    },
+    {
+      path: 'reactapp/updatevolunteerprofile/:id',
+      element: <UpdateVolunteerProfile />
     },
     {
       path: '*',
@@ -60,6 +72,12 @@ const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProf
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
+);
+const UpdateVolunteerProfile = Loadable(
+  lazy(() => import('pages/UpdateVolunteerProfile/UpdateVolunteerProfile'))
+);
+const VolunteerRegistration = Loadable(
+  lazy(() => import('pages/VolunteerRegistration/VolunteerRegistration'))
 );
 
 export default Router;

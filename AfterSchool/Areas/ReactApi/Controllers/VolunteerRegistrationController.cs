@@ -235,11 +235,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                             currentUser,
                             Request,
                             amsgs, adc);
-
-                        if (json.groupid.ToInteger() == -1)
-                        {
-                            currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
-                        }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -270,6 +265,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var account = Account.LoadByUniqueName(json.accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
                 var currentRegistrant = Registrant.LoadByUid(json.registrantUid.ToGuid(), msgs);
+                SessionVariables.CurrentRegistrant = currentRegistrant;
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
@@ -452,7 +448,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                var form = FormService.GetAdministratorAccountStudentForm(msgs);
+                var form = FormService.GetAdministratorAccountVolunteerForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
                 
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);

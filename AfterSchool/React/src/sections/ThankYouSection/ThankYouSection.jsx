@@ -1,4 +1,5 @@
 import { useSnackbar } from 'notistack';
+import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Link, Typography, Icon } from '@material-ui/core';
 
@@ -9,10 +10,11 @@ import { useThankYou } from 'redux/hooks';
 import ShareButton from 'components/ShareButton';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 
-function ThankYouSection() {
+function ThankYouSection({ volunteerRegistration = false }) {
   const classes = useStyles();
   const { navigateTo } = utils;
   const { accountUrl } = apiRoutes;
+  const { registrationId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
@@ -29,7 +31,7 @@ function ThankYouSection() {
   } = useThankYou();
 
   useEffect(() => {
-    loadThankYouScreenData(window.location.pathname.split('/')[4]);
+    loadThankYouScreenData(registrationId, volunteerRegistration);
   }, []);
 
   const copyToClipBoard = async copyMe => {
@@ -65,23 +67,37 @@ function ThankYouSection() {
           <b>{RegistrantFirstName}</b> has been registered for <b>{ActivityName}</b>
         </Typography>
         <Box>
-          <Button
-            color="primary"
-            variant="outlined"
-            className={classes.anotherActivityButton}
-            onClick={() => navigateTo(FindAnotherActivityUrl)}
-          >
-            Find Another Activity
-          </Button>
-          <Button
-            color="primary"
-            className={classes.viewAccountButton}
-            variant="contained"
-            type="submit"
-            onClick={() => navigateTo(accountUrl)}
-          >
-            View Account
-          </Button>
+          {volunteerRegistration ? (
+            <Button
+              color="primary"
+              className={classes.findOpportunityButton}
+              variant="contained"
+              type="submit"
+              onClick={() => navigateTo(FindAnotherActivityUrl)}
+            >
+              Find Another Oppurtunity
+            </Button>
+          ) : (
+            <>
+              <Button
+                color="primary"
+                variant="outlined"
+                className={classes.anotherActivityButton}
+                onClick={() => navigateTo(FindAnotherActivityUrl)}
+              >
+                Find Another Activity
+              </Button>
+              <Button
+                color="primary"
+                className={classes.viewAccountButton}
+                variant="contained"
+                type="submit"
+                onClick={() => navigateTo(accountUrl)}
+              >
+                View Account
+              </Button>
+            </>
+          )}
         </Box>
 
         {isParent && (
