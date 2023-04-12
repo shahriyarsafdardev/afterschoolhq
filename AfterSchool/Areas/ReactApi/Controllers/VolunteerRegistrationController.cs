@@ -360,6 +360,172 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             }
         }
         
+        [HttpGet]
+        public ActionResult GetRegistrantForm(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            try
+            {
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+                var registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+                var form = FormService.GetAdministratorAccountVolunteerForm(msgs);
+                var questions = form.GetAllQuestions(msgs);
+                var questionGroups = form.GetQuestionGroups(msgs);
+
+                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
+                foreach (var question in questions)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                             ID = question.ID.Value,
+                             FormQuestionGroupId = question.FormQuestionGroupId,
+                             Text = question.Text,
+                             Description = question.Description,
+                             GroupTitle = question.FormQuestionGroupName,
+                             Options = question.Options,
+                             IsRequired = question.IsRequired,
+                             DisplayOrder = question.DisplayOrder,
+                             IsActive = question.IsActive,
+                             IsDeleted = question.IsDeleted,
+                             QuestionTypeId = question.QuestionTypeId,
+                             QuestionDataTypeId = question.QuestionDataTypeId,
+                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+                foreach (var questionGroup in questionGroups)
+                {
+                    formQuestionGroupDtoList.Add(
+                        new FormQuestionGroupDto()
+                        {
+                            FormId = questionGroup.FormId,
+                            Name = questionGroup.Name,
+                            DisplayOrder = questionGroup.DisplayOrder,
+                            QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                        }
+                    );
+                }
+                foreach (var questionAnswer in registrant.GetAnswers(msgs))
+                {
+                    formQuestionAnswerDtoList.Add(
+                        new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText,
+                            Text = questionAnswer.Text
+                        }
+                    );
+                }
+                
+                var registrantType = registrant.PersonTypeId.ToString();
+
+                dynamic response = new
+                {
+                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    registrantType
+                };
+                return Json(
+                    new ApiResponse(msgs,response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult UpdateProfile(QuestionAnswerResponse json)
+        {
+            var msgs = new SystemMessages();
+            Registrant registrant = null;
+
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                var form = FormService.GetAdministratorAccountStudentForm(msgs);
+                var questions = form.GetAllQuestions(msgs);
+                
+                registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+
+                var collection = HttpUtility.ParseQueryString(json.answers);
+
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
+                qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
+                {
+                    switch (qvm.Question.QuestionDataTypeId)
+                    {
+                        case QuestionDataType.RegistrantMobilePhone:
+                        case QuestionDataType.RegistrantDoctorPhone:
+                        case QuestionDataType.RegistrantHomePhone:
+                        case QuestionDataType.RegistrantWorkPhone:
+                        case QuestionDataType.RegistrantPhone1:
+                        case QuestionDataType.RegistrantPhone2:
+                        case QuestionDataType.EmergencyContact1Phone:
+                        case QuestionDataType.EmergencyContact2Phone:
+                        case QuestionDataType.EmergencyContact3Phone:
+                        case QuestionDataType.EmergencyContact1Phone2:
+                        case QuestionDataType.EmergencyContact2Phone2:
+                        case QuestionDataType.EmergencyContact3Phone2:
+                        case QuestionDataType.EmergencyContact1Phone3:
+                        case QuestionDataType.EmergencyContact2Phone3:
+                        case QuestionDataType.EmergencyContact3Phone3:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.Contains("null") && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.PhoneRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid phone number", MessageType.UserError);
+                            break;
+                        case QuestionDataType.RegistrantEmail:
+                        case QuestionDataType.Parent1Email:
+                        case QuestionDataType.Parent2Email:
+                            if (qvm.Value.IsNotEmpty() && !qvm.Value.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                msgs.Add($"{qvm.Question.Text} must be a valid email", MessageType.UserError);
+                            break;
+                    }
+                });
+
+                if (msgs.HasNoErrors())
+                    Database.ExecuteTransaction
+                        (
+                            action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                            {
+                                qvms.ForEach(qvm =>
+                                {
+                                    registrant.AddOrUpdateAnswer(
+                                        answerText: qvm.Value.IfEmpty("").Trim(),
+                                        question: qvm.Question,
+                                        loggedInUser: currentUser,
+                                        msgs: amsgs,
+                                        dc: adc);
+                                });
+
+                            },
+                            onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                            onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                            onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                        );
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
         private static void ProcessRegistration(Registrant currentRegistrant, ParticipationObject participationObject, Registration registration,
             SystemMessages msgs)
         {
