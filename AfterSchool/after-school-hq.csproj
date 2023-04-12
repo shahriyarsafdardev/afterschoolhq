@@ -627,8 +627,8 @@
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
     <Compile Include="Areas\Org\Models\ReportResults.cs" />
-    <Compile Include="Areas\ReactApi\Controllers\ReactController.cs" />
-    <Compile Include="Areas\ReactApi\ReactApiAreaRegistration.cs" />
+    <Compile Include="Areas\Api\Controllers\RegistrationController.cs" />
+    <Compile Include="Areas\Api\ApiAreaRegistration.cs" />
     <Compile Include="Areas\User\Controllers\ActivityController.cs" />
     <Compile Include="Areas\User\Controllers\FamilyController.cs" />
     <Compile Include="Areas\User\Controllers\HomeController.cs" />
