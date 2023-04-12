@@ -40,7 +40,7 @@ export default function NavBar() {
     <>
       <HeaderStyle className={classes.headerWrapper}>
         <Button size="large" variant="text" target="_blank">
-          {activity.Organization || Organization}
+          {activity.Organization || Organization || volunteerActivity.Organization}
         </Button>
         <Box className={classes.outerOption}>
           <I18n />
