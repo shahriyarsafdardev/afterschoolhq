@@ -81,7 +81,9 @@ export const useVolunteerRegistrationActions = () => {
         if (obj) dispatch(setFormData(obj));
 
         dispatch(setMsgs(msgs));
-        if (!msgs.length) dispatch(formDataLoaded());
+        const { RegistrationIsCompleted, CanAccess } = obj?.activityDto;
+
+        if (CanAccess && !RegistrationIsCompleted && !msgs.length) dispatch(formDataLoaded());
       }
     );
   };
