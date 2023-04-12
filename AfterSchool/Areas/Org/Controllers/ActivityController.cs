@@ -1893,8 +1893,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        if (!isongoing.IsBoolean())
-                            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
+                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
 
                         outOfSessionDates =
@@ -3002,7 +3001,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             }
                             else
                             {
-                                attendanceDateText = " for " + raAttendance!.Date.ToLongDateString();
+                                attendanceDateText = " for " + raAttendance.Date.ToLongDateString();
                             }
 
                             // Send email to registrant
@@ -3023,11 +3022,15 @@ namespace AfterSchool.Areas.Org.Controllers
                                     registrantActivity.GetRegistrant(msgs).ID.Value,
                                     msgs)
                                 .ToList();
+
+                            var attendanceRegistrantsPresent =
+                                attendanceRegistrants.Where(attendanceRegistrant => attendanceRegistrant.IsNotEmpty()
+                                                                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser,
+                                                                                        msgs) && checkoutObject.Transaction.IsNotEmpty()
+                                                                                    && !attendanceRegistrant.IsAlreadyBilled &&
+                                                                                    attendanceRegistrant.NumberPresent > 0);
                             
-                            foreach (var attendanceRegistrant in attendanceRegistrants.Where(attendanceRegistrant => attendanceRegistrant.IsNotEmpty()
-                                         && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)
-                                         && (checkoutObject.Transaction).IsNotEmpty()
-                                         && !attendanceRegistrant.IsAlreadyBilled && attendanceRegistrant.NumberPresent > 0))
+                            foreach (var attendanceRegistrant in attendanceRegistrantsPresent)
                             {
                                 attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
                                 msgs.AddRange(attendanceRegistrant.Save());
