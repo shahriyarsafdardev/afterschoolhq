@@ -260,6 +260,9 @@ namespace AfterSchool.Controllers
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
+            
+            if (SessionVariables.CurrentRegistrant?.ProfileStatusId == RegistrantProfileStatus.Completed && SessionVariables.CurrentUser.IsNotEmpty())
+                return RedirectToAction("Index", "Family", new {area = "User"});
 
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
@@ -447,7 +450,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
-            
+
             WebUser user = null;
             Account account = null;
             Registrant registrant = null;
@@ -607,6 +610,7 @@ namespace AfterSchool.Controllers
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc:adc);
+                                
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
 
                                 SessionVariables.CurrentRegistrant = studentReg;
