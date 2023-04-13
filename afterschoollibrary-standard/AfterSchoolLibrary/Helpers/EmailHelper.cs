@@ -1731,8 +1731,8 @@ namespace AfterSchoolLibrary.Helpers
             msgs = msgs ?? new SystemMessages();
 
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
-            var purchaserAccount = checkoutObject.PayingAccount.GetAccountOwner();
-            var billingAccount = checkoutObject.BillingAccount.GetAccountOwner(); 
+            var purchaserWebUser = checkoutObject.PayingAccount.GetAccountOwner();
+            var billingWebUser = checkoutObject.BillingAccount.GetAccountOwner(); 
             var totalCreditCardFees = checkoutObject.PaymentTypeFeeOverrideAmount.Value;
             var postPayPlan = checkoutObject.PostPayPlan;
             var billingPeriodType = postPayPlan.BillingPeriodTypeId.ToString().ToLower();
@@ -1821,11 +1821,11 @@ namespace AfterSchoolLibrary.Helpers
 
             var model = new NameValueCollection
             {
-                {"FirstName", purchaserAccount.FirstName},
+                {"FirstName", purchaserWebUser.FirstName},
                 {"StudentName", registrantName},
-                {"ActivityContactEmail", billingAccount.Email},
-                {"ActivityContactPhone", billingAccount.Phone},
-                {"ActivityContactName", billingAccount.FirstName},
+                {"ActivityContactEmail", billingWebUser.Email},
+                {"ActivityContactPhone", billingWebUser.Phone},
+                {"ActivityContactName", billingWebUser.FirstName},
                 {"LoginLink", Utilities.LoginUrl()},
                 {"AttendanceDate", attendanceDateText},
                 {"RegistrationTable", attendanceDaysToCharge > 0 ? registrationTable : ""},
@@ -1848,7 +1848,7 @@ namespace AfterSchoolLibrary.Helpers
             // Send email to parent for attendance charge
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(purchaserAccount.Email),
+                new EmailAddress(purchaserWebUser.Email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
