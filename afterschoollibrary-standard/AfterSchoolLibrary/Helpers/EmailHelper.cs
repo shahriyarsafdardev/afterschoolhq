@@ -1664,7 +1664,7 @@ namespace AfterSchoolLibrary.Helpers
 
             var model = new NameValueCollection
             {
-                {"FirstName", purchaserAccount.Name},
+                {"FirstName", loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", Utilities.LoginUrl()},
                 {"ActivityName", checkoutObject.ParticipationObject.Name},
