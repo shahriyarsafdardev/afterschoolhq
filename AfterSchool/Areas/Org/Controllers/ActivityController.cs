@@ -4153,7 +4153,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     participationObject,
                     currentUser,
                     period,
-                    "",
+                    "IMPORTED",
                     Request.UserAgent,
                     Request.GetUserHostAddress(),
                     amsgs,
