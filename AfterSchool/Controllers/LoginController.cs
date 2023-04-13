@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Web.Mvc;
+using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.FeatureFlag;
@@ -80,6 +81,10 @@ namespace AfterSchool.Controllers
 
             if (password.IsEmpty())
                 msgs.Add("Password is required", MessageType.UserError);
+
+
+            //if (Utilities.IsLocalHost || LibraryUtilities.Is)
+            msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             WebUser user = null;
 

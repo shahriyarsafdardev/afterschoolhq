@@ -1,8 +1,8 @@
-﻿@using AfterSchoolLibrary.Helpers
+@using AfterSchoolLibrary.Helpers
 @{
     Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages) ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
 }
 
@@ -16,7 +16,7 @@
         height: 100%;
     }
 
-    .form-login-welcome,.form-login-sign {
+    .form-login-welcome, .form-login-sign {
         text-align: left;
     }
 
@@ -44,7 +44,7 @@
     }
 </style>
 <style media="all and (max-width: 1199px)">
-    .form-login-welcome,.form-login-sign {
+    .form-login-welcome, .form-login-sign {
         text-align: center;
     }
 
@@ -153,6 +153,18 @@
                         <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
                     </div>
                     <div class="clearfix"></div>
+                    <div class="padding-bottom-40" style="float: left;">
+                        @*@if (Utilities.IsLocalHost)
+                            {*@
+                        <div class="row">
+                            <div>
+                                @{
+                                    Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                                }
+                            </div>
+                        </div>
+                        @*}*@
+                    </div>
 
                     <div class="form-group login-submit text-center">
                         <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Log In</button>
@@ -222,5 +234,12 @@
                 },
             });
         });
+        $("#form-login").on("submit", function (e) {
+            if (grecaptcha.getResponse().length !== 0) {
+                return true;
+            }
+            $(".recaptcha-error").css("display", "block");
+            e.preventDefault();
+        })
     </script>
 }

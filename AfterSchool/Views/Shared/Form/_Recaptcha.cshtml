@@ -1,22 +1,50 @@
-﻿@model string
+@model string
 @if (Model.IsBlank())
 {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         .g-recaptcha {
             display: inline-block;
         }
+
+        .recaptcha-error {
+            color: red;
+            font-size: smaller;
+            font-style: italic;
+        }
     </style>
-    <div class="g-recaptcha" data-sitekey="@AfterSchoolLibrary.Helpers.GoogleHelper.Recaptcha.DataSiteKey"></div>
+    <div class="g-recaptcha" data-sitekey="@AfterSchoolLibrary.Helpers.GoogleHelper.Recaptcha.DataSiteKey" data-size="normal" data-callback="callback"></div>
+    <span class="recaptcha-error" style="display:none;">Please complete the reCAPTCHA verification.</span>
+    <script>
+        function callback() {
+            $(".recaptcha-error").css("display", "none");;
+        }
+    </script>
 }
 else
 {
     <div id="@Model"></div>
-
     <script>
         AHQRecaptcha.writeScriptTag();
         AHQRecaptcha.add('@Model', function () {
-            return grecaptcha.render('@Model', { 'sitekey': '@AfterSchoolLibrary.Helpers.GoogleHelper.Recaptcha.DataSiteKey' });
+            return grecaptcha.render('@Model', {
+                'sitekey': '@AfterSchoolLibrary.Helpers.GoogleHelper.Recaptcha.DataSiteKey',
+                'size': 'normal'
+            });
         });
+        // Add client-side validation
+        $('form').submit(function (event) {
+            if (!isCaptchaChecked()) {
+                event.preventDefault();
+                console.log('reCAPTCHA verification failed.');
+                $('.recaptcha-error').show();
+            } else {
+                console.log('reCAPTCHA verification passed.');
+            }
+        });
+        function isCaptchaChecked() {
+            return grecaptcha && grecaptcha.getResponse().length !== 0;
+        }
     </script>
 }
