@@ -564,51 +564,48 @@ namespace AfterSchoolLibrary.Models
             int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var existingInstances = this.GetInstances(false, msgs, dc);
+            var existingInstances = GetInstances(false, msgs, dc);
 
             // IN SESSION
             // delete in session instances
-            if (!this.IsOngoing)
-            {
-                existingInstances
-                    .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
-                    .Where(instance => !scheduleDates
-                        .Any(newInstance =>
-                            newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
-                            newInstance.EndDateTime.Value == instance.EndDateTime.Value
-                        )
+            existingInstances
+                .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                .Where(instance => !scheduleDates
+                    .Any(newInstance =>
+                        newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
+                        newInstance.EndDateTime.Value == instance.EndDateTime.Value
                     )
-                    .ToList()
-                    .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
+                )
+                .ToList()
+                .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
 
-                // add new in session instances
-                scheduleDates
-                    .Where(newInstance =>
-                        !existingInstances
-                            .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
-                            .Any(instance =>
-                                instance.StartDateTime.Value == newInstance.StartDateTime.Value &&
-                                instance.EndDateTime.Value == newInstance.EndDateTime.Value
-                            ))
-                    .ToList()
-                    .ForEach(instance => this.AddInstance(instance, InstanceType.InSession, loggedInUserId, msgs, dc));
+            // add new in session instances
+            scheduleDates
+                .Where(newInstance =>
+                    !existingInstances
+                        .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                        .Any(instance =>
+                            instance.StartDateTime.Value == newInstance.StartDateTime.Value &&
+                            instance.EndDateTime.Value == newInstance.EndDateTime.Value
+                        ))
+                .ToList()
+                .ForEach(instance => AddInstance(instance, InstanceType.InSession, loggedInUserId, msgs, dc));
 
-                // update instances
-                existingInstances
-                    .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
-                    .Where(instance => scheduleDates
-                        .Any(newInstance =>
-                            newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
-                            newInstance.EndDateTime.Value == instance.EndDateTime.Value
-                        )
+            // update instances
+            existingInstances
+                .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                .Where(instance => scheduleDates
+                    .Any(newInstance =>
+                        newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
+                        newInstance.EndDateTime.Value == instance.EndDateTime.Value
                     )
-                    .ToList()
-                    .ForEach(instance => this.UpdateInstance(instance, scheduleDates
-                        .FirstOrDefault(newInstance =>
-                            newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
-                            newInstance.EndDateTime.Value == instance.EndDateTime.Value
-                        )?.SeatsAvailable, loggedInUserId, msgs, dc));
-            }
+                )
+                .ToList()
+                .ForEach(instance => UpdateInstance(instance, scheduleDates
+                    .FirstOrDefault(newInstance =>
+                        newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
+                        newInstance.EndDateTime.Value == instance.EndDateTime.Value
+                    )?.SeatsAvailable, loggedInUserId, msgs, dc));
 
             // OUT OF SESSION
             // delete out of session instances
