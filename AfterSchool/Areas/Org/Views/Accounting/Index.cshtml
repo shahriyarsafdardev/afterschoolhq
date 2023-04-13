@@ -620,7 +620,7 @@
                 'uid=' + uid + '&amount=' + amount + '&reason=' + encodeURIComponent(reason),
                 function (data) {
                     if (data && data.status == 'ok') {
-                        refundTransaction($('#refund-request-transaction-uid').val(),data.uid, $('#refund-request-payment-source-type').val());                  
+                        refundTransaction(uid,amount,data.uid, $('#refund-request-payment-source-type').val());                  
                     } else {
                         Notifications.showErrors(data.messages);
                     }
@@ -630,8 +630,8 @@
 
     }
 
-    function refundTransaction(transactionUid,uid) {
-        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?request=' + uid;
+    function refundTransaction(transactionUid,amount,uid) {
+        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?amount='+amount+'&request=' + uid;
         $.get(
             url,
             function (data) {

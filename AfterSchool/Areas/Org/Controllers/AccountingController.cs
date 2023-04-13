@@ -526,49 +526,55 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Refund(string id, string amount, string request)
         {
             var msgs = new SystemMessages();
-            if (id.IsGuid() && amount.IsNumber() && amount.ToDecimal() > 0)
+            if (id.IsEmpty())
             {
-                var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
-                PaymentSourceType? paymentsource = transaction.PaymentSourceTypeId;
-                Transaction refund = new Transaction();
-                
-                if (request.IsNotEmpty())
-                {
-                    if (request.IsGuid())
-                    {
-                        var refundRequest = RefundRequest.LoadByUid(request.ToGuid(), msgs);
-                        
-                        if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
-                            refund = refundRequest.ApproveAndProcessRequest(
-                                true, 
-                                false, 
-                                false,
-                                amount.ToDecimal(),
-                                paymentsource.Value,
-                                SessionVariables.CurrentUser, 
-                                msgs);
-                    }
-                    else
-                        msgs.Add("Invalid Request", MessageType.UserError);
-                }
-                else
-                {
-                    if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        refund = transaction.RefundPayerFullAmount(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
-                    else
-                        msgs.Add("Invalid Request", MessageType.UserError);
-                }
-
-                if (msgs.HasNoErrors())
-                {
-                    SessionVariables.WebSession.LogRefundCompleted(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Refunded, refund.Amount.ToCurrency(), transaction, msgs);
-                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
-                }
-                    
+                msgs.Add("Invalid ID", MessageType.UserError);
+            }
+            if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
+            {
+                msgs.Add("Invalid Amount", MessageType.UserError);
             }
 
+            if (msgs.HasErrors()) return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
+                JsonRequestBehavior.AllowGet);
+            
+            var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+            PaymentSourceType? paymentSource = transaction.PaymentSourceTypeId;
+            var refund = new Transaction();
+                
+            if (request.IsNotEmpty())
+            {
+                if (request.IsGuid())
+                {
+                    var refundRequest = RefundRequest.LoadByUid(request.ToGuid(), msgs);
+                        
+                    if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
+                        refund = refundRequest.ApproveAndProcessRequest(
+                            true, 
+                            false, 
+                            false,
+                            amount.ToDecimal(),
+                            paymentSource.Value,
+                            SessionVariables.CurrentUser, 
+                            msgs);
+                }
+                else
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
+            else
+            {
+                if (transaction.IsNotEmpty() && !transaction.HasRefunds())
+                    refund = transaction.RefundPayerFullAmount(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+                else
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
 
-            return Json(new { status = "error", messages = msgs.ToList().Select(msg => new { msg.Text }) }, JsonRequestBehavior.AllowGet);
+            if (msgs.HasErrors()) return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
+                JsonRequestBehavior.AllowGet);
+            
+            SessionVariables.WebSession.LogRefundCompleted(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Refunded, 
+                refund.Amount.ToCurrency(), transaction, msgs);
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
