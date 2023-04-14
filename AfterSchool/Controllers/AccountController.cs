@@ -261,9 +261,6 @@ namespace AfterSchool.Controllers
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
             
-            if (SessionVariables.CurrentRegistrant?.ProfileStatusId == RegistrantProfileStatus.Completed && SessionVariables.CurrentUser.IsNotEmpty())
-                return RedirectToAction("Index", "Family", new {area = "User"});
-
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             Account registrationAccount = null;
