@@ -1701,7 +1701,7 @@ namespace AfterSchoolLibrary.Helpers
             // Send email to registerer
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(purchaserAccount.Email),
+                new EmailAddress(loggedInUser.Email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
