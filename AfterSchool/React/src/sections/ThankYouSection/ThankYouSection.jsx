@@ -12,7 +12,7 @@ import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 function ThankYouSection() {
   const classes = useStyles();
   const { navigateTo } = utils;
-  const { accountUrl, registerForNewChildUrl } = apiRoutes;
+  const { accountUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
@@ -30,11 +30,6 @@ function ThankYouSection() {
 
   useEffect(() => {
     loadThankYouScreenData(window.location.pathname.split('/')[4]);
-    //Restrict user not to go back
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function() {
-      window.history.pushState(null, '', window.location.href);
-    };
   }, []);
 
   const copyToClipBoard = async copyMe => {
