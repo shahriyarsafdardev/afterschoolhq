@@ -3585,11 +3585,18 @@ namespace AfterSchool.Areas.Org.Controllers
                                     {
                                         var approvalDate = reader.GetField<DateTime>(headers.IndexOf("Import Data - Date Reviewed"));
                                         
+                                        var expirationDate = approvalDate.AddYears(1);
+                                        var todayDate = DateTime.UtcNow;
+                                        var extendedDate = DateTime.UtcNow.ToString("07/01/2023").ToDateTime();
+
+                                        if ((expirationDate - todayDate).TotalDays <= 30)
+                                            expirationDate = extendedDate;
+                                        
                                         VolunteerApprovalService.CreateNewApproval(user.ID.Value,
                                             currentAccount.FiscalAccountId,
                                             ApprovalStatus.Approved,
                                             "Approved",
-                                            approvalDate.AddYears(1),
+                                            expirationDate,
                                             currentUser,
                                             approvalDate,
                                             amsgs,adc
