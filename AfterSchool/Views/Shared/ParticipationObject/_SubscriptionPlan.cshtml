@@ -31,6 +31,7 @@
 
             <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
         }
+        <span>@(Model.IsCheckoutCost ? "" : ")")</span>
         </span>
 
         @if (subscriptionPlan.RegFeeAsDownPayment && !Model.ParticipationObject.IsRegistrationFree)

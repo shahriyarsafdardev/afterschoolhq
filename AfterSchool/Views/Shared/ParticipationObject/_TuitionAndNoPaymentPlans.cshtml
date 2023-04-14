@@ -15,7 +15,18 @@
         }
         else
         {
-            <span>@youOrProvider.ToProperCase() will receive</span>
+            var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.FirstOrDefault();
+            if (!Model.ParticipationObject.IsRegistrationFree)
+            {
+                <span>One-time fee of <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> plus <strong>@subscriptionPlan.CostPerPeriod.ToCurrency()
+                    </strong> every <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong></span>
+            }
+            else
+            {
+                <span>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase()ly payment of 
+                    <strong>@subscriptionPlan.CostPerPeriod.ToCurrency()</strong></span>
+            }
+            <span>(@youOrProvider will receive</span>
         }
     }
 
@@ -30,14 +41,13 @@
                 }
                 else
                 {
-                    <span>@youOrProvider.ToProperCase() will receive</span>
+                    <span>One-time fee of <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> (@youOrProvider will receive</span>
                 }
             }
             
             <strong>
                 @((Model.ParticipationObject.Cost - (Model.IsCheckoutCost ? 0 : Model.ParticipationObject.GetConvenienceFee())).ToCurrency())
             </strong>
-            
             @if (!Model.ParticipationObject.SubscriptionPlans.Any())
             {
                 <span>
@@ -48,9 +58,13 @@
                     }
                     else
                     {
-                        <span>registration</span>
+                        <span>registration@(!Model.IsCheckoutCost ? ")" : "")</span>
                     }
                 </span>
+            }
+            else
+            {
+                @(Model.IsCheckoutCost ? "" : " per registration ")
             }
 
         </span>
