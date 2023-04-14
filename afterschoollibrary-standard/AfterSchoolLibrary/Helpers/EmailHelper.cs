@@ -1581,7 +1581,7 @@ namespace AfterSchoolLibrary.Helpers
 
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
             var purchaserAccount = checkoutObject.PayingAccount;
-            var purchaser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
+            var purchaserWebuser = checkoutObject.PayingAccount.GetAccountOwner(msgs, dc);
             var billingAccount = checkoutObject.BillingAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var masterRegistrant = checkoutObject.MasterRegistrant;
@@ -1664,7 +1664,7 @@ namespace AfterSchoolLibrary.Helpers
 
             var model = new NameValueCollection
             {
-                {"FirstName", loggedInUser.FirstName},
+                {"FirstName", purchaserWebuser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"LoginLink", Utilities.LoginUrl()},
                 {"ActivityName", checkoutObject.ParticipationObject.Name},
@@ -1701,7 +1701,7 @@ namespace AfterSchoolLibrary.Helpers
             // Send email to registerer
             mailMsgs.AddRange(SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(loggedInUser.Email),
+                new EmailAddress(purchaserWebuser.Email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
