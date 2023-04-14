@@ -338,9 +338,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 return Redirect($"~/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                Utilities.SystemErrorLog(ex);
                 throw;
             }
             
@@ -980,7 +980,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
-                RegistrantActivity registrantActivity = registration?.GetRegistrantActivity(participationObject);
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
                 
                 dynamic response = new
                 {
