@@ -626,7 +626,6 @@
     <Compile Include="Areas\Org\Controllers\ScheduleController.cs" />
     <Compile Include="Areas\Org\Controllers\ServicesController.cs" />
     <Compile Include="Areas\Org\Controllers\UserController.cs" />
-    <Compile Include="Areas\Org\Models\AttendanceSummaryResult.cs" />
     <Compile Include="Areas\Org\Models\ReportResults.cs" />
     <Compile Include="Areas\ReactApi\Controllers\ReactController.cs" />
     <Compile Include="Areas\ReactApi\ReactApiAreaRegistration.cs" />
