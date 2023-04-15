@@ -2573,6 +2573,7 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
+    <Folder Include="Areas\District\Models\" />
     <Folder Include="Areas\Org\Views\Period\" />
     <Folder Include="Areas\Org\Views\Registrant\" />
     <Folder Include="Areas\WebHooks\Models\" />
