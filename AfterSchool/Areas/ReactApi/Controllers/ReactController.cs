@@ -66,6 +66,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 Registrant parentRegistrant = null;
                 Registration registration = null;
                 RegistrantActivity registrantActivity = null;
+                Registrant submittedRecord;
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
@@ -134,8 +135,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
-                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
-                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
+                (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
                 dynamic response = new
                 {
@@ -153,7 +153,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         IsGenderRestricted = participationObject.IsGenderEnforced,
-                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
+                        RegistrationIsCompleted = registration.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),

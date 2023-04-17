@@ -1842,11 +1842,11 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/ReactApp");
-
-            var currentRegistrant = SessionVariables.CurrentRegistrant;
+                return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
+            
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
