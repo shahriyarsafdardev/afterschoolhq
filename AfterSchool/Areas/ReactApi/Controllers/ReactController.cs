@@ -1008,3 +1008,5 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+    }
+}
