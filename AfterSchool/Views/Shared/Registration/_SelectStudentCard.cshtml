@@ -105,7 +105,7 @@
         }
         else
         {
-            if (isGenderRestricted || isGradeRestricted || isAgeRestricted)
+            if (participationObject.ActivityGroupType != ActivityGroupType.Session && (isGenderRestricted || isGradeRestricted || isAgeRestricted))
             {
                 btnText = "Ineligible";
                 disabledText = " disabled=\"disabled\" ";
