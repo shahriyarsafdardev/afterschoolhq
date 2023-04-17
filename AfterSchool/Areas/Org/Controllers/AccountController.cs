@@ -866,7 +866,15 @@ namespace AfterSchool.Areas.Org.Controllers
             foreach (var question in questionsList)
             {
                 var text = Request.Params[$"new-text-{question}"];
-
+                var description = Request.Params[$"new-description-{question}"];
+                if (text != null && text.Length > 400)
+                {
+                    msgs.Add("Question should not exceed 400 characters!", MessageType.UserError);
+                }
+                if (description != null && description.Length > 4000)
+                {
+                    msgs.Add("Description should not exceed 4,000 characters! ", MessageType.UserError);
+                }
                 var formQuestion = new FormQuestion
                 {
                     FormId = formId,
@@ -882,7 +890,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Text = text,
                     Options = Request.Params[$"new-options-text-{question}"],
                     Link = Request.Params[$"new-link-text-{question}"],
-                    Description = Request.Params[$"new-description-{question}"],
+                    Description = description,
                     IsActive = true,
                     IsDeleted = false,
                     IsRequired = Request.Params[$"new-required-{question}"].IsBoolean(),
