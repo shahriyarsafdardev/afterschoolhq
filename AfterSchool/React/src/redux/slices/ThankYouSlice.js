@@ -24,9 +24,9 @@ const ThankYouSlice = createSlice({
 export const useThankYouActions = () => {
   const dispatch = useDispatch();
   const { setData, loadingStart, loadingCompleted } = ThankYouSlice.actions;
-  const loadThankYouScreenData = async id => {
+  const loadThankYouScreenData = async (id, volunteerRegistration = false) => {
     dispatch(loadingStart());
-    const data = await ThankYouRepository.getThankYouScreenData(id);
+    const data = await ThankYouRepository.getThankYouScreenData(id, volunteerRegistration);
     dispatch(setData(data.obj));
     dispatch(loadingCompleted());
   };

@@ -105,6 +105,8 @@ export default class RegistrationService {
         } else {
           buttonText = 'E-Sign and Continue to Payment';
         }
+      } else if (RegistrantType === 'Volunteer') {
+        buttonText = 'Complete Registration';
       } else {
         buttonText = 'Confirm';
       }

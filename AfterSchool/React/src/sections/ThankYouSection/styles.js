@@ -22,6 +22,9 @@ export default makeStyles(theme => ({
   viewAccountButton: {
     marginLeft: 15
   },
+  findOpportunityButton: {
+    marginLeft: 15
+  },
   link: { color: theme.palette.gray.primary },
   shareBoxesWrapper: {
     width: '700px',

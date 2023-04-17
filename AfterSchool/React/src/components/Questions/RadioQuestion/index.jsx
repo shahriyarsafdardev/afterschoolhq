@@ -17,7 +17,13 @@ function RadioQuestion({ question, formik }) {
   const handleRadioChange = ({ target: { value } }) => {
     setFieldValue(ID, JSON.stringify([{ key: value, value }]));
   };
-  const value = values[ID] ? JSON.parse(values[ID])[0].value : '';
+  const value = (() => {
+    if (values[ID]) {
+      const { value, Value } = JSON.parse(values[ID])[0];
+      return value || Value;
+    } else return '';
+  })();
+
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
       <div className={classes.radioGroupWrapper}>
