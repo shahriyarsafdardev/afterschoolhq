@@ -83,7 +83,7 @@ namespace AfterSchool.Controllers
                 msgs.Add("Password is required", MessageType.UserError);
 
 
-            //if (Utilities.IsLocalHost || LibraryUtilities.Is)
+            if (Utilities.IsProduction || Utilities.IsStaging)
             msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
 
             WebUser user = null;
