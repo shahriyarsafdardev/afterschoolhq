@@ -3538,14 +3538,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 reader.Configuration.Delimiter = ",";
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = TrimOptions.Trim;
-                
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var parent1Emails = new List<string>();
 
-                        while (reader.Read())
+                while (reader.Read())
+                {
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
+                            var parent1Emails = new List<string>();
+
                             if (headers.Count == 0)
                             {
                                 reader.ReadHeader();
@@ -3555,7 +3556,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                         headers.Add(header);
                                 }
 
-                                continue;
+                                return;
                             }
 
                             if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
@@ -3570,26 +3571,26 @@ namespace AfterSchool.Areas.Org.Controllers
                                     RegistrationPeriod period = null;
                                     ParticipationObject participationObject = null;
 
-                                    if (!CreateVolunteerAndLoadDataDuringImport(ref registrant,ref registration,ref account,ref user, activity, headers, questions, rows, reader,
-                                            ref participationObject,ref submittedRecord,ref period, currentUser, amsgs, adc))
-                                        continue;
+                                    if (!CreateVolunteerAndLoadDataDuringImport(ref registrant, ref registration, ref account, ref user, activity, headers, questions, rows, reader,
+                                            ref participationObject, ref submittedRecord, ref period, currentUser, amsgs, adc))
+                                        return;
 
                                     SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
-                                    
+
                                     CompleteVolunteerRegistration(account, user, registrant, ref registration, ref submittedRecord,
                                         period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
 
                                     if (amsgs.HasNoErrors())
                                     {
                                         var approvalDate = reader.GetField<DateTime>(headers.IndexOf("Import Data - Date Reviewed"));
-                                        
+
                                         var expirationDate = approvalDate.AddYears(1);
                                         var todayDate = DateTime.UtcNow;
                                         var extendedDate = DateTime.UtcNow.ToString("07/01/2023").ToDateTime();
 
                                         if ((expirationDate - todayDate).TotalDays <= 30)
                                             expirationDate = extendedDate;
-                                        
+
                                         VolunteerApprovalService.CreateNewApproval(user.ID.Value,
                                             currentAccount.FiscalAccountId,
                                             ApprovalStatus.Approved,
@@ -3597,7 +3598,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                             expirationDate,
                                             currentUser,
                                             approvalDate,
-                                            amsgs,adc
+                                            amsgs, adc
                                         );
                                     }
                                 }
@@ -3613,23 +3614,24 @@ namespace AfterSchool.Areas.Org.Controllers
                                 Registrant submittedRecord = null;
                                 RegistrationPeriod period = null;
                                 ParticipationObject participationObject = null;
-                                
+
                                 if (!CreateAndLoadDataDuringImport(activity, headers, questions, reader, createParentAccounts, enableTextMessaging, parent1Emails, ref parentUser, ref parentAccount,
                                     ref student, ref parentRegistrant, ref parent2Registrant, ref registration, ref submittedRecord, ref participationObject, ref period,
                                     currentAccount, currentUser, amsgs, adc))
-                                    continue;
+                                    return;
 
                                 SaveAnswersToRegistrantsDuringImport(headers, questions, reader, createParentAccounts, student, parentRegistrant, parent2Registrant, registration, submittedRecord, currentUser, amsgs, adc);
 
                                 CompleteRegistration(createParentAccounts, parentAccount, student, ref registration, ref submittedRecord,
                                     period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
                             }
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
-                );
+
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                }
             }
 
             ViewBag.CreateAccounts = createaccounts;
