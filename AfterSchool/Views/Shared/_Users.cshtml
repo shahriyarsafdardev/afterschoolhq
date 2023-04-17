@@ -68,11 +68,11 @@
                 <tr>
                     @if (isAfterSchoolAdmin)
                     {
-                        <td>
-                            <a href="@Url.Action("impersonate", "user", new {id = accountId, uid = user.Uid})" class="btn btn-default btn-xs">
-                                <i class="icon icon-left s7-user"></i> Impersonate
-                            </a>
-                        </td>
+                       <td style="@(user.GetUserType(currentAccount) == UserType.SuperAdmin ? "visibility: hidden;" : "visibility: visible;")">
+                           <a href="@(user.GetUserType(currentAccount) == UserType.SuperAdmin ? "" : Url.Action("impersonate", "user", new { id = accountId, uid = user.Uid }) )" class="btn btn-default btn-xs">
+                               <i class="icon icon-left s7-user"></i> Impersonate
+                           </a>
+                       </td>
                     }
                     <td>@user.DisplayName</td>
                     <td>

@@ -24,7 +24,6 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Index(string pn, string rpp, string search)
         {
             var msgs = new SystemMessages();
-            HandleTempMessages(msgs);
             int pageNumber = 1;
             int recordsPerPage = 10;
 
@@ -215,24 +214,13 @@ namespace AfterSchool.Areas.Admin.Controllers
         {
             var msgs = new SystemMessages();
             WebUser user = null;
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
-            UserType userType = new UserType();
-
+           
             if (uid.IsEmpty() && id.IsNumber())
                 user = Account.Load(id.ToInteger()).GetAccountOwner();
             else if (uid.IsGuid())
                 user = WebUser.LoadByUid(uid.ToGuid());
             else
                 msgs.Add("Invalid params", MessageType.UserError);
-
-            userType = user.GetUserType(currentAccount, msgs);
-
-            if (user.Uid == currentUser.Uid)
-                msgs.Add("Cannot Impersonate itself", MessageType.UserError);
-
-            if ((userType == UserType.Administrator || user.GetAccounts(msgs)?.FirstOrDefault().AccountTypeId == AccountType.AfterSchool) && msgs.HasNoErrors())
-                msgs.Add("Admin cannot impersonate another admin", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
@@ -252,8 +240,6 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 SessionVariables.OriginalLoggedInUser = null;
                 ViewBag.Messages = msgs;
-
-                SetTempMessages(msgs);
 
                 if (id.IsNotEmpty())
                     return RedirectToAction("Team", "Account", new { id });

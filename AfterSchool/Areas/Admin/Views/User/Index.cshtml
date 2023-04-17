@@ -1,10 +1,7 @@
 @model List<WebUser>
 @{
-    ViewBag.Title = "Users";
-    var msgs = (SystemMessages)ViewBag.Messages;
+    ViewBag.Title = "Users";   
 }
-
-@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
 <div class="page-head">
     <h2>Users</h2>
