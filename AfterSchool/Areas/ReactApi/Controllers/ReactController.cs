@@ -153,7 +153,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         IsGenderRestricted = participationObject.IsGenderEnforced,
-                        RegistrationIsCompleted = registration.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
+                        RegistrationIsCompleted = registration?.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
