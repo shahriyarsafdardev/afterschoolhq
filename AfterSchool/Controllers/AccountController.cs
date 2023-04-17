@@ -260,7 +260,7 @@ namespace AfterSchool.Controllers
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
                 return redirectResult;
-
+            
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             Account registrationAccount = null;
@@ -276,6 +276,8 @@ namespace AfterSchool.Controllers
 
                 return HttpNotFound();
             }
+
+            AddNoCacheHeaders();
 
             var questions = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
 
@@ -446,6 +448,11 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
 
+            WebUser user = null;
+            Account account = null;
+            Registrant registrant = null;
+            Registrant studentReg = null;
+
             var allQuestionsForQuestionGroup = RegistrationCommon.GetAllDefaultPersonalInformationQuestions(msgs);
             var getStartedAssembler = new GetStartedAssembler(featureFlagRepository);
             var qvms = getStartedAssembler.FilterAndTransformQuestionsForAllAgeRegistration(currentUser, allQuestionsForQuestionGroup, Request.Params);
@@ -528,10 +535,6 @@ namespace AfterSchool.Controllers
                 if (phone.Value.IsEmpty())
                     textnotifications = "";
 
-                WebUser user = null;
-                Account account = null;
-                Registrant registrant = null;
-
                 Database.ExecuteTransaction
                 (
                     (amsgs, adc) =>
@@ -592,7 +595,7 @@ namespace AfterSchool.Controllers
 
                             if (registrant.IsParentOrGuardian)
                             {
-                                var studentReg = account.CreateParentOrStudentRegistrant(
+                                studentReg = account.CreateParentOrStudentRegistrant(
                                     registrantOwner: null,
                                     canBeAccessedBy: user.AsList(),
                                     registrantType: RegistrantType.Individual,
@@ -604,6 +607,7 @@ namespace AfterSchool.Controllers
                                     loggedInUser: user,
                                     msgs: amsgs,
                                     dc:adc);
+                                
                                 RegistrationCommon.MapParent1AllAnswersToStudent(registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
 
                                 SessionVariables.CurrentRegistrant = studentReg;
@@ -621,7 +625,7 @@ namespace AfterSchool.Controllers
             }
             
             if(msgs.HasNoErrors())
-                return Redirect("~/ReactApp");
+                return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrantPersonType == RegistrantPersonType.Parent ? studentReg.Uid : registrant.Uid)}");
             
             Account registrationAccount = null;
             
@@ -1045,7 +1049,7 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
             if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
-                return Redirect("~/reactapp/?newChild=1");
+                return RedirectToAction("CreateChildRegistrant", "React", new {area = "ReactApi", accountName = participationObject.OwnerAccount.UniqueName , activityName = participationObject.UniqueName });
 
             var msgs = new SystemMessages();
             var adminAccountForm = FormService.GetAdministratorAccountStudentForm(msgs);
@@ -2992,6 +2996,13 @@ namespace AfterSchool.Controllers
                 return RegistrationCommon.GetAllParticipationObjectsForCheckout(registration, msgs);
 
             return null;
+        }
+        
+        private void AddNoCacheHeaders()
+        {
+            Response.AppendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+            Response.AppendHeader("Pragma", "no-cache"); // HTTP 1.0.
+            Response.AppendHeader("Expires", "0"); // Proxies.
         }
 
         #endregion

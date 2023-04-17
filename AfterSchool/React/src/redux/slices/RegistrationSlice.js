@@ -1,8 +1,9 @@
 import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
-import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+
 import schoolField from 'constants/schoolField';
+import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import RegistrationRepository from 'repository/RegistrationRepository';
 
@@ -30,23 +31,32 @@ const RegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
+      const {
+        CanAccess,
+        RegistrantType,
+        SchoolLocation,
+        IsAgeRestricted,
+        IsGradeRestricted,
+        IsGenderRestricted,
+        RegistrationIsCompleted
+      } = activityDto;
+
+      const isProhibited = RegistrationIsCompleted || !CanAccess;
+      if (isProhibited) return handleRedirection(activityDto);
+
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
-        activityDto.RegistrantType,
-        activityDto.IsGradeRestricted,
-        activityDto.IsAgeRestricted,
-        activityDto.IsGenderRestricted
+        RegistrantType,
+        IsGradeRestricted,
+        IsAgeRestricted,
+        IsGenderRestricted
       );
 
-      state.questions = [
-        ...questions,
-        ...formQuestionUpdated,
-        schoolField(activityDto.RegistrantType)
-      ];
+      state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
       state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
-      state.school = activityDto.SchoolLocation || {};
-      state.noSchool = isEmpty(activityDto.SchoolLocation) ? true : false;
+      state.school = SchoolLocation || {};
+      state.noSchool = isEmpty(SchoolLocation) ? true : false;
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
@@ -80,12 +90,17 @@ export const useRegistrationActions = () => {
 
   const loaded = () => dispatch(formDataLoaded());
 
-  const loadFormData = async (newChild = '0') => {
+  const loadFormData = async (newChild = false, accountName, activityName, registrantUid) => {
     dispatch(loadingFormData());
-    await RegistrationRepository.getFormData(newChild).then(({ obj, msgs }) => {
+    await RegistrationRepository.getFormData(
+      newChild,
+      accountName,
+      activityName,
+      registrantUid
+    ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
-      if (!msgs.length) dispatch(formDataLoaded());
+      if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) dispatch(formDataLoaded());
     });
   };
 
@@ -93,12 +108,18 @@ export const useRegistrationActions = () => {
     { answers, answerQuery, formData },
     lastSection,
     schoolLocationID,
-    newChild
+    newChild,
+    accountName,
+    activityName,
+    regUid
   ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
-    formData.append('newChild', newChild);
     formData.append('groupId', groupId);
+    formData.append('newChild', newChild);
+    formData.append('registrantUid', regUid);
+    formData.append('accountName', accountName);
+    formData.append('activityName', activityName);
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 

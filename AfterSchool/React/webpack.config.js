@@ -7,7 +7,8 @@ module.exports = {
   entry: ['babel-polyfill', './src/index.jsx'],
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    chunkFilename: '[name].[contenthash].js'
   },
   module: {
     rules: [
@@ -31,7 +32,6 @@ module.exports = {
       }
     ]
   },
-  devtool: 'inline-source-map',
   plugins: [
     new WebpackNotifierPlugin(),
     new BrowserSyncPlugin(),

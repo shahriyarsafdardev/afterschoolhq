@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult GetForm(int? id)
+        public ActionResult GetForm(string accountName, string activityName, string registrantUid)
         {
             var msgs = new SystemMessages();
             try
@@ -59,13 +59,17 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized User");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
                 Registrant parentRegistrant = null;
+                Registration registration = null;
+                RegistrantActivity registrantActivity = null;
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
                                 
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var participationObject = activity.GetParticipationObject(msgs);
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
@@ -129,6 +133,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
+
                 dynamic response = new
                 {
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
@@ -144,7 +151,11 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
-                        IsGenderRestricted = participationObject.IsGenderEnforced
+                        IsGenderRestricted = participationObject.IsGenderEnforced,
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
+                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                        RegistrationUid = registration?.Uid,
+                        IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                     }
                 };
                 
@@ -276,33 +287,26 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpGet]
-        public ActionResult GetNewChildForm()
+        public ActionResult CreateChildRegistrant(string accountName, string activityName)
         {
             var msgs = new SystemMessages();
+
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                
-                if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized");
-                
                 var currentAccount = SessionVariables.CurrentAccount;
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-                var activity = participationObject.GetActivity();
-                var questions = participationObject.Form.GetAllQuestions(msgs);
-                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var participationObject = activity.GetParticipationObject(msgs);
                 Registrant studentReg = null;
                 
                 Database.ExecuteTransaction
-                (
-                    (amsgs, adc) =>
-                    {
-                        if (currentRegistrant.IsEmpty())
+                    (
+                        (amsgs, adc) =>
                         {
                             studentReg = currentAccount.CreateParentOrStudentRegistrant(
                                 registrantOwner: null,
@@ -316,28 +320,52 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                                 loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc : adc);
-                        
+                            
                             if(parentRegistrant.IsNotEmpty())
                                 RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                
+                    
                             if(parent2Registrant.IsNotEmpty())
                                 RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                        }
-                    },
-                    smsgs =>
-                    {
-                        msgs.AddRange(smsgs);
-
-                        if (studentReg.IsNotEmpty())
+                        },
+                        smsgs =>
                         {
+                            msgs.AddRange(smsgs);
                             SessionVariables.CurrentRegistrant = studentReg;
-                            currentRegistrant = studentReg;
-                        }
-                    },
-                    fmsgs => msgs.AddRange(fmsgs),
-                    emsgs => throw new Exception(emsgs.ToString())
-                );
+                        },
+                        fmsgs => msgs.AddRange(fmsgs),
+                        emsgs => throw new Exception(emsgs.ToString())
+                    );
                 
+                return Redirect($"~/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}");
+            }
+            catch (Exception ex)
+            {
+                Utilities.SystemErrorLog(ex);
+                throw;
+            }
+            
+        }
+        
+        [HttpGet]
+        public ActionResult GetNewChildForm(string accountName, string activityName, string registrantUid)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+                
+                var currentAccount = SessionVariables.CurrentAccount;
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                var participationObject = activity.GetParticipationObject(msgs);
+                var questions = participationObject.Form.GetAllQuestions(msgs);
+                var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                Registration registration = null;
+
                 var formQuestionDtoList = new List<FormQuestionDto>();
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
@@ -389,6 +417,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         }
                     );
                 }
+                
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
+                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
 
                 dynamic response = new
                 {
@@ -402,7 +433,11 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
-                        IsGenderRestricted = participationObject.IsGenderEnforced
+                        IsGenderRestricted = participationObject.IsGenderEnforced,
+                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
+                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                        RegistrationUid = registration?.Uid,
+                        IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                     }
                 };
                 
@@ -579,7 +614,9 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(json.accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
+                var currentRegistrant = Registrant.LoadByUid(json.registrantUid.ToGuid(), msgs);
                 var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).PersonTypeId;
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
@@ -588,7 +625,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     throw new Exception("Unauthorized");
 
                 //var group = Regex.Match(json.groupid, @"\d+").Value;
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
@@ -737,10 +774,6 @@ namespace AfterSchool.Areas.ReactApi.Controllers
 
                         if (json.groupid.ToInteger() == -1)
                         {
-                            currentRegistrant.SetProfileAsCompleted(currentUser, amsgs, adc);
-                            parentRegistrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
-                            parent2Registrant?.SetProfileAsCompleted(currentUser, amsgs, adc);
-
                             if (json.newChild != -1)
                             {
                                 if(currentUserPersonType == RegistrantPersonType.Parent)
@@ -781,7 +814,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                var currentRegistrant = SessionVariables.CurrentRegistrant;
+                var account = Account.LoadByUniqueName(json.accountName, msgs);
+                var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
+                var currentRegistrant = Registrant.LoadByUid(json.registrantUid.ToGuid(), msgs);
+                
+                var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
+                var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
@@ -789,12 +827,19 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 if (json.esignature.IsEmpty())
                     msgs.Add("E-signature is required", MessageType.UserError);                
 
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    currentRegistrant.SetProfileAsCompleted(currentUser, msgs);
+                    parentRegistrant?.SetProfileAsCompleted(currentUser, msgs);
+                    parent2Registrant?.SetProfileAsCompleted(currentUser, msgs);
+                }
                 
                 if(participationObject.IsFree)
                 {
@@ -931,6 +976,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
                 
                 dynamic response = new
                 {
@@ -942,7 +988,10 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         isParent = currentUserRegistrant.IsParentOrGuardian,
-                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl()
+                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
+                        AmountPaid = registrantActivity?.GetAmountPaid(msgs),
+                        ProviderEmail = participationObject.OwnerAccount.Email,
+                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
                     }
                 };
                 
@@ -1050,6 +1099,12 @@ namespace AfterSchool.Areas.ReactApi.Controllers
             
             public int? newChild { get; set; }
             public string registrantId { get; set; }
+            
+            public string registrantUid { get; set; }
+            
+            public string accountName { get; set; }
+            
+            public string activityName { get; set; }
         }
         
         public class LocationDto

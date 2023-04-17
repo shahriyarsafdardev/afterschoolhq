@@ -12,7 +12,7 @@ import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 function ThankYouSection() {
   const classes = useStyles();
   const { navigateTo } = utils;
-  const { accountUrl, registerForNewChildUrl } = apiRoutes;
+  const { accountUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
 
