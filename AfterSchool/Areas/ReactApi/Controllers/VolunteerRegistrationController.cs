@@ -50,6 +50,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 
                 Registration registration = null;
                 RegistrantActivity registrantActivity = null;
+                Registrant submittedRecord;
 
                 var participationObject = activity.GetParticipationObject(msgs);
                 var form = participationObject.Form;
@@ -108,8 +109,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                     );
                 }
 
-                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
-                    registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
+                (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
                 dynamic response = new
                 {
@@ -328,7 +328,7 @@ namespace AfterSchool.Areas.ReactApi.Controllers
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
                 
-                RegistrantActivity registrantActivity = registration?.GetRegistrantActivity(participationObject);
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
                 
                 dynamic response = new
                 {
