@@ -4866,24 +4866,31 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser,
-            bool isAttendanceCharge = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static CheckoutObject ProcessPayment(CheckoutObject checkoutObject, WebUser loggedInUser, bool isAttendanceCharge = false, 
+            int attendanceDaysToCharge = 0, int remainingPrepayments = 0, int usedPrepayments = 0, string attendanceDateText = "", 
+            string datesList = "", string registrantName = "", SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
+                    if (attendanceDaysToCharge > 0)
+                    {
+                        ProcessPaymentWithStripe(checkoutObject, amsgs, adc);
 
-                    // must wait until after charges happen to know what card id is charged for sure
-                    if (amsgs.HasNoErrors())
-                        CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, amsgs, adc);
+                        // must wait until after charges happen to know what card id is charged for sure
+                        if (amsgs.HasNoErrors())
+                            CreatePurchaseTransactionPayment(checkoutObject, loggedInUser, amsgs, adc);
+                    }
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs,
-                        isAttendanceCharge, dc);
+                    if (!isAttendanceCharge)
+                        EmailHelper.SendPaymentConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    else
+                        EmailHelper.SendAttendanceChargedConfirmationToParent(checkoutObject, attendanceDateText, datesList, registrantName, attendanceDaysToCharge, 
+                            remainingPrepayments, usedPrepayments, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
