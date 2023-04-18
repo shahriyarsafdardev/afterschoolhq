@@ -5,7 +5,7 @@ import useStyles from './styles';
 
 export default function TextField({ formik, question }) {
   const classes = useStyles();
-  const { ID, Text: label, IsRequired: required = false } = question;
+  const { ID, Text: label, IsRequired: required = false, QuestionDataTypeId } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
@@ -20,6 +20,9 @@ export default function TextField({ formik, question }) {
       </Grid>
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <MuiTextField
+          inputProps={{
+            'data-testId': `${label}-${QuestionDataTypeId}`
+          }}
           className={classes.formControlClass}
           fullWidth
           variant="outlined"
