@@ -189,10 +189,12 @@ export default function Home({ newChild = false }) {
                       className={classes.backButton}
                       disabled={!activeGroup > 0}
                       onClick={() => handleSection('previous')}
+                      data-testid={`Back-${Name}`}
                     >
                       Back
                     </Button>
                     <Button
+                      data-testid={`Save-${Name}`}
                       color="primary"
                       className={classes.saveButton}
                       variant="contained"

@@ -46,7 +46,12 @@ function ThankYouSection({ volunteerRegistration = false }) {
   };
 
   const CopyButton = () => (
-    <Box onClick={() => copyToClipBoard(ActivityUrl)} className={classes.shareBox} title="Copy URL">
+    <Box
+      onClick={() => copyToClipBoard(ActivityUrl)}
+      className={classes.shareBox}
+      title="Copy URL"
+      data-testid={'Copy URL'}
+    >
       <Icon className={classes.icon}>
         <img className={classes.icon} src={CopyUrlIcon} />
       </Icon>
@@ -55,8 +60,13 @@ function ThankYouSection({ volunteerRegistration = false }) {
   );
 
   const ShareButtons = () =>
-    ['Facebook', 'Twitter'].map(site => (
-      <ShareButton key={site} site={site} activityName={ActivityName} activityUrl={ActivityUrl} />
+    ['Facebook', 'Twitter'].map(platformName => (
+      <ShareButton
+        key={platformName}
+        platformName={platformName}
+        activityName={ActivityName}
+        activityUrl={ActivityUrl}
+      />
     ));
 
   return (
@@ -74,6 +84,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
               variant="contained"
               type="submit"
               onClick={() => navigateTo(FindAnotherActivityUrl)}
+              data-testid={'Find Another Oppurtunity'}
             >
               Find Another Oppurtunity
             </Button>
@@ -84,6 +95,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
                 variant="outlined"
                 className={classes.anotherActivityButton}
                 onClick={() => navigateTo(FindAnotherActivityUrl)}
+                data-testid={'Find Another Activity'}
               >
                 Find Another Activity
               </Button>
@@ -93,6 +105,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
                 variant="contained"
                 type="submit"
                 onClick={() => navigateTo(accountUrl)}
+                data-testid={'View Account'}
               >
                 View Account
               </Button>
@@ -101,7 +114,12 @@ function ThankYouSection({ volunteerRegistration = false }) {
         </Box>
 
         {isParent && (
-          <Link href={RegisterForNewChildUrl} className={classes.link} variant="body1">
+          <Link
+            href={RegisterForNewChildUrl}
+            className={classes.link}
+            variant="body1"
+            data-testid={'Register for New Child'}
+          >
             Register for New Child
           </Link>
         )}

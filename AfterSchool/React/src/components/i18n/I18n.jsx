@@ -40,6 +40,13 @@ function I18n() {
     sw: 'Kiswahili'
   };
 
+  const MenuItems = () =>
+    Object.keys(lang).map(key => (
+      <MenuItem key={key} value={key} onClick={handleLanguageChange} data-testid={lang[key]}>
+        {lang[key]}
+      </MenuItem>
+    ));
+
   useEffect(() => {
     const selectedLang = localStorage.getItem('languageSelected');
     if (selectedLang && selectedLang !== 'null' && selectedLang !== selectedLanguage) {
@@ -63,21 +70,7 @@ function I18n() {
         anchorEl={menuRef.current}
         className="notranslate"
       >
-        <MenuItem value="en" onClick={handleLanguageChange}>
-          English
-        </MenuItem>
-        <MenuItem value="es" onClick={handleLanguageChange}>
-          Español
-        </MenuItem>
-        <MenuItem value="fr" onClick={handleLanguageChange}>
-          Français
-        </MenuItem>
-        <MenuItem value="ht" onClick={handleLanguageChange}>
-          Kreyòl ayisyen
-        </MenuItem>
-        <MenuItem value="sw" onClick={handleLanguageChange}>
-          Kiswahili
-        </MenuItem>
+        <MenuItems />
       </MenuPopover>
       <Button
         sx={{ display: { xs: 'block', md: 'none' } }}
@@ -87,6 +80,7 @@ function I18n() {
         onClick={() => setOpen(!open)}
         ref={menuRef}
         className={classes.button}
+        data-testid={'i18n-button'}
       >
         {selectedLanguageName}
       </Button>

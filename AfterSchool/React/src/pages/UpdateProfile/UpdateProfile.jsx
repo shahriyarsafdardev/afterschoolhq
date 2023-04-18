@@ -169,6 +169,7 @@ export default function UpdateProfile() {
                 variant="outlined"
                 className={classes.backButton}
                 onClick={() => handleRedirection()}
+                data-testid={`Exit-${Name}`}
               >
                 Exit
               </Button>
@@ -199,6 +200,7 @@ export default function UpdateProfile() {
                       className={classes.backButton}
                       disabled={!activeGroup > 0}
                       onClick={() => handleSection('previous')}
+                      data-testid={`Back-${Name}`}
                     >
                       Back
                     </Button>
@@ -209,6 +211,7 @@ export default function UpdateProfile() {
                       type="submit"
                       disabled={saveDisabled}
                       key={activeGroup}
+                      data-testid={`Save-${Name}`}
                     >
                       {saveDisabled ? (
                         <>

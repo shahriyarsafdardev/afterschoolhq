@@ -5,7 +5,7 @@ import useStyles from './styles';
 
 function SimpleCheckBox({ value, setValue, question }) {
   const classes = useStyles();
-  const { Text: title } = question;
+  const { Text: title, QuestionDataTypeId } = question;
 
   const handleCheck = ({ target: { checked } }) => {
     setValue(checked);
@@ -17,8 +17,10 @@ function SimpleCheckBox({ value, setValue, question }) {
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
+            data-testid={`${title}-${QuestionDataTypeId}-form`}
             control={
               <Checkbox
+                data-testid={`${title}-${QuestionDataTypeId}-checkbox`}
                 checked={value}
                 classes={{
                   checked: classes.checked,

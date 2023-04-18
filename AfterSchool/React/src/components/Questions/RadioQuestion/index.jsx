@@ -7,7 +7,7 @@ import useStyles from './styles';
 
 function RadioQuestion({ question, formik }) {
   const classes = useStyles();
-  const { ID, Options, Text: title, IsRequired: isRequired = false } = question;
+  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   const { touched, values, errors, setFieldValue } = formik;
   const options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
@@ -35,6 +35,7 @@ function RadioQuestion({ question, formik }) {
             classes={{
               root: classes.radioGroupRoot
             }}
+            data-testId={`${title}-${QuestionDataTypeId}`}
           >
             {options.length &&
               options.map(option => (
@@ -43,6 +44,7 @@ function RadioQuestion({ question, formik }) {
                   label={option.value}
                   value={option.value}
                   selectedValue={value}
+                  dataTestId={`${title}-${QuestionDataTypeId}-${option.value}`}
                 />
               ))}
           </RadioGroup>

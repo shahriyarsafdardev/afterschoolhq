@@ -50,13 +50,11 @@ function CheckBoxList({ formik, question }) {
             {options.length &&
               options.map(({ key, value }) => (
                 <FormControlLabel
+                  data-testid={`${title}-${QuestionDataTypeId}-${value}-form`}
                   key={key}
                   control={
                     <Checkbox
-                      data-testId={`${title}-${QuestionDataTypeId}`}
-                      //   inputProps={{
-                      //     'data-testId': `${title}-${QuestionDataTypeId}`
-                      //   }}
+                      data-testid={`${title}-${QuestionDataTypeId}-${value}-checkbox`}
                       checked={checkBoxListValue ? isChecked(checkBoxListValue, value) : false}
                       value={value}
                       onChange={handleCheck}

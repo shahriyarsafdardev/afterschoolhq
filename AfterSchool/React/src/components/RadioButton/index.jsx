@@ -4,7 +4,7 @@ import cs from 'classnames';
 
 import useStyles from './styles';
 
-function RadioButton({ label, value, selectedValue }) {
+function RadioButton({ label, value, selectedValue, dataTestId }) {
   const classes = useStyles();
   return (
     <div className={classes.radioButtonWrapper}>
@@ -16,6 +16,9 @@ function RadioButton({ label, value, selectedValue }) {
             }}
             checked={selectedValue === value}
             checkedIcon={<span className={cs(classes.icon, classes.checkedIcon)} />}
+            inputProps={{
+              'data-testId': dataTestId
+            }}
           />
         }
         label={label}
@@ -23,6 +26,7 @@ function RadioButton({ label, value, selectedValue }) {
         classes={{
           root: classes.formControlLabelRoot
         }}
+        data-testId={`${dataTestId}-label`}
       />
     </div>
   );

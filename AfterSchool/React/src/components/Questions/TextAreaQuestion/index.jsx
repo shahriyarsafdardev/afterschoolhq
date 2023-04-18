@@ -5,7 +5,7 @@ import useStyles from './styles';
 
 export default function TextAreaQuestion({ formik, question }) {
   const classes = useStyles();
-  const { ID, Text: label, IsRequired: required = false } = question;
+  const { ID, Text: label, IsRequired: required = false, QuestionDataTypeId } = question;
   const { errors, touched } = formik;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
@@ -22,6 +22,7 @@ export default function TextAreaQuestion({ formik, question }) {
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <>
           <TextareaAutosize
+            data-testid={`${label}-${QuestionDataTypeId}`}
             minRows={4}
             className={classes.formControlClass}
             variant="outlined"

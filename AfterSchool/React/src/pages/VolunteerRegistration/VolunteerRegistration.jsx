@@ -174,6 +174,7 @@ export default function VolunteerRegistration() {
                       className={classes.backButton}
                       disabled={!activeGroup > 0}
                       onClick={() => handleSection('previous')}
+                      data-testid={`Back-${Name}`}
                     >
                       Back
                     </Button>
@@ -184,6 +185,7 @@ export default function VolunteerRegistration() {
                       type="submit"
                       disabled={saveDisabled}
                       key={activeGroup}
+                      data-testid={`Save-${Name}`}
                     >
                       {saveDisabled ? (
                         <>

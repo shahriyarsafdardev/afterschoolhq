@@ -32,11 +32,12 @@ function DropdownQuestion({ question, formik }) {
                 classes={{
                   root: classes.formControlRoot
                 }}
+                data-testId={`${title}-${QuestionDataTypeId}-FormControl`}
               >
                 <Select
-                  data-testId={`${title}-${QuestionDataTypeId}`}
+                  data-testId={`${title}-${QuestionDataTypeId}-select`}
                   inputProps={{
-                    'data-testId': `${title}-${QuestionDataTypeId}`
+                    'data-testId': `${title}-${QuestionDataTypeId}-inputprops`
                   }}
                   id="dropdown-question"
                   value={value}
