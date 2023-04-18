@@ -1,10 +1,14 @@
 @using AfterSchoolLibrary.Helpers
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+
 @{
     Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+
 }
+
 
 <style>
     .bg-image {
@@ -154,16 +158,16 @@
                     </div>
                     <div class="clearfix"></div>
                     <div class="padding-bottom-40" style="float: left;">
-                        @*@if (Utilities.IsLocalHost)
-                            {*@
-                        <div class="row">
-                            <div>
-                                @{
-                                    Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                                }
+                        @if (Utilities.IsProduction || Utilities.IsStaging || Utilities.IsLocalHost)
+                        {
+                            <div class="row">
+                                <div>
+                                    @{
+                                        Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                                    }
+                                </div>
                             </div>
-                        </div>
-                        @*}*@
+                        }
                     </div>
 
                     <div class="form-group login-submit text-center">
