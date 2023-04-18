@@ -7,7 +7,7 @@ import useStyles from './styles';
 function CheckBoxList({ formik, question }) {
   const classes = useStyles();
   const { values, setFieldValue, touched, errors } = formik;
-  const { ID, Options, Text: title, IsRequired } = question;
+  const { ID, Options, Text: title, IsRequired, QuestionDataTypeId } = question;
   const [checkBoxListValue, setCheckBoxListValue] = useState([]);
 
   const isChecked = (arr, value) => {
@@ -53,6 +53,10 @@ function CheckBoxList({ formik, question }) {
                   key={key}
                   control={
                     <Checkbox
+                      data-testId={`${title}-${QuestionDataTypeId}`}
+                      //   inputProps={{
+                      //     'data-testId': `${title}-${QuestionDataTypeId}`
+                      //   }}
                       checked={checkBoxListValue ? isChecked(checkBoxListValue, value) : false}
                       value={value}
                       onChange={handleCheck}
