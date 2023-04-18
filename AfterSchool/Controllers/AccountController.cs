@@ -1246,9 +1246,12 @@ namespace AfterSchool.Controllers
                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value.ToDateTime();
             var studentGrade = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).Value;
 
-            var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced;
-            var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth);
-            var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade);
+            var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced && 
+                                     participationObject.ActivityGroupType != ActivityGroupType.Session;
+            var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsAgeInRange(dateOfBirth) && 
+                                  participationObject.ActivityGroupType != ActivityGroupType.Session;
+            var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsGradeInRange(studentGrade) &&
+                                    participationObject.ActivityGroupType != ActivityGroupType.Session;
 
             var ineligibilityMessage =
                 ParticipationObjectUI.PrintIneligibilityMessageString(participationObject, isGenderRestricted, isAgeRestricted, isGradeRestricted);
@@ -1511,18 +1514,19 @@ namespace AfterSchool.Controllers
                 }
 
                 else if (question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth && answer.IsNotEmpty() &&
-                         !participationObject.IsAgeInRange(answer.ToDateTime()))
+                         !participationObject.IsAgeInRange(answer.ToDateTime()) && participationObject.ActivityGroupType != ActivityGroupType.Session)
                 {
                     isAgeRestricted = true;
                 }
 
                 else if (question.QuestionDataTypeId == QuestionDataType.RegistrantGrade && answer.IsNotEmpty() &&
-                         !participationObject.IsGradeInRange(answer))
+                         !participationObject.IsGradeInRange(answer) && participationObject.ActivityGroupType != ActivityGroupType.Session)
                 {
                     isGradeRestricted = true;
                 }
                 else if (question.QuestionDataTypeId == QuestionDataType.RegistrantGender && answer.IsNotEmpty() && participationObject.IsGenderEnforced &&
-                         !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)))
+                         !participationObject.AcceptsGenderType(FormService.GetGenderFromAnswer(answer)) && 
+                         participationObject.ActivityGroupType != ActivityGroupType.Session)
                 {
                     isGenderRestricted = true;
                 }
