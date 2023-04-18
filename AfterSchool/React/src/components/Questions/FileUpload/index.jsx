@@ -6,12 +6,13 @@ import useStyles from './styles';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
-const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequired } }) => {
+const FileUpload = ({ formik, question }) => {
   const classes = useStyles();
   const uploadInputRef = useRef();
   const [fileName, setFileName] = useState('');
   const [uploadedStatus, setUploadedStatus] = useState(null);
   const { touched, values, errors, setFieldValue } = formik;
+  const { ID, Text: title, IsRequired: isRequired, QuestionDataTypeId } = question;
 
   const handleClick = () => {
     uploadInputRef.current.click();
@@ -46,10 +47,18 @@ const FileUpload = ({ formik, question: { ID, Text: title, IsRequired: isRequire
       <div className={classes.photoWrapper}>
         <div>Supported file types are .pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3</div>
         <Box className={classes.uploadButtonWrapper}>
-          <Button className={classes.uploadButton} onClick={handleClick}>
+          <Button
+            data-testid={`${title}-${QuestionDataTypeId}-button`}
+            className={classes.uploadButton}
+            onClick={handleClick}
+          >
             {fileName ? 'Discard & Upload New File' : 'Upload File'}
           </Button>
-          {fileName && <Typography>{fileName}</Typography>}
+          {fileName && (
+            <Typography data-testid={`${title}-${QuestionDataTypeId}-filename`}>
+              {fileName}
+            </Typography>
+          )}
         </Box>
         <input
           type="file"

@@ -44,6 +44,7 @@ function AlreadyPaidSection() {
             className={classes.anotherActivityButton}
             rel="noopener noreferrer"
             href={`mailto:${ProviderEmail}?subject=Inquiry About ${ActivityName}`}
+            data-testid={'Email Provider'}
           >
             Email Provider
           </Button>
@@ -53,6 +54,7 @@ function AlreadyPaidSection() {
             variant="contained"
             type="submit"
             onClick={() => navigateTo(accountUrl)}
+            data-testid={'Return to Account'}
           >
             Return to Account
           </Button>
