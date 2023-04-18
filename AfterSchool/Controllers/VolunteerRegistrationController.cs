@@ -492,6 +492,10 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
             var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
+            
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return Redirect($"~/ReactApp/volunteer-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
+            
             SessionVariables.CurrentRegistrant = currentRegistrant;
             var (_, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
