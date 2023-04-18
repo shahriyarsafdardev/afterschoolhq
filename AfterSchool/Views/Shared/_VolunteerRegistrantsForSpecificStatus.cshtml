@@ -52,7 +52,7 @@
                             </td>
                             <td>
                                 @(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail)
-                                    : ra.RegistrantEmail.Length < 3 ?
+                                    : ra.RegistrantName.Length < 6 ?
                                         ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
                                         : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
                             </td>
