@@ -32,12 +32,12 @@ function DropdownQuestion({ question, formik }) {
                 classes={{
                   root: classes.formControlRoot
                 }}
-                data-testId={`${title}-${QuestionDataTypeId}-FormControl`}
+                data-testid={`${title}-${QuestionDataTypeId}-FormControl`}
               >
                 <Select
-                  data-testId={`${title}-${QuestionDataTypeId}-select`}
+                  data-testid={`${title}-${QuestionDataTypeId}-select`}
                   inputProps={{
-                    'data-testId': `${title}-${QuestionDataTypeId}-inputprops`
+                    'data-testid': `${title}-${QuestionDataTypeId}-inputprops`
                   }}
                   id="dropdown-question"
                   value={value}
@@ -60,7 +60,7 @@ function DropdownQuestion({ question, formik }) {
                   <MenuItem
                     key="Select"
                     value="Select"
-                    data-testId={`${title}-${QuestionDataTypeId}-option-Select`}
+                    data-testid={`${title}-${QuestionDataTypeId}-option-Select`}
                   >
                     Select
                   </MenuItem>
@@ -72,7 +72,7 @@ function DropdownQuestion({ question, formik }) {
                         classes={{
                           root: classes.list
                         }}
-                        data-testId={`${title}-${QuestionDataTypeId}-option-${option.value}`}
+                        data-testid={`${title}-${QuestionDataTypeId}-option-${option.value}`}
                       >
                         {option.value}
                       </MenuItem>

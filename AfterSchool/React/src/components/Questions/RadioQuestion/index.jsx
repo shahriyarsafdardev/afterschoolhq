@@ -35,7 +35,7 @@ function RadioQuestion({ question, formik }) {
             classes={{
               root: classes.radioGroupRoot
             }}
-            data-testId={`${title}-${QuestionDataTypeId}`}
+            data-testid={`${title}-${QuestionDataTypeId}`}
           >
             {options.length &&
               options.map(option => (

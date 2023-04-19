@@ -17,7 +17,7 @@ function RadioButton({ label, value, selectedValue, dataTestId }) {
             checked={selectedValue === value}
             checkedIcon={<span className={cs(classes.icon, classes.checkedIcon)} />}
             inputProps={{
-              'data-testId': dataTestId
+              'data-testid': dataTestId
             }}
           />
         }
@@ -26,7 +26,7 @@ function RadioButton({ label, value, selectedValue, dataTestId }) {
         classes={{
           root: classes.formControlLabelRoot
         }}
-        data-testId={`${dataTestId}-label`}
+        data-testid={`${dataTestId}-label`}
       />
     </div>
   );
