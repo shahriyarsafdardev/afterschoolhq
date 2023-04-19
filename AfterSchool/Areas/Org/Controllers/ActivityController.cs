@@ -941,7 +941,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         BackgroundJob.Enqueue(() =>
                             ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
 
-                        msgs.Add("Your message has been sent to the selected registrants", MessageType.Success);
+                        msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                             currentUserIsActivityLeader);
