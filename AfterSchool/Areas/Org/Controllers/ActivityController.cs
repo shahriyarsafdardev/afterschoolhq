@@ -4515,7 +4515,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var activitiesList = activities == null ? null : activities.Split(',').ToIntegerArray().ToList();
+            var activitiesList = activities.IsEmpty() ? null : activities.Split(',').ToIntegerArray().ToList();
             var activityAttendanceSummaries = ActivityAttendanceSummary.LoadAttendanceSummary(currentAccount.ID.Value, sdate, edate, activitiesList, msgs);
 
             var table = new List<List<string>>();
