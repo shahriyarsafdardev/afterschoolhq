@@ -1,25 +1,25 @@
 export default {
-  RegisterAPI: 'ReactApi/React/Register',
-  currentUserAPI: 'ReactApi/React/GetCurrentUser',
-  submitFormDataAPI: 'ReactApi/React/AddUpdateAnswers',
-  SchoolAPI: 'ReactApi/React/CreateOrUpdateFromGoogle',
-  updateProfileFormDataAPI: 'ReactApi/React/UpdateProfile',
-  ThankYouAPI: id => `ReactApi/React/ThankYou/${id}`,
-  getProfileFormDataAPI: id => `ReactApi/React/GetRegistrantForm/${id}`,
+  RegisterAPI: 'Api/Registration/Register',
+  currentUserAPI: 'Api/Registration/GetCurrentUser',
+  submitFormDataAPI: 'Api/Registration/AddUpdateAnswers',
+  SchoolAPI: 'Api/Registration/CreateOrUpdateFromGoogle',
+  updateProfileFormDataAPI: 'Api/Registration/UpdateProfile',
+  ThankYouAPI: id => `Api/Registration/ThankYou/${id}`,
+  getProfileFormDataAPI: id => `Api/Registration/GetRegistrantForm/${id}`,
   getFormDataAPI: (accountName, activityName, registrantUid) =>
-    `ReactApi/React/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+    `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
-    `ReactApi/React/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+    `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
-  VolunteerRegisterAPI: 'ReactApi/VolunteerRegistration/Register',
-  submitVolunteerFormDataAPI: 'ReactApi/VolunteerRegistration/AddUpdateAnswers',
-  updateVolunteerProfileFormDataAPI: 'ReactApi/VolunteerRegistration/UpdateProfile',
-  VolunteerRegistrationThankYouAPI: id => `ReactApi/VolunteerRegistration/ThankYou/${id}`,
-  getVolunteerProfileFormDataAPI: id => `ReactApi/VolunteerRegistration/GetRegistrantForm/${id}`,
+  VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
+  submitVolunteerFormDataAPI: 'Api/VolunteerRegistration/AddUpdateAnswers',
+  updateVolunteerProfileFormDataAPI: 'Api/VolunteerRegistration/UpdateProfile',
+  VolunteerRegistrationThankYouAPI: id => `Api/VolunteerRegistration/ThankYou/${id}`,
+  getVolunteerProfileFormDataAPI: id => `Api/VolunteerRegistration/GetRegistrantForm/${id}`,
   volunteerThankYouUrl: registrationId =>
     `/reactapp/volunteer-registration/thankyou/${registrationId}`,
   getVolunteerFormDataAPI: (accountName, activityName, regUid) =>
-    `ReactApi/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
+    `Api/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
 
   paymentScreenPath: uId => `/account/payment/${uId}`,
   thankyouScreenPath: uId => `/account/thankyou/${uId}`,
