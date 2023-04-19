@@ -1,6 +1,6 @@
 using BasicLibrary;
 
-namespace AfterSchool.Areas.ReactApi.Models
+namespace AfterSchool.Areas.Api.Models
 {
     public class ApiResponse
     {
