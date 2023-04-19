@@ -21,11 +21,11 @@ function Router() {
       children: [
         {
           path: 'reactapp/registration/:accountName/:activityName/:regUid',
-          element: <Home />
+          element: <Registration />
         },
         {
           path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
-          element: <Home newChild={true} />
+          element: <Registration newChild={true} />
         },
         {
           path: 'reactapp/registration/thankyou/:registrationId',
@@ -66,8 +66,8 @@ const RedirectToExternal = () => {
   redirect(pathWithOrigin('/User/home'));
   return null;
 };
-const Home = Loadable(lazy(() => import('pages/registration/Home')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
+const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const AlreadyPaidSection = Loadable(

@@ -1,19 +1,15 @@
-import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
-import { useFormik, Form, FormikProvider } from 'formik';
+import { useFormik } from 'formik';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
-import cs from 'classnames';
 
 import { useUser, useVolunteerProfile } from 'redux/hooks/index';
-import { Loader, ProgressBar, ShowQuestion } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
-import useStyles from './styles';
+import RegistrationForm from 'pages/shared/RegistrationForm';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
 export default function UpdateVolunteerProfile() {
-  const classes = useStyles();
   const { loadUser } = useUser();
   const { volunteerAccountUrl } = apiRoutes;
   const { id: userUid } = useParams();
@@ -139,80 +135,23 @@ export default function UpdateVolunteerProfile() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const saveButtonText = () => (dirty ? 'Save' : 'Skip');
+
   return (
-    <FormikProvider value={formik}>
-      <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
-        {loading ? (
-          <Loader />
-        ) : (
-          <Box className={classes.outerWrapper}>
-            <Box className={classes.exitButtonWrapper}>
-              <Button
-                color="primary"
-                variant="outlined"
-                className={classes.backButton}
-                onClick={() => handleRedirection()}
-                data-testid={`Exit-${Name}`}
-              >
-                Exit
-              </Button>
-            </Box>
-            <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
-            <Box className={classes.formWrapper}>
-              <Box className={classes.formInnerWrapper}>
-                <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
-                  {Name}
-                </Typography>
-                <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
-                  <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                    {currentQuestions?.map(question =>
-                      ShowQuestion({
-                        currentQuestion: question,
-                        formik,
-                        currentQuestions,
-                        isUpdating: true
-                      })
-                    )}
-                  </Grid>
-                </Grid>
-                <Box className={classes.buttonOuterWrapper}>
-                  <Box className={classes.buttonWrapper}>
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      className={classes.backButton}
-                      disabled={!activeGroup > 0}
-                      onClick={() => handleSection('previous')}
-                      data-testid={`Back-${Name}`}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      color="primary"
-                      className={classes.saveButton}
-                      variant="contained"
-                      type="submit"
-                      disabled={saveDisabled}
-                      key={activeGroup}
-                      data-testid={`Save-${Name}`}
-                    >
-                      {saveDisabled ? (
-                        <>
-                          {'Loading . . .'} <CircularProgress size={'20px'} />
-                        </>
-                      ) : dirty ? (
-                        'Save'
-                      ) : (
-                        'Skip'
-                      )}
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        )}
-      </Form>
-    </FormikProvider>
+    <RegistrationForm
+      loading={loading}
+      totalGroups={totalGroups}
+      activeGroup={activeGroup}
+      saveDisabled={saveDisabled}
+      currentQuestions={currentQuestions}
+      Name={Name}
+      saveButtonText={saveButtonText}
+      handleSection={handleSection}
+      lastSection={lastSection}
+      formik={formik}
+      handleSubmit={handleSubmit}
+      isUpdating={true}
+      handleRedirection={handleRedirection}
+    ></RegistrationForm>
   );
 }

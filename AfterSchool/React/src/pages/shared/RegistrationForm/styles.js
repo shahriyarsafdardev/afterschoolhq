@@ -97,6 +97,9 @@ export default makeStyles(theme => ({
     borderBottomLeftRadius: 0,
     color: theme.palette.text.secondary
   },
+  outerWrapperMarginTop: {
+    marginTop: '-28px'
+  },
   formWrapper: {
     display: 'flex',
     justifyContent: 'center',
