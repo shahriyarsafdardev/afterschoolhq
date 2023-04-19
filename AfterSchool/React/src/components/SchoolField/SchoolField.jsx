@@ -127,7 +127,7 @@ function SchoolField({ question, formik, isUpdating = false }) {
             >
               <MuiTextField
                 inputProps={{
-                  'data-testId': `${Text}-${QuestionDataTypeId}`
+                  'data-testid': `${Text}-${QuestionDataTypeId}`
                 }}
                 variant="outlined"
                 fullWidth

@@ -55,7 +55,7 @@ function DateQuestion({ question, formik }) {
                 }}
                 KeyboardButtonProps={{
                   'aria-label': 'change date',
-                  'data-testId': `${title}-${QuestionDataTypeId}`
+                  'data-testid': `${title}-${QuestionDataTypeId}`
                 }}
               />
             </MuiPickersUtilsProvider>

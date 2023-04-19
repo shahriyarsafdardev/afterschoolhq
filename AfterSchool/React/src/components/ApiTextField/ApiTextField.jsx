@@ -71,7 +71,7 @@ function ApiTextField({ formik, question, currentQuestions }) {
           >
             <MuiTextField
               inputProps={{
-                'data-testId': `${Text}-${QuestionDataTypeId}`
+                'data-testid': `${Text}-${QuestionDataTypeId}`
               }}
               variant="outlined"
               fullWidth

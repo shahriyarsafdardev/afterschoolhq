@@ -66,6 +66,7 @@ const FileUpload = ({ formik, question }) => {
           ref={uploadInputRef}
           className={classes.inputFile}
           onChange={handleUploadChange}
+          data-testid={`${title}-${QuestionDataTypeId}-input`}
         />
       </div>
       {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (

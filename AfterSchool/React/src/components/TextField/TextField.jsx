@@ -10,7 +10,11 @@ export default function TextField({ formik, question }) {
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
+    <Grid
+      className={classes.textFieldBox}
+      xs={12}
+      data-testid={`${label}-${QuestionDataTypeId}-text-field`}
+    >
       <Grid xs={12} md={4} item className={classes.titleGrid}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
@@ -18,10 +22,17 @@ export default function TextField({ formik, question }) {
           <Typography className={typeClass}>{typeText}</Typography>
         </Typography>
       </Grid>
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+      <Grid
+        xs={12}
+        md={8}
+        item
+        className={classes.textFieldGrid}
+        data-testid={`${label}-${QuestionDataTypeId}-text-field-input`}
+      >
         <MuiTextField
+          data-testid={`${label}-${QuestionDataTypeId}-form-control`}
           inputProps={{
-            'data-testId': `${label}-${QuestionDataTypeId}`
+            'data-testid': `${label}-${QuestionDataTypeId}`
           }}
           className={classes.formControlClass}
           fullWidth
