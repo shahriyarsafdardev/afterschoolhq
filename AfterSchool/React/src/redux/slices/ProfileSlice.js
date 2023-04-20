@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
@@ -39,7 +38,6 @@ const ProfileSlice = createSlice({
       state.questionsGroups = [...formQuestionGroupUpdated];
       state.answeredQuestions = formQuestionAnswer;
       state.school = SchoolLocation || {};
-      state.noSchool = isEmpty(SchoolLocation) ? true : false;
       state.RegistrantType = registrantType;
     },
     submitFormSection: (state, { payload }) => {
