@@ -51,7 +51,8 @@ export default function UpdateVolunteerProfile() {
     formSectionSubmitObject
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) => `section=${questionsGroups[index].Name}`;
+  const buildQueryParams = (index = activeGroup) =>
+    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
 
   const handleSection = action => {
     if (action === 'next') {
@@ -119,7 +120,7 @@ export default function UpdateVolunteerProfile() {
       const paramsQuery = buildQueryParams();
       if (searchParams.get('section')) {
         const groupIndex = questionsGroups.findIndex(
-          section => section.Name === searchParams.get('section')
+          section => section.Name === decodeURI(searchParams.get('section'))
         );
         if (groupIndex < 0) return setSearchParams(paramsQuery);
         QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
