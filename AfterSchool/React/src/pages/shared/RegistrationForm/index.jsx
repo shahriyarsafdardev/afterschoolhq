@@ -65,8 +65,9 @@ export default function RegistrationForm(props) {
                   <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
                     {currentQuestions?.map(question =>
                       ShowQuestion({
-                        currentQuestion: question,
+                        isUpdating,
                         formik: formik,
+                        currentQuestion: question,
                         currentQuestions: currentQuestions
                       })
                     )}
