@@ -1915,15 +1915,15 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var currentRegistrant = SessionVariables.CurrentRegistrant;
 
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
-            var questions = RegistrationCommon.GetActiveCustomQuestionsThatHaveNotYetBeenAnswered(participationObject, msgs);
-            RegistrationCommon.ValidateRegisterStudentQuestions(questions, msgs, Request);
+            var qvms = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
+            RegistrationCommon.ValidateRegisterStudentQuestions(qvms.Select(x => x.Question).ToList(), msgs, Request);
 
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
 
-            var qvms = questions.Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
             var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, signature, Request, msgs);
 
             if (msgs.HasNoErrors())
@@ -1931,7 +1931,6 @@ namespace AfterSchool.Controllers
                     ? RedirectToAction("payment", new {id = registration.Uid})
                     : RedirectToAction("finalizeregistration", new {id = registration.Uid});
 
-            var currentRegistrant = SessionVariables.CurrentRegistrant;
             var result = GatherDataForAndAssembleRegisterResult(participationObject, registration, msgs, qvms, currentRegistrant);
             return View(result);
         }
