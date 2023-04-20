@@ -160,9 +160,11 @@
                                 @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
                                 {
                                     <button type="button" class="btn btn-primary searchActivitiesBtn"
-                                            onclick="showModal(@(activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"));
-                                            setModalAttributes('@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()', 
-                                            '@ra.ParticipationObjectTypeId.ToString()', '@ra.RegistrantName')">
+                                            onclick="setModalAttributes('@RegistrantService.GetReEnrollmentModalHtmlContent(participationObject, 
+                                             activity,ra.GetRegistrant(),ra.GetAmountPaidByParent() > 0 ? ra.GetAmountPaidByParent() : 
+                                                 ra.GetAmountPaid())','@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()',
+                                            '@ra.ParticipationObjectTypeId.ToString()', '@ra.RegistrantName', '@ra.GetIsProRatedFlagByParent().ToString()',
+                                            '@ra.GetAmountPaidByParent().ToCurrency()');showModal(@(activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"))">
                                         Re-Enroll
                                     </button>
                                 }
@@ -235,30 +237,7 @@
             <h3 class="modal-title">Re-enrollment Confirmation</h3>
         </div>
         <div id="modal-attributes" class="modal-body form text-center" data-ruid="" data-aid="" data-atype="" >
-            <p>
-                @{
-                    decimal costToDiplay = 0;
-                    var registrationSubscriptionText = "";
-                    var isRegFree = participationObject.IsRegistrationFree;
-                    if (!isRegFree)
-                    {
-                        costToDiplay = participationObject.Cost ?? 0;
-                        registrationSubscriptionText = $"a registration fee of <strong>{costToDiplay.ToCurrency()}</strong>";
-                    }
-                    if (activity.HasSubscriptionPlan())
-                    {
-                        var subscriptionPlan = activity.GetSubscriptionPlan();
-                        costToDiplay += subscriptionPlan.CostPerPeriod ?? 0;
-                        registrationSubscriptionText += 
-                            $"{(!isRegFree ? " plus a" : "a")} {subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()}ly " +
-                            $"subscription charge of <strong>{subscriptionPlan.CostPerPeriod.ToCurrency()}</strong>";
-                    }
-                    <span class="registrantName">Taco Turner</span>
-                    <span>
-                        has previously paid <strong>@costToDiplay.ToCurrency()</strong> for
-                        <strong>@participationObject.Name</strong>. Do you want to send a payment link for @Html.Raw(registrationSubscriptionText)?
-                    </span>
-                }
+            <p id="processReEnrollmentContent">
             </p>
             <p class="fontSize12"><strong>NOTE:</strong> Refunds will not happen automatically and can be handled via the Accounting page.</p>
         </div>
@@ -311,10 +290,13 @@
         let participationObjectId = $('#modal-attributes').attr('data-aid');
         let registrantUId = $('#modal-attributes').attr('data-ruid');
         let type = $('#modal-attributes').attr('data-atype');
+        let paidCost = $('#paidCost').html();
+        let costToPay = $('#costToPay').html();
         $.ajax({
             type: "POST",
             url: url,
-            data: { participationObjectId: participationObjectId, registrantUId: registrantUId, requirePayment: requirePayment, participationObjectType: type },
+            data: { participationObjectId: participationObjectId, registrantUId: registrantUId, requirePayment: requirePayment,paidCost:paidCost, 
+            costToPay: costToPay, participationObjectType: type },
             success: function (data) {
                 if (data && data.success === true) {
                     hideLoader();
@@ -326,12 +308,18 @@
             }
         });
     }
-    function setModalAttributes(ruid,aid,atype,rname)
+    function setModalAttributes(modalHtml,ruid,aid,atype,rname,isProrated,amountPaid)
     {
+        $("#processReEnrollmentContent").html(modalHtml);
         $(".registrantName").html(rname);
         $("#modal-attributes").attr('data-ruid',ruid);
         $("#modal-attributes").attr('data-aid',aid);
         $("#modal-attributes").attr('data-atype',atype);    
+        if (isProrated.toLowerCase() === 'true')
+        {       
+            $(".proratedCost").html(amountPaid);
+            $("#costToPay").html(amountPaid);
+        }
     }
     function showModal(modal)
     {

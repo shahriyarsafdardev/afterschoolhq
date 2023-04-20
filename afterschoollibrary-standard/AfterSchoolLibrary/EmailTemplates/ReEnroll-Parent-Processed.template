@@ -6,10 +6,10 @@
   </p>  
   <br/>  
   <p>  
-    You have previously paid this provider @Model.Cost for this activity. @Model.ProviderName is charging you @Model.Cost to re-enroll. Click "Pay Now" below to make your payment.
+    You have previously paid this provider @Model.PaidCost for this activity. @Model.ProviderName is charging you @Model.CostToPay to re-enroll. Click "Pay Now" below to make your payment.
   </p>
   <br/>
-  @Model.PayNowLink
+  <a href="@Model.PayNowLink">Pay Now</a>
   <br/>
   <br/>
   <p> 

@@ -447,7 +447,8 @@ namespace AfterSchool.Areas.Org.Controllers
         }
         
         [HttpPost]
-        public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string participationObjectType)
+        public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string paidCost, string costToPay, 
+            string participationObjectType)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -469,6 +470,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     loggedInUser: SessionVariables.CurrentUser,
                     account: currentAccount,
                     requirePayment: requirePayment,
+                    paidCost: paidCost,
+                    costToPay: costToPay,
                     msgs: msgs);
             }
 

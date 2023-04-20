@@ -1446,9 +1446,50 @@ namespace AfterSchoolLibrary.Services
                 dc: dc
             );
         }
-        
+
+        public static string GetReEnrollmentModalHtmlContent(ParticipationObject participationObject, Activity activity,Registrant registrant, decimal amountPaid)
+        {
+            decimal costToDisplay = 0;
+            var registrationSubscriptionText = "";
+            var isRegFree = participationObject.IsRegistrationFree;
+            var regSubPlanCount = registrant.GetRegistrantSubscriptionPlans(null).Count;
+            var htmlString = "";
+            if (!isRegFree)
+            {
+                var totalFee = activity.HasPaymentPlan() ? 0 : participationObject.GetCreditCardFee();
+                amountPaid += totalFee + (activity.HasSubscriptionPlan() ? participationObject.Cost ?? 0 : 0);
+                costToDisplay = participationObject.Cost + totalFee ?? 0;
+                registrationSubscriptionText = $"a registration fee of <strong>{costToDisplay.ToCurrency()}</strong>";
+            }
+            if (activity.HasSubscriptionPlan())
+            {
+                var subscriptionPlan = activity.GetSubscriptionPlan();
+                var account = subscriptionPlan.GetAccount();
+                var totalFee = subscriptionPlan.GetCreditCardFee(account);
+                costToDisplay += subscriptionPlan.CostPerPeriod + totalFee ?? 0;
+                registrationSubscriptionText += 
+                    $"{(!isRegFree ? " plus a" : "a")} {subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()}ly " +
+                    $"subscription charge of <strong class=\"proratedCost\">{(subscriptionPlan.CostPerPeriod + totalFee).ToCurrency()}</strong>";
+            }
+            if (activity.HasPaymentPlan() && regSubPlanCount > 0)
+            {
+                var paymentPlan = activity.GetPaymentPlan();
+                var totalPeriods = paymentPlan.TotalPeriods ?? 0;
+                htmlString = $"<span class=\"registrantName\">Taco Turner</span><span> has previously paid {regSubPlanCount} of {totalPeriods} payments towards the" +
+                             $" <strong>{participationObject.Cost.ToCurrency()}</strong> registration fee (totaling <strong class=\"proratedCost\" id=\"paidCost\">" +
+                             $"{amountPaid.ToCurrency()}</strong>) for <strong>{participationObject.Name}</strong>. Do you want to send a payment link for" +
+                             "<span id=\"costToPay\"> the full registration amount</span>?</span>";
+            }
+            else
+            {
+                htmlString = "<span class=\"registrantName\">Taco Turner</span><span> has previously paid <strong class=\"proratedCost\" id=\"paidCost\">" +
+                             $"{amountPaid.ToCurrency()}</strong> for <strong>{participationObject.Name}</strong>. Do you want to send a payment link for" +
+                             $" {registrationSubscriptionText}<span id=\"costToPay\" class=\"hide\">{costToDisplay.ToCurrency()}</span>?</span>";
+            }
+            return htmlString;
+        }
         public static (string,string) ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
-            WebUser loggedInUser, Account account, bool requirePayment, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, Account account, bool requirePayment, string paidCost, string costToPay, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
             var ras = registrant.GetRegistrantActivities(msgs, dc); // Need to look into this, why it is picking all
@@ -1489,7 +1530,7 @@ namespace AfterSchoolLibrary.Services
 
                     // Notify Parent
                     var participationObject = ra.GetParticipationObject(msgs, dc);
-                    EmailHelper.SendReEnrollConfirmation(masterRegistrant, ra, participationObject, requirePayment);
+                    EmailHelper.SendReEnrollConfirmation(masterRegistrant, ra, participationObject, requirePayment, paidCost, costToPay);
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),

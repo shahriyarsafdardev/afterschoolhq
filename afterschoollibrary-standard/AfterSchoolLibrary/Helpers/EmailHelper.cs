@@ -1410,7 +1410,7 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static SystemMessages SendReEnrollConfirmation(Registrant masterRegistrant, RegistrantActivity ra,
-            ParticipationObject participationObject, bool requirePayment, DatabaseConnection dc = null)
+            ParticipationObject participationObject, bool requirePayment, string paidCost, string costToPay, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var purchaserAccount = masterRegistrant?.GetAccount(msgs);
@@ -1421,6 +1421,8 @@ namespace AfterSchoolLibrary.Helpers
             var registration = ra.GetRegistration();
             var registrantName = ra.RegistrantName;
             var registrantEmail = ra.RegistrantEmail;
+            var totalPaidCost = paidCost;
+            var totalCostToPay = costToPay;
 
             var model = new NameValueCollection
             {
@@ -1428,7 +1430,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"ProviderName", billingAccountOwner.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"PayNowLink", registration.GetPaymentUrl},
-                {"Cost", participationObject.Cost.ToCurrency()},
+                {"PaidCost", totalPaidCost},
+                {"CostToPay", totalCostToPay},
                 {"ActivityName", participationObject.Name},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
                 {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
@@ -1442,7 +1445,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 requirePayment ? EmailTemplates.ReEnroll_Parent_Processed : EmailTemplates.ReEnroll_Free_Parent_Processed,
                 model,
-                "ReEnroll_Confirmation-1.0",
+                "ReEnroll_Confirmation-1.2",
                 msgs);
 
             // SEND EMAILS
