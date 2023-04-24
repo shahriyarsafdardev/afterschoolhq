@@ -2,6 +2,7 @@
 @{ 
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     bool signedUpForDefaultPackage = (bool)ViewBag.SignedUpForDefaultPackage;
+    var trialDays = (int) ViewBag.TrialDays;
  }
 
 <style>
@@ -86,7 +87,7 @@
         <p class="free-trial-p">
             Starting now, you will be able to get the most of AfterSchool HQ
             <strong>free</strong>
-            for 14 days.
+            for @trialDays days.
             @if (signedUpForDefaultPackage)
             {
                 @:In addition to features available with our free tier, you will have access to:
@@ -104,7 +105,7 @@
             </ul>
         }
         <p class="free-trial-p">
-            We start everyone with our 14-day free trial so you can get a feel for what you need out of AfterSchool HQ.
+            We start everyone with our @trialDays-day free trial so you can get a feel for what you need out of AfterSchool HQ.
             We will only collect your payment information when the trial is complete.
         </p>
         <p class="free-trial-p">
