@@ -157,6 +157,10 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
+                        MinGrade = participationObject.MinGradeId,
+                        MaxGrade = participationObject.MaxGradeId,
+                        MinAge = participationObject.AgeStart,
+                        MaxAge = participationObject.AgeEnd
                     }
                 };
                 
@@ -439,6 +443,10 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
+                        MinGrade = participationObject.MinGradeId,
+                        MaxGrade = participationObject.MaxGradeId,
+                        MinAge = participationObject.AgeStart,
+                        MaxAge = participationObject.AgeEnd
                     }
                 };
                 
