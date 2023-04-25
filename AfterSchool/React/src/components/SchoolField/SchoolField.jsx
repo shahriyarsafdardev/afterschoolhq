@@ -86,7 +86,7 @@ function SchoolField({ question, formik, isUpdating = false }) {
   const classes = useStyles();
   const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
-  const { ID, Text, IsRequired: required = false } = question;
+  const { ID, Text, IsRequired: required = false, QuestionDataTypeId } = question;
   const { school, noSchool, setSchoolFieldValue } = isUpdating ? useProfile() : useRegistration();
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
@@ -126,6 +126,9 @@ function SchoolField({ question, formik, isUpdating = false }) {
               onPlacesChanged={handlePlaceChanged}
             >
               <MuiTextField
+                inputProps={{
+                  'data-testid': `${Text}-${QuestionDataTypeId}`
+                }}
                 variant="outlined"
                 fullWidth
                 {...formik.getFieldProps(question.ID)}

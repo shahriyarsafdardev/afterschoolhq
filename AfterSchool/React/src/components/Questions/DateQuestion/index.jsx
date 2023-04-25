@@ -10,7 +10,7 @@ function DateQuestion({ question, formik }) {
   const classes = useStyles();
   const datePicker = useRef();
   const { touched, values, errors, setFieldValue } = formik;
-  const { ID, Text: title, IsRequired: isRequired = false } = question;
+  const { ID, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 
   const handleDateChange = date => {
     setFieldValue(
@@ -54,7 +54,8 @@ function DateQuestion({ question, formik }) {
                   }
                 }}
                 KeyboardButtonProps={{
-                  'aria-label': 'change date'
+                  'aria-label': 'change date',
+                  'data-testid': `${title}-${QuestionDataTypeId}`
                 }}
               />
             </MuiPickersUtilsProvider>

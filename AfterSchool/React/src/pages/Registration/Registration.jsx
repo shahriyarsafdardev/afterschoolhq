@@ -1,19 +1,15 @@
-import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
-import { useFormik, Form, FormikProvider } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
-import cs from 'classnames';
+import { useFormik } from 'formik';
 
-import { Loader, ProgressBar, ShowQuestion } from 'components';
 import RegistrationService from 'sevices/RegistrationService';
-import { useRegistration } from 'redux/hooks/index';
-import useStyles from './styles';
+import RegistrationForm from 'pages/shared/RegistrationForm';
+import { useRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
-export default function Home({ newChild = false }) {
-  const classes = useStyles();
+export default function Registration({ newChild = false }) {
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouUrl } = apiRoutes;
@@ -162,59 +158,21 @@ export default function Home({ newChild = false }) {
   }, [activeGroup, activeGroupId, questions]);
 
   return (
-    <FormikProvider value={formik}>
-      <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
-        {loading ? (
-          <Loader />
-        ) : (
-          <Box className={classes.outerWrapper}>
-            <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
-            <Box className={classes.formWrapper}>
-              <Box className={classes.formInnerWrapper}>
-                <Typography style={{ padding: '30px 0px' }} variant="h6" color="primary">
-                  {Name}
-                </Typography>
-                <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
-                  <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                    {currentQuestions?.map(question =>
-                      ShowQuestion({ currentQuestion: question, formik, currentQuestions })
-                    )}
-                  </Grid>
-                </Grid>
-                <Box className={classes.buttonOuterWrapper}>
-                  <Box className={classes.buttonWrapper}>
-                    <Button
-                      color="primary"
-                      variant="outlined"
-                      className={classes.backButton}
-                      disabled={!activeGroup > 0}
-                      onClick={() => handleSection('previous')}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      color="primary"
-                      className={classes.saveButton}
-                      variant="contained"
-                      type="submit"
-                      disabled={saveDisabled}
-                      key={activeGroup}
-                    >
-                      {saveDisabled ? (
-                        <>
-                          {'Loading . . .'} <CircularProgress size={'20px'} />
-                        </>
-                      ) : (
-                        saveButtonText(lastSection, RegistrantType, IsFree, skipAble)
-                      )}
-                    </Button>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        )}
-      </Form>
-    </FormikProvider>
+    <RegistrationForm
+      loading={loading}
+      totalGroups={totalGroups}
+      activeGroup={activeGroup}
+      saveDisabled={saveDisabled}
+      currentQuestions={currentQuestions}
+      Name={Name}
+      saveButtonText={saveButtonText}
+      handleSection={handleSection}
+      lastSection={lastSection}
+      formik={formik}
+      handleSubmit={handleSubmit}
+      skipAble={skipAble}
+      registrantType={RegistrantType}
+      isFree={IsFree}
+    ></RegistrationForm>
   );
 }

@@ -10,9 +10,9 @@ import twitterIcon from 'assets/social-twitter-outline-1.svg';
 function ShareButton(props) {
   const classes = useStyles();
   const { facebookShareUrl, twitterShareUrl } = apiRoutes;
-  const { activityUrl, activityName, appName = 'AfterSchool HQ', site } = props;
+  const { activityUrl, activityName, appName = 'AfterSchool HQ', platformName } = props;
 
-  const siteData = {
+  const platformData = {
     Facebook: {
       shareUrl: facebookShareUrl(activityUrl),
       icon: facebookIcon
@@ -23,15 +23,15 @@ function ShareButton(props) {
     }
   };
 
-  const { shareUrl, icon } = siteData[site];
+  const { shareUrl, icon } = platformData[platformName];
   const handleClick = () => window.open(shareUrl, '_blank', 'noopener noreferrer');
 
   return (
-    <Box className={classes.shareBox} onClick={handleClick}>
+    <Box className={classes.shareBox} onClick={handleClick} data-testid={platformName}>
       <Icon className={classes.icon}>
         <img className={classes.icon} src={icon} />
       </Icon>
-      <Typography>{site}</Typography>
+      <Typography>{platformName}</Typography>
     </Box>
   );
 }

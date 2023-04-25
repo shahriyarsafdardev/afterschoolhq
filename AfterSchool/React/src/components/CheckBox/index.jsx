@@ -5,7 +5,7 @@ import useStyles from './styles';
 
 function CheckBox({ formik, question }) {
   const classes = useStyles();
-  const { ID, Text: title } = question;
+  const { ID, Text: title, QuestionDataTypeId } = question;
   const { values, setFieldValue, errors, touched } = formik;
 
   const handleCheck = ({ target: { checked } }) => {
@@ -18,8 +18,10 @@ function CheckBox({ formik, question }) {
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
+            data-testid={`${title}-${QuestionDataTypeId}-form`}
             control={
               <Checkbox
+                data-testid={`${title}-${QuestionDataTypeId}-checkbox`}
                 checked={!!values[ID]}
                 classes={{
                   checked: classes.checked,

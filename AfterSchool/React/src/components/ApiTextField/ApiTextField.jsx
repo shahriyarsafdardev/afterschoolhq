@@ -10,7 +10,7 @@ function ApiTextField({ formik, question, currentQuestions }) {
   const classes = useStyles();
   const [disabled, setDisable] = useState(true);
   const { touched, values, errors, setFieldValue } = formik;
-  const { ID, Text, IsRequired: required = false } = question;
+  const { ID, Text, IsRequired: required = false, QuestionDataTypeId } = question;
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
@@ -70,6 +70,9 @@ function ApiTextField({ formik, question, currentQuestions }) {
             onPlacesChanged={handlePlaceChanged}
           >
             <MuiTextField
+              inputProps={{
+                'data-testid': `${Text}-${QuestionDataTypeId}`
+              }}
               variant="outlined"
               fullWidth
               {...formik.getFieldProps(question.ID)}

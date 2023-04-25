@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using AfterSchool.Areas.ReactApi.Models;
+using AfterSchool.Areas.Api.Models;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
@@ -15,9 +15,9 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
-namespace AfterSchool.Areas.ReactApi.Controllers
+namespace AfterSchool.Areas.Api.Controllers
 {
-    public class ReactController : BaseController
+    public class RegistrationController : BaseController
     {
         [HttpGet]
         public ActionResult GetCurrentUser()

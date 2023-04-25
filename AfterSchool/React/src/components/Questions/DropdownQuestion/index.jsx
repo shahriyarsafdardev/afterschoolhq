@@ -8,7 +8,7 @@ function DropdownQuestion({ question, formik }) {
   const classes = useStyles();
   const { touched, values, errors, setFieldValue } = formik;
 
-  const { ID, Options, Text: title, IsRequired: isRequired = false } = question;
+  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   const options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
     return { key, value };
@@ -32,8 +32,13 @@ function DropdownQuestion({ question, formik }) {
                 classes={{
                   root: classes.formControlRoot
                 }}
+                data-testid={`${title}-${QuestionDataTypeId}-FormControl`}
               >
                 <Select
+                  data-testid={`${title}-${QuestionDataTypeId}-select`}
+                  inputProps={{
+                    'data-testid': `${title}-${QuestionDataTypeId}-inputprops`
+                  }}
                   id="dropdown-question"
                   value={value}
                   onChange={handleChange}
@@ -52,7 +57,11 @@ function DropdownQuestion({ question, formik }) {
                     getContentAnchorEl: null
                   }}
                 >
-                  <MenuItem key="Select" value="Select">
+                  <MenuItem
+                    key="Select"
+                    value="Select"
+                    data-testid={`${title}-${QuestionDataTypeId}-option-Select`}
+                  >
                     Select
                   </MenuItem>
                   {options.length &&
@@ -63,6 +72,7 @@ function DropdownQuestion({ question, formik }) {
                         classes={{
                           root: classes.list
                         }}
+                        data-testid={`${title}-${QuestionDataTypeId}-option-${option.value}`}
                       >
                         {option.value}
                       </MenuItem>
