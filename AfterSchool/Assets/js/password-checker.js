@@ -64,7 +64,7 @@ function checkStrength() {
         $('#password-strength').css('width', '10%');
         $('#form-submit').prop("disabled", true);
     }
-    else if (strength == 2 || strength == 3) {
+    else if (strength < 4) {
         $('#result').removeClass();
         $('#password-strength').removeClass('progress-bar-danger');
         $('#password-strength').addClass('progress-bar-warning');
@@ -72,15 +72,16 @@ function checkStrength() {
         $('#password-strength').css('width', '60%');
         $('#form-submit').prop("disabled", true);
         return 'Medium'
-    } else if (strength == 4) {
+    }
+    else {
         $('#result').removeClass();
         $('#result').addClass('strong');
-        $('#password-strength').removeClass('progress-bar-warning');
+        $('#password-strength').removeClass('progress-bar-warning progress-bar-danger');
         $('#password-strength').addClass('progress-bar-success');
         $('#result').addClass('text-success').text('Strong');
         $('#password-strength').css('width', '100%');
         $('#form-submit').prop("disabled", false);
-        return 'Strong'
+        return 'Strong';
     }
 
 }
