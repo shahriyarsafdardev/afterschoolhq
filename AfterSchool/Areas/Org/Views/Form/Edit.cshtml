@@ -1359,6 +1359,32 @@
     function Validate() {
         $(".btn btn-default btn-lg btn-block").removeAttr("disabled");
         var validated = true;
+
+        $("#form1 input").each(function (index) {
+            console.log(this);
+            var inputFieldValue = $(this).val();
+            if (inputFieldValue.length > 400) {
+                $(this).css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Question should not exceed 400 characters').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;
+            }
+            else {
+                $(this).css("border", "0px solid red");
+                $(this).removeAttr('title');
+            }
+        });
+        $("#form1 textarea").each(function (index) {
+            console.log(this);
+            var inputFieldValue = $(this).val();
+            if (inputFieldValue.length > 4000) {
+                $(this).css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Description should not exceed 4000 characters').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;
+            }
+            else {
+                $(this).css("border", "0px solid red");
+                $(this).removeAttr('title');
+            }
+        });
+
         $("#form1 tr").each(function (index) {
 
             //Checking for options empty values
