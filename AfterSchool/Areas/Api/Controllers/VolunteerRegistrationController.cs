@@ -144,6 +144,41 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
         
+        [HttpGet]
+        public ActionResult Exit()
+        {
+            var msgs = new SystemMessages();
+
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+
+                var registrants = currentUser.GetAllRegistrants(msgs);
+
+                foreach (var registrant in registrants)
+                {
+                    //msgs.AddRange(registrant.Delete());
+                    registrant.IsDeleted = true;
+                }
+                
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            
+        }
+        
         public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
