@@ -160,7 +160,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
-                        MaxAge = participationObject.AgeEnd
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -443,10 +444,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
-                        MinGrade = participationObject.MinGradeId,
-                        MaxGrade = participationObject.MaxGradeId,
+                        MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
+                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
-                        MaxAge = participationObject.AgeEnd
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
