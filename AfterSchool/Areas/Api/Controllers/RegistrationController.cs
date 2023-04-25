@@ -160,7 +160,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
-                        MaxAge = participationObject.AgeEnd
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -443,10 +444,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
-                        MinGrade = participationObject.MinGradeId,
-                        MaxGrade = participationObject.MaxGradeId,
+                        MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
+                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
-                        MaxAge = participationObject.AgeEnd
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -813,6 +815,41 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
             }
+        }
+
+        [HttpGet]
+        public ActionResult Exit()
+        {
+            var msgs = new SystemMessages();
+
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+
+                var registrants = currentUser.GetAllRegistrants(msgs);
+
+                foreach (var registrant in registrants)
+                {
+                    //msgs.AddRange(registrant.Delete());
+                    registrant.IsDeleted = true;
+                }
+                
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
         [HttpPost]
