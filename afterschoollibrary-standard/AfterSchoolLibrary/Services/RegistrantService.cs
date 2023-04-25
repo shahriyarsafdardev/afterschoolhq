@@ -1465,6 +1465,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUserId,
                 LastModifiedBy = loggedInUserId,
                 LastUpdated = DateTime.UtcNow,
+                IsDeleted = false,
             };
             msgs.AddRange(reg.Save(dc));
 
@@ -1496,7 +1497,7 @@ namespace AfterSchoolLibrary.Services
                 LastUpdated = DateTime.UtcNow,
                 ESignatureUserAgent = userAgent,
                 ESignatureIPAddress = ipAddress,
-                IsDeleted = false
+                IsDeleted = false,
             };
             msgs.AddRange(reg.Save(dc));
             
