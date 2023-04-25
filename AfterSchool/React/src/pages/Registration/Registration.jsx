@@ -26,7 +26,18 @@ export default function Registration({ newChild = false }) {
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
-    activity: { IsFree, RegistrantType }
+    activity: {
+      IsFree,
+      RegistrantType,
+      IsAgeRestricted,
+      MaxAge,
+      MinAge,
+      IsGradeRestricted,
+      MaxGrade,
+      MinGrade,
+      IsGenderRestricted,
+      EnforcedGender
+    }
   } = useRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -173,6 +184,16 @@ export default function Registration({ newChild = false }) {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
+      ageRestrictions={{ isAgeRestricted: IsAgeRestricted, maxAge: MaxAge, minAge: MinAge }}
+      gradeRestrictions={{
+        isGradeRestricted: IsGradeRestricted,
+        maxGrade: MaxGrade,
+        minGrade: MinGrade
+      }}
+      genderRestrictions={{
+        enforcedGender: EnforcedGender,
+        isGenderRestricted: IsGenderRestricted
+      }}
     ></RegistrationForm>
   );
 }

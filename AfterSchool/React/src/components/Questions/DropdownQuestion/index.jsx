@@ -1,18 +1,30 @@
 import React from 'react';
 import { Box, Select, FormControl, FormHelperText, MenuItem } from '@material-ui/core';
-import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 
+import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
 
-function DropdownQuestion({ question, formik }) {
+function DropdownQuestion({ question, formik, gradeRestrictions }) {
+  let options = {};
   const classes = useStyles();
   const { touched, values, errors, setFieldValue } = formik;
+  const { maxGrade, minGrade, isGradeRestricted } = gradeRestrictions;
 
   const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
-  const options = Options.split(',').map(option => {
-    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
-    return { key, value };
-  });
+
+  if (QuestionDataTypeId === restrictedQuestionsDataTypeIds.grade && isGradeRestricted) {
+    options = Options.split(',')
+      .filter(
+        option => gradeIds[option] >= gradeIds[minGrade] && gradeIds[option] <= gradeIds[maxGrade]
+      )
+      .map(option => ({ key: option, value: option }));
+  } else {
+    options = Options.split(',').map(option => {
+      const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+      return { key, value };
+    });
+  }
 
   const handleChange = ({ target: { value } }) => {
     const selectedOption = options.find(option => option.value === value);

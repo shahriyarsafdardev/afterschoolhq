@@ -1,18 +1,32 @@
 import React from 'react';
 import { Box, FormHelperText, RadioGroup } from '@material-ui/core';
-import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
-import RadioButton from 'components/RadioButton';
 
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import { restrictedQuestionsDataTypeIds } from 'constants';
+import RadioButton from 'components/RadioButton';
 import useStyles from './styles';
 
-function RadioQuestion({ question, formik }) {
+function RadioQuestion({ question, formik, genderRestrictions }) {
   const classes = useStyles();
-  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   const { touched, values, errors, setFieldValue } = formik;
-  const options = Options.split(',').map(option => {
+  const { enforcedGender, isGenderRestricted } = genderRestrictions;
+  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
+  let options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
     return { key, value };
   });
+
+  if (
+    restrictedQuestionsDataTypeIds.gender === QuestionDataTypeId &&
+    isGenderRestricted &&
+    enforcedGender !== 0
+  ) {
+    if (enforcedGender === 1) {
+      options = options.filter(option => option.key === 'Male');
+    } else if (enforcedGender === 2) {
+      options = options.filter(option => option.key === 'Female');
+    }
+  }
 
   const handleRadioChange = ({ target: { value } }) => {
     setFieldValue(ID, JSON.stringify([{ key: value, value }]));
