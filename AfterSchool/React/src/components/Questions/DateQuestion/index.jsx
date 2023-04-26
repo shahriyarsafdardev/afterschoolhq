@@ -7,13 +7,10 @@ import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import { restrictedQuestionsDataTypeIds } from 'constants';
 import useStyles from './styles';
 
-function DateQuestion({
-  ageRestrictions: { isAgeRestricted = false, minAge, maxAge },
-  question,
-  formik
-}) {
+function DateQuestion({ ageRestrictions = {}, question, formik }) {
   const classes = useStyles();
   const datePicker = useRef();
+  const { isAgeRestricted = false, minAge, maxAge } = ageRestrictions;
   const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 

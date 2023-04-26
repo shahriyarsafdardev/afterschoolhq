@@ -25,7 +25,7 @@ export default function VolunteerRegistration() {
     questionsGroups,
     answeredQuestions,
     submitFormSectionData,
-    activity: { IsFree, RegistrantType }
+    activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender }
   } = useVolunteerRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -158,6 +158,10 @@ export default function VolunteerRegistration() {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
+      genderRestrictions={{
+        enforcedGender: EnforcedGender,
+        isGenderRestricted: IsGenderRestricted
+      }}
     ></RegistrationForm>
   );
 }

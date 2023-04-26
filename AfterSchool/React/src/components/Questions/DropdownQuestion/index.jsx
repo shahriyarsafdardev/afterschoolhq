@@ -5,11 +5,11 @@ import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
 
-function DropdownQuestion({ question, formik, gradeRestrictions }) {
+function DropdownQuestion({ question, formik, gradeRestrictions = {} }) {
   let options = {};
   const classes = useStyles();
   const { touched, values, errors, setFieldValue } = formik;
-  const { maxGrade, minGrade, isGradeRestricted } = gradeRestrictions;
+  const { maxGrade, minGrade, isGradeRestricted = false } = gradeRestrictions;
 
   const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 

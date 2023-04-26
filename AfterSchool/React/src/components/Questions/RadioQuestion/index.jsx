@@ -6,10 +6,10 @@ import { restrictedQuestionsDataTypeIds } from 'constants';
 import RadioButton from 'components/RadioButton';
 import useStyles from './styles';
 
-function RadioQuestion({ question, formik, genderRestrictions }) {
+function RadioQuestion({ question, formik, genderRestrictions = {} }) {
   const classes = useStyles();
   const { touched, values, errors, setFieldValue } = formik;
-  const { enforcedGender, isGenderRestricted } = genderRestrictions;
+  const { enforcedGender = 0, isGenderRestricted = false } = genderRestrictions;
   const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   let options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
