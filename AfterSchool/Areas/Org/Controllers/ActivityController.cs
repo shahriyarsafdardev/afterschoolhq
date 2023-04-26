@@ -7,12 +7,10 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.Org.Assemblers.Activity;
-using AfterSchool.Assemblers;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Enums;
-using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -4497,6 +4495,128 @@ namespace AfterSchool.Areas.Org.Controllers
             return View();
         }
 
+
+        #endregion
+
+        #region AttendanceSummaryReport
+
+        public ActionResult AttendanceSummary(string id, DateTime? sdate = null, DateTime? edate = null, string activities = null)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var activitiesList = activities.IsEmpty() ? null : activities.Split(',').ToIntegerArray().ToList();
+            var activityAttendanceSummaries = ActivityAttendanceSummary.LoadAttendanceSummary(currentAccount.ID.Value, sdate, edate, activitiesList, msgs);
+            var result = LoadAttendanceSummaryResult(activityAttendanceSummaries, activities, currentAccount, currentUser, msgs);
+            return View(result);
+        }
+
+        public ActionResult DownloadAttendanceSummary(string id, DateTime? sdate = null, DateTime? edate = null, string activities = null)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var activitiesList = activities.IsEmpty() ? null : activities.Split(',').ToIntegerArray().ToList();
+            var activityAttendanceSummaries = ActivityAttendanceSummary.LoadAttendanceSummary(currentAccount.ID.Value, sdate, edate, activitiesList, msgs);
+
+            var table = new List<List<string>>();
+            var row = new List<string>
+            {
+                "Activity Name",
+                "Total Enrollment",
+                "Reserved",
+                "Waitlist",
+                "Applied",
+                "Withdrawn",
+                "Number of Classes",
+                "Avg Attended Per Class",
+                "Percent Attended",
+                "Total Active",
+                "Percent Active",
+            };
+
+            table.Add(row);
+
+            foreach (var item in activityAttendanceSummaries)
+            {
+                row = new List<string>
+                {
+                    item.ActivityName,
+                    item.TotalStudentsRegistered.ToString(),
+                    item.Reserved.ToString(),
+                    item.Waitlisted.ToString(),
+                    item.Applied.ToString(),
+                    item.Withdrawn.ToString(),
+                    item.NumberOfClasses.ToString(),
+                    item.AvgAttendedPerClass.ToString(),
+                    item.PercentAttended.ToString(),
+                    item.TotalActive.ToString(),
+                    item.PercentActive.ToString(),
+                };
+                table.Add(row);
+            }
+
+            var csv = CsvFile.Create(table);
+
+            Response.Clear();
+            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
+            Response.AddHeader("Content-Disposition", $"attachment; filename={currentAccount.UniqueName}-attendancesummary.csv");
+
+            var fileBytes = Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", fileBytes.Length.ToString());
+            Response.BinaryWrite(fileBytes);
+            Response.End();
+
+            return View("AttendanceSummary", LoadAttendanceSummaryResult(activityAttendanceSummaries, activities, currentAccount, currentUser, msgs));
+        }
+
+        private AttendanceSummaryResult LoadAttendanceSummaryResult(List<ActivityAttendanceSummary> activityAttendanceSummaries, string activities, Account currentAccount,
+            WebUser currentUser, SystemMessages msgs)
+        {
+
+            var result = new AttendanceSummaryResult();
+            var totalReserved = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved), 1);
+            var totalReservedAllClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved * x.NumberOfClasses), 1);
+            var totalClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.NumberOfClasses), 1);
+
+            result.ActivityAttendanceSummaries = activityAttendanceSummaries;
+            result.CurrentAccount = currentAccount;
+            result.CurrentUser = currentUser;
+            result.Messages = msgs;
+            result.TotalEnrollment = activityAttendanceSummaries.Sum(x => x.TotalStudentsRegistered);
+            result.PercentAttended = activityAttendanceSummaries.Sum(x => x.TotalAttended) / totalReservedAllClasses;
+            result.AverageAttendedPerClass = activityAttendanceSummaries.Sum(x => x.TotalAttended) / totalClasses;
+            result.TotalActive = activityAttendanceSummaries.Sum(x => x.TotalActive);
+            result.PercentActive = activityAttendanceSummaries.Sum(x => x.TotalActive) / totalReserved;
+            result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, false, false, null, null, null, msgs);
+
+            if (activities.IsNotBlank())
+                result.SelectedActivities = currentAccount.GetActivities(activities.Split(',').ToIntegerArray().ToList(), msgs);
+
+            return result;
+        }
+
+        public class AttendanceSummaryResult
+        {
+            public Account CurrentAccount { get; set; }
+            public WebUser CurrentUser { get; set; }
+            public SystemMessages Messages { get; set; }
+            public int TotalEnrollment { get; set; }
+            public int PercentAttended { get; set; }
+            public int AverageAttendedPerClass { get; set; }
+            public int TotalActive { get; set; }
+            public int PercentActive { get; set; }
+            public List<ActivityAttendanceSummary> ActivityAttendanceSummaries { get; set; }
+            public List<Activity> ActivityOptions { get; set; }
+            public List<Activity> SelectedActivities { get; set; }
+
+            public AttendanceSummaryResult()
+            {
+                ActivityAttendanceSummaries = new List<ActivityAttendanceSummary>();
+                ActivityOptions = new List<Activity>();
+                SelectedActivities = new List<Activity>();
+            }
+        }
 
         #endregion
     }

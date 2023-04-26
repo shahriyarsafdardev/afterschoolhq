@@ -1,0 +1,286 @@
+@model AfterSchool.Areas.Org.Controllers.ActivityController.AttendanceSummaryResult
+@{
+    ViewBag.Title = "Activity Attendance Summary";
+    var activityAttendanceSummaries = Model.ActivityAttendanceSummaries;
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row margin-b-20 hidden-print">
+                <button class="btn btn-primary btn-space hidden-print" onclick="download()">
+                    <i class="s7-download"></i> Download
+                </button>
+                <button onclick="window.print()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-print"></i> Print
+                </button>
+                <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-close-circle"></i> Close
+                </button>
+            </div>
+
+            <div class="row hidden-print">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-date"></i> Date Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
+                </div>
+            </div>
+
+            <div id="date-selection" class="row hide toggles hidden-print">
+                <div class="col-md-12">&nbsp;</div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    <button onclick="apply()" class="btn btn-default btn-space">
+                        Apply
+                    </button>
+                </div>
+            </div>
+
+            <div class="row hide toggles hidden-print" id="activityoption-selection">
+
+                <div class="col-md-12">
+                    <button onclick="apply()" class="btn btn-default btn-space">
+                        Apply
+                    </button>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="activityoptions"
+                               class="form-control"
+                               value="1"
+                               onclick="toggleAllActivityOptions()" />
+
+                        <label for="activityoptions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
+                @for (var i = 0; i < 4; i++)
+                {
+                    var take = (int)Math.Ceiling(Model.ActivityOptions.Count() / 4M);
+                    var skip = i * take;
+
+                    <div class="col-md-3">
+
+                        @foreach (var activity in Model.ActivityOptions.Skip(skip).Take(take))
+                        {
+                            <div>
+                                <div class="am-checkbox">
+                                    <input type="checkbox"
+                                           id="activityoption-@activity.ID"
+                                           name="activityoption-@activity.ID"
+                                           class="form-control activityoption"
+                                           value="1"
+                                           @(activity.ID.In(Model.SelectedActivities.Select(x => x.ID)) ? "checked=\"checked\"" : "")
+                                           onclick="toggleActivityOption(@activity.ID)" />
+
+                                    <label for="activityoption-@activity.ID">
+                                        @activity.Name
+                                    </label>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                }
+            </div>
+
+            <div class="row hidden-print">
+                <div class="col-md-12">
+                    <br />
+                </div>
+            </div>
+
+            <div class="hidden-print">
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@Model.TotalEnrollment" data-decimals="0" data-suffix="" class="value">@Model.TotalEnrollment</div>
+                            <div class="desc">Total Enrollment</div>
+                        </div>
+                        <div class="icon">
+                            <span class="s7-users"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@Model.PercentAttended" data-decimals="1" data-suffix="" class="value">@Model.PercentAttended%</div>
+                            <div class="desc">% Attended</div>
+                        </div>
+                        <div class="icon">
+                            <span class="s7-users"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@Model.AverageAttendedPerClass" data-decimals="1" data-suffix="" class="value">@Model.AverageAttendedPerClass</div>
+                            <div class="desc">Avg Attended / Class</div>
+                        </div>
+                        <div class="icon">
+                            <span class="s7-users"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@Model.TotalActive" data-decimals="0" data-suffix="" class="value">@Model.TotalActive</div>
+                            <div class="desc">Total Active</div>
+                        </div>
+                        <div class="icon">
+                            <span class="s7-users"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="widget widget-tile widget-bordered">
+                        <div class="data-info">
+                            <div data-toggle="counter" data-end="@Model.PercentActive" data-decimals="1" data-suffix="" class="value">@Model.PercentActive%</div>
+                            <div class="desc">Percent Active</div>
+                        </div>
+                        <div class="icon">
+                            <span class="s7-users"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Activity Name</th>
+                            <th>Total Enrollment</th>
+                            <th>Reserved</th>
+                            <th>Waitlist</th>
+                            <th>Applied</th>
+                            <th>Withdrawn</th>
+                            <th># of Classes</th>
+                            <th>Avg Attended / Class</th>
+                            <th>% Attended</th>
+                            <th>Total Active</th>
+                            <th>% Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in activityAttendanceSummaries.OrderBy(x => x.ActivityName))
+                        {
+                            <tr>
+                                <td>@item.ActivityName</td>
+                                <td>@item.TotalStudentsRegistered</td>
+                                <td>@item.Reserved</td>
+                                <td>@item.Waitlisted</td>
+                                <td>@item.Applied</td>
+                                <td>@item.Withdrawn</td>
+                                <td>@item.NumberOfClasses</td>
+                                <td>@item.AvgAttendedPerClass</td>
+                                <td>@item.PercentAttended</td>
+                                <td>@item.TotalActive</td>
+                                <td>@item.PercentActive</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());
+
+    function toggleDateSelection() {
+        if ($('#date-selection').hasClass('hide')) {
+            hideToggles();
+            $('#date-selection').removeClass('hide');
+        } else {
+            $('#date-selection').addClass('hide');
+        }
+    }
+
+    function toggleActivityOptionSelection() {
+        if ($('#activityoption-selection').hasClass('hide')) {
+            hideToggles();
+            $('#activityoption-selection').removeClass('hide');
+        } else {
+            $('#activityoption-selection').addClass('hide');
+        }
+    }
+
+    function toggleAllActivityOptions() {
+        if ($('#activityoptions').is(':checked')) {
+            $('.activityoption').prop('checked', true);
+        } else {
+            $('.activityoption').prop('checked', false);
+        }
+    }
+
+    function getSelectedActivities() {
+        var selectedActivities = "";
+
+        for (let activityOption of activityOptions) {
+            if ($(`#activityoption-${activityOption.ID}`).is(':checked')) {
+                if (selectedActivities.length > 0)
+                    selectedActivities += ',';
+
+                selectedActivities += activityOption.ID;
+            }
+        }
+
+        return selectedActivities;
+    }
+
+    function hideToggles() {
+        $('.toggles').addClass('hide');
+    }
+
+    function apply() {
+        location.href = `@Url.Action("AttendanceSummary", "Activity")?sdate=${$('#startdate').val()}&edate=${$('#enddate').val()}&activities=${getSelectedActivities()}`;
+    }
+
+    function download() {
+        location.href = `@Url.Action("DownloadAttendanceSummary", "Activity")?sdate=${$('#startdate').val()}&edate=${$('#enddate').val()}&activities=${getSelectedActivities()}`;
+    }
+</script>
