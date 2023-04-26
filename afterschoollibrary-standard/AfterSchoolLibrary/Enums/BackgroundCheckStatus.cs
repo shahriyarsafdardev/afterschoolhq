@@ -7,8 +7,14 @@ namespace AfterSchoolLibrary.Models
         ManuallyApproved = 2,
         BackgroundCheckRequested = 3,
         EmailSentToVolunteer = 4,
-        CompletedByVolunteer = 5,
-        RequiresReview = 6,
+        Complete = 5,
+        Review = 6,
         AutomaticallyApproved = 7,
+        PreDraft = 8,
+        Pending = 9,
+        Hold = 10,
+        AdverseAction = 11,
+        Dispute = 12,
+        Archive = 13,
     }
 }

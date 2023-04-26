@@ -1,4 +1,4 @@
-﻿@model List<Activity>
+@model List<Activity>
 @{
     var account = (Account) ViewData["Account"];
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
@@ -138,6 +138,7 @@ else
                     <a href="@archivedListUrl" class="@archiveClass">Archived</a>
                 </div>
             </div>
+            <div class="col-md-12">&nbsp;</div>
         </div>
     }
 
@@ -342,6 +343,10 @@ else
 
                     @if (group.IsEmpty())
                     {
+                        <button data-uid="@UI.JavascriptSafeString(activity.Uid.ToString())" data-name="@UI.JavascriptSafeString(activity.Name)"
+                                class="btn btn-sm shadow-none featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
+                            <i class="s7-pin"></i>
+                        </button>
                         <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
                     }
 
@@ -563,10 +568,54 @@ else
         </div>
     </div>
 </div>
-
 <script>
+PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#registration-group').change(function () {
+            location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
+        });
+        
+         $(document).on('click','.featured',function(){   
+            showLoader();
+            showProgressBar();
+            let uid = $(this).attr("data-uid");
+            let name = $(this).attr("data-name");
+            let currentBtn = $(this); // get current activity pin button
+            $.get(
+                `/org/activity/PinFeatureActivity?id=${uid}`,
+                function (data) {
+                  if (data && data.status === 'ok') {
+                     Notifications.showBar({
+                        title: 'Success',
+                        message: `Featured Settings for <strong>${name}</strong> has been updated`,
+                        success: true
+                     });
+                     if (data.isFeaturedNow === true)
+                     {
+                        currentBtn.removeClass('btn-default');  
+                        currentBtn.addClass('btn-primary'); 
+                     }
+                     else 
+                     {
+                        currentBtn.removeClass('btn-primary');  
+                        currentBtn.addClass('btn-default');  
+                     }
+                  }
+                  else
+                  {
+                     Notifications.showBar({
+                         title: 'Error',
+                         message: 'Something went wrong. Please contact customer support.',
+                         success: false
+                     });
+                  }
+                  hideLoader();
+                  hideProgressBar();
+               });
+        }); 
+         
+        });
      function doSearch(){
-         location.href = `@Url.Action("index", "activity")?type=@((int)activityType)&archive=@(newArchiveValue)&${getQuery()}`;
+         location.href = `@Url.Action("index", "activity")?type=@((int) activityType)&archive=@(newArchiveValue)&${getQuery()}`;
     }
     function updateSchedule() {
         var schedule = $('#schedule').val();
@@ -623,13 +672,8 @@ else
         return `q=${q}`;
     }
 </script>
-
 <script>
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        $('#registration-group').change(function () {
-            location.href = '@Url.Action("index", "activity")?group=' + $(this).val();
-        });
-    });
+    
 
     function HandleNotification(packageName, packageID) {
         if(packageID > 0 && packageName !== ""){

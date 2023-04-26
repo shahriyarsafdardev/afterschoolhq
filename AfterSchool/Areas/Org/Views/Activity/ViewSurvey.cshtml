@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
@@ -93,7 +93,7 @@
                                 }
                             </td>
                             <td>
-                                @surveyResponse.GetRegistrantName().DisplayName
+                                @surveyResponse.GetRegistrantName()
                             </td>
                             <td>
                                 @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()

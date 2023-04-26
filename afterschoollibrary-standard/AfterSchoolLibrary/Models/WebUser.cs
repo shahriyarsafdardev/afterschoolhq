@@ -252,7 +252,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["Uid"], Uid);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
-
+        
         public static WebUser LoadByUidByIsActive(Guid Uid, bool IsActive, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -378,6 +378,7 @@ namespace AfterSchoolLibrary.Models
                 {
                     {"email", email},
                 },
+                msgs: msgs,
                 dc: dc
             ) > 0;
         }
@@ -389,6 +390,7 @@ namespace AfterSchoolLibrary.Models
                 {
                     {"phone", phone},
                 },
+                msgs: msgs,
                 dc: dc
             ) > 0;
         }

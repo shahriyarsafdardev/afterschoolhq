@@ -46,7 +46,7 @@
                             else if (answer.FormQuestionQuestionTypeId.In(new List<QuestionType>() { QuestionType.CheckboxList }))
                             {
                                 //[{"key":"html","value":"html"},{"key":"js","value":"js"}]
-                                @UILabel.GetFormattedAnswerForArray(answer.Text);
+                                @UILabel.GetFormattedAnswerForArray(answer.Text)
                             }
                             else if (answer.FormQuestionQuestionTypeId == QuestionType.RadioMatrix)
                             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -70,10 +70,10 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Edit(string id, string firstname, string lastname, string email, string phone, string password1, string password2, string isactive, string sysadmin)
         {
             var msgs = new SystemMessages();
-            WebUser user = null; 
+            WebUser user = null;
 
             if (id.IsGuid())
-                user = WebUser.LoadByUid(id.ToGuid()); 
+                user = WebUser.LoadByUid(id.ToGuid());
 
             if (!email.IsEmail())
                 msgs.Add("Email must be a valid email address", MessageType.UserError);
@@ -117,7 +117,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                     amsgs,
                                     adc);
                     },
-                    onSuccess: (SystemMessages smsgs) => 
+                    onSuccess: (SystemMessages smsgs) =>
                     {
                         msgs.AddRange(smsgs);
                         msgs.Add("Save successful", MessageType.Success);
@@ -163,16 +163,16 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
             else
             {
-                foreach(string email in emails.Split(',').Select(x=>x.Trim()))
+                foreach (string email in emails.Split(',').Select(x => x.Trim()))
                 {
-                    if(!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
+                    if (!email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                     {
                         msgs.Add(string.Format("{0} is not a valid email address", email), MessageType.UserError);
                     }
                 }
             }
-            
-            if(msgs.HasNoErrors())
+
+            if (msgs.HasNoErrors())
             {
                 Account a = null;
                 UserType ut;
@@ -214,10 +214,10 @@ namespace AfterSchool.Areas.Admin.Controllers
         {
             var msgs = new SystemMessages();
             WebUser user = null;
-
+           
             if (uid.IsEmpty() && id.IsNumber())
                 user = Account.Load(id.ToInteger()).GetAccountOwner();
-            else if(uid.IsGuid())
+            else if (uid.IsGuid())
                 user = WebUser.LoadByUid(uid.ToGuid());
             else
                 msgs.Add("Invalid params", MessageType.UserError);
@@ -227,6 +227,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 SessionVariables.OriginalLoggedInUser = SessionVariables.CurrentUser;
                 LoadSessionInfo(user, null, false, msgs);
             }
+ 
 
             if (msgs.HasNoErrors())
             {

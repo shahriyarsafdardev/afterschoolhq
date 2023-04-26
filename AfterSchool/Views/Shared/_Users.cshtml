@@ -1,11 +1,11 @@
-﻿@model List<WebUser>
+@model List<WebUser>
 @{
     var accountId = "";
     var returnUrl = "";
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
-    var paging = (PagingModel) ViewData["PagingModel"];
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var paging = (PagingModel)ViewData["PagingModel"];
     var isAfterSchoolAdmin = currentAccount.AccountTypeId == AccountType.AfterSchool;
     var canDelete = SessionVariables.OriginalLoggedInUser.IsNotEmpty();
     var inviteUrl = Url.Action("invite", "user");
@@ -24,7 +24,7 @@
 
     if (accountId.Length > 0)
     {
-        inviteUrl = Url.Action("teaminvite", "account", new {id = accountId});
+        inviteUrl = Url.Action("teaminvite", "account", new { id = accountId });
     }
 
     if (accountPackage.IsNotEmpty() && Model.Count >= accountPackage.GetFeature(FeatureType.TeamAccounts).Max.Value)
@@ -43,116 +43,120 @@
 <div class="table-responsive">
     <table class="table table-hover">
         <thead>
-        <tr>
-            @if (isAfterSchoolAdmin)
-            {
+            <tr>
+                @if (isAfterSchoolAdmin)
+                {
+                    <th></th>
+                }
+                <th>Name</th>
+                <th>Email</th>
+                <th>Registered?</th>
+                <th>Is Active?</th>
+                @if (!isAfterSchoolAdmin)
+                {
+                    <th>Type</th>
+                }
+                <th>Member Since</th>
                 <th></th>
-            }
-            <th>Name</th>
-            <th>Email</th>
-            <th>Registered?</th>
-            <th>Is Active?</th>
-            @if (!isAfterSchoolAdmin)
-            {
-                <th>Type</th>
-            }
-            <th>Member Since</th>
-            <th></th>
-        </tr>
+            </tr>
         </thead>
         <tbody>
-        @if (Model.Count() > 0)
-        {
-            foreach (var user in Model)
+            @if (Model.Count() > 0)
             {
-                <tr>
-                    @if (isAfterSchoolAdmin)
-                    {
+                foreach (var user in Model)
+                {
+                    <tr>
+                        @if (isAfterSchoolAdmin && !(FormConstants.AdminUserTypes.Contains(user.GetUserType(currentAccount))))
+                        {
+                            <td>
+                                <a href="@Url.Action("impersonate", "user", new {id = accountId, uid = user.Uid})" class="btn btn-default btn-xs">
+                                    <i class="icon icon-left s7-user"></i> Impersonate
+                                </a>
+                            </td>
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                        <td>@user.DisplayName</td>
                         <td>
-                            <a href="@Url.Action("impersonate", "user", new {id = accountId, uid = user.Uid})" class="btn btn-default btn-xs">
-                                <i class="icon icon-left s7-user"></i> View
-                            </a>
+                            <a href="mailto:@user.Email">@user.Email</a>
                         </td>
-                    }
-                    <td>@user.DisplayName</td>
-                    <td>
-                        <a href="mailto:@user.Email">@user.Email</a>
-                    </td>
-                    <td>@user.IsRegistered.ToYesNo()</td>
-                    <td>@user.IsActive.ToYesNo()</td>
-                    @if (!isAfterSchoolAdmin)
-                    {
-                        <td>
-                            @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner || currentUserType == UserType.TechSupport)
-                            {
-                                if ((user.GetUserType(currentAccount) == UserType.Administrator || user.GetUserType(currentAccount) == UserType.Owner) && currentUserType == UserType.Administrator)
+                        <td>@user.IsRegistered.ToYesNo()</td>
+                        <td>@user.IsActive.ToYesNo()</td>
+                        @if (!isAfterSchoolAdmin)
+                        {
+                            <td>
+                                @if (currentUserType == UserType.Administrator || currentUserType == UserType.Owner || currentUserType == UserType.TechSupport)
                                 {
-                                    @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
-                                }
-                                else if (user.GetUserType(currentAccount) == UserType.Owner && currentUserType == UserType.Owner)
-                                {
-                                    @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                                    if ((user.GetUserType(currentAccount) == UserType.Administrator || user.GetUserType(currentAccount) == UserType.Owner) && currentUserType == UserType.Administrator)
+                                    {
+                                        @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                                    }
+                                    else if (user.GetUserType(currentAccount) == UserType.Owner && currentUserType == UserType.Owner)
+                                    {
+                                        @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
+                                    }
+                                    else
+                                    {
+                                        <select name="newassignmenttype"
+                                                id="newassignmenttype-@user.ID"
+                                                class="form-control"
+                                                onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)">
+
+                                            @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
+                                            {
+                                                switch (assignmenttype)
+                                                {
+                                                    case UserType.NotSet:
+                                                    case UserType.Parent:
+                                                    case UserType.Student:
+                                                    case UserType.SuperAdmin:
+                                                        continue;
+                                                }
+                                                <option value="@((int) assignmenttype)" @(assignmenttype == user.GetUserType(currentAccount) ? "selected=\"selected\"" : "")>
+                                                    @assignmenttype.ToString().SplitByUpperCase()
+                                                </option>
+                                            }
+                                        </select>
+                                    }
                                 }
                                 else
                                 {
-                                    <select name="newassignmenttype"
-                                            id="newassignmenttype-@user.ID"
-                                            class="form-control"
-                                            onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)">
-
-                                        @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
-                                        {
-                                            switch (assignmenttype)
-                                            {
-                                                case UserType.NotSet:
-                                                case UserType.Parent:
-                                                case UserType.Student:
-                                                case UserType.SuperAdmin:
-                                                    continue;
-                                            }
-                                            <option value="@((int) assignmenttype)" @(assignmenttype == user.GetUserType(currentAccount) ? "selected=\"selected\"" : "")>
-                                                @assignmenttype.ToString().SplitByUpperCase()
-                                            </option>
-                                        }
-                                    </select>
+                                    @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
                                 }
-                            }
-                            else
-                            {
-                                @user.GetUserType(currentAccount).ToString().SplitByUpperCase()
-                            }
-                        </td>
-                    }
-                    <td>@user.CreateDate.Value.ToLongDateString()</td>
-                    <td>
-                        <div class="btn-group">
-                            @if (isAfterSchoolAdmin)
-                            {
-                                <a href="@Url.Action("edit", "user", new {id = user.Uid, returnUrl})" class="btn btn-default btn-xs">
-                                    <i class="icon icon-left s7-edit"></i> Edit
-                                </a>
-                            }
-                            else if (!user.IsRegistered)
-                            {
-                                <button type="button"
-                                        class="btn btn-default btn-sm md-trigger"
-                                        data-modal="modal-invite"
-                                        onclick="showInviteLink('@user.GetInviteUrl(currentAccount)')">
-                                    Get Invite Link
-                                </button>
-                            }
-                            else if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes) && user.ID != currentUser.ID)
-                            {
-                                <button type="button"
-                                        class="btn btn-danger btn-sm md-trigger"
-                                        data-modal="modal-confirm-delete"
-                                        onclick="removeUser('@user.Uid', '@UI.JavascriptSafeString(user.DisplayName)')">
-                                    <i class="s7-trash"></i> Remove
-                                </button>
+                            </td>
+                        }
+                        <td>@user.CreateDate.Value.ToLongDateString()</td>
+                        <td>
+                            <div class="btn-group">
+                                @if (isAfterSchoolAdmin)
+                                {
+                                    <a href="@Url.Action("edit", "user", new {id = user.Uid, returnUrl})" class="btn btn-default btn-xs">
+                                        <i class="icon icon-left s7-edit"></i> Edit
+                                    </a>
+                                }
+                                else if (!user.IsRegistered)
+                                {
+                                    <button type="button"
+                                            class="btn btn-default btn-sm md-trigger"
+                                            data-modal="modal-invite"
+                                            onclick="showInviteLink('@user.GetInviteUrl(currentAccount)')">
+                                        Get Invite Link
+                                    </button>
+                                }
+                                else if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes) && user.ID != currentUser.ID)
+                                {
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm md-trigger"
+                                            data-modal="modal-confirm-delete"
+                                            onclick="removeUser('@user.Uid', '@UI.JavascriptSafeString(user.DisplayName)')">
+                                        <i class="s7-trash"></i> Remove
+                                    </button>
 
-                                Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel {ActionButtonHtml = "Remove Team Member &raquo;", ActionButtonId = "btn-confirm-delete", HtmlBody = "<p>Are you sure you want to remove <strong><span class=\"delete-user-name\"></span></strong> from the team?</p><p><strong>If you want to re-add <span class=\"delete-user-name\"></span> you will need to invite them again</strong></p>", ID = "modal-confirm-delete", Title = "Remove Team Member"});
+                                    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel { ActionButtonHtml = "Remove Team Member &raquo;", ActionButtonId = "btn-confirm-delete", HtmlBody = "<p>Are you sure you want to remove <strong><span class=\"delete-user-name\"></span></strong> from the team?</p><p><strong>If you want to re-add <span class=\"delete-user-name\"></span> you will need to invite them again</strong></p>", ID = "modal-confirm-delete", Title = "Remove Team Member" });
 
-                                <script>
+                                    <script>
                                         var userUid = '';
                                         function removeUser(uid, name) {
                                             $('.delete-user-name').html(name);
@@ -163,34 +167,34 @@
                                                 location.href = '@Url.Action("TeamRemoveMember", "account")/' + userUid;
                                             });
                                         });
-                            </script>
-                            }
-                        </div>
-                    </td>
+                                    </script>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7">There are no users. Please <a href="@Url.Action("invite", "user", new {id = accountId, returnUrl})">invite new user</a></td>
                 </tr>
             }
-        }
-        else
-        {
-            <tr>
-                <td colspan="7">There are no users. Please <a href="@Url.Action("invite", "user", new {id = accountId, returnUrl})">invite new user</a></td>
-            </tr>
-        }
         </tbody>
     </table>
 </div>
 
 @{ Html.RenderPartial(
-       "~/Views/Shared/_Paging.cshtml",
-       paging,
-       new ViewDataDictionary
-       {
+        "~/Views/Shared/_Paging.cshtml",
+        paging,
+        new ViewDataDictionary
+        {
            {"id", ""},
            {"action", "index"},
            {"controller", "user"},
            {"querystring", $"search={Request["search"]}"},
-       }
-       ); }
+                }
+        ); }
 
 <div id="modal-invite" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
@@ -202,7 +206,7 @@
         </div>
         <div class="modal-body form">
 
-            <input type="text" readonly="readonly" id="invite-link" value="" class="form-control" onclick="this.select()"/>
+            <input type="text" readonly="readonly" id="invite-link" value="" class="form-control" onclick="this.select()" />
 
         </div>
         <div class="modal-footer">

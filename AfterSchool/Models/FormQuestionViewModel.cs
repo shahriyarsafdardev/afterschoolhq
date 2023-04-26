@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using System.Collections.Specialized;
 
 namespace AfterSchool.Models
@@ -29,7 +29,7 @@ namespace AfterSchool.Models
         public FormQuestionViewModel(FormQuestion question, FormQuestionAnswer answer)
         {
             Question = question;
-            Values = new NameValueCollection() { { Id, answer.Text } };
+            Values = new NameValueCollection() { { Id, answer?.Text } };
         }
 
         public bool Hide { get; set; }  

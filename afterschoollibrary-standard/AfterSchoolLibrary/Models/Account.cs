@@ -265,6 +265,12 @@ namespace AfterSchoolLibrary.Models
             get => (int?) MDV["ReferrerAccountId"].Value;
             set => MDV["ReferrerAccountId"].Value = value;
         }
+        
+        public int? FiscalAccountId
+        {
+            get => (int?) MDV["FiscalAccountId"].Value;
+            set => MDV["FiscalAccountId"].Value = value;
+        }
 
 
         public Account()
@@ -335,6 +341,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "SignUpTypeId", SqlDbType.Int);
                 _dp.Add(className, "ReferralCode", SqlDbType.UniqueIdentifier);
                 _dp.Add(className, "ReferrerAccountId", SqlDbType.Int);
+                _dp.Add(className, "FiscalAccountId", SqlDbType.Int);
                 return _dp;
             }
         }
@@ -562,6 +569,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["ReferrerAccountId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FiscalAccountId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 
@@ -1336,7 +1347,6 @@ namespace AfterSchoolLibrary.Models
 
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).Select(a => a.Subdomain).ToList();
         }
-
         public static List<Account> LoadByIdsByAccountTypes(List<int> ids, List<AccountType> accountTypes,
             SystemMessages msgs, DatabaseConnection dc)
         {

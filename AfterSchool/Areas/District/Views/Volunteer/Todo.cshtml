@@ -1,0 +1,466 @@
+﻿@using AfterSchoolLibrary.Enums
+@model List<TodoViewModel>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var selectedTaskType = ViewBag.SelectedTaskType;
+    var selectedApplicationStatus = ViewBag.SelectedApplicationStatus;
+    var paging = (PagingModel)ViewBag.PagingModel;
+    var returnUrl = Request.Url;
+}
+
+<style>
+    a
+    {
+        width: auto;
+    }
+    
+    .panel > .row
+    {
+        padding-top: 20px;
+        padding-left: 50px;
+    }
+    
+    .panel-heading
+    {
+        border-style: hidden;
+    }
+    
+    .form-control
+    {
+        display: inline-block;
+        width: fit-content;
+    }
+    
+    .input-group
+    {
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        align-items: flex-start;
+    }
+    
+    @*
+    label
+    {
+        color: #00b492;
+        font-size: 12px;
+    }*@
+    
+    .searchActivitiesBtn
+    {
+        color: black;
+    }
+    
+    small
+    {
+        font-size: 76%;
+        color: grey;
+    }
+    
+    .pull-left , .pull-right > button
+    {
+        width: 100px;
+    }
+    
+    .date
+    {
+        display: table;
+    }
+    
+    .no-task > p > img
+    {
+        height: 100px;
+    }
+    
+    .paper-plan
+    {
+        height: 20px;
+    }
+    
+    #search
+    {
+        width:30%;
+    }
+    
+</style>
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@{Html.RenderPartial("DistrictHeader");}
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_VolunteerHeader");}
+    
+    <div class="panel panel-default">
+        
+        <div class="row hide">
+        
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">4</div>
+                        <div class="desc">New Volunteer Applicants</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">3</div>
+                        <div class="desc">Expiring Volunteers</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+            <div class="col-md-2">
+                <div class="widget widget-tile widget-bordered">
+                    <div class="data-info">
+                        <div data-toggle="counter" data-end="7858" id="totalTransactionAmount" data-decimals="2" data-suffix="" class="value">4</div>
+                        <div class="desc">Background Check for Review</div>
+                    </div>
+                    <div class="icon"><span class=""></span></div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="panel-heading">
+            <div class="pull-right">
+                <select name="taskType" id="taskType" class="form-control">
+                    <option value="">All Task</option>
+                    @foreach (var taskType in Enum.GetValues(typeof(TaskStatus)).Cast<TaskStatus>().Except(TaskStatus.NotSet.AsList()))
+                    {
+                        <option value="@((int)taskType)" @(Request["taskType"] == ((int)taskType).ToString() ? "selected=\"selected\"" : "")>
+                            @taskType.ToString().SplitByUpperCase()
+                        </option>
+                    }
+                </select>
+                <select name="applicationStatus" id="applicationStatus" class="form-control">
+                    <option value="">All Statuses</option>
+                    @foreach (var applicationStatus in Enum.GetValues(typeof(ApplicationStatus)).Cast<ApplicationStatus>().Except(ApplicationStatus.NotSet.AsList()))
+                    {
+                        <option value="@((int)applicationStatus)" @(Request["applicationStatus"] == ((int)applicationStatus).ToString() ? "selected=\"selected\"" : "")>
+                            @applicationStatus.ToString().SplitByUpperCase()
+                        </option>
+                    }
+                </select>
+                <a class="btn btn-primary whitebgbtn hidden" onclick="sendEmail('multiple')"><img class="paper-plan" src="/Assets/img/paper-plane 8.svg"/>Initiate Background Check</a>
+                <a class="btn btn-primary" onclick="addRemoveApproval('approve' , 'multiple')" data-ids data-operation><img class="paper-plan" src="/Assets/img/approve-white.svg"/> Approve All Selected</a>
+                <a class="btn btn-danger" onclick="addRemoveApproval('reject' , 'multiple')"><img class="paper-plan" src="/Assets/img/deny-white.svg"/> Deny All Selected</a>
+            </div>
+            <div>
+                <input type="text" id="search" name="search" value="@Request["search"]" class="form-control" placeholder="Enter Search Term..." />
+            </div>
+            <div>
+                <h2>To do</h2>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            
+            
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>
+                                <input class="checkbox-override" type="checkbox" name="parentCheckBox" />
+                            </th>
+                            <th>Actions</th>
+                            <th>Task</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Application Status</th>
+                            <th>Date Submitted</th>
+                            <th>Phone Number</th>
+                        </tr>
+                        @if (Model.Count > 0)
+                        {
+                            foreach (var taskViewModel in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="childCheckBox" value="@taskViewModel.WebUserId"/>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span>
+                                                <span class="btn btn-default btn-sm hidden" onclick="sendEmail('single' , @taskViewModel.WebUserId)" ><img class="paper-plan" src="/Assets/img/paper-plane.svg"/> Initiate </span>
+                                            </span>
+                                            <span class="approve" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('approve' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/approve.svg"/></span>
+                                            <span class="reject" id="@taskViewModel.WebUserId" onclick="addRemoveApproval('reject' , 'single' , @taskViewModel.WebUserId)" ><img src="/Assets/img/deny.svg"/></span>
+                                        </div>
+                                    </td>
+                                    <td>@taskViewModel.TaskStatus.ToString().SplitByUpperCase()</td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
+                                            @(taskViewModel.FirstName)
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Volunteer", new {id = Registrant.LoadByWebUserId((int)taskViewModel.WebUserId, RegistrantPersonType.Volunteer, false , false).FirstOrDefault().ID , returnUrl = returnUrl})">
+                                            @(taskViewModel.LastName)
+                                        </a>
+                                    </td>
+                                    <td>@taskViewModel.ApplicationStatus.ToString().SplitByUpperCase()</td>
+                                    <td>@taskViewModel.DateSubmitted.Date.ToShortDateString()</td>
+                                    <td>@taskViewModel.Phone</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                    @if (Model.Count == 0)
+                    {
+                        <div class="no-task text-center">
+                            <p><img src="/Assets/img/celebration.svg"/></p>
+                            <p>You have completed all open tasks!</p>
+                        </div>
+                    }
+                </div>
+                
+                @{Html.RenderPartial(
+                    "~/Views/Shared/_Paging.cshtml",
+                    paging,
+                    new ViewDataDictionary()
+                    {
+                        { "id", "" },
+                        { "action", "todo" },
+                        { "controller", "volunteer" },
+                        { "querystring", $"taskType={Request["taskType"]}&applicationStatus={Request["applicationStatus"]}&search={Request["search"]}" }
+                    }
+                    );
+                }
+                
+        </div>
+        
+    </div>
+</div>
+
+<div id="modal-confirm" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Approve Applicant Without Background Check
+            </h3>
+        </div>
+        <div class="modal-body ">
+            <div class="modal-text">
+                
+            </div>
+            
+            <div class="modal-form">
+                <form action="@Url.Action("AddRemoveApproval" , "Volunteer")" method="post">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label class="reason">Approval Reason</label>
+                            <input id="name" name="reason" type="text" class="form-control" placeholder="Reason" required>
+                            <input type="hidden" class="webUserIDs" name="webUserIDs"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <label class="expiration-date">Background Check Expiration Date</label>
+                            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                                <input type="text" class="form-control" onfocus="this.select()" placeholder="Expiration Date" required data-type="date" name="expirationDate" />
+                                <span class="input-group-addon btn btn-default"><i class="icon-th s7-date"></i></span>
+                            </div>
+                            <input type="hidden" id="operation" name="operation"/>
+                            <small class="note"></small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-default searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right confirm">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Approve
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<div id="modal-send-mail" class="md-modal colored-header modal-colored-header modal-colored-header-dark custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                Send Background Check Email to Applicant
+            </h3>
+        </div>
+        <div class="modal-body text-center">
+            <p>Do you want to send an email to this applicant prompting them
+                <br/>to submit a background check via STERLING<br/>
+            </p>
+            
+            <div class="modal-form">
+                <form action="@Url.Action("InitiateBackgroundCheck" , "Volunteer")" method="post">
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3 col-md-12 text-medium-small">
+                            <div class="pull-left">
+                                <button type="button"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary searchActivitiesBtn btn-md"
+                                        onclick="closeModal()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div class="pull-right">
+                                <button type="submit"
+                                        data-dismiss="modal"
+                                        class="btn btn-primary btn-md">
+                                    Send Email
+                                </button>
+                                <input type="hidden" class  ="webUserIDs" name="webUserIDs"/>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        
+        $('input[name="parentCheckBox"]').bind('click', function () {
+                $('input:checkbox').not(this).prop('checked', this.checked);
+        });
+        
+        $('#taskType').on('change', function() {
+           location.href = '@Url.Action("Todo","Volunteer")?taskType=' + this.value + '&applicationStatus=' + $('#applicationStatus').find(":selected").val(); 
+        });
+        
+        $('#applicationStatus').on('change', function() {
+          location.href = '@Url.Action("Todo","Volunteer")?applicationStatus=' + this.value + '&taskType=' + $('#taskType').find(":selected").val();
+        });
+        
+        $('#search').keypress(function (e) {
+            if (e.keyCode == 13 || e.keyCode == 10) {
+                doSearch();
+            }
+        });
+    });
+    
+    function addRemoveApproval(operation , type , webUserId)
+    {
+        var webUserIDs = '';
+        
+        if (operation === 'approve' && type === 'single')
+        {
+            webUserIDs = webUserId;
+            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve');
+            $('.modal-text').html("<p class='text-center' ><strong>Approving this applicatant will allow them to bypass backgroundcheck process.<br>Please select the reason for approving this applicant</strong></p>");
+            $('.reason').text('Approval Reason').css('color', '#00c5a3');
+            $('.expiration-date').text('Background Check Expiration Date').css('color', '#00c5a3');
+            $('.modal-confirm').children('.modal-header').css('color','#00c5a3');
+            $('#modal-confirm').children().children().first().text('Approve Volunteer Without Background Check');
+            $('#modal-confirm').children().children().first().css("background-color", "#00c5a3'");
+            $('#modal-confirm').children().children().first().css("font-size", "20px");
+            $('.note').text('Standard background check are available for one year. Please set an expiratrion date.');
+        }
+        
+        if (operation === 'reject' && type === 'single')
+        {
+           webUserIDs = webUserId;
+           $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+           $('.modal-text').html("<p class='text-center'><strong>Please select the reason for denying this applicant</strong></p>");
+           $('.reason').text('Denial Reason').css('color', '#ed4b4b'); 
+           $('.expiration-date').text('Denial Expiration Date').css('color', '#ed4b4b');
+           $('#modal-confirm').children().children().first().text('Deny Volunteer Without Background Check');
+           $('#modal-confirm').children().children().first().css("background-color", "#ed4b4b");
+           $('#modal-confirm').children().children().first().css("font-size", "20px");
+           $('.note').text('Select the date when this applicant is elegible to re-ply');
+        }
+        
+        if (operation === 'approve' && type === 'multiple')
+        {
+            $("input:checkbox[name=childCheckBox]:checked").each(function(){
+                webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+            });
+            
+            $('.confirm').children().removeClass('btn-danger').addClass('btn-primary').text('Approve');
+            $('.modal-text').html("<p class='text-center'><strong>Approving these applicants will allow them to bypass the Background check the process.<br>Please Select the reason for approving these applicants.<br>Approval Reason and Expiration Date will be applied to all selected volunteer.</p></strong>");
+            $('.reason').text('Approval Reason').css('color', '#00c5a3');
+            $('.expiration-date').text('Background Check Expiration Date').css('color', '#00c5a3');
+            $('.modal-confirm').children('.modal-header').css('color','#00c5a3');
+            $('#modal-confirm').children().children().first().text('Approve Volunteer Without Background Check');
+            $('#modal-confirm').children().children().first().css("background-color", "#00c5a3'");
+            $('#modal-confirm').children().children().first().css("font-size", "20px");
+            $('.note').text('Standard background check are available for one year. Please set an expiratrion date.');
+        }
+        
+        if (operation === 'reject' && type === 'multiple')
+        {
+           $("input:checkbox[name=childCheckBox]:checked").each(function(){
+               webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+           });
+           
+           $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+           $('.modal-text').html("<p class='text-center'><strong>Please select the reason for denying this applicant without a background check.<br>Denial Reason and Expiration Date will be applied to all selected volunteers.</p></strong>");
+           $('.reason').text('Denial Reason').css('color', '#ed4b4b'); 
+           $('.expiration-date').text('Denial Expiration Date').css('color', '#ed4b4b');
+           $('#modal-confirm').children().children().first().text('Deny Volunteer Without Background Check');
+           $('#modal-confirm').children().children().first().css("background-color", "#ed4b4b");
+           $('#modal-confirm').children().children().first().css("font-size", "20px");
+           $('.note').text('Select the date when this applicant is elegible to re-ply');
+        }
+        
+        @*if (operation === 'reject')
+        {
+            $('.confirm').children().removeClass('btn-primary').addClass('btn-danger').text('Deny');
+        }*@
+        
+        $('.webUserIDs').val(webUserIDs);
+        $('#operation').val(operation);
+        
+        $('#modal-confirm').addClass('md-show');  
+    }
+    
+    function sendEmail(type , webUserId)
+    {
+        var webUserIDs = '';
+                
+        if (type === 'multiple')
+        {
+            $("input:checkbox[name=childCheckBox]:checked").each(function(){
+                webUserIDs = $.trim(webUserIDs).length == 0 ? $(this).val() : webUserIDs + ',' + $(this).val();
+            });
+        }
+        
+        if(type === 'single')
+            webUserIDs = webUserId;
+       
+       $('.webUserIDs').val(webUserIDs);
+       $('#modal-send-mail').addClass('md-show'); 
+    }
+    
+    function closeModal()
+    {
+        $('#modal-confirm').removeClass('md-show');
+        $('#modal-send-mail').removeClass('md-show');
+        $(':input','.modal-form').val('');
+    }
+    
+    function doSearch() 
+    {
+        location.href = `@Url.Action("Todo", "volunteer")?applicationStatus=${$('#applicationStatus').find(":selected").val()}&taskType=` + $('#taskType').find(":selected").val() + `&search=${$('#search').val()}`;
+    }
+    
+</script>

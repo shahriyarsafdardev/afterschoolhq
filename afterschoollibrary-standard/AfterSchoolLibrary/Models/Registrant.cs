@@ -6,6 +6,8 @@ using System.Linq;
 using AfterSchoolLibrary.Enums;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Microsoft.Identity.Client;
+using Dapper;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Models
@@ -114,6 +116,48 @@ namespace AfterSchoolLibrary.Models
             set => MDV["IsDeleted"].Value = value;
         }
 
+        public bool FormDataFixProcessed
+        {
+            get => (bool) MDV["FormDataFixProcessed"].Value;
+            set => MDV["FormDataFixProcessed"].Value = value;
+        }
+
+        public string LocationName
+        {
+            get => (string) MDV["LocationName"].Value;
+            set => MDV["LocationName"].Value = value;
+        }
+
+        public string LocationAddress1
+        {
+            get => (string) MDV["LocationAddress1"].Value;
+            set => MDV["LocationAddress1"].Value = value;
+        }
+
+        public string LocationAddress2
+        {
+            get => (string) MDV["LocationAddress2"].Value;
+            set => MDV["LocationAddress2"].Value = value;
+        }
+
+        public string LocationCity
+        {
+            get => (string) MDV["LocationCity"].Value;
+            set => MDV["LocationCity"].Value = value;
+        }
+
+        public string LocationState
+        {
+            get => (string) MDV["LocationState"].Value;
+            set => MDV["LocationState"].Value = value;
+        }
+
+        public string LocationPostalCode
+        {
+            get => (string) MDV["LocationPostalCode"].Value;
+            set => MDV["LocationPostalCode"].Value = value;
+        }
+
 
         public Registrant()
         {
@@ -128,6 +172,7 @@ namespace AfterSchoolLibrary.Models
             ProfileStatusId = RegistrantProfileStatus.NotSet;
             IsDeleted = false;
             PersonTypeId = RegistrantPersonType.NotSet;
+            FormDataFixProcessed = false;
         }
 
         public static DatabaseParameters ObjectMap
@@ -151,6 +196,14 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ProfileStatusId", SqlDbType.Int);
                 _dp.Add(className, "IsDeleted", SqlDbType.Bit);
                 _dp.Add(className, "PersonTypeId", SqlDbType.Int);
+                _dp.Add(className, "FormDataFixProcessed", SqlDbType.Bit);
+
+                _dp.Add(className, "LocationName", typeof(Location).Name, "Name", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationAddress1", typeof(Location).Name, "Address1", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationAddress2", typeof(Location).Name, "Address2", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationCity", typeof(Location).Name, "City", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationState", typeof(Location).Name, "State", SqlDbType.NVarChar);
+                _dp.Add(className, "LocationPostalCode", typeof(Location).Name, "PostalCode", SqlDbType.NVarChar);
 
                 return _dp;
             }
@@ -168,6 +221,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 var dq = get_DatabaseQuery(ObjectMap, typeof(Registrant).Name);
+                dq.Joins.Add(Location.ObjectMap["ID"], ObjectMap["SchoolLocationId"], DatabaseJoinTypeEnum.LeftOuterJoin);
 
                 return dq;
             }
@@ -181,7 +235,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<Registrant> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null,
+        public static List<Registrant> Load(Hashtable criterias = null, List<string> orderBys = null, int? start = null, int? length = null, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -189,7 +243,8 @@ namespace AfterSchoolLibrary.Models
             dq.UseParameterizedQuery = false;
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
-            return BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+           
+            return BaseLoad(criterias, orderBys, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
         public static int GetCount(Hashtable criterias = null, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -283,6 +338,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["PersonTypeId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["FormDataFixProcessed"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 
@@ -396,14 +455,15 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsVolunteer => PersonTypeId == RegistrantPersonType.Volunteer;
 
-
         public bool IsStudent => PersonTypeId == RegistrantPersonType.Student;
+
+        public bool IsAdult => PersonTypeId == RegistrantPersonType.Adult;
 
         public string Name => BuildDisplayName(FirstName, LastName);
 
         public List<FormQuestionAnswer> GetAnswers(int activityId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, dc: dc)
+            return FormQuestionAnswer.LoadByRegistrantIdByActivityId(ID.Value, activityId, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
         }
@@ -413,6 +473,11 @@ namespace AfterSchoolLibrary.Models
             return FormQuestionAnswer.LoadByRegistrantId(ID.Value, msgs, dc)
                 .OrderBy(x => x.FormQuestionDisplayOrder)
                 .ToList();
+        }
+
+        public bool HasAnswers(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return FormQuestionAnswer.ExistsByRegistrantId(ID.Value, msgs, dc);
         }
 
         public FormQuestionAnswer GetAnswer(QuestionDataType questionDataType, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -538,6 +603,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["lastName"], lastName);
             dq.Criterias.Add(ObjectMap["email"], email);
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static bool ExistsByName(int accountId, string firstName, string lastName, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["accountId"], accountId);
+            dq.Criterias.Add(ObjectMap["firstName"], firstName);
+            dq.Criterias.Add(ObjectMap["lastName"], lastName);
+            return dq.GetCount() > 0;
         }
 
         public static Registrant LoadByEmailOnly(int accountId, string email, DatabaseConnection dc = null)
@@ -678,7 +753,364 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeIds.Select(x => (int) x).ToList(), DatabaseCriteriaOperatorEnum.In);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static List<Registrant> LoadByAnsweredFormId(int formId, int accountId, int? start, int? length, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
 
+            string sql = @$"
+                select distinct Registrant.* 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID 
+                where 
+                    FormQuestion.FormId = {formId} and
+                    Registrant.AccountId = {accountId}
+                order by Registrant.CreateDate";
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, 
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, true, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
+
+            return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
+        }
+
+        public static List<Registrant> LoadByAnswered(int accountId, int? formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int? start, int? length,
+            bool getFirstRegistrantsOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            DatabaseCriteria searchCriteria = null;
+
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(FormQuestionAnswer.ObjectMap["Text"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, getFirstRegistrantsOnly, false, searchQuestionIds, searchQuestionTypeIds, registrantPersonType);
+
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
+
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        private static string LoadByAnsweredQuery(int accountId, int? formId, List<int> activityIds, DatabaseCriteria search, DateTime? startDate, DateTime? endDate, 
+            bool getFirstRegistrantsOnly, bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, RegistrantPersonType registrantPersonType)
+        {
+            string sql = @$"
+                select {(getCountOnly ? 
+                    "count(distinct Registrant.ID)" : "" +
+                    @"distinct Registrant.*, 
+                        Location.Name as LocationName, 
+                        Location.Address1 as LocationAddress1, 
+                        Location.Address2 as LocationAddress2, 
+                        Location.City as LocationCity, 
+                        Location.State as LocationState, 
+                        Location.PostalCode as LocationPostalCode")} 
+                from 
+                    FormQuestionAnswer inner join 
+                    FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID left outer join
+                    Location on Registrant.SchoolLocationId = Location.ID";
+
+            if (activityIds.IsNotEmpty() && activityIds.Any())
+                sql += @"
+                    left outer join 
+                    RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
+
+            sql += @$"
+                where 
+                    Registrant.AccountId = {accountId}";
+            
+            if (formId.HasValue) 
+                sql += $" and FormQuestion.FormId = {formId.Value}";
+
+            if (search.IsNotEmpty())
+            {
+                sql += $" and FormQuestionAnswer.Text like @{search.UniqueName}";
+
+                if (searchQuestionIds.IsNotEmpty() && searchQuestionIds.Any())
+                {
+                    sql += @$" and (
+                                FormQuestion.ID in ({searchQuestionIds.ToStrings().ToStringList()})";
+
+                    var excludingNotSet = searchQuestionTypeIds.Where(x => x != QuestionDataType.NotSet).ToList();
+                    if (excludingNotSet.IsNotEmpty() && excludingNotSet.Any())
+                        sql += @$" or    
+                                FormQuestion.QuestionDataTypeId in ({excludingNotSet.Select(x => (int) x).ToStrings().ToStringList()})";
+
+                    sql += ")";
+                }
+            }
+
+            if (startDate.HasValue)
+                sql += $" and Registrant.CreateDate >= '{startDate.ToShortDateTimeString()}'";
+
+            if (endDate.HasValue)
+                sql += $" and Registrant.CreateDate <= '{endDate.ToShortDateTimeString()}'";
+
+            if (registrantPersonType != RegistrantPersonType.NotSet)
+                sql += $" and Registrant.PersonTypeId = {(int)registrantPersonType}";
+
+            if (getFirstRegistrantsOnly)
+            {
+                sql += " and Registrant.FirstRegistrantId is NULL";
+
+                if (activityIds.IsNotEmpty() && activityIds.Any())
+                    sql += @$"
+                    and 
+                    (
+                        (RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                        and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        or 
+                        Registrant.ID in 
+                        (
+                            select r2.FirstRegistrantId 
+                            from 
+                                Registrant r2 inner join RegistrantActivity ra2 on r2.ID = ra2.RegistrantId
+                            where 
+                                r2.FirstRegistrantId = Registrant.ID and
+                                (ra2.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                                and ra2.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity})
+                        )
+                    )";
+            }
+            else
+            {
+                if (activityIds.IsNotEmpty() && activityIds.Any())
+                    sql += @$"
+                    and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
+                    and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";
+            }
+
+            if (!getCountOnly)
+                sql += @"
+                    order by Registrant.CreateDate";            
+
+            return sql;
+        }
+        
+        public static List<Registrant> LoadApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetApprovedSearchedRegistrant(AccountHostId, registrantPersonType, searchCriteria, type, start, length);
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        public static int GetCountApprovedMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int type, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetApprovedSearchedRegistrantCount(AccountHostId, registrantPersonType, searchCriteria, type);
+
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
+        }
+        
+        public static List<Registrant> LoadABackgroundMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, int start, int length, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetBackgroundSearchedRegistrant(AccountHostId, registrantPersonType, searchCriteria, start, length);
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        
+        public static int GetCountBackgroundMasterRegistrantsByAccountHostAndPersonType(int AccountHostId, RegistrantPersonType registrantPersonType, string search, SystemMessages msgs= null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            
+            DatabaseCriteria searchCriteria = null;
+            
+            if (search.IsNotBlank())
+            {
+                searchCriteria = new DatabaseCriteria(Registrant.ObjectMap["LastName"], search.Trim(), DatabaseCriteriaOperatorEnum.Like);
+                dq.Criterias.Add(searchCriteria);
+            }
+            
+            var sql = GetBackgroundSearchedRegistrantCount(AccountHostId, registrantPersonType, searchCriteria);
+
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
+        }
+        
+        private static string GetApprovedSearchedRegistrant(int Id, RegistrantPersonType personType, DatabaseCriteria search, int type, int? start, int? length)
+        {
+            var persontTypeId = (int) personType;
+            var typeQuery = "";
+            var typecondition = "";
+
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+            var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                {typecondition}
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+
+            if (search.IsNotEmpty())
+                 sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+             
+            sql += @$"{typeQuery}
+                order by masterReg.ID
+                offset {start} rows
+                fetch next {length} rows only";
+
+            return sql;
+        }
+
+        private static string GetApprovedSearchedRegistrantCount(int Id, RegistrantPersonType personType, DatabaseCriteria search, int type)
+        {
+            var persontTypeId = (int) personType;
+            
+            var typeQuery = "";
+            var typecondition = "";
+            
+            if (type != 4)
+            {
+                typeQuery = typeQuery + $" and volunteer.approvalstatusid = {type} " +
+                            "and volunteer.IsActive = 1";
+                typecondition = typecondition + " inner join VolunteerApproval volunteer on submittedReg.WebUserId = volunteer.WebUserId ";
+            }
+
+            var sql = $@"select count(distinct masterReg.webuserid)
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+                {typecondition}   
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})"; 
+                
+            sql += @$"{typeQuery}";
+            
+            return sql;
+        }
+        
+        private static string GetBackgroundSearchedRegistrant(int Id, RegistrantPersonType personType, DatabaseCriteria search, int? start, int? length)
+        {
+            var persontTypeId = (int) personType;
+            var sql = $@"select distinct(masterReg.webuserid) , masterReg.*
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
+                BackgroundCheck bg on submittedReg.WebUserId = bg.WebUserId 
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+            
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+            
+            sql += @$"and bg.IsActive = 1
+                order by masterReg.webuserid
+                offset {start} rows
+                fetch next {length} rows only";
+
+            return sql;
+        }
+        
+        private static string GetBackgroundSearchedRegistrantCount(int Id, RegistrantPersonType personType, DatabaseCriteria search)
+        {
+            var persontTypeId = (int) personType;
+            var sql = $@"select count(distinct masterReg.WebUserId)
+            from
+                Registrant submittedReg inner join
+                Registration reg on submittedReg.id = reg.registrantid inner JOIN
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id inner join 
+                BackgroundCheck bg on submittedReg.WebUserId = bg.WebUserId 
+            WHERE
+                reg.accountid in (
+                    select visitoraccountid
+                    from accountrelationship
+                    where hostaccountid = {Id}
+                ) and
+                submittedReg.PersonTypeId = {persontTypeId}";
+            
+            if (search.IsNotEmpty())
+                sql += $" and (submittedReg.FirstName like @{search.UniqueName} or submittedReg.lastName like @{search.UniqueName})";
+            
+            sql += @$"and bg.IsActive = 1";;
+
+            return sql;
+        }
+        
         #endregion
     }
 }

@@ -5,6 +5,7 @@ namespace AfterSchoolLibrary.Enums
         NotSet = 0,
         Student,
         Parent,
-        Volunteer
+        Volunteer,
+        Adult
     }
 }

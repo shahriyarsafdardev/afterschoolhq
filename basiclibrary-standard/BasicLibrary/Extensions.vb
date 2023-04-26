@@ -1,4 +1,4 @@
-﻿Imports System.ComponentModel
+Imports System.ComponentModel
 Imports System.Runtime.CompilerServices
 Imports System.Reflection
 Imports System.Web
@@ -38,6 +38,16 @@ Public Module Extensions
     <Extension>
     Public Function IsEmail(ByVal aString As String) As Boolean
         Return aString.IsNotEmpty() AndAlso aString.IsRegExMatch(Utilities.EmailRegEx)
+    End Function
+
+    <Extension>
+    Public Function [In](ByVal aObject As String, ByVal list As IEnumerable(Of String), Optional ByVal comparer As StringComparer = Nothing) As Boolean
+
+        If comparer.IsEmpty Then
+            comparer = StringComparer.CurrentCultureIgnoreCase
+        End If
+
+        Return list.Contains(aObject, comparer)
     End Function
 
     <Extension>
@@ -507,6 +517,11 @@ Public Module Extensions
     <Extension()>
     Public Function AddWeeks(ByVal aDateTime As Date, ByVal weeks As Integer) As Date
         Return aDateTime.AddDays(weeks * 7)
+    End Function
+
+    <Extension()>
+    Public Function AddBiWeeks(ByVal aDateTime As Date, ByVal weeks As Integer) As Date
+        Return aDateTime.AddDays(weeks * 14)
     End Function
 
     <Extension()>
@@ -1072,9 +1087,9 @@ Public Module Extensions
     Public Function ToBoolean(ByVal aString As String) As Boolean
         Try
             Select Case aString.ToLower
-                Case "1", "y", "yes", "true"
+                Case "1", "y", "yes", "true", "t"
                     Return True
-                Case "0", "n", "no", "false"
+                Case "0", "n", "no", "false", "f"
                     Return False
             End Select
         Catch ex As Exception

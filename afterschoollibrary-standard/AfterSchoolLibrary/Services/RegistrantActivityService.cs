@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
@@ -414,6 +414,14 @@ namespace AfterSchoolLibrary.Services
         public static bool IsReservedRegistrationAssignmentType(this RegistrantActivity registrantActivity)
         {
             return registrantActivity.AssignmentTypeId.In(ReservedRegistrantAssignmentTypes);
+        }
+
+        public static void SetAssignmentType(this RegistrantActivity registrantActivity, RegistrationAssignmentType selectedAssignmentType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registrantActivity.AssignmentTypeId = selectedAssignmentType;
+            registrantActivity.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            registrantActivity.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(registrantActivity.Save(dc));
         }
     }
 }

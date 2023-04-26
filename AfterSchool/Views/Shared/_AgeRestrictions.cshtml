@@ -1,4 +1,4 @@
-﻿@{
+@{
     var agestart = (int?)ViewData["agestart"] ?? 0;
     var ageend = (int?)ViewData["ageend"] ?? 18;
     var showToggle = true;
@@ -32,7 +32,7 @@
     </div>
     <div class="col-lg-9" id="age">
         <select id="agestart" name="agestart" class="form-control">
-            @for (int i = 0; i <= 18; i++)
+            @for (int i = 0; i <= 100; i++)
             {
                 <option value="@i" @(agestart == i ? " selected=\"selected\" " : "")>@i</option>
             }
@@ -41,7 +41,7 @@
             To
         </p>
         <select id="ageend" name="ageend" class="form-control">
-            @for (int i = 0; i <= 18; i++)
+            @for (int i = 0; i <= 100; i++)
             {
                 <option value="@i" @(ageend == i ? " selected=\"selected\" " : "")>@i</option>
             }

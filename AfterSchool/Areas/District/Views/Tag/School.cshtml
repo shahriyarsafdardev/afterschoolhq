@@ -1,0 +1,102 @@
+@using Microsoft.Ajax.Utilities
+@using ServiceStack.Text
+@model List<Account>
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var availableTags = (List<AvailableTag>)ViewBag.AvailableTags;
+}
+
+@{Html.RenderPartial("DistrictHeader");}
+
+@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);};
+
+
+<div class="main-content">
+    
+    @{ Html.RenderPartial("_TagHeader");}
+
+    <div class="panel panel-default">
+        
+        <div class="panel-heading">
+            <h2><i class="s7-study"></i> School</h2>
+            <div class="clearfix"></div>
+        </div>
+
+        <div class="panel-body">
+            
+            <table class="table">
+                <tr>
+                    <th>School</th>
+                    <th>Tag</th>
+                    <th>Link</th>
+                </tr>
+                @if (Model.Count > 0)
+                {
+                    foreach (var school in Model)
+                    {
+                        <tr>
+                            <td>@school.Name</td>
+                            <td>
+                                <input type="text" class="assignedTags" data-role="tagsinput" value="@(AssignedTag.LoadByObjectIdByObjectType((int)school.ID, (int)ObjectType.Account).Select(x => x.Tag).ToStringList(","))">
+                                <input type="hidden" id="@school.ID" />
+                            </td>
+
+                            <td>
+                                <span onclick="WebPage.copySelection('@school.BrowseUrl', 'URL has been copied')" title="Copy Url">
+                                    <i class="s7-copy-file icon-large text-success pointer"></i>
+                                </span>
+                                <a href="@school.BrowseUrl" target="_blank" title="View Page">
+                                    <i class="s7-link icon-large"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+PageEvent.add(PageEvent.AFTER_INIT, function () {
+    
+    $(".assignedTags").on('beforeItemAdd', function(event) {
+        
+        var availableTags = JSON.parse('@Html.Raw(availableTags.Select(x => x.Tag).ToJson())');
+        
+        if(!availableTags.includes(event.item)) {
+             event.cancel = true;
+        }
+        else
+        {
+             var tag = event.item;
+             var objectId = $(this).next().attr("id");
+             var objectType = '@((int)ObjectType.Account)';
+             
+             $.get(
+              '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=add',
+              function (data) {});
+             
+        }
+        
+    });
+    
+    $(".assignedTags").on('beforeItemRemove', function(event) {
+                    
+         var tag = event.item;
+         var objectId = $(this).next().attr("id");
+         var objectType = '@((int)ObjectType.Account)';
+         
+         $.get(
+          '@(Url.Action("AddRemoveAssignedTag", "Tag"))?tag='+tag+'&objectId='+objectId+'&objectType='+objectType+'&operation=remove',
+          function (data) {});
+        
+    });
+    
+}); 
+
+</script>
+

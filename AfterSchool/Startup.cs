@@ -6,7 +6,6 @@ using AfterSchool;
 using AfterSchoolLibrary.FeatureFlag;
 using AfterSchoolLibrary.Integrations;
 using AfterSchoolLibrary.Models;
-using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Emmersion.InfluxDB;
 using Hangfire;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
+using AccountService = AfterSchoolLibrary.Services.AccountService;
 
 [assembly: OwinStartup(typeof(Startup))]
 
@@ -51,14 +51,17 @@ namespace AfterSchool
             Database.ConnectionString = connectionString;
 
             AppConfig.Init();
-
+            
             app.Use<RecordControllerActionsToInfluxMiddleware>(resolver.GetService<IInfluxRecorder>());
-
+            
             app.UseHangfireDashboard();
             app.UseHangfireServer();
-
+            
             // schedule and run the task daily at 3am EST
             RecurringJob.AddOrUpdate(() => AccountService.PreparePayouts(null, null), Cron.Daily(3, 00));
+
+            // Schedule reinitiate backgroundcheck
+            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
         }
 
         private void ConfigureServices(IServiceCollection services)
@@ -98,7 +101,7 @@ namespace AfterSchool
             services.AddTransient<IBackgroundCheckWorkflow, BackgroundCheckWorkflow>();
             services.AddTransient<IJsonSerializer, JsonSerializer>();
             services.AddTransient<ISterlingBearerTokenQuery, SterlingBearerTokenQuery>();
-            services.AddTransient<ISterlingCreateCandidateQuery, SterlingCreateCandidateQuery>();
+            services.AddTransient<ISterlingCandidateQuery, SterlingCandidateQuery>();
             services.AddTransient<ISterlingCreateScreeningQuery, SterlingCreateScreeningQuery>();
             services.AddTransient<IInfluxLogger, InfluxLogger>();
             services.AddTransient<IBackgroundCheckRepository, BackgroundCheckRepository>();

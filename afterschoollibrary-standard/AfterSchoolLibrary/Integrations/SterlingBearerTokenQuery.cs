@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BasicLibrary;
 using Emmersion.Http;
 using Newtonsoft.Json;
 
@@ -30,6 +31,7 @@ namespace AfterSchoolLibrary.Integrations
                 Method = HttpMethod.POST,
             };
             request.AddBasicAuthentication(credentials.ClientId, credentials.ClientSecret);
+            
             await request.AddFormUrlEncodedBody(new Dictionary<string, string>
             {
                 {"grant_type", "client_credentials"},

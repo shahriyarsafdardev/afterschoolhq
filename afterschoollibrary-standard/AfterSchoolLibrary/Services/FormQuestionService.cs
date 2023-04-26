@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Linq;
@@ -9,6 +9,42 @@ namespace AfterSchoolLibrary.Services
 {
     public static class FormQuestionService
     {
+        public static bool IsPhoneDataType(this FormQuestion question)
+        {
+            switch (question.QuestionDataTypeId)
+            {
+                case QuestionDataType.EmergencyContact1Phone:
+                case QuestionDataType.EmergencyContact1Phone2:
+                case QuestionDataType.EmergencyContact1Phone3:
+                case QuestionDataType.EmergencyContact2Phone:
+                case QuestionDataType.EmergencyContact2Phone2:
+                case QuestionDataType.EmergencyContact2Phone3:
+                case QuestionDataType.EmergencyContact3Phone:
+                case QuestionDataType.EmergencyContact3Phone2:
+                case QuestionDataType.EmergencyContact3Phone3:
+                case QuestionDataType.OrganizationContactPhone:
+                case QuestionDataType.Parent1HomePhone:
+                case QuestionDataType.Parent1MobilePhone:
+                case QuestionDataType.Parent1Phone1:
+                case QuestionDataType.Parent1Phone2:
+                case QuestionDataType.Parent1WorkPhone:
+                case QuestionDataType.Parent2HomePhone:
+                case QuestionDataType.Parent2MobilePhone:
+                case QuestionDataType.Parent2Phone1:
+                case QuestionDataType.Parent2Phone2:
+                case QuestionDataType.Parent2WorkPhone:
+                case QuestionDataType.RegistrantDoctorPhone:
+                case QuestionDataType.RegistrantHomePhone:
+                case QuestionDataType.RegistrantMobilePhone:
+                case QuestionDataType.RegistrantPhone1:
+                case QuestionDataType.RegistrantPhone2:
+                case QuestionDataType.RegistrantWorkPhone:
+                    return true;
+            }
+
+            return false;
+        }
+
         public static List<FormQuestion> GetEmergencyContactQuestions(SystemMessages msgs, DatabaseConnection dc = null)
         {
             var questions = new List<FormQuestion>();

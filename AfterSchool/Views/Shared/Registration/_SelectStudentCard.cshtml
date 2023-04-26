@@ -1,4 +1,4 @@
-﻿@model Registrant
+@model Registrant
 
 @{
     var participationObject = (ParticipationObject) ViewBag.ParticipationObject;
@@ -105,7 +105,7 @@
         }
         else
         {
-            if (isGenderRestricted || isGradeRestricted || isAgeRestricted)
+            if (participationObject.ActivityGroupType != ActivityGroupType.Session && (isGenderRestricted || isGradeRestricted || isAgeRestricted))
             {
                 btnText = "Ineligible";
                 disabledText = " disabled=\"disabled\" ";
@@ -144,7 +144,8 @@
             <p class="text-center">
                 @if (Model.IsProfileCompleted)
                 {
-                    <a href="@Url.Action("editstudentpersonal", "family", new {Area = "user", id = Model.Uid, student = Model?.Uid, returnUrl = Request.Url.AbsolutePath})">Update Profile</a>
+                    //<a href="@Url.Action("editstudentpersonal", "family", new {Area = "user", id = Model.Uid, student = Model?.Uid, returnUrl = Request.Url.AbsolutePath})">Update Profile</a>
+                    <a href="/reactapp/updateprofile/@Model.Uid">Update Profile</a>
                 }
                 else
                 {

@@ -121,12 +121,18 @@
   <data name="Account_Confirm" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\account-confirm.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Initiate_BackgoundCheck" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>emailtemplates\Initiate-BackgoundCheck.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Account_Invited" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\Account-Invited.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Activity_Invite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\activity-invite.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Attendance_Charge_Notification" type="System.Resources.ResXFileRef, System.Windows.Forms">
+      <value>emailtemplates\Attendance-Charge-Notification.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>   
   <data name="Attendance_Charge_Confirmation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\Attendance-Charge-Confirmation.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

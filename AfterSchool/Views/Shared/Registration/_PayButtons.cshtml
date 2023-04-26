@@ -13,6 +13,7 @@
     var hasPlans = postPayPlan.IsNotEmpty() || subscriptionPlan.IsNotEmpty();
     var savePaymentInfoOnly = postPayPlan.IsNotEmpty() && !postPayPlan.NumberOfPeriodsPrePaid.IsPositive();
 
+    var isProrated = ViewBag.isProrated ?? false;
     var ccClassAttendedLabel = savePaymentInfoOnly
         ? postPayPlan.IsNotEmpty()
             ? $"({participationObject.GetPostPayCreditCardFee().ToCurrency()} per {postPayPlan.BillingPeriodTypeId.ToString().ToLower()})"
@@ -67,7 +68,7 @@
                         <div class="form-group">
                             <button type="submit" class="btn btn-register-primary btn-lg btn-pay" id="btn-paywithexistingach">
                                 @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
-                                <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                                <span class="pay-button-amount @(savePaymentInfoOnly || isProrated ? "hide" : "")">
                                     -
                                     <span class="total-due-today-ach"></span>*
                                 </span>
@@ -91,11 +92,11 @@
                         @(savePaymentInfoOnly ? "Save Bank Info" : "Pay using a new Bank Account")
                     </p>
                     <p class="text-muted">
-                        Clicking @(savePaymentInfoOnly ? "'Save Bank Info'" : "'Pay via ACH'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(savePaymentInfoOnly ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
+                        Clicking @(savePaymentInfoOnly ? "'Save Bank Info'" : "'Pay via Bank Account'") will allow you to connect and pay using your bank account. After you login and select the account to use, it will checkout and @(savePaymentInfoOnly ? "use your bank account information for attendance payments." : "complete your purchase using your bank account information.")
                     </p>
                     <button type="button" id="plaid-button" class="btn btn-register@(bankAccounts.Any() ? "-default" : "-primary") btn-lg btn-pay">
                         @(savePaymentInfoOnly ? "Save Bank Info" : "Pay via Bank Account")
-                        <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                        <span class="pay-button-amount @(savePaymentInfoOnly || isProrated ? "hide" : "")">
                             -
                             $<span class="total-due-today-ach"></span>*
                         </span>
@@ -123,7 +124,7 @@
             <div class="text-center">
                 <p class="text-large">@(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay using a credit card")</p>
                 <p class="text-medium-small margin-t-20">
-                    @(Html.Raw(savePaymentInfoOnly ? "" : "Credit card transactions will be charged <br />an additional"))
+                    @(Html.Raw(savePaymentInfoOnly || isProrated ? "" : "Credit card transactions will be charged <br />an additional"))
                     <strong>
                         $<span class="total-fee-ccf">0</span>
                         Transaction Fee
@@ -168,7 +169,7 @@
                     <div class="form-group">
                         <button type="submit" class="btn btn-register-default btn-lg btn-pay" id="btn-paywithexistingcard">
                             @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
-                            <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                            <span class="pay-button-amount @(savePaymentInfoOnly || isProrated ? "hide" : "")">
                                 -
                                 $<span class="total-due-today-cc"></span>*
                             </span>
@@ -226,7 +227,7 @@
                 <div class="form-group padding-v-20">
                     <button type="button" id="btn-paywithnewcard" class="btn btn-register-default btn-lg btn-pay">
                         @(savePaymentInfoOnly ? "Save Credit Card Info" : "Pay via credit card")
-                        <span class="pay-button-amount @(savePaymentInfoOnly ? "hide" : "")">
+                        <span class="pay-button-amount @(savePaymentInfoOnly || isProrated ? "hide" : "")">
                             -
                             $<span class="total-due-today-cc"></span>*
                         </span>
@@ -395,6 +396,20 @@
         $('#fee-asf').html(0);
         $('#fee-asf-text').html('$0');
     }
+    
+    function updatePaymentButtonText(val)
+    {
+        if (val === "")
+        {
+            $('.payment-plan-text').addClass(' hide');
+            $('.pay-button-amount').removeClass('hide');
+        }
+        else 
+        {
+            $('.payment-plan-text').removeClass('hide');
+            $('.pay-button-amount').addClass(' hide');
+        }
+    }
 </script>
 
 <script>
@@ -405,6 +420,7 @@
 
             let paymentPlanId = $(this).attr('id').split('-')[1];
 
+            updatePaymentButtonText($(this).val());
             updatePaymentFees(paymentPlanId);
             updatePaymentFeesAch();
             updatePaymentOptionCost(paymentPlanId);

@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -17,6 +17,21 @@ namespace AfterSchoolLibrary.Models
         public decimal ConvenienceFlatFee { get; private set; }
 
         private bool? _IsConvenienceFeeTakenOutOfCost { get; set; }
+
+        public FeeCalculationObject(decimal cost, decimal convenienceFlatFee, decimal conveniencePercentFee, bool isConvenienceFeeTakenOutOfCost)
+        {
+            Cost = cost;
+            ConvenienceFlatFee = convenienceFlatFee;
+            ConveniencePercentFee = conveniencePercentFee;
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
+        }
+
+        public static decimal CalculateStripeProratedCharge(DateTime anchorDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            var diffInMinutes = (anchorDate - purchaseDate).TotalMinutes;
+            var currentMonthTotalMinutes = (anchorDate - anchorDate.Date.AddMonths(-1)).TotalMinutes;
+            return (diffInMinutes / currentMonthTotalMinutes).ToDecimal() * fullChargeAmount;
+        }
 
         public FeeCalculationObject(decimal cost, Account billingAccount, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -42,6 +57,17 @@ namespace AfterSchoolLibrary.Models
             BillingAccount = billingAccount;
             if (participationObject.IsActivity())
                 Activity = participationObject.GetActivity();
+            LoadConvenienceFlatFee(msgs, dc);
+            LoadConveniencePercentFee(msgs, dc);
+        }
+
+        public FeeCalculationObject(decimal cost, Account billingAccount, ParticipationObject participationObject, bool? isConvenienceFeeTakenOutOfCost, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            Cost = cost;
+            BillingAccount = billingAccount;
+            if (participationObject.IsActivity())
+                Activity = participationObject.GetActivity();
+            _IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost;
             LoadConvenienceFlatFee(msgs, dc);
             LoadConveniencePercentFee(msgs, dc);
         }
@@ -94,7 +120,7 @@ namespace AfterSchoolLibrary.Models
             if (Cost > 50)
                 finalFee = Math.Ceiling(fee);
 
-            return Math.Max(finalFee, 0.50M) + (Math.Ceiling(Cost) - Cost); // Math.Max(finalFee - .01M, 0.59M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
+            return Math.Max(finalFee, 0.50M); // + (Math.Ceiling(Cost) - Cost); // Math.Max(finalFee - .01M, 0.59M) + (Math.Ceiling(cost) - cost); // .KeepInRange(0.49M, 9.99M)
         }
 
         public decimal GetCreditCardFee()
@@ -112,13 +138,6 @@ namespace AfterSchoolLibrary.Models
 
             // no more rounding
             return stripeFee;
-            
-            // always round up to nearest dollar or .5
-            // result should always be 3.50 or 4.00 or 2.50 or 3.00, etc.
-            if (Cost <= 50)
-                return (Math.Ceiling(stripeFee * 2) / 2); //  - .01M;
-
-            return Math.Ceiling(stripeFee); // - .01M;
         }
 
         public decimal GetTotalFees(PaymentType paymentType)

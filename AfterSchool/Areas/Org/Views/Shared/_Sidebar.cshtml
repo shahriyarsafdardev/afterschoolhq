@@ -212,40 +212,43 @@
             }
 
 
-            <li class="parent @contactmenuactive">
-                <a href="#">
-                    <i class="icon s7-id"></i> <span>Contacts</span>
-                </a>
-                <ul class="sub-menu">
-                    @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
-                    {
-                        <li class="@registrationactive">
-                            <a href="@Url.Action("index", "registration")">
-                                <i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)
-                            </a>
-                        </li>
-                    }
-                    @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
-                    {
-                        <li class="@volunteercontactsactive">
-                            <a href="@Url.Action("index", "registration", new { volunteers = "true" })">
-                                <i class="icon s7-smile"></i> @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
-                            </a>
-                        </li>
-                    }
-
-                    @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
-                    {
-                        <li class="@contactactive">
-                            <a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a>
-                        </li>
-                    }
-                </ul>
-            </li>
-
-            @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount))
+            @if (SessionVariables.AccountUserType != UserType.Instructor || !currentAccount.HasFeature(FeatureType.LimitInstructorRegistrantView))
             {
-                <li class="@formactive hide">
+                <li class="parent @contactmenuactive">
+                    <a href="#">
+                        <i class="icon s7-id"></i> <span>Contacts</span>
+                    </a>
+                    <ul class="sub-menu">
+                        @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
+                        {
+                            <li class="@registrationactive">
+                                <a href="@Url.Action("index", "registration")">
+                                    <i class="icon s7-id"></i> @UILabel.RegistrantLabel(true)
+                                </a>
+                            </li>
+                        }
+                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
+                        {
+                            <li class="@volunteercontactsactive">
+                                <a href="@Url.Action("index", "registration", new { volunteers = "true" })">
+                                    <i class="icon s7-smile"></i> @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true)
+                                </a>
+                            </li>
+                        }
+
+                        @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
+                        {
+                            <li class="@contactactive">
+                                <a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a>
+                            </li>
+                        }
+                    </ul>
+                </li>
+            }
+
+            @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount) && FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+            {
+                <li class="@formactive">
                     <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a>
                 </li>
             }

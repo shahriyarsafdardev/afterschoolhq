@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Index(int? start = null, int? length = null)
         {
-            return View(Package.Load(start: start, length: length));
+            return View(Package.Load(start: start, length: length).OrderByDescending(x => x.IsActive).ThenBy(x => x.Price).ToList());
         }
 
         [HttpGet]

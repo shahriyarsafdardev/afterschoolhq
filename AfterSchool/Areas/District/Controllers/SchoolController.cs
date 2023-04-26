@@ -87,6 +87,7 @@ namespace AfterSchool.Areas.District.Controllers
         public ActionResult Invite(string orgname, string firstname, string lastname, string email, string message)
         {
             var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
             WebUser user = null;
             Account account = null;
 
@@ -129,6 +130,9 @@ namespace AfterSchool.Areas.District.Controllers
                             loggedInUser: SessionVariables.CurrentUser,
                             msgs: amsgs,
                             dc: adc);
+
+                        account.FiscalAccountId = currentAccount.ID;
+                        msgs.AddRange(account.Save(adc));
 
                         // Adding the school to the district account so district can see details
                         msgs.AddRange(

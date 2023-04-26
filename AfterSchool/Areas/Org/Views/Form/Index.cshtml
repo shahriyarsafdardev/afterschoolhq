@@ -1,7 +1,15 @@
-﻿@model List<Form>
+@model List<Form>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
+    var currentFormCount = Model.Count;
+    var showFormFields = currentFormCount >= maxFormCount ? false : true;
+    var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
+    var archived = (bool)ViewBag.Archived;
 }
+<input type="hidden" id="isSurveyForm" name="isSurveyForm" value="@ViewBag.FromSurvey" />
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -12,17 +20,76 @@
     <div class="panel panel-default">
 
         <div class="panel-heading">
-            <div class="pull-right">
-                <button class="btn btn-primary btn-space md-trigger" data-modal="modal-newform">
-                    <i class="icon icon-left s7-plus"></i>
-                    Add Form
-                </button>
+            <div class="row">
+                <div class="col-md-12">
+                    <i class="s7-note2"></i> Forms
+                    <div class="pull-right">
+                        @if (showFormFields)
+                        {
+                            <button class="btn btn-primary btn-space md-trigger mdpopup" data-modal="modal-newform" onclick="showFormType()">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                <i class="icon icon-left s7-plus"></i>
+                                Add Form
+                            </button>
+                        }
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
             </div>
-            <i class="s7-note2"></i> Forms
-            <div class="clearfix"></div>
         </div>
 
-        <div class="panel-body">            
+        <div class="panel-body">
+            @if (maxFormCount > 0)
+            {
+                <p class="pull-right text-bold formCount">
+                    @if (!archived)
+                    { 
+                        @:<span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
+                    }
+                    else 
+                    {
+                        @:&nbsp;    
+                    }
+                </p>
+                <div class="clearfix"></div>
+            }
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="pull-right">
+                        <a href="@Url.Action("index", "form", new { archived = false })" class="@(!archived ? "text-bold" : "")">Current</a> |
+                        <a href="@Url.Action("index", "form", new { archived = true })" class="@(archived ? "text-bold" : "")">Archived</a>
+                    </div>
+                </div>
+                <div class="col-md-12">&nbsp;</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-7"></div>
+                <div class="col-md-2">
+                    <select class="form-control" id="formtypefilter">
+                        <option value="">All Form Types</option>
+                        @foreach (var formType in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(x => x != FormType.NotSet))
+                        {
+                            <option value="@((int)@formType)" @(Request["type"] == ((int)formType).ToString() ? "selected=\"selected\"" : "")>@formType.ToString().SplitByUpperCase()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="pull-right">
+                        <input type="text" id="search" class="form-control searchFormInput" placeholder="Search Forms" value="@Request["q"]" />
+                        <button class="btn btn-primary searchFormBtn" id="searchBtn">
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -30,23 +97,90 @@
                         <tr>
                             <th></th>
                             <th>Form</th>
+                            <td>Submissions</td>
+                            <th>Type</th>
+                            <th>Default Form?</th>
                             <th>Created On</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.Count > 0)
+                        @if (maxFormCount == 0)
+                        {
+                            <tr>
+                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">upgrade your plan.</a></td>
+                            </tr>
+                        }
+                        else if (Model.Count > 0)
                         {
                             foreach (var form in Model)
                             {
+                                var isDefaultForm = form.ID == currentAccount.DefaultFormId || form.ID == currentAccount.DefaultVolunteerFormId;
+                                var totalSubmissions = form.GetTotalSubmissionCount();
+
                                 <tr>
-                                    <td><a href="@Url.Action("edit", "form", new {id = form.ID})" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a></td>
-                                    <td><a href="@Url.Action("edit", "form", new {id = form.ID})">@form.Name</a></td>
+                                    <td>
+                                        @if (maxFormCount > 0)
+                                        {
+                                            <a href="@Url.Action("edit", "form", new { id = form.ID })" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        }
+
+                                        @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
+                                        {
+                                            <a href="@Url.Action("report", "form", new { form = form.ID })" class="btn btn-default btn-sm" target="_blank">Submissions</a>
+                                        }
+
+                                     </td>
+                                    <td><a href="@Url.Action("edit", "form", new { id = form.ID })">@form.Name</a></td>
+                                    <td>@totalSubmissions</td>
+                                    <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
+                                    <td>@isDefaultForm.ToYesNo()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
                                     <td>
-                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name')">
-                                            <i class="icon icon-left s7-copy-file"></i> Copy
-                                        </button>
+                                        @if (showFormFields)
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+
+                                            if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
+                                            {
+                                                var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
+
+                                                if (form.FormTypeId == FormType.VolunteerForm)
+                                                {
+                                                    formType = UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true).ToLower();
+                                                }
+
+                                                <button class="btn btn-default btn-sm md-trigger" 
+                                                        data-modal="modal-setdefault" 
+                                                        onclick="setFormAsDefault('@UI.JavascriptSafeString(form.Name)', '@formType', '@Url.Action("setasdefault", "form", new { id = form.ID.ToString() })')">
+                                                    Set as Default
+                                                </button>
+                                            }
+
+                                            if (!form.IsArchived)
+                                            {
+                                                if (!isDefaultForm)
+                                                {
+                                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("archive", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Archive</button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -54,12 +188,33 @@
                         else
                         {
                             <tr>
-                                <td colspan="4">There are no forms. Please <a href="#" class="md-trigger" data-modal="modal-newform">add a new registration form</a></td>
+                                <td colspan="4">
+                                    There are no @(archived ? "archived" : "") forms.
+                                    @if (!archived)
+                                    {
+                                        <span>Please <a href="#" class="md-trigger" data-modal="modal-newform">add a new registration form</a></span>
+                                    }
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
+
             </div>
+
+            @{
+                Html.RenderPartial(
+                   "~/Views/Shared/_Paging.cshtml",
+                   (PagingModel)ViewBag.PagingModel,
+                   new ViewDataDictionary
+                   {
+                       { "querystring", $"q={Request["q"]}&type={Request["type"]}&archived={archived.ToString().ToLower()}" },
+                       { "action", "index" },
+                       { "controller", "form" }
+            }
+                   );
+            }
+
         </div>
     </div>
 </div>
@@ -70,16 +225,41 @@
         <div class="md-content">
             <div class="modal-header">
                 <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
-                <h3 class="modal-title">New Registration Form</h3>
+                <h3 class="modal-title">New Form</h3>
             </div>
             <div class="modal-body form">
 
                 <p>This is used to create a registration form that can be used for your @UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()</p>
 
                 <div class="form-group">
-                    <label>Registration Form Name</label>
-                    <input type="text" placeholder="" class="form-control" id="name" name="name" onfocus="this.select()">
+                    <label>Form Name</label>
+                    <input type="text" placeholder="" class="form-control" id="name" name="name" onfocus="this.select()" required="">
                 </div>
+                @if (accountPackage.HasAnyFeature(new FeatureType[] { FeatureType.Survey, FeatureType.ManageVolunteerOpportunities }))
+                {
+                    <div class="form-group formTypeRow">
+                        <label>Form Type</label>
+                        <select class="form-control formtype-select" id="formtype" name="formtype" required>
+                            <option value="" selected>-- Select Form Type --</option>
+                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet)))
+                            {
+                                <option value="@((int)type)">
+                                    @type.ToString().SplitByUpperCase()
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group hidden">
+                        <label>Form Type</label>
+                        <select class="form-control formtype-select" id="formtype" name="formtype">
+                            <option value="@((int)FormType.StudentForm)" selected="selected"></option>
+                        </select>
+                    </div>
+                }
+
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -89,11 +269,141 @@
     </form>
 </div>
 
-<script>
-    function copy(id, name) {
-        $('.modal-title').html('Copy Registration Form');
-        $('#form-new').attr('action', '/org/form/edit/0?copyfrom=' + id);
-        $('#name').val(name + ' Copy');
-        $('#name').focus();
-    }
-</script>
+
+<div id="modal-archive" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Archive Form</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>
+                Are you sure you want to archive
+                <strong>
+                    <span id="archive-form-name"></span>
+                </strong>?
+            </p>
+            <p>Archived forms can no longer be used for new @UILabel.ActivityLabel(plural: true).ToLower().</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="archive-form-button">Archive &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-restore" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Restore Form</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>
+                Are you sure you want to restore
+                <strong>
+                    <span id="restore-form-name"></span>
+                </strong>?
+            </p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="restore-form-button">Restore &raquo;</a>
+        </div>
+    </div>
+</div>
+
+<div id="modal-setdefault" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Set Form as Default</h3>
+        </div>
+        <div class="modal-body form">
+
+            <p>
+                Are you sure you want to set
+                <strong>
+                    <span class="setdefault-form-name"></span>
+                </strong>
+                as the default form for <span class="setdefault-form-type"></span> on your account?
+            </p>
+            <p>This will set the default form to <span class="setdefault-form-name"></span> for for new <span class="setdefault-form-type"></span> being created.</p>
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a class="btn btn-primary" href="#" id="setdefault-form-button">Set Default &raquo;</a>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        function copy(id, name, formtype) {
+            $('.modal-title').html('Copy Registration Form');
+            $('#form-new').attr('action', '/org/form/edit/0?copyfrom=' + id);
+            $('#name').val(name + ' Copy');
+            if (formtype == "Survey")
+                $('#formtype').val('2');
+            else
+                $('#formtype').val('1');
+
+            $('.formTypeRow').addClass("hide");
+            $('#name').focus();
+        }
+
+        function showFormType() {
+            $('.formTypeRow').removeClass("hide");
+        }
+
+        $(document).ready(function () {
+            if ($("#isSurveyForm").val() == "true") {
+                $("#formtype").val("2");
+                $(".mdpopup").trigger('click');
+            }
+
+            $('#formtypefilter').on('change', function (){
+                search();
+            });
+
+            $("#searchBtn").on("click", function () {
+                search();
+            });
+
+            $("#search").keypress(function (event) {
+                if (event.which == 13) {
+                    search();
+                }
+            });
+        });
+
+        function search(){
+            location.href='@Url.Action("index", "form")?q=' + $('#search').val() + '&type='+$('#formtypefilter').val() + '&archived=' + @(archived.ToString().ToLower());
+        }
+
+        function archiveForm(name, url) {
+            $('#archive-form-name').html(name);
+            $('#archive-form-button').attr('href', url);
+        }
+        function restoreForm(name, url) {
+            $('#restore-form-name').html(name);
+            $('#restore-form-button').attr('href', url);
+        }
+        function setFormAsDefault(name, type, url) {
+            $('.setdefault-form-name').html(name);
+            $('.setdefault-form-type').html(type);
+            $('#setdefault-form-button').attr('href', url);
+        }
+    </script>
+}

@@ -98,6 +98,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["Options"].Value = value;
         }
 
+        public string OptionsJson
+        {
+            get => (string) MDV["OptionsJson"].Value;
+            set => MDV["OptionsJson"].Value = value;
+        }
+
         public string Link
         {
             get => (string) MDV["Link"].Value;
@@ -162,6 +168,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "IsLocked", SqlDbType.Bit);
                 _dp.Add(className, "IsAnswerDescriptionEnabled", SqlDbType.Bit);
                 _dp.Add(className, "Options", SqlDbType.NVarChar, "1000");
+                _dp.Add(className, "OptionsJson", SqlDbType.NVarChar, "4000");
                 _dp.Add(className, "Link", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "DependsOnQuestionId", SqlDbType.Int);
                 _dp.Add(className, "DependsOnValues", SqlDbType.NVarChar, "400");
@@ -303,6 +310,10 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters();
+            dps.Add(ObjectMap["OptionsJson"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
             dps.Add(ObjectMap["Link"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
@@ -317,8 +328,7 @@ namespace AfterSchoolLibrary.Models
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["DisplayOrder"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-
-
+            
             return msgs;
         }
 
@@ -332,6 +342,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -341,6 +352,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormId);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -349,6 +361,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -359,6 +372,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormQuestionGroupId"], FormQuestionGroupId);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -420,6 +434,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -429,6 +444,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["FormId"], FormIds, DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["IsActive"], IsActive);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -437,6 +453,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], ids, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -466,6 +483,7 @@ namespace AfterSchoolLibrary.Models
                 Text = Text,
                 IsActive = IsActive,
                 IsLocked = IsLocked,
+                IsDeleted = IsDeleted,
                 QuestionDataTypeId = QuestionDataTypeId,
             };
 
@@ -478,6 +496,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["QuestionDataTypeId"], questionDataTypeIds, DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 

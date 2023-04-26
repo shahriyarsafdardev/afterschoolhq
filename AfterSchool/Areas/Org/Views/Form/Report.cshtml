@@ -1,0 +1,703 @@
+@model AfterSchool.Models.ReportPageResults
+@{
+    ViewBag.Title = "Report";
+    var questions = Model.Questions;
+    var msgs = Model.Messages;
+    Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
+
+    var hasRegistrantInfoInQuestions = questions.Any(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+}
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="row">                
+
+                <div class="col-md-4">
+                    <input type="text" id="search" placeholder="Search" class="form-control" />
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
+                    <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
+                    <button type="button" class="btn btn-default" onclick="emailReport()" id="btn-email-report">Email Report</button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-default hidden-print pull-right" onclick="window.close()">
+                        <i class="s7-close-circle"></i> Close Window
+                    </button>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+
+            @if (Model.ShowCollapseRecordOption)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox"
+                                   id="collapse-records"
+                                   class="form-control"
+                                   value="1"
+                                   @(Model.CollapseRecords ? "checked=\"checked\"" : "")
+                                   onclick="toggleCollapseRecords()" />
+
+                            <label for="collapse-records">
+                                Collapse Records
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">&nbsp;</div>
+            }
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-date"></i> Date Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleActivityOptionSelection()"><i class="s7-gleam"></i> Activity Filter</button>
+                    <button type="button" class="btn btn-link" onclick="toggleSearchColumnSelection()"><i class="s7-filter"></i> Search Columns</button>
+                    <button type="button" class="btn btn-link" onclick="toggleColumnSelection()"><i class="s7-settings"></i> Visible Columns</button>
+                </div>
+            </div>
+
+            <div id="date-selection" class="row hide toggles">
+                <div class="col-md-12">&nbsp;</div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "startdate",
+                                Name = "startdate",
+                                Value = Request["sdate"],
+                                Placeholder = "From Date",
+                            }
+                            );
+                    }
+                </div>
+                <div class="col-md-2">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/Components/_Date.cshtml",
+                            new FormInputViewModel
+                            {
+                                Id = "enddate",
+                                Name = "enddate",
+                                Value = Request["edate"],
+                                Placeholder = "To Date",
+                            }
+                            );
+                    }
+                </div>
+            </div>
+
+            <div class="row hide toggles" id="activityoption-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="activityoptions"
+                               class="form-control"
+                               value="1"
+                               onclick="toggleAllActivityOptions()" />
+
+                        <label for="activityoptions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
+                @for (var i = 0; i < 4; i++)
+                {
+                    var take = (int)Math.Ceiling(Model.ActivityOptions.Count() / 4M);
+                    var skip = i * take;
+
+                    <div class="col-md-3">
+
+                        @foreach (var activity in Model.ActivityOptions.Skip(skip).Take(take))
+                        {
+                            <div>
+                                <div class="am-checkbox">
+                                    <input type="checkbox"
+                                           id="activityoption-@activity.ID"
+                                           name="activityoption-@activity.ID"
+                                           class="form-control activityoption"
+                                           value="1"
+                                           @(activity.ID.In(Model.SelectedActivities.Select(x => x.ID)) ? "checked=\"checked\"" : "")
+                                           onclick="toggleActivityOption(@activity.ID)" />
+
+                                    <label for="activityoption-@activity.ID">
+                                        @activity.Name
+                                    </label>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                }
+            </div>
+
+            <div class="row hide toggles" id="search-column-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="search-columns"
+                               class="form-control"
+                               value="1"
+                               checked="checked"
+                               onclick="toggleAllSearchColumns()" />
+
+                        <label for="search-columns">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
+                @{
+                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                }
+                @foreach (var group in searchGroups)
+                {
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="search-group-@group.ID" name="search-group-@group.ID" class="form-control search-questions" value="1" checked="checked" onclick="toggleSearchGroup(@group.ID)" />
+                            <label for="search-group-@group.ID" class="text-medium-small text-bold">
+                                @group.Name
+                            </label>
+                        </div>
+                    </div>
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var take = (int)Math.Ceiling(questions.Where(x => x.FormQuestionGroupId == group.ID).Count() / 4M);
+                        var skip = i * take;
+
+                        <div class="col-md-3">
+
+                            @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID).Skip(skip).Take(take))
+                            {
+                                <div>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="search-question-@question.ID" name="search-question-@question.ID" class="form-control search-questions search-question-group-@group.ID" value="1" checked="checked" />
+                                        <label for="search-question-@question.ID">
+                                            @question.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="row hide toggles" id="column-selection">
+
+                <div class="col-md-12">
+                    <div class="am-checkbox">
+                        <input type="checkbox"
+                               id="visible-questions"
+                               class="form-control"
+                               value="1"
+                               checked="checked"
+                               onclick="toggleAllVisibleColumns()" />
+
+                        <label for="visible-questions">
+                            Select All / None
+                        </label>
+                    </div>
+                </div>
+
+                @{
+                    var groups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                }
+                @foreach (var group in groups)
+                {
+                    <div class="col-md-12">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="group-@group.ID" name="group-@group.ID" class="form-control visible-questions" value="1" checked="checked" onclick="toggleGroup(@group.ID)" />
+                            <label for="group-@group.ID" class="text-medium-small text-bold">
+                                @group.Name
+                            </label>
+                        </div>
+                    </div>
+
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var take = (int)Math.Ceiling(questions.Where(x => x.FormQuestionGroupId == group.ID).Count() / 4M);
+                        var skip = i * take;
+
+                        <div class="col-md-3">
+
+                            @foreach (var question in questions.Where(x => x.FormQuestionGroupId == group.ID).Skip(skip).Take(take))
+                            {
+                                <div>
+                                    <div class="am-checkbox">
+                                        <input type="checkbox" id="question-@question.ID" name="question-@question.ID" class="form-control question-group-@group.ID visible-questions" value="1" checked="checked" onclick="toggleColumn(@question.ID)" />
+                                        <label for="question-@question.ID">
+                                            @question.Text
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <span id="starting-record">0</span> -
+                    <span id="total-records-loaded">0</span> of
+                    <span id="total-records">0</span>
+                </div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive ">
+                        <table class="table table-striped table-condensed" id="answers-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")"></th>
+                                    <th></th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </text>
+                                    }
+                                    else
+                                    {
+                                        <text>
+                                            <th></th>
+                                        </text>
+                                    }
+
+                                    @foreach (var question in questions)
+                                    {
+                                        <th class="col-question-@question.ID">@question.FormQuestionGroupName</th>
+                                    }
+                                </tr>
+                                <tr>
+                                    <th>@(Model.Form.IsNotEmpty() && Model.Form.FormTypeId == FormType.Survey ? "Submission ID" : "Registrant ID")</th>
+                                    <th class="submission-date-col @(Model.CollapseRecords ? "hide" : "")">Submission Date</th>
+                                    <th>Activities</th>
+
+                                    @if (!hasRegistrantInfoInQuestions)
+                                    {
+                                        <text>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Email</th>
+                                        </text>
+                                    }
+                                    else
+                                    {
+                                        <text>
+                                            <th>School</th>
+                                        </text>
+                                    }
+
+                                    @foreach (var question in questions)
+                                    {
+                                        <th class="col-question-@question.ID">@question.Text</th>
+                                    }
+
+                                </tr>
+                            </thead>
+                            <tbody id="answer-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@{ 
+    questions.Select(x => x.FormQuestionGroupId.ToString()).DistinctBy(x => x).ToList().ToStringList();
+}
+
+<script>
+
+    var questions = @Html.Raw(questions.Select(question => new { question.ID, question.Text, QuestionDataTypeId = (int)question.QuestionDataTypeId }).ToJSON());
+    var questionGroupIds = @Html.Raw(questions.Select(x => x.FormQuestionGroupId).DistinctBy(x => x).ToList().ToJSON())
+    var activityOptions = @Html.Raw(Model.ActivityOptions.Select(x => new { x.ID }).ToJSON());
+    var pageStart = 0;
+    let pageSize = 25;
+    var maxRecords = null;
+    var hasRegistrantInfoInQuestions = @hasRegistrantInfoInQuestions.ToString().ToLower();
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+
+        $(window).on('scroll', function () {
+            if ((window.innerHeight + window.scrollY) >= $(document).height() - 10) {
+                loadRegistrants(pageStart, pageSize);
+            }
+        });
+
+        loadRegistrants(pageStart, pageSize);
+
+    });
+
+    function resetScreen() {
+        pageStart = 0;
+        $('#answer-tbody').html('');
+    }
+
+    function searchClick() {
+        hideToggles();
+        search();
+    }
+
+    function search() {
+        resetScreen();
+        loadRegistrants(pageStart, pageSize);
+    }
+
+    function getSelectedActivities() {
+        var selectedActivities = "";
+
+        for (let activityOption of activityOptions) {
+            if ($(`#activityoption-${activityOption.ID}`).is(':checked')) {
+                if (selectedActivities.length > 0)
+                    selectedActivities += ',';
+
+                selectedActivities += activityOption.ID;
+            }
+        }
+
+        return selectedActivities;
+    }
+
+    function getSearchValue() {
+        return encodeURIComponent($('#search').val());
+    }
+
+    function getStartDateValue() {
+        return encodeURIComponent($('#startdate').val());
+    }
+
+    function getEndDateValue() {
+        return encodeURIComponent($('#enddate').val());
+    }
+
+    function getCollapseRecordsValue() {
+        return $('#collapse-records').is(':checked') ? "true" : "false";
+    }
+
+    function getHiddenQuestionIdList() {
+        var hiddenQuestions = "";
+
+        for (let question of questions) {
+            if (!$(`#question-${question.ID}`).is(':checked')) {
+                if (hiddenQuestions.length > 0)
+                    hiddenQuestions += ',';
+
+                hiddenQuestions += question.ID;
+            }
+        }
+
+        return hiddenQuestions;
+    }
+
+    function getSearchQuestionIdList() {
+        var searchQuestions = "";
+
+        for (let question of questions) {
+            if ($(`#search-question-${question.ID}`).is(':checked')) {
+                if (searchQuestions.length > 0)
+                    searchQuestions += ',';
+
+                searchQuestions += `${question.ID}|${question.QuestionDataTypeId}`;
+            }
+        }
+
+        return searchQuestions;
+    }
+
+    function toggleColumnSelection() {
+        if ($('#column-selection').hasClass('hide')) {
+            hideToggles();
+            $('#column-selection').removeClass('hide');
+        } else {
+            $('#column-selection').addClass('hide');
+        }
+    }
+
+    function toggleGroup(groupId) {
+        if ($(`#group-${groupId}`).is(':checked')) {
+            $(`.question-group-${groupId}`).prop('checked', true);
+        } else {
+            $(`.question-group-${groupId}`).prop('checked', false);
+        }
+
+        $(`.question-group-${groupId}`).each(function () {
+            let questionId = $(this).attr('id').split('-')[1];
+            toggleColumn(questionId);
+        });
+    }
+
+    function toggleColumn(questionId) {
+        if ($(`#question-${questionId}`).is(':checked')) {
+            $(`.col-question-${questionId}`).removeClass('hide');
+        } else {
+            $(`.col-question-${questionId}`).addClass('hide');
+        }
+    }
+
+    function toggleSearchColumnSelection() {
+        if ($('#search-column-selection').hasClass('hide')) {
+            hideToggles();
+            $('#search-column-selection').removeClass('hide');
+        } else {
+            $('#search-column-selection').addClass('hide');
+        }
+    }
+
+    function toggleSearchGroup(groupId) {
+        if ($(`#search-group-${groupId}`).is(':checked')) {
+            $(`.search-question-group-${groupId}`).prop('checked', true);
+        } else {
+            $(`.search-question-group-${groupId}`).prop('checked', false);
+        }
+
+        $(`.search-question-group-${groupId}`).each(function () {
+            let questionId = $(this).attr('id').split('-')[1];
+            toggleColumn(questionId);
+        });
+    }
+
+    function toggleAllSearchColumns() {
+        if ($('#search-columns').is(':checked')) {
+            $('.search-questions').prop('checked', true);
+        } else {
+            $('.search-questions').prop('checked', false);
+        }
+        search();
+    }
+
+    function toggleAllVisibleColumns() {
+        if ($('#visible-questions').is(':checked')) {
+            $('.visible-questions').prop('checked', true);
+        } else {
+            $('.visible-questions').prop('checked', false);
+        }
+
+        for (var groupId of questionGroupIds) {
+            toggleGroup(groupId);
+        }
+    }
+
+    function toggleActivityOptionSelection() {
+        if ($('#activityoption-selection').hasClass('hide')) {
+            hideToggles();
+            $('#activityoption-selection').removeClass('hide');
+        } else {
+            $('#activityoption-selection').addClass('hide');
+        }
+    }
+
+    function toggleActivityOption() {
+    }
+
+    function toggleAllActivityOptions() {
+        if ($('#activityoptions').is(':checked')) {
+            $('.activityoption').prop('checked', true);
+        } else {
+            $('.activityoption').prop('checked', false);
+        }
+    }
+
+    function toggleDateSelection() {
+        if ($('#date-selection').hasClass('hide')) {
+            hideToggles();
+            $('#date-selection').removeClass('hide');
+        } else {
+            $('#date-selection').addClass('hide');
+        }
+    }
+
+    function toggleCollapseRecords() {
+        if ($('#collapse-records').is(':checked')) {
+            $('#startdate').prop('disabled', true);
+            $('#enddate').prop('disabled', true);
+            $('.submission-date-col').addClass('hide');
+        } else {
+            $('#startdate').prop('disabled', false);
+            $('#enddate').prop('disabled', false);
+            $('.submission-date-col').removeClass('hide');
+        }
+        search();
+    }
+
+    function hideToggles() {
+        $('.toggles').addClass('hide');
+    }
+
+    function toggleEmailReportButton(disable) {
+        $('#btn-email-report').prop('disabled', disable);
+
+        if (disable) {
+            $('#btn-email-report').html('Sending...');
+        } else {
+            $('#btn-email-report').html('Email Report');
+        }
+    }
+
+    function emailReport() {
+
+        toggleEmailReportButton(true);
+
+        let params = `form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&hidden=${getHiddenQuestionIdList()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`;
+
+        $.post(
+            '@Url.Action("EmailReport", "Form")',
+            params,
+            function (data) {
+
+                if (data && data.status === 'ok') {
+                    Notifications.showBar({
+                        title: 'Success',
+                        message: `Your report will be emailed shortly to ${data.email}`,
+                        success: true
+                    });
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+
+                toggleEmailReportButton(false);
+            }
+        );
+    }
+
+    function addLoading() {
+        $('.no-results').remove();
+        $('#answer-tbody').append(`<tr id="tr-loading"><td class="padding-20" colspan="${(questions.length + 1)}"><h4>Loading...</h4></td></tr>`);
+    }
+
+    function removeLoading() {
+        $('#tr-loading').remove();
+    }
+
+    var isLoading = false;
+
+    function loadRegistrants(start, length) {
+
+        if (maxRecords && start >= maxRecords)
+            return;
+
+        if (isLoading)
+            return;
+
+        isLoading = true;
+
+        addLoading();
+
+        let params = `form=@Model.FormId&persontype=@((int)Model.PersonType)&activities=${getSelectedActivities()}&start=${start}&length=${length}&search=${getSearchValue()}&sdate=${getStartDateValue()}&edate=${getEndDateValue()}&searchquestions=${getSearchQuestionIdList()}&collapseRecords=${getCollapseRecordsValue()}`;
+
+        $.post(
+            '@Url.Action("GetReportPage", "Form")',
+            params,
+            function (data) {
+
+                removeLoading();
+
+                if (data && data.status === 'ok') {
+
+                    if (data.records.length == 0) {
+                        var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
+                        $('#answer-tbody').append(tableRow);
+                    } else {
+
+                        for (let record of data.records) {
+
+                            var tableRow = `<tr>`;
+
+                            tableRow += `<td>${record.RecordId}</td>`;
+                            if (!$('#collapse-records').is(':checked')) {
+                                tableRow += `<td class="submission-date-col">${record.SubmissionDate}</td>`;
+                            }
+                            tableRow += `<td>${record.Activities}</td>`;
+
+                            if (!hasRegistrantInfoInQuestions) {
+                                tableRow += `<td>${record.FirstName}</td>`;
+                                tableRow += `<td>${record.LastName}</td>`;
+                                tableRow += `<td>${record.Email}</td>`;
+                            } else {
+                                tableRow += `<td>${record.School}</td>`;
+                            }
+
+                            for (let question of questions) {
+
+                                answer = getAnswerForQuestion(question, record, data.answers);
+
+                                var hide = "";
+
+                                if (!$(`#question-${question.ID}`).is(':checked')) {
+                                    hide = "hide";
+                                }
+
+                                tableRow += `<td class="col-question-${question.ID} ${hide}">`;
+                                if (answer) {
+                                    tableRow += answer.Text;
+                                }
+                                tableRow += `</td>`;
+                            }
+
+                            tableRow += `</tr>`;
+                            $('#answer-tbody').append(tableRow);
+                        }
+
+                        pageStart += pageSize;
+
+                        if (data.records.length > 0)
+                            $('#starting-record').html(1);
+
+                        $('#total-records-loaded').html(pageStart < data.recordCount ? pageStart : data.recordCount);
+                        $('#total-records').html(data.recordCount);
+
+                        maxRecords = data.recordCount;
+                    }
+
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+
+                isLoading = false;
+            }
+        );
+    }
+
+    function getAnswerForQuestion(question, record, answers) {
+
+        for (let answer of answers) {
+            if (answer.Text.trim().length > 0) {
+                if (answer.QuestionId == question.ID || (answer.QuestionDataTypeId != @((int)QuestionDataType.NotSet) && answer.QuestionDataTypeId == question.QuestionDataTypeId)) {
+
+                    if (answer.RegistrantId == record.RegistrantId || answer.FirstRegistrantId == record.FirstRegistrantId) {
+                        return answer;
+                    } else if (answer.SurveyResponseId == record.SurveyResponseId) {
+                        return answer;
+                    }
+
+                }
+            }
+        }
+
+        return null;
+    }
+
+</script>

@@ -369,7 +369,6 @@ var App = (function () {
         $.extend( config, options );
 
     /*FastClick on mobile*/
-        console.log('fast click');
         FastClick.attach(document.body, {
             excludeNode: '^pac-'
         });

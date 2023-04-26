@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -578,8 +578,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type)
+        public ActionResult Forms(string fromSurvey, string pn, string rpp, string q, string type, bool isarchived = false)
         {
+            if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("index", "form", new { fromSurvey, pn, rpp, q, type });
+
             var msgs = new SystemMessages();
             
             var pageNumber = 1;
@@ -599,8 +602,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
             
-            var forms = currentAccount.GetForms(formType, q, start, length, msgs);
-            var formCount = currentAccount.GetFormCount(formType, q, msgs);
+            var forms = currentAccount.GetForms(isarchived, formType, q, start, length, msgs);
+            var formCount = currentAccount.GetFormCount(isarchived, formType, q, msgs);
             var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
             
             ViewBag.PagingModel = new PagingModel
@@ -618,6 +621,9 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult FormEdit(string id, string qg)
         {
+            if (FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+                return RedirectToAction("edit", "form", new { id, qg });
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
@@ -1031,7 +1037,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.CostLow = profile.CostLow.HasValue ? profile.CostLow.Value.ToString("0.00") : "";
             ViewBag.CostHigh = profile.CostHigh.HasValue ? profile.CostHigh.Value.ToString("0.00") : "";
-            ViewBag.IsIsypAccount = AccountService.CheckIfIsypAccount(account, msgs);
+            ViewBag.IsIsypAccount = AccountService.IsInIsypDirectory(account, msgs);
 
             return profile;
         }
@@ -1383,6 +1389,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 BillingPeriodType.Month,
                 true,
                 accountPackage.StripeSubscriptionId,
+                null,
                 currentUser,
                 msgs
             );
@@ -1517,13 +1524,20 @@ namespace AfterSchool.Areas.Org.Controllers
                                 (BillingPeriodType) period.ToInteger(),
                                 true,
                                 accountPackage.StripeSubscriptionId,
+                                null,
                                 currentUser,
                                 amsgs,
                                 adc
                             );
                         else if (currentAccount.ReferrerAccountId.HasValue)
-                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(accountPackage.StripeSubscriptionId, null,
-                                null, null, null, null, StripeHelper.ReferralCouponId, amsgs);
+                            StripeHelper.GetStripeHelperSubscriberAccount().UpdateSubscription(
+                                accountPackage.StripeSubscriptionId, 
+                                null,
+                                null, 
+                                null, 
+                                null, 
+                                StripeHelper.ReferralCouponId, 
+                                amsgs);
                     }
 
                     // check if finally added payment
