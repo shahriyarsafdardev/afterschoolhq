@@ -475,24 +475,36 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult ApproveManualRefundRequest(string uid)
+        public ActionResult ApproveManualRefundRequest(string transactionUid, string requestUid, string amount)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            if (transactionUid.IsEmpty())
+                msgs.Add("Invalid Transaction ID", MessageType.UserError);
+            
+            if (requestUid.IsEmpty())
+                msgs.Add("Invalid Request ID",MessageType.UserError);
+            
+            if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
+                msgs.Add("Invalid Amount", MessageType.UserError);
 
-            if (uid.IsGuid())
+            if (!transactionUid.IsGuid() || !requestUid.IsGuid() || !amount.IsNumber())
+                return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            
+            var transaction = currentAccount.GetBillerTransaction(transactionUid.ToGuid(), msgs);
+            var request = currentAccount.GetRefundRequest(requestUid.ToGuid(), msgs);
+                
+            if (transaction.IsNotEmpty())
+                transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+
+            if (request.IsNotEmpty())
+                request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
+
+            if (msgs.HasNoErrors())
             {
-                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
-
-                if (request.IsNotEmpty())
-                    request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
-
-                if (msgs.HasNoErrors())
-                {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
-                        WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
-                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
-                }
+                SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                    WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
+                return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
             }
 
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};

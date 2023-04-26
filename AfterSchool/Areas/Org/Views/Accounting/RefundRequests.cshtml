@@ -122,7 +122,7 @@
                                         @if (request.RefundRequestStatusId == RefundRequestStatus.RequestedByParent)
                                         {
                                             <button type="button" class="btn btn-default btn-sm md-trigger" id="btn-approve" 
-                                                    onclick="approve('@transaction.Uid','@request.Uid'); manualRefund('@transaction.Uid'); 
+                                                    onclick="approve('@transaction.Uid','@request.Uid'); manualRefund('@transaction.Uid','@request.Uid'); 
                                                     showModal('modal-process-refund'); 
                                                     requestRefund('@transaction.Uid',
                                                     @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"),
@@ -300,15 +300,15 @@
     }
 
     function confirmApproveManual() {
-        $.get('@Url.Action("approvemanualrefundrequest", "accounting")?uid=' + uid, function (data) {
-
+        const amount = $('#manual-refund-amount').val();
+        $.get('@Url.Action("approvemanualrefundrequest", "accounting")?transactionUid=' + transactionUid + '&requestUid=' + uid + '&amount=' + amount, 
+        function (data) {
             if (data && data.status === 'ok') {
                 Notifications.showMessage('Success', 'The refund request has been approved', true);
                 setTimeout(function () { location.reload() }, 500);
             } else {
                 Notifications.showErrors(data.messages);
             }
-
         });
     }
 

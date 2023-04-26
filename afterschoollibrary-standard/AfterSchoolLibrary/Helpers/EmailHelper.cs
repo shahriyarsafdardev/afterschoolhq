@@ -2038,7 +2038,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityName", activityName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"ActivityContactEmail", providerAccountOwner.Email},
-                {"ActivityContactPhone", providerAccountOwner.Phone},
+                {"ActivityContactPhone", providerAccountOwner.Phone.IsNotEmpty() ? $"either by phone ({providerAccountOwner.Phone}) or": "by"},
                 {"ActivityContactName", providerAccountOwner.FirstName},
                 {"BillerAccountName", providerAccount.Name},
                 {"BillerAccountLink", providerAccount.HomePageUrl},
@@ -2053,7 +2053,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 isSendToProvider ? EmailTemplates.Refund_Provider_Processed : EmailTemplates.Refund_Parent_Processed,
                 model,
-                "refund_processed-1.0.1",
+                "refund_processed-1.2.1",
                 msgs
             );
 
