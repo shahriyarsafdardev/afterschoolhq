@@ -123,7 +123,15 @@ export const useVolunteerRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
-  return { loadFormData, submitFormSectionData, clearMessages, loaded };
+  const exit = async (uid, activityUrl) => {
+    await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
+      dispatch(setMsgs(msgs));
+      const { redirect } = utils;
+      if (!msgs.length) redirect(activityUrl);
+    });
+  };
+
+  return { loadFormData, submitFormSectionData, clearMessages, loaded, exit };
 };
 
 export default VolunteerRegistrationSlice;

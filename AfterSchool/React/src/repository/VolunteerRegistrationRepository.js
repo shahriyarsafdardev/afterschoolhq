@@ -8,5 +8,6 @@ export default {
     axios
       .get(ApiRoutes.getVolunteerFormDataAPI(accountName, activityName, regUid))
       .then(res => res),
-  register: params => axios.post(ApiRoutes.VolunteerRegisterAPI, params)
+  register: params => axios.post(ApiRoutes.VolunteerRegisterAPI, params),
+  exit: uid => axios.get(ApiRoutes.exitVolunteerRegistrationAPI(uid))
 };

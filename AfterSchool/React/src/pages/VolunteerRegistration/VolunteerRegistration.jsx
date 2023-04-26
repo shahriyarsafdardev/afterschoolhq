@@ -16,6 +16,7 @@ export default function VolunteerRegistration() {
   const { volunteerThankYouUrl } = apiRoutes;
   const { accountName, activityName, regUid } = useParams();
   const {
+    exit,
     msgs = [],
     loading,
     questions,
@@ -25,7 +26,7 @@ export default function VolunteerRegistration() {
     questionsGroups,
     answeredQuestions,
     submitFormSectionData,
-    activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender }
+    activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender, ActivityUrl }
   } = useVolunteerRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -142,6 +143,10 @@ export default function VolunteerRegistration() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const exitHandler = () => {
+    exit(regUid, ActivityUrl);
+  };
+
   return (
     <RegistrationForm
       loading={loading}
@@ -162,6 +167,8 @@ export default function VolunteerRegistration() {
         enforcedGender: EnforcedGender,
         isGenderRestricted: IsGenderRestricted
       }}
+      firstSection={activeGroup === 0}
+      exitHandler={exitHandler}
     ></RegistrationForm>
   );
 }

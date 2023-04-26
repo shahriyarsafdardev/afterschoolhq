@@ -15,6 +15,7 @@ export default function Registration({ newChild = false }) {
   const { paymentScreenPath, thankyouUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
+    exit,
     msgs,
     school,
     loading,
@@ -36,7 +37,8 @@ export default function Registration({ newChild = false }) {
       MaxGrade,
       MinGrade,
       IsGenderRestricted,
-      EnforcedGender
+      EnforcedGender,
+      ActivityUrl
     }
   } = useRegistration();
 
@@ -168,6 +170,10 @@ export default function Registration({ newChild = false }) {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const exitHandler = () => {
+    exit(regUid, ActivityUrl);
+  };
+
   return (
     <RegistrationForm
       loading={loading}
@@ -194,6 +200,8 @@ export default function Registration({ newChild = false }) {
         enforcedGender: EnforcedGender,
         isGenderRestricted: IsGenderRestricted
       }}
+      firstSection={activeGroup === 0}
+      exitHandler={exitHandler}
     ></RegistrationForm>
   );
 }

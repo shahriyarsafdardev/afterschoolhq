@@ -12,5 +12,6 @@ export default {
       )
       .then(res => res),
   submitSchoolData: params => axios.post(ApiRoutes.SchoolAPI, params),
+  exit: uid => axios.get(ApiRoutes.exitRegistrationAPI(uid)),
   register: params => axios.post(ApiRoutes.RegisterAPI, params)
 };
