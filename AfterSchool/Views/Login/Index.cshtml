@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Helpers
+@using AfterSchoolLibrary.Helpers
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 @{
@@ -6,7 +6,7 @@
     ViewBag.Title = "Login";
     var msgs = (SystemMessages)ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
-
+    bool isProduction = Utilities.IsProduction;
 }
 
 
@@ -216,34 +216,39 @@
 {
     <script src="~/Scripts/jquery.validate.js"></script>
     <script type="text/javascript">
+        var isProduction = @isProduction.ToString().ToLower();
         $(document).ready(function () {
-            $("#form-login").validate({
-                rules: {
-                    username: {
-                        required: true,
-                        email: true,
-                    },
-                    password: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    username: {
-                        required: "Please enter your email",
-                        email: "Please verify that the entered email is a valid format"
-                    },
-                    password: {
-                        required: "Please enter your password",
-                    },
-                },
+            if (isProduction) {
+                    $("#form-login").on("submit", function (e) {
+                        if (grecaptcha.getResponse().length !== 0) {
+                            return true;
+                        }
+                        $(".recaptcha-error").css("display", "block");
+                        e.preventDefault();
+                    });
+                }
             });
-        });
-        $("#form-login").on("submit", function (e) {
-            if (grecaptcha.getResponse().length !== 0) {
-                return true;
-            }
-            $(".recaptcha-error").css("display", "block");
-            e.preventDefault();
-        })
+            $(document).ready(function () {
+                $("#form-login").validate({
+                    rules: {
+                        username: {
+                            required: true,
+                            email: true,
+                        },
+                        password: {
+                            required: true,
+                        },
+                    },
+                    messages: {
+                        username: {
+                            required: "Please enter your email",
+                            email: "Please verify that the entered email is a valid format"
+                        },
+                        password: {
+                            required: "Please enter your password",
+                        },
+                    },
+                });
+            });
     </script>
 }
