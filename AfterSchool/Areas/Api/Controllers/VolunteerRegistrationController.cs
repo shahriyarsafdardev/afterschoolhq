@@ -122,12 +122,12 @@ namespace AfterSchool.Areas.Api.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
-                        IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         RegistrationIsCompleted = registration?.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
+                        IsGenderRestricted = participationObject.IsGenderEnforced,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -145,25 +145,27 @@ namespace AfterSchool.Areas.Api.Controllers
         }
         
         [HttpGet]
-        public ActionResult Exit()
+        public ActionResult Exit(string uid)
         {
             var msgs = new SystemMessages();
 
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = Registrant.LoadByUid(uid.ToGuid(), msgs);
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
-                var registrants = currentUser.GetAllRegistrants(msgs);
-
-                foreach (var registrant in registrants)
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                 {
-                    //msgs.AddRange(registrant.Delete());
-                    registrant.IsDeleted = true;
+                    var registrants = currentUser.GetAllRegistrants(msgs);
+
+                    foreach (var registrant in registrants)
+                    {
+                        msgs.AddRange(registrant.Delete());
+                    }
                 }
-                
                 
                 return Json(
                     new ApiResponse(msgs,null),
