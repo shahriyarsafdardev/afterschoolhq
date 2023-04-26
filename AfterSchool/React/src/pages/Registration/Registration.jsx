@@ -92,6 +92,16 @@ export default function Registration({ newChild = false }) {
     else redirect(paymentScreenPath(registrationId));
   };
 
+  const gradeRestrictions = {
+    minGrade: MinGrade,
+    maxGrade: MaxGrade,
+    isGradeRestricted: IsGradeRestricted
+  };
+  const genderRestrictions = {
+    enforcedGender: EnforcedGender,
+    isGenderRestricted: IsGenderRestricted
+  };
+  const ageRestrictions = { isAgeRestricted: IsAgeRestricted, maxAge: MaxAge, minAge: MinAge };
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -99,7 +109,7 @@ export default function Registration({ newChild = false }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values),
+    validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty || secondLastSection) {
@@ -190,16 +200,6 @@ export default function Registration({ newChild = false }) {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
-      ageRestrictions={{ isAgeRestricted: IsAgeRestricted, maxAge: MaxAge, minAge: MinAge }}
-      gradeRestrictions={{
-        isGradeRestricted: IsGradeRestricted,
-        maxGrade: MaxGrade,
-        minGrade: MinGrade
-      }}
-      genderRestrictions={{
-        enforcedGender: EnforcedGender,
-        isGenderRestricted: IsGenderRestricted
-      }}
       firstSection={activeGroup === 0}
       exitHandler={exitHandler}
     ></RegistrationForm>

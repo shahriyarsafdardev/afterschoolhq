@@ -4,13 +4,11 @@ import { Box, FormHelperText } from '@material-ui/core';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
-import { restrictedQuestionsDataTypeIds } from 'constants';
 import useStyles from './styles';
 
-function DateQuestion({ ageRestrictions = {}, question, formik }) {
+function DateQuestion({ question, formik }) {
   const classes = useStyles();
   const datePicker = useRef();
-  const { isAgeRestricted = false, minAge, maxAge } = ageRestrictions;
   const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 
@@ -28,13 +26,6 @@ function DateQuestion({ ageRestrictions = {}, question, formik }) {
   const handleError = () => {};
   const today = new Date();
   const datePickerProps = { maxDate: today };
-  if (isAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth) {
-    const startingDate = noOfYears =>
-      new Date(today.getFullYear() - noOfYears, today.getMonth(), today.getDate());
-
-    datePickerProps['maxDate'] = startingDate(minAge);
-    datePickerProps['minDate'] = startingDate(maxAge);
-  }
 
   return (
     <>

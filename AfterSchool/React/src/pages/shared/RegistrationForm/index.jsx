@@ -25,11 +25,8 @@ export default function RegistrationForm(props) {
     handleSection,
     registrantType,
     saveButtonText,
-    ageRestrictions,
     currentQuestions,
-    gradeRestrictions,
     handleRedirection,
-    genderRestrictions,
     isUpdating = false
   } = props;
   const outerWrapperClass = isUpdating
@@ -87,9 +84,6 @@ export default function RegistrationForm(props) {
                       ShowQuestion({
                         isUpdating,
                         formik: formik,
-                        ageRestrictions,
-                        gradeRestrictions,
-                        genderRestrictions,
                         currentQuestion: question,
                         currentQuestions: currentQuestions
                       })
