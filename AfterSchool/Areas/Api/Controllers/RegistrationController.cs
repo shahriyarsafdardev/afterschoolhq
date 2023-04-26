@@ -363,9 +363,13 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
+                
+                if(currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(accountName, msgs);
@@ -373,7 +377,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                
                 Registration registration = null;
 
                 var formQuestionDtoList = new List<FormQuestionDto>();
@@ -440,6 +444,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent,
+                        ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
