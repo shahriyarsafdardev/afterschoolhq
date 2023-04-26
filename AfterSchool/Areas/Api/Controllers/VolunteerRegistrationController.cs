@@ -122,12 +122,12 @@ namespace AfterSchool.Areas.Api.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
-                        IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
                         RegistrationIsCompleted = registration?.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
+                        IsGenderRestricted = participationObject.IsGenderEnforced,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -160,10 +160,8 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 foreach (var registrant in registrants)
                 {
-                    //msgs.AddRange(registrant.Delete());
-                    registrant.IsDeleted = true;
+                    msgs.AddRange(registrant.Delete());
                 }
-                
                 
                 return Json(
                     new ApiResponse(msgs,null),

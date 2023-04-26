@@ -833,10 +833,8 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 foreach (var registrant in registrants)
                 {
-                    //msgs.AddRange(registrant.Delete());
-                    registrant.IsDeleted = true;
+                    msgs.AddRange(registrant.Delete());
                 }
-                
                 
                 return Json(
                     new ApiResponse(msgs,null),
