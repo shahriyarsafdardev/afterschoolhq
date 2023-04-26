@@ -13,7 +13,8 @@ axios.interceptors.response.use(
   response => {
     const { msgs } = response.data;
     if (msgs?.length && msgs[0].IsError)
-      if (msgs.find(msg => msg.Text === 'Unauthorized')) navigateTo('/login');
+      if (msgs.find(msg => ['No Registrant', 'Unauthorized'].includes(msg.Text)))
+        navigateTo('/login');
 
     return response;
   },
