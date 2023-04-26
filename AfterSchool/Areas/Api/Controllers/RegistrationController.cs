@@ -55,14 +55,18 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
+                
+                if(currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
-                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                
                 Registrant parentRegistrant = null;
                 Registration registration = null;
                 RegistrantActivity registrantActivity = null;
@@ -832,12 +836,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                 {
-                    var registrants = currentUser.GetAllRegistrants(msgs);
-
-                    foreach (var registrant in registrants)
-                    {
-                        msgs.AddRange(registrant.Delete());
-                    }
+                    var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(currentRegistrant.ID.Value, false, msgs).FirstOrDefault();
+                    msgs.AddRange(currentRegistrant.Delete());
+                    msgs.AddRange(registrantWebUser.Delete());
                 }
                 
                 return Json(
