@@ -85,6 +85,7 @@ function checkStrength() {
     }
     if (!password) {
         $('#popover-password').css("display", "none");
+        $('#form-submit').prop("disabled", false);
     }
 
 }
