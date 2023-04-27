@@ -79,6 +79,10 @@ export default function VolunteerRegistration() {
     navigate(thankyouUrl);
   };
 
+  const genderRestrictions = {
+    enforcedGender: EnforcedGender,
+    isGenderRestricted: IsGenderRestricted
+  };
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -86,7 +90,7 @@ export default function VolunteerRegistration() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values),
+    validate: values => validator(values, genderRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty || secondLastSection) {
@@ -163,10 +167,6 @@ export default function VolunteerRegistration() {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
-      genderRestrictions={{
-        enforcedGender: EnforcedGender,
-        isGenderRestricted: IsGenderRestricted
-      }}
       firstSection={activeGroup === 0}
       exitHandler={exitHandler}
     ></RegistrationForm>

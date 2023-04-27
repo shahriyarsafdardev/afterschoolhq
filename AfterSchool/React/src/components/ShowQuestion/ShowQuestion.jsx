@@ -17,15 +17,7 @@ import {
   ApiTextField
 } from 'components';
 
-function ShowQuestion({
-  formik,
-  isUpdating,
-  ageRestrictions,
-  currentQuestion,
-  currentQuestions,
-  gradeRestrictions,
-  genderRestrictions
-}) {
+function ShowQuestion({ formik, isUpdating, currentQuestion, currentQuestions }) {
   const { QuestionTypeId } = currentQuestion;
 
   switch (QuestionTypeId) {
@@ -44,29 +36,11 @@ function ShowQuestion({
     case questionType.email:
       return <TextField question={currentQuestion} formik={formik} />;
     case questionType.date:
-      return (
-        <DateQuestion
-          question={currentQuestion}
-          formik={formik}
-          ageRestrictions={ageRestrictions}
-        />
-      );
+      return <DateQuestion question={currentQuestion} formik={formik} />;
     case questionType.dropdown:
-      return (
-        <DropdownQuestion
-          question={currentQuestion}
-          formik={formik}
-          gradeRestrictions={gradeRestrictions}
-        />
-      );
+      return <DropdownQuestion question={currentQuestion} formik={formik} />;
     case questionType.radioList:
-      return (
-        <RadioQuestion
-          question={currentQuestion}
-          formik={formik}
-          genderRestrictions={genderRestrictions}
-        />
-      );
+      return <RadioQuestion question={currentQuestion} formik={formik} />;
     case questionType.checkBoxList:
       return <CheckBoxList question={currentQuestion} formik={formik} />;
     case questionType.textArea:
