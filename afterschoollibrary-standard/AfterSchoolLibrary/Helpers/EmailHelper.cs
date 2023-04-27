@@ -254,7 +254,7 @@ namespace AfterSchoolLibrary.Helpers
                 if (registrant.GetRegistrantActivity(participationObject, msgs).HasPaymentPlan(true, msgs))
                 {
                     if (isProviderCancelled)
-                        lastPara = "Additional payments remaining on your payment plan with " +
+                        lastPara = "Additional payments remaining on your payment plan " +
                                    participationObject?.Provider?.Name +
                                    " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='" +
                                    Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
@@ -2030,6 +2030,9 @@ namespace AfterSchoolLibrary.Helpers
             var isAfterSchool = refund.GetPayerAccount(msgs).IsAfterSchool;
             var activityName = refund.Description.Substring(0, refund.Description.LastIndexOf(' ')).TrimEnd();
 
+            if (providerAccountOwner.Phone.IsEmpty())
+                providerAccountOwner.Phone = providerAccount.Phone;
+            
             var model = new NameValueCollection
             {
                 {"ParentName", parentAccountOwner.FirstName},
@@ -2038,7 +2041,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityName", activityName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"ActivityContactEmail", providerAccountOwner.Email},
-                {"ActivityContactPhone", providerAccountOwner.Phone.IsNotEmpty() ? $"either by phone ({providerAccountOwner.Phone}) or": "by"},
+                {"ActivityContactPhone", providerAccountOwner.Phone.IsNotEmpty() ? 
+                    $"either by phone ({providerAccountOwner.Phone}) or": "by"},
                 {"ActivityContactName", providerAccountOwner.FirstName},
                 {"BillerAccountName", providerAccount.Name},
                 {"BillerAccountLink", providerAccount.HomePageUrl},
