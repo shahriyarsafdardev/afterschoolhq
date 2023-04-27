@@ -1421,7 +1421,8 @@ namespace AfterSchoolLibrary.Models
                             FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
-                                PayoutId IS NULL AND 
+                                PayoutId IS NOT NULL AND
+                                UsedStripeConnect != 0 AND
                                 IsDeleted = 0 AND 
                                 (
                                     (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  -- cc 2 days
