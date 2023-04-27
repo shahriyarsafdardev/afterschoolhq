@@ -2297,8 +2297,11 @@ namespace AfterSchool.Controllers
             SessionVariables.CurrentRegistrant = currentRegistrant;
             SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
-            return RedirectToAction("payment", new {id = registration.Uid});
+            if (!currentRegistrant.HasWithdrawn(participationObject, msgs)) return RedirectToAction("payment", new {id = registration.Uid});
             
+            ViewBag.ProviderEmail = participationObject.OwnerAccount.Email;
+            return View("AlreadyWithdrawn");
+
 
             //return RedirectToAction("thankyou", new {id = registration.Uid});
         }
