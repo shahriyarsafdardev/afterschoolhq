@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -56,7 +55,6 @@ const RegistrationSlice = createSlice({
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
       state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
       state.school = SchoolLocation || {};
-      state.noSchool = isEmpty(SchoolLocation) ? true : false;
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
