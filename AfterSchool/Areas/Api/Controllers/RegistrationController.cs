@@ -989,7 +989,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         isParent = currentUserRegistrant.IsParentOrGuardian,
-                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
+                        RegisterForNewChildUrl = participationObject.GetHomePageUrl(),
                         AmountPaid = registrantActivity?.GetAmountPaid(msgs),
                         ProviderEmail = participationObject.OwnerAccount.Email,
                         RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
