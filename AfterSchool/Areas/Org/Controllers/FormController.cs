@@ -226,13 +226,11 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var isAnswerDescriptionEnabled =Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                 if (text != null && text.Length > 400)
-                                {
-                                    amsgs.Add("Question should not exceed 400 characters!", MessageType.UserError);
-                                }
+                                amsgs.Add("Question should not exceed 400 characters", MessageType.UserError);
+                                
                                 if (desc != null && desc.Length > 4000)
-                                {
-                                    amsgs.Add("Description should not exceed 4,000 characters! ", MessageType.UserError);
-                                }
+                                amsgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
+                                
 
                                 // this extra conditions are to prevent null entry in db from refresh-post calls
                                 if (!question.IsLocked &&
@@ -645,14 +643,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 var description = Request.Params[$"new-description-{question}"];
 
                 if (text != null && text.Length > 400)
-                {
-                    msgs.Add("Question should not exceed 400 characters!", MessageType.UserError);
-                }
+                msgs.Add("Question should not exceed 400 characters", MessageType.UserError);
+                
                 if (description != null && description.Length > 4000)
-                {
-                    msgs.Add("Description should not exceed 4,000 characters! ", MessageType.UserError);
-                }
-
+                msgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
+                
                 var formQuestion = new FormQuestion
                 {
                     FormId = formId,

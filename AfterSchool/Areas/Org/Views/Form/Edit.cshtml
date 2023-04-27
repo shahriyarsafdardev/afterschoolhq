@@ -1361,7 +1361,6 @@
         var validated = true;
 
         $("#form1 input").each(function (index) {
-            console.log(this);
             var inputFieldValue = $(this).val();
             if (inputFieldValue.length > 400) {
                 $(this).css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Question should not exceed 400 characters').tooltip({ tooltipClass: 'tooltipclass' });
@@ -1373,7 +1372,6 @@
             }
         });
         $("#form1 textarea").each(function (index) {
-            console.log(this);
             var inputFieldValue = $(this).val();
             if (inputFieldValue.length > 4000) {
                 $(this).css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Description should not exceed 4000 characters').tooltip({ tooltipClass: 'tooltipclass' });
