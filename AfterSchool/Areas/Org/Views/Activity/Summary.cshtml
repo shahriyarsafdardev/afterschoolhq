@@ -152,6 +152,7 @@
                                 }
                             </div>
                             <div class="panel-body">
+                                <p>Registration payment options:</p>
                                 @if (participationObject.PostPayPlans.Any())
                                 {
                                     Html.RenderPartial("ParticipationObject/_TuitionAndPostPayPlans", new ParticipationObjectViewModel
@@ -229,8 +230,5 @@
             resize: true,
             barColors: ['#3d3c3c']
         });
-    });
-
-    
-
+    });    
 </script>

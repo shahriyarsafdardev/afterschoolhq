@@ -66,9 +66,10 @@ namespace AfterSchool.Models
             if (participationObject.Cost.HasValue)
             {
                 if (isCheckoutCost)
-                    return participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency();
+                    return $"<b>{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()}</b>";
 
-                return participationObject.Cost.ToCurrency();
+                return $"<b>{participationObject.Cost.ToCurrency()}</b> " +
+                       $"(you will receive <b>{(participationObject.Cost - participationObject.GetConvenienceFee()).ToCurrency()}</b>)";
             }
 
             return "Free";
