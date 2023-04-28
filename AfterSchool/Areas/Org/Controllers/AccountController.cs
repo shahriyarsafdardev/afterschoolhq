@@ -779,8 +779,16 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var link = Request.Params[$"link-text-{question.ID}"];
                                 var isActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                 var isRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
-                                var isAnswerDescriptionEnabled =
-                                    Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
+                                var isAnswerDescriptionEnabled =Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
+
+                                if (text != null && text.Length > 400)
+                                {
+                                    amsgs.Add("Question should not exceed 400 characters!", MessageType.UserError);
+                                }
+                                if (desc != null && desc.Length > 4000)
+                                {
+                                    amsgs.Add("Description should not exceed 4,000 characters! ", MessageType.UserError);
+                                }
 
                                 // this extra conditions are to prevent null entry in db from refresh-post calls
                                 if (!question.IsLocked &&
@@ -842,6 +850,9 @@ namespace AfterSchool.Areas.Org.Controllers
             if (questionGroup.IsNotEmpty())
                 currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
 
+            if (msgs.HasErrors() && questions.Count() == 0)
+                questionGroup.ID = 0;
+
             switch (cmd)
             {
                 case "prev":
@@ -866,6 +877,16 @@ namespace AfterSchool.Areas.Org.Controllers
             foreach (var question in questionsList)
             {
                 var text = Request.Params[$"new-text-{question}"];
+                var description = Request.Params[$"new-description-{question}"];
+
+                if (text != null && text.Length > 400)
+                {
+                    msgs.Add("Question should not exceed 400 characters!", MessageType.UserError);
+                }
+                if (description != null && description.Length > 4000)
+                {
+                    msgs.Add("Description should not exceed 4,000 characters! ", MessageType.UserError);
+                }
 
                 var formQuestion = new FormQuestion
                 {
@@ -882,7 +903,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     Text = text,
                     Options = Request.Params[$"new-options-text-{question}"],
                     Link = Request.Params[$"new-link-text-{question}"],
-                    Description = Request.Params[$"new-description-{question}"],
+                    Description = description,
                     IsActive = true,
                     IsDeleted = false,
                     IsRequired = Request.Params[$"new-required-{question}"].IsBoolean(),
