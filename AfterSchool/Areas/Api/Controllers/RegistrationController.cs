@@ -55,14 +55,18 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
+                
+                if(currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
-                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                
                 Registrant parentRegistrant = null;
                 Registration registration = null;
                 RegistrantActivity registrantActivity = null;
@@ -157,6 +161,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
+                        MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
+                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
+                        MinAge = participationObject.AgeStart,
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -354,9 +363,13 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
+                
+                if(currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
                 
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(accountName, msgs);
@@ -364,7 +377,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
+                
                 Registration registration = null;
 
                 var formQuestionDtoList = new List<FormQuestionDto>();
@@ -431,6 +444,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent,
+                        ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
                         IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
@@ -439,6 +453,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
+                        MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
+                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
+                        MinAge = participationObject.AgeStart,
+                        MaxAge = participationObject.AgeEnd,
+                        EnforcedGender = participationObject.GenderRestriction
                     }
                 };
                 
@@ -805,6 +824,40 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
             }
+        }
+
+        [HttpGet]
+        public ActionResult Exit(string uid)
+        {
+            var msgs = new SystemMessages();
+
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                var currentRegistrant = Registrant.LoadByUid(uid.ToGuid(), msgs);
+                
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+
+                if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
+                {
+                    var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(currentRegistrant.ID.Value, false, msgs).FirstOrDefault();
+                    msgs.AddRange(currentRegistrant.Delete());
+                    msgs.AddRange(registrantWebUser.Delete());
+                }
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            
         }
 
         [HttpPost]

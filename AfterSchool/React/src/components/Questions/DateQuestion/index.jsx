@@ -1,9 +1,9 @@
 import React, { useRef } from 'react';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import { Box, FormHelperText } from '@material-ui/core';
 import DayjsUtils from '@date-io/dayjs';
-import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import { Box, FormHelperText } from '@material-ui/core';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
 
 function DateQuestion({ question, formik }) {
@@ -24,6 +24,8 @@ function DateQuestion({ question, formik }) {
   };
 
   const handleError = () => {};
+  const today = new Date();
+  const datePickerProps = { maxDate: today };
 
   return (
     <>
@@ -32,7 +34,7 @@ function DateQuestion({ question, formik }) {
           <div className={classes.datePicker} ref={datePicker}>
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <KeyboardDatePicker
-                maxDate={new Date()}
+                {...datePickerProps}
                 InputProps={{ readOnly: true }}
                 autoFocus
                 variant="inline"

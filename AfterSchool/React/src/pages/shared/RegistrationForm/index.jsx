@@ -8,6 +8,7 @@ import useStyles from './styles';
 
 export default function RegistrationForm(props) {
   const classes = useStyles();
+
   const {
     Name,
     isFree,
@@ -15,10 +16,12 @@ export default function RegistrationForm(props) {
     loading,
     skipAble,
     totalGroups,
+    exitHandler,
     activeGroup,
     lastSection,
     handleSubmit,
     saveDisabled,
+    firstSection,
     handleSection,
     registrantType,
     saveButtonText,
@@ -36,7 +39,7 @@ export default function RegistrationForm(props) {
           <Loader />
         ) : (
           <Box className={outerWrapperClass}>
-            {isUpdating && (
+            {isUpdating ? (
               <Box className={classes.exitButtonWrapper}>
                 <Button
                   color="primary"
@@ -48,6 +51,20 @@ export default function RegistrationForm(props) {
                   Exit
                 </Button>
               </Box>
+            ) : (
+              firstSection && (
+                <Box className={classes.exitButtonWrapper}>
+                  <Button
+                    color="primary"
+                    variant="outlined"
+                    className={classes.backButton}
+                    onClick={exitHandler}
+                    data-testid={`Exit-${Name}`}
+                  >
+                    Exit
+                  </Button>
+                </Box>
+              )
             )}
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>

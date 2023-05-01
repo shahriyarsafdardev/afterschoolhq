@@ -1,14 +1,14 @@
 import React from 'react';
 import { Box, FormHelperText, RadioGroup } from '@material-ui/core';
+
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import RadioButton from 'components/RadioButton';
-
 import useStyles from './styles';
 
 function RadioQuestion({ question, formik }) {
   const classes = useStyles();
-  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   const { touched, values, errors, setFieldValue } = formik;
+  const { ID, Options, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
   const options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
     return { key, value };

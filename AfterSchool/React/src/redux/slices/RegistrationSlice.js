@@ -1,6 +1,7 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
+import utils from 'utils';
 import schoolField from 'constants/schoolField';
 import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
@@ -151,7 +152,15 @@ export const useRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded };
+  const exit = async (uid, activityUrl) => {
+    await RegistrationRepository.exit(uid).then(({ msgs }) => {
+      dispatch(setMsgs(msgs));
+      const { redirect } = utils;
+      if (!msgs.length) redirect(activityUrl);
+    });
+  };
+
+  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded, exit };
 };
 
 export default RegistrationSlice;

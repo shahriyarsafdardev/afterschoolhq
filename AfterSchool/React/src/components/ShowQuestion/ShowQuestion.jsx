@@ -17,7 +17,7 @@ import {
   ApiTextField
 } from 'components';
 
-function ShowQuestion({ currentQuestion, formik, currentQuestions, isUpdating }) {
+function ShowQuestion({ formik, isUpdating, currentQuestion, currentQuestions }) {
   const { QuestionTypeId } = currentQuestion;
 
   switch (QuestionTypeId) {

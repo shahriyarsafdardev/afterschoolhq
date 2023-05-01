@@ -15,6 +15,7 @@ export default function Registration({ newChild = false }) {
   const { paymentScreenPath, thankyouUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
+    exit,
     msgs,
     school,
     loading,
@@ -26,7 +27,19 @@ export default function Registration({ newChild = false }) {
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
-    activity: { IsFree, RegistrantType }
+    activity: {
+      IsFree,
+      RegistrantType,
+      IsAgeRestricted,
+      MaxAge,
+      MinAge,
+      IsGradeRestricted,
+      MaxGrade,
+      MinGrade,
+      IsGenderRestricted,
+      EnforcedGender,
+      ActivityUrl
+    }
   } = useRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -79,6 +92,16 @@ export default function Registration({ newChild = false }) {
     else redirect(paymentScreenPath(registrationId));
   };
 
+  const gradeRestrictions = {
+    minGrade: MinGrade,
+    maxGrade: MaxGrade,
+    isGradeRestricted: IsGradeRestricted
+  };
+  const genderRestrictions = {
+    enforcedGender: EnforcedGender,
+    isGenderRestricted: IsGenderRestricted
+  };
+  const ageRestrictions = { isAgeRestricted: IsAgeRestricted, maxAge: MaxAge, minAge: MinAge };
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -86,7 +109,7 @@ export default function Registration({ newChild = false }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values),
+    validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty || secondLastSection) {
@@ -157,6 +180,10 @@ export default function Registration({ newChild = false }) {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const exitHandler = () => {
+    exit(regUid, ActivityUrl);
+  };
+
   return (
     <RegistrationForm
       loading={loading}
@@ -173,6 +200,8 @@ export default function Registration({ newChild = false }) {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
+      firstSection={activeGroup === 0}
+      exitHandler={exitHandler}
     ></RegistrationForm>
   );
 }

@@ -5,6 +5,7 @@ export default {
   SchoolAPI: 'Api/Registration/CreateOrUpdateFromGoogle',
   updateProfileFormDataAPI: 'Api/Registration/UpdateProfile',
   ThankYouAPI: id => `Api/Registration/ThankYou/${id}`,
+  exitRegistrationAPI: uid => `Api/Registration/Exit?uid=${uid}`,
   getProfileFormDataAPI: id => `Api/Registration/GetRegistrantForm/${id}`,
   getFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
@@ -14,6 +15,7 @@ export default {
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
   submitVolunteerFormDataAPI: 'Api/VolunteerRegistration/AddUpdateAnswers',
   updateVolunteerProfileFormDataAPI: 'Api/VolunteerRegistration/UpdateProfile',
+  exitVolunteerRegistrationAPI: uid => `Api/VolunteerRegistration/Exit?uid=${uid}`,
   VolunteerRegistrationThankYouAPI: id => `Api/VolunteerRegistration/ThankYou/${id}`,
   getVolunteerProfileFormDataAPI: id => `Api/VolunteerRegistration/GetRegistrantForm/${id}`,
   volunteerThankYouUrl: registrationId =>

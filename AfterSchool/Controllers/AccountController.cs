@@ -178,6 +178,9 @@ namespace AfterSchool.Controllers
 
                 //var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentRegistrant(msgs);
                 var masterRegistrant = SessionVariables.CurrentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+
+                if (masterRegistrant.IsEmpty())
+                    return null;
                 
                 if (masterRegistrant.IsNotEmpty())
                     registrantAccount = masterRegistrant.GetAccount(msgs);
@@ -592,7 +595,7 @@ namespace AfterSchool.Controllers
                                 RegistrationCommon.AddOrUpdateStandardAnswers(qvms, registrant, user, amsgs, adc);
 
                             SessionVariables.CurrentRegistrant = registrant;
-
+                            
                             if (registrant.IsParentOrGuardian)
                             {
                                 studentReg = account.CreateParentOrStudentRegistrant(

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Select, FormControl, FormHelperText, MenuItem } from '@material-ui/core';
-import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 
+import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import useStyles from './styles';
 
 function DropdownQuestion({ question, formik }) {

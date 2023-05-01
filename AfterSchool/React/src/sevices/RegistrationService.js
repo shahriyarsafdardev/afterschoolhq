@@ -1,5 +1,7 @@
+import { calculateAge } from './helper';
 import Validations from 'constants/regex';
 import questionType from 'constants/questionType';
+import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
 
 export default class RegistrationService {
   constructor(questions = [], currentQuestions = [], answeredQuestions = []) {
@@ -26,7 +28,7 @@ export default class RegistrationService {
     return initialvalues;
   };
 
-  validator = values => {
+  validator = (values, genderRestrictions = {}, ageRestrictions = {}, gradeRestrictions = {}) => {
     const { validateEmail, validatePhone } = Validations;
     const errors = {};
     const addToErrors = (ID, msg) => {
@@ -34,8 +36,13 @@ export default class RegistrationService {
     };
 
     this.currentQuestions?.forEach(question => {
-      const { ID, IsRequired, QuestionTypeId, Text } = question;
+      const { ID, IsRequired, QuestionTypeId, QuestionDataTypeId, Text, Options } = question;
       const value = values[ID];
+      const restrictionParams = [QuestionDataTypeId, value, addToErrors, ID];
+
+      this.checkGenderRestriction(...restrictionParams, genderRestrictions);
+      this.checkAgeRestriction(...restrictionParams, ageRestrictions);
+      this.checkGradeRestriction(...restrictionParams, gradeRestrictions, Options);
 
       if (IsRequired && QuestionTypeId === questionType.email && value) {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid Email address');
@@ -137,4 +144,58 @@ export default class RegistrationService {
     };
   };
   questionObjectFindById = id => this.currentQuestions.find(q => q.ID === Number(id)) || {};
+
+  checkAgeRestriction(questionDataTypeId, value, addToErrors, id, ageRestrictions) {
+    const { isAgeRestricted = false, minAge, maxAge } = ageRestrictions;
+
+    if (!isAgeRestricted || questionDataTypeId !== restrictedQuestionsDataTypeIds.dateOfBirth) {
+      return;
+    }
+
+    const age = calculateAge(value);
+    const error = `Age should be between ${minAge} and ${maxAge}`;
+
+    if (age < minAge) {
+      addToErrors(id, error);
+    } else if (age > maxAge) {
+      addToErrors(id, error);
+    }
+  }
+
+  checkGradeRestriction(questionDataTypeId, value, addToErrors, id, gradeRestrictions, options) {
+    const { maxGrade, minGrade, isGradeRestricted = false } = gradeRestrictions;
+
+    if (questionDataTypeId !== restrictedQuestionsDataTypeIds.grade || !isGradeRestricted) {
+      return;
+    }
+
+    const grade = value ? JSON.parse(value)[0].value : '';
+    const optionGrades = options.split(',').map(option => gradeIds[option]);
+    const validOptions = optionGrades.filter(
+      optionGrade => optionGrade >= gradeIds[minGrade] && optionGrade <= gradeIds[maxGrade]
+    );
+
+    if (grade && grade !== 'null' && !validOptions.includes(gradeIds[grade])) {
+      addToErrors(id, `Grade should be between ${minGrade} and ${maxGrade}`);
+    }
+  }
+
+  checkGenderRestriction(questionDataTypeId, value, addToErrors, id, genderRestrictions) {
+    const { enforcedGender = 0, isGenderRestricted = false } = genderRestrictions;
+
+    if (
+      questionDataTypeId !== restrictedQuestionsDataTypeIds.gender ||
+      !isGenderRestricted ||
+      enforcedGender === 0
+    ) {
+      return;
+    }
+
+    const gender = value ? JSON.parse(value)[0].value : '';
+    const validGender = enforcedGender === 1 ? 'Male' : 'Female';
+
+    if (gender !== validGender) {
+      addToErrors(id, `Gender should be ${validGender} only`);
+    }
+  }
 }

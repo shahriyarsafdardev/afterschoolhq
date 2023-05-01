@@ -1,5 +1,6 @@
 import utils from 'utils';
 import Routes from 'routes';
+import { restrictedQuestionsDataTypeIds } from 'constants';
 import RegistrationService from 'sevices/RegistrationService';
 
 export const responseMapper = (formData, registrantType, ...restrictions) => {
@@ -9,7 +10,6 @@ export const responseMapper = (formData, registrantType, ...restrictions) => {
     IsGenderRestricted = false
   ] = restrictions;
   const { formQuestion, formQuestionGroup, formQuestionAnswer } = formData;
-  const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
   const filteredQs = formQuestion.filter(({ IsDeleted, IsActive, QuestionDataTypeId }) => {
     const isRestrictedEnforcedQuestion =
       (IsAgeRestricted && QuestionDataTypeId === restrictedQuestionsDataTypeIds.dateOfBirth) ||

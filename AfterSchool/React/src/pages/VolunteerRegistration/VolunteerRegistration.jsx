@@ -16,6 +16,7 @@ export default function VolunteerRegistration() {
   const { volunteerThankYouUrl } = apiRoutes;
   const { accountName, activityName, regUid } = useParams();
   const {
+    exit,
     msgs = [],
     loading,
     questions,
@@ -25,7 +26,7 @@ export default function VolunteerRegistration() {
     questionsGroups,
     answeredQuestions,
     submitFormSectionData,
-    activity: { IsFree, RegistrantType }
+    activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender, ActivityUrl }
   } = useVolunteerRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -78,6 +79,10 @@ export default function VolunteerRegistration() {
     navigate(thankyouUrl);
   };
 
+  const genderRestrictions = {
+    enforcedGender: EnforcedGender,
+    isGenderRestricted: IsGenderRestricted
+  };
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -85,7 +90,7 @@ export default function VolunteerRegistration() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values),
+    validate: values => validator(values, genderRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       if (!isEmpty || dirty || secondLastSection) {
@@ -142,6 +147,10 @@ export default function VolunteerRegistration() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const exitHandler = () => {
+    exit(regUid, ActivityUrl);
+  };
+
   return (
     <RegistrationForm
       loading={loading}
@@ -158,6 +167,8 @@ export default function VolunteerRegistration() {
       skipAble={skipAble}
       registrantType={RegistrantType}
       isFree={IsFree}
+      firstSection={activeGroup === 0}
+      exitHandler={exitHandler}
     ></RegistrationForm>
   );
 }
