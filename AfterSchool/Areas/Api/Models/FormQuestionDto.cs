@@ -1,4 +1,5 @@
 using AfterSchoolLibrary.Models;
+using System.Collections.Generic;
 
 namespace AfterSchool.Areas.Api.Models
 {
@@ -18,7 +19,7 @@ namespace AfterSchool.Areas.Api.Models
         public QuestionDataType QuestionDataTypeId { get; set; }
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
 
-        public static FormQuestionDto byFormQuestion(FormQuestion question)
+        public static FormQuestionDto GetByFormQuestion(FormQuestion question)
         {
             return new FormQuestionDto()
             {
@@ -36,6 +37,14 @@ namespace AfterSchool.Areas.Api.Models
                 QuestionDataTypeId = question.QuestionDataTypeId,
                 FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
             };
+        }
+
+        public static List<FormQuestionDto> GetByFormQuestionList(List<FormQuestion> questionList)
+        {
+            var questionGroupDtoList = new List<FormQuestionDto>();
+            foreach (var question in questionList)
+                questionGroupDtoList.Add(GetByFormQuestion(question));
+            return questionGroupDtoList;
         }
     }
 }
