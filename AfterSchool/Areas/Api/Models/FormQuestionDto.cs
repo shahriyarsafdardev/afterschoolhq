@@ -1,3 +1,5 @@
+using AfterSchoolLibrary.Models;
+
 namespace AfterSchool.Areas.Api.Models
 {
     public class FormQuestionDto
@@ -15,5 +17,25 @@ namespace AfterSchool.Areas.Api.Models
         public QuestionType QuestionTypeId { get; set; }
         public QuestionDataType QuestionDataTypeId { get; set; }
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
+
+        public static FormQuestionDto byFormQuestion(FormQuestion question)
+        {
+            return new FormQuestionDto()
+            {
+                ID = question.ID ?? 0,
+                FormQuestionGroupId = question.FormQuestionGroupId,
+                Text = question.Text,
+                Description = question.Description,
+                GroupTitle = question.FormQuestionGroupName,
+                Options = question.Options,
+                IsRequired = question.IsRequired,
+                DisplayOrder = question.DisplayOrder,
+                IsActive = question.IsActive,
+                IsDeleted = question.IsDeleted,
+                QuestionTypeId = question.QuestionTypeId,
+                QuestionDataTypeId = question.QuestionDataTypeId,
+                FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+            };
+        }
     }
 }
