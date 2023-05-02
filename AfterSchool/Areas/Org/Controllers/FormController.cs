@@ -110,6 +110,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return View("EditNew", form);
             return View(form);
         }
 
