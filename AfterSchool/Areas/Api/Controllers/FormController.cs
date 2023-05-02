@@ -16,7 +16,7 @@ namespace AfterSchool.Areas.Api.Controllers
     public class FormController : Controller
     {
         [HttpGet]
-        public ActionResult getFormData(string formId)
+        public ActionResult GetFormData(string formId)
         {
             if (formId.IsEmpty())
                 return HttpNotFound();
@@ -31,16 +31,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid Form Id");
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
-                var formQuestionGroups = new List<FormQuestionGroupDto>();
-                var formQuestions = new List<FormQuestionDto>();
-                foreach (var questionGroup in questionGroups)
-                {
-                    formQuestionGroups.Add(FormQuestionGroupDto.byQuestionGroup(questionGroup));
-                }
-                foreach (var question in questions)
-                {
-                    formQuestions.Add(FormQuestionDto.byFormQuestion(question));
-                }
+                var formQuestionGroups = FormQuestionGroupDto.GetByQuestionGroupList(questionGroups);
+                var formQuestions = FormQuestionDto.GetByFormQuestionList(questions);
                 var response = new
                 {
                     questions = formQuestions,
