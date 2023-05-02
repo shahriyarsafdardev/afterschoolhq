@@ -591,6 +591,8 @@
     function disablePostPayPlan(postPayPlan)
     {
         $(postPayPlan).prop('disabled',true);
+        $(postPayPlan).prop('checked',false);
+        setPostPayPlanSection();
     }
 
     function toggleSubscriptionPeriodWeek() {
