@@ -1,4 +1,4 @@
-﻿@model WebUser
+@model WebUser
 @{
     var account = (Account)ViewBag.Account;
     ViewBag.Title = account.Name;
@@ -7,6 +7,7 @@
 }
 
 @{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
+<script src="~/Assets/js/password-checker.js"></script>
 
 <div class="main-content">
 
@@ -51,7 +52,8 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label">Password</label>
                     <div class="col-sm-6">
-                        <input type="password" class="form-control" id="password1" name="password1" value="" onfocus="this.select()" />
+                        <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" onfocus="this.select()" />
+                        @Html.Partial("_PasswordStrengthBarLight")
                     </div>
                 </div>
                 <div class="form-group">
@@ -61,8 +63,8 @@
                     </div>
                 </div>
 
-                @if(Model.IsRegistered && SessionVariables.CurrentUser.ID != Model.ID)
-                { 
+                @if (Model.IsRegistered && SessionVariables.CurrentUser.ID != Model.ID)
+                {
                     <div class="form-group">
                         <label class="col-sm-3 control-label">Is Active</label>
                         <div class="col-sm-6">
@@ -81,7 +83,7 @@
                 {
                     <div class="row">
                         <div class="col-sm-6 col-sm-offset-3 margin-v-10">
-                            <hr/>
+                            <hr />
                             <h4>Login With Clever</h4>
 
                             @if (UILabel.IsCurrentUserCleverIntegrated())
@@ -91,20 +93,20 @@
                             }
                             else
                             {
-                                <br/>
+                                <br />
                                 <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLink">
-                                    <img src="~/Assets/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img"/>
+                                    <img src="~/Assets/img/clever-login.png" style="width: 160px; height: 39px;" class="clever-login-img" />
                                 </a>
                             }
                         </div>
                     </div>
                 }
-                
+
                 <br />
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-6 text-center">
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button id="form-submit" type="submit" class="btn btn-primary">Update</button>
                         <button type="reset" class="btn btn-default">Discard Changes</button>
                     </div>
                 </div>
