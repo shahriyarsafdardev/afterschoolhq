@@ -585,6 +585,8 @@
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
+    <Compile Include="Areas\Api\Controllers\AuthController.cs" />
+    <Compile Include="Areas\Api\Controllers\FormController.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
@@ -2583,6 +2585,8 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
+    <Folder Include="Areas\Api\Views\Auth\" />
+    <Folder Include="Areas\Api\Views\Form\" />
     <Folder Include="Areas\Org\Views\Period\" />
     <Folder Include="Areas\Org\Views\Registrant\" />
     <Folder Include="Areas\WebHooks\Models\" />
