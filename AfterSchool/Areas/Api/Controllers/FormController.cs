@@ -23,9 +23,12 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                if (currentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
                 var form = currentAccount.GetForm(formId.ToInteger(), msgs);
+                if (form.IsEmpty())
+                    throw new Exception("Invalid Form Id");
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
                 var formQuestionGroups = new List<FormQuestionGroupDto>();
