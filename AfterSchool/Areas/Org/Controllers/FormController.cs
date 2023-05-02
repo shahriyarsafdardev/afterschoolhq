@@ -68,6 +68,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("formedit", "account", new { id, qg });
 
+
+
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
@@ -107,6 +109,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return View("EditNew", form);
             return View(form);
         }
 
