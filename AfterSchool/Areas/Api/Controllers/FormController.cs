@@ -24,20 +24,26 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentAccount = SessionVariables.CurrentAccount;
+
                 if (currentAccount.IsEmpty())
-                    throw new Exception("Unauthorized Account");
-                var form = currentAccount.GetForm(formId.ToInteger(), msgs);
+                    throw new Exception("Unauthorized Account"); 
+
+                var form = currentAccount.GetForm(formId.ToInteger(), msgs); 
+
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form Id");
+
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
                 var formQuestionGroups = FormQuestionGroupDto.GetByQuestionGroupList(questionGroups);
                 var formQuestions = FormQuestionDto.GetByFormQuestionList(questions);
+
                 var response = new
                 {
                     questions = formQuestions,
                     questionGroups = formQuestionGroups
                 };
+
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
@@ -45,6 +51,7 @@ namespace AfterSchool.Areas.Api.Controllers
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
+
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
