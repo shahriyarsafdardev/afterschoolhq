@@ -1422,7 +1422,7 @@ namespace AfterSchoolLibrary.Models
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
                                 PayoutId IS NULL AND
-                                UsedStripeConnect != 0 AND
+                                UsedStripeConnect = 1 AND
                                 IsDeleted = 0 AND 
                                 (
                                     (PaymentTypeId = 1 and GETDATE() >= DATEADD(day, 2, CreateDate)) OR  -- cc 2 days
