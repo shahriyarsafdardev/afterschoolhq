@@ -9,7 +9,7 @@
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
     var paymentDisabled = "";
     var hasSchedule = (bool) ViewData["hasSchedule"];
-    var hasActivityIsOngoing = Model.IsContinuousEnrollment || (hasSchedule && Model.GetSchedule().IsOngoing);
+    var IsContinuousEnrollOrOngoing = Model.IsContinuousEnrollment || (hasSchedule && Model.GetSchedule().IsOngoing);
     
     if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
     {
@@ -315,7 +315,7 @@
                             {"checkboxid", "haspostpayplan"},
                         });
                     
-                    if (hasActivityIsOngoing)
+                    if (IsContinuousEnrollOrOngoing)
                     {
                         <p class="text-muted">
                             <em>
@@ -425,10 +425,10 @@
         setPaymentPlanSection();
         $(document).ready(function (){
             let isPublished = @Model.IsPublished.ToString().ToLower();
-            let isActivityOngoing = @hasActivityIsOngoing.ToString().ToLower();
+            let isActivityContinuousEnrollOrOngoing = @IsContinuousEnrollOrOngoing.ToString().ToLower();
             if (!isPublished)
                 disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
-            if (isActivityOngoing)
+            if (isActivityContinuousEnrollOrOngoing)
                 disablePostPayPlan($('#haspostpayplan'));
             
         });
