@@ -1421,7 +1421,7 @@ namespace AfterSchoolLibrary.Models
                             FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
-                                PayoutId IS NOT NULL AND
+                                PayoutId IS NULL AND
                                 UsedStripeConnect != 0 AND
                                 IsDeleted = 0 AND 
                                 (
