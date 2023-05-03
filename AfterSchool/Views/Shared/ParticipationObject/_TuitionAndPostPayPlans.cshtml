@@ -1,4 +1,4 @@
-@model ParticipationObjectViewModel
+﻿@model ParticipationObjectViewModel
 
 @{
     var billingPeriod = Model.ParticipationObject.PostPayPlans.FirstOrDefault()?.BillingPeriodTypeId.ToString().ToLower();
@@ -17,7 +17,7 @@
 <p>
     @if (!Model.ParticipationObject.IsRegistrationFree)
     {
-        <span>Cost to register is @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost) plus</span>
+        <span>Cost to register is @Html.Raw(ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost)) plus</span>
     }
 
     @if (Model.ParticipationObject.PostPayPlans.Any())
