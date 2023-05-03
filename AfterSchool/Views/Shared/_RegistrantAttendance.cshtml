@@ -9,7 +9,13 @@
     var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
     var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
 }
-
+<style media="all and (max-width: 479px)">
+    .attendance-table {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding: 0 !important;
+    }
+</style>
 <form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
 
     <div class="panel panel-default">
@@ -54,7 +60,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-10 col-md-offset-2">
+            <div class="col-md-10 col-md-offset-2 attendance-table">
 
                 <div class="table-responsive">
                     <table class="table table-striped">
