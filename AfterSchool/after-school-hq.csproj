@@ -2579,7 +2579,6 @@
     <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
     <Content Include="reactapp\Index.html" />
     <Content Include="React\**" CopyToPublishDirectory="PreserveNewest" Exclude="React\node_modules\**" />
-    <Content Include="Views\Shared\_PartialPage1.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBar.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBarLight.cshtml" />
   </ItemGroup>
