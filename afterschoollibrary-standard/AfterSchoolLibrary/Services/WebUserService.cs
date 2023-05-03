@@ -278,6 +278,11 @@ namespace AfterSchoolLibrary.Services
             return EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
         }
 
+        public static SystemMessages SendMultipartAuth(this WebUser user, string authCode, bool isAfterSchool = true)
+        {
+            return EmailHelper.SendAuthEmail(user, authCode, isAfterSchool);
+        }
+
         public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool isAfterSchool = true)
         {
             return EmailHelper.SendWelcomePurchase(userFirstName, userEmail, isAfterSchool);

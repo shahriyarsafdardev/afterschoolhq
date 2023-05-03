@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Helpers;
@@ -8,6 +10,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+//using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
@@ -108,6 +111,15 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                if(FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)))
+                {
+                    Logout(null);
+                    msgs.AddRange(HandleMultiPartAuth(user));
+                    string uid = user.Uid.ToString();
+                    msgs.Add("Authetication code successfully sent to you email.", MessageType.Success);
+                    return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember });
+                }
+
                 var currentAccount = SessionVariables.CurrentAccount;
 
                 // select account
@@ -129,8 +141,105 @@ namespace AfterSchool.Controllers
 
                 return LoginRedirect(msgs: msgs);
             }
-
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember)
+        {
+            var msgs = new SystemMessages();
+            ViewBag.Messages = msgs;
+            ViewBag.uid = uid;
+            ViewBag.returnurl = returnurl;
+            ViewBag.invite = invite;
+            ViewBag.remember = remember;
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult MultiPartAuth(string uid, string authcode, string returnurl, string invite, string remember, bool isJson = false, string source = null)
+        {
+            WebUser user = WebUser.LoadByUid(uid.ToGuid());
+            var msgs = new SystemMessages();
+
+            if (authcode.IsEmpty())
+                msgs.Add("Authentication code is required for login", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                MultipartAuth multipartAuth = MultipartAuth.LoadByWebUser(user.ID);
+
+                if(multipartAuth != null)
+                {
+                    if(multipartAuth.ExpirationDate <= DateTime.UtcNow)
+                    {
+                        msgs.Add("Authentication code is expired, kindly press resend code to get code again", MessageType.UserError);
+                    }
+                    else if (multipartAuth.Code != authcode)
+                    {
+                        msgs.Add("Authentication code did not match", MessageType.UserError);
+                    }
+                    else
+                    {
+                        List<MultipartAuth> UserCodes = MultipartAuth.LoadListByWebUser(user.ID);
+                        if (UserCodes.Count > 1)
+                        {
+                            UserCodes = UserCodes.OrderByDescending(x => x.ID).ToList();
+                            for (int i = 1; i < UserCodes.Count; i++)
+                            {
+                                msgs.AddRange(UserCodes[i].Delete());
+                            }
+                        }
+                        if(isJson)
+                        {
+                            LoadSessionInfo(user, null, remember.ToBoolean(), source, msgs);
+                            return Json(new { status = "ok" }, JsonRequestBehavior.DenyGet);
+                        }
+                        else
+                            LoadSessionInfo(user, null, remember.IsBoolean(), msgs);
+                            
+
+                        var currentAccount = SessionVariables.CurrentAccount;
+
+                        if (currentAccount.IsEmpty())
+                            return RedirectToAction("select", "login", new { returnurl, invite });
+
+                        HandleInvite(invite, currentAccount, user, msgs);
+
+                        if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
+                            SessionVariables.WebSession.LogActivity(
+                                account: currentAccount,
+                                actor: user,
+                                actionType: WebSessionActionType.LoggedIn
+                            );
+
+                        if (returnurl.IsNotEmpty())
+                            return HandleRedirectAfterLogin(returnurl, msgs);
+
+                        return LoginRedirect(msgs: msgs);
+                    }
+                }
+            }
+            ViewBag.uid = uid;
+            ViewBag.returnurl = returnurl;
+            ViewBag.invite = invite;
+            ViewBag.remember = remember;
+            ViewBag.Messages = msgs;
+            if (isJson)
+            {
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult ResendVerificationCode(string uid, string returnurl, string invite, string remember)
+        {
+            WebUser user = WebUser.LoadByUid(uid.ToGuid());
+            var msgs = new SystemMessages();
+
+            msgs.AddRange(HandleMultiPartAuth(user));
+            return Json(new { success = true });
         }
 
         [HttpGet]
@@ -349,10 +458,10 @@ namespace AfterSchool.Controllers
             if (password.IsEmpty())
                 msgs.Add("Password is required", MessageType.UserError);
 
+            WebUser user = null;
+
             if (msgs.HasNoErrors())
             {
-                WebUser user = null;
-
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                     user = WebUserService.LoginByEmail(username, password);
                 else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
@@ -367,7 +476,17 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return Json(new {status = "ok", isNewParentAccount}, JsonRequestBehavior.DenyGet);
+            {
+                if (FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)))
+                {
+                    Logout(null);
+                    msgs.AddRange(HandleMultiPartAuth(user));
+                    string uid = user.Uid.ToString();
+                    var isAdminAccount = true;
+                    return Json(new { status = "ok", isNewParentAccount, isAdminAccount, uid }, JsonRequestBehavior.DenyGet);
+                }
+                return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
+            }
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.DenyGet);
         }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
@@ -7,6 +9,8 @@ using System.Web.Routing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
+using Hangfire;
 
 namespace AfterSchool.Models
 {
@@ -137,7 +141,7 @@ namespace AfterSchool.Models
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
+                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
 
                     case AccountType.SchoolDistrict:
                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "district"});
@@ -275,6 +279,37 @@ namespace AfterSchool.Models
                 return Redirect(returnUrl);
 
             return RedirectToAction("index", "Login", new {returnurl = returnUrl, area = ""});
+        }
+
+        internal SystemMessages HandleMultiPartAuth(WebUser user)
+        {
+            var msgs = new SystemMessages();
+            var multipartAuth = new MultipartAuth();
+
+            var rBytes = new byte[24];
+            using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
+            var result = Convert.ToBase64String(rBytes);
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    multipartAuth.Code = result;
+                    multipartAuth.WebUserId = user.ID;
+                    multipartAuth.ExpirationDate = DateTime.UtcNow.AddSeconds(30);
+                    multipartAuth.CreateDate = DateTime.UtcNow;
+                    multipartAuth.CreatedBy = user.ID;
+
+                    amsgs.AddRange(multipartAuth.Save(adc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user, result, true));
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+            );
+            return msgs;
         }
 
         internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
