@@ -2096,6 +2096,8 @@
     <Content Include="Views\Shared\Registration\_BrowseAllActivities.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />
     <Content Include="Views\Shared\Registration\_ParticipationObjectSection.cshtml" />
+    <Content Include="Views\Shared\Registration\_PasswordStrengthBarLight.cshtml" />
+    <Content Include="Views\Shared\Registration\_PasswordStrengthBar.cshtml"/>
     <Content Include="Views\Shared\_VolunteerRegistrantsForSpecificStatus.cshtml" />
     <Content Include="Views\Shared\_CopyActivityModal.cshtml" />
     <Content Include="Views\Shared\_Users.cshtml" />
@@ -2579,6 +2581,7 @@
     <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
     <Content Include="reactapp\Index.html" />
     <Content Include="React\**" CopyToPublishDirectory="PreserveNewest" Exclude="React\node_modules\**" />
+    <Content Include="Views\Shared\_PartialPage1.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
