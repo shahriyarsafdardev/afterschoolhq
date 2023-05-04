@@ -102,6 +102,7 @@ namespace AfterSchoolLibrary.Models
             AssignedTag.Create(dc);
             VolunteerApproval.Create(dc);
             VolunteerTask.Create(dc);
+            FormQuestionSettings.Create(dc);
 
             return msgs;
         }
@@ -196,6 +197,7 @@ namespace AfterSchoolLibrary.Models
             AssignedTag.Alter(dc);
             VolunteerApproval.Alter(dc);
             VolunteerTask.Alter(dc);
+            FormQuestionSettings.Alter(dc);
 
             return msgs;
         }

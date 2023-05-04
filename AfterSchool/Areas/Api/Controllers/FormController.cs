@@ -4,18 +4,11 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Clever.Models;
-using Microsoft.AspNet.SignalR.Hubs;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Windows.Forms;
-using System.Windows.Interop;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -30,13 +23,14 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                var currentAccount = SessionVariables.CurrentAccount;
-                if (currentAccount.IsEmpty())
-                    throw new Exception("Unauthorized Account");
+                //var currentAccount = SessionVariables.CurrentAccount;
+                //if (currentAccount.IsEmpty())
+                //    throw new Exception("Unauthorized Account");
 
-                var form = currentAccount.GetForm(formId, msgs);
-                //var form = AfterSchoolLibrary.Models.Form.Load(
-                //    criterias: new Hashtable{ {"ID", formId} }).FirstOrDefault();
+                //var form = currentAccount.GetForm(formId, msgs);
+                var form = AfterSchoolLibrary.Models.Form.Load(
+                    criterias: new Hashtable { { "ID", formId } }
+                    ).First();
 
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form Id");
@@ -63,6 +57,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
+
             }
             catch (Exception ex)
             {
@@ -71,6 +66,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
+
             }
         }
         [HttpGet]
@@ -83,15 +79,15 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (formId.IsEmpty())
                     throw new Exception("Invalid Form Id");
 
-                var currentAccount = SessionVariables.CurrentAccount;
+                //var currentAccount = SessionVariables.CurrentAccount;
 
-                if (currentAccount.IsEmpty())
-                    throw new Exception("Unauthorized Account");
+                //if (currentAccount.IsEmpty())
+                //    throw new Exception("Unauthorized Account");
 
-                var form = currentAccount.GetForm(formId, msgs);
-                //var form = AfterSchoolLibrary.Models.Form.Load(
-                //    criterias: new Hashtable { { "ID", formId } }
-                //    ).First();
+                //var form = currentAccount.GetForm(formId, msgs);
+                var form = AfterSchoolLibrary.Models.Form.Load(
+                    criterias: new Hashtable { { "ID", formId } }
+                    ).First();
 
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form Id");
@@ -121,14 +117,17 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
+
             }
             catch (Exception ex)
             {
+
                 msgs.Add(ex.Message, MessageType.ApiError);
 
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
+
             }
         }
 
@@ -169,10 +168,13 @@ namespace AfterSchool.Areas.Api.Controllers
                         },
                         msgs: amsgs,
                         dc: adc);
+
                     FormQuestionGroup currQuestionGroup;
                     List<FormQuestion> prevQuestions;
+
                     if (!questionGroupExists)
                     {
+
                         currQuestionGroup = new FormQuestionGroup()
                         {
                             CreateDate = DateTime.UtcNow,
@@ -187,11 +189,14 @@ namespace AfterSchool.Areas.Api.Controllers
                             IsDeleted = false,
                             IsActive = true,
                         };
+
                         amsgs.AddRange(currQuestionGroup.Save(adc));
                         prevQuestions = new List<FormQuestion>();
+
                     }
                     else
                     {
+
                         currQuestionGroup = FormQuestionGroup
                                 .Load(criterias: new Hashtable{
                                     {"Name", formQuestionGroup.Name},
@@ -212,6 +217,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         formQuestion.ForEach(newQuestion =>
                         {
                             var prevQuestion = prevQuestions.Where(question => question.ID == newQuestion.ID).First();
+
                             if (prevQuestion.IsNotEmpty() && !prevQuestion.IsLocked &&
                                     (!prevQuestion.IsActive.Equals(newQuestion.IsActive) ||
                                     prevQuestion.IsRequired.Equals(newQuestion.IsRequired) ||
@@ -224,7 +230,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             }
                             else
                             {
-                                var newFormQuestion = new FormQuestion
+
+                                var newFormQuestion = new FormQuestion()
                                 {
                                     FormId = formId,
                                     CreateDate = DateTime.UtcNow,
@@ -247,6 +254,28 @@ namespace AfterSchool.Areas.Api.Controllers
                                 };
                                 msgs.AddRange(newFormQuestion.Save(adc));
                             }
+
+                            var prevSettingsList = FormQuestionSettings.LoadByQuestionIds(formId, msgs);
+
+                            if(prevSettingsList.IsNotEmpty())
+                                prevSettingsList.ForEach(setting=>msgs.AddRange(setting.Delete(adc)));
+
+                            newQuestion.questionSettings.ForEach(setting =>
+                            {
+                                var questionSetting = new FormQuestionSettings()
+                                {
+                                    QuestionId = newQuestion.ID,
+                                    Audience = setting.audience,
+                                    ShowFor = setting.showFor,
+                                    RequiredFor = setting.requiredFor,
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    LastModifiedBy = currentUser.ID,
+                                };
+                                msgs.AddRange(questionSetting.Save(adc));
+                            });
+
                         });
                     }
 
