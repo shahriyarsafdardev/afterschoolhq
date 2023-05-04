@@ -129,6 +129,15 @@ namespace AfterSchool.Models
             return Redirect(DetermineUrlForLoginRedirect(registrationAccount, msgs));
         }
 
+        protected ActionResult HandleAdminAccounts(WebUser user, SystemMessages msgs, string returnurl, string invite, string remember)
+        {
+            Logout(null);
+            msgs.AddRange(HandleMultiPartAuth(user));
+            string uid = user.Uid.ToString();
+            msgs.Add("Authetication code successfully sent to you email.", MessageType.Success);
+            return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember });
+        }
+
         internal string DetermineUrlForLoginRedirect(Account registrationAccount, SystemMessages msgs)
         {
             if (msgs.IsNotEmpty())

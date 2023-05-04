@@ -138,6 +138,23 @@ namespace AfterSchoolLibrary.Services
             return UserType.NotSet;
         }
 
+        public static List<UserType> GetUserTypes(this WebUser user, List<Account> accounts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            List<UserType> userTypes = new List<UserType>();
+
+            foreach (Account account in accounts)
+            {
+                if (!account.IsEmpty())
+                {
+                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
+                    if (!awu.IsEmpty())
+                        userTypes.Add(awu.UserTypeId);
+                }
+            }
+
+            return userTypes;
+        }
+
         public static void UpdateLastActivity(this WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             user.LastActivity = DateTime.UtcNow;

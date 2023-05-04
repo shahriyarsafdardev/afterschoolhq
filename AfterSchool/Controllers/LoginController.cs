@@ -10,7 +10,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-//using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Controllers
@@ -113,18 +112,21 @@ namespace AfterSchool.Controllers
             {
                 if(FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)))
                 {
-                    Logout(null);
-                    msgs.AddRange(HandleMultiPartAuth(user));
-                    string uid = user.Uid.ToString();
-                    msgs.Add("Authetication code successfully sent to you email.", MessageType.Success);
-                    return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember });
+                    HandleAdminAccounts(user, msgs, returnurl, invite, remember);
                 }
 
                 var currentAccount = SessionVariables.CurrentAccount;
 
                 // select account
                 if (currentAccount.IsEmpty())
+                {
+                    var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
+                    if (SessionVariables.CurrentUser.GetUserTypes(accounts).Any(userType => FormConstants.AdminUserTypes.Contains(userType)))
+                    {
+                        return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
+                    }
                     return RedirectToAction("select", "login", new {returnurl, invite});
+                }
 
                 HandleInvite(invite, currentAccount, user, msgs);
 
