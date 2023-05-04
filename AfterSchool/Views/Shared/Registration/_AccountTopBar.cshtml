@@ -347,7 +347,7 @@ else if (currentUser.IsNotEmpty())
 </header>
 
 @{
-    Html.RenderPartial("~/Views/Shared/Registration/_LoginModalWithUpdatedDesign.cshtml", null, new ViewDataDictionary
+    Html.RenderPartial("~/Views/Shared/Registration/_LoginModal.cshtml", null, new ViewDataDictionary
     {
         { "ReturnUrl", loginReturnUrl },
         { "CleverSsoEnabled", cleverSsoEnabled }
