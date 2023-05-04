@@ -9,7 +9,8 @@
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
     var paymentDisabled = "";
     var hasSchedule = (bool) ViewData["hasSchedule"];
-
+    var IsContinuousEnrollOrOngoing = Model.IsContinuousEnrollment || (hasSchedule && Model.GetSchedule().IsOngoing);
+    
     if (!accountPackage.HasFeature(FeatureType.AcceptPayments))
     {
         paymentDisabled = " disabled=\"disabled\" ";
@@ -303,7 +304,7 @@
     <div class="form-group">
         <div class="row">
             <label class="col-sm-3 control-label">Attendance-Based Billing Option</label>
-            <div class="col-sm-1">
+            <div class="col-sm-9">
                 @{
                     Html.RenderPartial(
                         "~/Views/Shared/_SwitchButton.cshtml",
@@ -313,6 +314,16 @@
                             {"checkboxname", "haspostpayplan"},
                             {"checkboxid", "haspostpayplan"},
                         });
+                    
+                    if (IsContinuousEnrollOrOngoing)
+                    {
+                        <p class="text-muted">
+                            <em>
+                                <strong>NOTE: Attendance-based billing is disabled because this 
+                                    @(Model.IsContinuousEnrollment ? "activity uses continuous enrollment" : "is an ongoing activity").</strong>
+                            </em>
+                        </p>
+                    }
                 }
             </div>
         </div>
@@ -414,8 +425,12 @@
         setPaymentPlanSection();
         $(document).ready(function (){
             let isPublished = @Model.IsPublished.ToString().ToLower();
+            let isActivityContinuousEnrollOrOngoing = @IsContinuousEnrollOrOngoing.ToString().ToLower();
             if (!isPublished)
                 disableSubscriptionOrPaymentPlan($('#haspaymentplan'), $('#hassubscriptionplan'));
+            if (isActivityContinuousEnrollOrOngoing)
+                disablePostPayPlan($('#haspostpayplan'));
+            
         });
         setPostPayPlanSection();
         toggleSubscriptionPeriodWeek();
@@ -571,6 +586,13 @@
         else {       
             plan1.is(':checked') ? plan2.prop('disabled', true) : plan2.prop('disabled', false);
         }
+    }
+    
+    function disablePostPayPlan(postPayPlan)
+    {
+        $(postPayPlan).prop('disabled',true);
+        $(postPayPlan).prop('checked',false);
+        setPostPayPlanSection();
     }
 
     function toggleSubscriptionPeriodWeek() {
