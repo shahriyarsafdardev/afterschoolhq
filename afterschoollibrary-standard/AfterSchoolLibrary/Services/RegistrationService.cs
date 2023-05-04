@@ -1124,8 +1124,8 @@ namespace AfterSchoolLibrary.Services
                 lastName = registrant.LastName;
                 email = registrant.Email;
             }
-
-            registration.FindAndSetFirstRegistration(firstName, lastName, email, msgs, dc);
+            if (firstName.IsNotEmpty() && lastName.IsNotEmpty() && email.IsNotEmpty())
+                registration.FindAndSetFirstRegistration(firstName, lastName, email, msgs, dc);
         }
 
         public static bool IsPaid(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
