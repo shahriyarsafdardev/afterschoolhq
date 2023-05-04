@@ -4,16 +4,11 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Clever.Models;
-using Microsoft.AspNet.SignalR.Hubs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Windows.Forms;
-using System.Windows.Interop;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -21,23 +16,26 @@ namespace AfterSchool.Areas.Api.Controllers
     {
 
         [HttpGet]
-        public ActionResult GetFormData(string formId)
+        public ActionResult GetFormData(int formId)
         {
             if (formId.IsEmpty())
                 return HttpNotFound();
             var msgs = new SystemMessages();
             try
             {
-                var currentAccount = SessionVariables.CurrentAccount;
+                //var currentAccount = SessionVariables.CurrentAccount;
+                //if (currentAccount.IsEmpty())
+                //    throw new Exception("Unauthorized Account");
 
-                if (currentAccount.IsEmpty())
-                    throw new Exception("Unauthorized Account");
-
-                var form = currentAccount.GetForm(formId.ToInteger(), msgs);
-                var formSettings = FormSettingsDto.fromForm(form);
+                //var form = currentAccount.GetForm(formId, msgs);
+                var form = AfterSchoolLibrary.Models.Form.Load(
+                    criterias: new Hashtable { { "ID", formId } }
+                    ).First();
 
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form Id");
+
+                var formSettings = FormSettingsDto.fromForm(form);
 
                 var questionGroups = form.GetQuestionGroups(msgs)
                     .Where(
@@ -47,6 +45,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         questionGroup => questionGroup
                         .DisplayOrder)
                     .ToList();
+
                 var formQuestionGroups = FormQuestionGroupDto.GetByQuestionGroupList(questionGroups);
 
                 var response = new
@@ -58,6 +57,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
+
             }
             catch (Exception ex)
             {
@@ -66,22 +66,28 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
+
             }
         }
         [HttpGet]
-        public ActionResult GetFormQuestions(string formId, string sectionId, string sectionTitle)
+        public ActionResult GetFormQuestions(int formId, int sectionId)
         {
-            if (formId.IsEmpty())
-                return HttpNotFound();
+            
             var msgs = new SystemMessages();
             try
             {
-                var currentAccount = SessionVariables.CurrentAccount;
+                if (formId.IsEmpty())
+                    throw new Exception("Invalid Form Id");
 
-                if (currentAccount.IsEmpty())
-                    throw new Exception("Unauthorized Account");
+                //var currentAccount = SessionVariables.CurrentAccount;
 
-                var form = currentAccount.GetForm(formId.ToInteger(), msgs);
+                //if (currentAccount.IsEmpty())
+                //    throw new Exception("Unauthorized Account");
+
+                //var form = currentAccount.GetForm(formId, msgs);
+                var form = AfterSchoolLibrary.Models.Form.Load(
+                    criterias: new Hashtable { { "ID", formId } }
+                    ).First();
 
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form Id");
@@ -89,19 +95,18 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (sectionId.IsEmpty())
                     throw new Exception("Invalid Section Id");
 
-                var sectionQuestionTypeId = (QuestionGroupDataType)sectionId.ToInteger();
+                var sectionQuestionTypeId = (QuestionGroupDataType) sectionId;
 
                 var questions = form.GetAllQuestions(msgs)
                     .Where(
-                        question=>question.
+                        question => question.
                         FormQuestionGroupQuestionGroupDataTypeId.Equals(sectionQuestionTypeId)
-                        &&
-                        question.FormQuestionGroupName.Equals(sectionTitle)
                     )
                     .OrderBy(
-                        question=>question.DisplayOrder
+                        question => question.DisplayOrder
                     )
                     .ToList();
+
                 var formQuestions = FormQuestionDto.GetByFormQuestionList(questions);
 
                 var response = new
@@ -112,177 +117,275 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
+
             }
             catch (Exception ex)
             {
+
                 msgs.Add(ex.Message, MessageType.ApiError);
 
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
+
             }
         }
 
+        [HttpPost]
+        public ActionResult SaveFormData(FormSettingsDto formSettings, FormQuestionGroupDto formQuestionGroup, List<FormQuestionDto> formQuestion)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var formId = formSettings.formId;
+
+            if (currentAccount.IsEmpty())
+                throw new Exception("Unauthorized Account");
+
+            if (formId.IsEmpty())
+                throw new Exception("Invalid Form Id");
+
+            Database.ExecuteTransaction(
+            action: (SystemMessages amsgs, DatabaseConnection adc) =>
+            {
+                var form = currentAccount.GetForm(formId, msgs);
+
+                //var form = AfterSchoolLibrary.Models.Form.Load(
+                //    criterias: new Hashtable { { "ID", formId } }
+
+                //    ).First();
+
+                formSettings.UpdateFormIfNotEmpty(form);
+                amsgs.AddRange(form.Save(adc));
+
+                if (formQuestionGroup.IsNotEmpty())
+                {
+                    var questionGroupExists = FormQuestionGroup.Exists(criterias:
+                        new Hashtable{
+                            {"Name", formQuestionGroup.Name},
+                            {"FormId", form.ID},
+                            {"IsDeleted", false}
+                        },
+                        msgs: amsgs,
+                        dc: adc);
+
+                    FormQuestionGroup currQuestionGroup;
+                    List<FormQuestion> prevQuestions;
+
+                    if (!questionGroupExists)
+                    {
+
+                        currQuestionGroup = new FormQuestionGroup()
+                        {
+                            CreateDate = DateTime.UtcNow,
+                            CreatedBy = currentUser.ID,
+                            LastModifiedDate = DateTime.UtcNow,
+                            LastModifiedBy = currentUser.ID,
+                            DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
+                            FormId = form.ID,
+                            QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                            RegistrantTypeId = RegistrantType.Individual,
+                            Name = formQuestionGroup.Name,
+                            IsDeleted = false,
+                            IsActive = true,
+                        };
+
+                        amsgs.AddRange(currQuestionGroup.Save(adc));
+                        prevQuestions = new List<FormQuestion>();
+
+                    }
+                    else
+                    {
+
+                        currQuestionGroup = FormQuestionGroup
+                                .Load(criterias: new Hashtable{
+                                    {"Name", formQuestionGroup.Name},
+                                    {"FormId", form.ID},
+                                    {"IsDeleted", false}
+                                },
+                                msgs: amsgs, dc: adc)?.FirstOrDefault();
+
+                        if (currQuestionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                        {
+                            currQuestionGroup.Name = formQuestionGroup.Name;
+                            currQuestionGroup.LastModifiedBy = currentUser.ID;
+                            currQuestionGroup.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(currQuestionGroup.Save(adc));
+                        }
+
+                        prevQuestions = currQuestionGroup.GetAllQuestions(amsgs, adc);
+                        formQuestion.ForEach(newQuestion =>
+                        {
+                            var prevQuestion = prevQuestions.Where(question => question.ID == newQuestion.ID).First();
+
+                            if (prevQuestion.IsNotEmpty() && !prevQuestion.IsLocked &&
+                                    (!prevQuestion.IsActive.Equals(newQuestion.IsActive) ||
+                                    prevQuestion.IsRequired.Equals(newQuestion.IsRequired) ||
+                                    prevQuestion.IsAnswerDescriptionEnabled.Equals(newQuestion.IsAnswerDescriptionEnabled)))
+                            {
+                                newQuestion.UpdateQuestionIfNotEmpty(prevQuestion);
+                                prevQuestion.LastModifiedBy = currentUser.ID;
+                                prevQuestion.LastModifiedDate = DateTime.UtcNow;
+                                msgs.AddRange(prevQuestion.Save(adc));
+                            }
+                            else
+                            {
+
+                                var newFormQuestion = new FormQuestion()
+                                {
+                                    FormId = formId,
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    LastModifiedBy = currentUser.ID,
+                                    DisplayOrder = newQuestion.DisplayOrder,
+                                    FormQuestionGroupId = newQuestion.FormQuestionGroupId,
+                                    IsTemplate = false,
+                                    QuestionDataTypeId = QuestionDataType.NotSet,
+                                    QuestionTypeId = newQuestion.QuestionTypeId,
+                                    Text = newQuestion.Text,
+                                    Options = newQuestion.Options,
+                                    Link = newQuestion.Link,
+                                    Description = newQuestion.Description,
+                                    IsActive = true,
+                                    IsDeleted = false,
+                                    IsRequired = newQuestion.IsRequired,
+                                    IsAnswerDescriptionEnabled = newQuestion.IsAnswerDescriptionEnabled,
+                                };
+                                msgs.AddRange(newFormQuestion.Save(adc));
+                            }
+
+                            var prevSettingsList = FormQuestionSettings.LoadByQuestionIds(formId, msgs);
+
+                            if(prevSettingsList.IsNotEmpty())
+                                prevSettingsList.ForEach(setting=>msgs.AddRange(setting.Delete(adc)));
+
+                            newQuestion.questionSettings.ForEach(setting =>
+                            {
+                                var questionSetting = new FormQuestionSettings()
+                                {
+                                    QuestionId = newQuestion.ID,
+                                    Audience = setting.audience,
+                                    ShowFor = setting.showFor,
+                                    RequiredFor = setting.requiredFor,
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    LastModifiedBy = currentUser.ID,
+                                };
+                                msgs.AddRange(questionSetting.Save(adc));
+                            });
+
+                        });
+                    }
+
+                }
+            },
+            onSuccess: (SystemMessages smsgs) =>
+            {
+                msgs.AddRange(smsgs);
+                msgs.Add("Form Saved", MessageType.Success);
+            },
+            onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+            onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs));
+            return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+        }
+
         //[HttpGet]
-        //public ActionResult SaveFormData(string formId, List<FormQuestionGroupDto> formQuestionGroup, List<FormQuestionDto> formQuestion)
+        //public ActionResult CopyFromQuestion(int formId, int sectionId, int questionIdToCopyFrom, string questionName)
         //{
         //    var msgs = new SystemMessages();
         //    var currentAccount = SessionVariables.CurrentAccount;
         //    var currentUser = SessionVariables.CurrentUser;
 
         //    if (currentAccount.IsEmpty())
-        //        throw new Exception("Unauthorized Account");
-
+        //        throw new Exception("Unauthorized Account.");
         //    if (formId.IsEmpty())
-        //        throw new Exception("Invalid Form Id");
-
-        //    var form = currentAccount.GetForm(formId.ToInteger(), msgs);
-        //    var formSettings = FormSettingsDto.fromForm(form);
-
+        //        throw new Exception("Invalid form id.");
+        //    if (sectionId.IsEmpty())
+        //        throw new Exception("Invalid section id.");
+        //    if (questionIdToCopyFrom.IsEmpty())
+        //        throw new Exception("Invalid question id.");
+        //    if (questionName.IsEmpty())
+        //        throw new Exception("Question Name is required.");
 
         //    Database.ExecuteTransaction(
-        //    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-        //    {
-        //        formSettings.alterForm(form);
-        //        amsgs.AddRange(form.Save(adc));
-        //        formQuestionGroup.ForEach(questionGroup =>
+        //        action: (SystemMessages amsgs, DatabaseConnection adc) =>
         //        {
-        //            var questionGroupExists = FormQuestionGroup.Exists(criterias:
-        //                new Hashtable{
-        //                    {"Name", questionGroup.Name},
-        //                    {"FormId", form.ID},
-        //                    {"IsDeleted", false}
-        //                },
-        //                msgs: amsgs,
-        //                dc: adc);
-        //            FormQuestionGroup currQuestionGroup;
-        //            List<FormQuestion> prevQuestions;
-        //            if (!questionGroupExists)
-        //            {
-        //                currQuestionGroup = new FormQuestionGroup()
-        //                {
-        //                    CreateDate = DateTime.UtcNow,
-        //                    CreatedBy = currentUser.ID,
-        //                    LastModifiedDate = DateTime.UtcNow,
-        //                    LastModifiedBy = currentUser.ID,
-        //                    DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
-        //                    FormId = form.ID,
-        //                    QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-        //                    RegistrantTypeId = RegistrantType.Individual,
-        //                    Name = questionGroup.Name,
-        //                    IsDeleted = false,
-        //                    IsActive = true,
-        //                };
-        //                amsgs.AddRange(currQuestionGroup.Save(adc));
-        //                prevQuestions = new List<FormQuestion>();
-        //            }
-        //            else
-        //            {
-        //                currQuestionGroup = FormQuestionGroup
-        //                        .Load(criterias: new Hashtable{
-        //                            {"Name", questionGroup.Name},
+        //            var form = currentAccount.GetForm(formId, msgs);
+
+        //            if (form.IsEmpty())
+        //                throw new Exception("Invalid form id.");
+
+        //            var questionToCopyFrom = FormQuestion
+        //                            .Load(criterias: new Hashtable{
         //                            {"FormId", form.ID},
-        //                            {"IsDeleted", false}
+        //                            {"FormQuestionGroupId", sectionId},
+        //                            {"QuestionTypeId", questionIdToCopyFrom}
+        //                            },
+        //                            msgs: msgs)?.First();
+
+        //            if(questionToCopyFrom.IsEmpty())
+        //                throw new Exception("Invalid 'Section Id' or 'Question Id'.");
+
+        //            var newFormQuestion = new FormQuestion
+        //            {
+        //                FormId = form.ID,
+        //                CreateDate = DateTime.UtcNow,
+        //                LastModifiedDate = DateTime.UtcNow,
+        //                CreatedBy = currentUser.ID,
+        //                LastModifiedBy = currentUser.ID,
+        //                DisplayOrder = questionToCopyFrom.DisplayOrder + 1,
+        //                FormQuestionGroupId = questionToCopyFrom.FormQuestionGroupId,
+        //                IsTemplate = false,
+        //                QuestionDataTypeId = QuestionDataType.NotSet,
+        //                QuestionTypeId = questionToCopyFrom.QuestionTypeId,
+        //                Text = questionName,
+        //                Options = questionToCopyFrom.Options,
+        //                Link = questionToCopyFrom.Link,
+        //                Description = questionToCopyFrom.Description,
+        //                IsActive = true,
+        //                IsDeleted = false,
+        //                IsRequired = questionToCopyFrom.IsRequired,
+        //                IsAnswerDescriptionEnabled = questionToCopyFrom.IsAnswerDescriptionEnabled,
+        //            };
+
+        //            var prevFormQuestions = FormQuestion
+        //                        .Load(criterias: new Hashtable{
+        //                            {"FormId", form.ID},
+        //                            {"FormQuestionGroupId", sectionId},
         //                        },
-        //                        msgs: amsgs, dc: adc)?.FirstOrDefault();
-        //                if (currQuestionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
-        //                {
-        //                    currQuestionGroup.Name = Request.Params[$"name-{currQuestionGroup.ID}"];
-        //                    currQuestionGroup.LastModifiedBy = currentUser.ID;
-        //                    currQuestionGroup.LastModifiedDate = DateTime.UtcNow;
-        //                    amsgs.AddRange(currQuestionGroup.Save(adc));
-        //                }
-        //                prevQuestions = currQuestionGroup.GetAllQuestions(amsgs, adc);
-        //            }
-        //            var currQuestions = formQuestion.Where(question=>
-        //                                                    question.FormQuestionGroupQuestionGroupDataTypeId.Equals(questionGroup.QuestionGroupDataTypeId)
-        //                                                    &&
-        //                                                    question.GroupTitle.Equals(questionGroup.Name));
+        //                        msgs: msgs);
 
-        //        });
-        //        if (qg.IsNumber())
-        //        {
-        //            // create or update question groups
-        //            if (qg.ToInteger() == 0)
+        //            if(prevFormQuestions.IsEmpty())
+        //                throw new Exception("Invalid 'Section Id'.");
+
+        //            prevFormQuestions.ForEach(question =>
         //            {
-        //            }
-        //            else
-        //            {
-        //                questionGroup = FormQuestionGroup.Load(qg.ToInteger(), amsgs, adc);
-        //                questions = questionGroup.GetAllQuestions(amsgs, adc);
-
-        //                if (questionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+        //                if (question.DisplayOrder > questionToCopyFrom.DisplayOrder)
         //                {
-        //                    questionGroup.Name = Request.Params[$"name-{questionGroup.ID}"];
-        //                    questionGroup.LastModifiedBy = currentUser.ID;
-        //                    questionGroup.LastModifiedDate = DateTime.UtcNow;
-        //                    amsgs.AddRange(questionGroup.Save(adc));
-        //                }
-        //            }
-
-        //            // save existing questions
-        //            questions.ForEach(question =>
-        //            {
-        //                var text = Request.Params[$"text-{question.ID}"];
-        //                var desc = Request.Params[$"description-{question.ID}"];
-        //                var options = Request.Params[$"options-text-{question.ID}"];
-        //                var link = Request.Params[$"link-text-{question.ID}"];
-        //                var isActive = Request.Params[$"active-{question.ID}"].IsBoolean();
-        //                var isRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
-        //                var isAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
-
-        //                if (text != null && text.Length > 400)
-        //                    amsgs.Add("Question should not exceed 400 characters", MessageType.UserError);
-
-        //                if (desc != null && desc.Length > 4000)
-        //                    amsgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
-
-
-        //                // this extra conditions are to prevent null entry in db from refresh-post calls
-        //                if (!question.IsLocked &&
-        //                    (text.IsNotEmpty() || desc.IsNotEmpty() || options.IsNotEmpty() ||
-        //                     link.IsNotEmpty() ||
-        //                     question.IsActive != isActive || question.IsRequired != isRequired ||
-        //                     question.IsAnswerDescriptionEnabled != isAnswerDescriptionEnabled))
-        //                {
-        //                    question.IsActive = isActive;
-        //                    question.IsRequired = isRequired;
-        //                    question.IsAnswerDescriptionEnabled = isAnswerDescriptionEnabled;
-
-        //                    if (question.QuestionDataTypeId == QuestionDataType.NotSet)
-        //                    {
-        //                        question.Text = text;
-        //                        question.Description = desc;
-        //                        question.Options = options;
-        //                        question.Link = link;
-        //                        question.DisplayOrder =
-        //                            Request.Params[$"displayOrderId-{question.ID}"].ToInteger();
-        //                        question.QuestionTypeId =
-        //                            (QuestionType) Request.Params[$"questiontype-{question.ID}"].ToInteger();
-        //                    }
-
-        //                    question.LastModifiedBy = currentUser.ID;
-        //                    question.LastModifiedDate = DateTime.UtcNow;
-        //                    amsgs.AddRange(question.Save(adc));
+        //                    question.DisplayOrder++;
+        //                    msgs.AddRange(question.Save());
         //                }
         //            });
 
-        //            if (Request.Form["newquestionsIds"].Length > 0)
-        //            {
-        //                SaveNewQuestions(form.ID, currentUser.ID, questionGroup.ID, amsgs, adc);
-        //            }
-        //        }
-        //    },
-        //            onSuccess: (SystemMessages smsgs) =>
-        //            {
-        //                msgs.AddRange(smsgs);
-        //                msgs.Add("Form Saved", MessageType.Success);
-        //            },
-        //            onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-        //            onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
-        //        );
+        //            msgs.AddRange(newFormQuestion.Save());
 
-        //    return Json();
+        //        },
+        //        onSuccess: (SystemMessages smsgs) =>
+        //        {
+        //            msgs.AddRange(smsgs);
+        //            msgs.Add("Form Saved", MessageType.Success);
+        //        },
+        //        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+        //        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs));
+        //    if(msgs.HasNoErrors())
+        //        return GetFormQuestions(formId,sectionId);
+        //    return Json(
+        //            new ApiResponse(msgs, null),
+        //            JsonRequestBehavior.AllowGet);
         //}
     }
 }

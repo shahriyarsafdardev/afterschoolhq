@@ -9,9 +9,9 @@ namespace AfterSchool.Areas.Api.Models
     public class FormSettingsDto
     {
         public int formId { get; set; }
-        public FormType formType { get; set; }
-        public string formName { get; set; }
-        public string formDescription { get; set; }
+        public FormType? formType { get; set; }
+        public string? formName { get; set; }
+        public string? formDescription { get; set; }
 
         public static FormSettingsDto fromForm(Form form)
         {
@@ -24,12 +24,12 @@ namespace AfterSchool.Areas.Api.Models
             };
         }
 
-        public void alterForm(Form form)
+        public void UpdateFormIfNotEmpty(Form form)
         {
             form.ID = this.formId;
-            form.FormTypeId = this.formType;
-            form.Name = this.formName;
-            form.Description = this.formDescription;
+            form.FormTypeId = this.formType??form.FormTypeId;
+            form.Name = this.formName??form.Name;
+            form.Description = this.formDescription??form.Description;
         }
 
     }
