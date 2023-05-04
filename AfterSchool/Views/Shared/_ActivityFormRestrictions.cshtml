@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var grades = GradeLevel.Load();
     var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration) && Model.ActivityTypeId.In(new[]
@@ -130,10 +130,11 @@
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         if (isStudentAllowed) {
             $('#parentConsent').removeClass("hidden");
+            $("#requiresparentalconsent").prop('checked', true);
         }
         else {
             $('#parentConsent').addClass("hidden");
-            $("#requiresparentalconsent").prop('checked', true);
+            $("#requiresparentalconsent").prop('checked', false);
         }
     }
     
