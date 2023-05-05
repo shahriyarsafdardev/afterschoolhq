@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 
 @{
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
@@ -111,7 +111,7 @@
 
         @if (group.IsEmpty())
         {
-            <div class="form-group">
+            <div class="form-group @(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
                 <label class="col-sm-3 control-label">Students Can Register For:</label>
                 <div class="col-sm-9">
 
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <div class="registrationperiod-container">
+            <div class="registrationperiod-container @(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
 
                 <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID"/>
 

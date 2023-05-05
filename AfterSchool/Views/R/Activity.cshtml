@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Helpers.GoogleHelper
+@using AfterSchoolLibrary.Helpers.GoogleHelper
 @model ParticipationObject
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
@@ -312,8 +312,8 @@
         {
             <button class="btn btn-default btn-activity-footer btn-share" type="button">Share</button>
             <a class="btn btn-default btn-activity-footer"
-               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
-                Edit Activity
+               href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
+                Edit @(Model.ActivityType.Equals(ActivityType.PermissionSlip) ? "Permission Slip" : "Activity")
             </a>
         }
         else
