@@ -113,7 +113,7 @@
         <div class="modal-body">
             <div class="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 col-xs-10 col-xs-offset-1">
 
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="updateAndHideModal()">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close btn-close-login-form" onclick="updateAndHideAuthModal()">
                     <i class="icon s7-close"></i>
                 </button>
 
@@ -199,7 +199,6 @@
     }
 
     function resendCode() {
-        var remainingTime = localStorage.getItem('remainingTime') || 60;
         var uid = $('#btn-login').data('uid');
         var remember = $('#lm-login-rememberme').val();
         $('#resend-code-btn').prop('disabled', true);
@@ -208,21 +207,20 @@
             type: 'POST',
             data: { uid: uid, returnurl: null, invite: null, remember: remember },
             success: function (data) {
+                var dateString = data.expirationDate.replace(/\/Date\((\d+)\)\//, '$1');
+                var expirationDate = new Date(parseInt(dateString));
+                var remainingTime = Math.round((expirationDate.getTime() - Date.now()) / 1000);
+                debugger
                 var successMessage = "Authentication code resent to your email";
                 Notifications.showMessage('Success', successMessage, true);
                 var timer = setInterval(function() {
                     $('#resend-code-btn').text('Resend Code (' + remainingTime + ')');
-
                     remainingTime--;
-
-                    localStorage.setItem('remainingTime', remainingTime);
-
                     if (remainingTime < 0) {
                         $('#messages-container').empty();
                         clearInterval(timer);
                         $('#resend-code-btn').text('Resend Code');
                         $('#resend-code-btn').prop('disabled', false);
-                        localStorage.removeItem('remainingTime');
                     }
                 }, 1000);
             },
@@ -233,24 +231,10 @@
         });
     }
 
-    var remainingTime = localStorage.getItem('remainingTime');
-
-    if (remainingTime !== null) {
-        $('#resend-code-btn').prop('disabled', true);
-
-        var timer = setInterval(function() {
-            $('#resend-code-btn').text('Resend Code (' + remainingTime + ')');
-
-            remainingTime--;
-
-            localStorage.setItem('remainingTime', remainingTime);
-
-            if (remainingTime < 0) {
-                clearInterval(timer);
-                $('#resend-code-btn').text('Resend Code');
-                $('#resend-code-btn').prop('disabled', false);
-                localStorage.removeItem('remainingTime');
-            }
-        }, 1000);
+    function updateAndHideAuthModal() {
+        $('#btn-login').html('Log In');
+        $('#btn-login').prop('disabled', false);
+        hideModal('modal-authcode');
     }
+
 </script>

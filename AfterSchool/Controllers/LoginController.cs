@@ -110,9 +110,9 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if(FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)))
+                if(FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)) && SessionVariables.CurrentAccount.AccountTypeId == AccountType.AfterSchool)
                 {
-                    HandleAdminAccounts(user, msgs, returnurl, invite, remember);
+                    return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
                 }
 
                 var currentAccount = SessionVariables.CurrentAccount;
@@ -121,7 +121,8 @@ namespace AfterSchool.Controllers
                 if (currentAccount.IsEmpty())
                 {
                     var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
-                    if (SessionVariables.CurrentUser.GetUserTypes(accounts).Any(userType => FormConstants.AdminUserTypes.Contains(userType)))
+                    var userTypes = SessionVariables.CurrentUser.GetUserTypes(accounts);
+                    if (userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                     {
                         return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
                     }
@@ -147,14 +148,17 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember)
+        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember, string msg)
         {
             var msgs = new SystemMessages();
+            if (TempData["msg"].IsNotEmpty())
+                msgs.Add(TempData["msg"].ToString(), MessageType.Success);
             ViewBag.Messages = msgs;
             ViewBag.uid = uid;
             ViewBag.returnurl = returnurl;
             ViewBag.invite = invite;
             ViewBag.remember = remember;
+            ViewBag.ExpirationDate = TempData.Peek("expirationDate");
             return View();
         }
 
@@ -173,14 +177,10 @@ namespace AfterSchool.Controllers
 
                 if(multipartAuth != null)
                 {
-                    if(multipartAuth.ExpirationDate <= DateTime.UtcNow)
-                    {
-                        msgs.Add("Authentication code is expired, kindly press resend code to get code again", MessageType.UserError);
-                    }
-                    else if (multipartAuth.Code != authcode)
-                    {
+                    if(multipartAuth.Code != authcode)
                         msgs.Add("Authentication code did not match", MessageType.UserError);
-                    }
+                    else if (multipartAuth.ExpirationDate <= DateTime.UtcNow)
+                        msgs.Add("Authentication code is expired, kindly press resend code to get code again", MessageType.UserError);
                     else
                     {
                         List<MultipartAuth> UserCodes = MultipartAuth.LoadListByWebUser(user.ID);
@@ -227,6 +227,7 @@ namespace AfterSchool.Controllers
             ViewBag.invite = invite;
             ViewBag.remember = remember;
             ViewBag.Messages = msgs;
+            ViewBag.ExpirationDate = TempData.Peek("expirationDate");
             if (isJson)
             {
                 return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
@@ -241,7 +242,7 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
 
             msgs.AddRange(HandleMultiPartAuth(user));
-            return Json(new { success = true });
+            return Json(new { success = true, expirationDate = TempData.Peek("expirationDate") });
         }
 
         [HttpGet]
@@ -479,13 +480,17 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if (FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)))
+                var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
+                var userTypes = SessionVariables.CurrentUser.GetUserTypes(accounts);
+
+                if(userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                 {
                     Logout(null);
                     msgs.AddRange(HandleMultiPartAuth(user));
                     string uid = user.Uid.ToString();
                     var isAdminAccount = true;
-                    return Json(new { status = "ok", isNewParentAccount, isAdminAccount, uid }, JsonRequestBehavior.DenyGet);
+                    var expirationDate = TempData.Peek("expirationDate");
+                    return Json(new { status = "ok", isNewParentAccount, isAdminAccount, uid, expirationDate }, JsonRequestBehavior.DenyGet);
                 }
                 return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
             }
