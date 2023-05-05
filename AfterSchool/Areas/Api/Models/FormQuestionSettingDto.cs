@@ -10,25 +10,25 @@ namespace AfterSchool.Areas.Api.Models
     public class FormQuestionSettingDto
     {
         public int QuestionId { get; set; }
-        public AudienceType audience { get; set; }
-        public bool showFor { get; set; }
-        public bool requiredFor { get; set; }
+        public AudienceType Audience { get; set; }
+        public bool Show { get; set; }
+        public bool Required { get; set; }
 
-        public static FormQuestionSettingDto fromFormSettings(FormQuestionSettings questionSettings)
+        public static FormQuestionSettingDto fromFormSettings(FormQuestionSettings QuestionSettings)
         {
             return new FormQuestionSettingDto()
             {
-                QuestionId = questionSettings.QuestionId,
-                audience = questionSettings.Audience,
-                showFor = questionSettings.ShowFor,
-                requiredFor = questionSettings.RequiredFor,
+                QuestionId = QuestionSettings.QuestionId,
+                Audience = QuestionSettings.Audience,
+                Show = QuestionSettings.Show,
+                Required = QuestionSettings.Required,
             };
         }
 
-        public static List<FormQuestionSettingDto> fromFormSettingsList(List<FormQuestionSettings> questionSettingsList) {
-            return questionSettingsList.Select(
-                questionSetting=>
-                fromFormSettings(questionSetting))
+        public static List<FormQuestionSettingDto> fromFormSettingsList(List<FormQuestionSettings> QuestionSettingsList) {
+            return QuestionSettingsList.Select(
+                QuestionSetting=>
+                fromFormSettings(QuestionSetting))
                 .ToList();
         }
     }

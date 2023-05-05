@@ -1,5 +1,6 @@
 using AfterSchoolLibrary.Models;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AfterSchool.Areas.Api.Models
 {
@@ -10,24 +11,23 @@ namespace AfterSchool.Areas.Api.Models
         public int? DisplayOrder { get; set; }
         public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
 
-        public static FormQuestionGroupDto GetByQuestionGroup(FormQuestionGroup questionGroup)
+        public static FormQuestionGroupDto GetByQuestionGroup(FormQuestionGroup QuestionGroup)
         {
             return new FormQuestionGroupDto()
             {
-                FormId = questionGroup.FormId,
-                Name = questionGroup.Name,
-                DisplayOrder = questionGroup.DisplayOrder,
-                QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId
+                FormId = QuestionGroup.FormId,
+                Name = QuestionGroup.Name,
+                DisplayOrder = QuestionGroup.DisplayOrder,
+                QuestionGroupDataTypeId = QuestionGroup.QuestionGroupDataTypeId
             };
         }
 
-        public static List<FormQuestionGroupDto> GetByQuestionGroupList(List<FormQuestionGroup> questionGroupList)
+        public static List<FormQuestionGroupDto> MapToDtoList(List<FormQuestionGroup> QuestionGroupList)
         {
-            var questionGroupDtoList = new List<FormQuestionGroupDto>();
-            foreach (var questionGroup in questionGroupList)
-                questionGroupDtoList.Add(GetByQuestionGroup(questionGroup));
-            return questionGroupDtoList;
-
+            return QuestionGroupList
+                .Select(QuestionGroup => 
+                GetByQuestionGroup(QuestionGroup))
+                .ToList();
         }
 
 

@@ -8,28 +8,28 @@ namespace AfterSchool.Areas.Api.Models
 {
     public class FormSettingsDto
     {
-        public int formId { get; set; }
-        public FormType? formType { get; set; }
-        public string? formName { get; set; }
-        public string? formDescription { get; set; }
+        public int FormId { get; set; }
+        public FormType? FormType { get; set; }
+        public string? FormName { get; set; }
+        public string? FormDescription { get; set; }
 
-        public static FormSettingsDto fromForm(Form form)
+        public static FormSettingsDto MapToDto(Form Form)
         {
             return new FormSettingsDto()
             {
-                formId = form.ID ?? 0,
-                formType = form.FormTypeId,
-                formName = form.Name,
-                formDescription = form.Description
+                FormId = Form.ID ?? 0,
+                FormType = Form.FormTypeId,
+                FormName = Form.Name,
+                FormDescription = Form.Description
             };
         }
 
-        public void UpdateFormIfNotEmpty(Form form)
+        public void UpdateIfNotNull(Form Form)
         {
-            form.ID = this.formId;
-            form.FormTypeId = this.formType??form.FormTypeId;
-            form.Name = this.formName??form.Name;
-            form.Description = this.formDescription??form.Description;
+            Form.ID = this.FormId;
+            Form.FormTypeId = this.FormType??Form.FormTypeId;
+            Form.Name = this.FormName??Form.Name;
+            Form.Description = this.FormDescription??Form.Description;
         }
 
     }

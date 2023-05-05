@@ -17,8 +17,8 @@ namespace AfterSchoolLibrary.Models
             Config(ObjectMap, DatabaseQuery, nameof(FormQuestionSettings), "ID");
             LoadObjectValues(ObjectMap);
             Audience = AudienceType.NotSet;
-            ShowFor = false;
-            RequiredFor = false;
+            Show = false;
+            Required = false;
         }
         public int QuestionId
         {
@@ -32,16 +32,16 @@ namespace AfterSchoolLibrary.Models
             set => MDV["Audience"].Value = value;
         }
 
-        public bool ShowFor
+        public bool Show
         {
-            get => (bool) MDV["ShowFor"].Value;
-            set => MDV["ShowFor"].Value = value;
+            get => (bool) MDV["Show"].Value;
+            set => MDV["Show"].Value = value;
         }
 
-        public bool RequiredFor
+        public bool Required
         {
-            get => (bool) MDV["RequiredFor"].Value;
-            set => MDV["RequiredFor"].Value = value;
+            get => (bool) MDV["Required"].Value;
+            set => MDV["Required"].Value = value;
         }
 
         public static DatabaseParameters ObjectMap
@@ -52,8 +52,8 @@ namespace AfterSchoolLibrary.Models
                 var dp = get_BaseObjectMap(className);
                 dp.Add(className, "QuestionId", SqlDbType.Int);
                 dp.Add(className, "Audience", SqlDbType.Int);
-                dp.Add(className, "ShowFor", SqlDbType.Bit);
-                dp.Add(className, "RequiredFor", SqlDbType.Bit);
+                dp.Add(className, "Show", SqlDbType.Bit);
+                dp.Add(className, "Required", SqlDbType.Bit);
                 return dp;
             }
         }
@@ -119,8 +119,8 @@ namespace AfterSchoolLibrary.Models
 
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["QuestionId"] }));
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["Audience"] }));
-            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["ShowFor"] }));
-            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["RequiredFor"] }));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["Show"] }));
+            msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["Required"] }));
 
             return msgs;
         }
