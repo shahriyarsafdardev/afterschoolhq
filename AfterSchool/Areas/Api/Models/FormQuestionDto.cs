@@ -17,53 +17,53 @@ namespace AfterSchool.Areas.Api.Models
         public int? DisplayOrder { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public List<FormQuestionSettingDto> questionSettings { get; set; }
+        public List<FormQuestionSettingDto> QuestionSettings { get; set; }
         public bool IsAnswerDescriptionEnabled { get; set; }
         public QuestionType QuestionTypeId { get; set; }
         public QuestionDataType QuestionDataTypeId { get; set; }
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
 
-        public void UpdateQuestionIfNotEmpty(FormQuestion question)
+        public void UpdateQuestionIfNotEmpty(FormQuestion Question)
         {
-            question.ID = this.ID;
-            question.FormQuestionGroupId = this.FormQuestionGroupId ?? question.FormQuestionGroupId;
-            question.Text = this.Text;
-            question.Description = this.Description;
-            question.Options = this.Options;
-            question.IsRequired = this.IsRequired;
-            question.DisplayOrder = this.DisplayOrder;
-            question.IsActive = this.IsActive;
-            question.IsDeleted = this.IsDeleted;
-            question.QuestionTypeId = this.QuestionTypeId;
-            question.QuestionDataTypeId = this.QuestionDataTypeId;
-            question.IsAnswerDescriptionEnabled = this.IsAnswerDescriptionEnabled;
-            question.Link = this.Link;
+            Question.ID = this.ID;
+            Question.FormQuestionGroupId = this.FormQuestionGroupId ?? Question.FormQuestionGroupId;
+            Question.Text = this.Text;
+            Question.Description = this.Description;
+            Question.Options = this.Options;
+            Question.IsRequired = this.IsRequired;
+            Question.DisplayOrder = this.DisplayOrder;
+            Question.IsActive = this.IsActive;
+            Question.IsDeleted = this.IsDeleted;
+            Question.QuestionTypeId = this.QuestionTypeId;
+            Question.QuestionDataTypeId = this.QuestionDataTypeId;
+            Question.IsAnswerDescriptionEnabled = this.IsAnswerDescriptionEnabled;
+            Question.Link = this.Link;
         }
 
-        public static FormQuestionDto GetByFormQuestion(FormQuestion question)
+        public static FormQuestionDto GetByFormQuestion(FormQuestion Question)
         {
             return new FormQuestionDto()
             {
-                ID = question.ID ?? 0,
-                FormQuestionGroupId = question.FormQuestionGroupId,
-                Text = question.Text,
-                Description = question.Description,
-                GroupTitle = question.FormQuestionGroupName,
-                Options = question.Options,
-                IsRequired = question.IsRequired,
-                DisplayOrder = question.DisplayOrder,
-                IsActive = question.IsActive,
-                IsDeleted = question.IsDeleted,
-                QuestionTypeId = question.QuestionTypeId,
-                QuestionDataTypeId = question.QuestionDataTypeId,
-                FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
-                questionSettings = FormQuestionSettingDto.fromFormSettingsList(FormQuestionSettings.LoadByQuestionIds(question.ID)),
+                ID = Question.ID ?? 0,
+                FormQuestionGroupId = Question.FormQuestionGroupId,
+                Text = Question.Text,
+                Description = Question.Description,
+                GroupTitle = Question.FormQuestionGroupName,
+                Options = Question.Options,
+                IsRequired = Question.IsRequired,
+                DisplayOrder = Question.DisplayOrder,
+                IsActive = Question.IsActive,
+                IsDeleted = Question.IsDeleted,
+                QuestionTypeId = Question.QuestionTypeId,
+                QuestionDataTypeId = Question.QuestionDataTypeId,
+                FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
+                QuestionSettings = FormQuestionSettingDto.fromFormSettingsList(FormQuestionSettings.LoadByQuestionIds(Question.ID)),
             };
         }
 
-        public static List<FormQuestionDto> GetByFormQuestionList(List<FormQuestion> questionList)
+        public static List<FormQuestionDto> MapToDtoList(List<FormQuestion> QuestionList)
         {
-            return questionList
+            return QuestionList
                 .Select(question=>
                 GetByFormQuestion(question))
                 .ToList();

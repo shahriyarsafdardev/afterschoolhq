@@ -16,46 +16,46 @@ namespace AfterSchool.Areas.Api.Controllers
     {
 
         [HttpGet]
-        public ActionResult GetFormData(int formId)
+        public ActionResult GetFormData(int FormId)
         {
-            if (formId.IsEmpty())
+            if (FormId.IsEmpty())
                 return HttpNotFound();
             var msgs = new SystemMessages();
             try
             {
-                //var currentAccount = SessionVariables.CurrentAccount;
-                //if (currentAccount.IsEmpty())
-                //    throw new Exception("Unauthorized Account");
+                var CurrentAccount = SessionVariables.CurrentAccount;
+                if (CurrentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
 
-                //var form = currentAccount.GetForm(formId, msgs);
-                var form = AfterSchoolLibrary.Models.Form.Load(
-                    criterias: new Hashtable { { "ID", formId } }
-                    ).First();
+                var RequestedForm = CurrentAccount.GetForm(FormId, msgs);
 
-                if (form.IsEmpty())
+                if (RequestedForm.IsEmpty())
                     throw new Exception("Invalid Form Id");
 
-                var formSettings = FormSettingsDto.fromForm(form);
+                var FormSettings = FormSettingsDto.MapToDto(RequestedForm);
 
-                var questionGroups = form.GetQuestionGroups(msgs)
+                var QuestionGroups = RequestedForm.GetQuestionGroups(msgs)
                     .Where(
-                        questionGroup => questionGroup.
-                        RegistrantTypeId == RegistrantType.Individual)
+                        QuestionGroup => 
+                        QuestionGroup.RegistrantTypeId == RegistrantType.Individual &&
+                        !QuestionGroup.IsDeleted
+                        )
                     .OrderBy(
                         questionGroup => questionGroup
-                        .DisplayOrder)
+                        .DisplayOrder
+                        )
                     .ToList();
 
-                var formQuestionGroups = FormQuestionGroupDto.GetByQuestionGroupList(questionGroups);
+                var FormQuestionGroups = FormQuestionGroupDto.MapToDtoList(QuestionGroups);
 
-                var response = new
+                var Response = new
                 {
-                    formQuestionGroup = formQuestionGroups,
-                    form = formSettings
+                    FormQuestionGroup = FormQuestionGroups,
+                    Form = FormSettings
                 };
 
                 return Json(
-                    new ApiResponse(msgs, response),
+                    new ApiResponse(msgs, Response),
                     JsonRequestBehavior.AllowGet);
 
             }
@@ -70,48 +70,46 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
         [HttpGet]
-        public ActionResult GetFormQuestions(int formId, int sectionId)
+        public ActionResult GetFormQuestions(int FormId, int SectionId)
         {
             
             var msgs = new SystemMessages();
             try
             {
-                if (formId.IsEmpty())
+                if (FormId.IsEmpty())
                     throw new Exception("Invalid Form Id");
 
-                //var currentAccount = SessionVariables.CurrentAccount;
+                var CurrentAccount = SessionVariables.CurrentAccount;
 
-                //if (currentAccount.IsEmpty())
-                //    throw new Exception("Unauthorized Account");
+                if (CurrentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
 
-                //var form = currentAccount.GetForm(formId, msgs);
-                var form = AfterSchoolLibrary.Models.Form.Load(
-                    criterias: new Hashtable { { "ID", formId } }
-                    ).First();
+                var RequestedForm = CurrentAccount.GetForm(FormId, msgs);
 
-                if (form.IsEmpty())
+                if (RequestedForm.IsEmpty())
                     throw new Exception("Invalid Form Id");
 
-                if (sectionId.IsEmpty())
+                if (SectionId.IsEmpty())
                     throw new Exception("Invalid Section Id");
 
-                var sectionQuestionTypeId = (QuestionGroupDataType) sectionId;
+                var RequestedSectionTypeId = (QuestionGroupDataType) SectionId;
 
-                var questions = form.GetAllQuestions(msgs)
+                var RequestedQuestions = RequestedForm.GetAllQuestions(msgs)
                     .Where(
-                        question => question.
-                        FormQuestionGroupQuestionGroupDataTypeId.Equals(sectionQuestionTypeId)
+                        Question => 
+                        Question.FormQuestionGroupQuestionGroupDataTypeId.Equals(RequestedSectionTypeId) &&
+                        !Question.IsDeleted
                     )
                     .OrderBy(
-                        question => question.DisplayOrder
+                        Question => Question.DisplayOrder
                     )
                     .ToList();
 
-                var formQuestions = FormQuestionDto.GetByFormQuestionList(questions);
+                var QuestionsToSend = FormQuestionDto.MapToDtoList(RequestedQuestions);
 
                 var response = new
                 {
-                    formQuestion = formQuestions,
+                    FormQuestion = QuestionsToSend,
                 };
 
                 return Json(
@@ -132,146 +130,147 @@ namespace AfterSchool.Areas.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveFormData(FormSettingsDto formSettings, FormQuestionGroupDto formQuestionGroup, List<FormQuestionDto> formQuestion)
+        public ActionResult SaveFormData(FormSettingsDto FormSettings, FormQuestionGroupDto FormQuestionGroup, List<FormQuestionDto> FormQuestion)
         {
             var msgs = new SystemMessages();
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentUser = SessionVariables.CurrentUser;
-            var formId = formSettings.formId;
+            var CurrentAccount = SessionVariables.CurrentAccount;
+            var CurrentUser = SessionVariables.CurrentUser;
+            var FormId = FormSettings.FormId;
 
-            if (currentAccount.IsEmpty())
+            if (CurrentAccount.IsEmpty())
                 throw new Exception("Unauthorized Account");
 
-            if (formId.IsEmpty())
+            if (FormId.IsEmpty())
                 throw new Exception("Invalid Form Id");
 
             Database.ExecuteTransaction(
             action: (SystemMessages amsgs, DatabaseConnection adc) =>
             {
-                var form = currentAccount.GetForm(formId, msgs);
+                var RequestedForm = CurrentAccount.GetForm(FormId, msgs);
 
-                //var form = AfterSchoolLibrary.Models.Form.Load(
-                //    criterias: new Hashtable { { "ID", formId } }
+                if (RequestedForm.IsEmpty())
+                    throw new Exception("Invalid Form Id");
 
-                //    ).First();
+                FormSettings.UpdateIfNotNull(RequestedForm);
+                amsgs.AddRange(RequestedForm.Save(adc));
 
-                formSettings.UpdateFormIfNotEmpty(form);
-                amsgs.AddRange(form.Save(adc));
-
-                if (formQuestionGroup.IsNotEmpty())
+                if (FormQuestionGroup.IsNotEmpty())
                 {
-                    var questionGroupExists = FormQuestionGroup.Exists(criterias:
+                    var QuestionGroupExists = AfterSchoolLibrary.Models.FormQuestionGroup.Exists(criterias:
                         new Hashtable{
-                            {"Name", formQuestionGroup.Name},
-                            {"FormId", form.ID},
+                            {"Name", FormQuestionGroup.Name},
+                            {"FormId", RequestedForm.ID},
                             {"IsDeleted", false}
                         },
                         msgs: amsgs,
                         dc: adc);
 
-                    FormQuestionGroup currQuestionGroup;
-                    List<FormQuestion> prevQuestions;
+                    FormQuestionGroup CurrentQuestionGroup;
+                    List<FormQuestion> PrevQuestions;
 
-                    if (!questionGroupExists)
+                    if (!QuestionGroupExists)
                     {
 
-                        currQuestionGroup = new FormQuestionGroup()
+                        CurrentQuestionGroup = new FormQuestionGroup()
                         {
                             CreateDate = DateTime.UtcNow,
-                            CreatedBy = currentUser.ID,
+                            CreatedBy = CurrentUser.ID,
                             LastModifiedDate = DateTime.UtcNow,
-                            LastModifiedBy = currentUser.ID,
-                            DisplayOrder = form.GetQuestionGroupCount(amsgs, adc) + 1,
-                            FormId = form.ID,
+                            LastModifiedBy = CurrentUser.ID,
+                            DisplayOrder = RequestedForm.GetQuestionGroupCount(amsgs, adc) + 1,
+                            FormId = RequestedForm.ID,
                             QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
                             RegistrantTypeId = RegistrantType.Individual,
-                            Name = formQuestionGroup.Name,
+                            Name = FormQuestionGroup.Name,
                             IsDeleted = false,
                             IsActive = true,
                         };
 
-                        amsgs.AddRange(currQuestionGroup.Save(adc));
-                        prevQuestions = new List<FormQuestion>();
+                        amsgs.AddRange(CurrentQuestionGroup.Save(adc));
+                        PrevQuestions = new List<FormQuestion>();
 
                     }
                     else
                     {
 
-                        currQuestionGroup = FormQuestionGroup
+                        CurrentQuestionGroup = AfterSchoolLibrary.Models.FormQuestionGroup
                                 .Load(criterias: new Hashtable{
-                                    {"Name", formQuestionGroup.Name},
-                                    {"FormId", form.ID},
+                                    {"Name", FormQuestionGroup.Name},
+                                    {"FormId", RequestedForm.ID},
                                     {"IsDeleted", false}
                                 },
                                 msgs: amsgs, dc: adc)?.FirstOrDefault();
 
-                        if (currQuestionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                        if(CurrentQuestionGroup.IsEmpty())
+                            throw new Exception("Invalid Section Name");
+
+                        if (CurrentQuestionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
                         {
-                            currQuestionGroup.Name = formQuestionGroup.Name;
-                            currQuestionGroup.LastModifiedBy = currentUser.ID;
-                            currQuestionGroup.LastModifiedDate = DateTime.UtcNow;
-                            amsgs.AddRange(currQuestionGroup.Save(adc));
+                            CurrentQuestionGroup.Name = FormQuestionGroup.Name;
+                            CurrentQuestionGroup.LastModifiedBy = CurrentUser.ID;
+                            CurrentQuestionGroup.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(CurrentQuestionGroup.Save(adc));
                         }
 
-                        prevQuestions = currQuestionGroup.GetAllQuestions(amsgs, adc);
-                        formQuestion.ForEach(newQuestion =>
+                        PrevQuestions = CurrentQuestionGroup.GetAllQuestions(amsgs, adc);
+                        FormQuestion.ForEach(NewQuestion =>
                         {
-                            var prevQuestion = prevQuestions.Where(question => question.ID == newQuestion.ID).First();
+                            var ExistingQuestion = PrevQuestions.Where(question => question.ID == NewQuestion.ID).First();
 
-                            if (prevQuestion.IsNotEmpty() && !prevQuestion.IsLocked &&
-                                    (!prevQuestion.IsActive.Equals(newQuestion.IsActive) ||
-                                    prevQuestion.IsRequired.Equals(newQuestion.IsRequired) ||
-                                    prevQuestion.IsAnswerDescriptionEnabled.Equals(newQuestion.IsAnswerDescriptionEnabled)))
+                            if (ExistingQuestion.IsNotEmpty() && !ExistingQuestion.IsLocked &&
+                                    (!ExistingQuestion.IsActive.Equals(NewQuestion.IsActive) ||
+                                    !ExistingQuestion.IsRequired.Equals(NewQuestion.IsRequired) ||
+                                    !ExistingQuestion.IsAnswerDescriptionEnabled.Equals(NewQuestion.IsAnswerDescriptionEnabled)))
                             {
-                                newQuestion.UpdateQuestionIfNotEmpty(prevQuestion);
-                                prevQuestion.LastModifiedBy = currentUser.ID;
-                                prevQuestion.LastModifiedDate = DateTime.UtcNow;
-                                msgs.AddRange(prevQuestion.Save(adc));
+                                NewQuestion.UpdateQuestionIfNotEmpty(ExistingQuestion);
+                                ExistingQuestion.LastModifiedBy = CurrentUser.ID;
+                                ExistingQuestion.LastModifiedDate = DateTime.UtcNow;
+                                msgs.AddRange(ExistingQuestion.Save(adc));
                             }
                             else
                             {
 
-                                var newFormQuestion = new FormQuestion()
+                                var NewFormQuestion = new FormQuestion()
                                 {
-                                    FormId = formId,
+                                    FormId = FormId,
                                     CreateDate = DateTime.UtcNow,
                                     LastModifiedDate = DateTime.UtcNow,
-                                    CreatedBy = currentUser.ID,
-                                    LastModifiedBy = currentUser.ID,
-                                    DisplayOrder = newQuestion.DisplayOrder,
-                                    FormQuestionGroupId = newQuestion.FormQuestionGroupId,
+                                    CreatedBy = CurrentUser.ID,
+                                    LastModifiedBy = CurrentUser.ID,
+                                    DisplayOrder = NewQuestion.DisplayOrder,
+                                    FormQuestionGroupId = NewQuestion.FormQuestionGroupId,
                                     IsTemplate = false,
                                     QuestionDataTypeId = QuestionDataType.NotSet,
-                                    QuestionTypeId = newQuestion.QuestionTypeId,
-                                    Text = newQuestion.Text,
-                                    Options = newQuestion.Options,
-                                    Link = newQuestion.Link,
-                                    Description = newQuestion.Description,
+                                    QuestionTypeId = NewQuestion.QuestionTypeId,
+                                    Text = NewQuestion.Text,
+                                    Options = NewQuestion.Options,
+                                    Link = NewQuestion.Link,
+                                    Description = NewQuestion.Description,
                                     IsActive = true,
                                     IsDeleted = false,
-                                    IsRequired = newQuestion.IsRequired,
-                                    IsAnswerDescriptionEnabled = newQuestion.IsAnswerDescriptionEnabled,
+                                    IsRequired = NewQuestion.IsRequired,
+                                    IsAnswerDescriptionEnabled = NewQuestion.IsAnswerDescriptionEnabled,
                                 };
-                                msgs.AddRange(newFormQuestion.Save(adc));
+                                msgs.AddRange(NewFormQuestion.Save(adc));
                             }
 
-                            var prevSettingsList = FormQuestionSettings.LoadByQuestionIds(formId, msgs);
+                            var PrevSettingsList = FormQuestionSettings.LoadByQuestionIds(NewQuestion.ID, msgs);
 
-                            if(prevSettingsList.IsNotEmpty())
-                                prevSettingsList.ForEach(setting=>msgs.AddRange(setting.Delete(adc)));
+                            if(PrevSettingsList.IsNotEmpty())
+                                PrevSettingsList.ForEach(Setting=> msgs.AddRange(Setting.Delete(adc)));
 
-                            newQuestion.questionSettings.ForEach(setting =>
+                            NewQuestion.QuestionSettings.ForEach(Setting =>
                             {
                                 var questionSetting = new FormQuestionSettings()
                                 {
-                                    QuestionId = newQuestion.ID,
-                                    Audience = setting.audience,
-                                    ShowFor = setting.showFor,
-                                    RequiredFor = setting.requiredFor,
+                                    QuestionId = NewQuestion.ID,
+                                    Audience = Setting.Audience,
+                                    Show = Setting.Show,
+                                    Required = Setting.Required,
                                     CreateDate = DateTime.UtcNow,
                                     LastModifiedDate = DateTime.UtcNow,
-                                    CreatedBy = currentUser.ID,
-                                    LastModifiedBy = currentUser.ID,
+                                    CreatedBy = CurrentUser.ID,
+                                    LastModifiedBy = CurrentUser.ID,
                                 };
                                 msgs.AddRange(questionSetting.Save(adc));
                             });
@@ -292,100 +291,5 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
         }
-
-        //[HttpGet]
-        //public ActionResult CopyFromQuestion(int formId, int sectionId, int questionIdToCopyFrom, string questionName)
-        //{
-        //    var msgs = new SystemMessages();
-        //    var currentAccount = SessionVariables.CurrentAccount;
-        //    var currentUser = SessionVariables.CurrentUser;
-
-        //    if (currentAccount.IsEmpty())
-        //        throw new Exception("Unauthorized Account.");
-        //    if (formId.IsEmpty())
-        //        throw new Exception("Invalid form id.");
-        //    if (sectionId.IsEmpty())
-        //        throw new Exception("Invalid section id.");
-        //    if (questionIdToCopyFrom.IsEmpty())
-        //        throw new Exception("Invalid question id.");
-        //    if (questionName.IsEmpty())
-        //        throw new Exception("Question Name is required.");
-
-        //    Database.ExecuteTransaction(
-        //        action: (SystemMessages amsgs, DatabaseConnection adc) =>
-        //        {
-        //            var form = currentAccount.GetForm(formId, msgs);
-
-        //            if (form.IsEmpty())
-        //                throw new Exception("Invalid form id.");
-
-        //            var questionToCopyFrom = FormQuestion
-        //                            .Load(criterias: new Hashtable{
-        //                            {"FormId", form.ID},
-        //                            {"FormQuestionGroupId", sectionId},
-        //                            {"QuestionTypeId", questionIdToCopyFrom}
-        //                            },
-        //                            msgs: msgs)?.First();
-
-        //            if(questionToCopyFrom.IsEmpty())
-        //                throw new Exception("Invalid 'Section Id' or 'Question Id'.");
-
-        //            var newFormQuestion = new FormQuestion
-        //            {
-        //                FormId = form.ID,
-        //                CreateDate = DateTime.UtcNow,
-        //                LastModifiedDate = DateTime.UtcNow,
-        //                CreatedBy = currentUser.ID,
-        //                LastModifiedBy = currentUser.ID,
-        //                DisplayOrder = questionToCopyFrom.DisplayOrder + 1,
-        //                FormQuestionGroupId = questionToCopyFrom.FormQuestionGroupId,
-        //                IsTemplate = false,
-        //                QuestionDataTypeId = QuestionDataType.NotSet,
-        //                QuestionTypeId = questionToCopyFrom.QuestionTypeId,
-        //                Text = questionName,
-        //                Options = questionToCopyFrom.Options,
-        //                Link = questionToCopyFrom.Link,
-        //                Description = questionToCopyFrom.Description,
-        //                IsActive = true,
-        //                IsDeleted = false,
-        //                IsRequired = questionToCopyFrom.IsRequired,
-        //                IsAnswerDescriptionEnabled = questionToCopyFrom.IsAnswerDescriptionEnabled,
-        //            };
-
-        //            var prevFormQuestions = FormQuestion
-        //                        .Load(criterias: new Hashtable{
-        //                            {"FormId", form.ID},
-        //                            {"FormQuestionGroupId", sectionId},
-        //                        },
-        //                        msgs: msgs);
-
-        //            if(prevFormQuestions.IsEmpty())
-        //                throw new Exception("Invalid 'Section Id'.");
-
-        //            prevFormQuestions.ForEach(question =>
-        //            {
-        //                if (question.DisplayOrder > questionToCopyFrom.DisplayOrder)
-        //                {
-        //                    question.DisplayOrder++;
-        //                    msgs.AddRange(question.Save());
-        //                }
-        //            });
-
-        //            msgs.AddRange(newFormQuestion.Save());
-
-        //        },
-        //        onSuccess: (SystemMessages smsgs) =>
-        //        {
-        //            msgs.AddRange(smsgs);
-        //            msgs.Add("Form Saved", MessageType.Success);
-        //        },
-        //        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-        //        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs));
-        //    if(msgs.HasNoErrors())
-        //        return GetFormQuestions(formId,sectionId);
-        //    return Json(
-        //            new ApiResponse(msgs, null),
-        //            JsonRequestBehavior.AllowGet);
-        //}
     }
 }
