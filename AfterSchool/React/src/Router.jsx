@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom';
 
 import { Loader } from 'components';
 import utils from 'utils';
+import FormBuilderSection from 'sections/FormBuilderSection';
 
 // eslint-disable-next-line react/display-name
 const Loadable = Component => props => {
@@ -54,12 +55,15 @@ function Router() {
       element: <UpdateVolunteerProfile />
     },
     {
+      path: '/Org/form/edit/:formId',
+      element: <FormBuilderSection />
+    },
+    {
       path: '*',
       element: <RedirectToExternal />
     }
   ]);
 }
-
 const RedirectToExternal = () => {
   const { pathWithOrigin, redirect } = utils;
 
