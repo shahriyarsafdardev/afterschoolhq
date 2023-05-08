@@ -1,4 +1,10 @@
 export default {
+  MuiChip: {
+    root: {
+      fontSize: '14px',
+      minWidth: '100px'
+    }
+  },
   MuiLink: {
     underlineHover: {
       textDecoration: 'underline',
@@ -45,5 +51,8 @@ export default {
         '-webkit-box-shadow': '0 0 0 100px #ffffff inset'
       }
     }
+  },
+  MuiInputBase: {
+    root: { '&.Mui-disabled': { color: 'gray' } }
   }
 };
