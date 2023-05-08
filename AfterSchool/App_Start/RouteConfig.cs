@@ -384,6 +384,18 @@ namespace AfterSchool
                 "{controller}/{action}/{id}",
                 new {controller = "pricing", action = "index", id = UrlParameter.Optional}
             );
+
+            routes.MapRoute(
+                "ActivitySelectDatesAllAge",
+                "{accountname}/{activitytype}/{activityname}/selectdates",
+                new
+                {
+                    controller = "r",
+                    action = "selectdates",
+                    accountname = UrlParameter.Optional,
+                    activitytype = UrlParameter.Optional,
+                    activityname = UrlParameter.Optional,
+                });
         }
     }
 }
