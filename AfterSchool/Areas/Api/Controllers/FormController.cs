@@ -231,10 +231,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 var ExistingQuestion = PrevQuestions.Where(question => question.ID == NewQuestion.ID).FirstOrDefault();
 
-                                if (ExistingQuestion.IsNotEmpty() && !ExistingQuestion.IsLocked &&
-                                        (!ExistingQuestion.IsActive.Equals(NewQuestion.IsActive) ||
-                                        !ExistingQuestion.IsRequired.Equals(NewQuestion.IsRequired) ||
-                                        !ExistingQuestion.IsAnswerDescriptionEnabled.Equals(NewQuestion.IsAnswerDescriptionEnabled)))
+                                if (ExistingQuestion.IsNotEmpty())
                                 {
                                     NewQuestion.UpdateQuestionIfNotEmpty(ExistingQuestion);
                                     ExistingQuestion.LastModifiedBy = CurrentUser.ID;

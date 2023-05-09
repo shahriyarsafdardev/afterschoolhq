@@ -8,11 +8,9 @@ namespace AfterSchool.Areas.Api.Models
     {
         public int Id { get; set; }
         public int? FormId { get; set; }
-        
-        public int? Id { get; set; }
+        public int? ID { get; set; }
         public string Name { get; set; }
         public int? DisplayOrder { get; set; }
-
         public bool? IsDeleted { get; set; }
         public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
 
@@ -35,7 +33,7 @@ namespace AfterSchool.Areas.Api.Models
         {
             return new FormQuestionGroupDto()
             {
-                Id = QuestionGroup.ID,
+                ID = QuestionGroup.ID,
                 FormId = QuestionGroup.FormId,
                 Name = QuestionGroup.Name,
                 DisplayOrder = QuestionGroup.DisplayOrder,
