@@ -1,6 +1,8 @@
 using AfterSchoolLibrary.Models;
+using RestSharp.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.WebPages;
 
 namespace AfterSchool.Areas.Api.Models
 {
@@ -22,6 +24,11 @@ namespace AfterSchool.Areas.Api.Models
                 DisplayOrder == null &&
                 IsDeleted == null &&
                 QuestionGroupDataTypeId == QuestionGroupDataType.NotSet;
+        }
+
+        public bool IsValid()
+        {
+            return Name.HasValue() || !Name.Equals("") || DisplayOrder.HasValue || IsDeleted.HasValue ;
         }
 
         public bool IsNotNull()

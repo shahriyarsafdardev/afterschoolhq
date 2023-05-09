@@ -140,7 +140,7 @@ namespace AfterSchool.Areas.Api.Controllers
         [HttpPost]
         public ActionResult SaveFormData(FormSettingsDto FormSettings, FormQuestionGroupDto FormQuestionGroup, List<FormQuestionDto> FormQuestion)
         {
-  
+
             var msgs = new SystemMessages();
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
@@ -154,7 +154,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (FormId.IsEmpty())
                     throw new Exception("Invalid Form Id");
 
-                var RequestedForm = CurrentAccount.GetForm(FormId??0, msgs);
+                var RequestedForm = CurrentAccount.GetForm(FormId ?? 0, msgs);
 
                 if (RequestedForm.IsEmpty())
                     throw new Exception("Invalid Form Id");
@@ -170,7 +170,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         var QuestionGroupExists = AfterSchoolLibrary.Models.FormQuestionGroup.Exists(criterias:
                             new Hashtable{
-                            {"Name", FormQuestionGroup.Name},
+                            {"ID", FormQuestionGroup.ID },
                             {"FormId", RequestedForm.ID},
                             {"IsDeleted", false}
                             },
@@ -180,43 +180,22 @@ namespace AfterSchool.Areas.Api.Controllers
                         FormQuestionGroup CurrentQuestionGroup;
                         List<FormQuestion> PrevQuestions;
 
-                        if (!QuestionGroupExists)
-                        {
-
-                            CurrentQuestionGroup = new FormQuestionGroup()
-                            {
-                                CreateDate = DateTime.UtcNow,
-                                CreatedBy = CurrentUser.ID,
-                                LastModifiedDate = DateTime.UtcNow,
-                                LastModifiedBy = CurrentUser.ID,
-                                DisplayOrder = RequestedForm.GetQuestionGroupCount(amsgs, adc) + 1,
-                                FormId = RequestedForm.ID,
-                                QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
-                                RegistrantTypeId = RegistrantType.Individual,
-                                Name = FormQuestionGroup.Name,
-                                IsDeleted = false,
-                                IsActive = true,
-                            };
-
-                            amsgs.AddRange(CurrentQuestionGroup.Save(adc));
-                            PrevQuestions = new List<FormQuestion>();
-
-                        }
-                        else
+                        if (QuestionGroupExists)
                         {
 
                             CurrentQuestionGroup = AfterSchoolLibrary.Models.FormQuestionGroup
                                     .Load(criterias: new Hashtable{
-                                    {"Name", FormQuestionGroup.Name},
+                                    {"ID", FormQuestionGroup.ID },
                                     {"FormId", RequestedForm.ID},
                                     {"IsDeleted", false}
                                     },
                                     msgs: amsgs, dc: adc)?.FirstOrDefault();
 
                             if (CurrentQuestionGroup.IsEmpty())
-                                throw new Exception("Invalid Section Name");
+                                throw new Exception("Invalid Section id");
 
-                            if (CurrentQuestionGroup.QuestionGroupDataTypeId == QuestionGroupDataType.NotSet)
+                            if (CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.NotSet) || 
+                                CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.Custom))
                             {
                                 CurrentQuestionGroup.Name = FormQuestionGroup.Name;
                                 CurrentQuestionGroup.LastModifiedBy = CurrentUser.ID;
@@ -224,7 +203,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 amsgs.AddRange(CurrentQuestionGroup.Save(adc));
                             }
 
-                            PrevQuestions = CurrentQuestionGroup.GetAllQuestions(amsgs, adc).Where(Question=>!Question.IsDeleted).ToList();
+                            PrevQuestions = CurrentQuestionGroup.GetAllQuestions(amsgs, adc).Where(Question => !Question.IsDeleted).ToList();
                             FormQuestion.ForEach(NewQuestion =>
                             {
                                 var ExistingQuestion = PrevQuestions.Where(question => question.ID == NewQuestion.ID).FirstOrDefault();
@@ -238,7 +217,6 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
                                 else if (ExistingQuestion.IsEmpty())
                                 {
-
                                     var NewFormQuestion = new FormQuestion()
                                     {
                                         FormId = FormId,
@@ -263,7 +241,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     msgs.AddRange(NewFormQuestion.Save(adc));
                                 }
 
-                                var PrevSettingsList = FormQuestionSettings.LoadByQuestionIds(NewQuestion.ID, msgs,adc);
+                                var PrevSettingsList = FormQuestionSettings.LoadByQuestionIds(NewQuestion.ID, msgs, adc);
 
                                 if (PrevSettingsList.Count > 0)
                                     PrevSettingsList.ForEach(Setting => msgs.AddRange(Setting.Delete(adc)));
@@ -286,19 +264,110 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             });
                         }
+                        else
+                           throw new Exception("Section does not exist");
 
                     }
                 },
                 onSuccess: (SystemMessages smsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(smsgs),
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => msgs.AddRange(emsgs));
-                
-            }catch(Exception ex)
+
+            }
+            catch (Exception ex)
             {
-                msgs.Add(ex.Message, MessageType.Error);   
+                msgs.Add(ex.Message, MessageType.Error);
             }
             return Json(
                         new ApiResponse(msgs, null),
+                        JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpPost]
+        public ActionResult SaveNewSection(FormQuestionGroupDto FormQuestionGroup)
+        {
+
+            var msgs = new SystemMessages();
+            var CurrentAccount = SessionVariables.CurrentAccount;
+            var CurrentUser = SessionVariables.CurrentUser;
+            int? NewSectionId = null;
+            try
+            {
+
+                if (CurrentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
+
+                if (FormQuestionGroup.IsEmpty())
+                    throw new Exception("Invalid Question Group");
+
+                if (FormQuestionGroup.FormId.IsEmpty())
+                    throw new Exception("Invalid Form Id");
+
+                Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    var RequestedForm = CurrentAccount.GetForm(FormQuestionGroup.FormId ?? 0, msgs, adc);
+
+                    if (RequestedForm.IsEmpty())
+                        throw new Exception("Invalid Form Id");
+
+                    if (FormQuestionGroup.IsNotNull() && FormQuestionGroup.IsValid())
+                    {
+                        var QuestionGroupExists = AfterSchoolLibrary.Models.FormQuestionGroup.Exists(criterias:
+                            new Hashtable{
+                            {"Name", FormQuestionGroup.Name},
+                            {"FormId", RequestedForm.ID},
+                            {"IsDeleted", false}
+                            },
+                            msgs: amsgs,
+                            dc: adc);
+
+                        if (!QuestionGroupExists)
+                        {
+                            var NewQuestionGroup = new FormQuestionGroup()
+                            {
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = CurrentUser.ID,
+                                LastModifiedDate = DateTime.UtcNow,
+                                LastModifiedBy = CurrentUser.ID,
+                                DisplayOrder = RequestedForm.GetQuestionGroupCount(amsgs, adc) + 1,
+                                FormId = RequestedForm.ID,
+                                QuestionGroupDataTypeId = QuestionGroupDataType.NotSet,
+                                RegistrantTypeId = RegistrantType.Individual,
+                                Name = FormQuestionGroup.Name,
+                                IsDeleted = false,
+                                IsActive = true,
+                            };
+
+                            amsgs.AddRange(NewQuestionGroup.Save(adc));
+                            if(amsgs.HasNoErrors())
+                                NewSectionId = NewQuestionGroup.ID;
+                        }
+                        else
+                            throw new Exception("Section with same name already exists");
+
+                    }
+                    else
+                    {
+                        if (FormQuestionGroup.IsNull())
+                            throw new Exception("Section is empty");
+                        else
+                            throw new Exception("Section is not valid");
+                    }
+
+                },
+                onSuccess: (SystemMessages smsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(smsgs),
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => msgs.AddRange(emsgs));
+
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.Error);
+            }
+            return Json(
+                        new ApiResponse(msgs, NewSectionId),
                         JsonRequestBehavior.AllowGet);
         }
     }
