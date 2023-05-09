@@ -312,6 +312,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.Messages = msgs;
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                return View("EditNew", form);
             return View(form);
         }
 

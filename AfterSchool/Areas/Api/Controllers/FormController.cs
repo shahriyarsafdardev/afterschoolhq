@@ -42,7 +42,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         !QuestionGroup.IsDeleted
                         )
                     .OrderBy(
-                        questionGroup => questionGroup
+                        QuestionGroup => QuestionGroup
                         .DisplayOrder
                         )
                     .ToList();
