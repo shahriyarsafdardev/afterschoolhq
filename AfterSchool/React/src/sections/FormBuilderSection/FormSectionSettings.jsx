@@ -7,12 +7,12 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 
 import useStyles from './styles';
+import { toInteger } from 'lodash';
 import { Loader } from 'components';
+import { newQuestion } from './helper';
 import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
-import { toInteger } from 'lodash';
-import { newQuestion } from './helper';
 
 function FormSectionSettings() {
   const classes = useStyles();
@@ -32,14 +32,31 @@ function FormSectionSettings() {
     submitFormSectionData,
     questionsGroups,
     questions,
+    updateSectionName,
     sectionLoading
   } = useFormBuilder();
-  const currentSection = questionsGroups.find(qg => qg.QuestionGroupDataTypeId == questionGroup);
-  const sectionName = currentSection?.Name || '';
+  const currentSectionIndex = questionsGroups.findIndex(
+    qg => qg.QuestionGroupDataTypeId == questionGroup
+  );
+  const currentSection = questionsGroups[currentSectionIndex];
+  const [sectionName, setSectionName] = useState(currentSection?.Name || '');
 
   useEffect(() => {
     loadSectionData(formId, questionGroup);
   }, [formId, questionGroup]);
+
+  useEffect(() => {
+    setSectionName(currentSection?.Name || '');
+  }, [currentSection?.Name]);
+
+  const updateSectionNameHandler = async () => {
+    const updatedQuestionsGroups = [...questionsGroups];
+    updatedQuestionsGroups[currentSectionIndex] = {
+      ...updatedQuestionsGroups[currentSectionIndex],
+      Name: sectionName
+    };
+    await updateSectionName(updatedQuestionsGroups);
+  };
 
   const initialValues = {};
   questions.map(question => (initialValues[question.DisplayOrder] = question));
@@ -65,9 +82,8 @@ function FormSectionSettings() {
   const { handleSubmit, values, setFieldValue, setValues } = formik;
 
   const addNewQuestionHandler = index => {
-    const newDisplayOrder = toInteger(
-      index || values[Object.keys(values).at(-1)]?.DisplayOrder || -1
-    );
+    const newDisplayOrder =
+      toInteger(index || values[Object.keys(values).at(-1)]?.DisplayOrder || -1) + 1;
     const newQuest = {
       ...newQuestion,
       GroupTitle: sectionName,
@@ -104,6 +120,9 @@ function FormSectionSettings() {
       newValues[newRow] = { ...restValues[k], DisplayOrder: newRow };
     });
 
+    const newKey = Object.keys(newValues).length + 1;
+    newValues[newKey] = { ...deletedValue, IsDeleted: true, DisplayOrder: newKey };
+
     setValues({ ...newValues });
   };
 
@@ -116,7 +135,12 @@ function FormSectionSettings() {
       return acc;
     }, {});
 
-    newValues[Number(key) + 1] = { ...copiedValue, ID: 0, DisplayOrder: Number(key) + 1 };
+    newValues[Number(key) + 1] = {
+      ...copiedValue,
+      ID: 0,
+      QuestionDataTypeId: 0,
+      DisplayOrder: Number(key) + 1
+    };
     formik.setValues(newValues);
   };
 
@@ -157,8 +181,7 @@ function FormSectionSettings() {
     if (!destination) return;
 
     // const { [source.index]: copiedValue, ...restValues } = values;
-    // moveObjectInFormikState(source.index, destination.index);
-    console.log(source, destination);
+    moveObjectInFormikState(source.index, destination.index);
 
     // const temp = [...options];
     // const [sourceValue] = temp.splice(source.index, 1);
@@ -275,6 +298,8 @@ function FormSectionSettings() {
                 fullWidth
                 variant="outlined"
                 value={sectionName}
+                onChange={event => setSectionName(event.target.value)}
+                disabled={currentSection.QuestionGroupDataTypeId !== 0}
               />
             </Box>
             <Box>
@@ -289,35 +314,41 @@ function FormSectionSettings() {
                     >
                       {provided => (
                         <div ref={provided.innerRef} {...provided.droppableProps}>
-                          {Object.keys(values).map((key, index) => (
-                            <Draggable draggableId={`question-${key}`} index={key} key={key}>
-                              {(provided, snapshot) => (
-                                <Box
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  //   {...provided.dragHandleProps}
-                                  className={
-                                    snapshot.isDragging
-                                      ? classes.whiteBorder
-                                      : classes.transparentBorder
-                                  }
+                          {Object.keys(values).map(
+                            (key, index) =>
+                              !values[key].IsDeleted && (
+                                <Draggable
+                                  draggableId={`question-${key}`}
+                                  index={Number(key)}
+                                  key={key}
                                 >
-                                  <span {...provided.dragHandleProps}>
-                                    <DragIndicatorIcon style={{ float: 'left' }} />
-                                  </span>
-                                  <RenderQuestion
-                                    index={key}
-                                    key={`${key}-${values[key]?.ID}${reRender}`}
-                                    value={values[key]}
-                                    setFieldValue={setFieldValue}
-                                    handleDelete={handleDelete}
-                                    handleCopy={handleCopy}
-                                    handleAddNewQuestion={addNewQuestionHandler}
-                                  />
-                                </Box>
-                              )}
-                            </Draggable>
-                          ))}
+                                  {(provided, snapshot) => (
+                                    <Box
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className={
+                                        snapshot.isDragging
+                                          ? classes.whiteBorder
+                                          : classes.transparentBorder
+                                      }
+                                    >
+                                      <span {...provided.dragHandleProps}>
+                                        <DragIndicatorIcon style={{ float: 'left' }} />
+                                      </span>
+                                      <RenderQuestion
+                                        index={key}
+                                        key={`${key}-${values[key]?.ID}${reRender}`}
+                                        value={values[key]}
+                                        setFieldValue={setFieldValue}
+                                        handleDelete={handleDelete}
+                                        handleCopy={handleCopy}
+                                        handleAddNewQuestion={addNewQuestionHandler}
+                                      />
+                                    </Box>
+                                  )}
+                                </Draggable>
+                              )
+                          )}
                           {provided.placeholder}
                         </div>
                       )}

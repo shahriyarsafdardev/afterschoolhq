@@ -40,7 +40,7 @@ const RenderQuestion = ({
   const [question, setQuestion] = useState(value);
   const [showAudience, setShowAudience] = useState(false);
   const { dropdown, radioList, checkBoxList } = questionType;
-  const { ID, Text, Options, QuestionTypeId, QuestionSettings } = question;
+  const { ID, Text, Options, QuestionTypeId, QuestionSettings, QuestionDataTypeId } = question;
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
   const questionTypesOptions = Object.keys(questionType).map(key => ({
@@ -53,7 +53,8 @@ const RenderQuestion = ({
     return { key, value };
   });
 
-  const [options, setOptions] = useState(genOptions);
+  const [options, setOptions] = useState(genOptions || []);
+  const customQuestion = QuestionDataTypeId === 0;
 
   function renderOptions() {
     const radioListIcon = radioList === QuestionTypeId;
@@ -110,7 +111,7 @@ const RenderQuestion = ({
 
     const renderOption = ({ option, index, dragHandleProps }) => {
       return (
-        <Grid container className={classes.deleteIcon}>
+        <Grid container className={classes.deleteIcon} key={`value-${index}`}>
           <Grid item lg={6} xs={12} sm={6} className={cs(classes.displayFlex)}>
             <span {...dragHandleProps}>
               <DragIndicatorIcon style={{ float: 'left' }} />
@@ -130,7 +131,7 @@ const RenderQuestion = ({
               onChange={event => handleKeyChange(index, event)}
             />
           </Grid>
-          <Grid item lg={4} xs={12} sm={6}>
+          <Grid item lg={4} xs={12} sm={6} key={`option-${index}`}>
             <TextField
               className={classes.formControlClass}
               fullWidth
@@ -236,20 +237,24 @@ const RenderQuestion = ({
             onChange={event => {
               setQuestion({ ...question, Text: event.target.value });
             }}
+            disabled={!customQuestion}
           />
           <DropDown
             question={{ ...question, ...{ options: questionTypesOptions } }}
             setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
+            disabled={!customQuestion}
           />
           <DeleteOutlineOutlinedIcon
             style={{
-              color: '#FF7070',
+              color: `${customQuestion ? '#FF7070' : '#494949'}`,
               width: '30px',
               height: 'auto',
               margin: '4px 6px',
-              cursor: 'pointer'
+              cursor: `${customQuestion ? 'pointer' : 'not-allowed'}`
             }}
-            onClick={() => handleDelete(index)}
+            onClick={() => {
+              if (customQuestion) handleDelete(index);
+            }}
           />
           <FileCopyOutlinedIcon
             onClick={() => handleCopy(index)}
@@ -262,7 +267,13 @@ const RenderQuestion = ({
             }}
           />
           <AddOutlinedIcon
-            style={{ color: '#494949', width: '30px', height: 'auto', margin: '4px 6px' }}
+            style={{
+              color: '#494949',
+              width: '30px',
+              height: 'auto',
+              margin: '4px 6px',
+              cursor: 'pointer'
+            }}
             onClick={() => handleAddNewQuestion(index)}
           />
         </Box>
@@ -309,7 +320,7 @@ const RenderQuestion = ({
             />
           </Box>
         </Box>
-        {showOptions && Options && renderOptions()}
+        {showOptions && renderOptions()}
       </Box>
     </Box>
   );
