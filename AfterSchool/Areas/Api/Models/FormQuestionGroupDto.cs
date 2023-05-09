@@ -1,17 +1,19 @@
 using AfterSchoolLibrary.Models;
+using RestSharp.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.WebPages;
 
 namespace AfterSchool.Areas.Api.Models
 {
     public class FormQuestionGroupDto
     {
-        public int? FormId { get; set; }
-        public int? ID { get; set; }
-        public string Name { get; set; }
-        public int? DisplayOrder { get; set; }
-        public bool? IsDeleted { get; set; }
-        public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
+        public int? FormId { get; set; }//Required
+        public int? ID { get; set; }//Not Required
+        public string Name { get; set; }//Required
+        public int? DisplayOrder { get; set; }//Required
+        public bool? IsDeleted { get; set; }//Required-False
+        public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }//Required-0
 
         public bool IsNull()
         {
@@ -21,6 +23,11 @@ namespace AfterSchool.Areas.Api.Models
                 DisplayOrder == null &&
                 IsDeleted == null &&
                 QuestionGroupDataTypeId == QuestionGroupDataType.NotSet;
+        }
+
+        public bool IsValid()
+        {
+            return Name.HasValue() || !Name.Equals("") || DisplayOrder.HasValue || IsDeleted.HasValue ;
         }
 
         public bool IsNotNull()
