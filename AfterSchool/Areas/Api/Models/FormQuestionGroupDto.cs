@@ -8,18 +8,39 @@ namespace AfterSchool.Areas.Api.Models
     {
         public int Id { get; set; }
         public int? FormId { get; set; }
+        
+        public int? Id { get; set; }
         public string Name { get; set; }
         public int? DisplayOrder { get; set; }
+
+        public bool? IsDeleted { get; set; }
         public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
+
+        public bool IsNull()
+        {
+            return 
+                FormId == null &&
+                Name == null &&
+                DisplayOrder == null &&
+                IsDeleted == null &&
+                QuestionGroupDataTypeId == QuestionGroupDataType.NotSet;
+        }
+
+        public bool IsNotNull()
+        {
+            return !IsNull();
+        }
 
         public static FormQuestionGroupDto GetByQuestionGroup(FormQuestionGroup QuestionGroup)
         {
             return new FormQuestionGroupDto()
             {
+                Id = QuestionGroup.ID,
                 FormId = QuestionGroup.FormId,
                 Name = QuestionGroup.Name,
                 DisplayOrder = QuestionGroup.DisplayOrder,
-                QuestionGroupDataTypeId = QuestionGroup.QuestionGroupDataTypeId
+                QuestionGroupDataTypeId = QuestionGroup.QuestionGroupDataTypeId,
+                IsDeleted = QuestionGroup.IsDeleted,
             };
         }
 

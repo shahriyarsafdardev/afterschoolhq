@@ -57,7 +57,7 @@ namespace AfterSchool.Areas.Api.Models
                 QuestionTypeId = Question.QuestionTypeId,
                 QuestionDataTypeId = Question.QuestionDataTypeId,
                 FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
-                QuestionSettings = FormQuestionSettingDto.fromFormSettingsList(FormQuestionSettings.LoadByQuestionIds(Question.ID)),
+                QuestionSettings = FormQuestionSettingDto.fromFormSettingsList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0),
             };
         }
 
