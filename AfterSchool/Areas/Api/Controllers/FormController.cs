@@ -291,7 +291,7 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
-            int? NewSectionId = null;
+            FormQuestionGroupDto? NewSection = null;
             try
             {
 
@@ -342,7 +342,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             amsgs.AddRange(NewQuestionGroup.Save(adc));
                             if(amsgs.HasNoErrors())
-                                NewSectionId = NewQuestionGroup.ID;
+                                NewSection = FormQuestionGroupDto.GetByQuestionGroup(NewQuestionGroup);
                         }
                         else
                             throw new Exception("Section with same name already exists");
@@ -367,7 +367,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 msgs.Add(ex.Message, MessageType.Error);
             }
             return Json(
-                        new ApiResponse(msgs, NewSectionId),
+                        new ApiResponse(msgs, NewSection),
                         JsonRequestBehavior.AllowGet);
         }
     }
