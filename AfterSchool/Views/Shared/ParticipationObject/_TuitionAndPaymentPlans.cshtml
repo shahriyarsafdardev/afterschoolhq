@@ -1,24 +1,45 @@
-﻿@model ParticipationObjectViewModel
+@model ParticipationObjectViewModel
+@{
+    var paymentPlan = Model.ParticipationObject.PaymentPlans.FirstOrDefault();
+} 
 <p>
-    Registration Fee payment options:
     <ul>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
         <li>
             1 payment of
-            @ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost)@(Model.ParticipationObject.PaymentPlans.Any() ? ", or " : "")
+            @Html.Raw(ParticipationObjectUI.PrintRegistrationFee(Model.ParticipationObject, Model.IsCheckoutCost))
+            @(Model.ParticipationObject.PaymentPlans.Any() ? ", or " : "")
         </li>
         }
         @foreach (var plan in Model.ParticipationObject.PaymentPlans)
         {
             <li>
                 @plan.TotalPeriods payments of
-                @ParticipationObjectUI.PrintPlanFee(plan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)
+                <strong>@ParticipationObjectUI.PrintPlanFee(plan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
 
                 @if (plan.TotalPeriods > 1)
-                {    
+                {
                     <span>every</span>
                     @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() @(plan.ID != Model.ParticipationObject.PaymentPlans.Last().ID ? ", or " : "")
+                    @Html.Raw(Model.IsCheckoutCost ? "" : 
+                        $" (you will receive <strong>{(plan.CostPerPeriod - plan.GetConvenienceFee(null)).ToCurrency()}</strong> per payment)")
+                }
+                @if (paymentPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                {
+                    <span> starting <strong>today</strong></span>
+                }
+                else if (paymentPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts && !paymentPlan.StartDate.HasValue)
+                {
+                    var accountTodayDate = Model.ParticipationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+                    if (Model.ParticipationObject.StartDate.HasValue && Model.ParticipationObject.StartDate.Value.Date.IsAfter(accountTodayDate.Date))
+                    {
+                        <span>starting on <strong>@Model.ParticipationObject.StartDate.ToShortDateString()</strong></span>
+                    }
+                    else
+                    {
+                        <span>starting <strong>today</strong></span>
+                    }
                 }
             </li>
         }

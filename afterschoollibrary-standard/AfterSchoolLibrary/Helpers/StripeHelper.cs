@@ -1304,7 +1304,7 @@ namespace AfterSchoolLibrary.Billing
             catch (StripeException ex)
             {
                 msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Subscription was not created", MessageType.UserError);
+                msgs.Add($"Subscription was not updated", MessageType.UserError);
             }
 
             return subscription;
@@ -1322,7 +1322,7 @@ namespace AfterSchoolLibrary.Billing
             return CreateRegistrantSubscription(customer.Id, plan.Id, isProrated, sourceId, platformFeePercent, startDate, null, null, stripeAccountId, stripeCouponId, metaData, msgs);
         }
 
-        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, bool? billingCycleAnchorNow, bool? billingCycleAnchorUnchanged, DateTime? trialEndDate, bool? prorate, string couponId, SystemMessages msgs)
+        public Stripe.Subscription UpdateSubscription(string subscriptionId, string priceId, SubscriptionBillingCycleAnchor billingCycleAnchor, DateTime? trialEndDate, bool? prorate, string couponId, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             
@@ -1341,12 +1341,9 @@ namespace AfterSchoolLibrary.Billing
             
             if (couponId.IsNotEmpty())
                 options.Coupon = couponId;
-            
-            if (billingCycleAnchorNow.HasValue)
-                options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now;
 
-            if (billingCycleAnchorUnchanged.HasValue)
-                options.BillingCycleAnchor = SubscriptionBillingCycleAnchor.Unchanged;
+            if (billingCycleAnchor.IsNotEmpty())
+                options.BillingCycleAnchor = billingCycleAnchor;
 
             if (trialEndDate.HasValue)
                 options.TrialEnd = trialEndDate;

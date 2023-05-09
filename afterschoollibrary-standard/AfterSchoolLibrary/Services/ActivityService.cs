@@ -2852,18 +2852,18 @@ namespace AfterSchoolLibrary.Services
 
             var schedule = activity.GetSchedule(msgs, dc);
             var upcomingInstance = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault();
-            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth.Day, schedule, upcomingInstance,
+            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, upcomingInstance,
                 DateTime.UtcNow);
         }
 
         internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
-            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, int dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
             DateTime utcNow)
         {
             if (!activityHasSchedule)
                 return (null, null);
 
-            var startDate = schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
+            var startDate = dayOfMonth; // schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
             var paymentEnd = schedule.EndDate.Value;
 
             switch (billingPeriodType)
@@ -2878,8 +2878,8 @@ namespace AfterSchoolLibrary.Services
                 }
                 case BillingPeriodType.Month:
                 {
-                    var startingDay = new DateTime(startDate.Year, startDate.Month, dayOfMonth);
-                    var paymentStart = startingDay.IsAfter(utcNow) ? startingDay : utcNow;
+                    // var startingDay = new DateTime(startDate.Year, startDate.Month, startDate.Day);
+                    var paymentStart = new DateTime(startDate.Year, startDate.Month, startDate.Day); //startingDay.IsAfter(utcNow) ? startingDay : utcNow;
                     return (paymentStart, paymentEnd);
                 }
                 default:

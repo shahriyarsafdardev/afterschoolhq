@@ -66,9 +66,10 @@ namespace AfterSchool.Models
             if (participationObject.Cost.HasValue)
             {
                 if (isCheckoutCost)
-                    return participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency();
+                    return $"<b>{participationObject.GetCheckoutCostWithConvenienceFee().ToCurrency()}</b>";
 
-                return participationObject.Cost.ToCurrency();
+                return $"<b>{participationObject.Cost.ToCurrency()}</b> " +
+                       $"(you will receive <b>{(participationObject.Cost - participationObject.GetConvenienceFee()).ToCurrency()}</b>)";
             }
 
             return "Free";
@@ -161,20 +162,18 @@ namespace AfterSchool.Models
 
         public static string PrintRegistrationPeriod(ParticipationObject participationObject)
         {
-            if (participationObject.RegistrationPeriod.IsNotEmpty())
+            if (participationObject.RegistrationPeriod.IsEmpty()) 
+                return "Registration is closed";
+            
+            var account = participationObject.OwnerAccount;
+
+            if (participationObject.RegistrationPeriod.WillOpen(account))
+                return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
+            if (participationObject.RegistrationPeriod.IsOpen(account))
             {
-                var account = participationObject.OwnerAccount;
-
-                if (participationObject.RegistrationPeriod.WillOpen(account))
-                    return $"<span style=\"display:inline-block;\">Registration will open</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.StartDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.StartDateTime.Value.ToShortTimeString()}</span>";
-                else if (participationObject.RegistrationPeriod.IsOpen(account))
-                {
-                    if (participationObject.IsContinuousEnrollmentEnabled)
-                        return "<span style=\"display:inline-block;\">Registration will remain open</span>";
-                    else
-                        return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
-                }
-
+                if (participationObject.IsContinuousEnrollmentEnabled)
+                    return "<span style=\"display:inline-block;\">Registration will remain open</span>";
+                return $"<span style=\"display:inline-block;\">Registration will close</span> <span style=\"display:inline-block;\">{participationObject.RegistrationPeriod.EndDateTime.ToShortDateString()} {participationObject.RegistrationPeriod.EndDateTime.Value.ToShortTimeString()}</span>";
             }
             return "Registration is closed";
         }

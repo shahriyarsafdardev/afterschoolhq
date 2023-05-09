@@ -1,43 +1,38 @@
-﻿@model ParticipationObjectViewModel
+@model ParticipationObjectViewModel
 @if (Model.ParticipationObject.SubscriptionPlans.Any())
 {
     var subscriptionPlan = Model.ParticipationObject.SubscriptionPlans.First();
     <span>
         @if (!Model.ParticipationObject.IsRegistrationFree)
         {
-            <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today plus</span>
+            if (Model.IsCheckoutCost)
+            {
+                <span>Pay</span> <strong>@Model.ParticipationObject.Cost.ToCurrency()</strong> <span>today </span>
+            }
+            <span>plus</span>
         }
+        <span>
+        <strong>@((subscriptionPlan.CostPerPeriod - (Model.IsCheckoutCost ? 0 :
+                    subscriptionPlan.GetConvenienceFee(Model.ParticipationObject.OwnerAccount))).ToCurrency())</strong>
+        every
+        <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
 
-        @if (subscriptionPlan.SplitCostEvenly)
+        @if (subscriptionPlan.StartDate.HasValue)
         {
-            <span>
-                a fee to be determined after all students are registered
-            </span>
+            <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
         }
-        else
+
+        @if (subscriptionPlan.EndDate.HasValue)
         {
-            <span>
-                <strong>@ParticipationObjectUI.PrintPlanFee(subscriptionPlan, Model.ParticipationObject.OwnerAccount, Model.IsCheckoutCost)</strong>
-                every
-                <strong>@subscriptionPlan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()</strong>
+            if (subscriptionPlan.StartDate.HasValue)
+            {
+                <span> and </span>
+            }
 
-                @if (subscriptionPlan.StartDate.HasValue)
-                {
-                    <span>starting on <strong>@subscriptionPlan.StartDate.ToShortDateString()</strong></span>
-                }
-
-                @if (subscriptionPlan.EndDate.HasValue)
-                {
-                    if (subscriptionPlan.StartDate.HasValue)
-                    {
-                        <span> and </span>
-                    }
-
-                    <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
-                }
-
-            </span>
+            <span>ending on <strong>@subscriptionPlan.EndDate.ToShortDateString()</strong></span>
         }
+        <span>@(Model.IsCheckoutCost ? "" : ")")</span>
+        </span>
 
         @if (subscriptionPlan.RegFeeAsDownPayment && !Model.ParticipationObject.IsRegistrationFree)
         {

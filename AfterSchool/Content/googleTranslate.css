@@ -1,4 +1,4 @@
-﻿body{
+body{
     top:0 !important;
 }
 .goog-te-banner-frame {
@@ -8,6 +8,10 @@
 }
 
 #google_translate_element {
+    display: none;
+}
+
+.skiptranslate {
     display: none;
 }
 

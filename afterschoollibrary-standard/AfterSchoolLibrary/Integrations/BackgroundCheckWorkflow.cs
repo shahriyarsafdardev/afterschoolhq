@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -118,6 +119,35 @@ namespace AfterSchoolLibrary.Integrations
                             if (msgs.HasNoErrors())
                                 msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
                         }
+
+                        if (candidateId.IsEmpty() && backgroundCheck.IsEmpty())
+                        {
+                            candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
+                            
+                            var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
+                            
+                            var newBackgroundCheck = new BackgroundCheck
+                            {
+                                WebUserId = webUser.ID!.Value,
+                                RequestedForFiscalAccountId = volunteerApproval.AccountId.Value,
+                                BackgroundCheckStatusId = BackgroundCheckStatus.EmailSentToVolunteer,
+                                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
+                                SterlingCandidateId = candidateId,
+                                SterlingInviteUrl = backgroundCheckUrl,
+                                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                                IsActive = true,
+                                CreateDate = DateTime.UtcNow,
+                            };
+                            
+                            if (msgs.HasNoErrors())
+                                msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
+                            
+                            // if(msgs.HasNoErrors())
+                            //     EmailHelper.InitiateBackgroundCheckMail(webUser, null, backgroundCheckUrl, msgs);
+                        }
+                        
                     }
                 }
             }

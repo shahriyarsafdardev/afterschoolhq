@@ -1,4 +1,4 @@
-﻿@model List<FormQuestionViewModel>
+@model List<FormQuestionViewModel>
 
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
@@ -98,7 +98,8 @@
                             Password <span class="text-danger">*</span>
                         </label>
                         <div class="col-md-6">
-                            <input id="password1" name="password1" type="password" class="form-control" />
+                            <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" />
+                            @Html.Partial("_PasswordStrengthBarLight")
                         </div>
                     </div>
 
@@ -123,7 +124,7 @@
                     </div>
 
                     <div class="padding-v-20">
-                        <button type="submit" id="btn-create-account" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                        <button type="submit" id="form-submit" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
                     </div>
 
                     <div class="row">
@@ -137,12 +138,12 @@
         </div>
     </div>
 </div>
-
+<script src="~/Assets/js/password-checker.js"></script>
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#sign-up-form').submit(function () {
-            $('#btn-create-account').html('Saving...');
-            $('#btn-create-account').prop('disabled', true);
+            $('#form-submit').html('Saving...');
+            $('#form-submit').prop('disabled', true);
         });
     });
 </script>

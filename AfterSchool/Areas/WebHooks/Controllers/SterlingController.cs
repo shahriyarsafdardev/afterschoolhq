@@ -49,10 +49,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             "Approve By Sterling",
                             DateTime.UtcNow.AddYears(1),
                             null,
+                            DateTime.UtcNow,
                             msgs
                         );
                     
-                    if(responseBody.result == "Review")
+                    if(responseBody.result == "Consider")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId, 
                             TaskStatus.ReviewBackground, 
                             ApplicationStatus.FailedBackgroundCheck, 

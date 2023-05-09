@@ -564,7 +564,7 @@ namespace AfterSchoolLibrary.Models
             int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var existingInstances = this.GetInstances(false, msgs, dc);
+            var existingInstances = GetInstances(false, msgs, dc);
 
             // IN SESSION
             // delete in session instances
@@ -591,7 +591,7 @@ namespace AfterSchoolLibrary.Models
                                 instance.EndDateTime.Value == newInstance.EndDateTime.Value
                             ))
                     .ToList()
-                    .ForEach(instance => this.AddInstance(instance, InstanceType.InSession, loggedInUserId, msgs, dc));
+                    .ForEach(instance => AddInstance(instance, InstanceType.InSession, loggedInUserId, msgs, dc));
 
                 // update instances
                 existingInstances
@@ -603,7 +603,7 @@ namespace AfterSchoolLibrary.Models
                         )
                     )
                     .ToList()
-                    .ForEach(instance => this.UpdateInstance(instance, scheduleDates
+                    .ForEach(instance => UpdateInstance(instance, scheduleDates
                         .FirstOrDefault(newInstance =>
                             newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
                             newInstance.EndDateTime.Value == instance.EndDateTime.Value
@@ -634,10 +634,10 @@ namespace AfterSchoolLibrary.Models
                         .Any())
                 .ToList()
                 .ForEach(date =>
-                    this.AddInstance(new DateRange(date, date), InstanceType.OutOfSession, loggedInUserId, msgs, dc));
+                    AddInstance(new DateRange(date, date), InstanceType.OutOfSession, loggedInUserId, msgs, dc));
 
 
-            msgs.AddRange(this.ValidateInSessionInstances(dc));
+            msgs.AddRange(ValidateInSessionInstances(dc));
 
             return msgs;
         }

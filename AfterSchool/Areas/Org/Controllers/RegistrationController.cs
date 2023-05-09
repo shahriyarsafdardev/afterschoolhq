@@ -573,7 +573,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
             // Get the uid of the activity before deleting the registration
-            var activityUid = registration.GetFirstParticipationObject(msgs).Uid;
+            var activityUid = registration.GetFirstParticipationObject(msgs)?.Uid;
 
             selectedRegistration.CancelAll(msgs);
 
@@ -879,7 +879,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                 ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                 ViewBag.Messages = msgs;
                 ViewBag.Volunteers = getVolunteers;
@@ -909,7 +909,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                 ViewBag.Messages = msgs;
                 return View("messagedetail", am);
             }

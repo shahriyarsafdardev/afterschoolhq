@@ -37,9 +37,12 @@ namespace AfterSchoolLibrary.Services
 
             // if the person registering is the student
             // TODO: Handle better if provider on the backend is registering the student
-            var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            //var masterRegistrant = loggedInUser.GetMasterParentOrStudentRegistrant(msgs, dc);
+            var masterRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs, dc);
 
-            if (masterRegistrant.IsNotEmpty() && masterRegistrant.PersonTypeId == RegistrantPersonType.Student)
+            // this is the email that is sent to parents if the main registrant is the student
+            // ** PARENT EMAIL if student is registering
+            if (masterRegistrant.IsNotEmpty() && masterRegistrant.IsStudent && masterRegistrant.GetParentOrGuardian(msgs, dc).IsNotEmpty())
                 msgs.AddRange(EmailHelper.SendRegistrationConfirmed(checkoutObject, customMessage, loggedInUser, true,
                     false, dc));
         }
@@ -134,8 +137,9 @@ namespace AfterSchoolLibrary.Services
             // if there is room
             if (!seatsAvailable.HasValue || seatsAvailable >= numberOfSeatsRequested)
             {
-                var isStudentOrTeacherRegistering = masterRegistrant.IsEmpty() ||
-                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId);
+                var isStudentOrTeacherRegistering = (masterRegistrant.IsEmpty() ||
+                                                    (masterRegistrant.WebUserId.HasValue && loggedInWebUserId == masterRegistrant.WebUserId)) &&
+                                                    masterRegistrant?.PersonTypeId != RegistrantPersonType.Adult;
 
                 // if the person registering is the student
                 if (participationObject.RequiresParentalConsent && isStudentOrTeacherRegistering)
@@ -878,7 +882,7 @@ namespace AfterSchoolLibrary.Services
             var paidFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
             var hasSubscription = submittedRecord.GetActiveSubscription(participationObject, msgs, dc).IsNotEmpty();
 
-            return paidFee && hasSubscription;
+            return paidFee || hasSubscription;
         }
 
         public static List<Registration> GetCurrentRelatedRegistrations(this Registration registration,
@@ -1120,8 +1124,8 @@ namespace AfterSchoolLibrary.Services
                 lastName = registrant.LastName;
                 email = registrant.Email;
             }
-
-            registration.FindAndSetFirstRegistration(firstName, lastName, email, msgs, dc);
+            if (firstName.IsNotEmpty() && lastName.IsNotEmpty() && email.IsNotEmpty())
+                registration.FindAndSetFirstRegistration(firstName, lastName, email, msgs, dc);
         }
 
         public static bool IsPaid(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)

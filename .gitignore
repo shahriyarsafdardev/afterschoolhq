@@ -50,6 +50,7 @@ Thumbs.db
 # User preferences
 *.user
 /afterschool-orm-generator
+*.csproj.user
 
 ### Rider ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -59,3 +60,6 @@ Thumbs.db
 .idea
 *.bak
 *.user
+node_modules
+dist
+.env

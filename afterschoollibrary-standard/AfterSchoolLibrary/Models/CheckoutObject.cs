@@ -531,7 +531,7 @@ namespace AfterSchoolLibrary.Models
         {
             var couponDiscount = CouponValue();
             var costWithDiscount = ParticipationObject.GetPostPayCheckoutCostWithoutConvenienceFee() - couponDiscount;
-            var convenienceFee = ParticipationObject.GetCheckoutPostPayConvenienceFee();
+            var convenienceFee = PostPayPlan?.IsConvenienceFeeTakenOutOfCost ?? false ? 0 : ParticipationObject.GetCheckoutPostPayConvenienceFee();
             return Math.Max(costWithDiscount + convenienceFee, 0);
         }
 

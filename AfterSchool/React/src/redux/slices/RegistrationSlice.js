@@ -1,0 +1,166 @@
+import { useDispatch } from 'react-redux';
+import { createSlice } from '@reduxjs/toolkit';
+
+import utils from 'utils';
+import schoolField from 'constants/schoolField';
+import { responseMapper, handleRedirection } from './helper';
+import ConfirmRegistrationSection from 'constants/eSignatureSection';
+import RegistrationRepository from 'repository/RegistrationRepository';
+
+const RegistrationSlice = createSlice({
+  name: 'registrationSlice',
+  initialState: {
+    msgs: [],
+    school: {},
+    activity: {},
+    questions: [],
+    loading: true,
+    noSchool: false,
+    questionsGroups: [],
+    registrationId: null,
+    answeredQuestions: []
+  },
+  reducers: {
+    loadingFormData: state => {
+      state.loading = true;
+    },
+    formDataLoaded: state => {
+      state.loading = false;
+    },
+    formDataLoadingFailed: state => {
+      state.loading = false;
+    },
+    setFormData: (state, { payload: { FormDto, activityDto } }) => {
+      const {
+        CanAccess,
+        RegistrantType,
+        SchoolLocation,
+        IsAgeRestricted,
+        IsGradeRestricted,
+        IsGenderRestricted,
+        RegistrationIsCompleted
+      } = activityDto;
+
+      const isProhibited = RegistrationIsCompleted || !CanAccess;
+      if (isProhibited) return handleRedirection(activityDto);
+
+      const { questions, questionsGroups } = ConfirmRegistrationSection();
+      const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
+        FormDto,
+        RegistrantType,
+        IsGradeRestricted,
+        IsAgeRestricted,
+        IsGenderRestricted
+      );
+
+      state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
+      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.school = SchoolLocation || {};
+      state.answeredQuestions = formQuestionAnswer;
+      state.activity = activityDto;
+    },
+    submitFormSection: (state, { payload }) => {
+      state.answeredQuestions = payload;
+    },
+    setRegistrationId: (state, { payload }) => {
+      state.registrationId = payload;
+    },
+    setSchool: (state, { payload: { school, noSchool } }) => {
+      state.school = school;
+      state.noSchool = noSchool;
+    },
+    setMsgs: (state, { payload }) => {
+      state.msgs = payload;
+    }
+  }
+});
+
+export const useRegistrationActions = () => {
+  const {
+    setMsgs,
+    setSchool,
+    setFormData,
+    formDataLoaded,
+    loadingFormData,
+    submitFormSection,
+    setRegistrationId
+  } = RegistrationSlice.actions;
+  const dispatch = useDispatch();
+
+  const loaded = () => dispatch(formDataLoaded());
+
+  const loadFormData = async (newChild = false, accountName, activityName, registrantUid) => {
+    dispatch(loadingFormData());
+    await RegistrationRepository.getFormData(
+      newChild,
+      accountName,
+      activityName,
+      registrantUid
+    ).then(({ obj, msgs }) => {
+      if (obj) dispatch(setFormData(obj));
+      dispatch(setMsgs(msgs));
+      if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) dispatch(formDataLoaded());
+    });
+  };
+
+  const submitFormSectionData = async (
+    { answers, answerQuery, formData },
+    lastSection,
+    schoolLocationID,
+    newChild,
+    accountName,
+    activityName,
+    regUid
+  ) => {
+    const { answerQuery: answersQuery, groupId } = answerQuery;
+
+    formData.append('groupId', groupId);
+    formData.append('newChild', newChild);
+    formData.append('registrantUid', regUid);
+    formData.append('accountName', accountName);
+    formData.append('activityName', activityName);
+    formData.append('schoolLocationID', schoolLocationID);
+    formData.append('answers', new URLSearchParams(answersQuery).toString());
+
+    if (lastSection) {
+      const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
+      formData.append('eSignature', eSignature);
+      dispatch(loadingFormData());
+      RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
+        dispatch(setRegistrationId(obj));
+        dispatch(setMsgs(msgs));
+      });
+    } else
+      await RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
+        dispatch(setMsgs(msgs))
+      );
+
+    dispatch(submitFormSection(answers));
+  };
+
+  const setSchoolFieldValue = ({ school, noSchool }, submit) => {
+    if (!submit) return dispatch(setSchool({ school, noSchool }));
+
+    return RegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
+      dispatch(setMsgs(msgs));
+      dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
+      return { obj, msgs };
+    });
+  };
+
+  const clearMessages = () => {
+    dispatch(setMsgs([]));
+  };
+
+  const exit = async (uid, activityUrl) => {
+    await RegistrationRepository.exit(uid).then(({ msgs }) => {
+      dispatch(setMsgs(msgs));
+      const { redirect } = utils;
+      if (!msgs.length) redirect(activityUrl);
+    });
+  };
+
+  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded, exit };
+};
+
+export default RegistrationSlice;

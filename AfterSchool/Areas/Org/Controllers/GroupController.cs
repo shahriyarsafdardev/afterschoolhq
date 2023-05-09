@@ -615,7 +615,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                         if (msgs.HasNoErrors())
                         {
-                            msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                            msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                             ViewBag.Messages = msgs;
                             return View("messagedetail", am);
@@ -646,7 +646,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                 ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                 ViewBag.Messages = msgs;
                 return View("messagedetail", am);

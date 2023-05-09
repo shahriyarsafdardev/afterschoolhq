@@ -347,24 +347,19 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static bool CancelSubscription(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, WebUser loggedInUser,
+        public static bool CancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, WebUser loggedInUser,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-            {
-                string stripeUserId = null;
+            string stripeUserId = null;
 
-                //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
-                //    stripeUserId = billingAccount.StripeUserId;
+            //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
+            //    stripeUserId = billingAccount.StripeUserId;
 
-                new StripeHelper().CancelSubscription(rsp.StripeSubscriptionId);
+            StripeHelper.GetStripeHelperConnectAccount().CancelSubscription(rsp.StripeSubscriptionId);
+            rsp.MarkAsCancelled(loggedInUser, msgs, dc);
 
-                rsp.MarkAsCancelled(loggedInUser, msgs, dc);
-
-                if (msgs.HasNoErrors())
-                    return true;
-            }
-
+            if (msgs.HasNoErrors())
+                return true;
             return false;
         }
 
@@ -645,7 +640,7 @@ namespace AfterSchoolLibrary.Services
 
                 // no need for UTC since it just calculates based on the passed in start date time
                 else if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -675,7 +670,7 @@ namespace AfterSchoolLibrary.Services
                     endDate = plan.GetSubscriptionEndDate(participationObject);
 
                 if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymenPlanEndDate(startDateTime, msgs);
+                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
             }
 
             // make sure endDate > startDate for stripe
@@ -707,7 +702,7 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
-        public static DateTime? GetPaymenPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
+        public static DateTime? GetPaymentPlanEndDate(this SubscriptionPlan plan, DateTime startDateTime, SystemMessages msgs = null)
         {
             if (plan.PlanTypeId != SubscriptionPlanType.PaymentPlan)
                 return null;

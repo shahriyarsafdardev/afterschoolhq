@@ -16,6 +16,10 @@
 
     var hideButtons = Model.AccountProfile.IsEmpty() || (ViewData["hidebuttons"] != null && ViewData["hidebuttons"].ToString().ToBoolean());
     var midColumnSpan = Model.AccountProfile.IsEmpty() ? 12 : logoUrl.IsBlank() ? hideButtons ? 12 : 8 : hideButtons ? 10 : 7;
+
+    var IsAccountScreen = ViewData["IsAccountScreen"] != null && ViewData["IsAccountScreen"].ToString().ToBoolean();
+
+    regHeaderStyle = regHeaderStyle + (IsAccountScreen ? " min-height:165px" : "");
 }
 
 <style>
@@ -49,8 +53,8 @@
             display: flex;
             justify-content: center;
             min-height: 50px;
-            padding: 0;
-        }
+            padding: 0;   
+            }
     </style>
 }
 
@@ -93,7 +97,7 @@
         }
 
         <div class="col-lg-@midColumnSpan col-md-6 col-sm-12">
-            @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title)
+            @if (Model.Account.Name != Model.Title && Model.AccountProfile?.Title != Model.Title && !IsAccountScreen)
             {
                     <a href="@Model.Account.HomePageUrl" class="text-medium-small notranslate activity-account-name">
                     @Model.Account.Name
@@ -125,7 +129,7 @@
                             @Model.NumberOfHoursEnrolledFormatted hrs of education provided
                         </span>
                     }
-                    @if (Model.NumberOfStudentsServed > 0)
+                    @if (Model.NumberOfStudentsServed > 0 && !IsAccountScreen)
                     {
                         <span class="icon-span icon-span-mobile" title="@Model.NumberOfStudentsServedFormatted students served">
                             <svg viewBox="0 0 512 512">
@@ -141,7 +145,7 @@
                             Virtual Options
                         </span>
                     }
-                    @if (Model.Followers > 0)
+                    @if (Model.Followers > 0 && !IsAccountScreen)
                     {
                         <span class="icon-span icon-span-mobile" title=" @Model.FollowersFormatted follower@(Model.Followers == 1 ? "" : "s")">
                             <svg viewBox="0 0 24 24">

@@ -1,4 +1,5 @@
-﻿@model SignUpIndexViewModel
+@model SignUpIndexViewModel
+<script src="~/Assets/js/password-checker.js"></script>
 
 @Html.AntiForgeryToken()
 
@@ -36,7 +37,8 @@
 
     <div class="col-md-12 onboarding-form-group">
         <label class="onboarding-label">PASSWORD</label>
-        <input type="password" name="password1" required="required" class="form-control onboarding-input" />
+        <input type="password" id="password1" name="password1" required="required" class="form-control onboarding-input" onkeyup="checkStrength();" />
+        @Html.Partial("_PasswordStrengthBarLight")
     </div>
 
     <div class="col-md-12 onboarding-form-group">
@@ -78,7 +80,7 @@
         <img src="~/Assets/img/welcome-back-arrow.png" />
     </a>
 
-    <button type="submit" class="btn btn-primary pull-right register-continue">Continue</button>
+    <button id="form-submit" type="submit" disabled class="btn btn-primary pull-right register-continue">Continue</button>
 </div>
 
 <div class="visible-sm visible-xs margin-v-30">

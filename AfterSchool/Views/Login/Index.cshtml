@@ -1,10 +1,14 @@
-﻿@using AfterSchoolLibrary.Helpers
+@using AfterSchoolLibrary.Helpers
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+
 @{
     Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages) ViewBag.Messages;
+    var msgs = (SystemMessages)ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    bool isProduction = Utilities.IsProduction;
 }
+
 
 <style>
     .bg-image {
@@ -16,7 +20,7 @@
         height: 100%;
     }
 
-    .form-login-welcome,.form-login-sign {
+    .form-login-welcome, .form-login-sign {
         text-align: left;
     }
 
@@ -44,7 +48,7 @@
     }
 </style>
 <style media="all and (max-width: 1199px)">
-    .form-login-welcome,.form-login-sign {
+    .form-login-welcome, .form-login-sign {
         text-align: center;
     }
 
@@ -153,6 +157,18 @@
                         <a href="/login/resetpassword" class="reset-login-pass">Forgot Password</a>
                     </div>
                     <div class="clearfix"></div>
+                    <div class="padding-bottom-40" style="float: left;">
+                        @if (Utilities.IsProduction)
+                        {
+                            <div class="row">
+                                <div>
+                                    @{
+                                        Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
 
                     <div class="form-group login-submit text-center">
                         <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Log In</button>
@@ -200,27 +216,39 @@
 {
     <script src="~/Scripts/jquery.validate.js"></script>
     <script type="text/javascript">
+        var isProduction = @isProduction.ToString().ToLower();
         $(document).ready(function () {
-            $("#form-login").validate({
-                rules: {
-                    username: {
-                        required: true,
-                        email: true,
-                    },
-                    password: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    username: {
-                        required: "Please enter your email",
-                        email: "Please verify that the entered email is a valid format"
-                    },
-                    password: {
-                        required: "Please enter your password",
-                    },
-                },
+            if (isProduction) {
+                    $("#form-login").on("submit", function (e) {
+                        if (grecaptcha.getResponse().length !== 0) {
+                            return true;
+                        }
+                        $(".recaptcha-error").css("display", "block");
+                        e.preventDefault();
+                    });
+                }
             });
-        });
+            $(document).ready(function () {
+                $("#form-login").validate({
+                    rules: {
+                        username: {
+                            required: true,
+                            email: true,
+                        },
+                        password: {
+                            required: true,
+                        },
+                    },
+                    messages: {
+                        username: {
+                            required: "Please enter your email",
+                            email: "Please verify that the entered email is a valid format"
+                        },
+                        password: {
+                            required: "Please enter your password",
+                        },
+                    },
+                });
+            });
     </script>
 }

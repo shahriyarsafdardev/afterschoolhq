@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BasicLibrary;
@@ -44,6 +44,61 @@ namespace AfterSchoolLibrary.Services
                 QuestionDataType.RegistrantParentRelationship,
                 QuestionDataType.RegistrantEmployer,
                 QuestionDataType.StudentId,
+            };
+        }
+
+        public static List<QuestionDataType> QuestionsToNotIncludeInAllAgeSignUpPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.RegistrantOrganization,
+                QuestionDataType.RegistrantGrade,
+                QuestionDataType.RegistrantGender,
+                QuestionDataType.RegistrantRaceUsFed,
+                QuestionDataType.RegistrantEthnicityUsFed,
+                QuestionDataType.RegistrantTShirtSize,
+                QuestionDataType.RegistrantWorkPhone,
+                QuestionDataType.RegistrantHomePhone,
+                QuestionDataType.RegistrantParentRelationship,
+                QuestionDataType.RegistrantEmployer,
+                QuestionDataType.StudentId,
+            };
+        }
+
+        public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInAdultPanel()
+        {
+            return new List<QuestionGroupDataType>
+            {
+                QuestionGroupDataType.Parent1Address,
+                QuestionGroupDataType.Parent1Information,
+                QuestionGroupDataType.Parent2Address,
+                QuestionGroupDataType.Parent2Information
+            };
+        }
+        
+        public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInParentPanel()
+        {
+            return new List<QuestionGroupDataType>
+            {
+                QuestionGroupDataType.Parent1Address,
+                QuestionGroupDataType.Parent1Information,
+                QuestionGroupDataType.Parent2Address,
+                QuestionGroupDataType.Parent2Information,
+                QuestionGroupDataType.EmergencyContact1,
+                QuestionGroupDataType.EmergencyContact2,
+                QuestionGroupDataType.EmergencyContact3,
+                QuestionGroupDataType.HealthInformation
+            };
+        }
+        
+        public static List<QuestionGroupDataType> QuestionsGroupToNotIncludeInStudentPanel()
+        {
+            return new List<QuestionGroupDataType>
+            {
+                QuestionGroupDataType.Parent1Address,
+                QuestionGroupDataType.Parent1Information,
+                QuestionGroupDataType.Parent2Address,
+                QuestionGroupDataType.Parent2Information
             };
         }
 

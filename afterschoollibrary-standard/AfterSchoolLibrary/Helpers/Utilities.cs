@@ -241,7 +241,7 @@ namespace AfterSchoolLibrary.Helpers
         { 
             var data = new List<KeyValuePair>();
 
-            if (s.IsEmpty())
+            if (s.IsEmpty() || (s.Trim().StartsWith("{") && !s.Trim().EndsWith("}")))
                 return data;
 
             var stringInput = s.Trim();

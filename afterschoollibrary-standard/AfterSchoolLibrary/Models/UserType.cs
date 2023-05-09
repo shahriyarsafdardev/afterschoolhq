@@ -10,5 +10,6 @@ public enum UserType
 	Parent,
 	ProgramDirector,
 	Treasurer,
-	TechSupport
+	TechSupport,
+    Adult
 }

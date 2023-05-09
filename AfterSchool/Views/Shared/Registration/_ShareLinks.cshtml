@@ -72,9 +72,9 @@
             $('#share-more').parent().removeClass('hide');
             $('#share-more').click(function () {
                 navigator.share({
-                    title: '@shareObject',
+                    title: htmlDecode('@shareObject'),
                     url: '@shareUrl',
-                    text: 'Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()'
+                    text: htmlDecode('Check out @shareObject on @AfterSchoolLibrary.Helpers.Utilities.AppName()')
                 }).then(() => {
                     console.log('Thanks for sharing!');
                 }).catch(console.error);
@@ -90,7 +90,12 @@
         });
 
     });
-
+    
+    function htmlDecode(input) {
+      let doc = new DOMParser().parseFromString(input, "text/html");
+      return doc.documentElement.textContent;
+    }
+    
     function copyUrlToShare(url) {
         WebPage.copySelection(url, 'URL has been copied', function () {
             $('#copy-url-text').html('Copied!');

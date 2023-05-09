@@ -204,9 +204,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var result = GatherDataForAndAssembleRegistrantsResult(activity, atype, currentAccount, currentUser, msgs, registrationDate);
 
             if (activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
-            {
                 return View("VolunteerRegistrants", result);
-            }
 
             return View(result);
         }
@@ -397,12 +395,12 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var registrantName = registrant.Name;
                 var successMessage = new SystemMessage($"{registrantName} Withdrawn successfully.", MessageType.Success);
-                SetTempMessages(new SystemMessages {successMessage});
-                return Json(new {success = true, status = "ok"}, JsonRequestBehavior.AllowGet);
+                SetTempMessages(new SystemMessages { successMessage });
+                return Json(new { success = true, status = "ok" }, JsonRequestBehavior.AllowGet);
             }
 
             // something went wrong, error occured
-            return Json(new {success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text})},
+            return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) },
                 JsonRequestBehavior.AllowGet);
         }
 
@@ -498,7 +496,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ParticipationObject = registrantActivity.GetParticipationObject(msgs),
                         Registration = registrantActivity.GetRegistration(msgs),
                         MasterRegistrant = masterRegistrant,
-                        PaymentType = (PaymentType) paymenttype.ToInteger(),
+                        PaymentType = (PaymentType)paymenttype.ToInteger(),
                         PaymentSourceType = PaymentSourceType.ManualProvider,
                         OverrideAmount = amountpaid.ToDecimal(),
                         PaymentTypeFeeOverrideAmount = 0,
@@ -941,7 +939,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         BackgroundJob.Enqueue(() =>
                             ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
 
-                        msgs.Add("Your message will been sent to the selected registrants", MessageType.Success);
+                        msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
                         ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                             currentUserIsActivityLeader);
@@ -1141,7 +1139,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     objectId: activity.ID.Value,
                     objectText: "Student for activity " + activity.Name
                 );
-                return RedirectToAction("registrants", new {id = activity.Uid});
+                return RedirectToAction("registrants", new { id = activity.Uid });
             }
 
             return View(activity);
@@ -1185,10 +1183,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
 
             if (!IsRequestFromApp() || activityId.IsEmpty() || currentAccount.IsEmpty())
-                return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
 
             var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
-            var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType) billingPeriodType.ToInteger(),
+            var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType)billingPeriodType.ToInteger(),
                 dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday,
                 dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
@@ -1203,7 +1201,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     endDateFormatted = dates.paymentEnd.Value.ToString("dddd, MMMM d, yyyy"),
                 }, JsonRequestBehavior.AllowGet);
 
-            return Json(new {success = false}, JsonRequestBehavior.AllowGet);
+            return Json(new { success = false }, JsonRequestBehavior.AllowGet);
         }
 
         public class PrintRegistrantsResults
@@ -1303,7 +1301,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return View(result);
             }
 
-            var activityLocationTypeId = (int) (activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
+            var activityLocationTypeId = (int)(activity.IsNotEmpty() ? activity.ActivityLocationTypeId : defaultActivity.ActivityLocationTypeId);
             var values = new Dictionary<string, object>
             {
                 {"name", name.MaxChars(75)},
@@ -1339,7 +1337,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var isNew = Request[IsNewRequest] == "1";
 
-            if (isNew && activityLocationTypeId == (int) ActivityLocationType.Physical && activity.IsEmpty())
+            if (isNew && activityLocationTypeId == (int)ActivityLocationType.Physical && activity.IsEmpty())
             {
                 var location = currentAccount.GetDefaultLocation();
 
@@ -1515,7 +1513,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public string GetFullScreenExitUrl(Activity activity, string groupUid = "")
         {
             if (groupUid.IsNotEmpty())
-                return Url.Action("Activities", "Group", new {id = groupUid});
+                return Url.Action("Activities", "Group", new { id = groupUid });
 
             if (activity.ActivityGroupId.HasValue)
             {
@@ -1523,10 +1521,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (activity.ActivityGroupUid.IsEmpty())
                     activity = activity.Reload();
 
-                return Url.Action("Activities", "Group", new {id = activity.ActivityGroupUid});
+                return Url.Action("Activities", "Group", new { id = activity.ActivityGroupUid });
             }
 
-            return Url.Action("index", "activity", new {type = (int) activity.ActivityTypeId});
+            return Url.Action("index", "activity", new { type = (int)activity.ActivityTypeId });
         }
 
         [HttpGet]
@@ -2231,12 +2229,12 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (!activity.IsPublished)
                 {
                     activity = ActivityService.EditExisting(
-                        loggedInUserId: currentUser.ID.Value,
-                        account: currentAccount,
-                        activityId: activity.ID.Value.ToString(),
-                        values: values,
-                        msgs: msgs
-                    );
+                    loggedInUserId: currentUser.ID.Value,
+                    account: currentAccount,
+                    activityId: activity.ID.Value.ToString(),
+                    values: values,
+                    msgs: msgs
+                );
                 }
             }
 
@@ -2279,7 +2277,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
                         ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
                         ViewBag.Messages = msgs;
-                        return RedirectToAction("activities", "group", new {id = activity.ActivityGroupUid});
+                        return RedirectToAction("activities", "group", new { id = activity.ActivityGroupUid });
                     case "publish":
                         ViewBag.Account = currentAccount;
                         ViewBag.AccountPackage = SessionVariables.AccountPackage;
@@ -2287,7 +2285,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
                         ViewBag.Messages = msgs;
                         return RedirectToAction("publish", "activity",
-                            new {id = activity.Uid, isnew = isNew, source = Request["source"]});
+                            new { id = activity.Uid, isnew = isNew, source = Request["source"] });
                 }
             }
 
@@ -2373,7 +2371,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (msgs.HasErrors())
                         {
                             ViewBag.Messages = msgs;
-                            return RedirectToAction("PublishDetail", new {id = activity.Uid.ToString()});
+                            return RedirectToAction("PublishDetail", new { id = activity.Uid.ToString() });
                         }
 
                         ViewBag.Messages = msgs;
@@ -2385,7 +2383,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     default:
                         ViewBag.Messages = msgs;
                         return RedirectToAction("requesttopublish",
-                            new {id = activity.Uid, isnew = isNew, source = Request["source"]});
+                            new { id = activity.Uid, isnew = isNew, source = Request["source"] });
                 }
             }
 
@@ -2437,11 +2435,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
                 ViewBag.Messages = msgs;
-                return RedirectToAction("editsetup", new {id = activity.Uid, isnew = 1, source = Request["source"]});
+                return RedirectToAction("editsetup", new { id = activity.Uid, isnew = 1, source = Request["source"] });
             }
 
             ViewBag.Messages = msgs;
-            return RedirectToAction("index", "activity", new {copyerror = true, type});
+            return RedirectToAction("index", "activity", new { copyerror = true, type });
         }
 
         [HttpGet]
@@ -2611,7 +2609,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (orderby.IsNotBlank())
                 orderByParam = orderby;
             if (direction.IsNotBlank())
-                orderbyDirection = (OrderByDirectionEnum) Enum.Parse(typeof(OrderByDirectionEnum), direction);
+                orderbyDirection = (OrderByDirectionEnum)Enum.Parse(typeof(OrderByDirectionEnum), direction);
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
@@ -2656,7 +2654,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
             if (attendance.IsEmpty())
-                return RedirectToAction("Attendance", new {id, msg = "Error: No classes have taken place yet"});
+                return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
             var activitySchedule = activity.GetSchedule(msgs);
             var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
@@ -2741,7 +2739,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 switch (postPayPlan.BillingPeriodTypeId)
                 {
                     case BillingPeriodType.Day:
-
                         attendancesToCharge = attendances.FindAll(attendance =>
                         {
                             var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity,
@@ -2753,11 +2750,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         }).ToList();
 
                         registrantActivityAttendanceCounts.Add(registrantActivity, attendancesToCharge);
-
                         break;
-
                     case BillingPeriodType.Week:
-
                         attendances.ForEach(attendance =>
                         {
                             var currentWeekPresent = currentAccount.GetAttendanceRegistrantByDateRange(
@@ -2776,13 +2770,11 @@ namespace AfterSchool.Areas.Org.Controllers
                             {
                                 var firstAttendanceOfWeek = currentWeekPresent.First().GetAttendance(msgs);
 
-                                var currentUser = SessionVariables.CurrentUser;
                                 var attendanceRegistrant = currentAccount.GetAttendanceRegistrant(activity,
                                     attendance.ID.Value, registrantActivity.RegistrantId.Value, msgs);
 
-                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() &&
-                                    !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs) &&
-                                    !attendancesToCharge.Any(item => item.ID == firstAttendanceOfWeek.ID))
+                                if (attendanceRegistrant.IsNotEmpty() && firstAttendanceOfWeek.IsNotEmpty() && 
+                                    attendancesToCharge.All(item => item.ID != firstAttendanceOfWeek.ID) && attendanceRegistrant.NumberPresent > 0)
                                     attendancesToCharge.Add(firstAttendanceOfWeek);
                             }
                         });
@@ -2926,7 +2918,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentAccount,
                     registrantActivities,
                     selectedAttendances,
-                    billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                    billingPeriodType ?? BillingPeriodType.NotSet,
                     msgs);
 
                 foreach (var registrantActivityAttendance in registrantActivityAttendances)
@@ -2934,8 +2926,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     // one person multiple attendance dates
                     var registrantActivity = registrantActivityAttendance.Key;
                     var registration = registrantActivity.GetRegistration(msgs);
-                    var costPerAttendance =
-                        registration.CostPerClass.IsNotEmpty() ? registration.CostPerClass.Value : 0;
+                    var costPerAttendance = registration.CostPerClass ?? 0;
 
                     if (costPerAttendance > 0)
                     {
@@ -2948,101 +2939,109 @@ namespace AfterSchool.Areas.Org.Controllers
                         var paymentTypeFeePayer = registration.GetPaymentTypeFeePayer(msgs);
                         var availablePrePayments = registration.GetAvailablePrePayments(activity, msgs);
                         var attendanceDaysToCharge = Math.Max(0, raAttendances.Count - availablePrePayments.Count);
-                        CheckoutObject checkoutObject = null;
-                        var coupon = CouponService.GetCoupon(registration, msgs);
-
-                        if (attendanceDaysToCharge > 0)
-                        {
-                            BankAccountPurchaseObject bankAccountPurchaseObject = null;
-                            CreditCardPurchaseObject creditCardPurchaseObject = null;
+                        var remainingPrepayments = Math.Max(0, availablePrePayments.Count - raAttendances.Count);
+                        var usedPrepayments = raAttendances.Count - attendanceDaysToCharge;
+                        var coupon = registration.GetCoupon(msgs);
+                        
+                        BankAccountPurchaseObject bankAccountPurchaseObject = null;
+                        CreditCardPurchaseObject creditCardPurchaseObject = null;
 
                             if (registration.PaymentTypeId == PaymentType.ACH)
                                 bankAccountPurchaseObject = new BankAccountPurchaseObject
-                                    {StripeSourceId = registration.StripeSourceId};
+                                { StripeSourceId = registration.StripeSourceId };
                             else
                                 creditCardPurchaseObject = new CreditCardPurchaseObject
-                                    {StripeSourceId = registration.StripeSourceId};
+                                { StripeSourceId = registration.StripeSourceId };
 
-                            var overrideAmount = costPerAttendance * attendanceDaysToCharge;
+                        var overrideAmount = costPerAttendance * attendanceDaysToCharge;
 
-                            if (postPayPlan.IsNotEmpty())
-                            {
-                                //.. if post pay plan, then we will have coupon value in registration to discount.
-                                var couponDiscount = attendanceDaysToCharge * (registration.CouponValue.HasValue
-                                    ? registration.CouponValue.Value
-                                    : 0);
-                                overrideAmount = (costPerAttendance * attendanceDaysToCharge) - couponDiscount;
-                            }
-
-                            checkoutObject = new CheckoutObject
-                            {
-                                Coupon = coupon,
-                                OverrideAmount = overrideAmount,
-                                ConvenienceFeeOverrideAmount =
-                                    registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
-                                PaymentTypeFeeOverrideAmount =
-                                    registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
-                                PayingAccount = masterRegistrantAccount,
-                                BillingAccount = activity.GetAccount(msgs),
-                                CreditCardPurchaseObject = creditCardPurchaseObject,
-                                BankAccountPurchaseObject = bankAccountPurchaseObject,
-                                PaymentType = bankAccountPurchaseObject.IsNotEmpty()
-                                    ? PaymentType.ACH
-                                    : PaymentType.CreditCard,
-                                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
-                                ConvenienceFeePayer = convenienceFeePayer,
-                                CreditCardFeePayer = paymentTypeFeePayer,
-                                MasterRegistrant = masterRegistrant,
-                                Description = description,
-                                SavePaymentInfo = false,
-                                ParticipationObject = activity.GetParticipationObject(msgs),
-                                Quantity = attendanceDaysToCharge,
-                                Registration = registration,
-                                PostPayPlan = postPayPlan,
-                            };
-
-                            if (msgs.HasNoErrors())
-                                AccountService.ProcessPayment(
-                                    checkoutObject,
-                                    isAttendanceCharge: true,
-                                    loggedInUser: currentUser,
-                                    msgs: msgs);
+                        if (postPayPlan.IsNotEmpty())
+                        {
+                            //.. if post pay plan, then we will have coupon value in registration to discount.
+                            overrideAmount = (costPerAttendance - (registration.CouponValue ?? 0)) * attendanceDaysToCharge;
                         }
 
-                        if (msgs.HasNoErrors())
-                            raAttendances.ForEach(raAttendance =>
-                            {
-                                var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(
-                                        raAttendance.ID.Value,
-                                        registrantActivity.GetRegistrant(msgs).ID.Value,
-                                        msgs)
-                                    .FirstOrDefault();
-
-                                // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
-                                if (attendanceRegistrant.IsNotEmpty()
-                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser, msgs)
-                                    && (checkoutObject?.Transaction).IsNotEmpty()
-                                    && !attendanceRegistrant.IsAlreadyBilled)
-                                {
-                                    attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
-
-                                    attendanceRegistrant
-                                        .GetAttendanceRegistrantsInSameBillingPeriod(postPayPlan.BillingPeriodTypeId,
-                                            msgs)
-                                        .ForEach(ar =>
-                                        {
-                                            ar.TransactionId = checkoutObject.Transaction.ID.Value;
-                                            msgs.AddRange(ar.Save());
-                                        });
-
-                                    msgs.AddRange(attendanceRegistrant.Save());
-                                }
-                            });
-
-                        if (msgs.HasErrors())
+                        var checkoutObject = new CheckoutObject
                         {
+                            Coupon = coupon,
+                            OverrideAmount = overrideAmount,
+                            ConvenienceFeeOverrideAmount =
+                                registration.ConvenienceFeePaid.IfEmpty(0) * attendanceDaysToCharge,
+                            PaymentTypeFeeOverrideAmount =
+                                registration.PaymentTypeFeePaid.IfEmpty(0) * attendanceDaysToCharge,
+                            PayingAccount = masterRegistrantAccount,
+                            BillingAccount = activity.GetAccount(msgs),
+                            CreditCardPurchaseObject = creditCardPurchaseObject,
+                            BankAccountPurchaseObject = bankAccountPurchaseObject,
+                            PaymentType = registration.PaymentTypeId,
+                            PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                            ConvenienceFeePayer = convenienceFeePayer,
+                            CreditCardFeePayer = paymentTypeFeePayer,
+                            MasterRegistrant = masterRegistrant,
+                            Description = description,
+                            SavePaymentInfo = false,
+                            ParticipationObject = activity.GetParticipationObject(msgs),
+                            Quantity = attendanceDaysToCharge,
+                            Registration = registration,
+                            PostPayPlan = postPayPlan,
+                        };
+                        
+                        if (msgs.HasNoErrors() && raAttendances.Count > 0)
+                        {
+                            var raAttendance =  raAttendances.FirstOrDefault();
+                            // set first attendance date by default if multiple no need to show that
+                            string attendanceDateText,datesList = "";
+                            if (raAttendances.Count > 1)
+                            {
+                                attendanceDateText = " for the below dates";
+                                datesList = raAttendances.Aggregate("<div style='color: #494949;font-size: 12px;float: left; padding-left: 15px; width:100%; padding-bottom: 10px'>",
+                                    (current, date) => current +
+                                                       (billingPeriodType == BillingPeriodType.Week ? date.Date?.ToLongDateString() + " - " + 
+                                                            date.Date?.AddDays(6).ToLongDateString() : date.Date?.ToLongDateString()) + "<br>");
+                                datesList += "</div>";
+                            }
+                            else
+                            {
+                                attendanceDateText = " for " + raAttendance.Date.ToLongDateString();
+                            }
+
+                            // Send email to registrant
+                            AccountService.ProcessPayment(
+                                checkoutObject,
+                                currentUser,
+                                true,
+                                attendanceDaysToCharge,
+                                remainingPrepayments,
+                                usedPrepayments,
+                                attendanceDateText,
+                                datesList,
+                                registrantActivity.RegistrantName,
+                                msgs);
+                            
+                            // add next available pre payment if available, if not then continue to set the checkoutobject transaction id
+                            var attendanceRegistrants = AttendanceRegistrant.LoadByRegistrantId(
+                                    registrantActivity.GetRegistrant(msgs).ID.Value,
+                                    msgs)
+                                .ToList();
+
+                            var attendanceRegistrantsPresent =
+                                attendanceRegistrants.Where(attendanceRegistrant => attendanceRegistrant.IsNotEmpty()
+                                                                                    && !attendanceRegistrant.IncludeNextAvailablePrePayment(currentUser,
+                                                                                        msgs) && checkoutObject.Transaction.IsNotEmpty()
+                                                                                    && !attendanceRegistrant.IsAlreadyBilled &&
+                                                                                    attendanceRegistrant.NumberPresent > 0);
+                            
+                            foreach (var attendanceRegistrant in attendanceRegistrantsPresent)
+                            {
+                                attendanceRegistrant.TransactionId = checkoutObject.Transaction.ID.Value;
+                                msgs.AddRange(attendanceRegistrant.Save());
+                            }
+                        }
+                        else if(msgs.HasErrors()) 
+                        { 
                             msg =
-                                $"An error occured while charging some parents, some parents may have already been processed and you will still receive a summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
+                                $"An error occured while charging some parents, some parents may have already been processed and you will still receive a " +
+                                $"summary email if any have. Please contact support and do NOT attempt to charge for attendance again.";
                             break;
                         }
                     }
@@ -3062,11 +3061,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 // Send summary email of charged AttendanceRegistrants to Activity Provider if there were any successful charges
                 var registrantsBilledPerAttendance = GetNumberOfRegistrantsBilledPerAttendance(
                     selectedAttendances,
-                    billingPeriodType.HasValue ? billingPeriodType.Value : BillingPeriodType.NotSet,
+                    billingPeriodType ?? BillingPeriodType.NotSet,
                     msgs);
                 var objRegistration = registrantActivities.First().GetRegistration(msgs);
-                var costPerClass = objRegistration.CostPerClass.HasValue ? objRegistration.CostPerClass.Value : 0;
-                var couponValue = objRegistration.CouponValue.HasValue ? objRegistration.CouponValue.Value : 0;
+                var costPerClass = objRegistration.CostPerClass ?? 0;
+                var couponValue = objRegistration.CouponValue ?? 0;
 
                 if (registrantsBilledPerAttendance.Count > 0)
                     EmailHelper.SendAttendanceChargeConfirmation(registrantsBilledPerAttendance, activity, costPerClass,
@@ -3074,7 +3073,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            return RedirectToAction("attendance", new {id = activityId, msg = msg});
+            return RedirectToAction("attendance", new { id = activityId, msg = msg });
         }
 
         [HttpGet]
@@ -3147,13 +3146,12 @@ namespace AfterSchool.Areas.Org.Controllers
             };
 
             return View("AttendanceReport", model);
+
         }
 
         public class AttendanceReportResults
         {
-            public AttendanceReportResults()
-            {
-            }
+            public AttendanceReportResults() { }
 
             public List<AttendanceRegistrant> AttendanceRegistrants { get; set; }
             public SystemMessages Messages { get; set; }
@@ -3168,7 +3166,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Surveys(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -3186,7 +3184,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult NewSurvey(string id)
         {
             var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
 
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
@@ -3278,24 +3276,24 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
 
                     TempData["msgs"] = msgs;
-                    return RedirectToAction("Surveys", new {id, msgs});
+                    return RedirectToAction("Surveys", new { id, msgs });
                 }
                 else
                 {
                     TempData["msgs"] = msgs;
-                    return RedirectToAction("NewSurvey", new {id, msgs});
+                    return RedirectToAction("NewSurvey", new { id, msgs });
                 }
             }
             else
             {
                 TempData["msgs"] = msgs;
-                return RedirectToAction("NewSurvey", new {id, msgs});
+                return RedirectToAction("NewSurvey", new { id, msgs });
             }
         }
 
         private static IDictionary<string, string> ToDictionary(NameValueCollection source)
         {
-            return source.Cast<string>().Select(s => new {Key = s, Value = source[s]})
+            return source.Cast<string>().Select(s => new { Key = s, Value = source[s] })
                 .ToDictionary(p => p.Key, p => p.Value);
         }
 
@@ -3359,7 +3357,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 CheckRegistrantInviteCodeAndSendEmail(surveyResponse);
             }
 
-            return Json(new {msg = "Reminder sent", success = true}, JsonRequestBehavior.AllowGet);
+            return Json(new { msg = "Reminder sent", success = true }, JsonRequestBehavior.AllowGet);
         }
 
         private void CheckRegistrantInviteCodeAndSendEmail(SurveyResponse surveyResponse)
@@ -3483,7 +3481,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (importfile.IsEmpty())
                     msgs.Add("Please upload a file", MessageType.UserError);
-                else if (Path.GetExtension(importfile.FileName).NotIn(new string[] {".csv"}))
+                else if (Path.GetExtension(importfile.FileName).NotIn(new string[] { ".csv" }))
                     msgs.Add("Please upload a valid file", MessageType.UserError);
                 else
                     extension = Path.GetExtension(importfile.FileName);
@@ -3505,10 +3503,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     reader.Configuration.TrimOptions = TrimOptions.Trim;
 
                     LoadHeadersAndRowsDuringImport(questions, headers, rows, reader);
-
-                    DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers,
-                        participationObject, msgs);
-
+                    //volunteer 
+                    if(participationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                        DoRowValidationVolunteerImport(questions, headers, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
+                    else
+                        DoRowValidationsDuringImport(questions, headers, createParentAccounts, rows, validatedRows, skipRequiredCheck, validatePhoneNumbers, participationObject, msgs);
+                    
                     importfile.InputStream.Position = 0;
                     var sr2 = new StreamReader(importfile.InputStream);
                     var csvString = sr2.ReadToEnd();
@@ -3537,13 +3537,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 reader.Configuration.HasHeaderRecord = true;
                 reader.Configuration.TrimOptions = TrimOptions.Trim;
 
-                Database.ExecuteTransaction(
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var parent1Emails = new List<string>();
-
-                        while (reader.Read())
+                while (reader.Read())
+                {
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
+                            var parent1Emails = new List<string>();
+
                             if (headers.Count == 0)
                             {
                                 reader.ReadHeader();
@@ -3553,37 +3554,82 @@ namespace AfterSchool.Areas.Org.Controllers
                                         headers.Add(header);
                                 }
 
-                                continue;
+                                return;
                             }
 
-                            WebUser parentUser = null;
-                            Account parentAccount = null;
-                            Registrant parentRegistrant = null;
-                            Registrant parent2Registrant = null;
-                            Registrant student = null;
-                            Registration registration = null;
-                            Registrant submittedRecord = null;
-                            RegistrationPeriod period = null;
-                            ParticipationObject participationObject = null;
+                            if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
+                            {
+                                if (reader.GetField<String>(headers.IndexOf("Import Data - Volunteer Status")).Contains("Approved"))
+                                {
+                                    WebUser user = null;
+                                    Account account = null;
+                                    Registrant registrant = null;
+                                    Registration registration = null;
+                                    Registrant submittedRecord = null;
+                                    RegistrationPeriod period = null;
+                                    ParticipationObject participationObject = null;
 
-                            if (!CreateAndLoadDataDuringImport(activity, headers, questions, reader, createParentAccounts, enableTextMessaging, parent1Emails,
-                                    ref parentUser, ref parentAccount,
-                                    ref student, ref parentRegistrant, ref parent2Registrant, ref registration, ref submittedRecord, ref participationObject,
-                                    ref period,
+                                    if (!CreateVolunteerAndLoadDataDuringImport(ref registrant, ref registration, ref account, ref user, activity, headers, questions, rows, reader,
+                                            ref participationObject, ref submittedRecord, ref period, currentUser, amsgs, adc))
+                                        return;
+
+                                    SaveVolunteerAnswersToRegistrantsDuringImport(registrant, headers, questions, reader, currentUser, submittedRecord, registration, amsgs, adc);
+
+                                    CompleteVolunteerRegistration(account, user, registrant, ref registration, ref submittedRecord,
+                                        period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
+
+                                    if (amsgs.HasNoErrors())
+                                    {
+                                        var approvalDate = reader.GetField<DateTime>(headers.IndexOf("Import Data - Date Reviewed"));
+
+                                        var expirationDate = approvalDate.AddYears(1);
+                                        var todayDate = DateTime.UtcNow;
+                                        var extendedDate = DateTime.UtcNow.ToString("07/01/2023").ToDateTime();
+
+                                        if ((expirationDate - todayDate).TotalDays <= 30)
+                                            expirationDate = extendedDate;
+
+                                        VolunteerApprovalService.CreateNewApproval(user.ID.Value,
+                                            currentAccount.FiscalAccountId,
+                                            ApprovalStatus.Approved,
+                                            "Approved",
+                                            expirationDate,
+                                            currentUser,
+                                            approvalDate,
+                                            amsgs, adc
+                                        );
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                WebUser parentUser = null;
+                                Account parentAccount = null;
+                                Registrant parentRegistrant = null;
+                                Registrant parent2Registrant = null;
+                                Registrant student = null;
+                                Registration registration = null;
+                                Registrant submittedRecord = null;
+                                RegistrationPeriod period = null;
+                                ParticipationObject participationObject = null;
+
+                                if (!CreateAndLoadDataDuringImport(activity, headers, questions, reader, createParentAccounts, enableTextMessaging, parent1Emails, ref parentUser, ref parentAccount,
+                                    ref student, ref parentRegistrant, ref parent2Registrant, ref registration, ref submittedRecord, ref participationObject, ref period,
                                     currentAccount, currentUser, amsgs, adc))
-                                continue;
+                                    return;
 
-                            SaveAnswersToRegistrantsDuringImport(headers, questions, reader, createParentAccounts, student, parentRegistrant, parent2Registrant,
-                                registration, submittedRecord, currentUser, amsgs, adc);
+                                SaveAnswersToRegistrantsDuringImport(headers, questions, reader, createParentAccounts, student, parentRegistrant, parent2Registrant, registration, submittedRecord, currentUser, amsgs, adc);
 
-                            CompleteRegistration(createParentAccounts, parentAccount, student, ref registration, ref submittedRecord,
-                                period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
-                        }
-                    },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
-                );
+                                CompleteRegistration(createParentAccounts, parentAccount, student, ref registration, ref submittedRecord,
+                                    period, participationObject, selectedAssignmentType, currentUser, amsgs, adc);
+                            }
+
+                        },
+                        onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                }
             }
 
             ViewBag.CreateAccounts = createaccounts;
@@ -3620,14 +3666,132 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
-        private void DoRowValidationsDuringImport(List<FormQuestion> questions, List<string> headers, bool createParentAccounts,
+        private void DoRowValidationVolunteerImport(List<FormQuestion> questions, List<string> headers,
             List<List<string>> rows, List<List<ImportField>> validatedRows, bool ignoreRequiredFields, bool validatePhoneNumbers,
             ParticipationObject participationObject, SystemMessages msgs)
         {
-            var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First()
-                .FormQuestionGroupName;
-            var studentInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First()
-                .FormQuestionGroupName;
+            var volunteerInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First().FormQuestionGroupName;
+            var volunteerFirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First().Text;
+            var volunteerLastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First().Text;
+            var volunteerEmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantEmail).First().Text;
+            var volunteerFirstNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerFirstNameLabel}");
+            var volunteerLastNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerLastNameLabel}");
+            var volunteerEmailIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerEmailLabel}");
+            var volunteerEmails = new List<string>();
+
+
+            foreach (var row in rows)
+            {
+                var volunteerFirstName = row[volunteerFirstNameIndex];
+                var volunteerLastName = row[volunteerLastNameIndex];
+                var volunteerEmail = row[volunteerEmailIndex];
+
+                var validatedRow = new List<ImportField>();
+                var possibleDuplicate = false;
+
+                if (volunteerFirstName.IsNotEmpty() && volunteerLastName.IsNotEmpty() &&
+                    RegistrantActivity.ExistsByParticipationObjectByRegistrantName(participationObject.GetId().Value, participationObject.ObjectType, volunteerFirstName, volunteerLastName))
+                    possibleDuplicate = true;
+
+                for (var i = 0; i < headers.Count; i++)
+                {
+                    var validatedField = new ImportField();
+                    validatedField.Value = row[i];
+
+                    var field = row[i].IfBlank("").Trim();
+                    var question = questions.Where(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")).FirstOrDefault();
+
+                    if (question.IsEmpty())
+                        continue;
+
+                    validatedField.Value = field;
+
+                    if (field.Length > 1000)
+                        validatedField.Messages.Add("Must be less than or equal to 1000 characters. Data will be truncated.", MessageType.Warning);
+
+                    if (field.IsBlank() && question.IsRequired)
+                        validatedField.Messages.Add("This field is required, but has no value assigned", ignoreRequiredFields ? MessageType.Warning : MessageType.UserError);
+
+                    switch (question.QuestionTypeId)
+                    {
+                        case QuestionType.Date:
+
+                            if (field.IsNotBlank() && !field.IsDateTime())
+                                validatedField.Messages.Add("Must be a valid date", MessageType.UserError);
+
+                            break;
+
+                        case QuestionType.Checkbox:
+
+                            if (field.IsNotBlank() && !field.IsBoolean())
+                                validatedField.Messages.Add("Must be one of the following values: 0, 1, T, F, True, False, Y, N, Yes, No", MessageType.UserError);
+
+                            break;
+
+                        case QuestionType.TextBox:
+                        case QuestionType.TextArea:
+
+                            if (field.IsNotBlank() && question.IsPhoneDataType() && !field.IsPhone())
+                                validatedField.Messages.Add("Phone must be a valid phone number", validatePhoneNumbers ? MessageType.UserError : MessageType.Warning);
+
+                            if ((volunteerFirstNameIndex == i || volunteerLastNameIndex == i) && possibleDuplicate)
+                                validatedField.Messages.Add("Another volunteer with this name is already registered for this activity", MessageType.Warning);
+
+                            break;
+
+                        case QuestionType.Email:
+
+                            if (field.IsNotBlank() && !field.IsRegExMatch(BasicLibrary.Utilities.EmailRegEx))
+                                validatedField.Messages.Add("Must be a valid email address", MessageType.UserError);
+                            
+                            if (field.In(volunteerEmails, StringComparer.OrdinalIgnoreCase))
+                                validatedField.Messages.Add("This email is a duplicate of another volunteer email in this import.", MessageType.Warning);
+                            
+                            if (!volunteerEmails.Contains(field, StringComparer.OrdinalIgnoreCase))
+                                volunteerEmails.Add(field);
+
+                            break;
+
+                        case QuestionType.DropDownList:
+                        case QuestionType.RadioList:
+
+                            if (field.IsNotBlank())
+                            {
+                                var options = Utilities.GetKeyValuePairs(question.Options.ToLower()).ToStringDictionary();
+
+                                if (!options.ContainsKey(field.ToLower()) && !options.ContainsValue(field.ToLower()))
+                                    validatedField.Messages.Add($"Must be one of the following values: {Utilities.GetKeyValuePairs(question.Options).ToStringDictionary().Keys.ToStringList()}", MessageType.UserError);
+                            }
+
+                            break;
+
+                        case QuestionType.CheckboxList:
+
+                            if (field.IsNotBlank())
+                            {
+                                var options = Utilities.GetKeyValuePairs(question.Options.ToLower()).ToStringDictionary();
+                                var fieldvalues = field.ToLower().Split(',').Select(x => x.Trim()).Where(x => x.Length > 0);
+
+                                if (!options.Keys.Any(key => key.In(fieldvalues)) && !options.Values.Any(value => value.In(fieldvalues)))
+                                    validatedField.Messages.Add($"Must be one of the following values: {Utilities.GetKeyValuePairs(question.Options).ToStringDictionary().Keys.ToStringList()}", MessageType.UserError);
+                            }
+
+                            break;
+                    }
+
+                    validatedRow.Add(validatedField);
+                }
+                validatedRows.Add(validatedRow);
+            }
+        }
+
+
+         private void DoRowValidationsDuringImport(List<FormQuestion> questions, List<string> headers, bool createParentAccounts, 
+         List<List<string>> rows, List<List<ImportField>> validatedRows, bool ignoreRequiredFields, bool validatePhoneNumbers, 
+         ParticipationObject participationObject, SystemMessages msgs)
+         {
+            var parent1InformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.Parent1Information).First().FormQuestionGroupName;
+            var studentInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First().FormQuestionGroupName;
             var studentFirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First().Text;
             var studentLastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First().Text;
             var parent1EmailLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.Parent1Email).First().Text;
@@ -3717,12 +3881,10 @@ namespace AfterSchool.Areas.Org.Controllers
                                 /*if (WebUser.ExistsByEmail(field, msgs))
                                     validatedField.Messages.Add("Parent already has an account, record cannot be imported. Please ask parent to register. This record will be skipped.", MessageType.Warning);*/
 
-                                if (field.In(parent1Emails))
-                                    validatedField.Messages.Add(
-                                        "This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account",
-                                        MessageType.Warning);
+                                if (field.In(parent1Emails, StringComparer.OrdinalIgnoreCase))
+                                    validatedField.Messages.Add("This email is a duplicate of another parent email in this import. This student record will be attached to the same parent account", MessageType.Warning);
 
-                                if (!parent1Emails.Contains(field))
+                                if (!parent1Emails.Contains(field, StringComparer.OrdinalIgnoreCase))
                                     parent1Emails.Add(field);
                             }
 
@@ -3838,8 +4000,31 @@ namespace AfterSchool.Areas.Org.Controllers
                 registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
         }
 
-        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvReader reader,
-            bool createParentAccounts,
+        private void CompleteVolunteerRegistration(Account account,WebUser user, Registrant registrant, ref Registration registration, ref Registrant submittedRecord, RegistrationPeriod period, ParticipationObject participationObject, RegistrationAssignmentType selectedAssignmentType, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            AccountService.ProcessRegistrationWithoutPayment(
+                new CheckoutObject
+                {
+                    BillingAccount = participationObject.OwnerAccount,
+                    PayingAccount = account,
+                    NumberOfSeats = 1,
+                    ParticipationObject = participationObject,
+                    Registration = registration,
+                    MasterRegistrant = registrant,
+                    SubscriptionPlan = null,
+                    SelectedDates = new List<DateTime>(),
+                },
+                false,
+                user,
+                amsgs,
+                adc);
+
+            if (selectedAssignmentType != RegistrationAssignmentType.NotSet)
+                registration.GetRegistrantActivity(participationObject, amsgs, adc).SetAssignmentType(selectedAssignmentType, currentUser, amsgs, adc);
+        }
+
+        
+        private bool CreateAndLoadDataDuringImport(Activity activity, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts,
             bool enableTextMessaging, List<string> parent1Emails,
             ref WebUser parentUser, ref Account parentAccount,
             ref Registrant student, ref Registrant parentRegistrant, ref Registrant parent2Registrant,
@@ -3892,14 +4077,104 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs: amsgs,
                     dc: adc);
             }
-
             return true;
         }
 
-        private void SaveAnswersToRegistrantsDuringImport(List<string> headers, List<FormQuestion> questions, CsvReader reader, bool createParentAccounts,
-            Registrant student, Registrant parentRegistrant, Registrant parent2Registrant, Registration registration, Registrant submittedRecord,
+
+        private bool CreateVolunteerAndLoadDataDuringImport(ref Registrant registrant,ref Registration registration,ref Account account,ref WebUser user, Activity activity, List<string> headers, List<FormQuestion> questions, List<List<string>> rows, CsvHelper.CsvReader reader,
+            ref ParticipationObject participationObject,ref Registrant submittedRecord,ref RegistrationPeriod period, WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            var volunteerInformationLabel = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId == QuestionGroupDataType.PersonalInformation).First().FormQuestionGroupName;
+            var volunteerFirstNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).First().Text;
+            var volunteerLastNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantLastName).First().Text;
+            var volunteerEmailNameLabel = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantEmail).First().Text;
+            var phoneLable = questions.Where(x => x.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone).First().Text;
+            
+            var volunteerFirstNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerFirstNameLabel}");
+            var volunteerLastNameIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerLastNameLabel}");
+            var volunteerEmailIndex = headers.IndexOf($"{volunteerInformationLabel} - {volunteerEmailNameLabel}");
+
+            var phoneIndex = -1;
+            
+            var volunteerFirstName = reader.GetField<string>(volunteerFirstNameIndex);
+            var volunteerLastName = reader.GetField<string>(volunteerLastNameIndex);
+            var volunteerEmail = reader.GetField<string>(volunteerEmailIndex);
+            var phone = "";
+            
+            if (phoneLable.IsNotEmpty())
+                phoneIndex = headers.IndexOf($"{volunteerInformationLabel} - {phoneLable}");
+            
+            if (phoneIndex > -1)
+                phone = reader.GetField<string>(phoneIndex);
+            
+            period = activity.GetCurrentRegistrationPeriod(amsgs, adc);
+            participationObject = activity.GetParticipationObject(amsgs, adc);
+
+            bool isAlreadyRegistered = WebUser.ExistsByEmail(volunteerEmail, amsgs, adc);
+
+            if (isAlreadyRegistered)
+            {
+                user = WebUser.LoadByEmail(volunteerEmail, amsgs, adc);
+                
+                if(amsgs.HasNoErrors() && user.IsNotEmpty())
+                    account = user.GetVolunteerAccount(amsgs, adc);
+
+                if (amsgs.HasNoErrors() && account.IsEmpty())
+                    account = user.AddNewVolunteerAccount(
+                        UserType.Owner,
+                        true,
+                        user,
+                        amsgs,
+                        adc);
+            }
+            else
+            {
+                user = RegistrationCommon.CreateOrUpdateUserWithOptionalPhone(
+                    null,
+                    volunteerFirstName,
+                    volunteerLastName,
+                    volunteerEmail,
+                    phone.IsPhone() ? phone : "",
+                    Guid.NewGuid().ToString().MaxChars(8), //setting temp password
+                    true,
+                    amsgs,
+                    adc);
+
+                if (amsgs.HasNoErrors() && user.IsNotEmpty())
+                {
+                    account = RegistrationCommon.GetOrCreateVolunteerAccount(user, amsgs, adc);
+                }
+            }
+
+            if (amsgs.HasNoErrors())
+                registrant = RegistrationCommon.GetOrCreateVolunteerRegistrant(account, user, amsgs, adc);
+
+
+            if (!registrant.IsRegisteredFor(participationObject, null, amsgs, adc))
+                RegistrationCommon.SubmitRecord(
+                    ref registration,
+                    ref submittedRecord,
+                    registrant,
+                    participationObject,
+                    currentUser,
+                    period,
+                    "IMPORTED",
+                    Request.UserAgent,
+                    Request.GetUserHostAddress(),
+                    amsgs,
+                    adc);
+            else
+                return false;
+            
+                return true;
+        }
+
+
+        private void SaveAnswersToRegistrantsDuringImport(List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader, bool createParentAccounts, 
+            Registrant student, Registrant parentRegistrant, Registrant parent2Registrant, Registration registration, Registrant submittedRecord, 
             WebUser currentUser, SystemMessages amsgs, DatabaseConnection adc)
         {
+
             var saveParent2Answers = parent2Registrant.IsEmpty() || parent2Registrant.HasAnswers(amsgs, adc) || submittedRecord.IsNotEmpty() ? false : true;
 
             for (var i = 0; i < headers.Count; i++)
@@ -3913,6 +4188,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (field.IsNotBlank() && question.IsNotEmpty())
                     {
                         // having a submittedRecord means that the parent already had an account before this import
+                        
+                        if (question.QuestionTypeId == QuestionType.RadioList || question.QuestionTypeId == QuestionType.DropDownList || question.QuestionTypeId == QuestionType.CheckboxList )
+                            field = Utilities.GetKeyValuePairs(field).ToJSON();
+                        
                         (submittedRecord ?? student).AddOrUpdateAnswer(field, question, registration?.ID, currentUser, amsgs, adc);
 
                         if (createParentAccounts && question.QuestionDataTypeId != QuestionDataType.NotSet)
@@ -3984,10 +4263,32 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
         }
+        private void SaveVolunteerAnswersToRegistrantsDuringImport(Registrant registrant, List<string> headers, List<FormQuestion> questions, CsvHelper.CsvReader reader,
+            WebUser currentUser,Registrant submittedRecord, Registration registration, SystemMessages amsgs, DatabaseConnection adc)
+        {
+            for (var i = 0; i < headers.Count; i++)
+            {
+                var header = headers[i];
+                if (header.IsNotBlank())
+                {
+                    var field = reader.GetField<string>(i);
+                    var question = questions.Where(x => headers[i].IsSameAs($"{x.FormQuestionGroupName} - {x.Text}")).FirstOrDefault();
+                    if (field.IsNotBlank() && question.IsNotEmpty())
+                    {
+                        //var qvm = question.ToFormQuestionViewModel(question,);
+                        if (question.QuestionTypeId == QuestionType.RadioList || question.QuestionTypeId == QuestionType.DropDownList)
+                            field = Utilities.GetKeyValuePairs(field).ToJSON();
 
-        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvReader reader, bool enableTextMessaging,
-            int parentEmailIndex, List<string> parent1Emails, ParticipationObject participationObject, RegistrationPeriod period, ref Registration registration,
-            ref Registrant submittedRecord,
+                        submittedRecord.AddOrUpdateAnswer(field,question, registration?.ID, currentUser, amsgs, adc);
+                    }
+                }
+            }
+        }
+
+
+
+        private bool CreateNewAccountRegistrantsDuringImport(List<FormQuestion> questions, List<string> headers, CsvHelper.CsvReader reader, bool enableTextMessaging, 
+            int parentEmailIndex, List<string> parent1Emails, ParticipationObject participationObject, RegistrationPeriod period, ref Registration registration, ref Registrant submittedRecord,
             ref WebUser parentUser, ref Account parentAccount, ref Registrant parentRegistrant, ref Registrant parent2Registrant, ref Registrant student,
             WebUser currentUser, Account currentAccount, SystemMessages amsgs, DatabaseConnection adc)
         {
@@ -4034,7 +4335,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var createNewStudentRecord = true;
 
             // if parent account wasn't created during this import
-            if (!parent1Emails.Contains(parentEmail))
+            if (!parent1Emails.Contains(parentEmail, StringComparer.OrdinalIgnoreCase))
             {
                 parentUser = WebUser.LoadByEmail(parentEmail, amsgs, adc);
 
@@ -4102,7 +4403,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (amsgs.HasNoErrors())
                         parentRegistrant = RegistrationCommon.GetOrCreateParentOrGuardianRegistrant(parentAccount, parentUser, enableTextMessaging, amsgs, adc);
 
-                    if (!parent1Emails.Contains(parentEmail))
+                    if (!parent1Emails.Contains(parentEmail, StringComparer.OrdinalIgnoreCase))
                         parent1Emails.Add(parentEmail);
                 }
             }
@@ -4192,6 +4493,129 @@ namespace AfterSchool.Areas.Org.Controllers
             Response.End();
 
             return View();
+        }
+
+
+        #endregion
+
+        #region AttendanceSummaryReport
+
+        public ActionResult AttendanceSummary(string id, DateTime? sdate = null, DateTime? edate = null, string activities = null)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var activitiesList = activities.IsEmpty() ? null : activities.Split(',').ToIntegerArray().ToList();
+            var activityAttendanceSummaries = ActivityAttendanceSummary.LoadAttendanceSummary(currentAccount.ID.Value, sdate, edate, activitiesList, msgs);
+            var result = LoadAttendanceSummaryResult(activityAttendanceSummaries, activities, currentAccount, currentUser, msgs);
+            return View(result);
+        }
+
+        public ActionResult DownloadAttendanceSummary(string id, DateTime? sdate = null, DateTime? edate = null, string activities = null)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var activitiesList = activities.IsEmpty() ? null : activities.Split(',').ToIntegerArray().ToList();
+            var activityAttendanceSummaries = ActivityAttendanceSummary.LoadAttendanceSummary(currentAccount.ID.Value, sdate, edate, activitiesList, msgs);
+
+            var table = new List<List<string>>();
+            var row = new List<string>
+            {
+                "Activity Name",
+                "Total Enrollment",
+                "Reserved",
+                "Waitlist",
+                "Applied",
+                "Withdrawn",
+                "Number of Classes",
+                "Avg Attended Per Class",
+                "Percent Attended",
+                "Total Active",
+                "Percent Active",
+            };
+
+            table.Add(row);
+
+            foreach (var item in activityAttendanceSummaries)
+            {
+                row = new List<string>
+                {
+                    item.ActivityName,
+                    item.TotalStudentsRegistered.ToString(),
+                    item.Reserved.ToString(),
+                    item.Waitlisted.ToString(),
+                    item.Applied.ToString(),
+                    item.Withdrawn.ToString(),
+                    item.NumberOfClasses.ToString(),
+                    item.AvgAttendedPerClass.ToString(),
+                    item.PercentAttended.ToString(),
+                    item.TotalActive.ToString(),
+                    item.PercentActive.ToString(),
+                };
+                table.Add(row);
+            }
+
+            var csv = CsvFile.Create(table);
+
+            Response.Clear();
+            Response.AddHeader("Content-Type", BasicLibrary.Utilities.GetMimeType("csv"));
+            Response.AddHeader("Content-Disposition", $"attachment; filename={currentAccount.UniqueName}-attendancesummary.csv");
+
+            var fileBytes = Encoding.UTF8.GetBytes(csv);
+            Response.AddHeader("Content-Length", fileBytes.Length.ToString());
+            Response.BinaryWrite(fileBytes);
+            Response.End();
+
+            return View("AttendanceSummary", LoadAttendanceSummaryResult(activityAttendanceSummaries, activities, currentAccount, currentUser, msgs));
+        }
+
+        private AttendanceSummaryResult LoadAttendanceSummaryResult(List<ActivityAttendanceSummary> activityAttendanceSummaries, string activities, Account currentAccount,
+            WebUser currentUser, SystemMessages msgs)
+        {
+
+            var result = new AttendanceSummaryResult();
+            var totalReserved = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved), 1);
+            var totalReservedAllClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved * x.NumberOfClasses), 1);
+            var totalClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.NumberOfClasses), 1);
+
+            result.ActivityAttendanceSummaries = activityAttendanceSummaries;
+            result.CurrentAccount = currentAccount;
+            result.CurrentUser = currentUser;
+            result.Messages = msgs;
+            result.TotalEnrollment = activityAttendanceSummaries.Sum(x => x.TotalStudentsRegistered);
+            result.PercentAttended = activityAttendanceSummaries.Sum(x => x.TotalAttended) / totalReservedAllClasses;
+            result.AverageAttendedPerClass = activityAttendanceSummaries.Sum(x => x.TotalAttended) / totalClasses;
+            result.TotalActive = activityAttendanceSummaries.Sum(x => x.TotalActive);
+            result.PercentActive = activityAttendanceSummaries.Sum(x => x.TotalActive) / totalReserved;
+            result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, false, false, null, null, null, msgs);
+
+            if (activities.IsNotBlank())
+                result.SelectedActivities = currentAccount.GetActivities(activities.Split(',').ToIntegerArray().ToList(), msgs);
+
+            return result;
+        }
+
+        public class AttendanceSummaryResult
+        {
+            public Account CurrentAccount { get; set; }
+            public WebUser CurrentUser { get; set; }
+            public SystemMessages Messages { get; set; }
+            public int TotalEnrollment { get; set; }
+            public int PercentAttended { get; set; }
+            public int AverageAttendedPerClass { get; set; }
+            public int TotalActive { get; set; }
+            public int PercentActive { get; set; }
+            public List<ActivityAttendanceSummary> ActivityAttendanceSummaries { get; set; }
+            public List<Activity> ActivityOptions { get; set; }
+            public List<Activity> SelectedActivities { get; set; }
+
+            public AttendanceSummaryResult()
+            {
+                ActivityAttendanceSummaries = new List<ActivityAttendanceSummary>();
+                ActivityOptions = new List<Activity>();
+                SelectedActivities = new List<Activity>();
+            }
         }
 
         #endregion
