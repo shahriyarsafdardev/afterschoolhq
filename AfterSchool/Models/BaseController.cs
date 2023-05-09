@@ -304,7 +304,7 @@ namespace AfterSchool.Models
                 {
                     multipartAuth.Code = result;
                     multipartAuth.WebUserId = user.ID;
-                    multipartAuth.ExpirationDate = DateTime.UtcNow.AddMinutes(1);
+                    multipartAuth.ExpirationDate = DateTime.UtcNow.AddMinutes(3);
                     multipartAuth.CreateDate = DateTime.UtcNow;
                     multipartAuth.CreatedBy = user.ID;
 
@@ -318,7 +318,7 @@ namespace AfterSchool.Models
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
             );
-            TempData["expirationDate"] = multipartAuth.ExpirationDate;
+            TempData["expirationDate"] = multipartAuth.ExpirationDate.AddMinutes(-2);
             return msgs;
         }
 
