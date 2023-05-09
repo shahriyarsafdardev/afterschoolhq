@@ -93,12 +93,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (SectionId.IsEmpty())
                     throw new Exception("Invalid Section Id");
 
-                var RequestedSectionTypeId = (QuestionGroupDataType) SectionId;
-
                 var QuestionGroup = RequestedForm.GetQuestionGroups()
                     .Where(QuestionGroup =>
-                    QuestionGroup.QuestionGroupDataTypeId
-                    .Equals(RequestedSectionTypeId))
+                    QuestionGroup.ID
+                    .Equals(SectionId))
                     .FirstOrDefault();
                 if (QuestionGroup.IsEmpty())
                     throw new Exception("Invalid Section Id");
@@ -106,7 +104,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var RequestedQuestions = RequestedForm.GetAllQuestions(msgs)
                     .Where(
                         Question =>
-                        Question.FormQuestionGroupQuestionGroupDataTypeId.Equals(RequestedSectionTypeId) &&
+                        Question.FormQuestionGroupId.Equals(SectionId) &&
                         !Question.IsDeleted
                     )
                     .OrderBy(
