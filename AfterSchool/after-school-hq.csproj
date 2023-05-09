@@ -2477,7 +2477,6 @@
     <Content Include="Views\Account\AddParent.cshtml" />
     <Content Include="Views\Shared\Registration\_RegisterButton.cshtml" />
     <Content Include="Views\Shared\Registration\_AccountTopBar.cshtml" />
-    <Content Include="Views\Shared\Registration\_LoginModal.cshtml" />
     <Content Include="Views\SignUp\Invite.cshtml" />
     <Content Include="Views\Shared\Login\_SignUpForm.cshtml" />
     <Content Include="Views\Login\Select.cshtml" />
@@ -2565,7 +2564,7 @@
     <Content Include="Views\Shared\Modals\_TransferModal.cshtml" />
     <Content Include="Views\Shared\Modals\_TransferModal-TransferButton.cshtml" />
     <Content Include="Views\R\ActivitySelectDates.cshtml" />
-    <Content Include="Views\Shared\Registration\_LoginModalWithUpdatedDesign.cshtml" />
+    <Content Include="Views\Shared\Registration\_LoginModal.cshtml" />
     <Content Include="Views\Shared\_LayoutLogin-Updated.cshtml" />
     <Content Include="Views\Shared\Registration\_ResetPassword.cshtml" />
     <Content Include="Views\Shared\Registration\_ResetPasswordCompleted.cshtml" />
