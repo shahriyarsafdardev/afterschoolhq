@@ -90,10 +90,10 @@ namespace AfterSchoolLibrary.Models
             set => MDV["StripeSubscriptionId"].Value = value;
         }
 
-        public string PackageName => (string) MDV["PackageName"].Value;
+        public string PackageName => (string) MDV["PackageName"].Value ?? "Enterprise";
         public Guid PackageUid => (Guid) MDV["PackageUid"].Value;
-        public decimal? PackagePrice => (decimal?) MDV["PackagePrice"].Value;
-        public decimal? PackagePricePerYear => (decimal?) MDV["PackagePricePerYear"].Value;
+        public decimal? PackagePrice => (decimal?) MDV["PackagePrice"].Value ?? 0;
+        public decimal? PackagePricePerYear => (decimal?) MDV["PackagePricePerYear"].Value ?? 0;
 
 
         public AccountPackage()
@@ -145,7 +145,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 var dq = get_DatabaseQuery(ObjectMap, typeof(AccountPackage).Name);
-                dq.Joins.Add(Package.ObjectMap["ID"], ObjectMap["PackageId"], DatabaseJoinTypeEnum.InnerJoin,
+                dq.Joins.Add(Package.ObjectMap["ID"], ObjectMap["PackageId"], DatabaseJoinTypeEnum.LeftOuterJoin,
                     "Package");
 
                 return dq;
@@ -401,7 +401,16 @@ namespace AfterSchoolLibrary.Models
 
         public Package GetPackage(SystemMessages msgs, DatabaseConnection dc = null)
         {
-            return Package.Load(PackageId.Value, msgs, dc);
+            if(PackageId.IsNotEmpty())
+                return Package.Load(PackageId.Value, msgs, dc);
+            return new Package
+            {
+                IsDefaultCustomerPackage = false,
+                IsActive = true,
+                Name = "Enterprise",
+                Price = 0,
+                PricePerYear = 0,
+            };
         }
 
         public SystemMessages SaveWithStripe(string stripeCustomerId, bool upgradingFromTrial, string priceId,
