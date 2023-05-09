@@ -33,6 +33,12 @@ const FormBuilderSlice = createSlice({
       state.form = Form;
       state.questionsGroups = FormQuestionGroup;
     },
+    updateQuestionsGroups: (state, { payload }) => {
+      state.questionsGroups = payload;
+    },
+    updateform: (state, { payload }) => {
+      state.form = payload;
+    },
     loadingSectionData: state => {
       state.sectionLoading = true;
     },
@@ -60,6 +66,7 @@ const FormBuilderSlice = createSlice({
 export const useFormBuilderActions = () => {
   const {
     setMsgs,
+    updateform,
     setFormData,
     setSectionData,
     formDataLoaded,
@@ -68,7 +75,8 @@ export const useFormBuilderActions = () => {
     sectionDataLoaded,
     submitFormSection,
     setRegistrationId,
-    loadingSectionData
+    loadingSectionData,
+    updateQuestionsGroups
   } = FormBuilderSlice.actions;
   const dispatch = useDispatch();
 
@@ -94,9 +102,19 @@ export const useFormBuilderActions = () => {
 
   const submitFormSectionData = async values => {
     dispatch(loadingFormData());
-    await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) =>
-      dispatch(setMsgs(msgs))
-    );
+    await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) dispatch(formDataLoaded());
+    });
+  };
+
+  const updateFormSettings = async ({ FormSettings }) => {
+    dispatch(updateform(FormSettings));
+    await submitFormSectionData({ FormSettings });
+  };
+
+  const updateQuestionsGroupsData = questionGroups => {
+    dispatch(updateQuestionsGroups(questionGroups));
   };
 
   //   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
@@ -128,8 +146,10 @@ export const useFormBuilderActions = () => {
   return {
     loadFormData,
     loadSectionData,
+    updateFormSettings,
     setCurrentSectionName,
     submitFormSectionData,
+    updateQuestionsGroupsData,
     //  submitFormSectionData, setSchoolFieldValue, clearMessages,
     loaded
     //  exit

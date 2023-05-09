@@ -85,10 +85,12 @@ export default makeStyles(theme => ({
     }
   },
   sectionsListHeading: {
+    cursor: 'pointer',
     textDecoration: 'underline',
     marginBottom: '30px'
   },
   settingsLink: {
+    cursor: 'pointer',
     textDecoration: 'underline',
     fontWeight: 'normal',
     marginBottom: '30px'

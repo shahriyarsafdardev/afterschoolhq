@@ -17,7 +17,7 @@ function FormSettings() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { form, questionsGroups, submitFormSectionData } = useFormBuilder();
+  const { form, questionsGroups, updateFormSettings } = useFormBuilder();
 
   const validationSchema = Yup.object().shape({
     FormName: Yup.string().required('Form Name is required')
@@ -28,11 +28,12 @@ function FormSettings() {
     initialValues: form,
     validationSchema,
     onSubmit: async values => {
-      await submitFormSectionData({ FormSettings: values }).then(() =>
-        enqueueSnackbar('Submitted.', { variant: 'success' })
-      );
+      await updateFormSettings({
+        FormSettings: values
+      }).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
     }
   });
+
   const { handleSubmit, values, getFieldProps, touched, errors } = formik;
   const firstSectionQuestionGroupId = questionsGroups.length
     ? questionsGroups[0].QuestionGroupDataTypeId

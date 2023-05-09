@@ -3,7 +3,7 @@ import { Select, FormControl, MenuItem } from '@material-ui/core';
 
 import useStyles from './styles';
 
-const DropDown = ({ question, setFieldValue }) => {
+const DropDown = ({ question, setFieldValue, disabled }) => {
   const classes = useStyles();
   const { Text: title, QuestionDataTypeId, options, QuestionTypeId } = question;
   const questionType = options.find(option => option.key === QuestionTypeId);
@@ -21,6 +21,7 @@ const DropDown = ({ question, setFieldValue }) => {
           root: classes.formControlRoot
         }}
         data-testid={`${title}-${QuestionDataTypeId}-FormControl`}
+        disabled={disabled}
       >
         <Select
           data-testid={`${title}-${QuestionDataTypeId}-select`}
