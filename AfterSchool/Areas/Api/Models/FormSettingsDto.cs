@@ -13,6 +13,16 @@ namespace AfterSchool.Areas.Api.Models
         public string? FormName { get; set; }
         public string? FormDescription { get; set; }
 
+        public bool IsNull()
+        {
+            return FormId == null;
+        }
+
+        public bool IsForcedNull()
+        {
+            return IsNull() || FormName == null;
+        }
+
         public static FormSettingsDto MapToDto(Form Form)
         {
             return new FormSettingsDto()
@@ -26,7 +36,7 @@ namespace AfterSchool.Areas.Api.Models
 
         public void UpdateIfNotNull(Form Form)
         {
-            if (Form.Name != null)
+            if (!this.IsForcedNull())
             {
                 Form.FormTypeId = this.FormType;
                 Form.Name = this.FormName;

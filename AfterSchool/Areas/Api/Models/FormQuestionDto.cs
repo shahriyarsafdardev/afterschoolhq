@@ -25,8 +25,6 @@ namespace AfterSchool.Areas.Api.Models
 
         public void UpdateQuestionIfNotEmpty(FormQuestion Question)
         {
-            Question.ID = this.ID;
-            Question.FormQuestionGroupId = this.FormQuestionGroupId ?? Question.FormQuestionGroupId;
             Question.Text = this.Text;
             Question.Description = this.Description;
             Question.Options = this.Options;
