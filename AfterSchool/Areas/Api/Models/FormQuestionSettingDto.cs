@@ -1,4 +1,5 @@
 using AfterSchoolLibrary.Models;
+using Microsoft.Ajax.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,6 @@ namespace AfterSchool.Areas.Api.Models
 {
     public class FormQuestionSettingDto
     {
-        public int QuestionId { get; set; }
         public AudienceType Audience { get; set; }
         public bool Show { get; set; }
         public bool Required { get; set; }
@@ -18,16 +18,33 @@ namespace AfterSchool.Areas.Api.Models
         {
             return new FormQuestionSettingDto()
             {
-                QuestionId = QuestionSettings.QuestionId,
                 Audience = QuestionSettings.Audience,
                 Show = QuestionSettings.Show,
                 Required = QuestionSettings.Required,
             };
         }
 
-        public static List<FormQuestionSettingDto> fromFormSettingsList(List<FormQuestionSettings> QuestionSettingsList) {
+        public static List<FormQuestionSettingDto> fromFormSettingsList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0)
+        {
+            AudienceType[] AudienceTypes = { AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
+            if (QuestionSettingsList.Count != AudienceTypes.Count())
+            {
+                AudienceTypes.ForEach(AudienceType =>
+                                {
+                                    var exists = QuestionSettingsList.Any(QuestionSetting => QuestionSetting.Audience.Equals(AudienceType));
+                                    if (!exists)
+                                    {
+                                        QuestionSettingsList.Add(new FormQuestionSettings()
+                                        {
+                                            Audience = AudienceType,
+                                            Show = true,
+                                            Required = true,
+                                        });
+                                    }
+                                });
+            }
             return QuestionSettingsList.Select(
-                QuestionSetting=>
+                QuestionSetting =>
                 fromFormSettings(QuestionSetting))
                 .ToList();
         }

@@ -8,8 +8,8 @@ namespace AfterSchool.Areas.Api.Models
 {
     public class FormSettingsDto
     {
-        public int FormId { get; set; }
-        public FormType? FormType { get; set; }
+        public int? FormId { get; set; }
+        public FormType FormType { get; set; }
         public string? FormName { get; set; }
         public string? FormDescription { get; set; }
 
@@ -17,7 +17,7 @@ namespace AfterSchool.Areas.Api.Models
         {
             return new FormSettingsDto()
             {
-                FormId = Form.ID ?? 0,
+                FormId = Form.ID,
                 FormType = Form.FormTypeId,
                 FormName = Form.Name,
                 FormDescription = Form.Description
@@ -26,10 +26,12 @@ namespace AfterSchool.Areas.Api.Models
 
         public void UpdateIfNotNull(Form Form)
         {
-            Form.ID = this.FormId;
-            Form.FormTypeId = this.FormType??Form.FormTypeId;
-            Form.Name = this.FormName??Form.Name;
-            Form.Description = this.FormDescription??Form.Description;
+            if (Form.Name != null)
+            {
+                Form.FormTypeId = this.FormType;
+                Form.Name = this.FormName;
+                Form.Description = this.FormDescription;
+            }
         }
 
     }
