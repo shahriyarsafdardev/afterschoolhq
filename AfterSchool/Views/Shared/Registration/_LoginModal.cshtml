@@ -1,4 +1,4 @@
-﻿@{
+@{
     var cleverSsoEnabledRaw = ViewData["CleverSsoEnabled"];
     var cleverSsoEnabled = !(cleverSsoEnabledRaw is null) && (bool)cleverSsoEnabledRaw;
 }
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="form-group login-submit text-center">
-                        <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block btn-login-updated" onclick="authorize()">Log In</button>
+                        <button type="button" id="btn-login" class="btn btn-primary btn-lg btn-block btn-login-updated" data-uid="" onclick="authorize()">Log In</button>
                         @if (cleverSsoEnabled)
                         {
                             <a href="@AfterSchoolLibrary.Helpers.CleverHelper.SSOLinkAccount" class="btn btn-lg btn-block">
@@ -78,13 +78,21 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml"); }
+@{ Html.RenderPartial("~/Views/Shared/Registration/_ResetPassword.cshtml");
+    Html.RenderPartial("~/Views/Shared/Registration/_AuthCodeModal.cshtml", null, new ViewDataDictionary
+    {
+        { "CleverSsoEnabled", cleverSsoEnabled },
+        { "ReturnUrl", ViewData["ReturnUrl"] }
+    });
+}
 
 <script>
     let authorizationFormRedirectUrl = null;
     let authorizationFormAction = null;
     let signupFormRedirectUrl = null;
     let signupFormAction = null;
+    let timer;
+    var expirationDate;
 
     function authorize() {
 
@@ -127,6 +135,28 @@
             $.post('@Url.Action("authorize", "login")', params,
                 function (data) {
                     if (data && data.status == 'ok') {
+                        if (data.isAdminAccount == true) {
+                            var dateString = data.expirationDate.replace(/\/Date\((\d+)\)\//, '$1');
+                            var expirationDate = new Date(parseInt(dateString));
+                            var remainingTime = Math.round((expirationDate.getTime() - Date.now()) / 1000);
+                            $('#modal-authcode').data('expiration-date', remainingTime);
+                            $('#btn-login').data('uid', data.uid);
+                            hideLoader();
+                            if (timer) {
+                                clearInterval(timer);
+                            }
+                            timer = setInterval(function () {
+                                $('#resend-code-btn').text('Resend Code (' + remainingTime + ')');
+                                remainingTime--;
+                                if (remainingTime < 0) {
+                                    $('#messages-container').empty();
+                                    clearInterval(timer);
+                                    $('#resend-code-btn').text('Resend Code');
+                                    $('#resend-code-btn').prop('disabled', false);
+                                }
+                            }, 1000);
+                            return showAuthCodeModal();
+                        }
                         $('#btn-login').html('Redirecting...');
 
                         if (authorizationFormRedirectUrl) {
@@ -181,6 +211,11 @@
         hideModal('modal-login');
         // now show the reset password modal
         showModal('modal-rest-password');
+    }
+
+    function showAuthCodeModal() {
+        hideModal('modal-login');
+        showModal('modal-authcode');
     }
 
     function hideForgotPasswordModal() {        
