@@ -4,14 +4,14 @@
 @{
     Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
     ViewBag.Title = "Login";
-    var msgs = (SystemMessages)ViewBag.Messages;
-    string uid = ViewBag.uid;
-    string returnurl = (String)ViewBag.returnurl;
-    string remember = (String)ViewBag.remember;
-    string invite = (String)ViewBag.invite;
+    var msgs = @Model.Messages;
+    var uid = @Model.UID;
+    var returnurl = @Model.ReturnURL;
+    var remember = @Model.Remember;
+    var invite = @Model.Invite;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
     bool isProduction = Utilities.IsProduction;
-    var expirationDate = ViewBag.ExpirationDate;
+    var expirationDate = @Model.ExpirationDate;
     TimeSpan elapsedTime = expirationDate - DateTime.UtcNow;
     int elapsedSeconds = (int)elapsedTime.TotalSeconds;
 }
@@ -266,7 +266,7 @@
         $.ajax({
             url: '@Url.Action("ResendVerificationCode", "Login")',
             type: 'POST',
-            data: { uid: '@uid', returnurl: '@returnurl', invite: '@invite', remember: '@remember' },
+            data: { uid: '@uid' },
             success: function (data) {
                 var dateString = data.expirationDate.replace(/\/Date\((\d+)\)\//, '$1');
                 var expirationDate = new Date(parseInt(dateString));

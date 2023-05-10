@@ -140,19 +140,9 @@ namespace AfterSchoolLibrary.Services
 
         public static List<UserType> GetUserTypes(this WebUser user, List<Account> accounts, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            List<UserType> userTypes = new List<UserType>();
+            var awus = AccountWebUser.LoadByWebUserId((int) user.ID, true, false, false, msgs, dc).Select(x => x.UserTypeId).ToList();
 
-            foreach (Account account in accounts)
-            {
-                if (!account.IsEmpty())
-                {
-                    var awu = AccountWebUser.LoadByAccountIdByWebUserId(account.ID.Value, user.ID.Value, msgs, dc);
-                    if (!awu.IsEmpty())
-                        userTypes.Add(awu.UserTypeId);
-                }
-            }
-
-            return userTypes;
+            return awus;
         }
 
         public static void UpdateLastActivity(this WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
@@ -295,8 +285,9 @@ namespace AfterSchoolLibrary.Services
             return EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
         }
 
-        public static SystemMessages SendMultipartAuth(this WebUser user, string authCode, bool isAfterSchool = true)
+        public static SystemMessages SendMultipartAuth(int? userId, string authCode, bool isAfterSchool = true)
         {
+            var user = WebUser.Load((int) userId);
             return EmailHelper.SendAuthEmail(user, authCode, isAfterSchool);
         }
 

@@ -85,7 +85,7 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static MultipartAuth LoadByWebUser(int? Id, SystemMessages msgs = null,
+        public static MultipartAuth LoadLatestCodeByWebUserId(int? Id, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -95,7 +95,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
         }
 
-        public static List<MultipartAuth> LoadListByWebUser(int? Id, SystemMessages msgs = null,
+        public static List<MultipartAuth> LoadCodesListByWebUserId(int? Id, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

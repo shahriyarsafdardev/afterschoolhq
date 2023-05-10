@@ -110,12 +110,11 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                if(FormConstants.AdminUserTypes.Contains(SessionVariables.CurrentUser.GetUserType(SessionVariables.CurrentAccount)) && SessionVariables.CurrentAccount.AccountTypeId == AccountType.AfterSchool)
-                {
-                    return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
-                }
-
+                var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+
+                if (FormConstants.AdminUserTypes.Contains(currentUser.GetUserType(currentAccount)) && currentAccount.AccountTypeId == AccountType.AfterSchool)
+                    return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
 
                 // select account
                 if (currentAccount.IsEmpty())
@@ -148,32 +147,27 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember, string msg)
+        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember)
         {
             var msgs = new SystemMessages();
-            if (TempData["msg"].IsNotEmpty())
-                msgs.Add(TempData["msg"].ToString(), MessageType.Success);
-            ViewBag.Messages = msgs;
-            ViewBag.uid = uid;
-            ViewBag.returnurl = returnurl;
-            ViewBag.invite = invite;
-            ViewBag.remember = remember;
-            ViewBag.ExpirationDate = TempData.Peek("expirationDate");
-            return View();
+            HandleTempMessages(msgs);
+            var multiFactorViewModel = new MultiFactorViewModel(msgs, uid, returnurl, invite, remember, (DateTime) TempData.Peek("expirationDate"));
+
+            return View(multiFactorViewModel);
         }
 
         [HttpPost]
         public ActionResult MultiPartAuth(string uid, string authcode, string returnurl, string invite, string remember, bool isJson = false, string source = null)
         {
-            WebUser user = WebUser.LoadByUid(uid.ToGuid());
             var msgs = new SystemMessages();
+            var user = WebUser.LoadByUid(uid.ToGuid(), msgs);
 
             if (authcode.IsEmpty())
                 msgs.Add("Authentication code is required for login", MessageType.UserError);
 
             if (msgs.HasNoErrors())
             {
-                MultipartAuth multipartAuth = MultipartAuth.LoadByWebUser(user.ID);
+                var multipartAuth = MultipartAuth.LoadLatestCodeByWebUserId(user.ID, msgs);
 
                 if(multipartAuth != null)
                 {
@@ -183,13 +177,13 @@ namespace AfterSchool.Controllers
                         msgs.Add("Authentication code is expired, kindly press resend code to get code again", MessageType.UserError);
                     else
                     {
-                        List<MultipartAuth> UserCodes = MultipartAuth.LoadListByWebUser(user.ID);
-                        if (UserCodes.Count > 1)
+                        var userCodes = MultipartAuth.LoadCodesListByWebUserId(user.ID, msgs);
+                        if (userCodes.Count > 1)
                         {
-                            UserCodes = UserCodes.OrderByDescending(x => x.ID).ToList();
-                            for (int i = 1; i < UserCodes.Count; i++)
+                            userCodes = userCodes.OrderByDescending(x => x.ID).ToList();
+                            for (int i = 1; i < userCodes.Count; i++)
                             {
-                                msgs.AddRange(UserCodes[i].Delete());
+                                msgs.AddRange(userCodes[i].Delete());
                             }
                         }
                         if(isJson)
@@ -222,24 +216,18 @@ namespace AfterSchool.Controllers
                     }
                 }
             }
-            ViewBag.uid = uid;
-            ViewBag.returnurl = returnurl;
-            ViewBag.invite = invite;
-            ViewBag.remember = remember;
-            ViewBag.Messages = msgs;
-            ViewBag.ExpirationDate = TempData.Peek("expirationDate");
             if (isJson)
-            {
                 return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
-            }
-            return View();
+
+            var multiFactorViewModel = new MultiFactorViewModel(msgs, uid, returnurl, invite, remember, (DateTime) TempData.Peek("expirationDate"));
+            return View(multiFactorViewModel);
         }
 
         [HttpPost]
-        public ActionResult ResendVerificationCode(string uid, string returnurl, string invite, string remember)
+        public ActionResult ResendVerificationCode(string uid)
         {
-            WebUser user = WebUser.LoadByUid(uid.ToGuid());
             var msgs = new SystemMessages();
+            var user = WebUser.LoadByUid(uid.ToGuid(), msgs);
 
             msgs.AddRange(HandleMultiPartAuth(user));
             return Json(new { success = true, expirationDate = TempData.Peek("expirationDate") });
@@ -480,14 +468,15 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
-                var userTypes = SessionVariables.CurrentUser.GetUserTypes(accounts);
+                var currentUser = SessionVariables.CurrentUser;
+                var accounts = currentUser.GetAccounts(msgs);
+                var userTypes = currentUser.GetUserTypes(accounts, msgs);
 
                 if(userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                 {
                     Logout(null);
                     msgs.AddRange(HandleMultiPartAuth(user));
-                    string uid = user.Uid.ToString();
+                    var uid = user.Uid.ToString();
                     var isAdminAccount = true;
                     var expirationDate = TempData.Peek("expirationDate");
                     return Json(new { status = "ok", isNewParentAccount, isAdminAccount, uid, expirationDate }, JsonRequestBehavior.DenyGet);

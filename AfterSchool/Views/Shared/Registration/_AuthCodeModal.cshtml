@@ -1,8 +1,4 @@
 @{
-    string uid = ViewData["uid"] as String;
-    string remember = ViewBag.remember;
-    string returnurl = ViewBag.retunurl;
-    string invite = ViewBag.invite;
     var msgs = (SystemMessages)ViewBag.msgs;
 }
 
@@ -200,17 +196,15 @@
 
     function resendCode() {
         var uid = $('#btn-login').data('uid');
-        var remember = $('#lm-login-rememberme').val();
         $('#resend-code-btn').prop('disabled', true);
         $.ajax({
             url: '@Url.Action("ResendVerificationCode", "Login")',
             type: 'POST',
-            data: { uid: uid, returnurl: null, invite: null, remember: remember },
+            data: { uid: uid },
             success: function (data) {
                 var dateString = data.expirationDate.replace(/\/Date\((\d+)\)\//, '$1');
                 var expirationDate = new Date(parseInt(dateString));
                 var remainingTime = Math.round((expirationDate.getTime() - Date.now()) / 1000);
-                debugger
                 var successMessage = "Authentication code resent to your email";
                 Notifications.showMessage('Success', successMessage, true);
                 var timer = setInterval(function() {

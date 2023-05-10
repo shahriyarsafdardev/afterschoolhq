@@ -133,9 +133,10 @@ namespace AfterSchool.Models
         {
             Logout(null);
             msgs.AddRange(HandleMultiPartAuth(user));
-            string uid = user.Uid.ToString();
-            TempData["msg"] = "Authentication code successfully sent to your email.";
-            return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember, msg = "Success: Authentication code successfully sent to your email." });
+            var uid = user.Uid.ToString();
+            msgs.Add("Authentication code successfully sent to your email.", MessageType.Success);
+            SetTempMessages(msgs);
+            return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember });
         }
 
         internal string DetermineUrlForLoginRedirect(Account registrationAccount, SystemMessages msgs)
@@ -313,10 +314,10 @@ namespace AfterSchool.Models
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user, result, true));
+                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, result, true));
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                onException: (SystemMessages emsgs) => msgs.AddRange(emsgs)
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
             );
             TempData["expirationDate"] = multipartAuth.ExpirationDate.AddMinutes(-2);
             return msgs;
