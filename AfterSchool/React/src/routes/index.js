@@ -30,6 +30,7 @@ export default {
   getFormBuilderSectionDataAPI: (formId, sectionId) =>
     `Api/Form/GetFormQuestions/?FormId=${formId}&SectionId=${sectionId}`,
   submitFormBuilderDataAPI: 'Api/Form/SaveFormData',
+  saveNewSectionDataAPI: 'Api/Form/SaveNewSection',
 
   // Survey Form APIs
   getSurveyFormDataAPI: (formUid, surveyResponseUid) =>

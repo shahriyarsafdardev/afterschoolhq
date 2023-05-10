@@ -26,7 +26,8 @@ export default function TextField({ formikProps, label }) {
         <MuiTextField
           data-testid={`${label}-form-control`}
           inputProps={{
-            'data-testid': `${label}`
+            'data-testid': `${label}`,
+            maxLength: 400
           }}
           className={classes.formControlClass}
           fullWidth

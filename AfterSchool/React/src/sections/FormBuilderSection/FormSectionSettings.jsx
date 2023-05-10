@@ -35,9 +35,7 @@ function FormSectionSettings() {
     updateSectionName,
     sectionLoading
   } = useFormBuilder();
-  const currentSectionIndex = questionsGroups.findIndex(
-    qg => qg.QuestionGroupDataTypeId == questionGroup
-  );
+  const currentSectionIndex = questionsGroups.findIndex(qg => qg.ID == questionGroup);
   const currentSection = questionsGroups[currentSectionIndex];
   const [sectionName, setSectionName] = useState(currentSection?.Name || '');
 
@@ -71,10 +69,17 @@ function FormSectionSettings() {
     },
     onSubmit: async (values, ...props) => {
       const formQuestions = Object.keys(values).map(key => values[key]);
+      const updatedQuestionGroups = [...questionsGroups];
+
+      if (currentSection?.Name !== sectionName) {
+        updatedQuestionGroups[currentSectionIndex] = { ...currentSection, Name: sectionName };
+      }
+
       await submitFormSectionData({
         FormSettings: { FormId: formId },
-        FormQuestionGroup: currentSection,
-        FormQuestion: formQuestions
+        FormQuestionGroup: { ...currentSection, Name: sectionName },
+        FormQuestion: formQuestions,
+        FormQuestionGroups: updatedQuestionGroups
       });
       console.log(values, props, 'submitted successfully');
     }
@@ -180,16 +185,9 @@ function FormSectionSettings() {
     const { source, destination } = result;
     if (!destination) return;
 
-    // const { [source.index]: copiedValue, ...restValues } = values;
     moveObjectInFormikState(source.index, destination.index);
-
-    // const temp = [...options];
-    // const [sourceValue] = temp.splice(source.index, 1);
-    // temp.splice(destination.index, 0, sourceValue);
-    // setOptions(temp);
   };
 
-  //////
   const [reRender, setReRender] = useState(false);
   const [showFor, setShowFor] = useState(initialState);
   const [requiredFor, setRequiredFor] = useState(initialState);

@@ -11,42 +11,38 @@ function FormSectionList() {
   const { formId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { questionsGroups, updateQuestionsGroupsData, submitFormSectionData } = useFormBuilder();
+  const { questionsGroups, saveNewSectionData, submitFormSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
     questionsGroup => questionsGroup.IsDeleted === false
   );
 
-  const firstSectionQuestionGroupId = questionsGroupsToShow.length
-    ? questionsGroupsToShow[0].QuestionGroupDataTypeId
-    : -1;
+  const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].ID : -1;
 
   const questionGroup = searchParams.get('qg');
 
   const handleDelete = async key => {
-    const index = questionsGroups.findIndex(
-      questionGroup => questionGroup.QuestionGroupDataTypeId === key
-    );
+    const index = questionsGroups.findIndex(questionGroup => questionGroup.ID === key);
+
+    const updatedQuestionGroups = [...questionsGroups];
+
+    updatedQuestionGroups[index] = { ...questionsGroups[index], IsDeleted: true };
 
     await submitFormSectionData({
       FormSettings: { FormId: formId },
       FormQuestionGroup: { ...questionsGroups[index], IsDeleted: true },
-      FormQuestion: null
+      FormQuestion: null,
+      FormQuestionGroups: updatedQuestionGroups
     });
   };
 
-  const addNewSectionHandler = () => {
-    updateQuestionsGroupsData([
-      ...questionsGroups,
-      {
-        ID: null,
-        DisplayOrder: questionsGroups.length + 1,
+  const addNewSectionHandler = async () => {
+    await saveNewSectionData({
+      FormQuestionGroup: {
         FormId: formId,
-        IsDeleted: false,
-        Name: 'New Section',
-        QuestionGroupDataTypeId: 0
+        Name: 'New Section'
       }
-    ]);
+    });
   };
 
   return (
@@ -62,12 +58,12 @@ function FormSectionList() {
         variant="h6"
         className={classes.sectionsListHeading}
         onClick={() => {
-          setSearchParams(`qg=${firstSectionQuestionGroupId}`);
+          setSearchParams(`qg=${firstSectionId}`);
         }}
       >
         Sections
       </Typography>
-      {questionsGroupsToShow.map(({ QuestionGroupDataTypeId: key, Name }) => (
+      {questionsGroupsToShow.map(({ ID: key, QuestionGroupDataTypeId, Name }) => (
         <Grid item key={key} spacing={2} className={classes.displayFlex}>
           <Grid lg={11}>
             <Typography
@@ -82,7 +78,7 @@ function FormSectionList() {
             </Typography>
           </Grid>
           <Grid lg={1}>
-            {key === 0 && (
+            {QuestionGroupDataTypeId === 0 && (
               <CloseOutlinedIcon
                 style={{ cursor: 'pointer' }}
                 onClick={async () => {
@@ -90,7 +86,7 @@ function FormSectionList() {
 
                   if (questionGroup == key) {
                     if (questionsGroupsToShow.length > 0) {
-                      setSearchParams(`qg=${firstSectionQuestionGroupId}`);
+                      setSearchParams(`qg=${firstSectionId}`);
                     } else {
                       navigate(`/Org/form/edit/${formId}`);
                     }
@@ -112,9 +108,9 @@ function FormSectionList() {
         }}
         type="submit"
         disabled={false}
-        onClick={event => {
+        onClick={async event => {
           event.preventDefault();
-          addNewSectionHandler();
+          await addNewSectionHandler();
         }}
         data-testid={`Back-${'Name'}`}
       >
