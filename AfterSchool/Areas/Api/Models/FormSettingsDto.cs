@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.WebPages;
 
 namespace AfterSchool.Areas.Api.Models
 {
@@ -20,7 +21,7 @@ namespace AfterSchool.Areas.Api.Models
 
         public bool IsForcedNull()
         {
-            return IsNull() || FormName == null;
+            return IsNull() || FormName.IsEmpty();
         }
 
         public static FormSettingsDto MapToDto(Form Form)

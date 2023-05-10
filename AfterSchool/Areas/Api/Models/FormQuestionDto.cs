@@ -1,6 +1,10 @@
 using AfterSchoolLibrary.Models;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Cryptography;
 
 namespace AfterSchool.Areas.Api.Models
 {
@@ -23,22 +27,24 @@ namespace AfterSchool.Areas.Api.Models
         public QuestionDataType QuestionDataTypeId { get; set; }
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
 
-        public void UpdateQuestionIfNotEmpty(FormQuestion Question)
+        public void UpdateNonDefaultFields(FormQuestion Question)
         {
             Question.Text = this.Text;
             Question.Description = this.Description;
             Question.Options = this.Options;
-            Question.IsRequired = this.IsRequired;
-            Question.DisplayOrder = this.DisplayOrder;
-            Question.IsActive = this.IsActive;
-            Question.IsDeleted = this.IsDeleted;
-            Question.QuestionTypeId = this.QuestionTypeId;
-            Question.QuestionDataTypeId = this.QuestionDataTypeId;
-            Question.IsAnswerDescriptionEnabled = this.IsAnswerDescriptionEnabled;
             Question.Link = this.Link;
+            Question.DisplayOrder = this.DisplayOrder;
+            Question.QuestionTypeId = this.QuestionTypeId;
         }
 
-        public static FormQuestionDto GetByFormQuestion(FormQuestion Question)
+        public void UpdateDefaultFields(FormQuestion Question)
+        {
+            Question.IsActive = IsActive;
+            Question.IsRequired = IsRequired;
+            Question.IsAnswerDescriptionEnabled = IsAnswerDescriptionEnabled;
+        }
+
+        public static FormQuestionDto MapToDto(FormQuestion Question)
         {
             return new FormQuestionDto()
             {
@@ -55,7 +61,7 @@ namespace AfterSchool.Areas.Api.Models
                 QuestionTypeId = Question.QuestionTypeId,
                 QuestionDataTypeId = Question.QuestionDataTypeId,
                 FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
-                QuestionSettings = FormQuestionSettingDto.fromFormSettingsList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0),
+                QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0),
             };
         }
 
@@ -63,7 +69,7 @@ namespace AfterSchool.Areas.Api.Models
         {
             return QuestionList
                 .Select(question=>
-                GetByFormQuestion(question))
+                MapToDto(question))
                 .ToList();
         }
 
