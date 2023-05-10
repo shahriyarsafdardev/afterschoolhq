@@ -144,6 +144,8 @@ namespace AfterSchool.Areas.Api.Controllers
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
             var FormId = FormSettings.FormId;
+            if(FormQuestion.IsEmpty())
+                FormQuestion = new List<FormQuestionDto>();
             try
             {
 
