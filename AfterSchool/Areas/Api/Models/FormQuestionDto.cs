@@ -31,6 +31,7 @@ namespace AfterSchool.Areas.Api.Models
             Question.Link = this.Link;
             Question.DisplayOrder = this.DisplayOrder;
             Question.QuestionTypeId = this.QuestionTypeId;
+            Question.IsDeleted = this.IsDeleted;
         }
 
         public void UpdateDefaultFields(FormQuestion Question)
