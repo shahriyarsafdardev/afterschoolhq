@@ -4,16 +4,11 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Web.Mvc;
-using System.Windows.Interop;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -149,6 +144,8 @@ namespace AfterSchool.Areas.Api.Controllers
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
             var FormId = FormSettings.FormId;
+            if(FormQuestion.IsEmpty())
+                FormQuestion = new List<FormQuestionDto>();
             try
             {
 
