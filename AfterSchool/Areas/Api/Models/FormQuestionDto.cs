@@ -1,10 +1,6 @@
 using AfterSchoolLibrary.Models;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using System.Security.Cryptography;
 
 namespace AfterSchool.Areas.Api.Models
 {
