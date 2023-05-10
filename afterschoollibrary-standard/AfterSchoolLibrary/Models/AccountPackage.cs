@@ -182,8 +182,6 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            if (PackageId.IsEmpty())
-                msgs.Add("PackageId is required on AccountPackage object", MessageType.Error);
             if (AccountId.IsEmpty())
                 msgs.Add("AccountId is required on AccountPackage object", MessageType.Error);
 
