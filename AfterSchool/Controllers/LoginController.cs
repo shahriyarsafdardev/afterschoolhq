@@ -122,9 +122,7 @@ namespace AfterSchool.Controllers
                     var accounts = currentUser.GetAccounts(msgs);
                     var userTypes = currentUser.GetUserTypes(msgs);
                     if (userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
-                    {
                         return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
-                    }
                     return RedirectToAction("select", "login", new {returnurl, invite});
                 }
 
