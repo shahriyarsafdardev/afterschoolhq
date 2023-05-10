@@ -234,6 +234,11 @@ const RenderQuestion = ({
             fullWidth
             variant="outlined"
             value={Text}
+            helperText={`${Text?.length}/400`}
+            inputProps={{
+              maxLength: 400
+            }}
+            multiline
             onChange={event => {
               setQuestion({ ...question, Text: event.target.value });
             }}

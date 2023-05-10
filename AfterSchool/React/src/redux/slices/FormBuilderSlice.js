@@ -1,10 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
-import utils from 'utils';
-import schoolField from 'constants/schoolField';
-import { responseMapper, handleRedirection } from './helper';
-import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import FormBuilderRepository from 'repository/FormBuilderRepository';
 
 const FormBuilderSlice = createSlice({
@@ -32,6 +28,9 @@ const FormBuilderSlice = createSlice({
     setFormData: (state, { payload: { Form, FormQuestionGroup } }) => {
       state.form = Form;
       state.questionsGroups = FormQuestionGroup;
+    },
+    saveNewQuestionsGroup: (state, { payload }) => {
+      state.questionsGroups = [...state.questionsGroups, payload];
     },
     updateQuestionsGroups: (state, { payload }) => {
       state.questionsGroups = payload;
@@ -73,8 +72,7 @@ export const useFormBuilderActions = () => {
     setSectionName,
     loadingFormData,
     sectionDataLoaded,
-    submitFormSection,
-    setRegistrationId,
+    saveNewQuestionsGroup,
     loadingSectionData,
     updateQuestionsGroups
   } = FormBuilderSlice.actions;
@@ -100,48 +98,45 @@ export const useFormBuilderActions = () => {
     });
   };
 
-  const submitFormSectionData = async values => {
+  const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
     dispatch(loadingFormData());
     await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
       dispatch(setMsgs(msgs));
-      if (!msgs.length) dispatch(formDataLoaded());
+      if (!msgs.length) {
+        dispatch(updateQuestionsGroups(FormQuestionGroups));
+        dispatch(formDataLoaded());
+      }
     });
   };
 
   const updateFormSettings = async ({ FormSettings }) => {
-    dispatch(updateform(FormSettings));
-    await submitFormSectionData({ FormSettings });
+    dispatch(loadingFormData());
+    await FormBuilderRepository.submitFormSection({ FormSettings }).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) {
+        dispatch(updateform(FormSettings));
+        dispatch(formDataLoaded());
+      }
+    });
   };
 
+  const saveNewSectionData = async values => {
+    // dispatch(loadingFormData());
+    await FormBuilderRepository.saveNewSectionData(values).then(
+      ({ data: { obj: newQuestionGroup, msgs } }) => {
+        dispatch(saveNewQuestionsGroup(newQuestionGroup));
+        dispatch(setMsgs(msgs));
+        //   if (!msgs.length) dispatch(formDataLoaded());
+      }
+    );
+  };
   const updateQuestionsGroupsData = questionGroups => {
     dispatch(updateQuestionsGroups(questionGroups));
   };
 
-  //   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
-  //     if (!submit) return dispatch(setSchool({ school, noSchool }));
-
-  //     return FormBuilderRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
-  //       dispatch(setMsgs(msgs));
-  //       dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
-  //       return { obj, msgs };
-  //     });
-  //   };
-
-  //   const clearMessages = () => {
-  //     dispatch(setMsgs([]));
-  //   };
-
   const setCurrentSectionName = sectionName => {
     dispatch(setSectionName(sectionName));
   };
-
-  //   const exit = async (uid, activityUrl) => {
-  //     await FormBuilderRepository.exit(uid).then(({ msgs }) => {
-  //       dispatch(setMsgs(msgs));
-  //       const { redirect } = utils;
-  //       if (!msgs.length) redirect(activityUrl);
-  //     });
-  //   };
 
   return {
     loadFormData,
@@ -150,9 +145,8 @@ export const useFormBuilderActions = () => {
     setCurrentSectionName,
     submitFormSectionData,
     updateQuestionsGroupsData,
-    //  submitFormSectionData, setSchoolFieldValue, clearMessages,
+    saveNewSectionData,
     loaded
-    //  exit
   };
 };
 
