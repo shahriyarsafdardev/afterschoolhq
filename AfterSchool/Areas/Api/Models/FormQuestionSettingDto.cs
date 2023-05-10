@@ -14,7 +14,7 @@ namespace AfterSchool.Areas.Api.Models
         public bool Show { get; set; }
         public bool Required { get; set; }
 
-        public static FormQuestionSettingDto fromFormSettings(FormQuestionSettings QuestionSettings)
+        public static FormQuestionSettingDto MapToDto(FormQuestionSettings QuestionSettings)
         {
             return new FormQuestionSettingDto()
             {
@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Api.Models
             };
         }
 
-        public static List<FormQuestionSettingDto> fromFormSettingsList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0)
+        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0)
         {
             AudienceType[] AudienceTypes = { AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
             if (QuestionSettingsList.Count != AudienceTypes.Count())
@@ -45,7 +45,7 @@ namespace AfterSchool.Areas.Api.Models
             }
             return QuestionSettingsList.Select(
                 QuestionSetting =>
-                fromFormSettings(QuestionSetting))
+                MapToDto(QuestionSetting))
                 .ToList();
         }
     }
