@@ -138,7 +138,7 @@ namespace AfterSchoolLibrary.Services
             return UserType.NotSet;
         }
 
-        public static List<UserType> GetUserTypes(this WebUser user, List<Account> accounts, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<UserType> GetUserTypes(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var awus = AccountWebUser.LoadByWebUserId((int) user.ID, true, false, false, msgs, dc).Select(x => x.UserTypeId).ToList();
 

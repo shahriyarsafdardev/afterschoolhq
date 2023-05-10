@@ -119,8 +119,8 @@ namespace AfterSchool.Controllers
                 // select account
                 if (currentAccount.IsEmpty())
                 {
-                    var accounts = SessionVariables.CurrentUser.GetAccounts(msgs);
-                    var userTypes = SessionVariables.CurrentUser.GetUserTypes(accounts);
+                    var accounts = currentUser.GetAccounts(msgs);
+                    var userTypes = currentUser.GetUserTypes(msgs);
                     if (userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                     {
                         return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
@@ -470,7 +470,7 @@ namespace AfterSchool.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var accounts = currentUser.GetAccounts(msgs);
-                var userTypes = currentUser.GetUserTypes(accounts, msgs);
+                var userTypes = currentUser.GetUserTypes(msgs);
 
                 if(userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                 {
