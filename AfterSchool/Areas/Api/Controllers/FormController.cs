@@ -4,12 +4,16 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web.Mvc;
 using System.Windows.Interop;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -170,9 +174,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         var QuestionGroupExists = AfterSchoolLibrary.Models.FormQuestionGroup.Exists(criterias:
                             new Hashtable{
-                            {"ID", FormQuestionGroup.ID },
-                            {"FormId", RequestedForm.ID},
-                            {"IsDeleted", false}
+                                {"ID", FormQuestionGroup.ID },
+                                {"FormId", RequestedForm.ID},
+                                {"IsDeleted", false}
                             },
                             msgs: amsgs,
                             dc: adc);
@@ -185,17 +189,22 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             CurrentQuestionGroup = AfterSchoolLibrary.Models.FormQuestionGroup
                                     .Load(criterias: new Hashtable{
-                                    {"ID", FormQuestionGroup.ID },
-                                    {"FormId", RequestedForm.ID},
-                                    {"IsDeleted", false}
+                                        {"ID", FormQuestionGroup.ID },
+                                        {"FormId", RequestedForm.ID},
+                                        {"IsDeleted", false}
                                     },
                                     msgs: amsgs, dc: adc)?.FirstOrDefault();
 
                             if (CurrentQuestionGroup.IsEmpty())
                                 throw new Exception("Invalid Section id");
 
-                            if (CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.NotSet) || 
-                                CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.Custom))
+                            if (
+                                !CurrentQuestionGroup.Name.Equals(FormQuestionGroup.Name) &&
+                                 (
+                                    CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.NotSet) || 
+                                    CurrentQuestionGroup.QuestionGroupDataTypeId.Equals(QuestionGroupDataType.Custom)
+                                 )
+                                ) 
                             {
                                 CurrentQuestionGroup.Name = FormQuestionGroup.Name;
                                 CurrentQuestionGroup.LastModifiedBy = CurrentUser.ID;
@@ -207,12 +216,28 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestion.ForEach(NewQuestion =>
                             {
                                 var ExistingQuestion = PrevQuestions.Where(question => question.ID == NewQuestion.ID).FirstOrDefault();
-
                                 if (ExistingQuestion.IsNotEmpty())
                                 {
-                                    NewQuestion.UpdateQuestionIfNotEmpty(ExistingQuestion);
+                                    if (
+                                        !ExistingQuestion.IsLocked &&
+                                        (
+                                            NewQuestion.Text.IsNotEmpty() || 
+                                            NewQuestion.Description.IsNotEmpty() || 
+                                            NewQuestion.Options.IsNotEmpty() ||
+                                            NewQuestion.Link.IsNotEmpty() ||
+                                            ExistingQuestion.IsActive != NewQuestion.IsActive || 
+                                            ExistingQuestion.IsRequired != NewQuestion.IsRequired ||
+                                            ExistingQuestion.IsAnswerDescriptionEnabled != NewQuestion.IsAnswerDescriptionEnabled
+                                        )
+                                        )
+                                        NewQuestion.UpdateDefaultFields(ExistingQuestion);
+
+                                    if (ExistingQuestion.QuestionDataTypeId == QuestionDataType.NotSet)
+                                        NewQuestion.UpdateNonDefaultFields(ExistingQuestion);
+
                                     ExistingQuestion.LastModifiedBy = CurrentUser.ID;
                                     ExistingQuestion.LastModifiedDate = DateTime.UtcNow;
+
                                     msgs.AddRange(ExistingQuestion.Save(adc));
                                 }
                                 else if (ExistingQuestion.IsEmpty())
@@ -291,7 +316,7 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
-            FormQuestionGroupDto? NewSection = null;
+            FormQuestionGroupDto NewSection = null;
             try
             {
 
@@ -316,9 +341,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         var QuestionGroupExists = AfterSchoolLibrary.Models.FormQuestionGroup.Exists(criterias:
                             new Hashtable{
-                            {"Name", FormQuestionGroup.Name},
-                            {"FormId", RequestedForm.ID},
-                            {"IsDeleted", false}
+                                {"Name", FormQuestionGroup.Name},
+                                {"FormId", RequestedForm.ID},
+                                {"IsDeleted", false}
                             },
                             msgs: amsgs,
                             dc: adc);
@@ -342,7 +367,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             amsgs.AddRange(NewQuestionGroup.Save(adc));
                             if(amsgs.HasNoErrors())
-                                NewSection = FormQuestionGroupDto.GetByQuestionGroup(NewQuestionGroup);
+                                NewSection = FormQuestionGroupDto.MapToDto(NewQuestionGroup);
                         }
                         else
                             throw new Exception("Section with same name already exists");

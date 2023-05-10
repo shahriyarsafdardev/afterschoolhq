@@ -36,7 +36,7 @@ namespace AfterSchool.Areas.Api.Models
             return !IsNull();
         }
 
-        public static FormQuestionGroupDto GetByQuestionGroup(FormQuestionGroup QuestionGroup)
+        public static FormQuestionGroupDto MapToDto(FormQuestionGroup QuestionGroup)
         {
             return new FormQuestionGroupDto()
             {
@@ -53,7 +53,7 @@ namespace AfterSchool.Areas.Api.Models
         {
             return QuestionGroupList
                 .Select(QuestionGroup => 
-                GetByQuestionGroup(QuestionGroup))
+                MapToDto(QuestionGroup))
                 .ToList();
         }
 
