@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         
                         amsgs.AddRange(currentAccount.Save(adc));
 
-                        if (amsgs.HasNoErrors() && isSuperAdmin && !accountPackage.StripeSubscriptionId.IsSameAs(stripeCustomerId))
+                        if (amsgs.HasNoErrors() && isSuperAdmin && !accountPackage.StripeSubscriptionId.IsSameAs(stripeSubscriptionId))
                         {
                             accountPackage.StripeSubscriptionId = stripeSubscriptionId;
                             amsgs.AddRange(accountPackage.Save(adc));
