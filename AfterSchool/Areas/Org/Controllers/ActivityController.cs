@@ -4586,10 +4586,10 @@ namespace AfterSchool.Areas.Org.Controllers
             result.CurrentUser = currentUser;
             result.Messages = msgs;
             result.TotalEnrollment = activityAttendanceSummaries.Sum(x => x.TotalStudentsRegistered);
-            result.PercentAttended = Math.Round((decimal) totalAttended / totalReservedAllClasses * 100, 2);
+            result.PercentAttended = Math.Round(((decimal) totalAttended / totalReservedAllClasses) * 100, 2);
             result.AverageAttendedPerClass = totalAttended / totalClasses;
             result.TotalActive = totalActive;
-            result.PercentActive = Math.Round((decimal) totalActive / totalReserved * 100, 2);
+            result.PercentActive = Math.Round(((decimal) totalActive / totalReserved) * 100, 2);
             result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, false, false, null, null, null, msgs);
 
             if (activities.IsNotBlank())
