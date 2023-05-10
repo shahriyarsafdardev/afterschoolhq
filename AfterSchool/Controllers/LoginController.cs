@@ -113,17 +113,18 @@ namespace AfterSchool.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
 
-                if (FormConstants.AdminUserTypes.Contains(currentUser.GetUserType(currentAccount)) && currentAccount.AccountTypeId == AccountType.AfterSchool)
-                    return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
-
-                // select account
-                if (currentAccount.IsEmpty())
+                if (currentAccount.IsNotEmpty())
+                {
+                    if (FormConstants.AdminUserTypes.Contains(currentUser.GetUserType(currentAccount)) && currentAccount.AccountTypeId == AccountType.AfterSchool)
+                        return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
+                }
+                else
                 {
                     var accounts = currentUser.GetAccounts(msgs);
                     var userTypes = currentUser.GetUserTypes(msgs);
                     if (userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
                         return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
-                    return RedirectToAction("select", "login", new {returnurl, invite});
+                    return RedirectToAction("select", "login", new { returnurl, invite });
                 }
 
                 HandleInvite(invite, currentAccount, user, msgs);

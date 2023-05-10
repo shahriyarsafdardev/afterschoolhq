@@ -151,7 +151,7 @@ namespace AfterSchool.Models
                 switch (SessionVariables.CurrentAccount.AccountTypeId)
                 {
                     case AccountType.AfterSchool:
-                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
+                        return new UrlHelper(ControllerContext.RequestContext).Action("index", "account", new {area = "admin"});
 
                     case AccountType.SchoolDistrict:
                         return new UrlHelper(ControllerContext.RequestContext).Action("index", "home", new {area = "district"});
