@@ -313,11 +313,7 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             var CurrentAccount = SessionVariables.CurrentAccount;
             var CurrentUser = SessionVariables.CurrentUser;
-<<<<<<< HEAD
-            FormQuestionGroupDto? NewSection = null;
-=======
             FormQuestionGroupDto NewSection = null;
->>>>>>> feature/react-form-backend
             try
             {
 
@@ -368,11 +364,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             amsgs.AddRange(NewQuestionGroup.Save(adc));
                             if(amsgs.HasNoErrors())
-<<<<<<< HEAD
-                                NewSection = FormQuestionGroupDto.GetByQuestionGroup(NewQuestionGroup);
-=======
                                 NewSection = FormQuestionGroupDto.MapToDto(NewQuestionGroup);
->>>>>>> feature/react-form-backend
                         }
                         else
                             throw new Exception("Section with same name already exists");
