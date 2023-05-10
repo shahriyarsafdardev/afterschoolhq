@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using AfterSchoolLibraryTests.Factories;
 using BasicLibrary;
@@ -214,6 +214,46 @@ namespace AfterSchoolLibraryTests.Tests
             Assert.True(msgs.HasNoErrors());
             Assert.True(instances.Count == 12);
             Assert.True(inSessionInstances.Count == 10); // we have removed one OutOfSession instance from all 11 inSessionInstances
+        }
+
+        [Fact]
+        public void DateRangesOverlap_TestFalse()
+        {
+            var dateRanges = new List<DateRange>
+            {
+                new DateRange
+                {
+                    StartDate = DateTime.Parse("2023-06-10 08:00:00"),
+                    EndDate = DateTime.Parse("2023-06-10 10:00:00")
+                },
+                new DateRange
+                {
+                    StartDate = DateTime.Parse("2023-06-10 10:00:00"),
+                    EndDate = DateTime.Parse("2023-06-10 12:00:00")
+                }
+            };
+            var overlap = DateRange.HasOverlappingDates(dateRanges);
+            Assert.False(overlap);
+        }
+
+        [Fact]
+        public void DateRangesOverlap_TestTrue()
+        {
+            var dateRanges = new List<DateRange>
+            {
+                new DateRange
+                {
+                    StartDate = DateTime.Parse("2023-06-10 08:00:00"),
+                    EndDate = DateTime.Parse("2023-06-10 10:01:00")
+                },
+                new DateRange
+                {
+                    StartDate = DateTime.Parse("2023-06-10 9:00:00"),
+                    EndDate = DateTime.Parse("2023-06-10 11:00:00")
+                }
+            };
+            var overlap = DateRange.HasOverlappingDates(dateRanges);
+            Assert.True(overlap);
         }
     }
 }
