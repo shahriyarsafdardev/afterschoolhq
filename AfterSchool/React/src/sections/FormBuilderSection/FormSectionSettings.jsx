@@ -236,46 +236,77 @@ function FormSectionSettings() {
         <Typography variant="h6" className={classes.applyAllHeading}>
           Apply to all in this section:
         </Typography>
-        <Box className={classes.displayFlex}>
-          <Typography variant="body1" className={classes.applyAllRow}>
-            Show For:
-          </Typography>
-          {Object.keys(showFor).map(key => (
-            <Box key={key} className={cs(classes.displayFlex, classes.applyToAllControlsWrapper)}>
-              <RenderCheckbox
-                key={key}
-                checked={showFor[key]}
-                handleCheck={() => {
-                  handleSettingForAll('show', key);
-                  setShowFor(prevState => ({ ...prevState, [key]: !showFor[key] }));
-                }}
-              />
-              <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
-                {key}
+        <Grid container className={classes.controlsContainer}>
+          <Grid container item className={classes.formControlsRow}>
+            <Grid item lg={3} sm={3} xs={3}>
+              <Typography variant="body1" className={classes.applyAllRow}>
+                Show For:
               </Typography>
-            </Box>
-          ))}
-        </Box>
-        <Box className={classes.displayFlex}>
-          <Typography variant="body1" className={classes.applyAllRow}>
-            Required For:
-          </Typography>
-          {Object.keys(requiredFor).map(key => (
-            <Box key={key} className={cs(classes.displayFlex, classes.applyToAllControlsWrapper)}>
-              <RenderCheckbox
-                key={key}
-                checked={requiredFor[key]}
-                handleCheck={() => {
-                  handleSettingForAll('required', key);
-                  setRequiredFor(prevState => ({ ...prevState, [key]: !requiredFor[key] }));
-                }}
-              />
-              <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
-                {key}
+            </Grid>
+            <Grid
+              container
+              item
+              lg={9}
+              sm={9}
+              xs={9}
+              className={classes.applyToAllControlsContainer}
+            >
+              {Object.keys(showFor).map(key => (
+                <Grid
+                  item
+                  lg={3}
+                  sm={6}
+                  xs={6}
+                  key={key}
+                  className={classes.applyToAllControlsItem}
+                >
+                  <RenderCheckbox
+                    key={key}
+                    checked={showFor[key]}
+                    handleCheck={() => {
+                      handleSettingForAll('show', key);
+                      setShowFor(prevState => ({ ...prevState, [key]: !showFor[key] }));
+                    }}
+                  />
+                  <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
+                    {key}
+                  </Typography>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+          <Grid container item className={classes.formControlsRow}>
+            <Grid item lg={3} sm={3} xs={3}>
+              <Typography variant="body1" className={classes.applyAllRow}>
+                Required For:
               </Typography>
-            </Box>
-          ))}
-        </Box>
+            </Grid>
+            <Grid container className={classes.applyToAllControlsContainer}>
+              {Object.keys(requiredFor).map(key => (
+                <Grid
+                  item
+                  lg={3}
+                  sm={6}
+                  xs={6}
+                  key={key}
+                  className={classes.applyToAllControlsItem}
+                >
+                  <RenderCheckbox
+                    key={key}
+                    checked={requiredFor[key]}
+                    handleCheck={() => {
+                      handleSettingForAll('required', key);
+                      setRequiredFor(prevState => ({ ...prevState, [key]: !requiredFor[key] }));
+                    }}
+                  />
+                  <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
+                    {key}
+                  </Typography>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+        </Grid>
       </Box>
     );
   };

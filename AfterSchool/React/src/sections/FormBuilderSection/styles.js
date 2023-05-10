@@ -4,7 +4,10 @@ export default makeStyles(theme => ({
   wrapper: {
     marginLeft: 'auto',
     width: '98%',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column-reverse'
+    }
   },
   sectionHeading: {
     // borderBottom: '1px solid #dddddd',
@@ -27,7 +30,17 @@ export default makeStyles(theme => ({
   },
   sectionListWrapper: {
     borderLeft: '1px solid #dddddd',
-    paddingLeft: '10px'
+    paddingLeft: '10px',
+    [theme.breakpoints.down('sm')]: {
+      position: 'absolute',
+      backgroundColor: '#F9F9F9',
+      boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
+      zIndex: 1,
+      maxHeight: '600px',
+      overflow: 'scroll',
+      padding: '8px 12px',
+      top: '200px'
+    }
   },
   formControlRoot: {
     width: '100%',
@@ -51,6 +64,14 @@ export default makeStyles(theme => ({
   displayFlex: {
     display: 'flex',
     alignItems: 'center'
+  },
+  formControlsRow: {
+    display: 'flex',
+    alignItems: 'center',
+
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'unset'
+    }
   },
   formControlDropDownClass: {
     // display: 'block',
@@ -154,6 +175,15 @@ export default makeStyles(theme => ({
       width: '100%'
     }
   },
+  formSettingsButton: {
+    fontSize: 14,
+    width: 120,
+    border: '1px solid #E4E4E4',
+    // margin: '8px 12px',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
+    }
+  },
   positionRelative: {
     position: 'relative'
   },
@@ -190,5 +220,13 @@ export default makeStyles(theme => ({
   },
   applyToAllControlsWrapper: {
     padding: '5px'
-  }
+  },
+  applyToAllControlsContainer: {
+    maxWidth: '340px',
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: '235px'
+    }
+  },
+  applyToAllControlsItem: { padiing: '5px', display: 'flex', alignItems: 'center' },
+  controlsContainer: { display: 'block', maxWidth: '454px', marginTop: '10px' }
 }));

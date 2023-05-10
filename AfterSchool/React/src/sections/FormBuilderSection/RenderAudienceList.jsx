@@ -11,32 +11,6 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 
   const RenderAudienceRow = ({ audience: { Audience, Show, Required } }) => {
-    // const clickHandler = propertyName => {
-    //   const updatedQuestionSettings = [];
-
-    //   questionSettings.forEach(setting => {
-    //     let updatedSetting = setting;
-    //     if (setting.Audience === Audience) {
-    //       if (propertyName === 'show') {
-    //         if (setting.Show) {
-    //           updatedSetting = { ...updatedSetting, Show: !setting.Show, Required: false };
-    //         } else {
-    //           updatedSetting = { ...updatedSetting, Show: !setting.Show };
-    //         }
-    //       } else if (propertyName === 'required') {
-    //         if (!setting.Required) {
-    //           updatedSetting = { ...updatedSetting, Required: !setting.Required, Show: true };
-    //         } else {
-    //           updatedSetting = { ...updatedSetting, Required: !setting.Required };
-    //         }
-    //       }
-    //     }
-
-    //     updatedQuestionSettings.push(updatedSetting);
-    //   });
-    //   setFieldValue(updatedQuestionSettings);
-    // };
-
     const clickHandler = propertyName => {
       const updatedSettings = questionSettings.map(setting => {
         if (setting.Audience !== Audience) {

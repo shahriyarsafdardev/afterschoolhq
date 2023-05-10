@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
-import { Grid, Typography, Button } from '@material-ui/core';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
+import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
+import { Grid, Typography, Button, useMediaQuery, useTheme } from '@material-ui/core';
 
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
 
 function FormSectionList() {
+  const theme = useTheme();
   const classes = useStyles();
   const { formId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { questionsGroups, saveNewSectionData, submitFormSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
@@ -25,7 +28,6 @@ function FormSectionList() {
     const index = questionsGroups.findIndex(questionGroup => questionGroup.ID === key);
 
     const updatedQuestionGroups = [...questionsGroups];
-
     updatedQuestionGroups[index] = { ...questionsGroups[index], IsDeleted: true };
 
     await submitFormSectionData({
@@ -45,6 +47,23 @@ function FormSectionList() {
     });
   };
 
+  const [showSettings, setShowSettings] = useState(!isMobile);
+  const toggleShowSettings = () => {
+    if (isMobile) setShowSettings(!showSettings);
+  };
+  if (isMobile && showSettings) {
+    return (
+      <Button
+        variant="outlined"
+        className={classes.formSettingsButton}
+        onClick={toggleShowSettings}
+      >
+        Form Settings
+        <ArrowDropDownOutlinedIcon style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
+      </Button>
+    );
+  }
+
   return (
     <Grid item lg={2} xs={12} sm={6} className={classes.sectionListWrapper}>
       <Typography
@@ -59,6 +78,7 @@ function FormSectionList() {
         className={classes.sectionsListHeading}
         onClick={() => {
           setSearchParams(`qg=${firstSectionId}`);
+          toggleShowSettings();
         }}
       >
         Sections
@@ -71,7 +91,7 @@ function FormSectionList() {
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
               onClick={() => {
                 setSearchParams(`qg=${key}`);
-                // setSectionName(Name);
+                toggleShowSettings();
               }}
             >
               {Name}
