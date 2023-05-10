@@ -4578,16 +4578,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalReserved = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved), 1);
             var totalReservedAllClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.Reserved * x.NumberOfClasses), 1);
             var totalClasses = Math.Max(activityAttendanceSummaries.Sum(x => x.NumberOfClasses), 1);
+            var totalAttended = activityAttendanceSummaries.Sum(x => x.TotalAttended);
+            var totalActive = activityAttendanceSummaries.Sum(x => x.TotalActive);
 
             result.ActivityAttendanceSummaries = activityAttendanceSummaries;
             result.CurrentAccount = currentAccount;
             result.CurrentUser = currentUser;
             result.Messages = msgs;
             result.TotalEnrollment = activityAttendanceSummaries.Sum(x => x.TotalStudentsRegistered);
-            result.PercentAttended = activityAttendanceSummaries.Sum(x => x.TotalAttended) * 100 / totalReservedAllClasses;
-            result.AverageAttendedPerClass = activityAttendanceSummaries.Sum(x => x.TotalAttended) / totalClasses;
-            result.TotalActive = activityAttendanceSummaries.Sum(x => x.TotalActive);
-            result.PercentActive = activityAttendanceSummaries.Sum(x => x.TotalActive) * 100 / totalReserved;
+            result.PercentAttended = Math.Round((decimal) totalAttended / totalReservedAllClasses * 100, 2);
+            result.AverageAttendedPerClass = totalAttended / totalClasses;
+            result.TotalActive = totalActive;
+            result.PercentActive = Math.Round((decimal) totalActive / totalReserved * 100, 2);
             result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, false, false, null, null, null, msgs);
 
             if (activities.IsNotBlank())
@@ -4602,10 +4604,10 @@ namespace AfterSchool.Areas.Org.Controllers
             public WebUser CurrentUser { get; set; }
             public SystemMessages Messages { get; set; }
             public int TotalEnrollment { get; set; }
-            public int PercentAttended { get; set; }
+            public decimal PercentAttended { get; set; }
             public int AverageAttendedPerClass { get; set; }
             public int TotalActive { get; set; }
-            public int PercentActive { get; set; }
+            public decimal PercentActive { get; set; }
             public List<ActivityAttendanceSummary> ActivityAttendanceSummaries { get; set; }
             public List<Activity> ActivityOptions { get; set; }
             public List<Activity> SelectedActivities { get; set; }
