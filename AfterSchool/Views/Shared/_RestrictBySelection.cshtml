@@ -94,11 +94,13 @@
         $('#allowRegistration').removeClass('hidden');
         if ($('#isStudentAllowed').is(':checked')) {
             $('#parentConsent').removeClass('hidden');
+        } else {
+            $('#parentConsent').addClass('hidden');
         }
     }
 
     function validateByAge() {
-        if (parseInt($('#ageend').val()) > 18) {
+        if (parseInt($('#ageend').val()) >= 18) {
             $('#allowRegistration').addClass("hidden");
             $('#parentConsent').addClass("hidden");
         }

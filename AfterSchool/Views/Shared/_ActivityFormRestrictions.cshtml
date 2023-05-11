@@ -81,7 +81,7 @@
                 <label class="col-md-3 control-label">
                     Allow @(allAgeRegistrationEnabled?"Minors":"Students") To Register
                 </label>
-                <div class="col-md-9">
+                <div class="col-md-9 d-flex align-items-center">
                     @{
                         Html.RenderPartial(
                             "~/Views/Shared/_SwitchButton.cshtml",
@@ -94,11 +94,11 @@
                                 {"onclick", "showParentConsent();"},
                                 {"required", false},
 
-                    });
+                            });
                     }
+                    <i id="parentConsentWarning" class="s7-attention icon-large text-warning margin-l-10 position-relative" data-toggle="popover" data-trigger="hover" data-content="If you allow minors to register, they can actually register without parental knowledge." data-placement="top"></i>
                 </div>
             </div>
-
             <div class="form-group hidden" id="parentConsent">
                 <label class="col-md-3 control-label">
                     Requires Parental Consent
@@ -112,8 +112,9 @@
                             {
                                 {"checkboxname", "requiresparentalconsent"},
                                 {"checkboxid", "requiresparentalconsent"},
+                                {"onclick", "showConsentWarning();"},
                                 {"disabled", false}
-                    });
+            });
                     }
                 </div>
             </div>
@@ -127,6 +128,18 @@
 </div>
 
 <script>
+    function showConsentWarning() {
+        if (@allAgeRegistrationEnabled.ToString().ToLower()) {
+            var isStudentAllowed = $("#isStudentAllowed").is(":checked");
+            var isParentConsent = $("#requiresparentalconsent").is(":checked");
+            if (isStudentAllowed && !isParentConsent) {
+                $('#parentConsentWarning').removeClass("hidden");
+            } else {
+                $('#parentConsentWarning').addClass("hidden");
+            }
+        }
+    }
+    
     function showParentConsent() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         if (isStudentAllowed) {
@@ -134,9 +147,10 @@
         }
         else {
             $('#parentConsent').addClass("hidden");
-
         }
-        $("#requiresparentalconsent").prop('checked', !@(allAgeRegistrationEnabled.ToString().ToLower()));
+        $("#requiresparentalconsent").prop('checked', false);
+        showConsentWarning();
+       
     }
 
     function showStrictGender() {
@@ -168,16 +182,16 @@
             }
             else {
                 $('#allowRegistration').removeClass("hidden");
-                $('#parentConsent').removeClass("hidden");
+                showParentConsent();
             }
         });
     }
-
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         showParentConsent();
         showStrictGender();
         if (@allAgeRegistrationEnabled.ToString().ToLower()) {
             handleAllAgeAdultCheck();
+            showConsentWarning();
         }
     });
 
