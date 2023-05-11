@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
 
@@ -24,7 +24,7 @@
                 <div class="pull-right">
                     <button class="btn btn-primary btn-space margin-r-10 md-trigger" data-modal="modal-add">
                         <i class="icon icon-left s7-plus"></i>
-                        Add @UILabel.RegistrationPeriodLabel()
+                        Add @UILabel.EnrollmentPeriodLabel()
                     </button>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="6">You haven't created any @UILabel.RegistrationPeriodLabel(true).ToLower(). <a href="#" class="md-trigger" data-modal="modal-add">Create a new signup period.</a></td>
+                                <td colspan="6">You haven't created any @UILabel.EnrollmentPeriodLabel(true).ToLower(). <a href="#" class="md-trigger" data-modal="modal-add">Create a new @UILabel.EnrollmentPeriodLabel().ToLower().</a></td>
                             </tr>
                         }
 
