@@ -285,7 +285,7 @@ namespace AfterSchoolLibrary.Services
             return EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
         }
 
-        public static SystemMessages SendMultipartAuth(int? userId, string authCode, bool isAfterSchool = true)
+        public static SystemMessages SendMultipartAuth(int? userId, int authCode, bool isAfterSchool = true)
         {
             var user = WebUser.Load((int) userId);
             return EmailHelper.SendAuthEmail(user, authCode, isAfterSchool);

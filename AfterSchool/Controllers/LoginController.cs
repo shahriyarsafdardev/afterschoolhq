@@ -156,7 +156,7 @@ namespace AfterSchool.Controllers
         }
 
         [HttpPost]
-        public ActionResult MultiPartAuth(string uid, string authcode, string returnurl, string invite, string remember, bool isJson = false, string source = null)
+        public ActionResult MultiPartAuth(string uid, int authcode, string returnurl, string invite, string remember, bool isJson = false, string source = null)
         {
             var msgs = new SystemMessages();
             var user = WebUser.LoadByUid(uid.ToGuid(), msgs);
