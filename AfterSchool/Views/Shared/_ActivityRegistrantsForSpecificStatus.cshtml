@@ -160,15 +160,14 @@
                                 @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
                                 {
                                     <button type="button" class="btn btn-primary searchActivitiesBtn"
-                                            onclick="setModalAttributes('@RegistrantService.GetReEnrollmentModalHtmlContent(participationObject, 
-                                             activity,ra.GetRegistrant(),ra.GetAmountPaidByParent() > 0 ? ra.GetAmountPaidByParent() : 
-                                                 ra.GetAmountPaid())','@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()',
+                                            onclick="setModalAttributes('@RegistrantService.GetReEnrollmentModalHtmlContent(participationObject, activity, ra.GetRegistrant(), ra.GetAmountPaidByParent() > 0 ? ra.GetAmountPaidByParent() : ra.GetAmountPaid())',
+                                                                                 '@ra.RegistrantUid.ToString()', '@ra.ParticipationObjectId.ToString()',
                                             '@ra.ParticipationObjectTypeId.ToString()', '@ra.RegistrantName', '@ra.GetIsProRatedFlagByParent().ToString()',
                                             '@ra.GetAmountPaidByParent().ToCurrency()');showModal(@(activity.IsFree ? "\'modal-process-free-re-enrollment\'" : "\'modal-process-re-enrollment\'"))">
                                         Re-Enroll
                                     </button>
                                 }
-                                else
+                                else if (activity.ActivityTypeId != ActivityType.PermissionSlip)
                                 {
                                     if (ra.IsWithdrawEnabled() && !isReadOnly)
                                     {
