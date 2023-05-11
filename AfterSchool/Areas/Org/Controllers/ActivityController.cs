@@ -4548,10 +4548,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     item.Applied.ToString(),
                     item.Withdrawn.ToString(),
                     item.NumberOfClasses.ToString(),
-                    Math.Round(item.AvgAttendedPerClass,1).ToString(),
-                    Math.Round(item.PercentAttended,1).ToString(),
+                    item.AvgAttendedPerClass.ToString(),
+                    item.PercentAttended.ToString(),
                     item.TotalActive.ToString(),
-                    Math.Round(item.PercentActive,1).ToString(),
+                    item.PercentActive.ToString(),
                 };
                 table.Add(row);
             }
