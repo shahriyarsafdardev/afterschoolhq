@@ -1,4 +1,4 @@
-﻿@{
+@{
     var restrictbygrade = (bool)ViewData["restrictbygrade"];
     var grades = (List<GradeLevel>)ViewData["grades"];
     var minGradeLevelId = (int?)ViewData["minGradeLevelId"];
@@ -12,6 +12,7 @@
         minGradeLevelId = grades.FirstOrDefault().ID.Value;
         maxGradeLevelId = grades.LastOrDefault().ID.Value;
     }
+    var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
 }
 
 <div class="form-group">
@@ -63,10 +64,16 @@
         function () {
             $('#restrictby-grade').click(function () {
                 gradeOrAgeCheck();
+                if (@allAgeRegistrationEnabled.ToString().ToLower()) {
+                    showRestrictionsCheck();
+                }
             });
-
+            //restrictby - age
             $('#restrictby-age').click(function () {
                 gradeOrAgeCheck();
+                if (@allAgeRegistrationEnabled.ToString().ToLower()) {
+                    validateByAge();
+                }
             });
 
             gradeOrAgeCheck();
@@ -80,6 +87,23 @@
         } else {
             $('#restrictbyage').removeClass('hide');
             $('#restrictbygrade').addClass('hide');
+        }
+    }
+
+    function showRestrictionsCheck() {
+        $('#allowRegistration').removeClass('hidden');
+        if ($('#isStudentAllowed').is(':checked')) {
+            $('#parentConsent').removeClass('hidden');
+        }
+    }
+
+    function validateByAge() {
+        if (parseInt($('#ageend').val()) > 18) {
+            $('#allowRegistration').addClass("hidden");
+            $('#parentConsent').addClass("hidden");
+        }
+        else {
+            showRestrictionsCheck();
         }
     }
 
