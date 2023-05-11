@@ -29,7 +29,7 @@ export default makeStyles(theme => ({
     // backgroundColor: '#dedede'
   },
   sectionListWrapper: {
-    borderLeft: '1px solid #dddddd',
+    // borderLeft: '1px solid #dddddd',
     paddingLeft: '10px',
     [theme.breakpoints.down('sm')]: {
       position: 'absolute',
@@ -169,11 +169,12 @@ export default makeStyles(theme => ({
   audienceButton: {
     fontSize: 14,
     width: 120,
+    height: '40px',
     border: '1px solid #E4E4E4',
-    margin: '8px 12px',
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
+    margin: '8px 12px'
+    // [theme.breakpoints.down('sm')]: {
+    //     width: '100%'
+    // }
   },
   formSettingsButton: {
     fontSize: 14,
@@ -199,7 +200,11 @@ export default makeStyles(theme => ({
     boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
     minWidth: '350px',
     padding: '8px 12px',
-    zIndex: 1
+    zIndex: 1,
+    [theme.breakpoints.down('sm')]: {
+      marginLeft: '-110px',
+      minWidth: '250px'
+    }
   },
   audienceRow: {
     margin: '4px 5px'
@@ -228,5 +233,17 @@ export default makeStyles(theme => ({
     }
   },
   applyToAllControlsItem: { padiing: '5px', display: 'flex', alignItems: 'center' },
-  controlsContainer: { display: 'block', maxWidth: '454px', marginTop: '10px' }
+  controlsContainer: { display: 'block', maxWidth: '454px', marginTop: '10px' },
+  questionIconsWrapper: {
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'row-reverse',
+      justifyContent: 'space-between'
+    }
+  },
+  optionsDragIcon: {
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'baseline',
+      flexDirection: 'column'
+    }
+  }
 }));

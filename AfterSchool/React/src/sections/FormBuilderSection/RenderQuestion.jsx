@@ -1,20 +1,22 @@
 import cs from 'classnames';
-import { isEqual, toInteger } from 'lodash';
 import React, { useState } from 'react';
+import { isEqual, toInteger } from 'lodash';
 import CheckIcon from '@material-ui/icons/Check';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
-import DeleteOutlineOutlinedIcon from '@material-ui/icons/DeleteOutlineOutlined';
-import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import DeleteOutlineOutlinedIcon from '@material-ui/icons/DeleteOutlineOutlined';
+import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
 
 import {
   FormControlLabel,
+  useMediaQuery,
   Typography,
   makeStyles,
   TextField,
+  useTheme,
   Checkbox,
   Button,
   Chip,
@@ -31,15 +33,18 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 const RenderQuestion = ({
   index,
   value,
-  setFieldValue,
-  handleDelete,
   handleCopy,
+  handleDelete,
+  setFieldValue,
+  dragIndicatorProps,
   handleAddNewQuestion
 }) => {
+  const theme = useTheme();
   const classes = useStyles();
   const [question, setQuestion] = useState(value);
   const [showAudience, setShowAudience] = useState(false);
   const { dropdown, radioList, checkBoxList } = questionType;
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { ID, Text, Options, QuestionTypeId, QuestionSettings, QuestionDataTypeId } = question;
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
@@ -112,39 +117,52 @@ const RenderQuestion = ({
     const renderOption = ({ option, index, dragHandleProps }) => {
       return (
         <Grid container className={classes.deleteIcon} key={`value-${index}`}>
-          <Grid item lg={6} xs={12} sm={6} className={cs(classes.displayFlex)}>
-            <span {...dragHandleProps}>
-              <DragIndicatorIcon style={{ float: 'left' }} />
-            </span>
-            {checkboxListIcon ? (
-              <CheckBoxOutlineBlankIcon />
-            ) : radioListIcon ? (
-              <RadioButtonUncheckedIcon />
-            ) : (
-              <Typography variant="body1">{index}.</Typography>
-            )}
-            <TextField
-              className={classes.formControlClass}
-              fullWidth
-              placeholder="Option"
-              value={option.key}
-              onChange={event => handleKeyChange(index, event)}
-            />
+          <Grid
+            item
+            lg={1}
+            xs={1}
+            sm={1}
+            className={cs(classes.displayFlex, classes.optionsDragIcon)}
+          >
+            <Grid item lg={12} xs={12} sm={12} className={cs(classes.displayFlex)}>
+              <span {...dragHandleProps}>
+                <DragIndicatorIcon style={{ float: 'left' }} />
+              </span>
+              {checkboxListIcon ? (
+                <CheckBoxOutlineBlankIcon />
+              ) : radioListIcon ? (
+                <RadioButtonUncheckedIcon />
+              ) : (
+                <Typography variant="body1">{index}.</Typography>
+              )}
+            </Grid>
+            <Grid item lg={0} xs={12} sm={12} className={cs(classes.displayFlex)}></Grid>
           </Grid>
-          <Grid item lg={4} xs={12} sm={6} key={`option-${index}`}>
-            <TextField
-              className={classes.formControlClass}
-              fullWidth
-              placeholder="Value (Optional)"
-              value={option.value}
-              onChange={event => handleValueChange(index, event)}
-            />
+          <Grid item container lg={10} xs={10} sm={10}>
+            <Grid item lg={7} xs={12} sm={12} className={cs(classes.displayFlex)}>
+              <TextField
+                className={classes.formControlClass}
+                fullWidth
+                placeholder="Option"
+                value={option.key}
+                onChange={event => handleKeyChange(index, event)}
+              />
+            </Grid>
+            <Grid item lg={5} xs={12} sm={12} key={`option-${index}`}>
+              <TextField
+                className={classes.formControlClass}
+                fullWidth
+                placeholder="Value (Optional)"
+                value={option.value}
+                onChange={event => handleValueChange(index, event)}
+              />
+            </Grid>
           </Grid>
           <Grid
             item
-            lg={2}
-            xs={12}
-            sm={6}
+            lg={1}
+            xs={1}
+            sm={1}
             className={cs(classes.deleteIconHidden, 'delete-icon-visible')}
           >
             <DeleteOutlineOutlinedIcon
@@ -163,60 +181,65 @@ const RenderQuestion = ({
     };
 
     return (
-      <Box
-        className={cs(classes.flexDirectionCol)}
-        onMouseLeave={() => {
-          handleSubmit();
-        }}
-        style={{ display: 'flex', padding: '8px 12px' }}
-      >
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable key="list" droppableId="droppable-options-container" type="column">
-            {provided => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                {options.map(({ key, value }, index) => (
-                  <Draggable
-                    draggableId={`question-${ID}-option-${key}`}
-                    index={toInteger(index)}
-                    key={key}
-                  >
-                    {(provided, snapshot) => (
-                      <Box
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        // {...provided.dragHandleProps}
-                        className={
-                          snapshot.isDragging ? classes.whiteBorder : classes.transparentBorder
-                        }
+      <Grid container>
+        <Grid lg={1}></Grid>
+        <Grid lg={11}>
+          <Box
+            className={cs(classes.flexDirectionCol)}
+            onMouseLeave={() => {
+              handleSubmit();
+            }}
+            style={{ display: 'flex', padding: '8px 12px' }}
+          >
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable key="list" droppableId="droppable-options-container" type="column">
+                {provided => (
+                  <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {options.map(({ key, value }, index) => (
+                      <Draggable
+                        draggableId={`question-${ID}-option-${key}`}
+                        index={toInteger(index)}
+                        key={key}
                       >
-                        {renderOption({
-                          option: { key, value },
-                          index,
-                          dragHandleProps: { ...provided.dragHandleProps }
-                        })}
-                      </Box>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-        <Typography
-          style={{ cursor: 'pointer', textDecoration: 'underline', padding: '12px 0px' }}
-          onClick={() => {
-            handleAddNewOption();
-          }}
-        >
-          Add new option
-        </Typography>
-      </Box>
+                        {(provided, snapshot) => (
+                          <Box
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={
+                              snapshot.isDragging ? classes.whiteBorder : classes.transparentBorder
+                            }
+                          >
+                            {renderOption({
+                              option: { key, value },
+                              index,
+                              dragHandleProps: { ...provided.dragHandleProps }
+                            })}
+                          </Box>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+            <Typography
+              style={{ cursor: 'pointer', textDecoration: 'underline', padding: '12px 0px' }}
+              onClick={() => {
+                handleAddNewOption();
+              }}
+            >
+              Add new option
+            </Typography>
+          </Box>
+        </Grid>
+      </Grid>
     );
   }
 
   return (
-    <Box
+    <Grid
+      container
       className={classes.question}
       onMouseLeave={() => {
         if (!isEqual(question, value)) {
@@ -224,31 +247,90 @@ const RenderQuestion = ({
         }
       }}
     >
-      <Typography variant="h6" style={{ margin: '8px 12px' }}>
-        {index}
-      </Typography>
-      <Box className={classes.width100}>
-        <Box className={classes.displayFlex}>
-          <TextField
-            className={classes.formControlClass}
-            fullWidth
-            variant="outlined"
-            value={Text}
-            helperText={`${Text?.length}/400`}
-            inputProps={{
-              maxLength: 400
-            }}
-            multiline
-            onChange={event => {
-              setQuestion({ ...question, Text: event.target.value });
-            }}
-            disabled={!customQuestion}
-          />
-          <DropDown
-            question={{ ...question, ...{ options: questionTypesOptions } }}
-            setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
-            disabled={!customQuestion}
-          />
+      <Grid item lg={10} sm={12} xs={12} container className={classes.width100}>
+        <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
+          <Grid item lg={1} sm={1} xs={1} className={cs(classes.displayFlex)}>
+            <span {...dragIndicatorProps}>
+              <DragIndicatorIcon style={{ float: 'left' }} />
+            </span>
+            <Typography variant="h6">{index}</Typography>
+          </Grid>
+          <Grid item lg={8} sm={11} xs={11}>
+            <TextField
+              className={classes.formControlClass}
+              fullWidth
+              variant="outlined"
+              value={Text}
+              //   helperText={`${Text?.length}/400`}
+              inputProps={{
+                maxLength: 400
+              }}
+              multiline
+              onChange={event => {
+                setQuestion({ ...question, Text: event.target.value });
+              }}
+              disabled={!customQuestion}
+            />
+          </Grid>
+          <Grid item lg={3} sm={3} xs={6}>
+            <DropDown
+              question={{ ...question, ...{ options: questionTypesOptions } }}
+              setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
+              disabled={!customQuestion}
+            />
+          </Grid>
+          <Grid lg={1}></Grid>
+          <Grid
+            item
+            lg={11}
+            sm={3}
+            xs={6}
+            className={cs(classes.displayFlex, classes.justifyContentSpaceBetween)}
+          >
+            {/* <Box className={classes.displayFlex}> */}
+            <Grid item lg={2} sm={12} xs={12} className={classes.positionRelative}>
+              <Button
+                variant="outlined"
+                className={classes.audienceButton}
+                onClick={() => setShowAudience(!showAudience)}
+              >
+                Audience
+                <ArrowDropDownOutlinedIcon
+                  style={{ width: '20px', height: 'auto', marginLeft: '2px' }}
+                />
+              </Button>
+              {showAudience && (
+                <RenderAudienceList
+                  setFieldValue={questionSettings =>
+                    setQuestion({ ...question, QuestionSettings: questionSettings })
+                  }
+                  questionSettings={QuestionSettings}
+                  setShowAudience={setShowAudience}
+                />
+              )}
+            </Grid>
+            {!isMobile && (
+              <Grid item lg={10} sm={0} xs={0}>
+                {QuestionSettings.map(({ Audience, Show, Required }) => {
+                  if (!(Show || Required)) return;
+
+                  return (
+                    <Chip
+                      style={{ backgroundColor: '#F2F2F5', marginRight: '2px' }}
+                      label={`${audienceTypes[Audience]}${Required ? '*' : ''}`}
+                      key={Audience}
+                    />
+                  );
+                })}
+              </Grid>
+            )}
+            {/* </Box> */}
+          </Grid>
+        </Grid>
+        {showOptions && renderOptions()}
+      </Grid>
+      <Grid item container lg={2} sm={12} xs={12} className={classes.questionIconsWrapper}>
+        <Grid item lg={12}>
           <DeleteOutlineOutlinedIcon
             style={{
               color: `${customQuestion ? '#FF7070' : '#494949'}`,
@@ -281,53 +363,15 @@ const RenderQuestion = ({
             }}
             onClick={() => handleAddNewQuestion(index)}
           />
-        </Box>
-        <Box className={cs(classes.displayFlex, classes.justifyContentSpaceBetween)}>
-          <Box className={classes.displayFlex}>
-            <Box className={classes.positionRelative}>
-              <Button
-                variant="outlined"
-                className={classes.audienceButton}
-                onClick={() => setShowAudience(!showAudience)}
-              >
-                Audience
-                <ArrowDropDownOutlinedIcon
-                  style={{ width: '20px', height: 'auto', marginLeft: '2px' }}
-                />
-              </Button>
-
-              {showAudience && (
-                <RenderAudienceList
-                  setFieldValue={questionSettings =>
-                    setQuestion({ ...question, QuestionSettings: questionSettings })
-                  }
-                  questionSettings={QuestionSettings}
-                  setShowAudience={setShowAudience}
-                />
-              )}
-            </Box>
-            {QuestionSettings.map(({ Audience, Show, Required }) => {
-              if (!(Show || Required)) return;
-
-              return (
-                <Chip
-                  style={{ backgroundColor: '#F2F2F5', marginRight: '2px' }}
-                  label={`${audienceTypes[Audience]}${Required ? '*' : ''}`}
-                  key={Audience}
-                />
-              );
-            })}
-          </Box>
-          <Box>
-            <HideCheckBox
-              setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
-              question={question}
-            />
-          </Box>
-        </Box>
-        {showOptions && renderOptions()}
-      </Box>
-    </Box>
+        </Grid>
+        <Grid item lg={12}>
+          <HideCheckBox
+            setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
+            question={question}
+          />
+        </Grid>
+      </Grid>
+    </Grid>
   );
 };
 

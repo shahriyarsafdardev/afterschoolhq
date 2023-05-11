@@ -1,10 +1,8 @@
-import cs from 'classnames';
 import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 
 import useStyles from './styles';
 import { toInteger } from 'lodash';
@@ -237,8 +235,8 @@ function FormSectionSettings() {
           Apply to all in this section:
         </Typography>
         <Grid container className={classes.controlsContainer}>
-          <Grid container item className={classes.formControlsRow}>
-            <Grid item lg={3} sm={3} xs={3}>
+          <Grid container item lg={12} sm={12} xs={12} className={classes.formControlsRow}>
+            <Grid item lg={3} md={3} sm={3} xs={3}>
               <Typography variant="body1" className={classes.applyAllRow}>
                 Show For:
               </Typography>
@@ -255,6 +253,7 @@ function FormSectionSettings() {
                 <Grid
                   item
                   lg={3}
+                  md={3}
                   sm={6}
                   xs={6}
                   key={key}
@@ -275,7 +274,7 @@ function FormSectionSettings() {
               ))}
             </Grid>
           </Grid>
-          <Grid container item className={classes.formControlsRow}>
+          <Grid container item lg={12} sm={12} xs={12} className={classes.formControlsRow}>
             <Grid item lg={3} sm={3} xs={3}>
               <Typography variant="body1" className={classes.applyAllRow}>
                 Required For:
@@ -286,6 +285,7 @@ function FormSectionSettings() {
                 <Grid
                   item
                   lg={3}
+                  md={3}
                   sm={6}
                   xs={6}
                   key={key}
@@ -312,7 +312,7 @@ function FormSectionSettings() {
   };
 
   return (
-    <Grid item lg={9} xs={12} sm={6}>
+    <Grid item lg={9} md={9} xs={12} sm={12}>
       {sectionLoading ? (
         <Loader />
       ) : (
@@ -361,9 +361,6 @@ function FormSectionSettings() {
                                           : classes.transparentBorder
                                       }
                                     >
-                                      <span {...provided.dragHandleProps}>
-                                        <DragIndicatorIcon style={{ float: 'left' }} />
-                                      </span>
                                       <RenderQuestion
                                         index={key}
                                         key={`${key}-${values[key]?.ID}${reRender}`}
@@ -372,6 +369,7 @@ function FormSectionSettings() {
                                         handleDelete={handleDelete}
                                         handleCopy={handleCopy}
                                         handleAddNewQuestion={addNewQuestionHandler}
+                                        dragIndicatorProps={provided.dragHandleProps}
                                       />
                                     </Box>
                                   )}

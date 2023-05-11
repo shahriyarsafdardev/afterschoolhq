@@ -39,13 +39,13 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
 
     return (
       <Grid container row key={Audience} className={classes.audienceRow}>
-        <Grid item lg={4} xs={12} sm={6}>
+        <Grid item lg={4} xs={4} sm={4}>
           {audienceTypes[Audience]}
         </Grid>
-        <Grid item lg={4} xs={12} sm={6}>
+        <Grid item lg={4} xs={4} sm={4}>
           <RenderCheckbox checked={Show} handleCheck={() => clickHandler('show')} />
         </Grid>
-        <Grid item lg={4} xs={12} sm={6}>
+        <Grid item lg={4} xs={4} sm={4}>
           <RenderCheckbox checked={Required} handleCheck={() => clickHandler('required')} />
         </Grid>
       </Grid>
@@ -57,11 +57,11 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
       <Box className={cs(classes.positionAbsolute, classes.audienceList)}>
         <Grid container>
           <Grid container row className={classes.audienceRow}>
-            <Grid item lg={4} xs={12} sm={6}></Grid>
-            <Grid item lg={4} xs={12} sm={6}>
+            <Grid item lg={4} xs={4} sm={4}></Grid>
+            <Grid item lg={4} xs={4} sm={4}>
               <b>Show</b>
             </Grid>
-            <Grid item lg={4} xs={12} sm={6}>
+            <Grid item lg={4} xs={4} sm={4}>
               <b>{'Require (*)'}</b>
             </Grid>
           </Grid>
