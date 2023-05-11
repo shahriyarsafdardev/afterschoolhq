@@ -173,17 +173,23 @@
                 $('#strictGenderRestrictions').addClass("hidden");
             }
     }
+    function validateAgeChanged() {
+        if (parseInt($('#agestart').val()) >= 18) {
+            $('#allowRegistration').addClass("hidden");
+            $('#parentConsent').addClass("hidden");
+        }
+        else {
+            $('#allowRegistration').removeClass("hidden");
+            showParentConsent();
+        }
+    }
 
     function handleAllAgeAdultCheck() {
+        $('#agestart').change(function () {
+            validateAgeChanged();
+        });
         $('#ageend').change(function () {
-            if (parseInt($(this).val()) > 18) {
-                $('#allowRegistration').addClass("hidden");
-                $('#parentConsent').addClass("hidden");
-            }
-            else {
-                $('#allowRegistration').removeClass("hidden");
-                showParentConsent();
-            }
+            validateAgeChanged();
         });
     }
     PageEvent.add(PageEvent.AFTER_INIT, function () {
