@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Helpers;
@@ -108,11 +110,22 @@ namespace AfterSchool.Controllers
 
             if (msgs.HasNoErrors())
             {
+                var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
 
-                // select account
-                if (currentAccount.IsEmpty())
-                    return RedirectToAction("select", "login", new {returnurl, invite});
+                if (currentAccount.IsNotEmpty())
+                {
+                    if (FormConstants.AdminUserTypes.Contains(currentUser.GetUserType(currentAccount)) && currentAccount.AccountTypeId == AccountType.AfterSchool)
+                        return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
+                }
+                else
+                {
+                    var accounts = currentUser.GetAccounts(msgs);
+                    var userTypes = currentUser.GetUserTypes(msgs);
+                    if (userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
+                        return HandleAdminAccounts(user, msgs, returnurl, invite, remember);
+                    return RedirectToAction("select", "login", new { returnurl, invite });
+                }
 
                 HandleInvite(invite, currentAccount, user, msgs);
 
@@ -129,8 +142,94 @@ namespace AfterSchool.Controllers
 
                 return LoginRedirect(msgs: msgs);
             }
-
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult MultiPartAuth(string uid, string returnurl, string invite, string remember)
+        {
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
+            var multiFactorViewModel = new MultiFactorViewModel(msgs, uid, returnurl, invite, remember, (DateTime) TempData.Peek("expirationDate"));
+
+            return View(multiFactorViewModel);
+        }
+
+        [HttpPost]
+        public ActionResult MultiPartAuth(string uid, string authcode, string returnurl, string invite, string remember, bool isJson = false, string source = null)
+        {
+            var msgs = new SystemMessages();
+            var user = WebUser.LoadByUid(uid.ToGuid(), msgs);
+
+            if (authcode.IsEmpty())
+                msgs.Add("Authentication code is required for login", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                var multipartAuth = MultipartAuth.LoadLatestCodeByWebUserId(user.ID, msgs);
+
+                if(multipartAuth != null)
+                {
+                    if(multipartAuth.Code != authcode)
+                        msgs.Add("Authentication code did not match", MessageType.UserError);
+                    else if (multipartAuth.ExpirationDate <= DateTime.UtcNow)
+                        msgs.Add("Authentication code is expired, kindly press resend code to get code again", MessageType.UserError);
+                    else
+                    {
+                        var userCodes = MultipartAuth.LoadCodesListByWebUserId(user.ID, msgs);
+                        if (userCodes.Count > 1)
+                        {
+                            userCodes = userCodes.OrderByDescending(x => x.ID).ToList();
+                            for (int i = 1; i < userCodes.Count; i++)
+                            {
+                                msgs.AddRange(userCodes[i].Delete());
+                            }
+                        }
+                        if(isJson)
+                        {
+                            LoadSessionInfo(user, null, remember.ToBoolean(), source, msgs);
+                            return Json(new { status = "ok" }, JsonRequestBehavior.DenyGet);
+                        }
+                        else
+                            LoadSessionInfo(user, null, remember.IsBoolean(), msgs);
+                            
+
+                        var currentAccount = SessionVariables.CurrentAccount;
+
+                        if (currentAccount.IsEmpty())
+                            return RedirectToAction("select", "login", new { returnurl, invite });
+
+                        HandleInvite(invite, currentAccount, user, msgs);
+
+                        if (user.IsNotEmpty() && currentAccount.IsNotEmpty())
+                            SessionVariables.WebSession.LogActivity(
+                                account: currentAccount,
+                                actor: user,
+                                actionType: WebSessionActionType.LoggedIn
+                            );
+
+                        if (returnurl.IsNotEmpty())
+                            return HandleRedirectAfterLogin(returnurl, msgs);
+
+                        return LoginRedirect(msgs: msgs);
+                    }
+                }
+            }
+            if (isJson)
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.DenyGet);
+
+            var multiFactorViewModel = new MultiFactorViewModel(msgs, uid, returnurl, invite, remember, (DateTime) TempData.Peek("expirationDate"));
+            return View(multiFactorViewModel);
+        }
+
+        [HttpPost]
+        public ActionResult ResendVerificationCode(string uid)
+        {
+            var msgs = new SystemMessages();
+            var user = WebUser.LoadByUid(uid.ToGuid(), msgs);
+
+            msgs.AddRange(HandleMultiPartAuth(user));
+            return Json(new { success = true, expirationDate = TempData.Peek("expirationDate") });
         }
 
         [HttpGet]
@@ -349,10 +448,10 @@ namespace AfterSchool.Controllers
             if (password.IsEmpty())
                 msgs.Add("Password is required", MessageType.UserError);
 
+            WebUser user = null;
+
             if (msgs.HasNoErrors())
             {
-                WebUser user = null;
-
                 if (username.IsMatch(BasicLibrary.Utilities.EmailRegEx))
                     user = WebUserService.LoginByEmail(username, password);
                 else if (username.IsMatch(BasicLibrary.Utilities.PhoneRegEx))
@@ -367,7 +466,22 @@ namespace AfterSchool.Controllers
             }
 
             if (msgs.HasNoErrors())
-                return Json(new {status = "ok", isNewParentAccount}, JsonRequestBehavior.DenyGet);
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                var accounts = currentUser.GetAccounts(msgs);
+                var userTypes = currentUser.GetUserTypes(msgs);
+
+                if(userTypes.Any(userType => FormConstants.AdminUserTypes.Contains(userType)) && accounts.Any(account => account.AccountTypeId == AccountType.AfterSchool))
+                {
+                    Logout(null);
+                    msgs.AddRange(HandleMultiPartAuth(user));
+                    var uid = user.Uid.ToString();
+                    var isAdminAccount = true;
+                    var expirationDate = TempData.Peek("expirationDate");
+                    return Json(new { status = "ok", isNewParentAccount, isAdminAccount, uid, expirationDate }, JsonRequestBehavior.DenyGet);
+                }
+                return Json(new { status = "ok", isNewParentAccount }, JsonRequestBehavior.DenyGet);
+            }
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.DenyGet);
         }

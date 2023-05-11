@@ -1,0 +1,312 @@
+@using AfterSchoolLibrary.Helpers
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+
+@{
+    Layout = "~/Views/Shared/_LayoutLogin-Updated.cshtml";
+    ViewBag.Title = "Login";
+    var msgs = @Model.Messages;
+    var uid = @Model.UID;
+    var returnurl = @Model.ReturnURL;
+    var remember = @Model.Remember;
+    var invite = @Model.Invite;
+    var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    bool isProduction = Utilities.IsProduction;
+    var expirationDate = @Model.ExpirationDate;
+    TimeSpan elapsedTime = expirationDate - DateTime.UtcNow;
+    int elapsedSeconds = (int)elapsedTime.TotalSeconds;
+}
+
+
+<style>
+    .bg-image {
+        background-image: url('../../Assets/img/4k-wallpaper-adorable-blur-boy-1148998-small.jpg');
+        background-repeat: no-repeat;
+        background-position: left top;
+        background-size: cover;
+        flex: 1;
+        height: 100%;
+    }
+
+    .form-authcode-welcome, .form-auth-code {
+        text-align: center;
+    }
+
+    .txt-generic-authcode {
+        width: 100%;
+        border-radius: 6px !important;
+    }
+
+    .form-authcode-welcome {
+        font-family: Montserrat, sans-serif;
+        font-size: 24px;
+        font-weight: bolder;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 1px;
+        color: #000;
+    }
+
+    .form-auth-code {
+        font-family: Montserrat, sans-serif;
+        font-size: 14px;
+        font-weight: 300;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: normal;
+        color: #494949;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .authcode-description {
+        flex-grow: 0;
+        font-size: 16px;
+        font-weight: 900;
+        font-stretch: normal;
+        font-style: normal;
+        line-height: normal;
+        letter-spacing: 1.78px;
+        text-align: left;
+        color: #4a4a4a;
+        margin-bottom: 7px;
+        margin-left: 1px;
+    }
+
+    .btn-resend-code {
+        text-decoration: underline;
+        color: grey;
+        background: none;
+        border: 0;
+        &:hover{
+        color: grey;
+        }
+    }
+
+    .rectangle-login-box {
+        height: 270px;
+        padding: 30px 60px 30px 60px;
+        border-radius: 10px;
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        text-align: left;
+        margin: 175px 30px 0;
+    }
+
+    .authcode-form-row {
+        margin-top: 36px;
+    }
+
+    .authcode-submit {
+        margin-top: 36px;
+    }
+
+    .am-checkbox input[type="checkbox"].remember-me {
+        background-color: transparent;
+        border-color: transparent;
+        display: block;
+        height: 100%;
+        margin-top: -7px;
+        width: 100%;
+    }
+</style>
+<style media="all and (max-width: 1199px)">
+    .form-authcode-welcome, .form-auth-code {
+        text-align: center;
+    }
+
+    .content-sidebar-login {
+        width: 100%;
+    }
+
+    .rectangle-login-box {
+        height: auto;
+        margin-top: 40px;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+
+    .authcode-form-row {
+        left: 0;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40px;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-top: 35px;
+        right: 0;
+        width: 350px;
+    }
+</style>
+<style media="all and (max-width: 991px)">
+    .authcode-form-row {
+        padding-left: 25px;
+        padding-right: 25px;
+        padding-top: 30px;
+    }
+</style>
+<style media="all and (max-width: 767px)">
+    .authcode-form-row {
+        -webkit-overflow-scrolling: touch;
+        height: 100%;
+        overflow: auto;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 20px;
+    }
+</style>
+<style media="all and (max-width: 479px)">
+    .authcode-form-row {
+        left: inherit;
+        margin-left: -15px;
+        margin-right: -15px;
+        right: inherit;
+        width: inherit;
+    }
+</style>
+
+<div class="container-login">
+    <div class="content-sidebar-login pull-left">
+
+        <div style="position: fixed; top: 30px; left: 30px;" class="hidden-md hidden-sm hidden-xs">
+            <a href="/">
+                <img src="~/Assets/img/ahq-logo-2-1-1.png" alt="AfterSchool HQ - Your home for afterschool experiences" style="width: 325px;">
+            </a>
+        </div>
+
+        <div class="rectangle-login-box">
+            <div class="form-group">
+                <p class="form-authcode-welcome">Two-factor authentication.</p>
+                <p class="form-auth-code">We just sent you an email with your authentication code.</p>
+                <p class="form-auth-code">Enter the code below to verify your identity.</p>
+            </div>
+            <div class="authcode-form-row form-group">
+                    @Html.Raw(UI.RenderMessagesToHtml(msgs))
+                <div class="clearfix"></div>
+
+                <form action="@Url.Action("multipartAuth", "login", new {uid, returnurl, invite, remember})" method="post" class="form-horizontal" id="form-auth-code">
+
+                    <div class="">
+                        <label class="authcode-description" for="authcode"> Authentication Code * </label>
+                        <div class="input-group" style="width: 100%;">
+                            <input id="authcode" name="authcode" type="text" class="form-control txt-generic-authcode" required>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="form-group login-submit text-center authcode-submit">
+                        <button id="btn-login" type="submit" class="btn btn-primary btn-lg btn-block btn-login-updated">Verify</button>
+                        <br>
+                        <button id="resend-code-btn" class="btn-resend-code">
+                            Resend Code
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+            <div class="clearfix"></div>
+            <div class="footer-logo-small-screen text-center hidden-xl hidden-lg">
+                <a href="/">
+                    <img src="~/Assets/img/ahq-logo-2-1-1.png" alt="AfterSchool HQ - Your home for afterschool experiences" style="width: 250px;">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-image hidden-md hidden-sm hidden-xs">
+        <div class="rectangle-thought">
+            <span class="thought-header-1">
+                Every kid is a genius in their own way. Our goal is to help them find their genius.
+            </span>
+            <br><br><br>
+            <span class="thought-header-2">
+                Darye Henry
+            </span>
+            <br><br>
+            <span class="thought-header-3">
+                Founder, AfterSchool HQ
+            </span>
+        </div>
+
+        <span class="photo-by-cole-keister">
+        </span>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#form-auth-code").validate({
+                rules: {
+                    authcode: {
+                        required: true,
+                    },
+                },
+                messages: {
+                    authcode: {
+                        required: "Please enter authentication code to verify",
+                    },
+                },
+            });
+        });
+
+        $(document).ready(function () {
+        $('#resend-code-btn').on('click', function(e) {
+        e.preventDefault();
+        var remainingTime = @elapsedSeconds;
+        $(this).prop('disabled', true);
+
+        $.ajax({
+            url: '@Url.Action("ResendVerificationCode", "Login")',
+            type: 'POST',
+            data: { uid: '@uid' },
+            success: function (data) {
+                var dateString = data.expirationDate.replace(/\/Date\((\d+)\)\//, '$1');
+                var expirationDate = new Date(parseInt(dateString));
+                var remainingTime = Math.round((expirationDate.getTime() - Date.now()) / 1000);
+                var successMessage = "Authentication code resent to your email";
+                Notifications.showMessage('Success', successMessage, true);
+                var timer = setInterval(function() {
+                    $('#resend-code-btn').text('Resend Code (' + remainingTime + ')');
+                    remainingTime--;
+                    if (remainingTime < 0) {
+                        $('#messages-container').empty();
+                        clearInterval(timer);
+                        $('#resend-code-btn').text('Resend Code');
+                        $('#resend-code-btn').prop('disabled', false);
+                    }
+                }, 1000);
+            },
+            error: function () {
+                var failureMessage = "An error occurred while sending the verification code.";
+                Notifications.showErrors(failureMessage);
+            }
+        });
+    });
+
+    var remainingTime = @elapsedSeconds;
+
+    if (remainingTime !== null) {
+        $('#resend-code-btn').prop('disabled', true);
+
+        var timer = setInterval(function() {
+            $('#resend-code-btn').text('Resend Code (' + remainingTime + ')');
+            remainingTime--;
+            if (remainingTime < 0) {
+                clearInterval(timer);
+                $('#resend-code-btn').text('Resend Code');
+                $('#resend-code-btn').prop('disabled', false);
+            }
+        }, 1000);
+    }
+});
+
+    </script>
+}

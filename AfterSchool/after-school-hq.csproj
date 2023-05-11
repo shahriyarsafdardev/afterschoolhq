@@ -667,6 +667,7 @@
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />
+    <Compile Include="Models\MultiFactorViewModel.cs" />
     <Compile Include="Models\ParticipationObjectViewModel.cs" />
     <Compile Include="RecordControllerActionsToInfluxMiddleware.cs" />
     <Compile Include="Controllers\AccountController.cs" />
@@ -2575,6 +2576,8 @@
     <Content Include="Views\Shared\_DirectoryContainer.cshtml" />
     <Content Include="reactapp\Index.html" />
     <Content Include="React\**" CopyToPublishDirectory="PreserveNewest" Exclude="React\node_modules\**" />
+    <Content Include="Views\Login\MultiPartAuth.cshtml" />
+    <Content Include="Views\Shared\Registration\_AuthCodeModal.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBar.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBarLight.cshtml" />
   </ItemGroup>

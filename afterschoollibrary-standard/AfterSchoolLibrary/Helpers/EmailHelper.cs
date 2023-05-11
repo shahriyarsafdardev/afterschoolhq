@@ -2226,6 +2226,42 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendAuthEmail(WebUser user, string authCode, bool isAfterSchool)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection
+            {
+                {"FirstName", user.FirstName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {
+                    "AuthCode",
+                    $"{authCode}"
+                },
+                {"SupportEmail", Email.AppSupportEmailAddress},
+            };
+
+            var body = ProcessTemplate(
+                EmailTemplates.AuthCode_Email,
+                model,
+                "authemail-1.0.1",
+                msgs
+            );
+
+            var subject = $"{Utilities.AppName(isAfterSchool)}: Authentication Code";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(user.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+            );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendWelcomeTrial(WebUser user, Account account)
         {
             var msgs = new SystemMessages();

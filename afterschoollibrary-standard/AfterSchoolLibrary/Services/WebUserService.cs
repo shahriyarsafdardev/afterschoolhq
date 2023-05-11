@@ -138,6 +138,13 @@ namespace AfterSchoolLibrary.Services
             return UserType.NotSet;
         }
 
+        public static List<UserType> GetUserTypes(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var awus = AccountWebUser.LoadByWebUserId((int) user.ID, true, false, false, msgs, dc).Select(x => x.UserTypeId).ToList();
+
+            return awus;
+        }
+
         public static void UpdateLastActivity(this WebUser user, SystemMessages msgs, DatabaseConnection dc = null)
         {
             user.LastActivity = DateTime.UtcNow;
@@ -276,6 +283,12 @@ namespace AfterSchoolLibrary.Services
         public static SystemMessages SendVerificationEmail(this WebUser user, string redirectUrl = null, bool isAfterSchool = true)
         {
             return EmailHelper.SendEmailVerification(user, redirectUrl, isAfterSchool);
+        }
+
+        public static SystemMessages SendMultipartAuth(int? userId, string authCode, bool isAfterSchool = true)
+        {
+            var user = WebUser.Load((int) userId);
+            return EmailHelper.SendAuthEmail(user, authCode, isAfterSchool);
         }
 
         public static SystemMessages SendWelcomePurchase(string userFirstName, string userEmail, bool isAfterSchool = true)

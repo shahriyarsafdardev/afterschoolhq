@@ -1,0 +1,17 @@
+<div>
+  <p>Hey @Model.FirstName,</p>
+
+  <p>
+    Kindly enter the code below to verify your identity.
+  </p>
+
+  <p>
+      <strong>Code:</strong> @Model.AuthCode
+  </p>
+  <p>
+    If you have not logged in for @Model.ProductName account, please let us know <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
+  </p>
+  <p>
+    @Model.ProductName
+  </p>
+</div>

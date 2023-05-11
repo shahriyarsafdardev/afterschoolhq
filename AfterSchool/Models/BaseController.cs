@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
@@ -7,6 +9,8 @@ using System.Web.Routing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
+using Hangfire;
 
 namespace AfterSchool.Models
 {
@@ -123,6 +127,16 @@ namespace AfterSchool.Models
         protected ActionResult LoginRedirect(Account registrationAccount = null, SystemMessages msgs = null)
         {
             return Redirect(DetermineUrlForLoginRedirect(registrationAccount, msgs));
+        }
+
+        protected ActionResult HandleAdminAccounts(WebUser user, SystemMessages msgs, string returnurl, string invite, string remember)
+        {
+            Logout(null);
+            msgs.AddRange(HandleMultiPartAuth(user));
+            var uid = user.Uid.ToString();
+            msgs.Add("Authentication code successfully sent to your email.", MessageType.Success);
+            SetTempMessages(msgs);
+            return RedirectToAction("multipartAuth", "Login", new { uid, returnurl, invite, remember });
         }
 
         internal string DetermineUrlForLoginRedirect(Account registrationAccount, SystemMessages msgs)
@@ -275,6 +289,38 @@ namespace AfterSchool.Models
                 return Redirect(returnUrl);
 
             return RedirectToAction("index", "Login", new {returnurl = returnUrl, area = ""});
+        }
+
+        internal SystemMessages HandleMultiPartAuth(WebUser user)
+        {
+            var msgs = new SystemMessages();
+            var multipartAuth = new MultipartAuth();
+
+            var rBytes = new byte[24];
+            using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
+            var result = Convert.ToBase64String(rBytes);
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    multipartAuth.Code = result;
+                    multipartAuth.WebUserId = user.ID;
+                    multipartAuth.ExpirationDate = DateTime.UtcNow.AddMinutes(3);
+                    multipartAuth.CreateDate = DateTime.UtcNow;
+                    multipartAuth.CreatedBy = user.ID;
+
+                    amsgs.AddRange(multipartAuth.Save(adc));
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, result, true));
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+            );
+            TempData["expirationDate"] = multipartAuth.ExpirationDate.AddMinutes(-2);
+            return msgs;
         }
 
         internal bool HandleInvite(string invite, Account currentAccount, WebUser currentUser, SystemMessages msgs)
