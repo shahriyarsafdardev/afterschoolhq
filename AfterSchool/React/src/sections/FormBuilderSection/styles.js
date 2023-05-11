@@ -120,10 +120,15 @@ export default makeStyles(theme => ({
     fontWeight: 'bold'
   },
   question: {
+    justifyContent: 'space-evenly',
     border: '1px solid #E4E4E4',
+    flexDirection: 'row',
     borderRadius: '3px',
     margin: '30px 0px',
-    display: 'flex'
+    display: 'flex',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column'
+    }
   },
   buttonOuterWrapper: {
     display: 'flex',
@@ -212,6 +217,9 @@ export default makeStyles(theme => ({
   flexDirectionCol: {
     flexDirection: 'column'
   },
+  questionFieldsWrapper: {
+    flexBasis: '85%'
+  },
   width100: {
     width: '100%'
   },
@@ -235,6 +243,11 @@ export default makeStyles(theme => ({
   applyToAllControlsItem: { padiing: '5px', display: 'flex', alignItems: 'center' },
   controlsContainer: { display: 'block', maxWidth: '454px', marginTop: '10px' },
   questionIconsWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    padding: '8px 0px',
+    flexBasis: '10%',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'row-reverse',
       justifyContent: 'space-between'

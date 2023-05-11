@@ -20,6 +20,14 @@
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
+<style>
+    @@media(max-width: 600px){
+        .panel-body{
+            padding-left:0;
+            padding-right:0;
+        }
+    }
+</style>
 
 <div class="main-content">
 
@@ -38,8 +46,6 @@
         </div>
         <div class="panel-body">
             <div id="root" style="height: 100%"></div>
-
-
         </div>
 
     </div>
