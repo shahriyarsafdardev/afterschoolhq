@@ -3460,7 +3460,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var participationObject = activity.GetParticipationObject();
             string extension = "";
             var questions = activity.GetActiveForm(msgs)
