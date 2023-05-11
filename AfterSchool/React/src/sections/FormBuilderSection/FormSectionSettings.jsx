@@ -1,3 +1,4 @@
+import * as Yup from 'yup';
 import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { newQuestion } from './helper';
 import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
+import questionType from 'constants/questionType';
 
 function FormSectionSettings() {
   const classes = useStyles();
@@ -56,15 +58,46 @@ function FormSectionSettings() {
 
   const initialValues = {};
   questions.map(question => (initialValues[question.DisplayOrder] = question));
+  const { dropdown, radioList, checkBoxList } = questionType;
+
+  const validationSchema = Yup.object().shape(
+    Object.keys(initialValues).reduce((acc, key) => {
+      acc[key] = Yup.object().shape({
+        QuestionTypeId: Yup.number(),
+        DisplayOrder: Yup.number(),
+        Text: Yup.string()
+          .required('Text is required')
+          .max(400, 'Text cannot be longer than 400 characters'),
+        Options: Yup.string().when(['QuestionTypeId'], {
+          is: val => [dropdown, radioList, checkBoxList].includes(val),
+          then: () =>
+            Yup.string()
+              .required('Options are required')
+              .test(
+                'len',
+                'Options should have two or more values',
+                val => val.split(',').length >= 2
+              )
+              .test(
+                'emptyOptionValue',
+                'Option value cannot be empty',
+                val => val && val.split(',').every(option => option.split('|')[0].trim() !== '')
+              ),
+          otherwise: () => Yup.string().notRequired()
+        })
+      });
+      return acc;
+    }, {})
+  );
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
-    // validationSchema,
-    validate: values => {
-      console.log(values, 'validate successfully');
-      return {};
-    },
+    validationSchema,
+    // validate: values => {
+    //   console.log(values, 'validate successfully');
+    //   return {};
+    // },
     onSubmit: async (values, ...props) => {
       const formQuestions = Object.keys(values).map(key => values[key]);
       const updatedQuestionGroups = [...questionsGroups];
@@ -82,7 +115,7 @@ function FormSectionSettings() {
       console.log(values, props, 'submitted successfully');
     }
   });
-  const { handleSubmit, values, setFieldValue, setValues } = formik;
+  const { handleSubmit, values, setFieldValue, setValues, errors, touched } = formik;
 
   const addNewQuestionHandler = index => {
     const newDisplayOrder =
@@ -370,6 +403,8 @@ function FormSectionSettings() {
                                         handleCopy={handleCopy}
                                         handleAddNewQuestion={addNewQuestionHandler}
                                         dragIndicatorProps={provided.dragHandleProps}
+                                        errors={errors[key]}
+                                        touched={touched[key]}
                                       />
                                     </Box>
                                   )}
