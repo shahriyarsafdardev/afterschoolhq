@@ -134,10 +134,11 @@
         }
         else {
             $('#parentConsent').addClass("hidden");
-            $("#requiresparentalconsent").prop('checked', !@allAgeRegistrationEnabled);
+
         }
+        $("#requiresparentalconsent").prop('checked', !@(allAgeRegistrationEnabled.ToString().ToLower()));
     }
-    
+
     function showStrictGender() {
             var genderrestrictions = $("#genderrestrictions-0").is(":checked");
             if (genderrestrictions) {
@@ -147,7 +148,7 @@
                 $('#strictGenderRestrictions').removeClass("hidden");
             }
     }
-    
+
     function handleCheck(obj) {
             if (obj.getAttribute("value") != 0)
                 {
@@ -158,7 +159,7 @@
                 $('#strictGenderRestrictions').addClass("hidden");
             }
     }
-    
+
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         showParentConsent();
         showStrictGender();
@@ -172,6 +173,6 @@
                 $('#parentConsent').removeClass("hidden");
             }
         });
-    }); 
-        
+    });
+
 </script>
