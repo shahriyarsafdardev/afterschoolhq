@@ -143,17 +143,19 @@ const RenderQuestion = ({
               <TextField
                 className={classes.formControlClass}
                 fullWidth
+                key={`${index}-${options.key}`}
                 placeholder="Option"
-                value={option.key}
+                value={option?.key || ''}
                 onChange={event => handleKeyChange(index, event)}
               />
             </Grid>
-            <Grid item lg={5} xs={12} sm={12} key={`option-${index}`}>
+            <Grid item lg={5} xs={12} sm={12}>
               <TextField
                 className={classes.formControlClass}
                 fullWidth
+                key={`${index}-${options.value}`}
                 placeholder="Value (Optional)"
-                value={option.value}
+                value={option?.value || ''}
                 onChange={event => handleValueChange(index, event)}
               />
             </Grid>
@@ -197,9 +199,9 @@ const RenderQuestion = ({
                   <div ref={provided.innerRef} {...provided.droppableProps}>
                     {options.map(({ key, value }, index) => (
                       <Draggable
-                        draggableId={`question-${ID}-option-${key}`}
+                        draggableId={`question-${ID}-option-${index}`}
                         index={toInteger(index)}
-                        key={key}
+                        key={index}
                       >
                         {(provided, snapshot) => (
                           <Box
