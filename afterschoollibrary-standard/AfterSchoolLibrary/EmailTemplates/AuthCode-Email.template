@@ -1,16 +1,24 @@
 <div>
-  <p>Hey @Model.FirstName,</p>
-
+  <p>Hi @Model.FirstName,</p>
+    <br/>
   <p>
-    Kindly enter the code below to verify your identity.
+    Someone is attempting to <a href="http://afterschoolhq.com/login">login</a> to AfterSchool HQ using this email address. If that is you, please enter the following code to complete the login:
   </p>
-
+    <br/>
   <p>
-      <strong>Code:</strong> @Model.AuthCode
+      <strong><font size="+2">@Model.AuthCode</font></strong>
   </p>
+    <br/>
+    <p>Please note that this code will expire in 3 minutes.</p>
+    <br/>
   <p>
-    If you have not logged in for @Model.ProductName account, please let us know <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>.
+    If you did not initiate this login, please go to your account and change your password right away.
   </p>
+    <br/>
+   <p>
+     Thank you,
+   </p>
+    <br/>
   <p>
     @Model.ProductName
   </p>
