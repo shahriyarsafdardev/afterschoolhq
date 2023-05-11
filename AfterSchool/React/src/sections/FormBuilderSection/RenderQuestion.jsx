@@ -238,8 +238,7 @@ const RenderQuestion = ({
   }
 
   return (
-    <Grid
-      container
+    <Box
       className={classes.question}
       onMouseLeave={() => {
         if (!isEqual(question, value)) {
@@ -247,7 +246,7 @@ const RenderQuestion = ({
         }
       }}
     >
-      <Grid item lg={10} sm={12} xs={12} container className={classes.width100}>
+      <Grid container className={cs(classes.questionFieldsWrapper)}>
         <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
           <Grid item lg={1} sm={1} xs={1} className={cs(classes.displayFlex)}>
             <span {...dragIndicatorProps}>
@@ -329,8 +328,8 @@ const RenderQuestion = ({
         </Grid>
         {showOptions && renderOptions()}
       </Grid>
-      <Grid item container lg={2} sm={12} xs={12} className={classes.questionIconsWrapper}>
-        <Grid item lg={12}>
+      <Grid container className={classes.questionIconsWrapper}>
+        <Box>
           <DeleteOutlineOutlinedIcon
             style={{
               color: `${customQuestion ? '#FF7070' : '#494949'}`,
@@ -363,15 +362,15 @@ const RenderQuestion = ({
             }}
             onClick={() => handleAddNewQuestion(index)}
           />
-        </Grid>
-        <Grid item lg={12}>
+        </Box>
+        <Box>
           <HideCheckBox
             setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
             question={question}
           />
-        </Grid>
+        </Box>
       </Grid>
-    </Grid>
+    </Box>
   );
 };
 
