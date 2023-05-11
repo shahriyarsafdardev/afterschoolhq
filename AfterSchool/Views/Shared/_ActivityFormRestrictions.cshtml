@@ -93,6 +93,7 @@
                                 {"disabled", false},
                                 {"onclick", "showParentConsent();"},
                                 {"required", false},
+
                     });
                     }
                 </div>
@@ -111,7 +112,7 @@
                             {
                                 {"checkboxname", "requiresparentalconsent"},
                                 {"checkboxid", "requiresparentalconsent"},
-                                {"disabled", false},
+                                {"disabled", false}
                     });
                     }
                 </div>
@@ -133,7 +134,7 @@
         }
         else {
             $('#parentConsent').addClass("hidden");
-            $("#requiresparentalconsent").prop('checked', true);
+            $("#requiresparentalconsent").prop('checked', !@allAgeRegistrationEnabled);
         }
     }
     
