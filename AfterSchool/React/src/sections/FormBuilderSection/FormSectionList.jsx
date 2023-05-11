@@ -65,7 +65,7 @@ function FormSectionList() {
   }
 
   return (
-    <Grid item lg={2} xs={12} sm={6} className={classes.sectionListWrapper}>
+    <Grid item lg={2} md={2} xs={12} sm={6} className={classes.sectionListWrapper}>
       <Typography
         variant="h6"
         className={classes.settingsLink}
