@@ -143,7 +143,7 @@
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.PercentAttended" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.PercentAttended)%</div>
+                            <div data-toggle="counter" data-end="@Model.PercentAttended" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.PercentAttended,1)%</div>
                             <div class="desc">% Attended</div>
                         </div>
                         @*<div class="icon">
@@ -154,7 +154,7 @@
                 <div class="col-md-4">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.AverageAttendedPerClass" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.AverageAttendedPerClass)</div>
+                            <div data-toggle="counter" data-end="@Model.AverageAttendedPerClass" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.AverageAttendedPerClass,1)</div>
                             <div class="desc">Avg Attended / Class</div>
                         </div>
                         @*<div class="icon">
@@ -176,7 +176,7 @@
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.PercentActive" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.PercentActive)%</div>
+                            <div data-toggle="counter" data-end="@Model.PercentActive" data-decimals="1" data-suffix="" class="value">@Math.Round((double)Model.PercentActive,1)%</div>
                             <div class="desc">Percent Active</div>
                         </div>
                         @*<div class="icon">
