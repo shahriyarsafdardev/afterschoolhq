@@ -2119,6 +2119,8 @@ namespace AfterSchoolLibrary.Helpers
             else
                 activityName = plan.GetActivityGroup().Name;
 
+            var billingAccount = plan.GetAccount().GetAccountOwner();
+
             var model = new NameValueCollection
             {
                 {"FirstName", user.FirstName},
@@ -2137,18 +2139,18 @@ namespace AfterSchoolLibrary.Helpers
             );
 
             var subject = $"Your payment failed for ${activityName}";
+            var emails = new List<string> { user.Email, billingAccount.Email };
+            emails.ForEach(email =>
+                msgs.AddRange(SendGridHelper.SendMail(
+                    Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                    new EmailAddress(email),
+                    subject,
+                    body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
+                    ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
+                    replyTo: new EmailAddress(Email.AppSupportEmailAddress)
+                )));
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(user.Email),
-                subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
-                ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
-                replyTo: new EmailAddress(Email.AppSupportEmailAddress)
-            );
-
-            msgs.AddRange(mailMsgs);
             return msgs;
         }
 
