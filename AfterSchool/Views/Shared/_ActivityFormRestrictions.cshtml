@@ -160,9 +160,7 @@
             }
     }
 
-    PageEvent.add(PageEvent.AFTER_INIT, function () {
-        showParentConsent();
-        showStrictGender();
+    function handleAllAgeAdultCheck() {
         $('#ageend').change(function () {
             if (parseInt($(this).val()) > 18) {
                 $('#allowRegistration').addClass("hidden");
@@ -173,6 +171,14 @@
                 $('#parentConsent').removeClass("hidden");
             }
         });
+    }
+
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        showParentConsent();
+        showStrictGender();
+        if (@allAgeRegistrationEnabled.ToString().ToLower()) {
+            handleAllAgeAdultCheck();
+        }
     });
 
 </script>
