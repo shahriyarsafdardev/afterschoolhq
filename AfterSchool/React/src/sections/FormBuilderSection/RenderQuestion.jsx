@@ -13,6 +13,7 @@ import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined'
 import {
   FormControlLabel,
   useMediaQuery,
+  FormHelperText,
   Typography,
   makeStyles,
   TextField,
@@ -33,6 +34,8 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 const RenderQuestion = ({
   index,
   value,
+  errors,
+  touched,
   handleCopy,
   handleDelete,
   setFieldValue,
@@ -188,9 +191,8 @@ const RenderQuestion = ({
         <Grid lg={11}>
           <Box
             className={cs(classes.flexDirectionCol)}
-            onMouseLeave={() => {
-              handleSubmit();
-            }}
+            onTouchEnd={handleSubmit}
+            onMouseLeave={handleSubmit}
             style={{ display: 'flex', padding: '8px 12px' }}
           >
             <DragDropContext onDragEnd={onDragEnd}>
@@ -225,6 +227,11 @@ const RenderQuestion = ({
                 )}
               </Droppable>
             </DragDropContext>
+            {touched?.Options && errors?.Options && (
+              <FormHelperText className={classes.maxWidth} error>
+                {errors?.Options}
+              </FormHelperText>
+            )}
             <Typography
               style={{ cursor: 'pointer', textDecoration: 'underline', padding: '12px 0px' }}
               onClick={() => {
@@ -239,14 +246,17 @@ const RenderQuestion = ({
     );
   }
 
+  const mouseLeaveHandler = () => {
+    if (!isEqual(question, value)) {
+      setFieldValue(index, question);
+    }
+  };
+
   return (
     <Box
       className={classes.question}
-      onMouseLeave={() => {
-        if (!isEqual(question, value)) {
-          setFieldValue(index, question);
-        }
-      }}
+      onTouchEnd={mouseLeaveHandler}
+      onMouseLeave={mouseLeaveHandler}
     >
       <Grid container className={cs(classes.questionFieldsWrapper)}>
         <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
@@ -262,7 +272,8 @@ const RenderQuestion = ({
               fullWidth
               variant="outlined"
               value={Text}
-              //   helperText={`${Text?.length}/400`}
+              helperText={errors?.Text ? errors?.Text : `${Text?.length}/400`}
+              error={touched?.Text && errors?.Text}
               inputProps={{
                 maxLength: 400
               }}
