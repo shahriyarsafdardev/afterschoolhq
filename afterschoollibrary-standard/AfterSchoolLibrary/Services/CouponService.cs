@@ -200,7 +200,7 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetNumberOfUses(this Coupon coupon)
         {
-            return Registration.LoadByCouponId(coupon.ID.Value).Distinct().Count();            
+            return Transaction.GetCountByCouponId(coupon.ID.Value);            
         }
 
         public static int GetNumberOfUsesByPurchaseAccount(this Coupon coupon, int PurchaserAccountId, SystemMessages msgs = null, DatabaseConnection dc = null)

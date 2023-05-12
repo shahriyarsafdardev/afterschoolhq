@@ -1095,17 +1095,7 @@ namespace AfterSchoolLibrary.Models
         public string GetParentalConsentUrl => $"{Utilities.BaseUrl()}/account/parentalconsent/{Uid}";
 
         public string GetPaymentUrl => $"{Utilities.BaseUrl()}/account/makepayment/{Uid}";
-
-        public static List<Registration> LoadByCouponId(int CouponId, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
-            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
+        
         public static List<Registration> LoadByCouponIdByPurchaseAccountId(int CouponId, int PurchaserAccountId,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {

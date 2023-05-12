@@ -1455,6 +1455,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static int GetCountByCouponId(int couponId, bool isDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["CouponId"], couponId);
+
+            return dq.GetCount(msgs);
+        }
         #endregion
     }
 }
