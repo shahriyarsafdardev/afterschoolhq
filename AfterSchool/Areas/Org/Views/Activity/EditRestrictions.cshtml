@@ -1,9 +1,10 @@
-﻿@using AfterSchool.Helpers
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditRestrictionsResult
 @{
     ViewBag.Title = Model.CurrentAccount.Name;
     var msgs = Model.Messages;
     var isFullScreen = Model.IsFullScreen;
+    var isSession = Model.IsSession;
     if (isFullScreen)
     {
         Layout = "~/Views/Shared/Layouts/_FullScreen.cshtml";
@@ -79,6 +80,7 @@
                 @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary
                    {
                        {"ActiveMenu", Model.ActiveMenu},
+                       { "IsSession", isSession },
                    }); }
             </div>
 

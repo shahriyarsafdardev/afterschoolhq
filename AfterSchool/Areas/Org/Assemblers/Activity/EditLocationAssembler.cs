@@ -1,4 +1,4 @@
-﻿using AfterSchool.Areas.Org.Controllers;
+using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -11,6 +11,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public bool IsFullScreen { get; set; }
         public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public bool IsActivityLeader { get; set; }
+        public bool IsSession { get; set; }
         public string FullScreenExitUrl { get; set; }
         public Location Location { get; set; }
         public AccountPackage AccountPackage { get; set; }
@@ -21,7 +22,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
     {
         public EditLocationResult AssembleEditLocationResult(Account account, AfterSchoolLibrary.Models.Activity activity, SystemMessages messages,
             string isNew, UserType accountUserType, bool currentUserIsActivityLeader, string fullScreenExitUrl, Location location,
-            AccountPackage accountPackage, WebUser currentUser)
+            AccountPackage accountPackage, WebUser currentUser, bool isSession = false)
         {
             var isActivityLeader = EditHelpers.IsActivityLeader(account.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
@@ -36,6 +37,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 Location = location ?? new Location(),
                 AccountPackage = accountPackage,
                 CurrentUser = currentUser,
+                IsSession = isSession,
             };
         }
     }

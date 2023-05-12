@@ -14,6 +14,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public bool IsPublished { get; set; }
         public bool IsFullScreen { get; set; }
         public bool IsActivityLeader { get; set; }
+        public bool IsSession { get; set; }
         public string FullScreenExitUrl { get; set; }
         public List<ActivitySchedule> Schedules { get; set; }
         public string ActiveMenu { get; set; }
@@ -24,7 +25,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
     {
         public EditScheduleResult AssembleEditScheduleResult(ActivitySchedule schedule, AfterSchoolLibrary.Models.Activity activity,
             Account currentAccount, UserType accountUserType, RegistrationPeriod activeRegistrationPeriod, bool currentUserIsActivityLeader,
-            List<ActivitySchedule> schedules, string isNew, string fullScreenUrl, SystemMessages msgs)
+            List<ActivitySchedule> schedules, string isNew, string fullScreenUrl, SystemMessages msgs, bool isSession = false)
         {
             if (schedule.IsEmpty())
                 schedule = activeRegistrationPeriod.IsEmpty()
@@ -42,6 +43,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 Schedule = schedule,
                 Messages = msgs,
                 Activity = activity,
+                IsSession = isSession,
             };
 
             return editScheduleResult;

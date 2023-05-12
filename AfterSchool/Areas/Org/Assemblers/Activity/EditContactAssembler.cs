@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using AfterSchool.Areas.Org.Controllers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -15,12 +15,13 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public bool IsActivityLeader { get; set; }
         public List<WebUser> Instructors { get; set; }
         public string ActiveMenu { get; set; }
+        public bool IsSession { get; set; }
     }
 
     public class EditContactAssembler
     {
         public EditContactResult AssembleEditContactResult(Account account, SystemMessages messages, AfterSchoolLibrary.Models.Activity activity, string isNew, string fullScreenExitUrl,
-            List<WebUser> instructors, UserType accountUserType, bool currentUserIsActivityLeader)
+            List<WebUser> instructors, UserType accountUserType, bool currentUserIsActivityLeader, bool isSession = false)
         {
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
             var isActivityLeader = EditHelpers.IsActivityLeader(account.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
@@ -34,6 +35,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 IsActivityLeader = isActivityLeader,
                 Instructors = instructors,
                 ActiveMenu = "EditContact",
+                IsSession = isSession,
             };
         }
     }
