@@ -107,6 +107,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         {
                             currentAccount.CheckIfSubscriberAccountHasPaymentMethod(null, amsgs, adc);
                             currentAccount.CheckIfSubscriberAccountSubscriptionChanged(startnewtrial.IsBoolean(), currentUser, amsgs, adc);
+                            SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage(amsgs, adc);
                         }
 
                         if (resyncpackagefeatures.IsBoolean())
