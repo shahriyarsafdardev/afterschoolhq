@@ -842,16 +842,14 @@ namespace AfterSchoolLibrary.Models
             var searchTerms = query.Split(' ').Where(term =>
                 term.IsNotBlank() &&
                 term.ToLower().NotIn(Utilities.FullTextSearchWordsToIgnore));
-
             if (searchTerms.Any())
             {
                 var dq = DatabaseQuery;
                 dq.Connection = dc;
-
                 var sql = $@"
                     select * from Account
                     where 
-                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') 
+                        {string.Join(" OR ", searchTerms.Select(w => $"Name LIKE '%{w}%'"))}
                         AND IsActive = 1 
                         AND IsDeleted = 0 
                         AND IsTest = 0 
