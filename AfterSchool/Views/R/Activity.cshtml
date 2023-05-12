@@ -313,7 +313,7 @@
             <button class="btn btn-default btn-activity-footer btn-share" type="button">Share</button>
             <a class="btn btn-default btn-activity-footer"
                href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
-                Edit @(Model.ActivityType.Equals(ActivityType.PermissionSlip) ? "Permission Slip" : "Activity")
+                Edit @(Model.ActivityType.ToString().SplitByUpperCase())
             </a>
         }
         else
