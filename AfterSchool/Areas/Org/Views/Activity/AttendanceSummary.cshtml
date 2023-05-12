@@ -135,30 +135,21 @@
                             <div data-toggle="counter" data-end="@Model.TotalEnrollment" data-decimals="0" data-suffix="" class="value">@Model.TotalEnrollment</div>
                             <div class="desc">Total Enrollment</div>
                         </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
-                        </div>
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.PercentAttended" data-decimals="1" data-suffix="" class="value">@Model.PercentAttended%</div>
+                            <div data-toggle="counter" data-end="@Model.PercentAttended" data-decimals="1" data-suffix="" class="value">@Model.PercentAttended.ToString("0.0")%</div>
                             <div class="desc">% Attended</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.AverageAttendedPerClass" data-decimals="1" data-suffix="" class="value">@Model.AverageAttendedPerClass</div>
+                            <div data-toggle="counter" data-end="@Model.AverageAttendedPerClass" data-decimals="1" data-suffix="" class="value">@Model.AverageAttendedPerClass.ToString("0.0")</div>
                             <div class="desc">Avg Attended / Class</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
                         </div>
                     </div>
                 </div>
@@ -168,19 +159,13 @@
                             <div data-toggle="counter" data-end="@Model.TotalActive" data-decimals="0" data-suffix="" class="value">@Model.TotalActive</div>
                             <div class="desc">Total Active</div>
                         </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
-                        </div>
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="widget widget-tile widget-bordered">
                         <div class="data-info">
-                            <div data-toggle="counter" data-end="@Model.PercentActive" data-decimals="1" data-suffix="" class="value">@Model.PercentActive%</div>
+                            <div data-toggle="counter" data-end="@Model.PercentActive" data-decimals="1" data-suffix="" class="value">@Model.PercentActive.ToString("0.0") %</div>
                             <div class="desc">Percent Active</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
                         </div>
                     </div>
                 </div>
@@ -214,10 +199,10 @@
                                 <td>@item.Applied</td>
                                 <td>@item.Withdrawn</td>
                                 <td>@item.NumberOfClasses</td>
-                                <td>@item.AvgAttendedPerClass</td>
-                                <td>@item.PercentAttended</td>
+                                <td>@item.AvgAttendedPerClass.ToString("0.0")</td>
+                                <td>@item.PercentAttended.ToString("0.0")</td>
                                 <td>@item.TotalActive</td>
-                                <td>@item.PercentActive</td>
+                                <td>@item.PercentActive.ToString("0.0")</td>
                             </tr>
                         }
                     </tbody>
