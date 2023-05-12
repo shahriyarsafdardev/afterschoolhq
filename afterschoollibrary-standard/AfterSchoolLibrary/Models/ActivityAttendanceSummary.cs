@@ -63,7 +63,6 @@ namespace AfterSchoolLibrary.Models
                 where 
                     accountid = {accountId} and
                     IsDeleted = 0 and
-                    IsArchived = 0 and
                     ActivityTypeId = {(int) ActivityType.Activity}
                     {activityString}
                 ) as A";
