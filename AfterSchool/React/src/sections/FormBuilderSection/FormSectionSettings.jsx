@@ -384,6 +384,7 @@ function FormSectionSettings() {
               </Typography>
               <TextField
                 className={classes.formControlClass}
+                size="small"
                 fullWidth
                 variant="outlined"
                 value={sectionName}

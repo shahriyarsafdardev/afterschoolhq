@@ -46,7 +46,7 @@ const RenderQuestion = ({
   const classes = useStyles();
   const [question, setQuestion] = useState(value);
   const [showAudience, setShowAudience] = useState(false);
-  const { dropdown, radioList, checkBoxList } = questionType;
+  const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { ID, Text, Options, QuestionTypeId, QuestionSettings, QuestionDataTypeId } = question;
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
@@ -148,6 +148,7 @@ const RenderQuestion = ({
             <Grid item lg={7} xs={12} sm={12} className={cs(classes.displayFlex)}>
               <TextField
                 className={classes.formControlClass}
+                size="small"
                 fullWidth
                 key={`${index}-${options.key}`}
                 placeholder="Option"
@@ -160,6 +161,7 @@ const RenderQuestion = ({
             <Grid item lg={5} xs={12} sm={12}>
               <TextField
                 className={classes.formControlClass}
+                size="small"
                 fullWidth
                 key={`${index}-${options.value}`}
                 placeholder="Value (Optional)"
@@ -270,6 +272,7 @@ const RenderQuestion = ({
     }, 1500);
     setTimeoutConst(tempTimeout);
   };
+  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
 
   return (
     <Box className={classes.question}>
@@ -285,12 +288,15 @@ const RenderQuestion = ({
             <TextField
               className={classes.formControlClass}
               fullWidth
+              size="small"
               variant="outlined"
               value={Text}
-              helperText={touched?.Text && errors?.Text ? errors?.Text : `${Text?.length}/400`}
+              helperText={
+                touched?.Text && errors?.Text ? errors?.Text : `${Text?.length}/${maxLimit}`
+              }
               error={touched?.Text && errors?.Text}
               inputProps={{
-                maxLength: 400
+                maxLength: maxLimit
               }}
               multiline
               onChange={event => {
