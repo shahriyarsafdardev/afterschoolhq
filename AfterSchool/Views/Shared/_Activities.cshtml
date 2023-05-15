@@ -274,9 +274,18 @@ else
                     {
                         if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                         {
-                            <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">
-                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                            </a>
+                            if (activity.GetStartingGradeLevel().Name == activity.GetEndingGradeLevel().Name)
+                            {
+                                <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">
+                                    @activity.GetStartingGradeLevel().Name
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">
+                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                </a>
+                            }
                         }
                         else
                         {
@@ -287,9 +296,19 @@ else
                     {
                         if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                         {
-                            <span>
-                                @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
-                            </span>
+                            if (activity.GetStartingGradeLevel().Name == activity.GetEndingGradeLevel().Name)
+                            {
+                                <span>
+                                    @activity.GetStartingGradeLevel().Name
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                </span>
+                            }
+
                         }
                         else
                         {
