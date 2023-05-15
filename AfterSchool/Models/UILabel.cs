@@ -60,6 +60,11 @@ namespace AfterSchool.Models
             return GetLabelConfigParam("RegistrationPeriod", plural);
         }
 
+        public static string EnrollmentPeriodLabel(bool plural = false)
+        {
+            return GetLabelConfigParam("EnrollmentPeriod", plural);
+        }
+
         public static string RegistrationPeriodAbbrLabel(bool plural = false)
         {
             return GetLabelConfigParam("RegistrationPeriodAbbr", plural);
