@@ -1,7 +1,7 @@
 import cs from 'classnames';
-import React, { useState } from 'react';
-import { isEqual, toInteger } from 'lodash';
+import { toInteger } from 'lodash';
 import CheckIcon from '@material-ui/icons/Check';
+import React, { useEffect, useState } from 'react';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
@@ -12,8 +12,8 @@ import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined'
 
 import {
   FormControlLabel,
-  useMediaQuery,
   FormHelperText,
+  useMediaQuery,
   Typography,
   makeStyles,
   TextField,
@@ -56,15 +56,30 @@ const RenderQuestion = ({
     value: key
   }));
 
-  const genOptions = Options?.split(',').map(option => {
-    const [key, value] = option.split('|');
-    return { key, value };
-  });
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    setInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    if (initialized) {
+      updateValue();
+    }
+  }, [question]);
+
+  const genOptions = Options;
 
   const [options, setOptions] = useState(genOptions || []);
   const customQuestion = QuestionDataTypeId === 0;
 
-  function renderOptions() {
+  function renderOptions(showOptions) {
+    useEffect(() => {
+      if (initialized) {
+        handleSubmit();
+      }
+    }, [options]);
+
     const radioListIcon = radioList === QuestionTypeId;
     const checkboxListIcon = checkBoxList === QuestionTypeId;
 
@@ -92,19 +107,7 @@ const RenderQuestion = ({
     };
 
     const handleSubmit = () => {
-      const optionsString = options
-        .map(option => {
-          if (option.value) {
-            return `${option.key}|${option.value}`;
-          } else {
-            return option.key;
-          }
-        })
-        .join(',');
-
-      if (!isEqual(Options, optionsString)) {
-        setQuestion({ ...question, Options: optionsString });
-      }
+      setQuestion({ ...question, Options: options });
     };
 
     const onDragEnd = result => {
@@ -117,7 +120,7 @@ const RenderQuestion = ({
       setOptions(temp);
     };
 
-    const renderOption = ({ option, index, dragHandleProps }) => {
+    const renderOption = ({ option, index, dragHandleProps, errors, touched }) => {
       return (
         <Grid container className={classes.deleteIcon} key={`value-${index}`}>
           <Grid
@@ -150,6 +153,8 @@ const RenderQuestion = ({
                 placeholder="Option"
                 value={option?.key || ''}
                 onChange={event => handleKeyChange(index, event)}
+                helperText={touched?.key && errors?.key ? errors?.key : ''}
+                error={touched?.key && errors?.key}
               />
             </Grid>
             <Grid item lg={5} xs={12} sm={12}>
@@ -186,78 +191,88 @@ const RenderQuestion = ({
     };
 
     return (
-      <Grid container>
-        <Grid lg={1}></Grid>
-        <Grid lg={11}>
-          <Box
-            className={cs(classes.flexDirectionCol)}
-            onTouchEnd={handleSubmit}
-            onMouseLeave={handleSubmit}
-            style={{ display: 'flex', padding: '8px 12px' }}
-          >
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable key="list" droppableId="droppable-options-container" type="column">
-                {provided => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {options.map(({ key, value }, index) => (
-                      <Draggable
-                        draggableId={`question-${ID}-option-${index}`}
-                        index={toInteger(index)}
-                        key={index}
-                      >
-                        {(provided, snapshot) => (
-                          <Box
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={
-                              snapshot.isDragging ? classes.whiteBorder : classes.transparentBorder
-                            }
-                          >
-                            {renderOption({
-                              option: { key, value },
-                              index,
-                              dragHandleProps: { ...provided.dragHandleProps }
-                            })}
-                          </Box>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-            {touched?.Options && errors?.Options && (
-              <FormHelperText className={classes.maxWidth} error>
-                {errors?.Options}
-              </FormHelperText>
-            )}
-            <Typography
-              style={{ cursor: 'pointer', textDecoration: 'underline', padding: '12px 0px' }}
-              onClick={() => {
-                handleAddNewOption();
-              }}
+      showOptions && (
+        <Grid container>
+          <Grid lg={1}></Grid>
+          <Grid lg={11}>
+            <Box
+              className={cs(classes.flexDirectionCol)}
+              style={{ display: 'flex', padding: '8px 12px' }}
             >
-              Add new option
-            </Typography>
-          </Box>
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable key="list" droppableId="droppable-options-container" type="column">
+                  {provided => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      {options.map(({ key, value }, index) => (
+                        <Draggable
+                          draggableId={`question-${ID}-option-${index}`}
+                          index={toInteger(index)}
+                          key={index}
+                        >
+                          {(provided, snapshot) => (
+                            <Box
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className={
+                                snapshot.isDragging
+                                  ? classes.whiteBorder
+                                  : classes.transparentBorder
+                              }
+                            >
+                              {renderOption({
+                                option: { key, value },
+                                index,
+                                dragHandleProps: { ...provided.dragHandleProps },
+                                errors: errors?.Options[index],
+                                touched: touched?.Options[index]
+                              })}
+                            </Box>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+              {touched?.Options && errors?.Options && typeof errors?.Options === 'string' && (
+                <FormHelperText className={classes.maxWidth} error>
+                  {errors?.Options}
+                </FormHelperText>
+              )}
+              <Typography
+                style={{
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  padding: '12px 0px',
+                  width: 'fit-content'
+                }}
+                onClick={() => {
+                  handleAddNewOption();
+                }}
+              >
+                Add new option
+              </Typography>
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
+      )
     );
   }
+  const [timeoutConst, setTimeoutConst] = useState(null);
 
-  const mouseLeaveHandler = () => {
-    if (!isEqual(question, value)) {
-      setFieldValue(index, question);
+  const updateValue = () => {
+    if (timeoutConst) {
+      clearTimeout(timeoutConst);
     }
+    const tempTimeout = setTimeout(() => {
+      setFieldValue(index, question);
+    }, 1500);
+    setTimeoutConst(tempTimeout);
   };
 
   return (
-    <Box
-      className={classes.question}
-      onTouchEnd={mouseLeaveHandler}
-      onMouseLeave={mouseLeaveHandler}
-    >
+    <Box className={classes.question}>
       <Grid container className={cs(classes.questionFieldsWrapper)}>
         <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
           <Grid item lg={1} sm={1} xs={1} className={cs(classes.displayFlex)}>
@@ -272,7 +287,7 @@ const RenderQuestion = ({
               fullWidth
               variant="outlined"
               value={Text}
-              helperText={errors?.Text ? errors?.Text : `${Text?.length}/400`}
+              helperText={touched?.Text && errors?.Text ? errors?.Text : `${Text?.length}/400`}
               error={touched?.Text && errors?.Text}
               inputProps={{
                 maxLength: 400
@@ -339,7 +354,7 @@ const RenderQuestion = ({
             {/* </Box> */}
           </Grid>
         </Grid>
-        {showOptions && renderOptions()}
+        {renderOptions(showOptions)}
       </Grid>
       <Grid container className={classes.questionIconsWrapper}>
         <Box>

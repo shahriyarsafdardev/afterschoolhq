@@ -103,6 +103,7 @@ export const useFormBuilderActions = () => {
     await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
       dispatch(setMsgs(msgs));
       if (!msgs.length) {
+        dispatch(setSectionData(values));
         dispatch(updateQuestionsGroups(FormQuestionGroups));
         dispatch(formDataLoaded());
       }

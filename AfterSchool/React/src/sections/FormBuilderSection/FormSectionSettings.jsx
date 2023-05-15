@@ -23,18 +23,19 @@ function FormSectionSettings() {
     Student: false,
     Adult: false
   };
-
+  const [initialValues, setInitialValues] = useState({});
+  const [validationSchema, setValidationSchema] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
 
   const {
-    loadSectionData,
     submitFormSectionData,
+    loadSectionData,
     questionsGroups,
-    questions,
-    updateSectionName,
-    sectionLoading
+    sectionLoading,
+    questions
   } = useFormBuilder();
+
   const currentSectionIndex = questionsGroups.findIndex(qg => qg.ID == questionGroup);
   const currentSection = questionsGroups[currentSectionIndex];
   const [sectionName, setSectionName] = useState(currentSection?.Name || '');
@@ -47,59 +48,47 @@ function FormSectionSettings() {
     setSectionName(currentSection?.Name || '');
   }, [currentSection?.Name]);
 
-  const updateSectionNameHandler = async () => {
-    const updatedQuestionsGroups = [...questionsGroups];
-    updatedQuestionsGroups[currentSectionIndex] = {
-      ...updatedQuestionsGroups[currentSectionIndex],
-      Name: sectionName
-    };
-    await updateSectionName(updatedQuestionsGroups);
-  };
+  useEffect(() => {
+    const tempInitialValues = {};
 
-  const initialValues = {};
-  questions.map(question => (initialValues[question.DisplayOrder] = question));
-  const { dropdown, radioList, checkBoxList } = questionType;
-
-  const validationSchema = Yup.object().shape(
-    Object.keys(initialValues).reduce((acc, key) => {
-      acc[key] = Yup.object().shape({
-        QuestionTypeId: Yup.number(),
-        DisplayOrder: Yup.number(),
-        Text: Yup.string()
-          .required('Text is required')
-          .max(400, 'Text cannot be longer than 400 characters'),
-        Options: Yup.string().when(['QuestionTypeId'], {
-          is: val => [dropdown, radioList, checkBoxList].includes(val),
-          then: () =>
-            Yup.string()
-              .required('Options are required')
-              .test(
-                'len',
-                'Options should have two or more values',
-                val => val.split(',').length >= 2
-              )
-              .test(
-                'emptyOptionValue',
-                'Option value cannot be empty',
-                val => val && val.split(',').every(option => option.split('|')[0].trim() !== '')
-              ),
-          otherwise: () => Yup.string().notRequired()
-        })
+    questions.forEach(question => {
+      let tempQuestion = { ...question };
+      tempQuestion.Options = tempQuestion.Options?.split(',').map(option => {
+        const [key, value] = option.split('|');
+        return { key, value };
       });
-      return acc;
-    }, {})
-  );
+      tempInitialValues[tempQuestion.DisplayOrder] = tempQuestion;
+    });
+    setInitialValues(tempInitialValues);
+  }, [questions?.length]);
+
+  const { dropdown, radioList, checkBoxList } = questionType;
+  const isQuestionWithOptions = questionTypeId =>
+    [dropdown, radioList, checkBoxList].includes(questionTypeId);
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialValues,
     validationSchema,
-    // validate: values => {
-    //   console.log(values, 'validate successfully');
-    //   return {};
-    // },
-    onSubmit: async (values, ...props) => {
-      const formQuestions = Object.keys(values).map(key => values[key]);
+    onSubmit: async values => {
+      const formQuestions = Object.keys(values).map(key => {
+        const updatedValue = { ...values[key] };
+        const shouldHaveOptions = isQuestionWithOptions(updatedValue.QuestionTypeId);
+
+        if (shouldHaveOptions) {
+          const optionsString =
+            updatedValue.Options?.map(option => {
+              if (option.value) {
+                return `${option.key}|${option.value}`;
+              } else {
+                return option.key;
+              }
+            }).join(',') || '';
+          updatedValue.Options = optionsString;
+        }
+        return updatedValue;
+      });
+
       const updatedQuestionGroups = [...questionsGroups];
 
       if (currentSection?.Name !== sectionName) {
@@ -112,14 +101,51 @@ function FormSectionSettings() {
         FormQuestion: formQuestions,
         FormQuestionGroups: updatedQuestionGroups
       });
-      console.log(values, props, 'submitted successfully');
+      console.log(values, formQuestions, 'submitted successfully');
     }
   });
+
   const { handleSubmit, values, setFieldValue, setValues, errors, touched } = formik;
+
+  useEffect(() => {
+    setValidationSchema(
+      Yup.object().shape(
+        Object.keys(values).reduce((acc, key) => {
+          acc[key] = Yup.object().shape({
+            QuestionTypeId: Yup.number(),
+            DisplayOrder: Yup.number(),
+            Text: Yup.string()
+              .required('Text is required')
+              .max(400, 'Text cannot be longer than 400 characters'),
+            Options: Yup.array().when(['QuestionTypeId'], {
+              is: val => isQuestionWithOptions(val),
+              then: () =>
+                Yup.array()
+                  .required('Options are required')
+                  .of(
+                    Yup.object().shape({
+                      key: Yup.string().required('Option key is required'),
+                      value: Yup.string()
+                    })
+                  )
+                  .test(
+                    'options-length',
+                    'Atleast 2 options are required',
+                    options => options.length >= 2
+                  ),
+              otherwise: () => Yup.array().notRequired()
+            })
+          });
+          return acc;
+        }, {})
+      )
+    );
+  }, [values && Object.keys(values).length]);
 
   const addNewQuestionHandler = index => {
     const newDisplayOrder =
-      toInteger(index || values[Object.keys(values).at(-1)]?.DisplayOrder || -1) + 1;
+      toInteger(index || values[Object.keys(values).at(-1)]?.DisplayOrder) + 1;
+
     const newQuest = {
       ...newQuestion,
       GroupTitle: sectionName,
@@ -222,6 +248,7 @@ function FormSectionSettings() {
   const [reRender, setReRender] = useState(false);
   const [showFor, setShowFor] = useState(initialState);
   const [requiredFor, setRequiredFor] = useState(initialState);
+
   const handleSettingForAll = (propertyName, registrantType) => {
     const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
     const updatedQuestionSettings = settings => {
@@ -377,7 +404,7 @@ function FormSectionSettings() {
                       {provided => (
                         <div ref={provided.innerRef} {...provided.droppableProps}>
                           {Object.keys(values).map(
-                            (key, index) =>
+                            key =>
                               !values[key].IsDeleted && (
                                 <Draggable
                                   draggableId={`question-${key}`}
@@ -428,7 +455,6 @@ function FormSectionSettings() {
                     fontWeight: 'bold',
                     border: '1px solid #E4E4E4'
                   }}
-                  //   type="submit"
                   disabled={false}
                   onClick={event => {
                     event.preventDefault();
@@ -441,7 +467,6 @@ function FormSectionSettings() {
                 <Button
                   color="primary"
                   variant="outlined"
-                  //   className={classes.backButton}
                   style={{
                     color: '#494949',
                     fontSize: '14px',

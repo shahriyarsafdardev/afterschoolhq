@@ -12,27 +12,33 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
 
   const RenderAudienceRow = ({ audience: { Audience, Show, Required } }) => {
     const clickHandler = propertyName => {
-      const updatedSettings = questionSettings.map(setting => {
-        if (setting.Audience !== Audience) {
-          return setting;
-        }
+      let updatedSettings = {};
 
-        let updatedSetting = { ...setting };
-        switch (propertyName) {
-          case 'show':
-            updatedSetting.Show = !setting.Show;
-            updatedSetting.Required = setting.Show ? false : setting.Required;
-            break;
-          case 'required':
-            updatedSetting.Required = !setting.Required;
-            updatedSetting.Show = !setting.Required ? true : setting.Show;
-            break;
-          default:
-            break;
-        }
+      if (Audience === 0) {
+        updatedSettings = {};
+      } else {
+        updatedSettings = questionSettings.map(setting => {
+          if (setting.Audience !== Audience) {
+            return setting;
+          }
 
-        return updatedSetting;
-      });
+          let updatedSetting = { ...setting };
+          switch (propertyName) {
+            case 'show':
+              updatedSetting.Show = !setting.Show;
+              updatedSetting.Required = setting.Show ? false : setting.Required;
+              break;
+            case 'required':
+              updatedSetting.Required = !setting.Required;
+              updatedSetting.Show = !setting.Required ? true : setting.Show;
+              break;
+            default:
+              break;
+          }
+
+          return updatedSetting;
+        });
+      }
 
       setFieldValue(updatedSettings);
     };
