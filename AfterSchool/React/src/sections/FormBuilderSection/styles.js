@@ -101,8 +101,8 @@ export default makeStyles(theme => ({
     // backgroundImage: 'none',
     // borderRadius: '0',
     '& .MuiOutlinedInput-root': {
-      width: '100%',
-      height: '40px'
+      width: '100%'
+      //   height: '40px'
     }
   },
   sectionsListHeading: {
