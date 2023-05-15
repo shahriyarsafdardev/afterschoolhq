@@ -5,7 +5,7 @@ export default makeStyles(() => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100%',
+    height: '100vh',
     width: '100%',
     margin: 'auto'
   }
