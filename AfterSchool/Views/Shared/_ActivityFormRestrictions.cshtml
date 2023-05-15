@@ -94,7 +94,7 @@
                                 {"onclick", "showParentConsent();"},
                                 {"required", false},
 
-                            });
+                    });
                     }
                     <i id="parentConsentWarning" class="s7-attention icon-large text-warning margin-l-10 position-relative" data-toggle="popover" data-trigger="hover" data-content="If you allow minors to register, they can actually register without parental knowledge." data-placement="top"></i>
                 </div>
@@ -114,7 +114,7 @@
                                 {"checkboxid", "requiresparentalconsent"},
                                 {"onclick", "showConsentWarning();"},
                                 {"disabled", false}
-            });
+    });
                     }
                 </div>
             </div>
@@ -129,17 +129,16 @@
 
 <script>
     function showConsentWarning() {
-        if (@allAgeRegistrationEnabled.ToString().ToLower()) {
-            var isStudentAllowed = $("#isStudentAllowed").is(":checked");
-            var isParentConsent = $("#requiresparentalconsent").is(":checked");
-            if (isStudentAllowed && !isParentConsent) {
-                $('#parentConsentWarning').removeClass("hidden");
-            } else {
-                $('#parentConsentWarning').addClass("hidden");
-            }
+        var isStudentAllowed = $("#isStudentAllowed").is(":checked");
+        var isParentConsent = $("#requiresparentalconsent").is(":checked");
+
+        if (isStudentAllowed && !isParentConsent) {
+            $('#parentConsentWarning').removeClass("hidden");
+        } else {
+            $('#parentConsentWarning').addClass("hidden");
         }
     }
-    
+
     function showParentConsent() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         if (isStudentAllowed) {
@@ -148,9 +147,9 @@
         else {
             $('#parentConsent').addClass("hidden");
         }
-        $("#requiresparentalconsent").prop('checked', false);
+        $("#requiresparentalconsent").prop('checked', @(Model.RequiresParentalConsent.IsEmpty() ? "false" : (Model.RequiresParentalConsent? "true" : "false")));
         showConsentWarning();
-       
+
     }
 
     function showStrictGender() {
@@ -193,12 +192,10 @@
         });
     }
     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        showConsentWarning();
         showParentConsent();
         showStrictGender();
-        if (@allAgeRegistrationEnabled.ToString().ToLower()) {
-            handleAllAgeAdultCheck();
-            showConsentWarning();
-        }
-    });
+        handleAllAgeAdultCheck();
 
+    });
 </script>
