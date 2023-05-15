@@ -147,7 +147,7 @@
         else {
             $('#parentConsent').addClass("hidden");
         }
-        $("#requiresparentalconsent").prop('checked', @(Model.RequiresParentalConsent.IsEmpty() ? "false" : (Model.RequiresParentalConsent? "true" : "false")));
+        $("#requiresparentalconsent").prop('checked', false);
         showConsentWarning();
 
     }
@@ -192,10 +192,10 @@
         });
     }
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        showConsentWarning();
         showParentConsent();
         showStrictGender();
         handleAllAgeAdultCheck();
-
+        $("#requiresparentalconsent").prop('checked', @(Model.RequiresParentalConsent.IsEmpty() ? "false" : (Model.RequiresParentalConsent? "true" : "false")));
+        showConsentWarning();
     });
 </script>
