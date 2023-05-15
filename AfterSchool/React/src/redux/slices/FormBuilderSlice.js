@@ -99,13 +99,20 @@ export const useFormBuilderActions = () => {
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
-    dispatch(loadingFormData());
     await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
       dispatch(setMsgs(msgs));
       if (!msgs.length) {
         dispatch(setSectionData(values));
         dispatch(updateQuestionsGroups(FormQuestionGroups));
-        dispatch(formDataLoaded());
+      }
+    });
+  };
+
+  const deleteSectionData = async ({ FormQuestionGroups, ...values }) => {
+    await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) {
+        dispatch(updateQuestionsGroups(FormQuestionGroups));
       }
     });
   };
@@ -142,6 +149,7 @@ export const useFormBuilderActions = () => {
   return {
     loadFormData,
     loadSectionData,
+    deleteSectionData,
     updateFormSettings,
     setCurrentSectionName,
     submitFormSectionData,
