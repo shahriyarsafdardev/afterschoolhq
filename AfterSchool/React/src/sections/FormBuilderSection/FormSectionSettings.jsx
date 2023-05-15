@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
@@ -23,7 +24,9 @@ function FormSectionSettings() {
     Student: false,
     Adult: false
   };
+  const { enqueueSnackbar } = useSnackbar();
   const [initialValues, setInitialValues] = useState({});
+  const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
@@ -33,7 +36,8 @@ function FormSectionSettings() {
     loadSectionData,
     questionsGroups,
     sectionLoading,
-    questions
+    questions,
+    msgs
   } = useFormBuilder();
 
   const currentSectionIndex = questionsGroups.findIndex(qg => qg.ID == questionGroup);
@@ -100,6 +104,8 @@ function FormSectionSettings() {
         FormQuestionGroup: { ...currentSection, Name: sectionName },
         FormQuestion: formQuestions,
         FormQuestionGroups: updatedQuestionGroups
+      }).then(() => {
+        if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
       });
       console.log(values, formQuestions, 'submitted successfully');
     }
@@ -278,6 +284,10 @@ function FormSectionSettings() {
     const newValues = { ...values };
 
     Object.keys(newValues).forEach(key => {
+      if (newValues[key].IsLocked) {
+        return;
+      }
+
       newValues[key] = {
         ...newValues[key],
         QuestionSettings: updatedQuestionSettings(newValues[key].QuestionSettings)
@@ -370,6 +380,27 @@ function FormSectionSettings() {
       </Box>
     );
   };
+  const [timeoutConst, setTimeoutConst] = useState(null);
+
+  const updateValue = value => {
+    setSectionName(value);
+
+    if (timeoutConst) {
+      clearTimeout(timeoutConst);
+    }
+    const tempTimeout = setTimeout(() => {
+      sectionNameChangeHandler(value);
+    }, 1500);
+    setTimeoutConst(tempTimeout);
+  };
+
+  const sectionNameChangeHandler = value => {
+    const isNameUnique = questionsGroups.every(({ Name: name }) => name !== value);
+
+    if (value.length === 0) setSectionNameError('Section Name cannot be empty');
+    else if (!isNameUnique) setSectionNameError('Section Name must be unique');
+    else setSectionNameError('');
+  };
 
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
@@ -388,8 +419,10 @@ function FormSectionSettings() {
                 fullWidth
                 variant="outlined"
                 value={sectionName}
-                onChange={event => setSectionName(event.target.value)}
+                onChange={event => updateValue(event.target.value)}
                 disabled={currentSection.QuestionGroupDataTypeId !== 0}
+                helperText={sectionNameError}
+                error={sectionNameError}
               />
             </Box>
             <Box>
@@ -475,7 +508,7 @@ function FormSectionSettings() {
                     border: '1px solid #E4E4E4'
                   }}
                   type="submit"
-                  disabled={false}
+                  disabled={sectionNameError}
                   onClick={event => {
                     event.preventDefault();
                     handleSubmit();

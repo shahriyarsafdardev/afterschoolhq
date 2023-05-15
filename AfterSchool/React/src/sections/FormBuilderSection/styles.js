@@ -258,5 +258,8 @@ export default makeStyles(theme => ({
       alignItems: 'baseline',
       flexDirection: 'column'
     }
+  },
+  newSectionName: {
+    padding: '8px 0px'
   }
 }));

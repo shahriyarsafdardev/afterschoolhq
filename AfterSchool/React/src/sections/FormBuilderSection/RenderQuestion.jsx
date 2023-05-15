@@ -48,7 +48,15 @@ const RenderQuestion = ({
   const [showAudience, setShowAudience] = useState(false);
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { ID, Text, Options, QuestionTypeId, QuestionSettings, QuestionDataTypeId } = question;
+  const {
+    ID,
+    Text,
+    Options,
+    IsLocked,
+    QuestionTypeId,
+    QuestionSettings,
+    QuestionDataTypeId
+  } = question;
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
   const questionTypesOptions = Object.keys(questionType).map(key => ({
@@ -156,6 +164,7 @@ const RenderQuestion = ({
                 onChange={event => handleKeyChange(index, event)}
                 helperText={touched?.key && errors?.key ? errors?.key : ''}
                 error={touched?.key && errors?.key}
+                disabled={!customQuestion || IsLocked}
               />
             </Grid>
             <Grid item lg={5} xs={12} sm={12}>
@@ -167,6 +176,7 @@ const RenderQuestion = ({
                 placeholder="Value (Optional)"
                 value={option?.value || ''}
                 onChange={event => handleValueChange(index, event)}
+                disabled={!customQuestion || IsLocked}
               />
             </Grid>
           </Grid>
@@ -175,7 +185,7 @@ const RenderQuestion = ({
             lg={1}
             xs={1}
             sm={1}
-            className={cs(classes.deleteIconHidden, 'delete-icon-visible')}
+            className={cs(classes.deleteIconHidden, customQuestion ? 'delete-icon-visible' : '')}
           >
             <DeleteOutlineOutlinedIcon
               style={{
@@ -302,14 +312,14 @@ const RenderQuestion = ({
               onChange={event => {
                 setQuestion({ ...question, Text: event.target.value });
               }}
-              disabled={!customQuestion}
+              disabled={!customQuestion || IsLocked}
             />
           </Grid>
           <Grid item lg={3} sm={3} xs={6}>
             <DropDown
               question={{ ...question, ...{ options: questionTypesOptions } }}
               setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
-              disabled={!customQuestion}
+              disabled={!customQuestion || IsLocked}
             />
           </Grid>
           <Grid lg={1}></Grid>
@@ -326,6 +336,7 @@ const RenderQuestion = ({
                 variant="outlined"
                 className={classes.audienceButton}
                 onClick={() => setShowAudience(!showAudience)}
+                disabled={IsLocked}
               >
                 Audience
                 <ArrowDropDownOutlinedIcon
@@ -401,6 +412,7 @@ const RenderQuestion = ({
           <HideCheckBox
             setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
             question={question}
+            disabled={IsLocked}
           />
         </Box>
       </Grid>
@@ -408,8 +420,10 @@ const RenderQuestion = ({
   );
 };
 
-const HideCheckBox = ({ question, setFieldValue }) => {
+const HideCheckBox = ({ question, setFieldValue, disabled }) => {
   const { Text: title, QuestionDataTypeId, IsActive: value } = question;
+  const unCheckedDisabled = value && disabled;
+  const checkboxDisabled = unCheckedDisabled ? { color: '#ffffff !important' } : {};
 
   const classes = makeStyles(() => ({
     checkboxWrapper: {
@@ -421,12 +435,17 @@ const HideCheckBox = ({ question, setFieldValue }) => {
         marginLeft: 18
       }
     },
+    formControlLabelDisabled: {
+      opacity: '0.5',
+      color: 'black !important'
+    },
     checked: {
       color: '#494949 !important',
       padding: 0,
       borderRadius: 3,
       background: 'transparent !important'
     },
+    checkboxDisabled,
     root: {
       padding: 0,
       background: '#ffffff',
@@ -445,13 +464,15 @@ const HideCheckBox = ({ question, setFieldValue }) => {
     <div className={classes.checkboxWrapper}>
       <FormControlLabel
         data-testid={`${title}-${QuestionDataTypeId}-form`}
+        disabled={disabled}
         control={
           <Checkbox
             data-testid={`${title}-${QuestionDataTypeId}-checkbox`}
             checked={!value}
             classes={{
               checked: classes.checked,
-              root: classes.root
+              root: classes.root,
+              disabled: classes.checkboxDisabled
             }}
             checkedIcon={
               <CheckIcon
@@ -466,7 +487,8 @@ const HideCheckBox = ({ question, setFieldValue }) => {
         }
         label={'Hide'}
         classes={{
-          root: classes.formControlLabelRoot
+          root: classes.formControlLabelRoot,
+          disabled: classes.formControlLabelDisabled
         }}
         onChange={() => {
           setFieldValue(!value);

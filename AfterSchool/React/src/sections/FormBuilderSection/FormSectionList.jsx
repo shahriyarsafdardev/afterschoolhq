@@ -1,8 +1,16 @@
+import cs from 'classnames';
 import React, { useState } from 'react';
-import CloseOutlinedIcon from '@material-ui/icons/CloseOutlined';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
-import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
-import { Grid, Typography, Button, useMediaQuery, useTheme } from '@material-ui/core';
+import { ArrowDropDownOutlined, Done, CloseOutlined } from '@material-ui/icons';
+import {
+  Grid,
+  Button,
+  useTheme,
+  TextField,
+  Typography,
+  useMediaQuery,
+  InputAdornment
+} from '@material-ui/core';
 
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
@@ -12,9 +20,12 @@ function FormSectionList() {
   const classes = useStyles();
   const { formId } = useParams();
   const navigate = useNavigate();
+  const [showNewSectionField, setShowNewSectionField] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
+  const [newSectionError, setNewSectionError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { questionsGroups, saveNewSectionData, submitFormSectionData } = useFormBuilder();
+  const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
     questionsGroup => questionsGroup.IsDeleted === false
@@ -30,7 +41,7 @@ function FormSectionList() {
     const updatedQuestionGroups = [...questionsGroups];
     updatedQuestionGroups[index] = { ...questionsGroups[index], IsDeleted: true };
 
-    await submitFormSectionData({
+    await deleteSectionData({
       FormSettings: { FormId: formId },
       FormQuestionGroup: { ...questionsGroups[index], IsDeleted: true },
       FormQuestion: null,
@@ -42,7 +53,7 @@ function FormSectionList() {
     await saveNewSectionData({
       FormQuestionGroup: {
         FormId: formId,
-        Name: 'New Section'
+        Name: newSectionName
       }
     });
   };
@@ -59,10 +70,29 @@ function FormSectionList() {
         onClick={toggleShowSettings}
       >
         Form Settings
-        <ArrowDropDownOutlinedIcon style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
+        <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
       </Button>
     );
   }
+
+  const cancelNewSectionHandler = () => {
+    setShowNewSectionField(false);
+    setNewSectionName('');
+    setNewSectionError('');
+  };
+
+  const addNewSection = async () => {
+    const isNameUnique = questionsGroupsToShow.every(({ Name: name }) => name !== newSectionName);
+
+    if (newSectionName.length === 0) setNewSectionError('Section Name cannot be empty');
+    else if (!isNameUnique) setNewSectionError('Section Name must be unique');
+    else {
+      setShowNewSectionField(false);
+      setNewSectionError('');
+      setNewSectionName('');
+      await addNewSectionHandler();
+    }
+  };
 
   return (
     <Grid item lg={2} md={2} xs={12} sm={6} className={classes.sectionListWrapper}>
@@ -99,7 +129,7 @@ function FormSectionList() {
           </Grid>
           <Grid lg={1}>
             {QuestionGroupDataTypeId === 0 && (
-              <CloseOutlinedIcon
+              <CloseOutlined
                 style={{ cursor: 'pointer' }}
                 onClick={async () => {
                   await handleDelete(key);
@@ -117,25 +147,51 @@ function FormSectionList() {
           </Grid>
         </Grid>
       ))}
-      <Button
-        color="primary"
-        variant="outlined"
-        style={{
-          color: '#494949',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          border: '1px solid #E4E4E4'
-        }}
-        type="submit"
-        disabled={false}
-        onClick={async event => {
-          event.preventDefault();
-          await addNewSectionHandler();
-        }}
-        data-testid={`Back-${'Name'}`}
-      >
-        + Add New Section
-      </Button>
+      {showNewSectionField ? (
+        <TextField
+          className={cs(classes.formControlClass, classes.newSectionName)}
+          size="small"
+          fullWidth
+          key="newSectionField"
+          placeholder="Section Name"
+          value={newSectionName}
+          onChange={event => setNewSectionName(event.target.value)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Done color="primary" style={{ cursor: 'pointer' }} onClick={addNewSection} />
+                <CloseOutlined
+                  color="error"
+                  style={{ cursor: 'pointer' }}
+                  onClick={cancelNewSectionHandler}
+                />
+              </InputAdornment>
+            )
+          }}
+          helperText={newSectionError}
+          error={newSectionError}
+        />
+      ) : (
+        <Button
+          color="primary"
+          variant="outlined"
+          style={{
+            color: '#494949',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            border: '1px solid #E4E4E4'
+          }}
+          type="submit"
+          disabled={false}
+          onClick={async event => {
+            event.preventDefault();
+            setShowNewSectionField(true);
+          }}
+          data-testid={`Back-${'Name'}`}
+        >
+          + Add New Section
+        </Button>
+      )}
     </Grid>
   );
 }

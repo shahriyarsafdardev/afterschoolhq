@@ -14,6 +14,7 @@ namespace AfterSchool.Areas.Api.Models
         public string GroupTitle { get; set; }
         public string Options { get; set; }
         public bool IsRequired { get; set; }
+        public bool IsLocked { get; set; }
         public int? DisplayOrder { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
@@ -32,6 +33,7 @@ namespace AfterSchool.Areas.Api.Models
             Question.DisplayOrder = this.DisplayOrder;
             Question.QuestionTypeId = this.QuestionTypeId;
             Question.IsDeleted = this.IsDeleted;
+            Question.IsLocked = this.IsLocked;
         }
 
         public void UpdateDefaultFields(FormQuestion Question)
@@ -59,6 +61,7 @@ namespace AfterSchool.Areas.Api.Models
                 QuestionDataTypeId = Question.QuestionDataTypeId,
                 FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
                 QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0),
+                IsLocked = Question.IsLocked,
             };
         }
 
