@@ -1,12 +1,13 @@
 import cs from 'classnames';
-import { toInteger } from 'lodash';
-import CheckIcon from '@material-ui/icons/Check';
 import { styled } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
-import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
-import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
+import {
+  CheckIcon,
+  DragIndicatorIcon,
+  RadioButtonUncheckedIcon,
+  CheckBoxOutlineBlankIcon,
+  ArrowDropDownOutlinedIcon
+} from '@material-ui/icons';
 
 import {
   FormControlLabel,
@@ -239,7 +240,7 @@ const RenderQuestion = ({
                       {options.map(({ key, value }, index) => (
                         <Draggable
                           draggableId={`question-${ID}-option-${index}`}
-                          index={toInteger(index)}
+                          index={Number(index)}
                           key={index}
                         >
                           {(provided, snapshot) => (
@@ -427,8 +428,7 @@ const RenderQuestion = ({
           <StyledImage
             src={CopyIcon}
             style={{
-              width: '30px',
-              cursor: 'pointer'
+              width: '30px'
             }}
             data-testid={`copyIconOfQuestion-${ID}-${index}`}
             onClick={() => handleCopy(index)}
@@ -436,8 +436,7 @@ const RenderQuestion = ({
           <StyledImage
             src={AddIcon}
             style={{
-              width: '25px',
-              cursor: 'pointer'
+              width: '25px'
             }}
             onClick={() => handleAddNewQuestion(index)}
             data-testid={`addQuestionBelowIcon-${ID}-${index}`}
@@ -463,7 +462,7 @@ const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
 
   const classes = makeStyles(() => ({
     checkboxWrapper: {
-      padding: '0px 12px'
+      padding: '0px 6px'
     },
     formControlLabelRoot: {
       margin: '10px 0px',
