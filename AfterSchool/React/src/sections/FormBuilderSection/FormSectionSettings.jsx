@@ -180,7 +180,7 @@ function FormSectionSettings() {
     setValues({ ...updatedValues });
   };
 
-  const handleDelete = key => {
+  const handleDelete = (key, removeFromList = false) => {
     const { [key]: deletedValue, ...restValues } = values;
     const newValues = {};
     Object.keys(restValues).forEach(k => {
@@ -188,8 +188,10 @@ function FormSectionSettings() {
       newValues[newRow] = { ...restValues[k], DisplayOrder: newRow };
     });
 
-    const newKey = Object.keys(newValues).length + 1;
-    newValues[newKey] = { ...deletedValue, IsDeleted: true, DisplayOrder: newKey };
+    if (!removeFromList) {
+      const newKey = Object.keys(newValues).length + 1;
+      newValues[newKey] = { ...deletedValue, IsDeleted: true, DisplayOrder: newKey };
+    }
 
     setValues({ ...newValues });
   };
