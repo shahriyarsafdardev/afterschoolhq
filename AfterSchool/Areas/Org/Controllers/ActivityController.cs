@@ -405,47 +405,7 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new { success = false, status = "error", data = msgs.ToList().Select(msg => new { msg.Text }) },
                 JsonRequestBehavior.AllowGet);
         }
-        
-        [HttpPost]
-        public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string participationObjectType)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var activityName = "";
-            var newRegistrationStatus = "";
-            if (currentAccount.IsEmpty())
-                return Json(new {success = false, status = "error", data = "Account not found."}, JsonRequestBehavior.AllowGet);
 
-            if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || participationObjectType.IsEmpty())
-                return Json(new {success = false, status = "error", data = "Registrant on this Activity not found."}, JsonRequestBehavior.AllowGet);
-
-            var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
-
-            if (registrant.IsNotEmpty())
-            {
-                (activityName,newRegistrationStatus) = registrant.ReEnrollCurrentRegistrant(
-                    participationObjectId: participationObjectId.ToInteger(),
-                    participationObjectType: (ParticipationObjectType) Enum.Parse(typeof(ParticipationObjectType), participationObjectType),
-                    loggedInUser: SessionVariables.CurrentUser,
-                    account: currentAccount,
-                    requirePayment: requirePayment,
-                    msgs: msgs);
-            }
-
-            if (msgs.HasNoErrors())
-            {
-                var successMessage = new SystemMessage($"{registrant.Name} has been re-enrolled in {activityName}. Their status will now be " +
-                                                       $"<b>{newRegistrationStatus.SplitByUpperCase()}</b>.", 
-                    MessageType.Success);
-                return Json(new {success = true, status = "ok", data = successMessage.Text}, JsonRequestBehavior.AllowGet);
-            }
-
-            // something went wrong, error occured
-            var dataString = msgs.ToList().Aggregate("", (current, msg) => current + (msg.Text + ". "));
-            return Json(new {success = false, status = "error", data = dataString},
-                JsonRequestBehavior.AllowGet);
-        }
-        
         [HttpPost]
         public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string paidCost, string costToPay, 
             string participationObjectType)
