@@ -58,8 +58,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, accountUserType, currentUserIsActivityLeader);
             var schedule = activity.GetSchedule(msgs);
             var totalPaid = activity.GetTotalAmountPaid(msgs);
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
             var result = new SummaryAssembler().AssembleSummaryResult(activity, participationObject, schedule, totalPaid, isActivityLeader,
-                accountUserType, currentAccount, accountPackage, currentUser, msgs);
+                accountUserType, currentAccount, accountPackage, currentUser, msgs, isSession);
             return result;
         }
 
@@ -1456,8 +1458,9 @@ namespace AfterSchool.Areas.Org.Controllers
                     case ActivityType.LearningPod:
                     case ActivityType.Activity:
                     case ActivityType.VolunteerOpportunity:
+                        var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
                         var editRestrictionsResult = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew,
-                            fullScreenExitUrl);
+                            fullScreenExitUrl, isSession);
 
                         return View("EditRestrictions", editRestrictionsResult);
 
@@ -1533,9 +1536,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var result = new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, Request[IsNewRequest] == "1",
-                fullScreenExitUrl);
+                fullScreenExitUrl, isSession);
             return View(result);
         }
 
@@ -1626,9 +1631,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var isNew = Request[IsNewRequest] == "1";
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
-
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
             var editRestrictionsResult =
-                new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew, fullScreenExitUrl);
+                new EditRestrictionsAssembler().AssembleEditRestrictionsResult(activity, msgs, currentAccount, isNew, fullScreenExitUrl, isSession);
 
             return View(editRestrictionsResult);
         }
@@ -1644,13 +1650,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
 
             var instructors = currentAccount.GetUsers(msgs: msgs);
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var accountUserType = SessionVariables.AccountUserType;
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var result = new EditContactAssembler().AssembleEditContactResult(currentAccount, msgs, activity, isNew, fullScreenExitUrl, instructors,
-                accountUserType, currentUserIsActivityLeader);
+                accountUserType, currentUserIsActivityLeader, isSession);
             return result;
         }
 
@@ -1725,6 +1733,13 @@ namespace AfterSchool.Areas.Org.Controllers
                         case ActivityType.VolunteerOpportunity:
                             var editLocationResult = GatherDataForAndAssembleEditLocationResult(id, Request[IsNewRequest], msgs);
                             return View("EditLocation", editLocationResult);
+                        case ActivityType.PermissionSlip:
+                            var accountUserType = SessionVariables.AccountUserType;
+                            var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
+                            var fullScreenExitUrl = GetFullScreenExitUrl(activity);
+                            var editConfirmationResult = new EditConfirmationAssembler().AssembleEditConfirmationResult(currentAccount, activity, accountUserType,
+                            currentUserIsActivityLeader, Request[IsNewRequest], fullScreenExitUrl, msgs);
+                            return View("EditConfirmation", editConfirmationResult);
                         default:
                             var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, Request[IsNewRequest]);
                             return View("EditCost", editCostResult);
@@ -1742,6 +1757,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
             var currentUser = SessionVariables.CurrentUser;
             var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
@@ -1749,7 +1766,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var isNew = Request[IsNewRequest] == "1";
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var result = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, isActivityLeader,
-                accountPackage, isNew);
+                accountPackage, isNew, isSession);
             return View(result);
         }
 
@@ -1815,8 +1832,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
             var result = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl, isActivityLeader,
-                accountPackage, isNew);
+                accountPackage, isNew, isSession);
             return View(result);
         }
 
@@ -1843,9 +1862,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
             var accountUserType = SessionVariables.AccountUserType;
             var fullScreenUrl = GetFullScreenExitUrl(activity);
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
 
             return new EditScheduleAssembler().AssembleEditScheduleResult(schedule, activity, currentAccount, accountUserType, activeRegistrationPeriod,
-                currentUserIsActivityLeader, schedules, isNew, fullScreenUrl, msgs);
+                currentUserIsActivityLeader, schedules, isNew, fullScreenUrl, msgs, isSession);
         }
 
         [HttpGet]
@@ -2010,8 +2031,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         case EditHelpers.EditDetails:
                             var isActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                                 currentUser.IsActivityLeader(activity, msgs));
+                            var activityGroup = activity.GetActivityGroup(msgs);
+                            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
                             var editDetailsResult = new EditDetailsAssembler().AssembleEditDetailsResult(currentAccount, msgs, activity, fullScreenExitUrl,
-                                isActivityLeader, currentAccountPackage, isNew);
+                                isActivityLeader, currentAccountPackage, isNew, isSession);
                             return View("EditDetails", editDetailsResult);
                         case EditHelpers.EditContact:
                             var editContactResult = GatherDataForAndAssembleEditContactResult(id, currentUser, currentAccount, Request[IsNewRequest]);
@@ -2035,6 +2058,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var currentUser = SessionVariables.CurrentUser;
+            var activityGroup = activity.GetActivityGroup(msgs);
+            var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
 
             var accountUserType = SessionVariables.AccountUserType;
             var currentUserIsActivityLeader = currentUser.IsActivityLeader(activity, msgs);
@@ -2042,7 +2067,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
             var location = activity.GetLocation() ?? activity.GetAccount().GetAccountProfile()?.GetLocation();
             return new EditLocationAssembler().AssembleEditLocationResult(currentAccount, activity, msgs, isNew, accountUserType,
-                currentUserIsActivityLeader, fullScreenExitUrl, location, accountPackage, currentUser);
+                currentUserIsActivityLeader, fullScreenExitUrl, location, accountPackage, currentUser, isSession);
         }
 
         [ValidateInput(false)]
@@ -2121,9 +2146,21 @@ namespace AfterSchool.Areas.Org.Controllers
             var isNew = Request[IsNewRequest];
             if (msgs.HasNoErrors() && cmd == "next")
             {
+                var activityGroup = activity.GetActivityGroup(msgs);
+                var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
                 switch (EditHelpers.GetNextScreenForActivityType(activity.ActivityTypeId, EditHelpers.EditLocation))
                 {
                     case EditHelpers.EditCost:
+                        if (isSession)
+                        {
+                            ViewBag.Account = currentAccount;
+                            ViewBag.AccountPackage = SessionVariables.AccountPackage;
+                            ViewBag.IsFullScreen = EditHelpers.GetIsFullScreen(activity, isNew == "1");
+                            ViewBag.FullScreenExitUrl = GetFullScreenExitUrl(activity);
+                            ViewBag.Messages = msgs;
+                            return RedirectToAction("publish", "activity",
+                                new { id = activity.Uid, isnew = isNew, source = Request["source"] });
+                        }
                         var editCostResult = GatherDataForAndAssembleEditCostResult(activity, msgs, currentAccount, currentUser, isNew);
                         return View("EditCost", editCostResult);
 

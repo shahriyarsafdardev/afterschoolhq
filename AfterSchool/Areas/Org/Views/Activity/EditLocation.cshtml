@@ -1,7 +1,8 @@
-﻿@using AfterSchool.Helpers
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditLocationResult
 @{
     var account = Model.Account;
+    var isSession = Model.IsSession;
     ViewBag.Title = account.Name;
     var msgs = Model.Messages;
     var isFullScreen = Model.IsFullScreen;
@@ -78,6 +79,7 @@
                        new ViewDataDictionary
                        {
                            {"ActiveMenu", "EditLocation"},
+                           {"IsSession", isSession },
                        }); }
             </div>
 

@@ -1,7 +1,8 @@
-﻿@model AfterSchool.Areas.Org.Assemblers.Activity.EditDetailsResult
+@model AfterSchool.Areas.Org.Assemblers.Activity.EditDetailsResult
 @{
     ViewBag.Title = Model.Account.Name;
     var msgs = Model.Messages;
+    var isSession = Model.IsSession;
     var isFullScreen = (Request["isnew"] == "1" && !Model.Activity.IsPublished) || Model.IsFullScreen;
     if (isFullScreen)
     {
@@ -79,10 +80,11 @@
 
             <div class="col-md-2 col-lg-3">
                 @{Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity,
-                      new ViewDataDictionary
-                      {
-                          {"ActiveMenu", Model.ActiveMenu }
-                      }); }
+                        new ViewDataDictionary
+                        {
+                          {"ActiveMenu", Model.ActiveMenu },
+                          {"IsSession", isSession },
+                        }); }
             </div>
 
         </div>

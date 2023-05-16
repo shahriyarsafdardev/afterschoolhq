@@ -38,7 +38,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 case ActivityType.FieldTrip:
                     return new[] {EditSetup, EditSchedule, EditDetails, EditContact, EditCost};
                 case ActivityType.PermissionSlip:
-                    return new[] {EditSetup, EditDetails, EditContact, EditCost};
+                    return new[] {EditSetup, EditDetails, EditContact};
                 case ActivityType.LearningPod:
                     return new[] {EditSetup, EditRestrictions, EditSchedule, EditDetails, EditContact, EditLocation, EditCost};
                 case ActivityType.VolunteerOpportunity:
