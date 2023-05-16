@@ -12,7 +12,7 @@ import {
 import useStyles from './styles';
 
 const Dialog = props => {
-  const { onClose, onSubmit, open, title, text } = props;
+  const { onClose, onSubmit, open, title, text, dataTestId } = props;
   const classes = useStyles();
 
   return (
@@ -30,6 +30,7 @@ const Dialog = props => {
           variant="outlined"
           color="primary"
           className={classes.dialogButton}
+          data-testid={`modalCancelButton-${dataTestId}`}
         >
           {'No'}
         </Button>
@@ -37,6 +38,7 @@ const Dialog = props => {
           onClick={onSubmit}
           variant="outlined"
           className={cs(classes.warningButton, classes.dialogButton)}
+          data-testid={`modalSubmitButton-${dataTestId}`}
         >
           {'Yes'}
         </Button>

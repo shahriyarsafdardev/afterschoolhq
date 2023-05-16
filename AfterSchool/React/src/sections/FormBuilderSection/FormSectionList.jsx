@@ -90,6 +90,7 @@ function FormSectionList() {
         variant="outlined"
         className={classes.formSettingsButton}
         onClick={toggleShowSettings}
+        data-testid={'formSettingsButton'}
       >
         Form Settings
         <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
@@ -132,6 +133,7 @@ function FormSectionList() {
           setSearchParams(`qg=${firstSectionId}`);
           toggleShowSettings();
         }}
+        data-testid={'formSections'}
       >
         Sections
       </Typography>
@@ -145,6 +147,7 @@ function FormSectionList() {
                 setSearchParams(`qg=${key}`);
                 toggleShowSettings();
               }}
+              data-testid={`formSection-${Name}`}
             >
               {Name}
             </Typography>
@@ -152,6 +155,7 @@ function FormSectionList() {
           <Grid lg={1}>
             {QuestionGroupDataTypeId === 0 && (
               <CloseOutlined
+                data-testid={`deleteFormSectionIcon-${Name}`}
                 style={{ cursor: 'pointer' }}
                 onClick={() => {
                   setIsOpen(true);
@@ -168,10 +172,12 @@ function FormSectionList() {
         title={'Delete Section'}
         text={'Do you want to delete this section? This action is irreversible.'}
         onSubmit={handleDeleteSection}
+        dataTestId={'deleteSection'}
       />
       {showNewSectionField ? (
         <TextField
           className={cs(classes.formControlClass, classes.newSectionName)}
+          data-testid={'newSectionNameField'}
           size="small"
           fullWidth
           key="newSectionField"
@@ -181,8 +187,14 @@ function FormSectionList() {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Done color="primary" style={{ cursor: 'pointer' }} onClick={addNewSection} />
+                <Done
+                  color="primary"
+                  style={{ cursor: 'pointer' }}
+                  onClick={addNewSection}
+                  data-testid={'saveNewSectionNameFieldIcon'}
+                />
                 <CloseOutlined
+                  data-testid={'closeNewSectionNameFieldIcon'}
                   color="error"
                   style={{ cursor: 'pointer' }}
                   onClick={cancelNewSectionHandler}
@@ -209,7 +221,7 @@ function FormSectionList() {
             event.preventDefault();
             setShowNewSectionField(true);
           }}
-          data-testid={`Back-${'Name'}`}
+          data-testid={'addNewSectionButton'}
         >
           + Add New Section
         </Button>

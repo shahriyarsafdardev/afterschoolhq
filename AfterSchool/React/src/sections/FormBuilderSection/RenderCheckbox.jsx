@@ -2,7 +2,7 @@ import React from 'react';
 import CheckIcon from '@material-ui/icons/Check';
 import { makeStyles, Checkbox } from '@material-ui/core';
 
-function RenderCheckbox({ checked = false, handleCheck }) {
+function RenderCheckbox({ checked = false, handleCheck, dataTestId }) {
   const classes = makeStyles(() => ({
     checkboxWrapper: {
       padding: '0px 12px'
@@ -36,7 +36,7 @@ function RenderCheckbox({ checked = false, handleCheck }) {
 
   return (
     <Checkbox
-      data-testid={`${'title'}-${'QuestionDataTypeId'}-checkbox`}
+      data-testid={dataTestId}
       checked={checked}
       onChange={handleCheck}
       classes={{

@@ -6,7 +6,7 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import useStyles from './styles';
 
-const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }) => {
+const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, dataTestId }) => {
   const classes = useStyles();
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 
@@ -49,10 +49,18 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
           {audienceTypes[Audience]}
         </Grid>
         <Grid item lg={4} xs={4} sm={4}>
-          <RenderCheckbox checked={Show} handleCheck={() => clickHandler('show')} />
+          <RenderCheckbox
+            checked={Show}
+            handleCheck={() => clickHandler('show')}
+            dataTestId={`showCheckBox${Audience}-${dataTestId}`}
+          />
         </Grid>
         <Grid item lg={4} xs={4} sm={4}>
-          <RenderCheckbox checked={Required} handleCheck={() => clickHandler('required')} />
+          <RenderCheckbox
+            checked={Required}
+            handleCheck={() => clickHandler('required')}
+            dataTestId={`requiredCheckBox${Audience}-${dataTestId}`}
+          />
         </Grid>
       </Grid>
     );
@@ -81,7 +89,7 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience }
   );
 };
 
-const RenderCheckbox = ({ checked = false, handleCheck }) => {
+const RenderCheckbox = ({ checked = false, handleCheck, dataTestId }) => {
   const classes = makeStyles(() => ({
     checkboxWrapper: {
       padding: '0px 12px'
@@ -115,7 +123,7 @@ const RenderCheckbox = ({ checked = false, handleCheck }) => {
 
   return (
     <Checkbox
-      data-testid={`${'title'}-${'QuestionDataTypeId'}-checkbox`}
+      data-testid={`${dataTestId}-checkbox`}
       checked={checked}
       onChange={handleCheck}
       classes={{
