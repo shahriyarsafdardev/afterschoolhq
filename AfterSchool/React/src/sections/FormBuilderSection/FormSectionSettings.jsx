@@ -209,7 +209,8 @@ function FormSectionSettings() {
       ...copiedValue,
       ID: 0,
       QuestionDataTypeId: 0,
-      DisplayOrder: Number(key) + 1
+      DisplayOrder: Number(key) + 1,
+      IsLocked: false
     };
     formik.setValues(newValues);
   };

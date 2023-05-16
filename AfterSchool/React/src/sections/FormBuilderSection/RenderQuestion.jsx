@@ -1,13 +1,11 @@
 import cs from 'classnames';
 import { toInteger } from 'lodash';
 import CheckIcon from '@material-ui/icons/Check';
+import { styled } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
-import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
-import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import DeleteOutlineOutlinedIcon from '@material-ui/icons/DeleteOutlineOutlined';
 import ArrowDropDownOutlinedIcon from '@material-ui/icons/ArrowDropDownOutlined';
 
 import {
@@ -28,9 +26,19 @@ import {
 import Dialog from './Dialog';
 import useStyles from './styles';
 import DropDown from './DropDown';
+import AddIcon from 'assets/add.svg';
+import CopyIcon from 'assets/copy.svg';
+import DeleteIcon from 'assets/delete.svg';
 import questionType from 'constants/questionType';
 import RenderAudienceList from './RenderAudienceList';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+const StyledImage = styled('img')(({ theme }) => ({
+  width: '20px',
+  height: 'auto',
+  margin: '4px 6px',
+  cursor: 'pointer'
+}));
 
 const RenderQuestion = ({
   index,
@@ -202,13 +210,10 @@ const RenderQuestion = ({
             sm={1}
             className={cs(classes.deleteIconHidden, customQuestion ? 'delete-icon-visible' : '')}
           >
-            <DeleteOutlineOutlinedIcon
+            <StyledImage
+              src={DeleteIcon}
               style={{
-                color: '#FF7070',
-                width: '30px',
-                height: 'auto',
-                margin: '4px 6px',
-                cursor: 'pointer'
+                width: '18px'
               }}
               onClick={() => handleDeleteOption(index)}
               data-testid={`deleteIconOfOption-${ID}-${index}`}
@@ -392,13 +397,11 @@ const RenderQuestion = ({
         {renderOptions(showOptions)}
       </Grid>
       <Grid container className={classes.questionIconsWrapper}>
-        <Box>
-          <DeleteOutlineOutlinedIcon
+        <Box className={classes.displayFlex}>
+          <StyledImage
+            src={DeleteIcon}
             style={{
-              color: `${customQuestion ? '#FF7070' : '#494949'}`,
-              width: '30px',
-              height: 'auto',
-              margin: '4px 6px',
+              opacity: `${customQuestion ? '1' : '0.5'}`,
               cursor: `${customQuestion ? 'pointer' : 'not-allowed'}`
             }}
             onClick={async () => {
@@ -421,23 +424,19 @@ const RenderQuestion = ({
             onSubmit={handleDeleteSection}
             dataTestId={`deleteQuestion-${ID}-${index}`}
           />
-          <FileCopyOutlinedIcon
-            data-testid={`copyIconOfQuestion-${ID}-${index}`}
-            onClick={() => handleCopy(index)}
+          <StyledImage
+            src={CopyIcon}
             style={{
-              color: '#494949',
-              width: '25px',
-              height: 'auto',
-              margin: '4px 6px',
+              width: '30px',
               cursor: 'pointer'
             }}
+            data-testid={`copyIconOfQuestion-${ID}-${index}`}
+            onClick={() => handleCopy(index)}
           />
-          <AddOutlinedIcon
+          <StyledImage
+            src={AddIcon}
             style={{
-              color: '#494949',
-              width: '30px',
-              height: 'auto',
-              margin: '4px 6px',
+              width: '25px',
               cursor: 'pointer'
             }}
             onClick={() => handleAddNewQuestion(index)}
