@@ -2276,10 +2276,7 @@ namespace AfterSchool.Controllers
 
             if (registration.IsEmpty())
                 return View("");
-
-            /*// check if still owes money, load up variables
-            if (!registration.IsPaid(msgs))
-            {*/
+            
             var participationObject = registration.GetFirstParticipationObject(msgs);
 
             if (participationObject.IsEmpty())
@@ -2301,9 +2298,6 @@ namespace AfterSchool.Controllers
             
             ViewBag.ProviderEmail = participationObject.OwnerAccount.Email;
             return View("AlreadyWithdrawn");
-
-
-            //return RedirectToAction("thankyou", new {id = registration.Uid});
         }
 
         [HttpGet]

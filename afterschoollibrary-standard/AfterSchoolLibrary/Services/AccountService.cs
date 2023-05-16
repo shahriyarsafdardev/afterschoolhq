@@ -4802,8 +4802,6 @@ namespace AfterSchoolLibrary.Services
                     var hasPaymentPlan = checkoutObject.PaymentPlan.IsNotEmpty();
                     var hasSubscription = checkoutObject.SubscriptionPlan.IsNotEmpty();
                     var hasPostPayPlan = checkoutObject.PostPayPlan.IsNotEmpty();
-                    // var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
-                    // remove !alreadyPaidRegFee check because now provider can re-enroll registrant again 
                     if (!isRegFree && !hasPaymentPlan && !hasPostPayPlan) 
                         ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
