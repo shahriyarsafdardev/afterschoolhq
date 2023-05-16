@@ -152,7 +152,7 @@ const RenderQuestion = ({
             className={cs(classes.displayFlex, classes.optionsDragIcon)}
           >
             <Grid item lg={12} xs={12} sm={12} className={cs(classes.displayFlex)}>
-              <span {...dragHandleProps}>
+              <span {...dragHandleProps} data-testid={`dragIconForOptions-${ID}-${index}`}>
                 <DragIndicatorIcon style={{ float: 'left' }} />
               </span>
               {checkboxListIcon ? (
@@ -178,6 +178,7 @@ const RenderQuestion = ({
                 helperText={touched?.key && errors?.key ? errors?.key : ''}
                 error={touched?.key && errors?.key}
                 disabled={!customQuestion || IsLocked}
+                data-testid={`keyOfOption-${ID}-${index}`}
               />
             </Grid>
             <Grid item lg={5} xs={12} sm={12}>
@@ -190,6 +191,7 @@ const RenderQuestion = ({
                 value={option?.value || ''}
                 onChange={event => handleValueChange(index, event)}
                 disabled={!customQuestion || IsLocked}
+                data-testid={`valueOfOption-${ID}-${index}`}
               />
             </Grid>
           </Grid>
@@ -209,6 +211,7 @@ const RenderQuestion = ({
                 cursor: 'pointer'
               }}
               onClick={() => handleDeleteOption(index)}
+              data-testid={`deleteIconOfOption-${ID}-${index}`}
             />
           </Grid>
         </Grid>
@@ -302,7 +305,7 @@ const RenderQuestion = ({
       <Grid container className={cs(classes.questionFieldsWrapper)}>
         <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
           <Grid item lg={1} sm={1} xs={1} className={cs(classes.displayFlex)}>
-            <span {...dragIndicatorProps}>
+            <span {...dragIndicatorProps} data-testid={`dragIconForQuestions-${ID}-${index}`}>
               <DragIndicatorIcon style={{ float: 'left' }} />
             </span>
             <Typography variant="h6">{index}</Typography>
@@ -326,6 +329,7 @@ const RenderQuestion = ({
                 setQuestion({ ...question, Text: event.target.value });
               }}
               disabled={!customQuestion || IsLocked}
+              data-testid={`questionNameField-${ID}-${index}`}
             />
           </Grid>
           <Grid item lg={3} sm={3} xs={6} className={classes.gridItemHeight}>
@@ -333,6 +337,7 @@ const RenderQuestion = ({
               question={{ ...question, ...{ options: questionTypesOptions } }}
               setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
               disabled={!customQuestion || IsLocked}
+              dataTestId={`questionTypeDropDown-${ID}-${index}`}
             />
           </Grid>
           <Grid lg={1}></Grid>
@@ -343,13 +348,13 @@ const RenderQuestion = ({
             xs={6}
             className={cs(classes.displayFlex, classes.justifyContentSpaceBetween)}
           >
-            {/* <Box className={classes.displayFlex}> */}
             <Grid item lg={2} sm={12} xs={12} className={classes.positionRelative}>
               <Button
                 variant="outlined"
                 className={classes.audienceButton}
                 onClick={() => setShowAudience(!showAudience)}
                 disabled={IsLocked}
+                data-testid={`audienceButtonForQuestion-${ID}-${index}`}
               >
                 Audience
                 <ArrowDropDownOutlinedIcon
@@ -363,6 +368,7 @@ const RenderQuestion = ({
                   }
                   questionSettings={QuestionSettings}
                   setShowAudience={setShowAudience}
+                  dataTestId={`audienceListForQuestion-${ID}-${index}`}
                 />
               )}
             </Grid>
@@ -381,7 +387,6 @@ const RenderQuestion = ({
                 })}
               </Grid>
             )}
-            {/* </Box> */}
           </Grid>
         </Grid>
         {renderOptions(showOptions)}
@@ -406,6 +411,7 @@ const RenderQuestion = ({
                 }
               }
             }}
+            data-testid={`deleteIconOfQuestion-${ID}-${index}`}
           />
           <Dialog
             open={isOpen}
@@ -413,8 +419,10 @@ const RenderQuestion = ({
             title={'Delete Question'}
             text={'Do you want to delete this question? This action is irreversible.'}
             onSubmit={handleDeleteSection}
+            dataTestId={`deleteQuestion-${ID}-${index}`}
           />
           <FileCopyOutlinedIcon
+            data-testid={`copyIconOfQuestion-${ID}-${index}`}
             onClick={() => handleCopy(index)}
             style={{
               color: '#494949',
@@ -433,11 +441,13 @@ const RenderQuestion = ({
               cursor: 'pointer'
             }}
             onClick={() => handleAddNewQuestion(index)}
+            data-testid={`addQuestionBelowIcon-${ID}-${index}`}
           />
         </Box>
         <Box>
           <HideCheckBox
             setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
+            dataTestId={`hideCheckboxOfQuestion-${ID}-${index}`}
             question={question}
             disabled={IsLocked}
           />
@@ -447,8 +457,8 @@ const RenderQuestion = ({
   );
 };
 
-const HideCheckBox = ({ question, setFieldValue, disabled }) => {
-  const { Text: title, QuestionDataTypeId, IsActive: value } = question;
+const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
+  const { IsActive: value } = question;
   const unCheckedDisabled = value && disabled;
   const checkboxDisabled = unCheckedDisabled ? { color: '#ffffff !important' } : {};
 
@@ -490,11 +500,11 @@ const HideCheckBox = ({ question, setFieldValue, disabled }) => {
   return (
     <div className={classes.checkboxWrapper}>
       <FormControlLabel
-        data-testid={`${title}-${QuestionDataTypeId}-form`}
+        data-testid={`${dataTestId}-form`}
         disabled={disabled}
         control={
           <Checkbox
-            data-testid={`${title}-${QuestionDataTypeId}-checkbox`}
+            data-testid={`${dataTestId}-checkbox`}
             checked={!value}
             classes={{
               checked: classes.checked,

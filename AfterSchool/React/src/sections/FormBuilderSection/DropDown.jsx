@@ -4,9 +4,9 @@ import { FormControl } from '@material-ui/core';
 
 import useStyles from './styles';
 
-const DropDown = ({ question, setFieldValue, disabled }) => {
+const DropDown = ({ question, setFieldValue, disabled, dataTestId }) => {
   const classes = useStyles();
-  const { Text: title, QuestionDataTypeId, options, QuestionTypeId } = question;
+  const { options, QuestionTypeId } = question;
   const questionType = options.find(option => option.key === QuestionTypeId);
 
   const handleChange = ({ value }) => {
@@ -27,10 +27,11 @@ const DropDown = ({ question, setFieldValue, disabled }) => {
         classes={{
           root: classes.formControlRoot
         }}
-        data-testid={`${title}-${QuestionDataTypeId}-FormControl`}
+        data-testid={`${dataTestId}-FormControl`}
         disabled={disabled}
       >
         <Select
+          data-testid={`${dataTestId}-select`}
           options={dropdownOptions}
           value={selectedValue}
           onChange={e => {

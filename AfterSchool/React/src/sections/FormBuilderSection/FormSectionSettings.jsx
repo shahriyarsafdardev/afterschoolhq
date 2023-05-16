@@ -338,6 +338,7 @@ function FormSectionSettings() {
                       handleSettingForAll('show', key);
                       setShowFor(prevState => ({ ...prevState, [key]: !showFor[key] }));
                     }}
+                    dataTestId={`ApplyAll-${questionGroup}-${key}-show`}
                   />
                   <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
                     {key}
@@ -370,6 +371,7 @@ function FormSectionSettings() {
                       handleSettingForAll('required', key);
                       setRequiredFor(prevState => ({ ...prevState, [key]: !requiredFor[key] }));
                     }}
+                    dataTestId={`ApplyAll-${questionGroup}-${key}-required`}
                   />
                   <Typography variant="body1" className={classes.applyToAllControlsWrapper}>
                     {key}
@@ -425,6 +427,7 @@ function FormSectionSettings() {
                 disabled={currentSection.QuestionGroupDataTypeId !== 0}
                 helperText={sectionNameError}
                 error={sectionNameError}
+                data-testid={`sectionName-${questionGroup}`}
               />
             </Box>
             <Box>
@@ -496,7 +499,7 @@ function FormSectionSettings() {
                     event.preventDefault();
                     addNewQuestionHandler();
                   }}
-                  data-testid={`Back-${'Name'}`}
+                  data-testid={`addNewQuestion-${questionGroup}`}
                 >
                   + Add New Question
                 </Button>
@@ -515,7 +518,7 @@ function FormSectionSettings() {
                     event.preventDefault();
                     handleSubmit();
                   }}
-                  data-testid={`Back-${'Name'}`}
+                  data-testid={`saveQuestions-${questionGroup}`}
                 >
                   Save
                 </Button>

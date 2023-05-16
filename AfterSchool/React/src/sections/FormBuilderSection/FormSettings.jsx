@@ -57,6 +57,7 @@ function FormSettings() {
                 helperText: touched['FormName'] && errors['FormName']
               }}
               label={'Form Name'}
+              data-testid={'Form Name'}
             />
             <TextField
               formikProps={{
@@ -67,6 +68,7 @@ function FormSettings() {
                 disabled: true
               }}
               label={'Form Type'}
+              data-testid={'Form Type'}
             />
             <TextAreaQuestion
               formikProps={{
@@ -76,6 +78,7 @@ function FormSettings() {
                 errorMsg: errors['FormDescription']
               }}
               label={'Description'}
+              data-testid={'Description'}
             />
           </Box>
           <Box className={classes.buttonOuterWrapper}>
@@ -90,12 +93,12 @@ function FormSettings() {
                   event.preventDefault();
                   handleSubmit();
                 }}
-                data-testid={`Back-${'Name'}`}
+                data-testid={'SaveFormSettingsButton'}
               >
                 Save
               </Button>
               <Button
-                data-testid={`Save-${'Name'}`}
+                data-testid={'GetStartedButton'}
                 color="primary"
                 className={classes.saveButton}
                 variant="contained"
