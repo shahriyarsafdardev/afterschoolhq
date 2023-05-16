@@ -6,7 +6,8 @@ export default makeStyles(theme => ({
     width: '98%',
     justifyContent: 'space-between',
     [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column-reverse'
+      flexDirection: 'column-reverse',
+      width: '100%',
     }
   },
   sectionHeading: {
@@ -191,7 +192,11 @@ export default makeStyles(theme => ({
     }
   },
   positionRelative: {
-    position: 'relative'
+    position: 'relative',
+    [theme.breakpoints.down('sm')]: {
+      height: '70px',
+      alignItems: 'flex-start'
+    }
   },
   positionAbsolute: {
     position: 'absolute'
@@ -268,5 +273,8 @@ export default makeStyles(theme => ({
   },
   dialogButton: {
     fontSize: '12px'
+  },
+  gridItemHeight: {
+    height: '70px'
   }
 }));

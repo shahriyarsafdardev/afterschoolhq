@@ -307,7 +307,7 @@ const RenderQuestion = ({
             </span>
             <Typography variant="h6">{index}</Typography>
           </Grid>
-          <Grid item lg={8} sm={11} xs={11}>
+          <Grid item lg={8} sm={11} xs={11} className={classes.gridItemHeight}>
             <TextField
               className={classes.formControlClass}
               fullWidth
@@ -328,7 +328,7 @@ const RenderQuestion = ({
               disabled={!customQuestion || IsLocked}
             />
           </Grid>
-          <Grid item lg={3} sm={3} xs={6}>
+          <Grid item lg={3} sm={3} xs={6} className={classes.gridItemHeight}>
             <DropDown
               question={{ ...question, ...{ options: questionTypesOptions } }}
               setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
