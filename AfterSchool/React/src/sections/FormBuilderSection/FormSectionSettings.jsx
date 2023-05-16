@@ -256,30 +256,53 @@ function FormSectionSettings() {
   const [showFor, setShowFor] = useState(initialState);
   const [requiredFor, setRequiredFor] = useState(initialState);
 
-  const handleSettingForAll = (propertyName, registrantType) => {
+  const handleSettingForAll = (propertyName, registrantType, val) => {
     const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
     const updatedQuestionSettings = settings => {
-      const updatedSettings = settings.map(setting => {
-        if (setting.Audience !== audienceTypes.indexOf(registrantType)) {
-          return setting;
-        }
+      let updatedSettings = {};
+      const audienceType = audienceTypes.indexOf(registrantType);
 
-        let updatedSetting = { ...setting };
-        switch (propertyName) {
-          case 'show':
-            updatedSetting.Show = !showFor[registrantType];
-            updatedSetting.Required = showFor[registrantType] ? false : setting.Required;
-            break;
-          case 'required':
-            updatedSetting.Required = !requiredFor[registrantType];
-            updatedSetting.Show = !requiredFor[registrantType] ? true : setting.Show;
-            break;
-          default:
-            break;
-        }
+      if (audienceType === 0) {
+        updatedSettings = settings.map(setting => {
+          let updatedSetting = { ...setting };
+          switch (propertyName) {
+            case 'show':
+              updatedSetting.Show = val;
+              updatedSetting.Required = val ? setting.Required : false;
+              break;
+            case 'required':
+              updatedSetting.Required = val;
+              updatedSetting.Show = val ? true : setting.Show;
+              break;
+            default:
+              break;
+          }
 
-        return updatedSetting;
-      });
+          return updatedSetting;
+        });
+      } else {
+        updatedSettings = settings.map(setting => {
+          if (setting.Audience !== audienceTypes.indexOf(registrantType)) {
+            return setting;
+          }
+
+          let updatedSetting = { ...setting };
+          switch (propertyName) {
+            case 'show':
+              updatedSetting.Show = val;
+              updatedSetting.Required = val ? setting.Required : false;
+              break;
+            case 'required':
+              updatedSetting.Required = val;
+              updatedSetting.Show = val ? true : setting.Show;
+              break;
+            default:
+              break;
+          }
+
+          return updatedSetting;
+        });
+      }
       return updatedSettings;
     };
     const newValues = { ...values };
@@ -295,7 +318,6 @@ function FormSectionSettings() {
       };
     });
 
-    formik.resetForm();
     setReRender(!reRender);
     setValues(newValues);
   };
@@ -333,8 +355,8 @@ function FormSectionSettings() {
                   <RenderCheckbox
                     key={key}
                     checked={showFor[key]}
-                    handleCheck={() => {
-                      handleSettingForAll('show', key);
+                    handleCheck={event => {
+                      handleSettingForAll('show', key, event.target.checked);
                       setShowFor(prevState => ({ ...prevState, [key]: !showFor[key] }));
                     }}
                     dataTestId={`ApplyAll-${questionGroup}-${key}-show`}
@@ -366,8 +388,8 @@ function FormSectionSettings() {
                   <RenderCheckbox
                     key={key}
                     checked={requiredFor[key]}
-                    handleCheck={() => {
-                      handleSettingForAll('required', key);
+                    handleCheck={event => {
+                      handleSettingForAll('required', key, event.target.checked);
                       setRequiredFor(prevState => ({ ...prevState, [key]: !requiredFor[key] }));
                     }}
                     dataTestId={`ApplyAll-${questionGroup}-${key}-required`}
