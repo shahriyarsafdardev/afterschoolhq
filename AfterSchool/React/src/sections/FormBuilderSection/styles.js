@@ -261,5 +261,12 @@ export default makeStyles(theme => ({
   },
   newSectionName: {
     padding: '8px 0px'
+  },
+  warningButton: {
+    color: theme.palette.error.main,
+    borderColor: theme.palette.error.main
+  },
+  dialogButton: {
+    fontSize: '12px'
   }
 }));

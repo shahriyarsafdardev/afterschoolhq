@@ -1,5 +1,6 @@
 import cs from 'classnames';
 import React, { useState } from 'react';
+import { useSnackbar } from 'notistack';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { ArrowDropDownOutlined, Done, CloseOutlined } from '@material-ui/icons';
 import {
@@ -14,12 +15,14 @@ import {
 
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
+import Dialog from './Dialog';
 
 function FormSectionList() {
   const theme = useTheme();
   const classes = useStyles();
   const { formId } = useParams();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const [showNewSectionField, setShowNewSectionField] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionError, setNewSectionError] = useState('');
@@ -46,7 +49,7 @@ function FormSectionList() {
       FormQuestionGroup: { ...questionsGroups[index], IsDeleted: true },
       FormQuestion: null,
       FormQuestionGroups: updatedQuestionGroups
-    });
+    }).then(() => enqueueSnackbar('Deleted.', { variant: 'success' }));
   };
 
   const addNewSectionHandler = async () => {
@@ -56,6 +59,25 @@ function FormSectionList() {
         Name: newSectionName
       }
     });
+  };
+
+  const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const handleDeleteSection = async () => {
+    await handleDelete(deleteSectionId);
+    handleCloseDialog();
+
+    if (questionGroup == deleteSectionId) {
+      if (questionsGroupsToShow.length > 0) {
+        setSearchParams(`qg=${firstSectionId}`);
+      } else {
+        navigate(`/Org/form/edit/${formId}`);
+      }
+    }
+  };
+  const handleCloseDialog = () => {
+    setdeleteSectionId(null);
+    setIsOpen(false);
   };
 
   const [showSettings, setShowSettings] = useState(!isMobile);
@@ -131,22 +153,22 @@ function FormSectionList() {
             {QuestionGroupDataTypeId === 0 && (
               <CloseOutlined
                 style={{ cursor: 'pointer' }}
-                onClick={async () => {
-                  await handleDelete(key);
-
-                  if (questionGroup == key) {
-                    if (questionsGroupsToShow.length > 0) {
-                      setSearchParams(`qg=${firstSectionId}`);
-                    } else {
-                      navigate(`/Org/form/edit/${formId}`);
-                    }
-                  }
+                onClick={() => {
+                  setIsOpen(true);
+                  setdeleteSectionId(key);
                 }}
               />
             )}
           </Grid>
         </Grid>
       ))}
+      <Dialog
+        open={isOpen}
+        onClose={handleCloseDialog}
+        title={'Delete Section'}
+        text={'Do you want to delete this section? This action is irreversible.'}
+        onSubmit={handleDeleteSection}
+      />
       {showNewSectionField ? (
         <TextField
           className={cs(classes.formControlClass, classes.newSectionName)}

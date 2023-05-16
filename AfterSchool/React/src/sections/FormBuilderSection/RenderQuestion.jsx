@@ -25,6 +25,7 @@ import {
   Box
 } from '@material-ui/core';
 
+import Dialog from './Dialog';
 import useStyles from './styles';
 import DropDown from './DropDown';
 import questionType from 'constants/questionType';
@@ -75,6 +76,18 @@ const RenderQuestion = ({
       updateValue();
     }
   }, [question]);
+
+  const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const handleDeleteSection = async () => {
+    await handleDelete(deleteSectionId);
+    handleCloseDialog();
+  };
+
+  const handleCloseDialog = () => {
+    setdeleteSectionId(null);
+    setIsOpen(false);
+  };
 
   const genOptions = Options;
 
@@ -383,9 +396,23 @@ const RenderQuestion = ({
               margin: '4px 6px',
               cursor: `${customQuestion ? 'pointer' : 'not-allowed'}`
             }}
-            onClick={() => {
-              if (customQuestion) handleDelete(index);
+            onClick={async () => {
+              if (customQuestion) {
+                if (ID !== 0) {
+                  setIsOpen(true);
+                  setdeleteSectionId(index);
+                } else {
+                  await handleDelete(index, true);
+                }
+              }
             }}
+          />
+          <Dialog
+            open={isOpen}
+            onClose={handleCloseDialog}
+            title={'Delete Question'}
+            text={'Do you want to delete this question? This action is irreversible.'}
+            onSubmit={handleDeleteSection}
           />
           <FileCopyOutlinedIcon
             onClick={() => handleCopy(index)}

@@ -40,6 +40,17 @@ export default {
       }
     }
   },
+  MuiPaper: {
+    root: {
+      width: 'fit-content',
+      padding: '0px 15px'
+    }
+  },
+  MuiDialogTitle: {
+    root: {
+      padding: '16px 0px !important'
+    }
+  },
   MuiOutlinedInput: {
     root: {
       '&.Mui-error .MuiOutlinedInput-notchedOutline': {
