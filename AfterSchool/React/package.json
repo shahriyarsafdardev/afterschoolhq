@@ -64,6 +64,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.0.0",
     "react-scripts": "4.0.3",
+    "react-select": "^5.7.3",
     "react-webcam": "^7.1.0",
     "rollbar": "^2.26.1",
     "smartlook-client": "^8.1.0",
