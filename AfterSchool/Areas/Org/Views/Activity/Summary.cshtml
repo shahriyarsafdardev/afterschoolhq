@@ -1,4 +1,4 @@
-﻿@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
+@model AfterSchool.Areas.Org.Assemblers.Activity.SummaryResult
 @{
     var participationObject = Model.ParticipationObject;
     var msgs = Model.Messages;
@@ -139,7 +139,7 @@
 
                 <div class="col-md-4">
                     
-                    @if (!Model.Activity.IsFree)
+                    @if (!Model.Activity.IsFree && !Model.IsSession && !(Model.Activity.ActivityTypeId == ActivityType.PermissionSlip))
                     {
                         <div class="panel panel-default">
                             <div class="panel-heading">

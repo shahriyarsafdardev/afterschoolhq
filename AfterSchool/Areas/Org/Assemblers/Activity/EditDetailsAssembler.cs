@@ -12,6 +12,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public AfterSchoolLibrary.Models.Activity Activity { get; set; }
         public string FullScreenExitUrl { get; set; }
         public bool IsActivityLeader { get; set; }
+        public bool IsSession { get; set; }
         public AccountPackage AccountPackage { get; set; }
         public string ActiveMenu { get; set; }
     }
@@ -19,7 +20,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
     public class EditDetailsAssembler
     {
         public EditDetailsResult AssembleEditDetailsResult(Account account, SystemMessages messages, AfterSchoolLibrary.Models.Activity activity,
-            string fullScreenExitUrl, bool isActivityLeader, AccountPackage accountPackage, bool isNew)
+            string fullScreenExitUrl, bool isActivityLeader, AccountPackage accountPackage, bool isNew, bool isSession = false)
         {
             var isFullScreen = EditHelpers.GetIsFullScreen(activity, isNew);
 
@@ -33,6 +34,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 IsActivityLeader = isActivityLeader,
                 AccountPackage = accountPackage,
                 ActiveMenu = "EditDetails",
+                IsSession = isSession,
             };
         }
     }

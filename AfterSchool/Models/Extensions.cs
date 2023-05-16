@@ -132,7 +132,7 @@ namespace AfterSchool.Models
             if (!activity.ActivityGroupId.HasValue)
             {
                 if (activity.GetActiveRegistrationPeriod().IsEmpty())
-                    setupMsgs.Add(UILabel.RegistrationPeriodLabel(), MessageType.UserError);
+                    setupMsgs.Add(UILabel.EnrollmentPeriodLabel(), MessageType.UserError);
 
                 if (activity.GetActiveActivityForm().IsEmpty())
                     setupMsgs.Add("Registration Form", MessageType.UserError);
@@ -291,7 +291,7 @@ namespace AfterSchool.Models
                     MessageType.Error);
 
             if (!group.GetRegistrationPeriods().Any())
-                msgs.Add($"Please <a href=\"/org/group/periods/{group.Uid}\">add a Sign Up Period</a>",
+                msgs.Add($"Please <a href=\"/org/group/periods/{group.Uid}\">add a {UILabel.EnrollmentPeriodLabel()}</a>",
                     MessageType.Error);
 
             if (group.GetActivities().Any(x => !x.ActivityScheduleId.HasValue))

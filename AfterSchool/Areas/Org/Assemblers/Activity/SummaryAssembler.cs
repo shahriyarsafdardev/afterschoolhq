@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
 namespace AfterSchool.Areas.Org.Assemblers.Activity
@@ -10,6 +10,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
         public ActivitySchedule Schedule { get; set; }
         public decimal TotalPaid { get; set; }
         public bool? IsActivityLeader { get; set; }
+        public bool IsSession { get; set; }
         public UserType AccountUserType { get; set; }
         public Account CurrentAccount { get; set; }
         public AccountPackage AccountPackage { get; set; }
@@ -20,7 +21,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
     {
         public SummaryResult AssembleSummaryResult(AfterSchoolLibrary.Models.Activity activity, ParticipationObject participationObject,
             ActivitySchedule schedule, decimal totalPaid, bool? isActivityLeader, UserType accountUserType, Account currentAccount,
-            AccountPackage accountPackage, WebUser currentUser, SystemMessages messages)
+            AccountPackage accountPackage, WebUser currentUser, SystemMessages messages, bool isSession = false)
         {
             return new SummaryResult
             {
@@ -34,6 +35,7 @@ namespace AfterSchool.Areas.Org.Assemblers.Activity
                 AccountPackage = accountPackage,
                 CurrentUser = currentUser,
                 Messages = messages,
+                IsSession = isSession,
             };
         }
     }

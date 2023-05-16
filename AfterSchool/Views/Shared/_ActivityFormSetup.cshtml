@@ -23,7 +23,7 @@
         <div class="form-group">
             <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Name <span class="text-danger">*</span></label>
             <div class="col-sm-9">
-                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)"/>
+                <input id="name" class="form-control" type="text" name="name" value="@Model.Name" maxlength="75" required onfocus="this.select()" placeholder="Your @UILabel.ActivityLabel(Model.ActivityTypeId) Name (75 Characters)" />
             </div>
         </div>
 
@@ -34,7 +34,7 @@
                     Total Available Seats <span class="text-danger">*</span>
                 </label>
                 <div class="col-sm-9">
-                    <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value"/>
+                    <input type="number" class="form-control" id="seatsavailable" name="seatsavailable" value="@Model.SeatsAvailable" onfocus="this.select()" required step="1" min="1" max="@accountPackage.GetFeature(FeatureType.Participants).Max.Value" />
                     <p class="text-muted">
                         Must be a number between 1 and @accountPackage.GetFeature(FeatureType.Participants).Max.Value.ToString("#")
                     </p>
@@ -49,17 +49,17 @@
                         <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover" data-content="If you have a mimimum amount of students to hold class, please set this value." data-placement="top"></i>
                     </label>
                     <div class="col-sm-9">
-                        <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1"/>
+                        <input type="number" class="form-control" id="minseatsrequired" name="minseatsrequired" value="@Model.MinSeatsRequired" onfocus="this.select()" step="1" min="1" />
                     </div>
                 </div>
             }
         }
         else
         {
-            <input type="hidden" name="seatsavailable" value="1000"/>
+            <input type="hidden" name="seatsavailable" value="1000" />
         }
 
-        @if (group.IsEmpty() && Model.ActivityTypeId.In(new[] {ActivityType.Activity, ActivityType.LearningPod}))
+        @if (group.IsEmpty() && Model.ActivityTypeId.In(new[] { ActivityType.Activity, ActivityType.LearningPod }))
         {
             <div class="form-group">
                 <label class="col-sm-3 control-label">
@@ -75,16 +75,16 @@
                 </div>
             </div>
         }
-        else if (Model.ActivityTypeId.In(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip}))
+        else if (Model.ActivityTypeId.In(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
         {
-            <input type="hidden" name="inviteonly" id="inviteonly" value="1"/>
+            <input type="hidden" name="inviteonly" id="inviteonly" value="1" />
         }
         else
         {
-            <input type="hidden" name="inviteonly" id="inviteonly" value="0"/>
+            <input type="hidden" name="inviteonly" id="inviteonly" value="0" />
         }
 
-        <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)"/>
+        <input type="hidden" name="type" value="@((int) Model.ActivityTypeId)" />
         @if (Model.ActivityTypeId == ActivityType.Activity && group.IsEmpty())
         {
             <div class="form-group">
@@ -119,12 +119,12 @@
                         <input type="radio" class="form-control costfrequencytype" name="costfrequencytype"
                                id="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)" required
                                @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerActivity ? "checked=\"checked\"" : "")
-                               value="@((int) ActivityCostFrequencyType.PerActivity)"/>
+                               value="@((int) ActivityCostFrequencyType.PerActivity)" />
                         <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerActivity)">The Entire Activity</label>
                     </div>
 
                     <div class="am-radio inline">
-                        <input @(Model.ID.HasValue && Model.HasPostPayPlan() ? "disabled" : "") type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerClass)"/>
+                        <input @(Model.ID.HasValue && Model.HasPostPayPlan() ? "disabled" : "") type="radio" class="form-control costfrequencytype" name="costfrequencytype" id="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)" required @(Model.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass ? "checked=\"checked\"" : "") value="@((int) ActivityCostFrequencyType.PerClass)" />
                         <label for="costfrequencytype-@((int) ActivityCostFrequencyType.PerClass)">Individual Classes</label>
                     </div>
 
@@ -147,7 +147,7 @@
                                value="@(Model.RegistrationCutoffHours.HasValue ? Model.RegistrationCutoffHours.Value.ToString() : "2")"
                                required
                                min="0"
-                               step="1"/>
+                               step="1" />
                         <span class="input-group-addon">Hours</span>
                     </div>
                     <p class="text-muted">
@@ -156,75 +156,88 @@
                 </div>
             </div>
 
-            <div class="registrationperiod-container @(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
-
-                <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID"/>
-
-                <div class="form-group reg-period">
-                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Open <span class="text-danger">*</span></label>
-                    <div class="col-sm-5">
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/Components/_Date.cshtml",
-                                new FormInputViewModel
-                                {
-                                    Id = "registrationopendate",
-                                    Name = "registrationopendate",
-                                    Value = activePeriod.StartDateTime.ToShortDateString(),
-                                });
-                        }
-                    </div>
-                    <div class="col-sm-4">
-
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_TimeSelect.cshtml",
-                                activePeriod.StartDateTime.Value,
-                                new ViewDataDictionary
-                                {
-                                    {"name", "registrationopentime"},
-                                    {"id", "registrationopentime"},
-                                    {"required", true},
-                                }
-                                );
-                        }
-
+            <div class="@(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @UILabel.EnrollmentPeriodLabel()
+                        <div class="row fontSize12">
+                            <div class="col-sm-12">
+                                <p class="text-muted margin-bottom-zero">Select the date range participants are allowed to register for this activity.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
-                    <label class="col-sm-3 control-label">@UILabel.RegistrationPeriodLabel() Close <span class="text-danger">*</span></label>
-                    <div class="col-sm-5">
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/Components/_Date.cshtml",
-                                new FormInputViewModel
-                                {
-                                    Id = "registrationclosedate",
-                                    Name = "registrationclosedate",
-                                    Value = activePeriod.EndDateTime.ToShortDateString(),
-                                }
-                                );
-                        }
-                    </div>
-                    <div class="col-sm-4">
+                <div class="registrationperiod-container">
 
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_TimeSelect.cshtml",
-                                activePeriod.EndDateTime.Value,
-                                new ViewDataDictionary
-                                {
-                                    {"name", "registrationclosetime"},
-                                    {"id", "registrationclosetime"},
-                                    {"required", true},
-                                }
-                                );
-                        }
+                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
 
+                    <div class="form-group reg-period">
+                        <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Open <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel
+                                    {
+                                        Id = "registrationopendate",
+                                        Name = "registrationopendate",
+                                        Value = activePeriod.StartDateTime.ToShortDateString(),
+                                    });
+                            }
+                        </div>
+                        <div class="col-sm-4">
+
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    activePeriod.StartDateTime.Value,
+                                    new ViewDataDictionary
+                                    {
+                                        {"name", "registrationopentime"},
+                                        {"id", "registrationopentime"},
+                                        {"required", true},
+                                    }
+                                    );
+                            }
+
+                        </div>
                     </div>
+
+                    <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
+                        <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Close <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel
+                                    {
+                                        Id = "registrationclosedate",
+                                        Name = "registrationclosedate",
+                                        Value = activePeriod.EndDateTime.ToShortDateString(),
+                                    }
+                                    );
+                            }
+                        </div>
+                        <div class="col-sm-4">
+
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    activePeriod.EndDateTime.Value,
+                                    new ViewDataDictionary
+                                    {
+                                        {"name", "registrationclosetime"},
+                                        {"id", "registrationclosetime"},
+                                        {"required", true},
+                                    }
+                                    );
+                            }
+
+                        </div>
+                    </div>
+
                 </div>
-
             </div>
 
             <div class="col-md-offset-3 col-md-9 padding-v-20">
@@ -265,24 +278,18 @@
                         </label>
                         <div class="col-sm-9">
                             <div class="am-radio inline"
-                                 @if (!showAllowApplications)
-                                 {
-                                     <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text>
-                                 }>
+                                 @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text>  }>
                                 @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
                                 {
                                     <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
                                            @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                           @if (!showAllowApplications)
-                                           {
-                                               <text> disabled="disabled" </text>
-                                           }/>
+                                           @if (!showAllowApplications) { <text> disabled="disabled" </text>  } />
                                     <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
                                 }
                             </div>
                             <p class="text-muted">
                                 <em>
-                                    <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br/>
+                                    <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
                                     <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
                                 </em>
                             </p>
@@ -291,15 +298,15 @@
                 }
                 else
                 {
-                    <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)"/>
+                    <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
                 }
             </div>
         }
         else
         {
-            <input type="hidden" name="group" value="@group.Uid"/>
-            <input type="hidden" name="regmode" value="@((int) Model.RegistrationModeId)"/>
-            <input type="hidden" name="form" value="@activeForm.FormId"/>
+            <input type="hidden" name="group" value="@group.Uid" />
+            <input type="hidden" name="regmode" value="@((int) Model.RegistrationModeId)" />
+            <input type="hidden" name="form" value="@activeForm.FormId" />
         }
     </div>
 </div>

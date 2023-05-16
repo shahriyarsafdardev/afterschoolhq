@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
 
     var accountActivityGroup = Model.GetAccountActivityGroup(SessionVariables.CurrentAccount);
@@ -30,7 +30,7 @@
             </a>
            
             <a href="@Url.Action("periods", "league", new {id = Model.Uid})" class="btn btn-alt6@(actionName == "periods" ? "-active" : "")">
-                <i class="s7-date"></i> @UILabel.RegistrationPeriodAbbrLabel(true)
+                <i class="s7-date"></i> @UILabel.EnrollmentPeriodLabel(true)
             </a>
 
             @if (ispublished)

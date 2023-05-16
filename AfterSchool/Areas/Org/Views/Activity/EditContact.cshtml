@@ -1,8 +1,9 @@
-﻿@using AfterSchool.Helpers
+@using AfterSchool.Helpers
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditContactResult
 @{
     ViewBag.Title = Model.Account.Name;
     var msgs = Model.Messages;
+    var isSession = Model.IsSession;
     var activityTitle = $"{(Model.Activity.ActivityGroupName.IsNotEmpty() ? $"{Model.Activity.ActivityGroupName} - " : "")}{Model.Activity.Name}";
     var isFullScreen = Model.IsFullScreen;
     if (isFullScreen)
@@ -82,7 +83,7 @@
             </div>
 
             <div class="col-md-2 col-lg-3">
-                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary {{"ActiveMenu", Model.ActiveMenu}}); }
+                @{ Html.RenderPartial("~/Views/Shared/_ActivityEditNav.cshtml", Model.Activity, new ViewDataDictionary {{"ActiveMenu", Model.ActiveMenu}, { "IsSession", isSession }, }); }
             </div>
 
         </div>

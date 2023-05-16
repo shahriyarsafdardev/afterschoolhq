@@ -1,4 +1,4 @@
-﻿@using AfterSchool.Areas.Org.Controllers
+@using AfterSchool.Areas.Org.Controllers
 @model Activity
 @{
     string SetToActiveIfEquals(string activeMenuValue, string matchString)
@@ -9,6 +9,7 @@
     var isActive = Model.ID.HasValue && Model.ID.Value > 0;
     var isScheduleActive = Model.ID.HasValue && Model.ID.Value > 0;
     var activeMenu = ViewData["ActiveMenu"].ToString();
+    var isSession = ViewData["IsSession"].IsNotEmpty() ? (bool)ViewData["IsSession"] : false;
 
     var editSetupActive = SetToActiveIfEquals(activeMenu, EditHelpers.EditSetup);
     var editRestrictionsActive = SetToActiveIfEquals(activeMenu, EditHelpers.EditRestrictions);
@@ -91,20 +92,19 @@
             </li>
         }
 
-        @if (EditHelpers.EditSetupPagesForActivityType(Model.ActivityTypeId).Contains(EditHelpers.EditCost))
+        @if (!isSession && EditHelpers.EditSetupPagesForActivityType(Model.ActivityTypeId).Contains(EditHelpers.EditCost))
         {
             <li data-id="5" class="dd-item">
                 <div class="dd-handle @editCostActive">
                     @{ Html.RenderPartial("_ActiveLink", new ViewDataDictionary
-                       {
-                           {"Url", Url.Action("editcost", "activity", new {id = Model.Uid.ToString(), isnew = Request["isnew"]})},
-                           {"Text", "Pricing & Payment"},
-                           {"IsActive", isActive},
-                       }); }
+                        {
+                            {"Url", Url.Action("editcost", "activity", new {id = Model.Uid.ToString(), isnew = Request["isnew"]})},
+                            {"Text", "Pricing & Payment"},
+                            {"IsActive", isActive},
+                        }); }
                 </div>
             </li>
-        }
-
+         }
         @if (!Model.ActivityGroupId.HasValue)
         {
             <li data-id="6" class="dd-item">
