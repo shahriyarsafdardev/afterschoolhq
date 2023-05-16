@@ -7,7 +7,6 @@ import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import useStyles from './styles';
-import { toInteger } from 'lodash';
 import { Loader } from 'components';
 import { newQuestion } from './helper';
 import { useFormBuilder } from 'redux/hooks';
@@ -149,8 +148,7 @@ function FormSectionSettings() {
   }, [values && Object.keys(values).length]);
 
   const addNewQuestionHandler = index => {
-    const newDisplayOrder =
-      toInteger(index || values[Object.keys(values).at(-1)]?.DisplayOrder) + 1;
+    const newDisplayOrder = Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder) + 1;
 
     const newQuest = {
       ...newQuestion,
@@ -165,7 +163,7 @@ function FormSectionSettings() {
       Object.keys(updatedValues)
         .reverse()
         .forEach(strKey => {
-          const key = toInteger(strKey);
+          const key = Number(strKey);
           if (key < newDisplayOrder) return;
 
           const questionObject = {
