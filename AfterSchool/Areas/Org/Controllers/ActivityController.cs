@@ -1644,6 +1644,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            if (isNew.IsNotEmpty())
+                activity.LeaderTypeId = ActivityLeaderType.StaffMember;
 
             var instructors = currentAccount.GetUsers(msgs: msgs);
             var fullScreenExitUrl = GetFullScreenExitUrl(activity);
