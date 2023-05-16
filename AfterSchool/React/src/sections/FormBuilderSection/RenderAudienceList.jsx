@@ -11,36 +11,30 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
   const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 
   const RenderAudienceRow = ({ audience: { Audience, Show, Required } }) => {
-    const clickHandler = propertyName => {
-      let updatedSettings = {};
+    const clickHandler = (propertyName, val) => {
+      const updatedAllSettings = questionSettings.map(setting => {
+        if (Audience !== 0 && setting.Audience !== Audience) {
+          return setting;
+        }
 
-      if (Audience === 0) {
-        updatedSettings = {};
-      } else {
-        updatedSettings = questionSettings.map(setting => {
-          if (setting.Audience !== Audience) {
-            return setting;
-          }
+        let updatedSetting = { ...setting };
+        switch (propertyName) {
+          case 'show':
+            updatedSetting.Show = Audience === 0 ? val : !setting.Show;
+            updatedSetting.Required = updatedSetting.Show ? setting.Required : false;
+            break;
+          case 'required':
+            updatedSetting.Required = Audience === 0 ? val : !setting.Required;
+            updatedSetting.Show = updatedSetting.Required ? true : setting.Show;
+            break;
+          default:
+            break;
+        }
 
-          let updatedSetting = { ...setting };
-          switch (propertyName) {
-            case 'show':
-              updatedSetting.Show = !setting.Show;
-              updatedSetting.Required = setting.Show ? false : setting.Required;
-              break;
-            case 'required':
-              updatedSetting.Required = !setting.Required;
-              updatedSetting.Show = !setting.Required ? true : setting.Show;
-              break;
-            default:
-              break;
-          }
+        return updatedSetting;
+      });
 
-          return updatedSetting;
-        });
-      }
-
-      setFieldValue(updatedSettings);
+      setFieldValue(updatedAllSettings);
     };
 
     return (
@@ -51,15 +45,15 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
         <Grid item lg={4} xs={4} sm={4}>
           <RenderCheckbox
             checked={Show}
-            handleCheck={() => clickHandler('show')}
             dataTestId={`showCheckBox${Audience}-${dataTestId}`}
+            handleCheck={event => clickHandler('show', event.target.checked)}
           />
         </Grid>
         <Grid item lg={4} xs={4} sm={4}>
           <RenderCheckbox
             checked={Required}
-            handleCheck={() => clickHandler('required')}
             dataTestId={`requiredCheckBox${Audience}-${dataTestId}`}
+            handleCheck={event => clickHandler('required', event.target.checked)}
           />
         </Grid>
       </Grid>
@@ -82,7 +76,14 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
           {questionSettings.map(audience => {
             return <RenderAudienceRow audience={audience} key={audience.Audience} />;
           })}
-          <RenderAudienceRow audience={{ Audience: 0, Show: false, Required: false }} key={0} />
+          <RenderAudienceRow
+            audience={{
+              Audience: 0,
+              Show: questionSettings.every(q => q.Show),
+              Required: questionSettings.every(q => q.Required)
+            }}
+            key={0}
+          />
         </Grid>
       </Box>
     </ClickAwayListener>

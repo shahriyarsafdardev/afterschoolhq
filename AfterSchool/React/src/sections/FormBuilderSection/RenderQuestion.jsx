@@ -2,11 +2,11 @@ import cs from 'classnames';
 import { styled } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import {
-  CheckIcon,
-  DragIndicatorIcon,
-  RadioButtonUncheckedIcon,
-  CheckBoxOutlineBlankIcon,
-  ArrowDropDownOutlinedIcon
+  Check as CheckIcon,
+  DragIndicator as DragIndicatorIcon,
+  RadioButtonUnchecked as RadioButtonUncheckedIcon,
+  CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
+  ArrowDropDownOutlined as ArrowDropDownOutlinedIcon
 } from '@material-ui/icons';
 
 import {
