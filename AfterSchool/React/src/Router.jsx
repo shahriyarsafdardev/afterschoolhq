@@ -3,7 +3,6 @@ import { useRoutes } from 'react-router-dom';
 
 import { Loader } from 'components';
 import utils from 'utils';
-import FormBuilderSection from 'sections/FormBuilderSection';
 
 // eslint-disable-next-line react/display-name
 const Loadable = Component => props => {
@@ -90,6 +89,7 @@ const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
+const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
