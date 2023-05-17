@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var instructors = (List<WebUser>) ViewData["Instructors"];
     var leaderTypeExceptions = new List<ActivityLeaderType> {ActivityLeaderType.NotSet, ActivityLeaderType.Student};
@@ -21,29 +21,34 @@
         <div>
             @if (SessionVariables.CurrentAccount.IsSchool && Model.ActivityTypeId == ActivityType.Activity)
             {
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Led By: <span class="text-danger">*</span></label>
-                    <div class="col-sm-9">
-                        <select name="leadertype" id="leadertype" class="form-control" required="required">
-                            <option value="">Select...</option>
-                            @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(leaderTypeExceptions))
-                            {
-                                var selected = Model.LeaderTypeId == item ? "selected=\"selected\"" : "";
-
-                                if (!SessionVariables.CurrentAccount.IsSchool)
+                if (Model.LeaderTypeId == ActivityLeaderType.ExternalProvider)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">@UILabel.ActivityLabel(Model.ActivityTypeId) Led By: <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select name="leadertype" id="leadertype" class="form-control" required="required">
+                                <option value="">Select...</option>
+                                @foreach (var item in Enum.GetValues(typeof(ActivityLeaderType)).Cast<ActivityLeaderType>().Except(leaderTypeExceptions))
                                 {
-                                    selected = item == ActivityLeaderType.StaffMember ? "selected=\"selected\"" : "";
+                                    var selected = Model.LeaderTypeId == item ? "selected=\"selected\"" : "";
+                                    if (!SessionVariables.CurrentAccount.IsSchool)
+                                    {
+                                        selected = item == ActivityLeaderType.StaffMember ? "selected=\"selected\"" : "";
+                                    }
+                                    <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
                                 }
-
-                                <option value="@((int) item)" @selected>@item.ToString().SplitByUpperCase()</option>
-                            }
-                        </select>
+                            </select>
+                        </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <input type="hidden" name="leadertype" value="@((int)ActivityLeaderType.StaffMember)" />
+                }
             }
             else
             {
-                <input type="hidden" name="leadertype" value="@ActivityLeaderType.StaffMember"/>
+                <input type="hidden" name="leadertype" value="@ActivityLeaderType.StaffMember" />
             }
 
             <div class="form-group advanced-settings hide">
@@ -86,7 +91,7 @@
                         Html.RenderPartial(
                             "~/Views/Shared/Components/_ProviderAddOrEdit.cshtml",
                             null,
-                            new ViewDataDictionary {{"ProviderAccountId", Model.ProviderAccountId}});
+                            new ViewDataDictionary { { "ProviderAccountId", Model.ProviderAccountId } });
                     }
                 </div>
             </div>
@@ -154,25 +159,25 @@
             <div class="form-group">
                 <label class="col-md-3 control-label">First Name</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorfirstname" name="instructorfirstname" onfocus="this.select()" value="@Request["instructorfirstname"]"/>
+                    <input type="text" class="form-control" id="instructorfirstname" name="instructorfirstname" onfocus="this.select()" value="@Request["instructorfirstname"]" />
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Last Name</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorlastname" name="instructorlastname" onfocus="this.select()" value="@Request["instructorlastname"]"/>
+                    <input type="text" class="form-control" id="instructorlastname" name="instructorlastname" onfocus="this.select()" value="@Request["instructorlastname"]" />
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Phone</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructorphone" name="instructorphone" onfocus="this.select()" value="@Request["instructorphone"]"/>
+                    <input type="text" class="form-control" id="instructorphone" name="instructorphone" onfocus="this.select()" value="@Request["instructorphone"]" />
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-3 control-label">Email</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="instructoremail" name="instructoremail" onfocus="this.select()" value="@Request["instructoremail"]"/>
+                    <input type="text" class="form-control" id="instructoremail" name="instructoremail" onfocus="this.select()" value="@Request["instructoremail"]" />
                 </div>
             </div>
         </div>

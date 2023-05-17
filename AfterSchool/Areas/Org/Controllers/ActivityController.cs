@@ -1650,6 +1650,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+
+            if (isNew.IsNotEmpty())
+                activity.LeaderTypeId = ActivityLeaderType.StaffMember;
+                
             var activityGroup = activity.GetActivityGroup(msgs);
             var isSession = activityGroup?.ActivityGroupTypeId == ActivityGroupType.Session;
 
