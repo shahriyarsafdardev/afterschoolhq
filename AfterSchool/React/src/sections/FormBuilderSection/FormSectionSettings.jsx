@@ -14,7 +14,7 @@ import { newQuestion } from './helper';
 import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
-import questionType from 'constants/questionType';
+import { audienceTypes, questionType } from 'constants';
 
 function FormSectionSettings() {
   const classes = useStyles();
@@ -242,7 +242,6 @@ function FormSectionSettings() {
   const [reRender, setReRender] = useState(false);
   const [settingsForAll, setSettingsForAll] = useState({});
 
-  const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
   const handleSettingForAll = (propertyName, registrantType, val) => {
     const updatedQuestionSettings = settings => {
       let updatedSettings = {};

@@ -1,14 +1,14 @@
 import React from 'react';
 import cs from 'classnames';
-import CheckIcon from '@material-ui/icons/Check';
-import { Grid, Box, Checkbox, makeStyles } from '@material-ui/core';
+import { Grid, Box } from '@material-ui/core';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
+import RenderCheckbox from './RenderCheckbox';
+import { audienceTypes } from 'constants';
 import useStyles from './styles';
 
 const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, dataTestId }) => {
   const classes = useStyles();
-  const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 
   const RenderAudienceRow = ({ audience: { Audience, Show, Required } }) => {
     const clickHandler = (propertyName, val) => {
@@ -87,60 +87,6 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
         </Grid>
       </Box>
     </ClickAwayListener>
-  );
-};
-
-const RenderCheckbox = ({ checked = false, handleCheck, dataTestId }) => {
-  const classes = makeStyles(() => ({
-    checkboxWrapper: {
-      padding: '0px 12px'
-    },
-    formControlLabelRoot: {
-      margin: '10px 0px',
-      '& .MuiTypography-root': {
-        marginLeft: 18
-      }
-    },
-    checked: {
-      color: '#494949 !important',
-      padding: 0,
-      borderRadius: 3,
-      background: 'transparent !important'
-    },
-    root: {
-      padding: 0,
-      background: '#ffffff',
-      color: '#ffffff',
-      border: '1px solid #c4c4c4',
-      borderRadius: 3,
-      height: '18px',
-      width: '18px',
-      '& .MuiSvgIcon-root': {
-        height: '18px',
-        width: '18px'
-      }
-    }
-  }))();
-
-  return (
-    <Checkbox
-      data-testid={`${dataTestId}-checkbox`}
-      checked={checked}
-      onChange={handleCheck}
-      classes={{
-        checked: classes.checked,
-        root: classes.root
-      }}
-      checkedIcon={
-        <CheckIcon
-          style={{
-            height: '18px',
-            width: '18px'
-          }}
-        />
-      }
-      IconStyle={{ fill: 'black' }}
-    />
   );
 };
 

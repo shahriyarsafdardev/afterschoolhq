@@ -30,8 +30,8 @@ import DropDown from './DropDown';
 import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
 import DeleteIcon from 'assets/delete.svg';
-import questionType from 'constants/questionType';
 import RenderAudienceList from './RenderAudienceList';
+import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const StyledImage = styled('img')(({ theme }) => ({
@@ -68,7 +68,6 @@ const RenderQuestion = ({
     QuestionDataTypeId
   } = question;
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
-  const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
   const questionTypesOptions = Object.keys(questionType).map(key => ({
     key: questionType[key],
     value: key

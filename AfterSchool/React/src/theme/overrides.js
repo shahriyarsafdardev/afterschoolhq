@@ -36,7 +36,8 @@ export default {
   MuiFormHelperText: {
     root: {
       '&.Mui-error': {
-        color: '#d32f2f'
+        color: '#d32f2f',
+        fontSize: 12
       }
     }
   },
