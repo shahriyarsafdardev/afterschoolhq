@@ -1,4 +1,4 @@
-﻿@model RegistrationHeaderViewModel
+@model RegistrationHeaderViewModel
 
 @{
     var currentUser = SessionVariables.CurrentUser;
@@ -190,12 +190,12 @@
                                     <i class="icon icon-left s7-door-lock"></i>
                                 </span>
                             }
-                            <span class="icon-span @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
+                            <span class="icon-span hide @(!isFollowing ? "" : "hide")" id="btn-follow" style="cursor:pointer" onclick="follow()" title="Follow">
                                 <svg viewBox="0 0 24 24">
                                     <use href="~/Assets/img/user-add.svg#svg"></use>
                                 </svg>
                             </span>
-                            <span class="icon-span @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
+                            <span class="icon-span hide @(!isFollowing ? "hide" : "")" id="btn-unfollow" style="cursor:pointer" onclick="unfollow()" title="Unfollow">
                                 <svg viewBox="0 0 24 24">
                                     <use href="~/Assets/img/user-remove.svg#svg"></use>
                                 </svg>
