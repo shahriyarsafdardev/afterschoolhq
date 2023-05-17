@@ -5,6 +5,7 @@ import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { cloneDeep } from 'lodash';
 
 import useStyles from './styles';
 import { Loader } from 'components';
@@ -195,11 +196,12 @@ function FormSectionSettings() {
   };
 
   const handleCopy = key => {
-    const { [key]: copiedValue, ...restValues } = values;
+    const copiedValue = cloneDeep(values[key]);
 
     const newValues = Object.keys(values).reduce((acc, k) => {
       const newKey = Number(k) > Number(key) ? Number(k) + 1 : k;
-      acc[newKey] = { ...values[k], DisplayOrder: newKey };
+      acc[newKey] = cloneDeep(values[k]);
+      acc[newKey].DisplayOrder = Number(newKey);
       return acc;
     }, {});
 
@@ -210,7 +212,9 @@ function FormSectionSettings() {
       DisplayOrder: Number(key) + 1,
       IsLocked: false
     };
-    formik.setValues(newValues);
+
+    setValues({ ...newValues });
+    setReRender(!reRender);
   };
 
   const handleCreateNew = key => {
