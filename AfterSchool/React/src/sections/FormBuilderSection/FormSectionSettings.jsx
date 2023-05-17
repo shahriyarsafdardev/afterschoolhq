@@ -75,19 +75,17 @@ function FormSectionSettings() {
     onSubmit: async values => {
       const formQuestions = Object.keys(values).map(key => {
         const updatedValue = { ...values[key] };
-        const shouldHaveOptions = isQuestionWithOptions(updatedValue.QuestionTypeId);
 
-        if (shouldHaveOptions) {
-          const optionsString =
-            updatedValue.Options?.map(option => {
-              if (option.value) {
-                return `${option.key}|${option.value}`;
-              } else {
-                return option.key;
-              }
-            }).join(',') || '';
-          updatedValue.Options = optionsString;
-        }
+        const optionsString =
+          updatedValue.Options?.map(option => {
+            if (option.value) {
+              return `${option.key}|${option.value}`;
+            } else {
+              return option.key;
+            }
+          }).join(',') || '';
+
+        updatedValue.Options = optionsString;
         return updatedValue;
       });
 
@@ -403,7 +401,9 @@ function FormSectionSettings() {
   };
 
   const sectionNameChangeHandler = value => {
-    const isNameUnique = questionsGroups.every(({ Name: name }) => name !== value);
+    const isNameUnique = questionsGroups.every(
+      ({ Name: name, ID }) => name !== value || ID == questionGroup
+    );
 
     if (value.length === 0) setSectionNameError('Section Name cannot be empty');
     else if (!isNameUnique) setSectionNameError('Section Name must be unique');
