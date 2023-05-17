@@ -1,8 +1,9 @@
 import * as Yup from 'yup';
+import cs from 'classnames';
 import { useSnackbar } from 'notistack';
-import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { cloneDeep } from 'lodash';
@@ -18,12 +19,6 @@ import questionType from 'constants/questionType';
 function FormSectionSettings() {
   const classes = useStyles();
   const { formId } = useParams();
-  const initialState = {
-    All: false,
-    Parent: false,
-    Student: false,
-    Adult: false
-  };
   const { enqueueSnackbar } = useSnackbar();
   const [initialValues, setInitialValues] = useState({});
   const [sectionNameError, setSectionNameError] = useState('');
@@ -257,11 +252,10 @@ function FormSectionSettings() {
   };
 
   const [reRender, setReRender] = useState(false);
-  const [showFor, setShowFor] = useState(initialState);
-  const [requiredFor, setRequiredFor] = useState(initialState);
+  const [settingsForAll, setSettingsForAll] = useState({});
 
+  const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
   const handleSettingForAll = (propertyName, registrantType, val) => {
-    const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
     const updatedQuestionSettings = settings => {
       let updatedSettings = {};
       const audienceType = audienceTypes.indexOf(registrantType);
@@ -346,7 +340,7 @@ function FormSectionSettings() {
               xs={9}
               className={classes.applyToAllControlsContainer}
             >
-              {Object.keys(showFor).map(key => (
+              {audienceTypes.map((key, i) => (
                 <Grid
                   item
                   lg={3}
@@ -358,10 +352,9 @@ function FormSectionSettings() {
                 >
                   <RenderCheckbox
                     key={key}
-                    checked={showFor[key]}
+                    checked={settingsForAll?.show[i]}
                     handleCheck={event => {
                       handleSettingForAll('show', key, event.target.checked);
-                      setShowFor(prevState => ({ ...prevState, [key]: !showFor[key] }));
                     }}
                     dataTestId={`ApplyAll-${questionGroup}-${key}-show`}
                   />
@@ -379,7 +372,7 @@ function FormSectionSettings() {
               </Typography>
             </Grid>
             <Grid container className={classes.applyToAllControlsContainer}>
-              {Object.keys(requiredFor).map(key => (
+              {audienceTypes.map((key, i) => (
                 <Grid
                   item
                   lg={3}
@@ -391,10 +384,9 @@ function FormSectionSettings() {
                 >
                   <RenderCheckbox
                     key={key}
-                    checked={requiredFor[key]}
+                    checked={settingsForAll?.required[i]}
                     handleCheck={event => {
                       handleSettingForAll('required', key, event.target.checked);
-                      setRequiredFor(prevState => ({ ...prevState, [key]: !requiredFor[key] }));
                     }}
                     dataTestId={`ApplyAll-${questionGroup}-${key}-required`}
                   />
@@ -431,6 +423,36 @@ function FormSectionSettings() {
     else setSectionNameError('');
   };
 
+  const updateAudienceSettings = () => {
+    if (!values) return;
+
+    const audienceShowSettings = {
+      show: [false, true, true, true],
+      required: [false, true, true, true]
+    };
+
+    Object.values(values).forEach(value => {
+      if (value.IsDeleted === false) {
+        value.QuestionSettings.forEach(setting => {
+          const audience = setting.Audience;
+          if (!setting.Show) audienceShowSettings.show[audience] = false;
+          if (!setting.Required) audienceShowSettings.required[audience] = false;
+        });
+      }
+    });
+
+    audienceShowSettings.show[0] = [1, 2, 3].every(audience => audienceShowSettings.show[audience]);
+    audienceShowSettings.required[0] = [1, 2, 3].every(
+      audience => audienceShowSettings.required[audience]
+    );
+
+    return audienceShowSettings;
+  };
+
+  useEffect(() => {
+    setSettingsForAll(updateAudienceSettings());
+  }, [values]);
+
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
       {sectionLoading ? (
@@ -443,7 +465,7 @@ function FormSectionSettings() {
                 Section Name
               </Typography>
               <TextField
-                className={classes.formControlClass}
+                className={cs(classes.formControlClass, classes.sectionNameField)}
                 size="small"
                 fullWidth
                 variant="outlined"
