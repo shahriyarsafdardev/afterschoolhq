@@ -3,11 +3,10 @@ import { useSearchParams, useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Grid } from '@material-ui/core';
 
-import { useFormBuilder } from 'redux/hooks';
-import { Loader } from 'components';
-
 import useStyles from './styles';
+import { Loader } from 'components';
 import FormSettings from './FormSettings';
+import { useFormBuilder } from 'redux/hooks';
 import FormSectionList from './FormSectionList';
 import FormSectionSettings from './FormSectionSettings';
 
@@ -17,7 +16,6 @@ const FormBuilderSection = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
-
   const { msgs, questionsGroups, loading, loadFormData } = useFormBuilder();
 
   useEffect(() => {

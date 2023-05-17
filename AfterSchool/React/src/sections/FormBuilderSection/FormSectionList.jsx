@@ -85,20 +85,6 @@ function FormSectionList() {
     setIsOpen(false);
   };
 
-  if (isMobile && showSettings) {
-    return (
-      <Button
-        variant="outlined"
-        className={classes.formSettingsButton}
-        onClick={toggleShowSettings}
-        data-testid={'formSettingsButton'}
-      >
-        Form Settings
-        <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
-      </Button>
-    );
-  }
-
   const cancelNewSectionHandler = () => {
     setShowNewSectionField(false);
     setNewSectionName('');
@@ -117,6 +103,20 @@ function FormSectionList() {
       await addNewSectionHandler();
     }
   };
+
+  if (isMobile && showSettings) {
+    return (
+      <Button
+        variant="outlined"
+        className={classes.formSettingsButton}
+        onClick={toggleShowSettings}
+        data-testid={'formSettingsButton'}
+      >
+        Form Settings
+        <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
+      </Button>
+    );
+  }
 
   return (
     <Grid item lg={2} md={2} xs={12} sm={6} className={classes.sectionListWrapper}>

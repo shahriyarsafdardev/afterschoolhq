@@ -8,21 +8,19 @@ import { Grid, Typography, Box, Button } from '@material-ui/core';
 import TextField from './components/TextField/TextField';
 import TextAreaQuestion from './components/TextAreaQuestion';
 import { useFormBuilder } from 'redux/hooks';
+import { formTypes } from 'constants';
 import useStyles from './styles';
 
 function FormSettings() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
-
   const [searchParams, setSearchParams] = useSearchParams();
-
   const { form, questionsGroups, updateFormSettings } = useFormBuilder();
+  const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].ID : -1;
 
   const validationSchema = Yup.object().shape({
     FormName: Yup.string().required('Form Name is required')
   });
-
-  const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -36,7 +34,6 @@ function FormSettings() {
   });
 
   const { handleSubmit, values, getFieldProps, touched, errors } = formik;
-  const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].ID : -1;
 
   return (
     <Grid item lg={9} xs={12} sm={6}>
@@ -60,7 +57,6 @@ function FormSettings() {
             />
             <TextField
               formikProps={{
-                // ...getFieldProps('FormType'),
                 value: formTypes[values['FormType']],
                 error: touched['FormType'] && errors['FormType'],
                 helperText: touched['FormType'] && errors['FormType'],
@@ -101,7 +97,6 @@ function FormSettings() {
                 color="primary"
                 className={classes.saveButton}
                 variant="contained"
-                // type="submit"
                 disabled={false}
                 key={'activeGroup'}
                 onClick={() => {

@@ -19,3 +19,4 @@ export const gradeIds = {
 };
 
 export const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
+export const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
