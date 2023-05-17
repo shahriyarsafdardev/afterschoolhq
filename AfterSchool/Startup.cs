@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
 using AccountService = AfterSchoolLibrary.Services.AccountService;
+using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 [assembly: OwinStartup(typeof(Startup))]
 
