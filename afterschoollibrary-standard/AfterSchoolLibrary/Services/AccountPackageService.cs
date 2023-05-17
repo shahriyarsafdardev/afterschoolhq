@@ -62,6 +62,8 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(accountPackage.Save(dc));
             
+            // If the new package is empty it means that they will be assigned Enterprise Package.
+            // For this we need to copy from the previous Package they were subscribed to. 
             if(package.IsEmpty())
                 package = prevAccountPackage.GetPackage(msgs,dc);
             package.CopyFeaturesToAccountPackage(accountPackage, loggedInUser, msgs, dc);
