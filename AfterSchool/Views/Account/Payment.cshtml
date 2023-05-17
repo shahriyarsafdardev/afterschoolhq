@@ -55,7 +55,7 @@
         {
             var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
             <span>
-                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()ly subscription.<br/>Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() every month.</strong>
+                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() == @BillingPeriodType.Day.ToString().ToLower()? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower()+ "ly") subscription.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() every month.</strong>
             </span>
         }
         else
