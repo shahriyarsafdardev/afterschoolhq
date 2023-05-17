@@ -1683,8 +1683,11 @@ namespace AfterSchoolLibrary.Services
                         return;
 
                     var stripePlan = stripeSubscription.Items.First().Plan;
-                    var packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), amsgs, adc);
-
+                    Package packageFromStripe = null;
+                    if (stripePlan.ProductId.IsGuid())
+                    {
+                        packageFromStripe = Package.LoadByUid(stripePlan.ProductId.ToGuid(), amsgs, adc); 
+                    }
                     if (!currentAccountPackage.StartDate.HasValue)
                     {
                         // no trial or trial has ended
@@ -1696,7 +1699,7 @@ namespace AfterSchoolLibrary.Services
                     }
 
                     // needs to match stripe
-                    if (currentAccountPackage.PackageId != packageFromStripe.ID)
+                    if (currentAccountPackage.PackageId != (packageFromStripe?.ID ?? 0))
                     {
                         var newAccountPackage = account.SwitchPackages(
                             packageFromStripe,
@@ -2509,7 +2512,7 @@ namespace AfterSchoolLibrary.Services
                         newPackage,
                         billingPeriodTypeId,
                         null,
-                        accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                        accountPackageToRemove,
                         newTrialEndDateOverride,
                         loggedInUser,
                         amsgs,
@@ -2559,7 +2562,7 @@ namespace AfterSchoolLibrary.Services
                 newPackage,
                 billingPeriodTypeId,
                 stripeSubscriptionId,
-                accountPackageToRemove.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
+                accountPackageToRemove,
                 newTrialEndDateOverride,
                 loggedInUser,
                 msgs,

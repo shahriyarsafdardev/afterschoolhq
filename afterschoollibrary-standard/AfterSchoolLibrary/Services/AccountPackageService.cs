@@ -39,12 +39,12 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static AccountPackage CreateNewAccountPackage(int accountId, Package package, BillingPeriodType billingPeriodType, string stripeSubscriptionId, 
-            DateTime? startDate, DateTime? trialEndDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            AccountPackage prevAccountPackage, DateTime? trialEndDate, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var accountPackage = new AccountPackage
             {
                 AccountId = accountId,
-                PackageId = package.ID,
+                PackageId = package?.ID ?? null,
                 BillingPeriodTypeId = billingPeriodType,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
@@ -52,16 +52,20 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 IsActive = true,
                 Price = billingPeriodType == BillingPeriodType.Month
-                    ? package.Price
-                    : package.PricePerYear,
+                    ? package?.Price ?? 0
+                    : package?.PricePerYear ?? 0,
                 StripeSubscriptionId = stripeSubscriptionId,
-                StartDate = startDate,
+                StartDate = prevAccountPackage.StartDate.HasValue ? DateTime.UtcNow : new DateTime?(),
                 TrialEndDate = trialEndDate,
                 TrialStartDate = trialEndDate.HasValue ? DateTime.UtcNow : new DateTime?()
             };
 
             msgs.AddRange(accountPackage.Save(dc));
             
+            // If the new package is empty it means that they will be assigned Enterprise Package.
+            // For this we need to copy from the previous Package they were subscribed to. 
+            if(package.IsEmpty())
+                package = prevAccountPackage.GetPackage(msgs,dc);
             package.CopyFeaturesToAccountPackage(accountPackage, loggedInUser, msgs, dc);
 
             return accountPackage;
