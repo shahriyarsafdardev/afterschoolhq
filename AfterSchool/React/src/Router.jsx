@@ -3,7 +3,6 @@ import { useRoutes } from 'react-router-dom';
 
 import { Loader } from 'components';
 import utils from 'utils';
-import FormBuilderSection from 'sections/FormBuilderSection';
 
 // eslint-disable-next-line react/display-name
 const Loadable = Component => props => {
@@ -72,6 +71,7 @@ const RedirectToExternal = () => {
 };
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
+const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const AlreadyPaidSection = Loadable(
