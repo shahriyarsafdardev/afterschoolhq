@@ -1,18 +1,17 @@
 import React from 'react';
-import { Grid, Typography, Box, Button } from '@material-ui/core';
-import useStyles from './styles';
-import { useFormik, FormikProvider, Form } from 'formik';
-import { useSnackbar } from 'notistack';
-
 import * as Yup from 'yup';
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+import { useSearchParams } from 'react-router-dom';
+import { useFormik, FormikProvider, Form } from 'formik';
+import { Grid, Typography, Box, Button } from '@material-ui/core';
+
 import TextField from './components/TextField/TextField';
 import TextAreaQuestion from './components/TextAreaQuestion';
 import { useFormBuilder } from 'redux/hooks';
+import useStyles from './styles';
 
 function FormSettings() {
   const classes = useStyles();
-  const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
 
   const [searchParams, setSearchParams] = useSearchParams();

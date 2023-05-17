@@ -144,7 +144,8 @@ function FormSectionSettings() {
   }, [values && Object.keys(values).length]);
 
   const addNewQuestionHandler = index => {
-    const newDisplayOrder = Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder) + 1;
+    const newDisplayOrder =
+      Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder || 0) + 1;
 
     const newQuest = {
       ...newQuestion,
@@ -210,19 +211,6 @@ function FormSectionSettings() {
 
     setValues({ ...newValues });
     setReRender(!reRender);
-  };
-
-  const handleCreateNew = key => {
-    const copiedValue = values[key];
-
-    const newValues = Object.keys(values).reduce((acc, k) => {
-      const newKey = Number(k) > Number(key) ? Number(k) + 1 : k;
-      acc[newKey] = values[k];
-      return acc;
-    }, {});
-
-    newValues[Number(key) + 1] = { ...copiedValue, ID: 0 };
-    formik.setValues(newValues);
   };
 
   const moveObjectInFormikState = (source, destination) => {
@@ -423,7 +411,7 @@ function FormSectionSettings() {
     else setSectionNameError('');
   };
 
-  const updateAudienceSettings = () => {
+  const updateAudienceSettings = useCallback(() => {
     if (!values) return;
 
     const audienceShowSettings = {
@@ -447,7 +435,7 @@ function FormSectionSettings() {
     );
 
     return audienceShowSettings;
-  };
+  }, [values]);
 
   useEffect(() => {
     setSettingsForAll(updateAudienceSettings());
