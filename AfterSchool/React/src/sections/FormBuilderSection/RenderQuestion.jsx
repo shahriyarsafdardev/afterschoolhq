@@ -498,7 +498,7 @@ const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
     }
   }))();
   return (
-    <div className={classes.checkboxWrapper}>
+    <Box className={classes.checkboxWrapper}>
       <FormControlLabel
         data-testid={`${dataTestId}-form`}
         disabled={disabled}
@@ -531,7 +531,7 @@ const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
           setFieldValue(!value);
         }}
       />
-    </div>
+    </Box>
   );
 };
 

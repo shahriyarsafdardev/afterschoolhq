@@ -73,9 +73,6 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
               <b>{'Require (*)'}</b>
             </Grid>
           </Grid>
-          {questionSettings.map(audience => {
-            return <RenderAudienceRow audience={audience} key={audience.Audience} />;
-          })}
           <RenderAudienceRow
             audience={{
               Audience: 0,
@@ -84,6 +81,9 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
             }}
             key={0}
           />
+          {questionSettings.map(audience => {
+            return <RenderAudienceRow audience={audience} key={audience.Audience} />;
+          })}
         </Grid>
       </Box>
     </ClickAwayListener>

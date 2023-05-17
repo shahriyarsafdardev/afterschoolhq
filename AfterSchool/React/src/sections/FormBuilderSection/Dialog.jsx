@@ -1,6 +1,5 @@
 import React from 'react';
 import cs from 'classnames';
-import PropTypes from 'prop-types';
 
 import {
   Dialog as MDialog,
@@ -45,14 +44,6 @@ const Dialog = props => {
       </DialogActions>
     </MDialog>
   );
-};
-
-Dialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  title: PropTypes.string,
-  text: PropTypes.string
 };
 
 export default Dialog;

@@ -23,11 +23,15 @@ function FormSectionList() {
   const { formId } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showNewSectionField, setShowNewSectionField] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
   const [newSectionError, setNewSectionError] = useState('');
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [showSettings, setShowSettings] = useState(!isMobile);
+  const questionGroup = searchParams.get('qg');
   const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
@@ -36,7 +40,9 @@ function FormSectionList() {
 
   const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].ID : -1;
 
-  const questionGroup = searchParams.get('qg');
+  const toggleShowSettings = () => {
+    if (isMobile) setShowSettings(!showSettings);
+  };
 
   const handleDelete = async key => {
     const index = questionsGroups.findIndex(questionGroup => questionGroup.ID === key);
@@ -61,8 +67,6 @@ function FormSectionList() {
     });
   };
 
-  const [deleteSectionId, setdeleteSectionId] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
   const handleDeleteSection = async () => {
     await handleDelete(deleteSectionId);
     handleCloseDialog();
@@ -75,15 +79,12 @@ function FormSectionList() {
       }
     }
   };
+
   const handleCloseDialog = () => {
     setdeleteSectionId(null);
     setIsOpen(false);
   };
 
-  const [showSettings, setShowSettings] = useState(!isMobile);
-  const toggleShowSettings = () => {
-    if (isMobile) setShowSettings(!showSettings);
-  };
   if (isMobile && showSettings) {
     return (
       <Button

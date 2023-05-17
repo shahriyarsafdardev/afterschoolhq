@@ -1,6 +1,7 @@
 import React from 'react';
 import Select from 'react-select';
-import { FormControl } from '@material-ui/core';
+import { startCase } from 'lodash';
+import { FormControl, Box } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -15,13 +16,13 @@ const DropDown = ({ question, setFieldValue, disabled, dataTestId }) => {
   };
 
   const dropdownOptions = options.map(({ key, value }) => {
-    return { value: key, label: value };
+    return { value: key, label: startCase(value) };
   });
 
-  const selectedValue = { value: questionType.key, label: questionType.value };
+  const selectedValue = { value: questionType.key, label: startCase(questionType.value) };
 
   return (
-    <div className={classes.formControlDropDownClass}>
+    <Box className={classes.formControlDropDownClass}>
       <FormControl
         variant="outlined"
         classes={{
@@ -40,7 +41,7 @@ const DropDown = ({ question, setFieldValue, disabled, dataTestId }) => {
           isDisabled={disabled}
         />
       </FormControl>
-    </div>
+    </Box>
   );
 };
 export default DropDown;

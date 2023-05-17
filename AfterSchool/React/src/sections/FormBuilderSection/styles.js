@@ -11,12 +11,8 @@ export default makeStyles(theme => ({
       padding: '0px 10px'
     }
   },
-  sectionHeading: {
-    // borderBottom: '1px solid #dddddd',
-    // fontWeight: 'normal'
-  },
+  sectionHeading: {},
   sectionName: {
-    // color: '#00b492',
     fontWeight: 'normal',
 
     cursor: 'pointer',
@@ -27,11 +23,8 @@ export default makeStyles(theme => ({
     lineHeight: '2',
     fontWeight: 'normal',
     color: '#00b492'
-
-    // backgroundColor: '#dedede'
   },
   sectionListWrapper: {
-    // borderLeft: '1px solid #dddddd',
     paddingLeft: '10px',
     [theme.breakpoints.down('sm')]: {
       position: 'absolute',
@@ -76,35 +69,25 @@ export default makeStyles(theme => ({
     }
   },
   formControlDropDownClass: {
-    // display: 'block',
     maxWidth: 340,
     width: '100%',
     padding: '8px 12px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',
-    // backgroundColor: '#ffffff',
-    // backgroundImage: 'none',
-    // borderRadius: '0',
     '& .MuiOutlinedInput-root': {
       width: '100%',
       height: '40px'
     }
   },
   formControlClass: {
-    // display: 'block',
-    // maxWidth: 540,
     width: '100%',
     padding: '8px 12px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',
-    // backgroundColor: '#ffffff',
-    // backgroundImage: 'none',
-    // borderRadius: '0',
     '& .MuiOutlinedInput-root': {
       width: '100%'
-      //   height: '40px'
     }
   },
   sectionsListHeading: {
@@ -179,15 +162,11 @@ export default makeStyles(theme => ({
     height: '40px',
     border: '1px solid #E4E4E4',
     margin: '8px 12px'
-    // [theme.breakpoints.down('sm')]: {
-    //     width: '100%'
-    // }
   },
   formSettingsButton: {
     fontSize: 14,
     width: 120,
     border: '1px solid #E4E4E4',
-    // margin: '8px 12px',
     [theme.breakpoints.down('sm')]: {
       width: '100%'
     }
