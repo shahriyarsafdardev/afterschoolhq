@@ -267,45 +267,50 @@ else
                     }
                 </td>
             }
-            @if (activityType.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip, ActivityType.VolunteerOpportunity}))
+            @if (activityType.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip, ActivityType.VolunteerOpportunity }))
             {
-                <td class="text-center">
+                <td class="text-center">                        
                     @if (showLink)
                     {
                         if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                         {
-                            if (activity.GetStartingGradeLevel().Name == activity.GetEndingGradeLevel().Name)
+                            var activityStartingGradeLevel = activity.GetStartingGradeLevel();
+                            var activityEndingGradeLevel = activity.GetEndingGradeLevel();
+
+                            if (activityStartingGradeLevel.ID == activityEndingGradeLevel.ID)
                             {
-                                <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">
-                                    @activity.GetStartingGradeLevel().Name
+                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                    @activityStartingGradeLevel.Name
                                 </a>
                             }
                             else
                             {
-                                <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">
-                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">
+                                    @activityStartingGradeLevel.Name - @activityEndingGradeLevel.Name
                                 </a>
                             }
                         }
                         else
                         {
-                            <a href="@Url.Action("editrestrictions", "activity", new {id = activity.Uid})">-</a>
+                            <a href="@Url.Action("editrestrictions", "activity", new { id = activity.Uid })">-</a>
                         }
                     }
                     else
                     {
                         if (activity.GradeLevelStart.HasValue && activity.GradeLevelEnd.HasValue)
                         {
-                            if (activity.GetStartingGradeLevel().Name == activity.GetEndingGradeLevel().Name)
+                            var activityStartingGradeLevel = activity.GetStartingGradeLevel();
+                            var activityEndingGradeLevel = activity.GetEndingGradeLevel();
+                            if (activityStartingGradeLevel.ID == activityEndingGradeLevel.ID)
                             {
                                 <span>
-                                    @activity.GetStartingGradeLevel().Name
+                                    @activityStartingGradeLevel.Name
                                 </span>
                             }
                             else
                             {
                                 <span>
-                                    @activity.GetStartingGradeLevel().Name - @activity.GetEndingGradeLevel().Name
+                                    @activityStartingGradeLevel.Name - @activityEndingGradeLevel.Name
                                 </span>
                             }
 
