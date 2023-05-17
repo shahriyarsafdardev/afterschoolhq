@@ -152,7 +152,7 @@ const RenderQuestion = ({
 
     const renderOption = ({ option, index, dragHandleProps, errors, touched }) => {
       return (
-        <Grid container className={classes.deleteIcon} key={`value-${index}`}>
+        <Grid container className={classes.deleteIcon} key={`value-${index}-${ID}`}>
           <Grid
             item
             lg={1}
@@ -180,7 +180,7 @@ const RenderQuestion = ({
                 className={classes.formControlClass}
                 size="small"
                 fullWidth
-                key={`${index}-${options.key}`}
+                key={`${ID}-${index}-${QuestionDataTypeId}`}
                 placeholder="Option"
                 value={option?.key || ''}
                 onChange={event => handleKeyChange(index, event)}
@@ -195,7 +195,7 @@ const RenderQuestion = ({
                 className={classes.formControlClass}
                 size="small"
                 fullWidth
-                key={`${index}-${options.value}`}
+                key={`${ID}-${index}-${QuestionDataTypeId}`}
                 placeholder="Value (Optional)"
                 value={option?.value || ''}
                 onChange={event => handleValueChange(index, event)}
