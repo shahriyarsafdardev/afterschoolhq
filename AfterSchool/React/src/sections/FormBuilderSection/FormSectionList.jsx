@@ -122,7 +122,10 @@ function FormSectionList() {
       <Typography
         variant="h6"
         className={classes.settingsLink}
-        onClick={() => navigate(`/Org/form/edit/${formId}`)}
+        onClick={() => {
+          navigate(`/Org/form/edit/${formId}`);
+          toggleShowSettings();
+        }}
       >
         Settings
       </Typography>

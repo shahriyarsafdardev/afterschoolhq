@@ -8,6 +8,7 @@ export default makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column-reverse',
       width: '100%',
+      padding: '0px 10px'
     }
   },
   sectionHeading: {
@@ -149,7 +150,7 @@ export default makeStyles(theme => ({
       justifyContent: 'space-between',
       minHeight: '80px',
       flexDirection: 'column',
-      width: '90%',
+      width: '100%',
       maxWidth: 540
     }
   },
@@ -275,6 +276,9 @@ export default makeStyles(theme => ({
     fontSize: '12px'
   },
   gridItemHeight: {
-    height: '70px'
+    minHeight: '70px'
+  },
+  sectionNameField: {
+    padding: '8px 0px'
   }
 }));
