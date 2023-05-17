@@ -274,19 +274,21 @@ const RenderQuestion = ({
                   {errors?.Options}
                 </FormHelperText>
               )}
-              <Typography
-                style={{
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: '12px 0px',
-                  width: 'fit-content'
-                }}
-                onClick={() => {
-                  handleAddNewOption();
-                }}
-              >
-                Add new option
-              </Typography>
+              {!(!customQuestion || IsLocked) && (
+                <Typography
+                  style={{
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: '12px 0px',
+                    width: 'fit-content'
+                  }}
+                  onClick={() => {
+                    handleAddNewOption();
+                  }}
+                >
+                  Add new option
+                </Typography>
+              )}
             </Box>
           </Grid>
         </Grid>
