@@ -21,6 +21,8 @@ function FormSectionSettings() {
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [initialValues, setInitialValues] = useState({});
+  const [reRender, setReRender] = useState(false);
+  const [settingsForAll, setSettingsForAll] = useState({});
   const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
   const [searchParams, setSearchParams] = useSearchParams();
@@ -38,6 +40,10 @@ function FormSectionSettings() {
   const currentSectionIndex = questionsGroups.findIndex(qg => qg.ID == questionGroup);
   const currentSection = questionsGroups[currentSectionIndex];
   const [sectionName, setSectionName] = useState(currentSection?.Name || '');
+
+  const { dropdown, radioList, checkBoxList } = questionType;
+  const isQuestionWithOptions = questionTypeId =>
+    [dropdown, radioList, checkBoxList].includes(questionTypeId);
 
   useEffect(() => {
     loadSectionData(formId, questionGroup);
@@ -58,12 +64,9 @@ function FormSectionSettings() {
       });
       tempInitialValues[tempQuestion.DisplayOrder] = tempQuestion;
     });
+
     setInitialValues(tempInitialValues);
   }, [questions?.length]);
-
-  const { dropdown, radioList, checkBoxList } = questionType;
-  const isQuestionWithOptions = questionTypeId =>
-    [dropdown, radioList, checkBoxList].includes(questionTypeId);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -238,9 +241,6 @@ function FormSectionSettings() {
 
     moveObjectInFormikState(source.index, destination.index);
   };
-
-  const [reRender, setReRender] = useState(false);
-  const [settingsForAll, setSettingsForAll] = useState({});
 
   const handleSettingForAll = (propertyName, registrantType, val) => {
     const updatedQuestionSettings = settings => {

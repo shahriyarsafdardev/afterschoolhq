@@ -26,8 +26,6 @@ export default {
   MuiButton: {
     root: {
       borderRadius: '6px'
-      //   minHeight: '52px'
-      //   minWidth: '200px'
     },
     containedPrimary: {
       color: '#ffffff'
