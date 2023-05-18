@@ -1,16 +1,19 @@
 import cs from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { ArrowDropDownOutlined, Done, CloseOutlined } from '@material-ui/icons';
 import {
+  Box,
   Grid,
   Button,
   useTheme,
   TextField,
   Typography,
   useMediaQuery,
-  InputAdornment
+  InputAdornment,
+  ClickAwayListener,
+  Popover
 } from '@material-ui/core';
 
 import { useFormBuilder } from 'redux/hooks';
@@ -20,6 +23,7 @@ import Dialog from './Dialog';
 function FormSectionList() {
   const theme = useTheme();
   const classes = useStyles();
+  const ref = useRef(null);
   const { formId } = useParams();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -29,6 +33,7 @@ function FormSectionList() {
   const [newSectionError, setNewSectionError] = useState('');
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
   const questionGroup = searchParams.get('qg');
@@ -104,46 +109,45 @@ function FormSectionList() {
     }
   };
 
-  if (isMobile && showSettings) {
-    return (
-      <Button
-        variant="outlined"
-        className={classes.formSettingsButton}
-        onClick={toggleShowSettings}
-        data-testid={'formSettingsButton'}
-      >
-        Form Settings
-        <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
-      </Button>
-    );
-  }
-
-  return (
-    <Grid item lg={2} md={2} xs={12} sm={6} className={classes.sectionListWrapper}>
-      <Typography
-        variant="h6"
-        className={classes.settingsLink}
-        onClick={() => {
-          navigate(`/Org/form/edit/${formId}`);
-          toggleShowSettings();
-        }}
-      >
-        Settings
-      </Typography>
-      <Typography
-        variant="h6"
-        className={classes.sectionsListHeading}
-        onClick={() => {
-          setSearchParams(`qg=${firstSectionId}`);
-          toggleShowSettings();
-        }}
-        data-testid={'formSections'}
-      >
-        Sections
-      </Typography>
+  const SectionList = () => (
+    <Grid item lg={2} md={2} xs={12} sm={12} className={classes.sectionListWrapper}>
+      {!isMobile && (
+        <>
+          <Typography
+            variant="h6"
+            className={classes.settingsLink}
+            onClick={() => {
+              navigate(`/Org/form/edit/${formId}`);
+              toggleShowSettings();
+            }}
+          >
+            Settings
+          </Typography>
+          <Typography
+            variant="h6"
+            className={classes.sectionsListHeading}
+            onClick={() => {
+              setSearchParams(`qg=${firstSectionId}`);
+              toggleShowSettings();
+            }}
+            data-testid={'formSections'}
+          >
+            Sections
+          </Typography>
+        </>
+      )}
       {questionsGroupsToShow.map(({ ID: key, QuestionGroupDataTypeId, Name }) => (
-        <Grid item key={key} spacing={2} className={classes.displayFlex}>
-          <Grid lg={11}>
+        <Grid
+          item
+          lg={12}
+          md={12}
+          xs={12}
+          sm={12}
+          key={key}
+          spacing={2}
+          className={classes.displayFlex}
+        >
+          <Grid lg={11} md={11} xs={11} sm={11}>
             <Typography
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
@@ -156,7 +160,7 @@ function FormSectionList() {
               {Name}
             </Typography>
           </Grid>
-          <Grid lg={1}>
+          <Grid lg={1} md={1} xs={1} sm={1}>
             {QuestionGroupDataTypeId === 0 && (
               <CloseOutlined
                 data-testid={`deleteFormSectionIcon-${Name}`}
@@ -232,6 +236,43 @@ function FormSectionList() {
       )}
     </Grid>
   );
+
+  if (isMobile) {
+    return (
+      <Box>
+        <Typography className={classes.link} onClick={() => navigate(`/Org/form/edit/${formId}`)}>
+          Return to Edit Settings
+        </Typography>
+        <Button
+          variant="outlined"
+          className={classes.formSettingsButton}
+          onClick={() => setOpen(true)}
+          data-testid={'formSettingsButton'}
+          ref={ref}
+        >
+          Form Settings
+          <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
+        </Button>
+        <Popover
+          anchorEl={ref.current}
+          open={open}
+          onClose={() => setOpen(false)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+        >
+          <SectionList />
+        </Popover>
+      </Box>
+    );
+  }
+
+  return <SectionList />;
 }
 
 export default FormSectionList;

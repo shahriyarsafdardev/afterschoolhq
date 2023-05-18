@@ -36,7 +36,7 @@ function FormSettings() {
   const { handleSubmit, values, getFieldProps, touched, errors } = formik;
 
   return (
-    <Grid item lg={9} xs={12} sm={6}>
+    <Grid item lg={9} md={9} xs={12} sm={12}>
       <Box>
         <Typography variant="h6" className={classes.sectionHeading}>
           Settings

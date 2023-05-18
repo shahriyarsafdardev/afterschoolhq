@@ -34,7 +34,7 @@ import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-const StyledImage = styled('img')(({ theme }) => ({
+const StyledImage = styled('img')(() => ({
   width: '20px',
   height: 'auto',
   margin: '4px 6px',
@@ -54,10 +54,15 @@ const RenderQuestion = ({
 }) => {
   const theme = useTheme();
   const classes = useStyles();
+  const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState(value);
+  const [initialized, setInitialized] = useState(false);
+  const [timeoutConst, setTimeoutConst] = useState(null);
   const [showAudience, setShowAudience] = useState(false);
+  const [deleteSectionId, setdeleteSectionId] = useState(null);
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
   const {
     ID,
     Text,
@@ -67,13 +72,24 @@ const RenderQuestion = ({
     QuestionSettings,
     QuestionDataTypeId
   } = question;
+
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
+  const [options, setOptions] = useState(Options || []);
+  const customQuestion = QuestionDataTypeId === 0;
+
+  const updateValue = () => {
+    if (timeoutConst) {
+      clearTimeout(timeoutConst);
+    }
+    const tempTimeout = setTimeout(() => {
+      setFieldValue(index, question);
+    }, 1500);
+    setTimeoutConst(tempTimeout);
+  };
   const questionTypesOptions = Object.keys(questionType).map(key => ({
     key: questionType[key],
     value: key
   }));
-
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     setInitialized(true);
@@ -85,8 +101,6 @@ const RenderQuestion = ({
     }
   }, [question]);
 
-  const [deleteSectionId, setdeleteSectionId] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
   const handleDeleteSection = async () => {
     await handleDelete(deleteSectionId);
     handleCloseDialog();
@@ -96,11 +110,6 @@ const RenderQuestion = ({
     setdeleteSectionId(null);
     setIsOpen(false);
   };
-
-  const genOptions = Options;
-
-  const [options, setOptions] = useState(genOptions || []);
-  const customQuestion = QuestionDataTypeId === 0;
 
   function renderOptions(showOptions) {
     useEffect(() => {
@@ -225,9 +234,9 @@ const RenderQuestion = ({
 
     return (
       showOptions && (
-        <Grid container>
+        <Grid item lg={12} md={12} sm={12} xs={12} container>
           <Grid lg={1}></Grid>
-          <Grid lg={11}>
+          <Grid lg={11} md={12} sm={12} xs={12}>
             <Box
               className={cs(classes.flexDirectionCol)}
               style={{ display: 'flex', padding: '8px 12px' }}
@@ -294,18 +303,6 @@ const RenderQuestion = ({
       )
     );
   }
-  const [timeoutConst, setTimeoutConst] = useState(null);
-
-  const updateValue = () => {
-    if (timeoutConst) {
-      clearTimeout(timeoutConst);
-    }
-    const tempTimeout = setTimeout(() => {
-      setFieldValue(index, question);
-    }, 1500);
-    setTimeoutConst(tempTimeout);
-  };
-  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
 
   return (
     <Box className={classes.question}>
@@ -339,7 +336,7 @@ const RenderQuestion = ({
               data-testid={`questionNameField-${ID}-${index}`}
             />
           </Grid>
-          <Grid item lg={3} sm={3} xs={6} className={classes.gridItemHeight}>
+          <Grid item lg={3} md={4} sm={4} xs={6} className={classes.gridItemHeight}>
             <DropDown
               question={{ ...question, ...{ options: questionTypesOptions } }}
               setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
@@ -348,14 +345,8 @@ const RenderQuestion = ({
             />
           </Grid>
           <Grid lg={1}></Grid>
-          <Grid
-            item
-            lg={11}
-            sm={3}
-            xs={6}
-            className={cs(classes.displayFlex, classes.justifyContentSpaceBetween)}
-          >
-            <Grid item lg={2} sm={12} xs={12} className={classes.positionRelative}>
+          <Grid item lg={11} md={8} sm={6} xs={6} className={cs(classes.audienceWrapper)}>
+            <Grid item lg={2} md={5} sm={12} xs={12} className={classes.positionRelative}>
               <Button
                 variant="outlined"
                 className={classes.audienceButton}
@@ -380,13 +371,20 @@ const RenderQuestion = ({
               )}
             </Grid>
             {!isMobile && (
-              <Grid item lg={10} sm={0} xs={0}>
+              <Grid
+                item
+                lg={9}
+                md={6}
+                sm={0}
+                xs={0}
+                className={cs(classes.displayFlex, classes.flexWrap)}
+              >
                 {QuestionSettings.map(({ Audience, Show, Required }) => {
                   if (!(Show || Required)) return;
 
                   return (
                     <Chip
-                      style={{ backgroundColor: '#F2F2F5', marginRight: '2px' }}
+                      style={{ backgroundColor: '#F2F2F5', margin: '1px' }}
                       label={`${audienceTypes[Audience]}${Required ? '*' : ''}`}
                       key={Audience}
                     />
