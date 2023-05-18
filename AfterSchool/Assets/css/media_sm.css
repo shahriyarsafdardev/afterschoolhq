@@ -109,6 +109,13 @@
         margin: 0 !important;
     }
 
+    .publish-activity-top {
+        position: relative;
+        width: 100%;
+        padding: 20px 40px;
+        color: white;
+    }
+
     .activity-footer {
         position: fixed;
         z-index: 999999;

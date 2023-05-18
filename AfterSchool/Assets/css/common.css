@@ -527,12 +527,26 @@
     text-decoration: underline;
 }
 
+.btn-publish-section {
+    background: #FFFFFF !important;
+    width: 280px !important;
+}
+
 .btn-activity-footer {
     box-shadow: 0 0 4px 0px #555555;
     background-color: #c3eae0;
     border-color: #c3eae0;
     padding: 10px 20px;
     width: 180px;
+    margin-bottom: 5px;
+}
+
+.activity-footer-green {
+    background-color: #00c5a3;
+}
+
+.activity-footer-red {
+    background-color: #FF7070;
 }
 
 .show-more {

@@ -62,6 +62,13 @@
         cursor:not-allowed !important;
         pointer-events: unset  !important;
     }
+
+    .publish-text {
+        padding-bottom: 8px;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 22px;
+    }
 </style>
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary
@@ -76,6 +83,67 @@
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+@if (isAccountAndLoggedInUserIsOwner)
+{
+    <div class="publish-activity-top text-center hide @(Model.IsPublished ? "activity-footer-green" : "activity-footer-red")" id="footer-activity">
+        <button aria-label="Close" class="modal-close-button" onclick="hideActivityRibbon()" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        @if (Model.IsPublished)
+        {
+            <p class="publish-text">This @(Model.ActivityType.ToString().SplitByUpperCase().ToLower()) is currently <strong>live.</strong></p>
+        }
+        else
+        {
+            <p class="publish-text">This @(Model.ActivityType.ToString().SplitByUpperCase().ToLower()) is currently <strong>unpublished.</strong></p>
+        }
+        @if (Model.IsPublished)
+        {
+            <a class="btn btn-default btn-activity-footer btn-publish-section"
+               href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
+                Return to Edit
+            </a>
+            <a class="btn btn-default btn-activity-footer btn-publish-section"
+               href="@Url.Action("unpublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                Unpublish @(Model.ActivityType.ToString().SplitByUpperCase())
+            </a>
+        }
+        else
+        {
+            <a class="btn btn-default btn-activity-footer btn-publish-section"
+               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
+                Return to Edit
+            </a>
+            if (Model.IsPublished)
+            {
+                <a class="btn btn-default btn-activity-footer btn-publish-section"
+                   href="@Url.Action("unpublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                    Unpublish
+                </a>
+            }
+            else
+            {
+                if (canPublishActivity)
+                {
+                    <a class="btn btn-default btn-activity-footer btn-publish-section"
+                       id="publish-activity"
+                       href="@Url.Action("publish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                        Publish @(Model.ActivityType.ToString().SplitByUpperCase())
+                    </a>
+                }
+                else
+                {
+                    <a class="btn btn-default btn-activity-footer btn-publish-section"
+                       href="@Url.Action("requesttopublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
+                        Request to Publish
+                    </a>
+                }
+            }
+        }
+    </div>
+    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary {{"ActivityUid", Model.Uid}, {"IsActivityFree", Model.IsFree}});
+}
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(Model, accountProfile, session)); }
 
@@ -302,57 +370,6 @@
 </div>
 </div>
 
-@if (isAccountAndLoggedInUserIsOwner)
-{
-    <div class="activity-footer text-center hide" id="footer-activity">
-        <button aria-label="Close" class="modal-close-button" onclick="hideActivityRibbon()" type="button">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        @if (Model.IsPublished)
-        {
-            <button class="btn btn-default btn-activity-footer btn-share" type="button">Share</button>
-            <a class="btn btn-default btn-activity-footer"
-               href="@Url.Action("editsetup", "activity", new { id = Model.Uid, area = "org" })">
-                Edit @(Model.ActivityType.ToString().SplitByUpperCase())
-            </a>
-        }
-        else
-        {
-            <button class="btn btn-default btn-activity-footer" disabled type="button">Share</button>
-            <a class="btn btn-default btn-activity-footer"
-               href="@Url.Action("editsetup", "activity", new {id = Model.Uid, area = "org"})">
-                Return to Edit
-            </a>
-            if (Model.IsPublished)
-            {
-                <a class="btn btn-default btn-activity-footer"
-                   href="@Url.Action("unpublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
-                    Unpublish
-                </a>
-            }
-            else
-            {
-                if (canPublishActivity)
-                {
-                    <a class="btn btn-default btn-activity-footer"
-                       id="publish-activity"
-                       href="@Url.Action("publish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
-                        Publish
-                    </a>
-                }
-                else
-                {
-                    <a
-                        class="btn btn-default btn-activity-footer"
-                        href="@Url.Action("requesttopublish", "activity", new {id = Model.Uid, isFromActivityHome = true, area = "org"})">
-                        Request to Publish
-                    </a>
-                }
-            }
-        }
-    </div>
-    Html.RenderPartial("~/Views/Shared/_GettingStartedModal.cshtml", Model.OwnerAccount, new ViewDataDictionary {{"ActivityUid", Model.Uid}, {"IsActivityFree", Model.IsFree}});
-}
 
 @if (session.IsNotEmpty())
 {
