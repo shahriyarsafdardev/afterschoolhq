@@ -1,15 +1,15 @@
 ﻿<div>
-  <p>Hey @Model.ActivityContactName,</p>
-
+  <p>Hi @Model.ActivityContactName,</p>
+  <br>
   <p>
-    This is an automated email letting you know that @Model.RegistrantName has been withdrawn from @Model.ActivityName. If you believe this is a mistake, please contact the provider.
+    This is an automated email letting you know that @Model.RegistrantName has been withdrawn from @Model.ActivityName. If you did not withdraw this participant or believe this is an error, 
+    please contact AfterSchool HQ support <a href="mailto:@Model.SupportEmail">(@Model.SupportEmail)</a>
   </p>
-
+  <br>
   <p>
-    @Model.LastParagraph
-  </p>
-
+      Thank you,
   <p>
-      Your @Model.ProductName Team
+  <p>
+      @Model.ProductName
   </p>
 </div>
