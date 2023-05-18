@@ -233,6 +233,7 @@ function FormSectionSettings() {
     newState[destination] = { ...sourceValue, DisplayOrder: Number(destination) };
 
     setValues(newState, false);
+    setReRender(!reRender);
   };
 
   const onDragEnd = result => {
