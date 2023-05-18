@@ -99,13 +99,20 @@ export const useFormBuilderActions = () => {
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
-    await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
-      if (!msgs.length) {
-        dispatch(setSectionData(values));
-        dispatch(updateQuestionsGroups(FormQuestionGroups));
+    await FormBuilderRepository.submitFormSection({ ...values, SaveQuestion: true }).then(
+      ({
+        data: {
+          msgs,
+          obj: { FormQuestion }
+        }
+      }) => {
+        dispatch(setMsgs(msgs));
+        if (!msgs.length) {
+          dispatch(setSectionData({ ...values, FormQuestion }));
+          dispatch(updateQuestionsGroups(FormQuestionGroups));
+        }
       }
-    });
+    );
   };
 
   const deleteSectionData = async ({ FormQuestionGroups, ...values }) => {
