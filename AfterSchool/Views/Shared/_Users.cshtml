@@ -74,7 +74,7 @@
                                 </a>
                             </td>
                         }
-                        else
+                        else if (isAfterSchoolAdmin)
                         {
                             <td></td>
                         }
@@ -102,6 +102,7 @@
                                         <select name="newassignmenttype"
                                                 id="newassignmenttype-@user.ID"
                                                 class="form-control"
+                                                style="min-width: 250px;"
                                                 onchange="updateAssignment(@user.ID, '@UI.JavascriptSafeString(user.FullName)', this)">
 
                                             @foreach (var assignmenttype in Enum.GetValues(typeof(UserType)).Cast<UserType>())
