@@ -77,13 +77,15 @@ function FormSectionSettings() {
         const updatedValue = { ...values[key] };
 
         const optionsString =
-          updatedValue.Options?.map(option => {
-            if (option.value) {
-              return `${option.key}|${option.value}`;
-            } else {
-              return option.key;
-            }
-          }).join(',') || '';
+          (updatedValue.Options &&
+            updatedValue.Options?.map(option => {
+              if (option.value) {
+                return `${option.key}|${option.value}`;
+              } else {
+                return option.key;
+              }
+            }).join(',')) ||
+          '';
 
         updatedValue.Options = optionsString;
         return updatedValue;
@@ -103,7 +105,6 @@ function FormSectionSettings() {
       }).then(() => {
         if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
       });
-      console.log(values, formQuestions, 'submitted successfully');
     }
   });
 
@@ -142,7 +143,7 @@ function FormSectionSettings() {
         }, {})
       )
     );
-  }, [values && Object.keys(values).length]);
+  }, [values]);
 
   const addNewQuestionHandler = index => {
     const newDisplayOrder =
@@ -150,6 +151,7 @@ function FormSectionSettings() {
 
     const newQuest = {
       ...newQuestion,
+      ID: 0,
       GroupTitle: sectionName,
       FormQuestionGroupId: currentSection?.ID,
       DisplayOrder: newDisplayOrder
@@ -189,7 +191,7 @@ function FormSectionSettings() {
       newValues[newKey] = { ...deletedValue, IsDeleted: true, DisplayOrder: newKey };
     }
 
-    setValues({ ...newValues });
+    setValues({ ...newValues }, false);
   };
 
   const handleCopy = key => {
@@ -210,13 +212,13 @@ function FormSectionSettings() {
       IsLocked: false
     };
 
-    setValues({ ...newValues });
+    setValues({ ...newValues }, false);
     setReRender(!reRender);
   };
 
   const moveObjectInFormikState = (source, destination) => {
-    const sourceValue = values[source];
-    const newState = { ...values };
+    const sourceValue = cloneDeep(values[source]);
+    const newState = cloneDeep(values);
 
     if (source < destination) {
       for (let i = source; i < destination; i++) {
@@ -228,9 +230,9 @@ function FormSectionSettings() {
       }
     }
 
-    newState[destination] = sourceValue;
+    newState[destination] = { ...sourceValue, DisplayOrder: Number(destination) };
 
-    setValues(newState);
+    setValues(newState, false);
   };
 
   const onDragEnd = result => {
@@ -302,7 +304,7 @@ function FormSectionSettings() {
     });
 
     setReRender(!reRender);
-    setValues(newValues);
+    setValues(newValues, false);
   };
   const ApplyToAllControls = () => {
     return (
