@@ -27,14 +27,12 @@ export default makeStyles(theme => ({
   sectionListWrapper: {
     paddingLeft: '10px',
     [theme.breakpoints.down('sm')]: {
-      position: 'absolute',
       backgroundColor: '#F9F9F9',
       boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
       zIndex: 1,
       maxHeight: '600px',
       overflow: 'scroll',
-      padding: '8px 12px',
-      top: '200px'
+      padding: '8px 12px'
     }
   },
   formControlRoot: {
@@ -53,8 +51,13 @@ export default makeStyles(theme => ({
       borderBottom: 0
     }
   },
-  justifyContentSpaceBetween: {
+  audienceWrapper: {
+    display: 'flex',
+    alignSelf: 'baseline',
     justifyContent: 'space-between'
+  },
+  flexWrap: {
+    flexWrap: 'wrap'
   },
   displayFlex: {
     display: 'flex',
@@ -164,8 +167,9 @@ export default makeStyles(theme => ({
     margin: '8px 12px'
   },
   formSettingsButton: {
-    fontSize: 14,
     width: 120,
+    fontSize: 14,
+    margin: '20px 0px 25px 0px',
     border: '1px solid #E4E4E4',
     [theme.breakpoints.down('sm')]: {
       width: '100%'
@@ -255,9 +259,18 @@ export default makeStyles(theme => ({
     fontSize: '12px'
   },
   gridItemHeight: {
-    minHeight: '70px'
+    minHeight: '70px',
+    alignSelf: 'flex-start'
   },
   sectionNameField: {
-    padding: '8px 0px'
+    padding: '8px 0px',
+    marginBottom: '20px'
+  },
+  link: {
+    color: theme.palette.gray.secondary,
+    textDecoration: 'underline',
+    '&:hover': {
+      color: theme.palette.gray.primary
+    }
   }
 }));
