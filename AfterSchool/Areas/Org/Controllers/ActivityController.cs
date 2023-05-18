@@ -1918,8 +1918,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        if (!isongoing.IsBoolean())
-                            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
+                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
 
                         outOfSessionDates =
