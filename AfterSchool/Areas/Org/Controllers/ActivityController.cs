@@ -4631,7 +4631,7 @@ namespace AfterSchool.Areas.Org.Controllers
             result.AverageAttendedPerClass = totalAttended / totalClasses;
             result.TotalActive = totalActive;
             result.PercentActive = Math.Round(((decimal) totalActive / totalReserved) * 100, 2);
-            result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, false, false, null, null, null, msgs);
+            result.ActivityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, ActivityType.Activity, null, false, null, null, null, msgs);
 
             if (activities.IsNotBlank())
                 result.SelectedActivities = currentAccount.GetActivities(activities.Split(',').ToIntegerArray().ToList(), msgs);
