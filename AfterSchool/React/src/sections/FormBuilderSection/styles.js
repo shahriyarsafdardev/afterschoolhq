@@ -57,7 +57,8 @@ export default makeStyles(theme => ({
     justifyContent: 'space-between'
   },
   flexWrap: {
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    marginBottom: '4px'
   },
   displayFlex: {
     display: 'flex',
