@@ -546,8 +546,15 @@ namespace AfterSchoolLibrary.Services
 
             if (!transaction.IsCharge())
                 return "Processed";
+            
+            var hasRefundableAmount = transaction.HasRefundableAmount(false, msgs, dc);
 
-            if (!transaction.HasRefundableAmount(false, msgs, dc))
+            if (transaction.CouponId.HasValue)
+            {
+                return !hasRefundableAmount ? "Coupon Applied" : "Incoming / Coupon Applied";
+            }
+            
+            if (!hasRefundableAmount)
                 return "Refunded";
 
             var currentPayout = GetPayout(transaction, msgs, dc);
@@ -566,7 +573,7 @@ namespace AfterSchoolLibrary.Services
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
-            if (transaction.HasRefundsAHQ(msgs, dc) && transaction.HasRefundableAmount(false, msgs, dc))
+            if (transaction.HasRefundsAHQ(msgs, dc))
                 return "Partially Refunded / Ready for Payout";
 
             if (transaction.HasRefundsManual(msgs, dc))
