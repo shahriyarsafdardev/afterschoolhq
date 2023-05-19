@@ -2,7 +2,6 @@ import cs from 'classnames';
 import { styled } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import {
-  Check as CheckIcon,
   DragIndicator as DragIndicatorIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
   CheckBoxOutlineBlank as CheckBoxOutlineBlankIcon,
@@ -17,7 +16,6 @@ import {
   makeStyles,
   TextField,
   useTheme,
-  Checkbox,
   Button,
   Chip,
   Grid,
@@ -30,6 +28,7 @@ import DropDown from './DropDown';
 import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
 import DeleteIcon from 'assets/delete.svg';
+import RenderCheckbox from './RenderCheckbox';
 import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -83,7 +82,7 @@ const RenderQuestion = ({
     }
     const tempTimeout = setTimeout(() => {
       setFieldValue(index, question);
-    }, 1500);
+    }, 1000);
     setTimeoutConst(tempTimeout);
   };
   const questionTypesOptions = Object.keys(questionType).map(key => ({
@@ -248,6 +247,7 @@ const RenderQuestion = ({
                       {options.map(({ key, value }, index) => (
                         <Draggable
                           draggableId={`question-${ID}-option-${index}`}
+                          isDragDisabled={!customQuestion}
                           index={Number(index)}
                           key={index}
                         >
@@ -427,17 +427,25 @@ const RenderQuestion = ({
           <StyledImage
             src={CopyIcon}
             style={{
+              opacity: `${!IsLocked ? '1' : '0.5'}`,
+              cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
               width: '30px'
             }}
             data-testid={`copyIconOfQuestion-${ID}-${index}`}
-            onClick={() => handleCopy(index)}
+            onClick={() => {
+              if (!IsLocked) handleCopy(index);
+            }}
           />
           <StyledImage
             src={AddIcon}
             style={{
+              opacity: `${!IsLocked ? '1' : '0.5'}`,
+              cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
               width: '25px'
             }}
-            onClick={() => handleAddNewQuestion(index)}
+            onClick={() => {
+              if (!IsLocked) handleAddNewQuestion(index);
+            }}
             data-testid={`addQuestionBelowIcon-${ID}-${index}`}
           />
         </Box>
@@ -457,7 +465,6 @@ const RenderQuestion = ({
 const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
   const { IsActive: value } = question;
   const unCheckedDisabled = value && disabled;
-  const checkboxDisabled = unCheckedDisabled ? { color: '#ffffff !important' } : {};
 
   const classes = makeStyles(() => ({
     checkboxWrapper: {
@@ -472,51 +479,21 @@ const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
     formControlLabelDisabled: {
       opacity: '0.5',
       color: 'black !important'
-    },
-    checked: {
-      color: '#494949 !important',
-      padding: 0,
-      borderRadius: 3,
-      background: 'transparent !important'
-    },
-    checkboxDisabled,
-    root: {
-      padding: 0,
-      background: '#ffffff',
-      color: '#ffffff',
-      border: '1px solid #c4c4c4',
-      borderRadius: 3,
-      height: '18px',
-      width: '18px',
-      '& .MuiSvgIcon-root': {
-        height: '18px',
-        width: '18px'
-      }
     }
   }))();
+
   return (
     <Box className={classes.checkboxWrapper}>
       <FormControlLabel
         data-testid={`${dataTestId}-form`}
         disabled={disabled}
         control={
-          <Checkbox
-            data-testid={`${dataTestId}-checkbox`}
+          <RenderCheckbox
             checked={!value}
-            classes={{
-              checked: classes.checked,
-              root: classes.root,
-              disabled: classes.checkboxDisabled
-            }}
-            checkedIcon={
-              <CheckIcon
-                style={{
-                  height: '18px',
-                  width: '18px'
-                }}
-              />
-            }
-            IconStyle={{ fill: 'black' }}
+            handleCheck={() => setFieldValue(!value)}
+            dataTestId={`${dataTestId}-checkbox`}
+            unCheckedDisabled={unCheckedDisabled}
+            disabled={disabled}
           />
         }
         label={'Hide'}

@@ -2,8 +2,17 @@ import React from 'react';
 import { makeStyles, Checkbox } from '@material-ui/core';
 import { Check, RadioButtonUnchecked } from '@material-ui/icons';
 
-function RenderCheckbox({ checked = false, handleCheck, dataTestId }) {
+function RenderCheckbox({
+  dataTestId,
+  handleCheck,
+  checked = false,
+  disabled = false,
+  unCheckedDisabled
+}) {
+  const checkboxDisabled = unCheckedDisabled ? { color: '#ffffff !important' } : {};
+
   const classes = makeStyles(() => ({
+    checkboxDisabled,
     checked: {
       color: '#494949 !important',
       padding: 0,
@@ -29,10 +38,12 @@ function RenderCheckbox({ checked = false, handleCheck, dataTestId }) {
     <Checkbox
       data-testid={dataTestId}
       checked={checked}
+      disabled={disabled}
       onChange={handleCheck}
       classes={{
         checked: classes.checked,
-        root: classes.root
+        root: classes.root,
+        disabled: classes.checkboxDisabled
       }}
       icon={
         <RadioButtonUnchecked
