@@ -30,7 +30,6 @@ namespace AfterSchool.Areas.Api.Models
             Question.Description = this.Description;
             Question.Options = this.Options;
             Question.Link = this.Link;
-            Question.DisplayOrder = this.DisplayOrder;
             Question.QuestionTypeId = this.QuestionTypeId;
             Question.IsDeleted = this.IsDeleted;
             Question.IsLocked = this.IsLocked;
@@ -41,6 +40,7 @@ namespace AfterSchool.Areas.Api.Models
             Question.IsActive = IsActive;
             Question.IsRequired = IsRequired;
             Question.IsAnswerDescriptionEnabled = IsAnswerDescriptionEnabled;
+            Question.DisplayOrder = DisplayOrder;
         }
 
         public static FormQuestionDto MapToDto(FormQuestion Question)

@@ -240,6 +240,9 @@ function FormSectionSettings() {
     const { source, destination } = result;
     if (!destination) return;
 
+    const canNotDrop = !!values[destination.index].IsLocked;
+    if (canNotDrop) return;
+
     moveObjectInFormikState(source.index, destination.index);
   };
 
@@ -399,7 +402,7 @@ function FormSectionSettings() {
     }
     const tempTimeout = setTimeout(() => {
       sectionNameChangeHandler(value);
-    }, 1500);
+    }, 1000);
     setTimeoutConst(tempTimeout);
   };
 
@@ -483,6 +486,7 @@ function FormSectionSettings() {
                             key =>
                               !values[key].IsDeleted && (
                                 <Draggable
+                                  isDragDisabled={values[key].IsLocked}
                                   draggableId={`question-${key}`}
                                   index={Number(key)}
                                   key={key}
