@@ -2226,7 +2226,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendAuthEmail(WebUser user, int authCode, bool isAfterSchool)
+        public static SystemMessages SendAuthEmail(WebUser user, string authCode, bool isAfterSchool)
         {
             var msgs = new SystemMessages();
 

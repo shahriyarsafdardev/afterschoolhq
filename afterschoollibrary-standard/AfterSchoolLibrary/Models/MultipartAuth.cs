@@ -17,9 +17,9 @@ namespace AfterSchoolLibrary.Models
             LoadObjectValues(ObjectMap);
         }
 
-        public int Code
+        public string Code
         {
-            get => (int) MDV["Code"].Value;
+            get => (string) MDV["Code"].Value;
             set => MDV["Code"].Value = value;
         }
 
@@ -42,7 +42,7 @@ namespace AfterSchoolLibrary.Models
             {
                 const string className = nameof(MultipartAuth);
                 var dp = get_BaseObjectMap(className);
-                dp.Add(className, "Code", SqlDbType.Int);
+                dp.Add(className, "Code", SqlDbType.NVarChar, "100");
                 dp.Add(className, "WebUserId", SqlDbType.Int);
                 dp.Add(className, "ExpirationDate", SqlDbType.DateTime);
 

@@ -302,7 +302,7 @@ namespace AfterSchool.Models
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    multipartAuth.Code = pin;
+                    multipartAuth.Code = pin.ToString();
                     multipartAuth.WebUserId = user.ID;
                     multipartAuth.ExpirationDate = DateTime.UtcNow.AddMinutes(3);
                     multipartAuth.CreateDate = DateTime.UtcNow;
@@ -313,7 +313,7 @@ namespace AfterSchool.Models
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, pin, true));
+                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, pin.ToString(), true));
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
