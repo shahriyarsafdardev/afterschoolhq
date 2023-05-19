@@ -164,7 +164,7 @@ function FormSectionList() {
             {QuestionGroupDataTypeId === 0 && (
               <CloseOutlined
                 data-testid={`deleteFormSectionIcon-${Name}`}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', color: '#B2B2B4' }}
                 onClick={() => {
                   setIsOpen(true);
                   setdeleteSectionId(key);
@@ -221,6 +221,7 @@ function FormSectionList() {
             color: '#494949',
             fontSize: '14px',
             fontWeight: 'bold',
+            marginTop: '25px',
             border: '1px solid #E4E4E4'
           }}
           type="submit"

@@ -127,7 +127,7 @@ function FormSectionSettings() {
                   .required('Options are required')
                   .of(
                     Yup.object().shape({
-                      key: Yup.string().required('Option key is required'),
+                      key: Yup.string().required('Text is required'),
                       value: Yup.string()
                     })
                   )

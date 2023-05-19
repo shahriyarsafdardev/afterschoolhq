@@ -167,14 +167,14 @@ const RenderQuestion = ({
           >
             <Grid item lg={12} xs={12} sm={12} className={cs(classes.displayFlex)}>
               <span {...dragHandleProps} data-testid={`dragIconForOptions-${ID}-${index}`}>
-                <DragIndicatorIcon style={{ float: 'left' }} />
+                <DragIndicatorIcon style={{ float: 'left', color: '#B2B2B4' }} />
               </span>
               {checkboxListIcon ? (
                 <CheckBoxOutlineBlankIcon />
               ) : radioListIcon ? (
                 <RadioButtonUncheckedIcon />
               ) : (
-                <Typography variant="body1">{index}.</Typography>
+                <Typography variant="body1">{index + 1}.</Typography>
               )}
             </Grid>
             <Grid item lg={0} xs={12} sm={12} className={cs(classes.displayFlex)}></Grid>
@@ -308,7 +308,7 @@ const RenderQuestion = ({
         <Grid item lg={12} sm={12} xs={12} container className={classes.displayFlex}>
           <Grid item lg={1} sm={1} xs={1} className={cs(classes.displayFlex)}>
             <span {...dragIndicatorProps} data-testid={`dragIconForQuestions-${ID}-${index}`}>
-              <DragIndicatorIcon style={{ float: 'left' }} />
+              <DragIndicatorIcon style={{ float: 'left', color: '#B2B2B4' }} />
             </span>
             <Typography variant="h6">{index}</Typography>
           </Grid>
