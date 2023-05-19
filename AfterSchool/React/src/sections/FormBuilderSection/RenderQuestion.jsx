@@ -9,11 +9,9 @@ import {
 } from '@material-ui/icons';
 
 import {
-  FormControlLabel,
   FormHelperText,
   useMediaQuery,
   Typography,
-  makeStyles,
   TextField,
   useTheme,
   Button,
@@ -28,7 +26,7 @@ import DropDown from './DropDown';
 import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
 import DeleteIcon from 'assets/delete.svg';
-import RenderCheckbox from './RenderCheckbox';
+import HideCheckBox from './HideCheckBox';
 import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -458,53 +456,6 @@ const RenderQuestion = ({
           />
         </Box>
       </Grid>
-    </Box>
-  );
-};
-
-const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
-  const { IsActive: value } = question;
-  const unCheckedDisabled = value && disabled;
-
-  const classes = makeStyles(() => ({
-    checkboxWrapper: {
-      padding: '0px 6px'
-    },
-    formControlLabelRoot: {
-      margin: '10px 0px',
-      '& .MuiTypography-root': {
-        marginLeft: 18
-      }
-    },
-    formControlLabelDisabled: {
-      opacity: '0.5',
-      color: 'black !important'
-    }
-  }))();
-
-  return (
-    <Box className={classes.checkboxWrapper}>
-      <FormControlLabel
-        data-testid={`${dataTestId}-form`}
-        disabled={disabled}
-        control={
-          <RenderCheckbox
-            checked={!value}
-            handleCheck={() => setFieldValue(!value)}
-            dataTestId={`${dataTestId}-checkbox`}
-            unCheckedDisabled={unCheckedDisabled}
-            disabled={disabled}
-          />
-        }
-        label={'Hide'}
-        classes={{
-          root: classes.formControlLabelRoot,
-          disabled: classes.formControlLabelDisabled
-        }}
-        onChange={() => {
-          setFieldValue(!value);
-        }}
-      />
     </Box>
   );
 };

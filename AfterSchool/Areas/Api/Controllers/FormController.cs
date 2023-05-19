@@ -137,7 +137,7 @@ namespace AfterSchool.Areas.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveFormData(FormSettingsDto FormSettings, FormQuestionGroupDto FormQuestionGroup, List<FormQuestionDto> FormQuestion, bool SaveQuestion)
+        public ActionResult SaveFormData(FormSettingsDto FormSettings, FormQuestionGroupDto FormQuestionGroup, List<FormQuestionDto> FormQuestion, bool? SaveQuestion)
         {
 
             var msgs = new SystemMessages();
@@ -301,7 +301,7 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 msgs.Add(ex.Message, MessageType.Error);
             }
-            if (SaveQuestion.IsNotEmpty() && SaveQuestion)
+            if (SaveQuestion==true)
             {
                 return GetFormQuestions(FormId??0,FormQuestionGroup.ID??0);
             }
