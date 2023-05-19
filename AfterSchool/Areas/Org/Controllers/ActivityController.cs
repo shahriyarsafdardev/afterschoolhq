@@ -1901,9 +1901,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (repeatsweekly.IsEmpty() && isongoing == "1")
+                    isongoing = null;
                 if (activity.IsContinuousEnrollment && hasschedule == "1")
                     isongoing = "1";
-
                 if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass &&
                     (!hasschedule.IsBoolean() || !hasschedule.ToBoolean()))
                     msgs.Add("Schedule is required", MessageType.UserError);
