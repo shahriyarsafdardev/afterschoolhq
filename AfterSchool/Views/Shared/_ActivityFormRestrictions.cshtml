@@ -9,6 +9,7 @@
         ActivityType.LearningPod,
     });
     var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
+    var requiresParentConsent= Model.RequiresParentalConsent;
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
@@ -195,7 +196,7 @@
         showParentConsent();
         showStrictGender();
         handleAllAgeAdultCheck();
-        $("#requiresparentalconsent").prop('checked', @(Model.RequiresParentalConsent.IsEmpty() ? "false" : (Model.RequiresParentalConsent? "true" : "false")));
+        $("#requiresparentalconsent").prop('checked', @(requiresParentConsent.IsEmpty() ? "false" : (requiresParentConsent ? "true" : "false")));
         showConsentWarning();
     });
 </script>
