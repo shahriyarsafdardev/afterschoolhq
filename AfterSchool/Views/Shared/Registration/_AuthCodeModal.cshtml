@@ -130,7 +130,7 @@
                             <div class="form-input">
                                 <label class="authcode-description" for="authcode"> Authentication Code * </label>
                                 <div class="input-group" style="width: 100%;">
-                                    <input id="authcode" name="authcode" type="text" class="form-control txt-generic-authcode" required>
+                                    <input id="authcode" name="authcode" type="number" class="form-control txt-generic-authcode" required pattern="[0-9]{4}" maxlength="4" minlength="4">
                                 </div>
                             </div>
 
@@ -158,6 +158,7 @@
         showLoader();
 
         var uid = $('#btn-login').data('uid');
+        var authcode = $('#authcode').val();
         params = 'uid=' + uid +
             '&authcode=' + encodeURIComponent($('#authcode').val()) +
             '&returnurl=' + null + '&invite=' + null +
@@ -168,7 +169,22 @@
         $('#btn-verify').html('Verifying...');
         $('#btn-verify').prop('disabled', true);
 
-        $.post('@Url.Action("multiPartAuth", "login")', params,
+        if (authcode.length > 4) {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please enter no more than 4 characters.',
+                success: false
+            });
+        }
+        else if (authcode.length < 4) {
+            Notifications.showBar({
+                title: 'Error',
+                message: 'Please enter at least 4 characters.',
+                success: false
+            });
+        }
+        else {
+            $.post('@Url.Action("multiPartAuth", "login")', params,
                 function (data) {
                     if (data && data.status == 'ok') {
                         if (authorizationFormRedirectUrl) {
@@ -184,14 +200,13 @@
                         }
                     } else {
                         Notifications.showErrors(data.messages);
-
-                        $('#btn-verify').html(verifyText);
-                        $('#btn-verify').prop('disabled', false);
                     }
-
-                    hideLoader();
                 }
             )
+        }
+        $('#btn-verify').html(verifyText);
+        $('#btn-verify').prop('disabled', false);
+        hideLoader();
     }
 
     function resendCode() {

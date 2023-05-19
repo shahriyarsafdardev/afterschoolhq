@@ -296,14 +296,13 @@ namespace AfterSchool.Models
             var msgs = new SystemMessages();
             var multipartAuth = new MultipartAuth();
 
-            var rBytes = new byte[24];
-            using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
-            var result = Convert.ToBase64String(rBytes);
+            var random = new Random();
+            var pin = random.Next(1000, 10000);
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    multipartAuth.Code = result;
+                    multipartAuth.Code = pin.ToString();
                     multipartAuth.WebUserId = user.ID;
                     multipartAuth.ExpirationDate = DateTime.UtcNow.AddMinutes(3);
                     multipartAuth.CreateDate = DateTime.UtcNow;
@@ -314,7 +313,7 @@ namespace AfterSchool.Models
                 onSuccess: (SystemMessages smsgs) =>
                 {
                     msgs.AddRange(smsgs);
-                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, result, true));
+                    BackgroundJob.Enqueue(() => WebUserService.SendMultipartAuth(user.ID, pin.ToString(), true));
                 },
                 onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                 onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
