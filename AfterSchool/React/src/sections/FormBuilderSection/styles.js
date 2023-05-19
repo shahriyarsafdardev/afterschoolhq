@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core';
 
 export default makeStyles(theme => ({
   wrapper: {
+    paddingTop: '30px',
     marginLeft: 'auto',
     width: '98%',
     justifyContent: 'space-between',
@@ -130,7 +131,8 @@ export default makeStyles(theme => ({
   },
   buttonWrapper: {
     margin: '60px 0px',
-    width: '300px',
+    width: 'fit-content',
+    gap: '15px',
     justifyContent: 'space-between',
     display: 'flex',
     [theme.breakpoints.down('sm')]: {
