@@ -160,6 +160,14 @@ function FormSectionSettings() {
     );
   }, [values]);
 
+  useEffect(() => {
+    window.onbeforeunload = () => dirty && confirm();
+
+    return () => {
+      window.onbeforeunload = undefined;
+    };
+  }, []);
+
   const addNewQuestionHandler = index => {
     const newDisplayOrder =
       Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder || 0) + 1;

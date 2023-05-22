@@ -33,7 +33,7 @@ function FormSettings() {
     }
   });
 
-  const { handleSubmit, values, getFieldProps, touched, errors } = formik;
+  const { handleSubmit, values, getFieldProps, touched, errors, dirty } = formik;
 
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
@@ -100,6 +100,7 @@ function FormSettings() {
                 disabled={false}
                 key={'activeGroup'}
                 onClick={() => {
+                  dirty && handleSubmit();
                   setSearchParams(`qg=${firstSectionQuestionGroupId}`);
                 }}
               >
