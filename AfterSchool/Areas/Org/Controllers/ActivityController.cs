@@ -1919,9 +1919,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (msgs.HasNoErrors())
                     {
-                        inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
+                        if (!isongoing.IsBoolean())
+                            inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-
+                        
                         outOfSessionDates =
                             ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
@@ -1931,7 +1932,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 msgs.Add(
                                     "Please ensure start dates and end times are earlier than the corresponding end date and end times",
                                     MessageType.UserError);
-                        });
+                        }); 
                     }
 
                     if (startdate.IsNotEmpty() && enddate.IsNotEmpty())
