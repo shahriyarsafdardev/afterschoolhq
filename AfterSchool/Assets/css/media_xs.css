@@ -120,6 +120,13 @@
         width: 116px;
     }
 
+    .publish-activity-top {
+        position: relative;
+        width: 100%;
+        color: white;
+        padding: 10px 0;
+    }
+
     .activity-footer {
         position: fixed;
         z-index: 999999;

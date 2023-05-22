@@ -85,6 +85,14 @@
         padding: 50px 145px 50px 145px !important;
     }
 
+    .publish-activity-top {
+        position: relative;
+        width: 100%;
+        min-height: 60px;
+        padding: 20px 40px;
+        color: white;
+    }
+
     .activity-footer {
         position: fixed;
         z-index: 999999;
