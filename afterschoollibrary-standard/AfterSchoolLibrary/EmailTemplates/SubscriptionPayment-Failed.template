@@ -1,4 +1,4 @@
-﻿<div>
+<div>
   <p>@Model.FirstName,</p>
 
   <p>
@@ -6,9 +6,13 @@
   </p>
 
   <p>
-    To update your payment details, please respond to this email or contact our support team by emailing <a href="mailto:support@afterschoolhq.com">support@afterschoolhq.com</a>. 
+    To update your payment details, please respond to this email or contact our support team by emailing <a href="mailto:@Model.SupportEmail">@Model.SupportEmail</a>. 
+  </p>
+    <br/>
+  <p>
+  Thanks
   </p>
   <p>
-    Your @Model.AccountName Team
+    @Model.ProductName
   </p>
 </div>
