@@ -157,6 +157,15 @@ export default makeStyles(theme => ({
     }
   },
   saveButton: {
+    color: '#494949',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    border: '1px solid #E4E4E4',
+    '& .MuiCircularProgress-colorPrimary': {
+      color: '#494949'
+    }
+  },
+  saveFormButton: {
     background: theme.palette.primary.main,
     position: 'absolute',
     color: '#FFFFFF',
@@ -176,6 +185,12 @@ export default makeStyles(theme => ({
     },
     '&:hover': {
       color: theme.palette.primary.main
+    },
+    '&:disabled': {
+      color: '#FFFFFF'
+    },
+    '& .MuiCircularProgress-colorPrimary': {
+      color: '#FFFFFF'
     }
   },
   backButton: {

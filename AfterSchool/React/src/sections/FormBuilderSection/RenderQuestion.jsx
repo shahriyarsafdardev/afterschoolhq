@@ -1,4 +1,5 @@
 import cs from 'classnames';
+import { cloneDeep } from 'lodash';
 import { styled } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
 import {
@@ -72,7 +73,7 @@ const RenderQuestion = ({
   } = question;
 
   const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
-  const [options, setOptions] = useState(Options || []);
+  const [options, setOptions] = useState(cloneDeep(Options) || []);
   const customQuestion = QuestionDataTypeId === 0;
 
   const updateValue = () => {
@@ -90,7 +91,7 @@ const RenderQuestion = ({
       clearTimeout(optionsTimeoutConst);
     }
     const tempTimeout = setTimeout(() => {
-      setFieldValue(`${index}['options']`, options);
+      setFieldValue(`${index}.Options`, options);
     }, 1000);
     setOptionsTimeoutConst(tempTimeout);
   };

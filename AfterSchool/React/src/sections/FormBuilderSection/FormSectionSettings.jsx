@@ -4,7 +4,7 @@ import { useSnackbar } from 'notistack';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
 import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
+import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { cloneDeep } from 'lodash';
 
@@ -22,10 +22,11 @@ function FormSectionSettings() {
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { markChangesAsUnsaved, markChangesAsSaved, unsavedChanges } = useUnsavedChanges();
+  const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
   const [settingsForAll, setSettingsForAll] = useState({ show: [], required: [] });
   const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
+  const [saveDisabled, setSaveDisabled] = useState(false);
   const [initialValues, setInitialValues] = useState({});
   const [reRender, setReRender] = useState(false);
   const questionGroup = searchParams.get('qg');
@@ -79,6 +80,7 @@ function FormSectionSettings() {
     initialValues: initialValues,
     validationSchema,
     onSubmit: async values => {
+      setSaveDisabled(true);
       const formQuestions = Object.keys(values).map(key => {
         const updatedValue = { ...values[key] };
 
@@ -109,7 +111,10 @@ function FormSectionSettings() {
         FormQuestion: formQuestions,
         FormQuestionGroups: updatedQuestionGroups
       }).then(() => {
-        if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+        if (msgs.length) return;
+
+        enqueueSnackbar('Submitted.', { variant: 'success' });
+        setSaveDisabled(false);
       });
       markChangesAsSaved();
     }
@@ -473,6 +478,16 @@ function FormSectionSettings() {
     setSettingsForAll(updateAudienceSettings());
   }, [values]);
 
+  const buttonText = text => {
+    if (!saveDisabled) return text;
+
+    return (
+      <>
+        {'Loading . . .'} <CircularProgress size={'20px'} />
+      </>
+    );
+  };
+
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
       {sectionLoading ? (
@@ -574,35 +589,30 @@ function FormSectionSettings() {
                 <Button
                   color="primary"
                   variant="outlined"
-                  style={{
-                    color: '#494949',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    border: '1px solid #E4E4E4'
-                  }}
+                  className={classes.saveButton}
                   type="submit"
-                  disabled={sectionNameError}
+                  disabled={!dirty || sectionNameError || saveDisabled}
                   onClick={event => {
                     event.preventDefault();
                     handleSubmit();
                   }}
                   data-testid={`bottom-saveQuestions-${questionGroup}`}
                 >
-                  Save
+                  {buttonText('Save')}
                 </Button>
                 <Button
                   color="primary"
                   variant="outlined"
-                  className={classes.saveButton}
+                  className={classes.saveFormButton}
                   type="submit"
-                  disabled={sectionNameError}
+                  disabled={!dirty || sectionNameError || saveDisabled}
                   onClick={event => {
                     event.preventDefault();
                     handleSubmit();
                   }}
                   data-testid={`top-saveQuestions-${questionGroup}`}
                 >
-                  Save Form
+                  {buttonText('Save Form')}
                 </Button>
               </Box>
             </Box>
