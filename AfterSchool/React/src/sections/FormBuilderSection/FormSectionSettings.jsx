@@ -119,6 +119,18 @@ function FormSectionSettings() {
 
   useEffect(() => {
     if (dirty) {
+      window.onbeforeunload = () => true;
+    } else {
+      window.onbeforeunload = undefined;
+    }
+
+    return () => {
+      window.onbeforeunload = undefined;
+    };
+  }, [dirty]);
+
+  useEffect(() => {
+    if (dirty) {
       markChangesAsUnsaved();
     } else {
       markChangesAsSaved();
@@ -159,14 +171,6 @@ function FormSectionSettings() {
       )
     );
   }, [values]);
-
-  useEffect(() => {
-    window.onbeforeunload = () => dirty && confirm();
-
-    return () => {
-      window.onbeforeunload = undefined;
-    };
-  }, []);
 
   const addNewQuestionHandler = index => {
     const newDisplayOrder =
