@@ -1,4 +1,4 @@
-﻿/*common style for whole application*/
+/*common style for whole application*/
 
 /*site wide Padding */
 
@@ -533,6 +533,22 @@
     border-color: #c3eae0;
     padding: 10px 20px;
     width: 180px;
+}
+
+.btn-underline-text {
+    font-style: normal;
+    font-weight: 300;
+    font-size: 12px;
+    line-height: 15px;
+    text-decoration-line: underline;
+    color: #B2B2B4;
+}
+
+.btn-underline-text:hover,
+.btn-underline-text:focus,
+.btn-underline-text:active {
+    color: #B2B2B4;
+    text-decoration: none;
 }
 
 .show-more {
