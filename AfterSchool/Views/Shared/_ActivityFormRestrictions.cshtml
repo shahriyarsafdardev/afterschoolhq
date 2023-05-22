@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var grades = GradeLevel.Load();
     var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration) && Model.ActivityTypeId.In(new[]
@@ -8,59 +8,14 @@
         ActivityType.FieldTrip,
         ActivityType.LearningPod,
     });
+    var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
+    var requiresParentConsent= Model.RequiresParentalConsent;
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
         Restrictions
     </div>
     <div class="panel-body">
-
-        @if (showAllowStudentRegistration)
-        {
-            <div class="form-group">
-                <label class="col-md-3 control-label">
-                    Allow Students To Register
-                </label>
-                <div class="col-md-9">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            Model.IsStudentAllowedToRegister,
-                            new ViewDataDictionary
-                            {
-                                {"checkboxname", "isStudentAllowed"},
-                                {"checkboxid", "isStudentAllowed"},
-                                {"disabled", false},
-                                {"onclick", "showParentConsent();"},
-                                {"required", false},
-                            });
-                    }
-                </div>
-            </div>
-
-            <div class="form-group hidden" id="parentConsent">
-                <label class="col-md-3 control-label">
-                    Requires Parental Consent
-                </label>
-                <div class="col-md-9">
-                    @{
-                        Html.RenderPartial(
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            Model.RequiresParentalConsent,
-                            new ViewDataDictionary
-                            {
-                                {"checkboxname", "requiresparentalconsent"},
-                                {"checkboxid", "requiresparentalconsent"},
-                                {"disabled", false},
-                            });
-                    }
-                </div>
-            </div>
-        }
-        else
-        {
-            <input type="hidden" value="true" name="requiresparentalconsent" id="requiresparentalconsent"/>
-        }
 
         <div class="form-group">
             <label class="col-md-3 control-label">
@@ -74,7 +29,7 @@
                                name="genderrestrictions"
                                id="genderrestrictions-@((int) item)"
                                @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
-                               value="@((int) item)" onclick="handleCheck(this)"/>
+                               value="@((int) item)" onclick="handleCheck(this)" />
                         <label for="genderrestrictions-@((int) item)" class="margin-h-10">
                             @item.ToString().SplitByUpperCase()
                         </label>
@@ -89,11 +44,11 @@
             </label>
             <div class="col-md-9 margin-left">
                 <div class="am-radio inline">
-                    <input id="genderrestrictions1" name="strictgenderrestrictions" @(!Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="0"/>
+                    <input id="genderrestrictions1" name="strictgenderrestrictions" @(!Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="0" />
                     <label for="genderrestrictions1" class="margin-h-10">
                         No
                     </label>
-                    <input id="genderrestrictions2" name="strictgenderrestrictions" @(Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="1"/>
+                    <input id="genderrestrictions2" name="strictgenderrestrictions" @(Model.IsGenderEnforced ? " checked=\"checked\" " : "") type="radio" value="1" />
                     <label for="genderrestrictions2" class="margin-h-10">
                         Yes
                     </label>
@@ -121,11 +76,70 @@
                 }
                 );
         }
+        @if (showAllowStudentRegistration)
+        {
+            <div class="form-group" id="allowRegistration">
+                <label class="col-md-3 control-label">
+                    Allow @(allAgeRegistrationEnabled?"Minors":"Students") To Register
+                </label>
+                <div class="col-md-9 d-flex align-items-center">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.IsStudentAllowedToRegister,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "isStudentAllowed"},
+                                {"checkboxid", "isStudentAllowed"},
+                                {"disabled", false},
+                                {"onclick", "showParentConsent();"},
+                                {"required", false},
+
+                    });
+                    }
+                    <i id="parentConsentWarning" class="s7-attention icon-large text-warning margin-l-10 position-relative" data-toggle="popover" data-trigger="hover" data-content="If you allow minors to register, they can actually register without parental knowledge." data-placement="top"></i>
+                </div>
+            </div>
+            <div class="form-group hidden" id="parentConsent">
+                <label class="col-md-3 control-label">
+                    Requires Parental Consent
+                </label>
+                <div class="col-md-9">
+                    @{
+                        Html.RenderPartial(
+                            "~/Views/Shared/_SwitchButton.cshtml",
+                            Model.RequiresParentalConsent,
+                            new ViewDataDictionary
+                            {
+                                {"checkboxname", "requiresparentalconsent"},
+                                {"checkboxid", "requiresparentalconsent"},
+                                {"onclick", "showConsentWarning();"},
+                                {"disabled", false}
+    });
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" value="true" name="requiresparentalconsent" id="requiresparentalconsent" />
+        }
 
     </div>
 </div>
 
 <script>
+    function showConsentWarning() {
+        var isStudentAllowed = $("#isStudentAllowed").is(":checked");
+        var isParentConsent = $("#requiresparentalconsent").is(":checked");
+
+        if (isStudentAllowed && !isParentConsent) {
+            $('#parentConsentWarning').removeClass("hidden");
+        } else {
+            $('#parentConsentWarning').addClass("hidden");
+        }
+    }
+
     function showParentConsent() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         if (isStudentAllowed) {
@@ -133,10 +147,12 @@
         }
         else {
             $('#parentConsent').addClass("hidden");
-            $("#requiresparentalconsent").prop('checked', true);
         }
+        $("#requiresparentalconsent").prop('checked', false);
+        showConsentWarning();
+
     }
-    
+
     function showStrictGender() {
             var genderrestrictions = $("#genderrestrictions-0").is(":checked");
             if (genderrestrictions) {
@@ -146,7 +162,7 @@
                 $('#strictGenderRestrictions').removeClass("hidden");
             }
     }
-    
+
     function handleCheck(obj) {
             if (obj.getAttribute("value") != 0)
                 {
@@ -157,10 +173,30 @@
                 $('#strictGenderRestrictions').addClass("hidden");
             }
     }
-    
+    function validateAgeChanged() {
+        if (parseInt($('#agestart').val()) >= 18) {
+            $('#allowRegistration').addClass("hidden");
+            $('#parentConsent').addClass("hidden");
+        }
+        else {
+            $('#allowRegistration').removeClass("hidden");
+            showParentConsent();
+        }
+    }
+
+    function handleAllAgeAdultCheck() {
+        $('#agestart').change(function () {
+            validateAgeChanged();
+        });
+        $('#ageend').change(function () {
+            validateAgeChanged();
+        });
+    }
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         showParentConsent();
         showStrictGender();
-    }); 
-        
+        handleAllAgeAdultCheck();
+        $("#requiresparentalconsent").prop('checked', @(requiresParentConsent.IsEmpty() ? "false" : (requiresParentConsent ? "true" : "false")));
+        showConsentWarning();
+    });
 </script>
