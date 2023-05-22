@@ -57,6 +57,7 @@ const RenderQuestion = ({
   const [timeoutConst, setTimeoutConst] = useState(null);
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [optionsTimeoutConst, setOptionsTimeoutConst] = useState(null);
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
@@ -83,6 +84,17 @@ const RenderQuestion = ({
     }, 1000);
     setTimeoutConst(tempTimeout);
   };
+
+  const updateOptions = () => {
+    if (optionsTimeoutConst) {
+      clearTimeout(optionsTimeoutConst);
+    }
+    const tempTimeout = setTimeout(() => {
+      setFieldValue(`${index}['options']`, options);
+    }, 1000);
+    setOptionsTimeoutConst(tempTimeout);
+  };
+
   const questionTypesOptions = Object.keys(questionType).map(key => ({
     key: questionType[key],
     value: key
@@ -111,7 +123,7 @@ const RenderQuestion = ({
   function renderOptions(showOptions) {
     useEffect(() => {
       if (initialized) {
-        handleSubmit();
+        updateOptions();
       }
     }, [options]);
 
@@ -139,10 +151,6 @@ const RenderQuestion = ({
     const handleAddNewOption = () => {
       const newOptions = [...options, { key: '', value: '' }];
       setOptions(newOptions);
-    };
-
-    const handleSubmit = () => {
-      setQuestion({ ...question, Options: options });
     };
 
     const onDragEnd = result => {
