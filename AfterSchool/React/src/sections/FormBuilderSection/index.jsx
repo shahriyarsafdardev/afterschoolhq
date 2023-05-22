@@ -9,6 +9,7 @@ import FormSettings from './FormSettings';
 import { useFormBuilder } from 'redux/hooks';
 import FormSectionList from './FormSectionList';
 import FormSectionSettings from './FormSectionSettings';
+import { UnsavedChangesProvider } from './UnsavedChangesProvider';
 
 const FormBuilderSection = () => {
   const classes = useStyles();
@@ -31,10 +32,12 @@ const FormBuilderSection = () => {
       {loading ? (
         <Loader />
       ) : (
-        <Grid container className={classes.wrapper}>
-          {questionGroup === null ? <FormSettings /> : <FormSectionSettings />}
-          <FormSectionList />
-        </Grid>
+        <UnsavedChangesProvider>
+          <Grid container className={classes.wrapper}>
+            {questionGroup === null ? <FormSettings /> : <FormSectionSettings />}
+            <FormSectionList />
+          </Grid>
+        </UnsavedChangesProvider>
       )}
     </>
   );

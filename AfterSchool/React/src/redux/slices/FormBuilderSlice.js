@@ -58,6 +58,9 @@ const FormBuilderSlice = createSlice({
     },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
+    },
+    clearFormQuestions: state => {
+      state.questions = [];
     }
   }
 });
@@ -72,6 +75,7 @@ export const useFormBuilderActions = () => {
     setSectionName,
     loadingFormData,
     sectionDataLoaded,
+    clearFormQuestions,
     saveNewQuestionsGroup,
     loadingSectionData,
     updateQuestionsGroups
@@ -153,6 +157,10 @@ export const useFormBuilderActions = () => {
     dispatch(setSectionName(sectionName));
   };
 
+  const clearQuestions = () => {
+    dispatch(clearFormQuestions());
+  };
+
   return {
     loadFormData,
     loadSectionData,
@@ -162,6 +170,7 @@ export const useFormBuilderActions = () => {
     submitFormSectionData,
     updateQuestionsGroupsData,
     saveNewSectionData,
+    clearQuestions,
     loaded
   };
 };

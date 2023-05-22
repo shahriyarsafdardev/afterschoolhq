@@ -15,23 +15,26 @@ import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
 import { audienceTypes, questionType } from 'constants';
+import { useUnsavedChanges } from './UnsavedChangesProvider';
 
 function FormSectionSettings() {
   const classes = useStyles();
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
-  const [initialValues, setInitialValues] = useState({});
-  const [reRender, setReRender] = useState(false);
-  const [settingsForAll, setSettingsForAll] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { markChangesAsUnsaved, markChangesAsSaved, unsavedChanges } = useUnsavedChanges();
+  const [settingsForAll, setSettingsForAll] = useState({ show: [], required: [] });
   const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [initialValues, setInitialValues] = useState({});
+  const [reRender, setReRender] = useState(false);
   const questionGroup = searchParams.get('qg');
 
   const {
     submitFormSectionData,
     loadSectionData,
     questionsGroups,
+    clearQuestions,
     sectionLoading,
     questions,
     msgs
@@ -47,6 +50,9 @@ function FormSectionSettings() {
 
   useEffect(() => {
     loadSectionData(formId, questionGroup);
+    return () => {
+      clearQuestions();
+    };
   }, [formId, questionGroup]);
 
   useEffect(() => {
@@ -105,10 +111,19 @@ function FormSectionSettings() {
       }).then(() => {
         if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
       });
+      markChangesAsSaved();
     }
   });
 
-  const { handleSubmit, values, setFieldValue, setValues, errors, touched } = formik;
+  const { handleSubmit, values, setFieldValue, setValues, errors, dirty, touched } = formik;
+
+  useEffect(() => {
+    if (dirty) {
+      markChangesAsUnsaved();
+    } else {
+      markChangesAsSaved();
+    }
+  }, [dirty]);
 
   useEffect(() => {
     setValidationSchema(
@@ -559,9 +574,23 @@ function FormSectionSettings() {
                     event.preventDefault();
                     handleSubmit();
                   }}
-                  data-testid={`saveQuestions-${questionGroup}`}
+                  data-testid={`bottom-saveQuestions-${questionGroup}`}
                 >
                   Save
+                </Button>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  className={classes.saveButton}
+                  type="submit"
+                  disabled={sectionNameError}
+                  onClick={event => {
+                    event.preventDefault();
+                    handleSubmit();
+                  }}
+                  data-testid={`top-saveQuestions-${questionGroup}`}
+                >
+                  Save Form
                 </Button>
               </Box>
             </Box>

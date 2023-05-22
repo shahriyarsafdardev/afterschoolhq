@@ -12,10 +12,10 @@ import {
   Typography,
   useMediaQuery,
   InputAdornment,
-  ClickAwayListener,
   Popover
 } from '@material-ui/core';
 
+import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
 import Dialog from './Dialog';
@@ -28,15 +28,20 @@ function FormSectionList() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showNewSectionField, setShowNewSectionField] = useState(false);
+
+  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isUnsaved, setIsUnsaved] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+  const [newSearchParams, setNewSearchParams] = useState('');
   const [newSectionError, setNewSectionError] = useState('');
   const [deleteSectionId, setdeleteSectionId] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [showNewSectionField, setShowNewSectionField] = useState(false);
+
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
   const questionGroup = searchParams.get('qg');
+  const { unsavedChanges } = useUnsavedChanges();
   const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
@@ -152,8 +157,13 @@ function FormSectionList() {
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
               onClick={() => {
-                setSearchParams(`qg=${key}`);
-                toggleShowSettings();
+                if (unsavedChanges) {
+                  setNewSearchParams(`qg=${key}`);
+                  setIsUnsaved(true);
+                } else {
+                  setSearchParams(`qg=${key}`);
+                  toggleShowSettings();
+                }
               }}
               data-testid={`formSection-${Name}`}
             >
@@ -181,6 +191,24 @@ function FormSectionList() {
         text={'Do you want to delete this section? This action is irreversible.'}
         onSubmit={handleDeleteSection}
         dataTestId={'deleteSection'}
+      />
+      <Dialog
+        open={isUnsaved}
+        onClose={() => {
+          setNewSearchParams('');
+          setIsUnsaved(false);
+        }}
+        title={'Unsaved Changes'}
+        cancelButtonText="Stay on Page"
+        confirmationButtonText="Leave This Page"
+        text={
+          'If you leave this page, any unsaved changes will be lost. Please close this window and click “Save” to keep progress.'
+        }
+        onSubmit={() => {
+          setSearchParams(newSearchParams);
+          setIsUnsaved(false);
+        }}
+        dataTestId={`deleteQuestion`}
       />
       {showNewSectionField ? (
         <TextField

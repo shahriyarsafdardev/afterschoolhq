@@ -11,7 +11,17 @@ import {
 import useStyles from './styles';
 
 const Dialog = props => {
-  const { onClose, onSubmit, open, title, text, dataTestId } = props;
+  const {
+    open,
+    text,
+    title,
+    onClose,
+    onSubmit,
+    dataTestId,
+    cancelButtonText,
+    confirmationButtonText
+  } = props;
+
   const classes = useStyles();
 
   return (
@@ -20,10 +30,27 @@ const Dialog = props => {
       onClose={onClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
+      className={classes.dialogWrapper}
     >
-      <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
-      <DialogContentText id="alert-dialog-title">{text}</DialogContentText>
-      <DialogActions>
+      <DialogTitle id="alert-dialog-title" className={classes.dialogTitle}>
+        {title}
+      </DialogTitle>
+      <DialogContentText
+        id="alert-dialog-title"
+        style={{ fontSize: '16px', padding: '20px', textAlign: 'center' }}
+      >
+        <b>Caution: </b>
+        {text}
+      </DialogContentText>
+      <DialogActions style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          onClick={onSubmit}
+          variant="outlined"
+          className={cs(classes.dialogButton, classes.warningButton)}
+          data-testid={`modalSubmitButton-${dataTestId}`}
+        >
+          {confirmationButtonText || 'Yes'}
+        </Button>
         <Button
           onClick={onClose}
           variant="outlined"
@@ -31,15 +58,7 @@ const Dialog = props => {
           className={classes.dialogButton}
           data-testid={`modalCancelButton-${dataTestId}`}
         >
-          {'No'}
-        </Button>
-        <Button
-          onClick={onSubmit}
-          variant="outlined"
-          className={cs(classes.warningButton, classes.dialogButton)}
-          data-testid={`modalSubmitButton-${dataTestId}`}
-        >
-          {'Yes'}
+          {cancelButtonText || 'No'}
         </Button>
       </DialogActions>
     </MDialog>

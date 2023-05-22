@@ -5,11 +5,12 @@ export default makeStyles(theme => ({
     paddingTop: '30px',
     marginLeft: 'auto',
     width: '98%',
+    position: 'relative',
     justifyContent: 'space-between',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column-reverse',
       width: '100%',
-      padding: '0px 10px'
+      padding: '25px 10px 0px 10px'
     }
   },
   sectionHeading: {},
@@ -27,6 +28,7 @@ export default makeStyles(theme => ({
   },
   sectionListWrapper: {
     paddingLeft: '10px',
+    marginTop: '104px',
     [theme.breakpoints.down('sm')]: {
       backgroundColor: '#F9F9F9',
       boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
@@ -143,7 +145,7 @@ export default makeStyles(theme => ({
       maxWidth: 540
     }
   },
-  saveButton: {
+  getStartedButton: {
     background: theme.palette.primary.main,
     fontSize: 14,
     color: '#FFFFFF',
@@ -152,6 +154,28 @@ export default makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       width: '100%',
       marginLeft: 0
+    }
+  },
+  saveButton: {
+    background: theme.palette.primary.main,
+    position: 'absolute',
+    color: '#FFFFFF',
+    marginLeft: 15,
+    minWidth: 145,
+    fontSize: 14,
+    left: '83.1%',
+    top: '60px',
+    [theme.breakpoints.down('md')]: {
+      minWidth: 100,
+      top: '60px'
+    },
+    [theme.breakpoints.down('sm')]: {
+      left: 'unset',
+      right: '10px',
+      top: '20px'
+    },
+    '&:hover': {
+      color: theme.palette.primary.main
     }
   },
   backButton: {
@@ -255,11 +279,19 @@ export default makeStyles(theme => ({
     padding: '8px 0px'
   },
   warningButton: {
-    color: theme.palette.error.main,
-    borderColor: theme.palette.error.main
+    color: '#494949 !important',
+    background: '#FFFFFF !important',
+    border: '1px solid #DEDEDE'
   },
   dialogButton: {
-    fontSize: '12px'
+    fontSize: '12px',
+    minWidth: '20%',
+    fontWeight: 'bold',
+    background: theme.palette.primary.main,
+    color: '#FFFFFF',
+    '&:hover': {
+      color: theme.palette.primary.main
+    }
   },
   gridItemHeight: {
     minHeight: '70px',
@@ -272,8 +304,22 @@ export default makeStyles(theme => ({
   link: {
     color: theme.palette.gray.secondary,
     textDecoration: 'underline',
+    marginBottom: '10px',
     '&:hover': {
       color: theme.palette.gray.primary
+    }
+  },
+  dialogTitle: {
+    background: theme.palette.primary.main,
+    color: '#FFFFFF',
+    '& .MuiTypography-root': {
+      color: '#FFFFFF',
+      paddingLeft: '15px'
+    }
+  },
+  dialogWrapper: {
+    '& .MuiPaper-root': {
+      padding: 0
     }
   }
 }));

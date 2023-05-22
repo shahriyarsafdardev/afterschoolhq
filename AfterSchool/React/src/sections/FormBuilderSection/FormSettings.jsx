@@ -95,7 +95,7 @@ function FormSettings() {
               <Button
                 data-testid={'GetStartedButton'}
                 color="primary"
-                className={classes.saveButton}
+                className={classes.getStartedButton}
                 variant="contained"
                 disabled={false}
                 key={'activeGroup'}
