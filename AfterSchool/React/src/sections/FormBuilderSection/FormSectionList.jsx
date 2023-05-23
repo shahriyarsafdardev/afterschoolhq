@@ -295,13 +295,13 @@ function FormSectionList() {
             horizontal: 'left'
           }}
         >
-          <SectionList />
+          {SectionList()}
         </Popover>
       </Box>
     );
   }
 
-  return <SectionList />;
+  return SectionList();
 }
 
 export default FormSectionList;
