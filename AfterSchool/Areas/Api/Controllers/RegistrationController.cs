@@ -87,32 +87,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
                 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormQuestions(currentRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -224,32 +201,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
                 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormQuestions(registrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -380,32 +334,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 Registration registration = null;
 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormQuestions(currentRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -1081,5 +1013,50 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+
+        private static AudienceType GetAudienceType(RegistrantPersonType type)
+        {
+            return type switch
+            {
+                RegistrantPersonType.Parent => AudienceType.Parents,
+                RegistrantPersonType.Student => AudienceType.Students,
+                RegistrantPersonType.Adult => AudienceType.Adults,
+                RegistrantPersonType.Volunteer => AudienceType.Volunteer,
+                _ => AudienceType.NotSet,
+            };
+        }
+
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentRegistrant, List<FormQuestion> questions)
+        {
+            var formQuestionDtoList = new List<FormQuestionDto>();
+            var audienceType = GetAudienceType(currentRegistrant.PersonTypeId);
+            foreach (var question in questions)
+            {
+                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType);
+                if (audienceSettings?.Show ?? true)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                            ID = question.ID.Value,
+                            FormQuestionGroupId = question.FormQuestionGroupId,
+                            Text = question.Text,
+                            Description = question.Description,
+                            GroupTitle = question.FormQuestionGroupName,
+                            Options = question.Options,
+                            IsRequired = audienceSettings?.Required ?? true,
+                            DisplayOrder = question.DisplayOrder,
+                            IsActive = question.IsActive,
+                            IsDeleted = question.IsDeleted,
+                            QuestionTypeId = question.QuestionTypeId,
+                            QuestionDataTypeId = question.QuestionDataTypeId,
+                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+            }
+            return formQuestionDtoList;
+        }
+        
     }
 }

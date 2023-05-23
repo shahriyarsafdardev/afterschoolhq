@@ -24,7 +24,7 @@ namespace AfterSchool.Areas.Api.Models
 
         public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0)
         {
-            AudienceType[] AudienceTypes = { AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
+            AudienceType[] AudienceTypes = { AudienceType.Parents, AudienceType.Students, AudienceType.Adults, AudienceType.Volunteer };
             if (QuestionSettingsList.Count != AudienceTypes.Count())
             {
                 AudienceTypes.ForEach(AudienceType =>
