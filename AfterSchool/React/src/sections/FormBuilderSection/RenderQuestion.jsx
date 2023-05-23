@@ -58,7 +58,6 @@ const RenderQuestion = ({
   const [timeoutConst, setTimeoutConst] = useState(null);
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
-  const [optionsTimeoutConst, setOptionsTimeoutConst] = useState(null);
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
@@ -72,7 +71,9 @@ const RenderQuestion = ({
     QuestionDataTypeId
   } = question;
 
-  const showOptions = [dropdown, radioList, checkBoxList].includes(QuestionTypeId);
+  const questionHasOptions = (qTypeId = QuestionTypeId) =>
+    [dropdown, radioList, checkBoxList].includes(qTypeId);
+  const showOptions = questionHasOptions();
   const [options, setOptions] = useState(cloneDeep(Options) || []);
   const customQuestion = QuestionDataTypeId === 0;
 
@@ -101,6 +102,11 @@ const RenderQuestion = ({
     }
   }, [question]);
 
+  const getOptions = key => {
+    !questionHasOptions(key) && setOptions([]);
+    return questionHasOptions(key) ? { Options: options } : { Options: undefined };
+  };
+
   const handleDeleteSection = async () => {
     await handleDelete(deleteSectionId);
     handleCloseDialog();
@@ -113,9 +119,7 @@ const RenderQuestion = ({
 
   function renderOptions(showOptions) {
     useEffect(() => {
-      if (initialized) {
-        handleSubmit();
-      }
+      if (initialized && options.length > 0) handleSubmit();
     }, [options]);
 
     const radioListIcon = radioList === QuestionTypeId;
@@ -340,7 +344,9 @@ const RenderQuestion = ({
           <Grid item lg={3} md={4} sm={4} xs={6} className={classes.gridItemHeight}>
             <DropDown
               question={{ ...question, ...{ options: questionTypesOptions } }}
-              setFieldValue={key => setQuestion({ ...question, QuestionTypeId: key })}
+              setFieldValue={key =>
+                setQuestion({ ...question, QuestionTypeId: key, ...getOptions(key) })
+              }
               disabled={!customQuestion || IsLocked}
               dataTestId={`questionTypeDropDown-${ID}-${index}`}
             />
