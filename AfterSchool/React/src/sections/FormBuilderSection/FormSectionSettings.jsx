@@ -183,7 +183,7 @@ function FormSectionSettings() {
       Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder || 0) + 1;
 
     const newQuest = {
-      ...newQuestion,
+      ...cloneDeep(newQuestion),
       ID: 0,
       GroupTitle: sectionName,
       FormQuestionGroupId: currentSection?.ID,
@@ -209,6 +209,7 @@ function FormSectionSettings() {
 
     updatedValues[newDisplayOrder] = newQuest;
     setValues({ ...updatedValues });
+    setReRender(!reRender);
   };
 
   const handleDelete = (key, removeFromList = false) => {
@@ -225,6 +226,7 @@ function FormSectionSettings() {
     }
 
     setValues({ ...newValues }, false);
+    setReRender(!reRender);
   };
 
   const handleCopy = key => {
