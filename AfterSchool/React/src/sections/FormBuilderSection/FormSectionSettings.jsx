@@ -45,7 +45,7 @@ function FormSectionSettings() {
   const currentSection = questionsGroups[currentSectionIndex];
   const [sectionName, setSectionName] = useState(currentSection?.Name || '');
 
-  const { dropdown, radioList, checkBoxList } = questionType;
+  const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isQuestionWithOptions = questionTypeId =>
     [dropdown, radioList, checkBoxList].includes(questionTypeId);
 
@@ -124,7 +124,7 @@ function FormSectionSettings() {
   const formDirty = dirty || currentSection?.Name !== sectionName;
 
   useEffect(() => {
-    if (dirty) {
+    if (formDirty) {
       window.onbeforeunload = () => true;
     } else {
       window.onbeforeunload = undefined;
@@ -133,7 +133,7 @@ function FormSectionSettings() {
     return () => {
       window.onbeforeunload = undefined;
     };
-  }, [dirty]);
+  }, [formDirty]);
 
   useEffect(() => {
     if (formDirty) {
@@ -150,9 +150,17 @@ function FormSectionSettings() {
           acc[key] = Yup.object().shape({
             QuestionTypeId: Yup.number(),
             DisplayOrder: Yup.number(),
-            Text: Yup.string()
-              .required('Text is required')
-              .max(400, 'Text cannot be longer than 400 characters'),
+            Text: Yup.string().when(['QuestionTypeId'], {
+              is: val => val !== textBlock,
+              then: () =>
+                Yup.string()
+                  .required('Text is Required')
+                  .max(400, 'Text cannot be longer than 400 characters'),
+              otherwise: () =>
+                Yup.string()
+                  .required('Text is Required')
+                  .max(4000, 'Text cannot be longer than 4000 characters')
+            }),
             Options: Yup.array().when(['QuestionTypeId'], {
               is: val => isQuestionWithOptions(val),
               then: () =>

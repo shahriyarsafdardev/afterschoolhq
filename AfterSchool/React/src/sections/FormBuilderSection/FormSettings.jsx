@@ -1,5 +1,6 @@
 import React from 'react';
 import * as Yup from 'yup';
+import { isEmpty } from 'lodash';
 import { useSnackbar } from 'notistack';
 import { useSearchParams } from 'react-router-dom';
 import { useFormik, FormikProvider, Form } from 'formik';
@@ -19,7 +20,8 @@ function FormSettings() {
   const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].ID : -1;
 
   const validationSchema = Yup.object().shape({
-    FormName: Yup.string().required('Form Name is required')
+    FormName: Yup.string().required('Form Name is required'),
+    FormDescription: Yup.string().max(400, 'Text cannot be longer than 400 characters')
   });
 
   const formik = useFormik({
@@ -68,7 +70,7 @@ function FormSettings() {
             <TextAreaQuestion
               formikProps={{
                 ...getFieldProps('FormDescription'),
-                error: touched['FormDescription'] && errors['FormDescription'],
+                error: values['FormDescription']?.length > 400,
                 helperText: touched['FormDescription'] && errors['FormDescription'],
                 errorMsg: errors['FormDescription']
               }}
@@ -101,7 +103,7 @@ function FormSettings() {
                 key={'activeGroup'}
                 onClick={() => {
                   dirty && handleSubmit();
-                  setSearchParams(`qg=${firstSectionQuestionGroupId}`);
+                  isEmpty(errors) && setSearchParams(`qg=${firstSectionQuestionGroupId}`);
                 }}
               >
                 Get Started

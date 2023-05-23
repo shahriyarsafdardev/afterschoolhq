@@ -31,6 +31,7 @@ const Dialog = props => {
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       className={classes.dialogWrapper}
+      disableScrollLock={true}
     >
       <DialogTitle id="alert-dialog-title" className={classes.dialogTitle}>
         {title}

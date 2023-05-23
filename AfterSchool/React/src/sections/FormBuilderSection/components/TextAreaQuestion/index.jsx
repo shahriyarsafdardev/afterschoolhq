@@ -23,12 +23,11 @@ export default function TextAreaQuestion({ formikProps, label }) {
             className={classes.formControlClass}
             variant="outlined"
             {...formikProps}
-            maxLength={400}
           />
           {
             <Box className={classes.flexCenter}>
               <FormHelperText className={classes.maxWidth} error={error}>
-                {error ? errorMsg : `${value?.length || 0}/400`}
+                {`${value?.length || 0}/400`}
               </FormHelperText>
             </Box>
           }

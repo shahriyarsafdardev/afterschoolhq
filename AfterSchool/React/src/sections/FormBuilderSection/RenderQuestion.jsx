@@ -60,7 +60,6 @@ const RenderQuestion = ({
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
   const {
     ID,
     Text,
@@ -71,6 +70,7 @@ const RenderQuestion = ({
     QuestionDataTypeId
   } = question;
 
+  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
   const questionHasOptions = (qTypeId = QuestionTypeId) =>
     [dropdown, radioList, checkBoxList].includes(qTypeId);
   const showOptions = questionHasOptions();
@@ -270,8 +270,8 @@ const RenderQuestion = ({
                                 option: { key, value },
                                 index,
                                 dragHandleProps: { ...provided.dragHandleProps },
-                                errors: errors?.Options[index],
-                                touched: touched?.Options[index]
+                                errors: errors?.Options && errors?.Options[index],
+                                touched: touched?.Options && touched?.Options[index]
                               })}
                             </Box>
                           )}
@@ -327,12 +327,9 @@ const RenderQuestion = ({
               variant="outlined"
               value={Text}
               helperText={
-                touched?.Text && errors?.Text ? errors?.Text : `${Text?.length}/${maxLimit}`
+                errors?.Text === 'Text is Required' ? errors?.Text : `${Text?.length}/${maxLimit}`
               }
-              error={touched?.Text && errors?.Text}
-              inputProps={{
-                maxLength: maxLimit
-              }}
+              error={Text?.length > maxLimit || errors?.Text}
               multiline
               onChange={event => {
                 setQuestion({ ...question, Text: event.target.value });

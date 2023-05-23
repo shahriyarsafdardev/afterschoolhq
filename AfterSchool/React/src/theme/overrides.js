@@ -34,8 +34,8 @@ export default {
   MuiFormHelperText: {
     root: {
       '&.Mui-error': {
-        color: '#d32f2f',
-        fontSize: 12
+        color: '#FF7070'
+        // fontSize: 12
       }
     }
   },
@@ -53,7 +53,7 @@ export default {
   MuiOutlinedInput: {
     root: {
       '&.Mui-error .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d32f2f'
+        borderColor: '#FF7070'
       }
     },
     input: {
