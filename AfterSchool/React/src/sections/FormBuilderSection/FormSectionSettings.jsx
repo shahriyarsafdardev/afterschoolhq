@@ -121,6 +121,7 @@ function FormSectionSettings() {
   });
 
   const { handleSubmit, values, setFieldValue, setValues, errors, dirty, touched } = formik;
+  const formDirty = dirty || currentSection?.Name !== sectionName;
 
   useEffect(() => {
     if (dirty) {
@@ -135,12 +136,12 @@ function FormSectionSettings() {
   }, [dirty]);
 
   useEffect(() => {
-    if (dirty) {
+    if (formDirty) {
       markChangesAsUnsaved();
     } else {
       markChangesAsSaved();
     }
-  }, [dirty]);
+  }, [formDirty]);
 
   useEffect(() => {
     setValidationSchema(
@@ -591,7 +592,7 @@ function FormSectionSettings() {
                   variant="outlined"
                   className={classes.saveButton}
                   type="submit"
-                  disabled={!dirty || sectionNameError || saveDisabled}
+                  disabled={!formDirty || sectionNameError || saveDisabled}
                   onClick={event => {
                     event.preventDefault();
                     handleSubmit();
@@ -605,7 +606,7 @@ function FormSectionSettings() {
                   variant="outlined"
                   className={classes.saveFormButton}
                   type="submit"
-                  disabled={!dirty || sectionNameError || saveDisabled}
+                  disabled={!formDirty || sectionNameError || saveDisabled}
                   onClick={event => {
                     event.preventDefault();
                     handleSubmit();

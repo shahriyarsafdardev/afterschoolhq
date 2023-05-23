@@ -114,6 +114,11 @@ function FormSectionList() {
     }
   };
 
+  const unsavedModal = (qg = firstSectionId) => {
+    setNewSearchParams(`qg=${qg}`);
+    setIsUnsaved(true);
+  };
+
   const SectionList = () => (
     <Grid item lg={2} md={2} xs={12} sm={12} className={classes.sectionListWrapper}>
       {!isMobile && (
@@ -132,8 +137,10 @@ function FormSectionList() {
             variant="h6"
             className={classes.sectionsListHeading}
             onClick={() => {
-              setSearchParams(`qg=${firstSectionId}`);
-              toggleShowSettings();
+              if (!unsavedChanges) {
+                setSearchParams(`qg=${firstSectionId}`);
+                toggleShowSettings();
+              } else unsavedModal();
             }}
             data-testid={'formSections'}
           >
@@ -157,13 +164,10 @@ function FormSectionList() {
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
               onClick={() => {
-                if (unsavedChanges) {
-                  setNewSearchParams(`qg=${key}`);
-                  setIsUnsaved(true);
-                } else {
+                if (!unsavedChanges) {
                   setSearchParams(`qg=${key}`);
                   toggleShowSettings();
-                }
+                } else unsavedModal(key);
               }}
               data-testid={`formSection-${Name}`}
             >
