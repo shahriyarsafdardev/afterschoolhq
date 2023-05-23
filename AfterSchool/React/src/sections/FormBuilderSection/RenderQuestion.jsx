@@ -86,16 +86,6 @@ const RenderQuestion = ({
     setTimeoutConst(tempTimeout);
   };
 
-  const updateOptions = () => {
-    if (optionsTimeoutConst) {
-      clearTimeout(optionsTimeoutConst);
-    }
-    const tempTimeout = setTimeout(() => {
-      setFieldValue(`${index}.Options`, options);
-    }, 1000);
-    setOptionsTimeoutConst(tempTimeout);
-  };
-
   const questionTypesOptions = Object.keys(questionType).map(key => ({
     key: questionType[key],
     value: key
@@ -124,7 +114,7 @@ const RenderQuestion = ({
   function renderOptions(showOptions) {
     useEffect(() => {
       if (initialized) {
-        updateOptions();
+        handleSubmit();
       }
     }, [options]);
 
@@ -152,6 +142,10 @@ const RenderQuestion = ({
     const handleAddNewOption = () => {
       const newOptions = [...options, { key: '', value: '' }];
       setOptions(newOptions);
+    };
+
+    const handleSubmit = () => {
+      setQuestion({ ...question, Options: options });
     };
 
     const onDragEnd = result => {
