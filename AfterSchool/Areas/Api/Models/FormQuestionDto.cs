@@ -43,7 +43,7 @@ namespace AfterSchool.Areas.Api.Models
             Question.DisplayOrder = DisplayOrder;
         }
 
-        public static FormQuestionDto MapToDto(FormQuestion Question)
+        public static FormQuestionDto MapToDto(FormQuestion Question,FormType formType = FormType.NotSet)
         {
             return new FormQuestionDto()
             {
@@ -60,16 +60,16 @@ namespace AfterSchool.Areas.Api.Models
                 QuestionTypeId = Question.QuestionTypeId,
                 QuestionDataTypeId = Question.QuestionDataTypeId,
                 FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
-                QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0),
+                QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0,formType),
                 IsLocked = Question.IsLocked,
             };
         }
 
-        public static List<FormQuestionDto> MapToDtoList(List<FormQuestion> QuestionList)
+        public static List<FormQuestionDto> MapToDtoList(List<FormQuestion> QuestionList, FormType formType = FormType.NotSet)
         {
             return QuestionList
                 .Select(question=>
-                MapToDto(question))
+                MapToDto(question, formType))
                 .ToList();
         }
 

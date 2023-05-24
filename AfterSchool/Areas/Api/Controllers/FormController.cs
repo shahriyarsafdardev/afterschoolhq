@@ -111,7 +111,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     )
                     .ToList();
 
-                var QuestionsToSend = FormQuestionDto.MapToDtoList(RequestedQuestions);
+                var QuestionsToSend = FormQuestionDto.MapToDtoList(RequestedQuestions,RequestedForm.FormTypeId);
 
                 var response = new
                 {

@@ -22,12 +22,13 @@ namespace AfterSchool.Areas.Api.Models
             };
         }
 
-        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0)
+        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0, FormType currFormType = FormType.NotSet)
         {
-            AudienceType[] AudienceTypes = { AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
-            if (QuestionSettingsList.Count != AudienceTypes.Count())
+            var audienceTypes = currFormType.Equals(FormType.VolunteerForm) ? new List<AudienceType>(){AudienceType.Volunteer} :
+                new List<AudienceType>(){ AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
+            if (QuestionSettingsList.Count != audienceTypes.Count())
             {
-                AudienceTypes.ForEach(AudienceType =>
+                audienceTypes.ForEach(AudienceType =>
                                 {
                                     var exists = QuestionSettingsList.Any(QuestionSetting => QuestionSetting.Audience.Equals(AudienceType));
                                     if (!exists)
