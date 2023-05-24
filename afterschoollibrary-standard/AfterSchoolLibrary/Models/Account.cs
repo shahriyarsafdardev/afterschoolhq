@@ -849,7 +849,7 @@ namespace AfterSchoolLibrary.Models
                 var sql = $@"
                     select * from Account
                     where 
-                        {string.Join(" OR ", searchTerms.Select(w => $"Name LIKE '%{w}%'"))}
+                        Contains(name, '{"\""}{searchTerms.ToStringList("*\" AND \"")}{"*\""}') 
                         AND IsActive = 1 
                         AND IsDeleted = 0 
                         AND IsTest = 0 
