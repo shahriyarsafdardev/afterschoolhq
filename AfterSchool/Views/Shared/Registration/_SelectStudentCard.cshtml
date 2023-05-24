@@ -23,7 +23,7 @@
     var registerUrl = Url.Action("setstudent", "account", new {id = Model.Uid});
     var btnUrl = $"javascript:checkEligibility('{Model.Uid}', '{registerUrl}', 'btn-register-{Model.Uid}')";
     var registrantGrade = Model.GetAnswer(QuestionDataType.RegistrantGrade);
-    var registrantGradeText = registrantGrade.Text;
+    var registrantGradeText = registrantGrade?.Text;
     var canStillRegister = false;
 
 
