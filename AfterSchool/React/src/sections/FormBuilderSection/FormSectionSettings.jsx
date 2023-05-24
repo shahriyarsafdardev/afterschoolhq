@@ -187,8 +187,13 @@ function FormSectionSettings() {
   }, [values]);
 
   const addNewQuestionHandler = index => {
-    const newDisplayOrder =
-      Number(index || values[Object.keys(values).at(-1)]?.DisplayOrder || 0) + 1;
+    const questionsToShow = () =>
+      Object.keys(values).reduce((qs, key) => {
+        if (!values[key].IsDeleted) return [...qs, values[key]];
+
+        return qs;
+      }, []);
+    const newDisplayOrder = Number(index || questionsToShow().at(-1)?.DisplayOrder || 0) + 1;
 
     const newQuest = {
       ...cloneDeep(newQuestion),
@@ -216,8 +221,8 @@ function FormSectionSettings() {
     }
 
     updatedValues[newDisplayOrder] = newQuest;
-    setValues({ ...updatedValues });
-    setReRender(!reRender);
+    setValues({ ...updatedValues }, false);
+    // setReRender(!reRender);
   };
 
   const handleDelete = (key, removeFromList = false) => {
