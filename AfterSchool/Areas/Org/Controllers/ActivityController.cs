@@ -1901,9 +1901,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (repeatsweekly.IsEmpty() && isongoing == "1")
+                    isongoing = null;
                 if (activity.IsContinuousEnrollment && hasschedule == "1")
                     isongoing = "1";
-
                 if (activity.CostFrequencyTypeId == ActivityCostFrequencyType.PerClass &&
                     (!hasschedule.IsBoolean() || !hasschedule.ToBoolean()))
                     msgs.Add("Schedule is required", MessageType.UserError);
@@ -1921,7 +1922,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (!isongoing.IsBoolean())
                             inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-
+                        
                         outOfSessionDates =
                             ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
@@ -1931,7 +1932,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                 msgs.Add(
                                     "Please ensure start dates and end times are earlier than the corresponding end date and end times",
                                     MessageType.UserError);
-                        });
+                        }); 
                     }
 
                     if (startdate.IsNotEmpty() && enddate.IsNotEmpty())

@@ -571,15 +571,15 @@ namespace AfterSchoolLibrary.Models
             if (!this.IsOngoing)
             {
                 existingInstances
-                    .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
-                    .Where(instance => !scheduleDates
-                        .Any(newInstance =>
-                            newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
-                            newInstance.EndDateTime.Value == instance.EndDateTime.Value
-                        )
+                .Where(instance => instance.InstanceTypeId == InstanceType.InSession)
+                .Where(instance => !scheduleDates
+                    .Any(newInstance =>
+                        newInstance.StartDateTime.Value == instance.StartDateTime.Value &&
+                        newInstance.EndDateTime.Value == instance.EndDateTime.Value
                     )
-                    .ToList()
-                    .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
+                )
+                .ToList()
+                .ForEach(instance => CheckForActivityInstanceSeats(instance, msgs, dc));
 
                 // add new in session instances
                 scheduleDates
