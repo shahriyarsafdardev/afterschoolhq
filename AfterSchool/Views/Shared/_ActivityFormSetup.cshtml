@@ -111,7 +111,7 @@
 
         @if (group.IsEmpty())
         {
-            <div class="form-group @(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
+            <div class="form-group @((Model.ActivityTypeId.In(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }) && Model.CostFrequencyTypeId != ActivityCostFrequencyType.PerClass) ? "hide" : "")">
                 <label class="col-sm-3 control-label">Students Can Register For:</label>
                 <div class="col-sm-9">
 
