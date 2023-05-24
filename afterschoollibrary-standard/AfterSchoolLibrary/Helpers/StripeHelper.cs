@@ -259,8 +259,11 @@ namespace AfterSchoolLibrary.Billing
             }
             catch (StripeException ex)
             {
-                msgs.Add(ex.Message, MessageType.UserError, ex);
-                msgs.Add($"Transfer Reversal was not created", MessageType.UserError);
+                // Changes from UserError to Warning 
+                // This will be reversed once we figure out how to handle reversal transfer call not to be made if transfer isn't deposited into
+                // provider account.
+                msgs.Add(ex.Message, MessageType.Warning, ex);
+                msgs.Add($"Transfer Reversal was not created", MessageType.Warning);
             }
 
             return transferReversal;
