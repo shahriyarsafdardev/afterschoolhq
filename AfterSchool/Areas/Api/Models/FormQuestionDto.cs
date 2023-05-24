@@ -53,11 +53,8 @@ namespace AfterSchool.Areas.Api.Models
         {
             var validatedQuestions = new List<FormQuestionDto>();
             validatedQuestions.AddRange(FormQuestionsToValidate.Where(x=>x.IsLocked).ToList().OrderBy(x=>x.DisplayOrder).Select((obj,index)=>obj.changeDispOrder(index+1)));
-            foreach(var question in FormQuestionsToValidate.Where(x => !x.IsLocked).ToList()) { 
-                if(validatedQuestions.Count > question.DisplayOrder)
-                    question.DisplayOrder = validatedQuestions.Count+1;
-                validatedQuestions.Add(question);
-            }
+            foreach(var question in FormQuestionsToValidate.Where(x => !x.IsLocked).ToList())
+                validatedQuestions.Add(question.changeDispOrder(validatedQuestions.Count + 1));
             return validatedQuestions;
         }
 
