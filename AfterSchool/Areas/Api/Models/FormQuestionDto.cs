@@ -43,6 +43,24 @@ namespace AfterSchool.Areas.Api.Models
             Question.DisplayOrder = DisplayOrder;
         }
 
+        public FormQuestionDto changeDispOrder(int dispOrder)
+        {
+            DisplayOrder = dispOrder;
+            return this;
+        }
+
+        public static List<FormQuestionDto> validateByDisplayOrder(List<FormQuestionDto> FormQuestionsToValidate)
+        {
+            var validatedQuestions = new List<FormQuestionDto>();
+            validatedQuestions.AddRange(FormQuestionsToValidate.Where(x=>x.IsLocked).ToList().OrderBy(x=>x.DisplayOrder).Select((obj,index)=>obj.changeDispOrder(index+1)));
+            foreach(var question in FormQuestionsToValidate.Where(x => !x.IsLocked).ToList()) { 
+                if(validatedQuestions.Count > question.DisplayOrder)
+                    question.DisplayOrder = validatedQuestions.Count+1;
+                validatedQuestions.Add(question);
+            }
+            return validatedQuestions;
+        }
+
         public static FormQuestionDto MapToDto(FormQuestion Question)
         {
             return new FormQuestionDto()

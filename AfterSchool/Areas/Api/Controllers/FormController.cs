@@ -112,7 +112,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ToList();
 
                 var QuestionsToSend = FormQuestionDto.MapToDtoList(RequestedQuestions);
-
+                QuestionsToSend = FormQuestionDto.validateByDisplayOrder(QuestionsToSend);
                 var response = new
                 {
                     FormQuestion = QuestionsToSend,
