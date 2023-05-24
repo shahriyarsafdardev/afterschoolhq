@@ -38,6 +38,7 @@ function FormSectionSettings() {
     clearQuestions,
     sectionLoading,
     questions,
+    form,
     msgs
   } = useFormBuilder();
 
@@ -529,7 +530,7 @@ function FormSectionSettings() {
               />
             </Box>
             <Box>
-              <ApplyToAllControls />
+              {form?.FormType !== 3 && <ApplyToAllControls />}
               <Box>
                 {values && (
                   <DragDropContext onDragEnd={onDragEnd}>
@@ -570,6 +571,7 @@ function FormSectionSettings() {
                                         dragIndicatorProps={provided.dragHandleProps}
                                         errors={errors[key]}
                                         touched={touched[key]}
+                                        formType={form?.FormType}
                                       />
                                     </Box>
                                   )}

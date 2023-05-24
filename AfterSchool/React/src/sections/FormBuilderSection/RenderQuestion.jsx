@@ -27,7 +27,7 @@ import DropDown from './DropDown';
 import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
 import DeleteIcon from 'assets/delete.svg';
-import HideCheckBox from './HideCheckBox';
+import LabeledCheckBox from './LabeledCheckBox';
 import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -44,6 +44,7 @@ const RenderQuestion = ({
   value,
   errors,
   touched,
+  formType,
   handleCopy,
   handleDelete,
   setFieldValue,
@@ -70,6 +71,7 @@ const RenderQuestion = ({
     QuestionDataTypeId
   } = question;
 
+  const volunteerQS = QuestionSettings[0];
   const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
   const questionHasOptions = (qTypeId = QuestionTypeId) =>
     [dropdown, radioList, checkBoxList].includes(qTypeId);
@@ -349,54 +351,90 @@ const RenderQuestion = ({
             />
           </Grid>
           <Grid lg={1}></Grid>
-          <Grid item lg={11} md={8} sm={6} xs={6} className={cs(classes.audienceWrapper)}>
-            <Grid item lg={2} md={5} sm={12} xs={12} className={classes.positionRelative}>
-              <Button
-                variant="outlined"
-                className={classes.audienceButton}
-                onClick={() => setShowAudience(!showAudience)}
-                disabled={IsLocked}
-                data-testid={`audienceButtonForQuestion-${ID}-${index}`}
-              >
-                Audience
-                <ArrowDropDownOutlinedIcon
-                  style={{ width: '20px', height: 'auto', marginLeft: '2px' }}
-                />
-              </Button>
-              {showAudience && (
-                <RenderAudienceList
-                  setFieldValue={questionSettings =>
-                    setQuestion({ ...question, QuestionSettings: questionSettings })
-                  }
-                  questionSettings={QuestionSettings}
-                  setShowAudience={setShowAudience}
-                  dataTestId={`audienceListForQuestion-${ID}-${index}`}
-                />
-              )}
-            </Grid>
-            {!isMobile && (
-              <Grid
-                item
-                lg={9}
-                md={6}
-                sm={0}
-                xs={0}
-                className={cs(classes.displayFlex, classes.flexWrap)}
-              >
-                {QuestionSettings.map(({ Audience, Show, Required }) => {
-                  if (!(Show || Required)) return;
-
-                  return (
-                    <Chip
-                      style={{ backgroundColor: '#F2F2F5', margin: '1px' }}
-                      label={`${audienceTypes[Audience]}${Required ? '*' : ''}`}
-                      key={Audience}
+          <>
+            {formType !== 3 ? (
+              <Grid item lg={11} md={8} sm={6} xs={6} className={cs(classes.audienceWrapper)}>
+                <Grid item lg={2} md={5} sm={12} xs={12} className={classes.positionRelative}>
+                  <Button
+                    variant="outlined"
+                    className={classes.audienceButton}
+                    onClick={() => setShowAudience(!showAudience)}
+                    disabled={IsLocked}
+                    data-testid={`audienceButtonForQuestion-${ID}-${index}`}
+                  >
+                    Audience
+                    <ArrowDropDownOutlinedIcon
+                      style={{ width: '20px', height: 'auto', marginLeft: '2px' }}
                     />
-                  );
-                })}
+                  </Button>
+                  {showAudience && (
+                    <RenderAudienceList
+                      setFieldValue={questionSettings =>
+                        setQuestion({ ...question, QuestionSettings: questionSettings })
+                      }
+                      questionSettings={QuestionSettings}
+                      setShowAudience={setShowAudience}
+                      dataTestId={`audienceListForQuestion-${ID}-${index}`}
+                    />
+                  )}
+                </Grid>
+                {!isMobile && (
+                  <Grid
+                    item
+                    lg={9}
+                    md={6}
+                    sm={0}
+                    xs={0}
+                    className={cs(classes.displayFlex, classes.flexWrap)}
+                  >
+                    {QuestionSettings.map(({ Audience, Show, Required }) => {
+                      if (!(Show || Required)) return;
+
+                      return (
+                        <Chip
+                          style={{ backgroundColor: '#F2F2F5', margin: '1px' }}
+                          label={`${audienceTypes[Audience]}${Required ? '*' : ''}`}
+                          key={Audience}
+                        />
+                      );
+                    })}
+                  </Grid>
+                )}
+              </Grid>
+            ) : (
+              <Grid item lg={3} md={3} sm={4} xs={7} className={cs(classes.audienceWrapper)}>
+                <LabeledCheckBox
+                  setFieldValue={() =>
+                    setQuestion({
+                      ...question,
+                      QuestionSettings: [{ ...volunteerQS, Show: !volunteerQS?.Show }]
+                    })
+                  }
+                  dataTestId={`showCheckboxOfQuestion-${ID}-${index}`}
+                  value={volunteerQS?.Show}
+                  disabled={IsLocked}
+                  label="Show"
+                />
+                <LabeledCheckBox
+                  setFieldValue={() =>
+                    setQuestion({
+                      ...question,
+                      QuestionSettings: [
+                        {
+                          ...volunteerQS,
+                          Required: !volunteerQS?.Required
+                        }
+                      ]
+                    })
+                  }
+                  dataTestId={`requireCheckboxOfQuestion-${ID}-${index}`}
+                  value={volunteerQS?.Required}
+                  disabled={IsLocked}
+                  label="Require"
+                />
               </Grid>
             )}
-          </Grid>
+          </>
         </Grid>
         {renderOptions(showOptions)}
       </Grid>
@@ -454,11 +492,12 @@ const RenderQuestion = ({
           />
         </Box>
         <Box>
-          <HideCheckBox
-            setFieldValue={isActive => setQuestion({ ...question, IsActive: isActive })}
+          <LabeledCheckBox
+            setFieldValue={() => setQuestion({ ...question, IsActive: !question?.IsActive })}
             dataTestId={`hideCheckboxOfQuestion-${ID}-${index}`}
-            question={question}
+            value={!question?.IsActive}
             disabled={IsLocked}
+            label="Hide"
           />
         </Box>
       </Grid>

@@ -2,9 +2,8 @@ import React from 'react';
 import RenderCheckbox from './RenderCheckbox';
 import { FormControlLabel, makeStyles, Box } from '@material-ui/core';
 
-const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
-  const { IsActive: value } = question;
-  const unCheckedDisabled = value && disabled;
+const LabeledCheckBox = ({ setFieldValue, dataTestId, disabled, label, value }) => {
+  const unCheckedDisabled = disabled;
 
   const classes = makeStyles(() => ({
     checkboxWrapper: {
@@ -29,24 +28,22 @@ const HideCheckBox = ({ question, setFieldValue, disabled, dataTestId }) => {
         disabled={disabled}
         control={
           <RenderCheckbox
-            checked={!value}
-            handleCheck={() => setFieldValue(!value)}
+            checked={value}
+            handleCheck={setFieldValue}
             dataTestId={`${dataTestId}-checkbox`}
             unCheckedDisabled={unCheckedDisabled}
             disabled={disabled}
           />
         }
-        label={'Hide'}
+        label={label}
         classes={{
           root: classes.formControlLabelRoot,
           disabled: classes.formControlLabelDisabled
         }}
-        onChange={() => {
-          setFieldValue(!value);
-        }}
+        onChange={setFieldValue}
       />
     </Box>
   );
 };
 
-export default HideCheckBox;
+export default LabeledCheckBox;
