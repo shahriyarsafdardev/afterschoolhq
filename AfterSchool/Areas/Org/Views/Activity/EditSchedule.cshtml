@@ -3,7 +3,8 @@
 @{
     ViewBag.Title = Model.Account.Name;
     var msgs = Model.Messages;
-    var hasSchedule = Model.Activity.HasSchedule;
+    var activityCostFrequency = Model.Activity.CostFrequencyTypeId;
+    var hasSchedule = activityCostFrequency == ActivityCostFrequencyType.PerClass ? true : Model.Activity.HasSchedule;
     var isSession = Model.IsSession;
 
     var fullscreen = Request["isnew"] == "1" && !Model.IsPublished;
@@ -59,7 +60,7 @@
                         {
                             Html.RenderPartial("_VolunteerFormSchedule", Model.Schedule, new ViewDataDictionary
                             {
-                                {"ActivityType", (int) Model.Activity.ActivityTypeId}, 
+                                {"ActivityType", (int) Model.Activity.ActivityTypeId},
                                 {"hasSchedule", hasSchedule},
                                 {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
                             });
@@ -70,6 +71,7 @@
                             {
                                 {"ActivityType", (int) Model.Activity.ActivityTypeId},
                                 {"hasSchedule", hasSchedule},
+                                {"activityCostFrequency", activityCostFrequency},
                                 {"isContinuousEnrollmentEnabled", Model.Activity.IsContinuousEnrollment},
                                 {"isDisabled", Model.Activity?.GetSubscriptionPlan() != null &&
                                 Model.Activity.GetSubscriptionPlan().PaymentStartTypeId != PlanPaymentStartType.OnPeriodStart},

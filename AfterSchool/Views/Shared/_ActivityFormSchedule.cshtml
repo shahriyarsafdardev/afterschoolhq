@@ -1,4 +1,4 @@
-﻿@model ActivitySchedule
+@model ActivitySchedule
 
 @{
     var daysOfTheWeek = Model.GetDaysOfTheWeek();
@@ -14,6 +14,8 @@
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
     var isDisabled = ViewData["isDisabled"]?.ToString().AsBool() ?? false;
     var paymentType = ViewData["PaymentStartType"] ?? PlanPaymentStartType.WhenActivityStarts;
+    var activityCostFrequency = (ActivityCostFrequencyType)ViewData["activityCostFrequency"];
+    var hidden = activityCostFrequency == ActivityCostFrequencyType.PerClass ? true : false;
 
     if (isContinuousEnrollmentEnabled)
     {
@@ -83,17 +85,17 @@
 
         <div id="schedule-edit" class="">
 
-            <div class="form-group">
+            <div class="form-group @(hidden ? "hide" : "") ">
                 <label class="col-md-3 control-label">
                     Has Schedule
                 </label>
                 <div class="col-md-1">
                     @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", hasSchedule, new ViewDataDictionary
-                       {
-                           {"checkboxname", "hasschedule"},
-                           {"checkboxid", "hasschedule"},
-                           {"disabled", false},
-                       }); }
+                                    {
+                {"checkboxname", "hasschedule"},
+                {"checkboxid", "hasschedule"},
+                {"disabled", false},
+            }); }            
                 </div>
             </div>
 
@@ -105,7 +107,7 @@
                     </label>
                     <div class="col-md-1">
                         @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", Model.RepeatsWeekly, new ViewDataDictionary
-                           {
+                                       {
                                {"checkboxname", "repeatsweekly"},
                                {"checkboxid", "repeatsweekly"},
                                {"disabled", false},
@@ -147,7 +149,7 @@
                                         {"checkboxname", "isongoing"},
                                         {"checkboxid", "isongoing"},
                                         {"disabled", isDisabled || isContinuousEnrollmentEnabled || !showAllowSubscriptionPlans},
-                                    }
+                    }
                                     );
                             }
 
@@ -165,10 +167,10 @@
                             <div class="col-sm-3"></div>
                             <div class="col-sm-9">
                                 <p class="text-muted">
-                                    Subscription plans beginning on @((PlanPaymentStartType)paymentType == PlanPaymentStartType.WhenActivityStarts ? 
-                                                                        "activity start" : "checkout") cannot be set to ongoing. To enable this setting, 
+                                    Subscription plans beginning on @((PlanPaymentStartType)paymentType == PlanPaymentStartType.WhenActivityStarts ?
+                                                                        "activity start" : "checkout") cannot be set to ongoing. To enable this setting,
                                     please update your subscription plan to begin on period start.
-                                </p>  
+                                </p>
                             </div>
                         </div>
                     }
