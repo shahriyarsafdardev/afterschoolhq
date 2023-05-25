@@ -1307,6 +1307,10 @@ namespace AfterSchoolLibrary.Models
             Migration_20230327_AddDefaultStudentForm.Do(amsgs,adc);
             Migration_20230403_DefaultStudentFormMiddleNameStudentId.Do(amsgs,adc);
             Migration_20230425_UpdateRegistrationIsDeleted.Do(amsgs,adc);
+            Migration_20230525_UpdateLocationDistanceFromOrigin.Do(amsgs,adc); 
+            Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc); 
+            Migration_20230525_UpdateLocationLongitude.Do(amsgs,adc);
+            Migration_20230525_UpdateLocationName.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()
