@@ -1,13 +1,14 @@
 import * as Yup from 'yup';
 import cs from 'classnames';
+import { cloneDeep } from 'lodash';
 import { useSnackbar } from 'notistack';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
-import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@material-ui/core';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { cloneDeep } from 'lodash';
+import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@material-ui/core';
 
+import Dialog from './Dialog';
 import useStyles from './styles';
 import { Loader } from 'components';
 import { newQuestion } from './helper';
@@ -28,8 +29,10 @@ function FormSectionSettings() {
   const [validationSchema, setValidationSchema] = useState({});
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [initialValues, setInitialValues] = useState({});
+  const [openModal, setOpenModal] = useState(false);
   const [reRender, setReRender] = useState(false);
   const questionGroup = searchParams.get('qg');
+  const backUrl = useRef();
 
   const {
     submitFormSectionData,
@@ -123,6 +126,27 @@ function FormSectionSettings() {
 
   const { handleSubmit, values, setFieldValue, setValues, errors, dirty, touched } = formik;
   const formDirty = dirty || currentSection?.Name !== sectionName;
+
+  useEffect(() => {
+    const backButtonClicked = e => {
+      e.preventDefault();
+      setOpenModal(true);
+    };
+
+    if (formDirty) {
+      if (backUrl.current !== window.location.href) {
+        backUrl.current = window.location.href;
+        window.history.pushState(null, null, window.location.href);
+      }
+
+      window.addEventListener('popstate', backButtonClicked);
+    } else {
+      setOpenModal(false);
+      window.removeEventListener('popstate', backButtonClicked);
+    }
+
+    return () => window.removeEventListener('popstate', backButtonClicked);
+  }, [window.location.href, formDirty]);
 
   useEffect(() => {
     if (formDirty) {
@@ -512,6 +536,24 @@ function FormSectionSettings() {
       ) : (
         <FormikProvider value={formik}>
           <Form autoComplete="off" noValidate className={classes.form}>
+            <Dialog
+              open={openModal}
+              onClose={() => {
+                window.history.pushState(null, null, window.location.href);
+                setOpenModal(false);
+              }}
+              title={'Unsaved Changes'}
+              cancelButtonText="Stay on Page"
+              confirmationButtonText="Leave This Page"
+              text={
+                'If you leave this page, any unsaved changes will be lost. Please close this window and click “Save” to keep progress.'
+              }
+              onSubmit={() => {
+                setOpenModal(false);
+                window.history.back();
+              }}
+              dataTestId={`deleteQuestion`}
+            />
             <Box>
               <Typography variant="h6" className={classes.sectionHeading}>
                 Section Name
