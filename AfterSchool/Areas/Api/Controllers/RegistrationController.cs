@@ -87,7 +87,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
                 
-                var formQuestionDtoList = GetAllFormQuestions(currentRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -164,12 +164,14 @@ namespace AfterSchool.Areas.Api.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+            
             try
             {
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
                 
                 var registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
@@ -201,7 +203,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
                 
-                var formQuestionDtoList = GetAllFormQuestions(registrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -325,6 +327,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
                 
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
@@ -334,7 +337,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 Registration registration = null;
 
-                var formQuestionDtoList = GetAllFormQuestions(currentRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
@@ -1026,10 +1029,10 @@ namespace AfterSchool.Areas.Api.Controllers
             };
         }
 
-        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentRegistrant, List<FormQuestion> questions)
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
         {
             var formQuestionDtoList = new List<FormQuestionDto>();
-            var audienceType = GetAudienceType(currentRegistrant.PersonTypeId);
+            var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
             foreach (var question in questions)
             {
                 var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType);
