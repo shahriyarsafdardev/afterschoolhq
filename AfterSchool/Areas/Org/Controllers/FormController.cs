@@ -110,7 +110,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
-            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form.FormTypeId != FormType.Survey)
                 return View("EditNew", form);
             return View(form);
         }
@@ -338,7 +338,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             if (id.ToInteger() == 0)
                 return RedirectToAction("Edit", new { id = form.ID });
-            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form?.FormTypeId != FormType.Survey)
                 return View("EditNew", form);
             return View(form);
         }
