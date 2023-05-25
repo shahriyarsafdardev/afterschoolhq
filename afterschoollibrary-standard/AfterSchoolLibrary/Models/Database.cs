@@ -1311,7 +1311,6 @@ namespace AfterSchoolLibrary.Models
             Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc); 
             Migration_20230525_UpdateLocationLongitude.Do(amsgs,adc);
             Migration_20230525_UpdateLocationName.Do(amsgs, adc);
-            Migration_20230525_AddIsPublishedColumnToForm.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()
