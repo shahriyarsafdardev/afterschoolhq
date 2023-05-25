@@ -19,12 +19,8 @@ namespace AfterSchoolLibrary.Migrations
             (
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    amsgs.AddRange(Form.Update(
-                        new Hashtable() { { "IsPublished", 0 } },
-                        new Hashtable() { { "IsPublished", DBNull.Value } },
-                        Form.ObjectMap,
-                        adc
-                    ));
+                    var dq = new DatabaseQuery {Connection = adc};
+                    amsgs.AddRange(dq.ExecuteSql("alter table Form add IsPublished bit NULL"));
                 },
                 uniqueIdenfier: "Migration_20230525_AddIsPublishedColumnToForm",
                 msgs: msgs,
