@@ -1,3 +1,4 @@
+using BasicLibrary;
 using MailKit.Net.Smtp;
 using MimeKit;
 using SendGrid.Helpers.Mail;
@@ -8,15 +9,21 @@ namespace AfterSchoolLibrary.Helpers
 {
     public class SMTPMailTrapHelper
     {
-        public static string MailTrapUsername => ConfigurationManager.AppSettings["MailTrap.Username"];
-        public static string MailTrapPassword => ConfigurationManager.AppSettings["MailTrap.Password"];
-        public static string MailTrapHost => ConfigurationManager.AppSettings["MailTrap.Host"];
-        public static string MailTrapPort => ConfigurationManager.AppSettings["MailTrap.Port"];
+        public SMTPMailTrapHelper(string username, string password, string host, string port)
+        {
+            MailTrapUsername = username;
+            MailTrapPassword = password;
+            MailTrapHost = host;
+            MailTrapPort = port;
+        }
 
-        public static bool SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body,
+        public static string MailTrapUsername { get; set; }
+        public static string MailTrapPassword { get; set; }
+        public static string MailTrapHost { get; set; }
+        public static string MailTrapPort { get; set; }
+        public static SystemMessages SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body, SystemMessages msgs,
          EmailAddress replyTo = null, string emailTemplateId = null, EmailAddress ccEmail = null)
         {
-            bool response = false;
             try
             {
                 var message = new MimeMessage();
@@ -37,15 +44,15 @@ namespace AfterSchoolLibrary.Helpers
                     client.Authenticate(MailTrapUsername, MailTrapPassword);
                     client.Send(message);
                     client.Disconnect(true);
-
-                    response = true;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                response = false;
+                Utilities.SystemErrorLog(ex);
+                msgs.Add(ex.Message, MessageType.Error, ex);
             }
-            return response;
+
+            return msgs;
         }
     }
 }

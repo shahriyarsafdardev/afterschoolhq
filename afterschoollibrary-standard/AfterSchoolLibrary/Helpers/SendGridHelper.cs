@@ -63,15 +63,14 @@ namespace AfterSchoolLibrary
 
             if (Utilities.IsLocalHost)
             {
-                bool IsEmailSend = SMTPMailTrapHelper.SendMail(
+                msgs.AddRange(SMTPMailTrapHelper.SendMail(
                 fromEmail,
                 toEmail,
                 subject,
                 body,
+                msgs,
                 emailTemplateId: emailTemplateId
-            );
-                if (!IsEmailSend)
-                    msgs.Add("Email not Send", MessageType.Error);
+                ));
             }
             else
             {
