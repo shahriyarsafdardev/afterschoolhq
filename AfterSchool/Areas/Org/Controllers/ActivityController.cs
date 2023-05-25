@@ -1646,9 +1646,10 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(result);
         }
 
-        private EditContactResult GatherDataForAndAssembleEditContactResult(string id, WebUser currentUser, Account currentAccount, string isNew)
+        private EditContactResult GatherDataForAndAssembleEditContactResult(string id, WebUser currentUser, Account currentAccount, string isNew, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
+            if(msgs.IsEmpty())
+                msgs = new SystemMessages();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             if (isNew.IsNotEmpty())
@@ -1751,7 +1752,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            var result = GatherDataForAndAssembleEditContactResult(id, currentUser, currentAccount, Request[IsNewRequest]);
+            var result = GatherDataForAndAssembleEditContactResult(id, currentUser, currentAccount, Request[IsNewRequest], msgs);
             return View(result);
         }
 

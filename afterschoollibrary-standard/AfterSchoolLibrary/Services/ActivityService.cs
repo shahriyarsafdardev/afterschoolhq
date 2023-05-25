@@ -1167,6 +1167,11 @@ namespace AfterSchoolLibrary.Services
                                 providerPhone.IfEmpty(""),
                                 loggedInUserId,
                                 adc));
+                        if(activity.LeaderTypeId != ActivityLeaderType.ExternalProvider)
+                        {
+                            activity.ProviderAccountId = null;
+                            amsgs.AddRange(activity.Save(adc));
+                        }
 
                         //setup SubscriptionPlan
                         if (amsgs.HasNoErrors() && hasSubscriptionPlan != null &&
