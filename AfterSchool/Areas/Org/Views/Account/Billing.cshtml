@@ -1,4 +1,4 @@
-﻿@model Account
+@model Account
 @{
     ViewBag.Title = Model.Name;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
@@ -26,11 +26,14 @@
                     </p>
                 </div>
                 
-                <div class="text-center">
-                    <p class="margin-v-30">
+                <div class="text-center margin-v-30">
+                    <p>
                         <button onclick="AccountSetup.getStripeBillingLink('')" class="btn btn-success btn-lg">
                             Manage Billing with Stripe &raquo;
                         </button>
+                        <div class="text-center">
+                            <a href="https://afterschoolhq.zendesk.com/hc/en-us/requests/new" class=" btn-underline-text" data-target="_blank" target="_blank">Cancel Subscription</a>
+                        </div>                    
                     </p>
                 </div>
                 
