@@ -1,5 +1,5 @@
-﻿@model Coupon
-@{ 
+@model Coupon
+@{
     var msgs = (SystemMessages)ViewBag.Messages;
     var id = Model.Uid.ToString() ?? Request["Uid"];
     var name = (string)Model.Name ?? Request["Name"];
@@ -16,7 +16,7 @@
     {
         activityIds = (string)ViewBag.Activities;
     }
- }
+}
 
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -33,7 +33,7 @@
             <i class="s7-plus"></i> Add Coupon
         </div>
 
-        <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting", new { id = Model.Uid })">
+        <form id="couponform" class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting", new { id = Model.Uid })">
 
             <input id="hdnActivityIds" type="hidden" name="activityIds" value="@activityIds" />
             <input id="hdnCouponId" type="hidden" name="id" value="@id" />
@@ -78,27 +78,27 @@
                     <div class="col-md-10 p-tb-5">
                         <label class="control-label p-5">  Expiration Date </label>
                         @{ Html.RenderPartial("~/Views/Shared/Components/_Date.cshtml",
-                                new FormInputViewModel()
-                                {
-                                    Id = "dateExpdate",
-                                    Name = "expirationDate",
-                                    Value = expirationDate,
-                                    Placeholder = "Expiration Date"
-                                }); }
+                                 new FormInputViewModel()
+                                 {
+                                     Id = "dateExpdate",
+                                     Name = "expirationDate",
+                                     Value = expirationDate,
+                                     Placeholder = "Expiration Date"
+                                 }); }
                     </div>
                     <div class="clearfix"></div>
 
                     <div class="col-md-10 p-tb-5">
                         <div class="col-md-7 no-padding">
                             <label class="control-label p-5"> Discount Amount </label>
-                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" required />
+                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" onchange="checkcoupon()" required />
                         </div>
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
 
                             <select class="form-control" id="amountType" name="amountType">
 
-                                @{ 
+                                @{
                                     foreach (var item in EnumHelper.GetSelectList(typeof(AmountType)))
                                     {
                                         var selected = item.Value.ToInteger() == amountType ? " selected=\"selected\" "  : "";
@@ -118,7 +118,7 @@
                 <div class="visible-sm visible-xs"><hr /></div>
 
                 <div class="col-md-6 col-sm-12 no-padding">
-                    
+
                     <div class="col-md-10">
                         <label class="row control-label p-5"> Activities </label>
                         <div class="form-group has-search no-padding">
@@ -136,7 +136,7 @@
                 <br />
                 <br />
                 <div class="col-md-12 p-tb-5">
-                    <button type="submit" class="btn btn-primary btn-lg btn-center register-continue">Save Coupon</button>
+                    <button id="subbtn" type="submit" class="btn btn-primary btn-lg btn-center register-continue" onclick="ValidateCouponForm()">Save Coupon</button>
                 </div>
 
                 <div class="clearfix"></div>
@@ -161,6 +161,46 @@
                 activityIdsToSelect = comma_seperated_activities.split(',');
             }
         });
+
+        function checkcoupon() {
+            var amountval = parseint($("#txtamount").val());
+            var amounttypeval = parseint($("#amounttype").val());
+            if (amountval > 100 && amounttypeval == 1) {
+                $("#txtamount").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'amount in percentage cannot be greater than 100').tooltip({ tooltipclass: 'tooltipclass' });
+                $("#subbtn").prop('disabled', true); 
+            }
+            else {
+                $("#txtamount").css("border", "0px solid red");
+                $("#txtamount").removeattr('title');
+                $("#subbtn").prop('disabled', false);
+            }
+
+        }
+        
+
+        function ValidateCouponForm() {
+            var validated = true;
+            var amountVal = parseInt($("#txtAmount").val());
+            var amountTypeVal = parseInt($("#amountType").val());
+
+
+            if (amountVal > 100 && amountTypeVal ==1) {
+                $("#txtAmount").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Amount in percentage cannot be greater than 100').tooltip({ tooltipClass: 'tooltipclass' });
+                validated = false;
+            }
+            else {
+                $("#txtAmount").css("border", "0px solid red");
+                $("#txtAmount").removeAttr('title');
+                validated = true;
+            }
+            if (!validated) {
+                return false;
+            }
+            $('#couponform').attr('action', '@Url.Action("savecoupon", "accounting", new { id = Model.Uid })');
+
+        }
+
+
 
         function getActivities() {
             var url = '@Url.Action("GetActivities", "Accounting", new { Area = "Org" })';

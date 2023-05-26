@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -368,7 +368,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else
                     msgs.Add("Registrant not found", MessageType.UserError);
-                
+
             }
 
             ViewBag.Messages = msgs;
@@ -471,7 +471,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
         [HttpGet]
@@ -654,6 +654,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (applyType.IsBlank() || Enum.IsDefined(typeof(CouponApplyType), applyType))
                 msgs.Add("Coupon Must have a Fee Type Set", MessageType.UserError);
+
+            if (amount.ToDecimal() > 100 && amountType.ToInteger() == 1)
+                msgs.Add("Amount in percentage cannot be greater than 100", MessageType.UserError);
+
 
             if (msgs.HasNoErrors())
             {
