@@ -1494,6 +1494,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.IsEmpty())
                 msgs = new SystemMessages();
 
+            if (isNew.IsNotEmpty() && activity.ActivityTypeId.In(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                activity.CostFrequencyTypeId = ActivityCostFrequencyType.PerActivity;
             var currentUser = SessionVariables.CurrentUser;
             currentAccount.EnsureDefaultForm(activity, currentUser, msgs);
             var activeForm = activity.GetActiveActivityForm(msgs) ?? activityGroup?.GetDefaultActivityForm(msgs) ??
