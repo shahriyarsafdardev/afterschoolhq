@@ -247,7 +247,6 @@ function FormSectionSettings() {
 
     updatedValues[newDisplayOrder] = newQuest;
     setValues({ ...updatedValues }, false);
-    // setReRender(!reRender);
   };
 
   const handleDelete = (key, removeFromList = false) => {
