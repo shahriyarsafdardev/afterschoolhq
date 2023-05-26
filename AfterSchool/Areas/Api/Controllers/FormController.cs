@@ -262,6 +262,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         IsAnswerDescriptionEnabled = NewQuestion.IsAnswerDescriptionEnabled,
                                     };
                                     msgs.AddRange(NewFormQuestion.Save(adc));
+                                    NewQuestion.ID = NewFormQuestion.ID??0;
                                 }
 
                                 var PrevSettingsList = FormQuestionSettings.LoadByQuestionIds(NewQuestion.ID, msgs, adc);
