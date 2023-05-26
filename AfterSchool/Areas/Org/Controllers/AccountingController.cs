@@ -655,7 +655,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (applyType.IsBlank() || Enum.IsDefined(typeof(CouponApplyType), applyType))
                 msgs.Add("Coupon Must have a Fee Type Set", MessageType.UserError);
 
-            if (amount.ToDecimal() > 100 && amountType.ToInteger() == 1)
+            if (amount.ToDecimal() > 100 && amountType.ToInteger() == (int) CouponAmountType.Percentage)
                 msgs.Add("Amount in percentage cannot be greater than 100", MessageType.UserError);
 
 

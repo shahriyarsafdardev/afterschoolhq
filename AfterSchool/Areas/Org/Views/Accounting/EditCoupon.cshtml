@@ -33,7 +33,7 @@
             <i class="s7-plus"></i> Add Coupon
         </div>
 
-        <form id="couponform" class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting", new { id = Model.Uid })">
+        <form class="form form-horizontal" method="post" action="@Url.Action("savecoupon", "accounting", new { id = Model.Uid })">
 
             <input id="hdnActivityIds" type="hidden" name="activityIds" value="@activityIds" />
             <input id="hdnCouponId" type="hidden" name="id" value="@id" />
@@ -91,7 +91,8 @@
                     <div class="col-md-10 p-tb-5">
                         <div class="col-md-7 no-padding">
                             <label class="control-label p-5"> Discount Amount </label>
-                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" onkeyup="validateCouponValue()" required />
+                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" onchange="validateCouponValue()" onkeyup="validateCouponValue()" required />
+                            <p id="couponError" class="text-danger text-muted hide">Amount in percentage can't be greater than 100.</p>
                         </div>
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
@@ -136,7 +137,7 @@
                 <br />
                 <br />
                 <div class="col-md-12 p-tb-5">
-                    <button id="subbtn" type="submit" class="btn btn-primary btn-lg btn-center register-continue">Save Coupon</button>
+                    <button id="btnSaveCoupon" type="submit" class="btn btn-primary btn-lg btn-center register-continue">Save Coupon</button>
                 </div>
 
                 <div class="clearfix"></div>
@@ -213,13 +214,15 @@
             if (textValue > 100 && amountTypeValue === 1) 
             {
                 txtAmount.css("border", "1px solid red")
-                .attr("title", "Amount in percentage can't be greater than 100");
-                $("#subbtn").prop('disabled', true); 
+                txtAmount.css("cursor", "pointer");
+                $("#couponError").removeClass("hide");        
+                $("#btnSaveCoupon").prop('disabled', true); 
             }
             else {
                 txtAmount.css("border", "");
-                txtAmount.attr('title','');
-                $("#subbtn").prop('disabled', false);
+                txtAmount.css('cursor', 'auto');
+                $("#couponError").addClass("hide");
+                $("#btnSaveCoupon").prop('disabled', false);
             }
         }
 
