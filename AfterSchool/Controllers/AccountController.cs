@@ -1135,15 +1135,9 @@ namespace AfterSchool.Controllers
             {
                 var firstName = qvms.Find(qvm =>
                                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
-                var lastName = qvms.Find(qvm =>
-                    qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
-                var middleName = qvms.Find(qvm =>
-                    qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMiddleName).Value;
-                var fullName = (firstName + middleName + lastName).ToLower();
                 var isDuplicate = students.Any(student =>
                 {
-                    var studentFullName = student.FirstName + student.MiddleName + student.LastName;
-                    return studentFullName.ToLower().Equals(fullName);
+                    return student.FirstName.ToLower().Equals(firstName);
                 });
 
                 if (isDuplicate)
