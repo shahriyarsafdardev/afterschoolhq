@@ -719,12 +719,13 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
                         {
-                            studentRegistrants.ForEach(currentRegistrant =>
+                            studentRegistrants.ForEach(stdRegistrant =>
                             {
-                                if (currentRegistrant.IsMaster && currentRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
+                                if (stdRegistrant.ID != currentRegistrant.ID && stdRegistrant.IsMaster && 
+                                    stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                                 {
-                                    var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(currentRegistrant.ID.Value, false, msgs).FirstOrDefault();
-                                    msgs.AddRange(currentRegistrant.Delete());
+                                    var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(stdRegistrant.ID.Value, false, msgs).FirstOrDefault();
+                                    msgs.AddRange(stdRegistrant.Delete());
                                     if(registrantWebUser.IsNotEmpty())
                                         msgs.AddRange(registrantWebUser.Delete());
                                 }
