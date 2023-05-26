@@ -11,11 +11,11 @@ import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@mat
 import Dialog from './Dialog';
 import useStyles from './styles';
 import { Loader } from 'components';
-import { newQuestion } from './helper';
 import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
 import { audienceTypes, questionType } from 'constants';
+import { newQuestion, unSavedDialogProps } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 
 function FormSectionSettings() {
@@ -528,156 +528,144 @@ function FormSectionSettings() {
     );
   };
 
+  const disableSaveButton = !formDirty || sectionNameError || saveDisabled;
+  const formSaveHandler = event => {
+    event.preventDefault();
+    handleSubmit();
+  };
+
+  if (sectionLoading) return <Loader />;
+
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
-      {sectionLoading ? (
-        <Loader />
-      ) : (
-        <FormikProvider value={formik}>
-          <Form autoComplete="off" noValidate className={classes.form}>
-            <Dialog
-              open={openModal}
-              onClose={() => {
-                window.history.pushState(null, null, window.location.href);
-                setOpenModal(false);
-              }}
-              title={'Unsaved Changes'}
-              cancelButtonText="Stay on Page"
-              confirmationButtonText="Leave This Page"
-              text={
-                'If you leave this page, any unsaved changes will be lost. Please close this window and click “Save” to keep progress.'
-              }
-              onSubmit={() => {
-                setOpenModal(false);
-                window.history.back();
-              }}
-              dataTestId={`deleteQuestion`}
+      <FormikProvider value={formik}>
+        <Form autoComplete="off" noValidate className={classes.form}>
+          <Dialog
+            open={openModal}
+            onClose={() => {
+              window.history.pushState(null, null, window.location.href);
+              setOpenModal(false);
+            }}
+            onSubmit={() => {
+              setOpenModal(false);
+              window.history.back();
+            }}
+            {...unSavedDialogProps}
+          />
+          <Box>
+            <Typography variant="h6" className={classes.sectionHeading}>
+              Section Name
+            </Typography>
+            <TextField
+              className={cs(classes.formControlClass, classes.sectionNameField)}
+              size="small"
+              fullWidth
+              variant="outlined"
+              value={sectionName}
+              onChange={event => updateValue(event.target.value)}
+              disabled={currentSection.QuestionGroupDataTypeId !== 0}
+              helperText={sectionNameError}
+              error={sectionNameError}
+              data-testid={`sectionName-${questionGroup}`}
             />
+          </Box>
+          <Box>
+            {form?.FormType !== 3 && <ApplyToAllControls />}
             <Box>
-              <Typography variant="h6" className={classes.sectionHeading}>
-                Section Name
-              </Typography>
-              <TextField
-                className={cs(classes.formControlClass, classes.sectionNameField)}
-                size="small"
-                fullWidth
+              {values && (
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable key="list-2" droppableId="dropable-questions-container" type="column">
+                    {provided => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
+                        {Object.keys(values).map(
+                          key =>
+                            !values[key].IsDeleted && (
+                              <Draggable
+                                isDragDisabled={values[key].IsLocked}
+                                draggableId={`question-${key}`}
+                                index={Number(key)}
+                                key={key}
+                              >
+                                {(provided, snapshot) => (
+                                  <Box
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={
+                                      snapshot.isDragging
+                                        ? classes.whiteBorder
+                                        : classes.transparentBorder
+                                    }
+                                  >
+                                    <RenderQuestion
+                                      index={key}
+                                      key={`${key}-${values[key]?.ID}${reRender}`}
+                                      value={values[key]}
+                                      setFieldValue={setFieldValue}
+                                      handleDelete={handleDelete}
+                                      handleCopy={handleCopy}
+                                      handleAddNewQuestion={addNewQuestionHandler}
+                                      dragIndicatorProps={provided.dragHandleProps}
+                                      errors={errors[key]}
+                                      touched={touched[key]}
+                                      formType={form?.FormType}
+                                    />
+                                  </Box>
+                                )}
+                              </Draggable>
+                            )
+                        )}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
+            </Box>
+            <Box className={classes.buttonWrapper}>
+              <Button
+                color="primary"
                 variant="outlined"
-                value={sectionName}
-                onChange={event => updateValue(event.target.value)}
-                disabled={currentSection.QuestionGroupDataTypeId !== 0}
-                helperText={sectionNameError}
-                error={sectionNameError}
-                data-testid={`sectionName-${questionGroup}`}
-              />
+                style={{
+                  color: '#494949',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  border: '1px solid #E4E4E4'
+                }}
+                disabled={false}
+                onClick={event => {
+                  event.preventDefault();
+                  addNewQuestionHandler();
+                }}
+                data-testid={`addNewQuestion-${questionGroup}`}
+              >
+                + Add New Question
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                variant="outlined"
+                data-testid={`bottom-saveQuestions-${questionGroup}`}
+                className={classes.saveButton}
+                disabled={disableSaveButton}
+                onClick={formSaveHandler}
+              >
+                {buttonText('Save')}
+              </Button>
+              <Button
+                type="submit"
+                color="primary"
+                variant="outlined"
+                data-testid={`top-saveQuestions-${questionGroup}`}
+                className={classes.saveFormButton}
+                disabled={disableSaveButton}
+                onClick={formSaveHandler}
+              >
+                {buttonText('Save Form')}
+              </Button>
             </Box>
-            <Box>
-              {form?.FormType !== 3 && <ApplyToAllControls />}
-              <Box>
-                {values && (
-                  <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable
-                      key="list-2"
-                      droppableId="dropable-questions-container"
-                      type="column"
-                    >
-                      {provided => (
-                        <div ref={provided.innerRef} {...provided.droppableProps}>
-                          {Object.keys(values).map(
-                            key =>
-                              !values[key].IsDeleted && (
-                                <Draggable
-                                  isDragDisabled={values[key].IsLocked}
-                                  draggableId={`question-${key}`}
-                                  index={Number(key)}
-                                  key={key}
-                                >
-                                  {(provided, snapshot) => (
-                                    <Box
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      className={
-                                        snapshot.isDragging
-                                          ? classes.whiteBorder
-                                          : classes.transparentBorder
-                                      }
-                                    >
-                                      <RenderQuestion
-                                        index={key}
-                                        key={`${key}-${values[key]?.ID}${reRender}`}
-                                        value={values[key]}
-                                        setFieldValue={setFieldValue}
-                                        handleDelete={handleDelete}
-                                        handleCopy={handleCopy}
-                                        handleAddNewQuestion={addNewQuestionHandler}
-                                        dragIndicatorProps={provided.dragHandleProps}
-                                        errors={errors[key]}
-                                        touched={touched[key]}
-                                        formType={form?.FormType}
-                                      />
-                                    </Box>
-                                  )}
-                                </Draggable>
-                              )
-                          )}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                )}
-              </Box>
-              <Box className={classes.buttonWrapper}>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  style={{
-                    color: '#494949',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    border: '1px solid #E4E4E4'
-                  }}
-                  disabled={false}
-                  onClick={event => {
-                    event.preventDefault();
-                    addNewQuestionHandler();
-                  }}
-                  data-testid={`addNewQuestion-${questionGroup}`}
-                >
-                  + Add New Question
-                </Button>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  className={classes.saveButton}
-                  type="submit"
-                  disabled={!formDirty || sectionNameError || saveDisabled}
-                  onClick={event => {
-                    event.preventDefault();
-                    handleSubmit();
-                  }}
-                  data-testid={`bottom-saveQuestions-${questionGroup}`}
-                >
-                  {buttonText('Save')}
-                </Button>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  className={classes.saveFormButton}
-                  type="submit"
-                  disabled={!formDirty || sectionNameError || saveDisabled}
-                  onClick={event => {
-                    event.preventDefault();
-                    handleSubmit();
-                  }}
-                  data-testid={`top-saveQuestions-${questionGroup}`}
-                >
-                  {buttonText('Save Form')}
-                </Button>
-              </Box>
-            </Box>
-          </Form>
-        </FormikProvider>
-      )}
+          </Box>
+        </Form>
+      </FormikProvider>
     </Grid>
   );
 }

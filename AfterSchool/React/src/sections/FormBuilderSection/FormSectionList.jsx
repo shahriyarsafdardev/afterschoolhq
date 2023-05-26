@@ -15,6 +15,7 @@ import {
   Popover
 } from '@material-ui/core';
 
+import { unSavedDialogProps, deleteItemDialogProps } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
@@ -191,10 +192,8 @@ function FormSectionList() {
       <Dialog
         open={isOpen}
         onClose={handleCloseDialog}
-        title={'Delete Section'}
-        text={'Do you want to delete this section? This action is irreversible.'}
         onSubmit={handleDeleteSection}
-        dataTestId={'deleteSection'}
+        {...deleteItemDialogProps('Section')}
       />
       <Dialog
         open={isUnsaved}
@@ -202,26 +201,20 @@ function FormSectionList() {
           setNewSearchParams('');
           setIsUnsaved(false);
         }}
-        title={'Unsaved Changes'}
-        cancelButtonText="Stay on Page"
-        confirmationButtonText="Leave This Page"
-        text={
-          'If you leave this page, any unsaved changes will be lost. Please close this window and click “Save” to keep progress.'
-        }
         onSubmit={() => {
           setSearchParams(newSearchParams);
           setIsUnsaved(false);
         }}
-        dataTestId={`deleteQuestion`}
+        {...unSavedDialogProps}
       />
       {showNewSectionField ? (
         <TextField
           className={cs(classes.formControlClass, classes.newSectionName)}
-          data-testid={'newSectionNameField'}
           size="small"
-          fullWidth
           key="newSectionField"
           placeholder="Section Name"
+          data-testid="newSectionNameField"
+          fullWidth
           value={newSectionName}
           onChange={event => setNewSectionName(event.target.value)}
           InputProps={{
@@ -229,15 +222,15 @@ function FormSectionList() {
               <InputAdornment position="end">
                 <Done
                   color="primary"
+                  data-testid="saveNewSectionNameFieldIcon"
                   style={{ cursor: 'pointer' }}
                   onClick={addNewSection}
-                  data-testid={'saveNewSectionNameFieldIcon'}
                 />
                 <CloseOutlined
-                  data-testid={'closeNewSectionNameFieldIcon'}
                   color="error"
-                  style={{ cursor: 'pointer' }}
+                  data-testid="closeNewSectionNameFieldIcon"
                   onClick={cancelNewSectionHandler}
+                  style={{ cursor: 'pointer' }}
                 />
               </InputAdornment>
             )
@@ -247,8 +240,10 @@ function FormSectionList() {
         />
       ) : (
         <Button
+          type="submit"
           color="primary"
           variant="outlined"
+          data-testid="addNewSectionButton"
           style={{
             color: '#494949',
             fontSize: '14px',
@@ -256,13 +251,10 @@ function FormSectionList() {
             marginTop: '25px',
             border: '1px solid #E4E4E4'
           }}
-          type="submit"
-          disabled={false}
           onClick={async event => {
             event.preventDefault();
             setShowNewSectionField(true);
           }}
-          data-testid={'addNewSectionButton'}
         >
           + Add New Section
         </Button>

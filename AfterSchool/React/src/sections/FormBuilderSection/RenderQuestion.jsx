@@ -28,6 +28,7 @@ import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
 import DeleteIcon from 'assets/delete.svg';
 import LabeledCheckBox from './LabeledCheckBox';
+import { deleteItemDialogProps } from './helper';
 import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -461,10 +462,8 @@ const RenderQuestion = ({
           <Dialog
             open={isOpen}
             onClose={handleCloseDialog}
-            title={'Delete Question'}
-            text={'Do you want to delete this question? This action is irreversible.'}
             onSubmit={handleDeleteSection}
-            dataTestId={`deleteQuestion-${ID}-${index}`}
+            {...deleteItemDialogProps('Question')}
           />
           <StyledImage
             src={CopyIcon}

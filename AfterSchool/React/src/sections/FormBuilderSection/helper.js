@@ -20,3 +20,18 @@ export const newQuestion = {
   QuestionDataTypeId: 0,
   FormQuestionGroupQuestionGroupDataTypeId: 0
 };
+
+export const unSavedDialogProps = {
+  title: 'Unsaved Changes',
+  cancelButtonText: 'Stay on Page',
+  dataTestId: 'unsavedChangesModal',
+  confirmationButtonText: 'Leave This Page',
+  text:
+    'If you leave this page, any unsaved changes will be lost. Please close this window and click “Save” to keep progress.'
+};
+
+export const deleteItemDialogProps = item => ({
+  title: `Delete ${item}`,
+  text: `Do you want to delete this ${item.toLowerCase()}? This action is irreversible.`,
+  dataTestId: `delete${item}`
+});

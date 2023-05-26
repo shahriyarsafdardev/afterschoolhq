@@ -27,19 +27,15 @@ const FormBuilderSection = () => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
+  if (loading) return <Loader />;
+
   return (
-    <>
-      {loading ? (
-        <Loader />
-      ) : (
-        <UnsavedChangesProvider>
-          <Grid container className={classes.wrapper}>
-            {questionGroup === null ? <FormSettings /> : <FormSectionSettings />}
-            <FormSectionList />
-          </Grid>
-        </UnsavedChangesProvider>
-      )}
-    </>
+    <UnsavedChangesProvider>
+      <Grid container className={classes.wrapper}>
+        {questionGroup === null ? <FormSettings /> : <FormSectionSettings />}
+        <FormSectionList />
+      </Grid>
+    </UnsavedChangesProvider>
   );
 };
 export default FormBuilderSection;
