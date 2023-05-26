@@ -660,18 +660,18 @@ namespace AfterSchoolLibrary.Services
                 return null;
 
             DateTime? endDate = null;
+            
+            /*if (plan.EndDate.HasValue)
+                endDate = plan.EndDate.Value;*/
 
-            if (plan.EndDate.HasValue)
-                endDate = plan.EndDate.Value;
+            /*if (endDate.IsEmpty())
+            {*/
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                endDate = plan.GetSubscriptionEndDate(participationObject);
 
-            if (endDate.IsEmpty())
-            {
-                if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
-                    endDate = plan.GetSubscriptionEndDate(participationObject);
-
-                if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-                    endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
-            }
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                endDate = plan.GetPaymentPlanEndDate(startDateTime, msgs);
+            //}
 
             // make sure endDate > startDate for stripe
             if (endDate.HasValue && Math.Abs((endDate.Value - startDateTime).TotalDays) < 1)

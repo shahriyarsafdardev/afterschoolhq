@@ -189,7 +189,9 @@
                     </p>
 
                     <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden"/>
+                    @*
                     <input id="subscriptionEndDate" name="subscriptionEndDate" type="hidden"/>
+                    *@
 
 
                     @*
@@ -282,7 +284,7 @@
                     if ($('.periodstartdate').attr('date-loaded') === 'false')
                     {
                        $('#subscriptionStartDate').val(startDateFormatted);
-                       $('#subscriptionEndDate').val(endDateFormatted); 
+                       //$('#subscriptionEndDate').val(endDateFormatted); 
                        $('.periodstartdate').html(startDateFormatted);
                        $('.periodstartdate').attr('date-loaded', 'true');
                     }
