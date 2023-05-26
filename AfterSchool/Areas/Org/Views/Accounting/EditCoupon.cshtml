@@ -91,7 +91,7 @@
                     <div class="col-md-10 p-tb-5">
                         <div class="col-md-7 no-padding">
                             <label class="control-label p-5"> Discount Amount </label>
-                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" onchange="checkcoupon()" required />
+                            <input id="txtAmount" name="amount" value="@amount" type="number" class="form-control" onkeyup="validateCouponValue()" required />
                         </div>
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
@@ -136,7 +136,7 @@
                 <br />
                 <br />
                 <div class="col-md-12 p-tb-5">
-                    <button id="subbtn" type="submit" class="btn btn-primary btn-lg btn-center register-continue" onclick="ValidateCouponForm()">Save Coupon</button>
+                    <button id="subbtn" type="submit" class="btn btn-primary btn-lg btn-center register-continue">Save Coupon</button>
                 </div>
 
                 <div class="clearfix"></div>
@@ -162,48 +162,8 @@
             }
         });
 
-        function checkcoupon() {
-            var amountval = parseint($("#txtamount").val());
-            var amounttypeval = parseint($("#amounttype").val());
-            if (amountval > 100 && amounttypeval == 1) {
-                $("#txtamount").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'amount in percentage cannot be greater than 100').tooltip({ tooltipclass: 'tooltipclass' });
-                $("#subbtn").prop('disabled', true); 
-            }
-            else {
-                $("#txtamount").css("border", "0px solid red");
-                $("#txtamount").removeattr('title');
-                $("#subbtn").prop('disabled', false);
-            }
-
-        }
-        
-
-        function ValidateCouponForm() {
-            var validated = true;
-            var amountVal = parseInt($("#txtAmount").val());
-            var amountTypeVal = parseInt($("#amountType").val());
-
-
-            if (amountVal > 100 && amountTypeVal ==1) {
-                $("#txtAmount").css("border", "2px solid red").css('cursor', 'pointer').attr('title', 'Amount in percentage cannot be greater than 100').tooltip({ tooltipClass: 'tooltipclass' });
-                validated = false;
-            }
-            else {
-                $("#txtAmount").css("border", "0px solid red");
-                $("#txtAmount").removeAttr('title');
-                validated = true;
-            }
-            if (!validated) {
-                return false;
-            }
-            $('#couponform').attr('action', '@Url.Action("savecoupon", "accounting", new { id = Model.Uid })');
-
-        }
-
-
-
         function getActivities() {
-            var url = '@Url.Action("GetActivities", "Accounting", new { Area = "Org" })';
+            var url = '@Url.Action("GetActivities", "Accounting", new {Area = "Org"})';
 
                 $.ajax({
                     url: url,
@@ -243,6 +203,24 @@
                         return;
                     }
                 });
+        }
+        
+        function validateCouponValue() {
+            let txtAmount = $("#txtAmount");
+            let amountType = $("#amountType");
+            let textValue = parseInt(txtAmount.val());
+            let amountTypeValue = parseInt(amountType.val());
+            if (textValue > 100 && amountTypeValue === 1) 
+            {
+                txtAmount.css("border", "1px solid red")
+                .attr("title", "Amount in percentage can't be greater than 100");
+                $("#subbtn").prop('disabled', true); 
+            }
+            else {
+                txtAmount.css("border", "");
+                txtAmount.attr('title','');
+                $("#subbtn").prop('disabled', false);
+            }
         }
 
         function loadActivities(data) {
