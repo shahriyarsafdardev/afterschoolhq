@@ -9,11 +9,13 @@ using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using Emmersion.InfluxDB;
 using Hangfire;
+using MailKit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Owin;
 using Owin;
 using AccountService = AfterSchoolLibrary.Services.AccountService;
+using SMTPMailTrapHelper = AfterSchoolLibrary.Helpers.SMTPMailTrapHelper;
 
 [assembly: OwinStartup(typeof(Startup))]
 
@@ -93,6 +95,11 @@ namespace AfterSchool
                 configuration.GetValue<string>("InfluxDB:OrgName"),
                 configuration.GetValue<string>("InfluxDB:BucketName"),
                 configuration.GetValue<string>("InfluxDB:ApiToken")));
+            services.AddSingleton(new SMTPMailTrapHelper(
+                configuration.GetValue<string>("Mailtrap:Username"),
+                configuration.GetValue<string>("Mailtrap:Password"),
+                configuration.GetValue<string>("Mailtrap:Host"),
+                configuration.GetValue<string>("Mailtrap:Port")));
         }
 
         private static void SetDependencyInjection(IServiceCollection services)

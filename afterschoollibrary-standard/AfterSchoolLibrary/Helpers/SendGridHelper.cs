@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -60,25 +61,39 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
 
-            var sg = new SendGridClient(SendGridApiKey);
+            if (Utilities.IsLocalHost)
+            {
+                msgs.AddRange(SMTPMailTrapHelper.SendMail(
+                fromEmail,
+                toEmail,
+                subject,
+                body,
+                msgs,
+                emailTemplateId: emailTemplateId
+                ));
+            }
+            else
+            {
 
-            if (!Utilities.IsProduction)
-                subject = $"{Utilities.Environment} ENV: {subject}";
+                var sg = new SendGridClient(SendGridApiKey);
 
-            var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
+                if (!Utilities.IsProduction)
+                    subject = $"{Utilities.Environment} ENV: {subject}";
 
-            mail.ReplyTo = replyTo;
-            mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
-            if (ccEmail != null)
-                mail.AddCc(ccEmail);
+                var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
 
-            var task = Task.Run(async () => await sg.SendEmailAsync(mail));
-            task.Wait();
+                mail.ReplyTo = replyTo;
+                mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
+                if (ccEmail != null)
+                    mail.AddCc(ccEmail);
 
-            dynamic response = task.Result;
-            if (response.StatusCode != HttpStatusCode.Accepted)
-                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+                var task = Task.Run(async () => await sg.SendEmailAsync(mail));
+                task.Wait();
 
+                dynamic response = task.Result;
+                if (response.StatusCode != HttpStatusCode.Accepted)
+                    msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            }
             return msgs;
         }
 
