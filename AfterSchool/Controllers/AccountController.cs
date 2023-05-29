@@ -1100,6 +1100,7 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var students = currentUser.GetStudentRegistrants(msgs);
 
             questions.ForEach(question =>
             {
@@ -1129,7 +1130,22 @@ namespace AfterSchool.Controllers
                     MessageType.UserError);
 
             AddStudentRestrictionsMessages(msgs, participationObject, qvms);
-            
+
+            if (students.Count > 0)
+            {
+                var firstName = qvms.Find(qvm =>
+                                qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                var isDuplicate = students.Any(student =>
+                {
+                    return student.FirstName.ToLower().Equals(firstName);
+                });
+
+                if (isDuplicate)
+                {
+                    msgs.Add("You already have a student with this name", MessageType.UserError);
+                }
+            }
+
             if (msgs.HasNoErrors())
             {
                 Registrant student = null;
