@@ -14,5 +14,11 @@ namespace AfterSchool.Areas.Api.Models
             this.formQuestionGroup = formQuestionGroup;
             this.formQuestionAnswer = formQuestionAnswer;
         }
+        
+        public FormDto(List<FormQuestionDto> formQuestion, List<FormQuestionGroupDto> formQuestionGroup)
+        {
+            this.formQuestion = formQuestion;
+            this.formQuestionGroup = formQuestionGroup;
+        }
     }
 }
