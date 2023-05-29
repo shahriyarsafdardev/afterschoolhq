@@ -1498,6 +1498,7 @@
     <Content Include="img\strategy.svg" />
     <Content Include="img\team.svg" />
     <Content Include="img\texture-fabric.png" />
+    <Content Include="img\under-construction.png" />
     <Content Include="img\v-hernly.png" />
     <Content Include="img\warning.png" />
     <Content Include="img\website.svg" />
@@ -1524,6 +1525,7 @@
     <Content Include="provider-faq.html" />
     <Content Include="providers.html" />
     <Content Include="referral-program.html" />
+    <Content Include="scheduled-maintenance.html" />
     <Content Include="Scripts\emojionearea.min.js" />
     <Content Include="Scripts\quill.min.js" />
     <Content Include="service-fee-schedule.html" />
