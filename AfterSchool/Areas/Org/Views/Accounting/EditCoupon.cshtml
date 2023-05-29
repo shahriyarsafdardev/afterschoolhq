@@ -97,7 +97,7 @@
                         <div class="col-md-offset-1 col-md-4 no-padding">
                             <label class="control-label p-5"> % or $ </label>
 
-                            <select class="form-control" id="amountType" name="amountType">
+                            <select class="form-control" id="amountType" name="amountType" onchange="validateCouponValue()">
 
                                 @{
                                     foreach (var item in EnumHelper.GetSelectList(typeof(AmountType)))
@@ -211,14 +211,14 @@
             let amountType = $("#amountType");
             let textValue = parseInt(txtAmount.val());
             let amountTypeValue = parseInt(amountType.val());
-            if (textValue > 100 && amountTypeValue === 1) 
+            if (textValue > 100 && amountTypeValue === 1)
             {
                 txtAmount.css("border", "1px solid red")
                 txtAmount.css("cursor", "pointer");
-                $("#couponError").removeClass("hide");        
-                $("#btnSaveCoupon").prop('disabled', true); 
+                $("#couponError").removeClass("hide");
+                $("#btnSaveCoupon").prop('disabled', true);
             }
-            else {
+            else { 
                 txtAmount.css("border", "");
                 txtAmount.css('cursor', 'auto');
                 $("#couponError").addClass("hide");
