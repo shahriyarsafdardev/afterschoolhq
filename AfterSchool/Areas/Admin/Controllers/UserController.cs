@@ -49,6 +49,18 @@ namespace AfterSchool.Areas.Admin.Controllers
                 TotalPages = totalPages
             };
 
+            try
+            {
+                throw new Exception("This is a test exception!");
+            }
+            catch (Exception ex)
+            {
+                msgs.Add("This is API error", MessageType.ApiError);
+                msgs.Add("This is Warning error", MessageType.Warning);
+                msgs.Add("This is Success error", MessageType.Success);
+            }
+            ViewBag.Messages = msgs;
+
             return View(users);
         }
 

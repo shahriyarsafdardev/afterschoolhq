@@ -132,6 +132,29 @@ namespace AfterSchoolLibrary.Helpers
             RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
+        public static void SystemAbcLog(SystemMessages msgs)
+        {
+            RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
+            { Environment = GetRollbarEnvironment() });
+            var desiredMessageTypes = new List<MessageType>
+            {
+                MessageType.Error,
+                MessageType.Warning,
+                MessageType.ApiUsageError,
+                MessageType.ApiError
+            };
+            var filteredMessages = new SystemMessages();
+            foreach (var message in msgs)
+            {
+                var systemMessage = message as SystemMessage;
+                if (systemMessage != null && desiredMessageTypes.Contains(systemMessage.MessageType))
+                {
+                    filteredMessages.Add(systemMessage);
+                }
+            }
+            RollbarLocator.RollbarInstance.Error(filteredMessages.RenderMessageList(MessageOutputType.Text));
+        }
+
         public static void SystemErrorLog(Exception ex)
         {
             RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
