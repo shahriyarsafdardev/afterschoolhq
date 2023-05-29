@@ -725,7 +725,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                                 {
                                     var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
-                                        currentUser?.ID ?? 0, msgs);
+                                        currentUser?.ID ?? 0, msgs, adc);
                                     msgs.AddRange(stdRegistrant.Delete(adc));
                                     if(registrantWebUser.IsNotEmpty())
                                         msgs.AddRange(registrantWebUser.Delete(adc));
