@@ -724,14 +724,11 @@ namespace AfterSchool.Areas.Api.Controllers
                                 if (stdRegistrant.ID != currentRegistrant.ID && stdRegistrant.IsMaster && 
                                     stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                                 {
-                                    if (currentUser.IsNotEmpty())
-                                    {
                                         var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
                                             currentUser.ID.Value, msgs, adc);
                                         msgs.AddRange(stdRegistrant.Delete(adc));
                                         if (registrantWebUser.IsNotEmpty())
                                             msgs.AddRange(registrantWebUser.Delete(adc));
-                                    }
                                 }
                             });
                         }
