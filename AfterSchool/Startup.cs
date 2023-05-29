@@ -75,8 +75,6 @@ namespace AfterSchool
                 .Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition)
                 .Where(t => typeof(IController).IsAssignableFrom(t)
                             || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
-
-            //SMTPMailTrapHelper(configurationRoot["Mailtrap:Username"], configurationRoot["Mailtrap:Password"], configurationRoot["Mailtrap:Host"], configurationRoot["Mailtrap:Port"]);
         }
 
         private static void SetConfigurationValues(IServiceCollection services, IConfiguration configuration)
