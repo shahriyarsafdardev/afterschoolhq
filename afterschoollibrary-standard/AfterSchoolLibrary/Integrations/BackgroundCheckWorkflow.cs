@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Integrations
             try
             {
                 var token = await tokenQuery.GetAsync(credentials);
-                candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+                candidateId = await candidateQuery.GetByEmailAsync(credentials, token.Token, webUser);
                 
                 if(candidateId.IsEmpty())
                     candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
@@ -94,7 +94,7 @@ namespace AfterSchoolLibrary.Integrations
 
                         var token = await tokenQuery.GetAsync(credentials);
 
-                        var candidateId = await candidateQuery.GetByEmaileAsync(credentials, token.Token, webUser);
+                        var candidateId = await candidateQuery.GetByEmailAsync(credentials, token.Token, webUser);
 
                         if (candidateId.IsNotEmpty() && backgroundCheck.IsActive)
                         {
