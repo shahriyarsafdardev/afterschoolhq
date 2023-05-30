@@ -15,8 +15,8 @@ import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
 import { audienceTypes, questionType } from 'constants';
-import { newQuestion, unSavedDialogProps } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
+import { newQuestion, unSavedDialogProps, infoText } from './helper';
 
 function FormSectionSettings() {
   const classes = useStyles();
@@ -387,6 +387,9 @@ function FormSectionSettings() {
       <Box>
         <Typography variant="h6" className={classes.applyAllHeading}>
           Apply to all in this section:
+        </Typography>
+        <Typography variant="body2" className={classes.infoText}>
+          {infoText}
         </Typography>
         <Grid container className={classes.controlsContainer}>
           <Grid container item lg={12} sm={12} xs={12} className={classes.formControlsRow}>

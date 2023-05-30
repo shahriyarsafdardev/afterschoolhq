@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core';
 
 export default makeStyles(theme => ({
+  infoText: { color: '#B2B2B4' },
   wrapper: {
     paddingTop: '30px',
     marginLeft: 'auto',

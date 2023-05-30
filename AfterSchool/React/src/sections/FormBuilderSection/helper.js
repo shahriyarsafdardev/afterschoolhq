@@ -35,3 +35,6 @@ export const deleteItemDialogProps = item => ({
   text: `Do you want to delete this ${item.toLowerCase()}? This action is irreversible.`,
   dataTestId: `delete${item}`
 });
+
+export const infoText =
+  'Selecting one of these options will apply it to existing questions (except for locked questions). Changing or de-selecting an option will override and apply it to existing questions. New questions will be shown/required for all audiences bu default. If an option below is selected, you can still make changes to individual questuions.';
