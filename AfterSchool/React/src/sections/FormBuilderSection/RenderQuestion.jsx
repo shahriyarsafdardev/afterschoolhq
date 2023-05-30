@@ -26,6 +26,7 @@ import useStyles from './styles';
 import DropDown from './DropDown';
 import AddIcon from 'assets/add.svg';
 import CopyIcon from 'assets/copy.svg';
+import LockIcon from 'assets/lock.svg';
 import DeleteIcon from 'assets/delete.svg';
 import LabeledCheckBox from './LabeledCheckBox';
 import { deleteItemDialogProps } from './helper';
@@ -440,65 +441,73 @@ const RenderQuestion = ({
         {renderOptions(showOptions)}
       </Grid>
       <Grid container className={classes.questionIconsWrapper}>
-        <Box className={classes.displayFlex}>
-          <StyledImage
-            src={DeleteIcon}
-            style={{
-              opacity: `${customQuestion ? '1' : '0.5'}`,
-              cursor: `${customQuestion ? 'pointer' : 'not-allowed'}`
-            }}
-            onClick={async () => {
-              if (customQuestion) {
-                if (ID !== 0) {
-                  setIsOpen(true);
-                  setdeleteSectionId(index);
-                } else {
-                  await handleDelete(index, true);
-                }
-              }
-            }}
-            data-testid={`deleteIconOfQuestion-${ID}-${index}`}
-          />
-          <Dialog
-            open={isOpen}
-            onClose={handleCloseDialog}
-            onSubmit={handleDeleteSection}
-            {...deleteItemDialogProps('Question')}
-          />
-          <StyledImage
-            src={CopyIcon}
-            style={{
-              opacity: `${!IsLocked ? '1' : '0.5'}`,
-              cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
-              width: '30px'
-            }}
-            data-testid={`copyIconOfQuestion-${ID}-${index}`}
-            onClick={() => {
-              if (!IsLocked) handleCopy(index);
-            }}
-          />
-          <StyledImage
-            src={AddIcon}
-            style={{
-              opacity: `${!IsLocked ? '1' : '0.5'}`,
-              cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
-              width: '25px'
-            }}
-            onClick={() => {
-              if (!IsLocked) handleAddNewQuestion(index);
-            }}
-            data-testid={`addQuestionBelowIcon-${ID}-${index}`}
-          />
-        </Box>
-        <Box>
-          <LabeledCheckBox
-            setFieldValue={() => setQuestion({ ...question, IsActive: !question?.IsActive })}
-            dataTestId={`hideCheckboxOfQuestion-${ID}-${index}`}
-            value={!question?.IsActive}
-            disabled={IsLocked}
-            label="Hide"
-          />
-        </Box>
+        {IsLocked ? (
+          <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <StyledImage src={LockIcon} data-testid={`LockIconOfQuestion-${ID}-${index}`} />
+          </Box>
+        ) : (
+          <>
+            <Box className={classes.displayFlex}>
+              <StyledImage
+                src={DeleteIcon}
+                style={{
+                  opacity: `${customQuestion ? '1' : '0.5'}`,
+                  cursor: `${customQuestion ? 'pointer' : 'not-allowed'}`
+                }}
+                onClick={async () => {
+                  if (customQuestion) {
+                    if (ID !== 0) {
+                      setIsOpen(true);
+                      setdeleteSectionId(index);
+                    } else {
+                      await handleDelete(index, true);
+                    }
+                  }
+                }}
+                data-testid={`deleteIconOfQuestion-${ID}-${index}`}
+              />
+              <Dialog
+                open={isOpen}
+                onClose={handleCloseDialog}
+                onSubmit={handleDeleteSection}
+                {...deleteItemDialogProps('Question')}
+              />
+              <StyledImage
+                src={CopyIcon}
+                style={{
+                  opacity: `${!IsLocked ? '1' : '0.5'}`,
+                  cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
+                  width: '30px'
+                }}
+                data-testid={`copyIconOfQuestion-${ID}-${index}`}
+                onClick={() => {
+                  if (!IsLocked) handleCopy(index);
+                }}
+              />
+              <StyledImage
+                src={AddIcon}
+                style={{
+                  opacity: `${!IsLocked ? '1' : '0.5'}`,
+                  cursor: `${!IsLocked ? 'pointer' : 'not-allowed'}`,
+                  width: '25px'
+                }}
+                onClick={() => {
+                  if (!IsLocked) handleAddNewQuestion(index);
+                }}
+                data-testid={`addQuestionBelowIcon-${ID}-${index}`}
+              />
+            </Box>
+            <Box>
+              <LabeledCheckBox
+                setFieldValue={() => setQuestion({ ...question, IsActive: !question?.IsActive })}
+                dataTestId={`hideCheckboxOfQuestion-${ID}-${index}`}
+                value={!question?.IsActive}
+                disabled={IsLocked}
+                label="Hide"
+              />
+            </Box>
+          </>
+        )}
       </Grid>
     </Box>
   );
