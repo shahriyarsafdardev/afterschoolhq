@@ -27,8 +27,8 @@ namespace AfterSchoolLibrary.Helpers
             try
             {
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("", fromEmail.ToString()));
-                message.To.Add(new MailboxAddress("", toEmail.ToString()));
+                message.From.Add(new MailboxAddress(fromEmail.Name, fromEmail.Email));
+                message.To.Add(new MailboxAddress(toEmail.Name, toEmail.Email));
                 message.Subject = subject;
                 message.Body = new TextPart("plain") { Text = body };
 
