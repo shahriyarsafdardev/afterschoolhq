@@ -64,8 +64,8 @@ namespace AfterSchool.Areas.Api.Models
             {
                 ID = Question.ID ?? 0,
                 FormQuestionGroupId = Question.FormQuestionGroupId,
-                Text = Question.Text,
-                Description = Question.Description,
+                Text = (Question.QuestionTypeId == QuestionType.TextBlock ? Question.Description : Question.Text),
+                Description = (Question.QuestionTypeId == QuestionType.TextBlock ? Question.Text : Question.Description),
                 GroupTitle = Question.FormQuestionGroupName,
                 Options = Question.Options,
                 IsRequired = Question.IsRequired,
