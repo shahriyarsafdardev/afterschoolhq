@@ -235,7 +235,11 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                     ExistingQuestion.LastModifiedBy = CurrentUser.ID;
                                     ExistingQuestion.LastModifiedDate = DateTime.UtcNow;
-
+                                    if (ExistingQuestion.QuestionTypeId == QuestionType.TextBlock)
+                                    {
+                                        ExistingQuestion.Description = ExistingQuestion.Text;
+                                        ExistingQuestion.Text = null;
+                                    }
                                     msgs.AddRange(ExistingQuestion.Save(adc));
                                 }
                                 else if (ExistingQuestion.IsEmpty())
@@ -261,6 +265,11 @@ namespace AfterSchool.Areas.Api.Controllers
                                         IsRequired = NewQuestion.IsRequired,
                                         IsAnswerDescriptionEnabled = NewQuestion.IsAnswerDescriptionEnabled,
                                     };
+                                    if (NewQuestion.QuestionTypeId == QuestionType.TextBlock)
+                                    {
+                                        NewFormQuestion.Text = null;
+                                        NewFormQuestion.Description = NewQuestion.Text;
+                                    }
                                     msgs.AddRange(NewFormQuestion.Save(adc));
                                     NewQuestion.ID = NewFormQuestion.ID??0;
                                 }
