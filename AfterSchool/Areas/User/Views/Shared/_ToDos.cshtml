@@ -24,7 +24,8 @@
                         <th>Profile</th>
                         <th></th>
                     </tr>
-                    @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
+                    @foreach (var registrant in Model.Where(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed && 
+                                                                          registrant.ProfileStatusId != RegistrantProfileStatus.NotSet))
                     {
                         <tr>
                             <td>

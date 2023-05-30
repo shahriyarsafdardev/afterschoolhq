@@ -644,6 +644,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
+                var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 //var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
@@ -714,7 +715,24 @@ namespace AfterSchool.Areas.Api.Controllers
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {                
+                    {
+
+                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
+                        {
+                            studentRegistrants.ForEach(stdRegistrant =>
+                            {
+                                if (stdRegistrant.ID != currentRegistrant.ID && stdRegistrant.IsMaster && 
+                                    stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
+                                {
+                                        var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
+                                            currentUser.ID.Value, msgs, adc);
+                                        msgs.AddRange(stdRegistrant.Delete(adc));
+                                        if (registrantWebUser.IsNotEmpty())
+                                            msgs.AddRange(registrantWebUser.Delete(adc));
+                                }
+                            });
+                        }
+                        
                         if (currentUserPersonType != RegistrantPersonType.Adult && json.newChild != 1)
                         {
                             if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
