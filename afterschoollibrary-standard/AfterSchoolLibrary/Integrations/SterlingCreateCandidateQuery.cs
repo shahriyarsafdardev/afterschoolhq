@@ -12,7 +12,7 @@ namespace AfterSchoolLibrary.Integrations
     public interface ISterlingCandidateQuery
     {
         Task<string> CreateAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
-        Task<string> GetByEmaileAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
+        Task<string> GetByEmailAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser);
     }
 
     public class SterlingCandidateQuery : ISterlingCandidateQuery
@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Integrations
             return responseBody.Id;
         }
         
-        public async Task<string> GetByEmaileAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser)
+        public async Task<string> GetByEmailAsync(SterlingCredentials credentials, string bearerToken, WebUser webUser)
         {
             var request = new HttpRequest
             {
@@ -65,16 +65,11 @@ namespace AfterSchoolLibrary.Integrations
                     .Add("Content-Type", "application/json"),
             };
             
-            Helpers.Utilities.SystemLog(request.ToString());
-
             var response = await httpClient.ExecuteAsync(request);
             
-            Helpers.Utilities.SystemLog(response.ToString());
-
             if (response.StatusCode == 404 || response.StatusCode == 400)
             {
                 return null;
-                Helpers.Utilities.SystemLog(response.ToString());
             }
             
             JArray responseBody = JArray.Parse(response.Body);
