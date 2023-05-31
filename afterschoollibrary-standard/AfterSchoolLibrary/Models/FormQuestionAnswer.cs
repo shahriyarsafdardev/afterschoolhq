@@ -374,6 +374,15 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["SurveyResponseId"], SurveyResponseId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static FormQuestionAnswer LoadBySurveyResponseIdByQuestionId(int surveyResponseId, int questionId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SurveyResponseId"], surveyResponseId);
+            dq.Criterias.Add(ObjectMap["FormQuestionId"], questionId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
         #endregion
 
