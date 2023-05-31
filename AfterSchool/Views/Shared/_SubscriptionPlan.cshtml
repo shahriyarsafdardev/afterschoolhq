@@ -200,14 +200,15 @@
                     </div>
 
                     <input type="checkbox" name="isongoingsubscription" id="isOngoingSubscription" value="0" class="hide" />*@
-                    <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && schedule.IsOngoing == false ? "" : "hide")">
-                        <div class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon"># of Payments</span>
-                            <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
-                                   name="subscriptionPlanPeriodNumber"
-                                   value="@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.TotalPeriods > 2 ? subscriptionPlan.TotalPeriods.ToString() : "2")" min="2" />
-                        </div>
-                    </div>
+            <div id="container-subscription-period" class="@(subscriptionPlan.IsNotEmpty() && schedule.IsOngoing == false ? "" : "hide")">
+                <div class="input-group input-group-lg xs-mb-15">
+                    <span class="input-group-addon"># of Payments</span>
+                    <input type="number" class="form-control" id="subscriptionPlanPeriodNumber"
+                           name="subscriptionPlanPeriodNumber"
+                           value="@(subscriptionPlan.IsNotEmpty() ? subscriptionPlan.TotalPeriods.ToString() : "")" min="2" />
+                </div>
+                <p class="text-muted text-medium-small">Minimum period number should be 2</p>
+            </div>
                 }
 
             </div>
