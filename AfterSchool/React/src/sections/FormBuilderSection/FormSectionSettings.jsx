@@ -77,7 +77,7 @@ function FormSectionSettings() {
     });
 
     setInitialValues(tempInitialValues);
-  }, [questions?.length]);
+  }, [questions]);
 
   const formik = useFormik({
     enableReinitialize: true,
