@@ -121,6 +121,24 @@ const RenderQuestion = ({
     setIsOpen(false);
   };
 
+  const updatedVolunteerSetting = propertyName => {
+    const setting = volunteerQS;
+    let updatedSetting = { ...setting };
+    switch (propertyName) {
+      case 'show':
+        updatedSetting.Show = !setting.Show;
+        updatedSetting.Required = updatedSetting.Show ? setting.Required : false;
+        break;
+      case 'required':
+        updatedSetting.Required = !setting.Required;
+        updatedSetting.Show = updatedSetting.Required ? true : setting.Show;
+        break;
+      default:
+        break;
+    }
+    return updatedSetting;
+  };
+
   function renderOptions(showOptions) {
     useEffect(() => {
       if (initialized && options.length > 0) handleSubmit();
@@ -409,7 +427,7 @@ const RenderQuestion = ({
                   setFieldValue={() =>
                     setQuestion({
                       ...question,
-                      QuestionSettings: [{ ...volunteerQS, Show: !volunteerQS?.Show }]
+                      QuestionSettings: [{ ...updatedVolunteerSetting('show') }]
                     })
                   }
                   dataTestId={`showCheckboxOfQuestion-${ID}-${index}`}
@@ -421,12 +439,7 @@ const RenderQuestion = ({
                   setFieldValue={() =>
                     setQuestion({
                       ...question,
-                      QuestionSettings: [
-                        {
-                          ...volunteerQS,
-                          Required: !volunteerQS?.Required
-                        }
-                      ]
+                      QuestionSettings: [{ ...updatedVolunteerSetting('required') }]
                     })
                   }
                   dataTestId={`requireCheckboxOfQuestion-${ID}-${index}`}
