@@ -81,5 +81,66 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+        
+        [HttpPost]
+        public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                int ?surveyResponseId = null;
+                var form = Form.Load(1115); // temporary
+                var questions = form.GetAllQuestions(msgs);
+                var collection = HttpUtility.ParseQueryString(json.answers);
+                var questionGroups = form.GetQuestionGroups(msgs);
+                SurveyRequest surveyRequest = null;
+                SurveyResponse surveyResponse = null;
+                var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (surveyResponseId.IsEmpty()) // Create survey response if not exist
+                        {
+                            surveyRequest = new SurveyRequest
+                            {
+                                FormId = form.ID.Value,
+                                CreateDate = DateTime.Now,
+                                LastModifiedDate = DateTime.Now,
+                                Uid = Guid.NewGuid(),
+                            };
+                            msgs.AddRange(surveyRequest.Save(adc));
+                            
+                            surveyResponse = new SurveyResponse()
+                            {
+                                CreateDate = DateTime.Now,
+                                LastModifiedDate = DateTime.Now,
+                                SurveyRequestId = surveyRequest.ID,
+                                IsDeleted = false,
+                                Uid = Guid.NewGuid(),
+                                SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed,
+                            };
+                            msgs.AddRange(surveyResponse.Save(adc));
+                        }
+                        
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+                
+                return Json(
+                    new ApiResponse(msgs,new {SurveyResponseId = surveyResponse.ID.Value, FormId = form.ID}),
+                    JsonRequestBehavior.AllowGet);
+
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }
