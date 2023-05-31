@@ -434,15 +434,22 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 stripeEvent.Data.Object.IsNotEmpty())
             {
                 var subscription = (Stripe.Subscription)stripeEvent.Data.Object;
-
+    
                 if (subscription.Items.FirstOrDefault().IsNotEmpty() && subscription.Items.FirstOrDefault().Plan.IsNotEmpty() && subscription.Items.First().Plan.Id.IsNotEmpty())
                 {
-                    var dbSubscription = SubscriptionPlan.LoadByStripePlanId(subscription.Items.FirstOrDefault().Plan.Id, msgs);
-                    if (dbSubscription.IsNotEmpty() &&
-                        dbSubscription.IsActive)
+                    var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id); 
+
+                    if (registrantSubscription.IsNotEmpty())
                     {
-                        dbSubscription.IsActive = false;
-                        msgs.AddRange(dbSubscription.Save());
+                        registrantSubscription.DateCancelled = DateTime.UtcNow; 
+                        registrantSubscription.ValidUntil = DateTime.UtcNow; 
+                        registrantSubscription.LastModifiedDate = DateTime.UtcNow; 
+                        registrantSubscription.LastModifiedBy = 1; 
+                        msgs.AddRange(registrantSubscription.Save());
+                    }
+                    else
+                    {
+                        msgs.Add("Can't find the Registrant Subscription Plan with SubscriptionId " + subscription.Id , MessageType.Error); 
                     }
                 }
             }
