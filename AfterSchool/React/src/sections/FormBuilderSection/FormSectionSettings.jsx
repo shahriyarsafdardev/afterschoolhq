@@ -221,7 +221,7 @@ function FormSectionSettings() {
     const newDisplayOrder = Number(index || questionsToShow().at(-1)?.DisplayOrder || 0) + 1;
 
     const newQuest = {
-      ...cloneDeep(newQuestion),
+      ...cloneDeep(newQuestion(form?.FormType)),
       ID: 0,
       GroupTitle: sectionName,
       FormQuestionGroupId: currentSection?.ID,
