@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
@@ -1356,6 +1357,26 @@ namespace AfterSchoolLibrary.Services
             var hasStripeChanges = true;
             var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
+
+            if (int.TryParse(subscriptionPlanPeriodNumber, out int n))
+            {
+                if (int.Parse(subscriptionPlanPeriodNumber) >= 2)
+                {
+                    subscriptionEndDate = new SubscriptionPlan
+                    {
+                        BillingPeriodTypeId = (BillingPeriodType) subscriptionplanperiod.ToInteger()
+                    }
+                    .CalculateEndDateFromNumberOfPeriods(subscriptionStartDate ?? DateTime.Now, subscriptionPlanPeriodNumber.ToInteger());
+                }
+                else
+                {
+                    msgs.Add("Period number should be greater than 2", MessageType.UserError);
+                }
+            }
+            else
+            {
+                msgs.Add("Period number should be a number", MessageType.UserError);
+            }
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
