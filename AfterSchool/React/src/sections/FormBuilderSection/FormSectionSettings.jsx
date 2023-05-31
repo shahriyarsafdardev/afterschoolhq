@@ -23,7 +23,7 @@ function FormSectionSettings() {
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
+  const { unsavedChanges, markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
   const [settingsForAll, setSettingsForAll] = useState({ show: [], required: [] });
   const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
@@ -149,7 +149,7 @@ function FormSectionSettings() {
   }, [window.location.href, formDirty]);
 
   useEffect(() => {
-    if (formDirty) {
+    if (unsavedChanges) {
       window.onbeforeunload = () => true;
     } else {
       window.onbeforeunload = undefined;
@@ -158,7 +158,7 @@ function FormSectionSettings() {
     return () => {
       window.onbeforeunload = undefined;
     };
-  }, [formDirty]);
+  }, [unsavedChanges]);
 
   useEffect(() => {
     if (formDirty) {
@@ -649,7 +649,7 @@ function FormSectionSettings() {
                 variant="outlined"
                 data-testid={`bottom-saveQuestions-${questionGroup}`}
                 className={classes.saveButton}
-                disabled={disableSaveButton}
+                disabled={!unsavedChanges}
                 onClick={formSaveHandler}
               >
                 {buttonText('Save')}
@@ -660,7 +660,7 @@ function FormSectionSettings() {
                 variant="outlined"
                 data-testid={`top-saveQuestions-${questionGroup}`}
                 className={classes.saveFormButton}
-                disabled={disableSaveButton}
+                disabled={!unsavedChanges}
                 onClick={formSaveHandler}
               >
                 {buttonText('Save Form')}
