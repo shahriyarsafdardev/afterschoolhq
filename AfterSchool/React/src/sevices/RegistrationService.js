@@ -62,8 +62,9 @@ export default class RegistrationService {
   formSectionSubmitObject = (values, activeGroupId) => {
     const filteredValues = Object.keys(values).filter(key => key !== 99999); //SchoolField value is removed from query string as it is being sent separately
     const [answerQuery, answers, keys, answerCompiled] = [{}, [], filteredValues, []];
+    const { fileUpload, audio, video, photo } = questionType;
+    const isfile = type => [fileUpload, audio, video, photo].includes(type);
     const formData = new FormData();
-
     const getQuestionID = answer =>
       this.questions.find(
         q => q.QuestionDataTypeId === answer.QuestionDataTypeId && q.Text === answer.QuestionText
@@ -84,7 +85,7 @@ export default class RegistrationService {
       );
 
       if (answer && !alreadyAnswered) {
-        if (answer.QuestionTypeId === questionType.fileUpload) {
+        if (isfile(answer.QuestionTypeId)) {
           addInFiles(ID, answer);
           answers.push({ ...answer, Text: { name: answer.Text.name } });
         } else {
@@ -97,7 +98,7 @@ export default class RegistrationService {
 
     keys.forEach(key => composeAnswers(this.answerObject(key, values), key));
 
-    this.answeredQuestions.forEach(answer => composeAnswers(answer, getQuestionID(answer)));
+    this.answeredQuestions?.forEach(answer => composeAnswers(answer, getQuestionID(answer)));
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId }, formData };
   };
 
@@ -126,7 +127,7 @@ export default class RegistrationService {
   //Private methods, only being called within the class
   submittedAnswer = (id, text) => {
     const answer =
-      this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
+      this.answeredQuestions?.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
         ?.Text || '';
     return answer === 'null' ? '' : answer;
   };
