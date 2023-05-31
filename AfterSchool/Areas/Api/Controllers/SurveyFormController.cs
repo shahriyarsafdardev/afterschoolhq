@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
@@ -83,18 +85,19 @@ namespace AfterSchool.Areas.Api.Controllers
         }
         
         [HttpPost]
-        public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
+        public ActionResult AddUpdateAnswers(SurveyQuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
             try
             {
-                int ?surveyResponseId = null;
-                var form = Form.Load(1115); // temporary
+                int ?surveyResponseId = json.surveyResponseId;
+                var form = Form.Load(json.formId); // temporary
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
-                var questionGroups = form.GetQuestionGroups(msgs);
-                SurveyRequest surveyRequest = null;
+                
+                SurveyRequest surveyRequest;
                 SurveyResponse surveyResponse = null;
+                
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 Database.ExecuteTransaction
                 (
@@ -122,7 +125,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             };
                             msgs.AddRange(surveyResponse.Save(adc));
                         }
-                        
+                        if(msgs.HasNoErrors())
+                            AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -142,5 +146,42 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+        
+        public static void AddCustomQuestions(SurveyResponse surveyResponse, List<FormQuestionViewModel> qvms, HttpRequestBase request, SystemMessages msgs, 
+            DatabaseConnection dc = null)
+        {
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                    {
+                        if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
+                        {
+                            var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
+                            //5 MB = 5242880 Bytes
+                            //File uploaded here should be less than of 5MB
+                            if (currentFileSizeInBytes <= 5242880)
+                                surveyResponse.AddOrUpdateAnswer(
+                                    request.Files[qvm.Name].InputStream,
+                                    request.Files[qvm.Name].FileName,
+                                    qvm.Question,
+                                    msgs,
+                                    dc);
+                            else
+                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                    }
+                    else
+                    {
+                        surveyResponse.AddOrUpdateAnswer(
+                            qvm.Value,
+                            qvm.Question,
+                            msgs,
+                            dc);
+                    }
+                });
+        }
+
     }
 }
