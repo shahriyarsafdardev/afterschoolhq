@@ -19,7 +19,6 @@ const VideoQuestion = ({ question, formik }) => {
 
   const { ID, Text: title, IsRequired: isRequired, Description: description } = question;
 
-  const [loading, setLoading] = useState(false);
   const [isDescriptionModal, setDescriptionModal] = useState(false);
   const [uploadVideoModal, setUploadVideoModal] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
@@ -38,8 +37,14 @@ const VideoQuestion = ({ question, formik }) => {
   };
 
   useEffect(() => {
+    if (typeof uploadedVideo === 'string') return;
     setFieldValue(ID, uploadedVideo);
   }, [uploadedVideo]);
+
+  useEffect(() => {
+    if (typeof values[ID] !== 'string') return;
+    setVideoUrl(values[ID]);
+  }, [values[ID]]);
 
   const handleVideoLoading = () => setVideoLoading(!isVideoLoading);
 
@@ -105,13 +110,6 @@ const VideoQuestion = ({ question, formik }) => {
     reader.readAsDataURL(file);
   };
 
-  const handleAnswer = async () => {
-    if (!isRequired && !uploadedVideo) return true;
-    setLoading(true);
-    setLoading(false);
-    return [];
-  };
-
   const handleVideoPlay = () => {
     setVideoPlaying(!isVideoPlaying);
   };
@@ -135,37 +133,10 @@ const VideoQuestion = ({ question, formik }) => {
     setRecording(false);
   };
 
-  const handleStoreChange = async (answer, description) => {
-    setDescriptionText(description);
-    setUploadedVideo(answer);
-    if (typeof answer === 'string') {
-      setVideoUrl(answer);
-    } else {
-      const fileReader = new FileReader();
-      fileReader.onload = async upload => {
-        const result = await upload.target.result;
-        setVideoUrl(result);
-      };
-      fileReader.readAsDataURL(answer);
-    }
-  };
-
-  //   useEffect(() => {
-  //     setDescriptionText('');
-  //     setUploadedVideo('');
-  //     const availableAnswer = surveyAnswers?.find(answer => answer.uid === uid);
-  //     if (availableAnswer?.answer) {
-  //       const { answer, description } = availableAnswer;
-  //       handleStoreChange(answer, description);
-  //     }
-  //     // // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [uid]);
-
   useEffect(() => {
     if (!isCameraOpen && currentVideoStream) {
       currentVideoStream.forEach(current => current.stop());
     }
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCameraOpen]);
 
   return (

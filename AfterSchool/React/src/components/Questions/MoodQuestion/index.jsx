@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, IconButton } from '@material-ui/core';
 import Emoji from 'react-emoji-render';
 import cs from 'classnames';
@@ -16,39 +16,19 @@ const MoodQuestion = ({ question, formik }) => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
     return { key, value };
   });
-  const [currentMood, setCurrentMood] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const handleMoodChange = mood => () => {
-    setCurrentMood(mood);
     setFieldValue(ID, JSON.stringify(mood));
   };
+
+  const currentMood =
+    values[ID] && values[ID] !== null ? JSON.parse(values[ID]) : { key: '', value: '' };
 
   const getClassName = moodName => {
     return moodName === currentMood?.value
       ? cs(classes.moodButton, classes.moodIconButton)
       : classes.moodIconButton;
   };
-
-  const handleAnswer = async () => {
-    if (!isRequired && !currentMood) return true;
-    setLoading(true);
-    const answerFormData = new FormData();
-    answerFormData.append('AnswerText', JSON.stringify([currentMood]));
-    setLoading(false);
-    setCurrentMood('');
-    return []; //resp;
-  };
-
-  //   useEffect(() => {
-  //     setCurrentMood(null);
-  //     const availableAnswer = surveyAnswers?.find(answer => answer.uid === uid);
-  //     if (availableAnswer?.answer) {
-  //       const ans = JSON.parse(availableAnswer?.answer);
-  //       setCurrentMood(ans[0]);
-  //     }
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [uid]);
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>

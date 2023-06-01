@@ -37,12 +37,18 @@ const AudioQuestion = ({ question, formik }) => {
     },
     blobPropertyBag: { type: 'audio/wav' }
   });
-  const [recordingError, setRecordingError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (typeof audioAnswer === 'string') return;
     setFieldValue(ID, audioAnswer);
   }, [audioAnswer]);
+
+  useEffect(() => {
+    if (typeof values[ID] !== 'string') return;
+    setAudioUrl(values[ID]);
+    setAudioAnswer(values[ID]);
+  }, [values[ID]]);
 
   const handleDiscard = () => {
     setAudioAnswer('');
@@ -101,36 +107,10 @@ const AudioQuestion = ({ question, formik }) => {
     setAudioUrl(media);
   };
 
-  const convertFileToBlob = answer => {
-    const fileReader = new FileReader();
-    fileReader.onload = async upload => {
-      const result = await upload.target.result;
-      setAudioUrl(result);
-    };
-    fileReader.readAsDataURL(answer);
-  };
-
-  //   useEffect(() => {
-  //     setAudioUrl('');
-  //     const availableAnswer = surveyAnswers?.find(answer => answer.uid === uid);
-  //     if (availableAnswer?.answer) {
-  //       const { answer, description } = availableAnswer;
-  //       setDescriptionText(description);
-  //       setAudioAnswer(answer);
-  //       if (typeof answer === 'string') {
-  //         setAudioUrl(answer);
-  //       } else {
-  //         convertFileToBlob(answer);
-  //       }
-  //     }
-  //     // // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [uid]);
-
   useEffect(() => {
     if (!recorderError && status === 'recording') {
       setTimerRunning(true);
     }
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, recorderError]);
 
   useEffect(() => {
@@ -138,7 +118,6 @@ const AudioQuestion = ({ question, formik }) => {
       convertBlobToFile(mediaBlobUrl);
       setDescriptionModal(true);
     }
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mediaBlobUrl]);
 
   return (

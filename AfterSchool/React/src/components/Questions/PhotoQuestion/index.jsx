@@ -23,10 +23,15 @@ const PhotoQuestion = ({ question, formik }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [uploadImageModal, setUploadImageModal] = useState(false);
   const [uploadedFile, setUploadedFile] = useState('');
-  const [loading, setLoading] = useState(false);
   const [isCameraOpen, setCameraOpen] = useState(false);
   const [currentVideoStream, setCurrentStream] = useState([]);
   const [isImageLoading, setImageLoading] = useState(false);
+
+  useEffect(() => {
+    if (typeof values[ID] !== 'string') return;
+    setImageUrl(values[ID]);
+    setCameraOpen(false);
+  }, [values[ID]]);
 
   const handleDiscard = () => {
     setImageUrl('');
@@ -64,14 +69,8 @@ const PhotoQuestion = ({ question, formik }) => {
     uploadInputRef.current.click();
   };
 
-  const handleAnswer = async () => {
-    if (!isRequired && !uploadedFile) return true;
-    setLoading(true);
-    setLoading(false);
-    return [];
-  };
-
   useEffect(() => {
+    if (typeof uploadedFile === 'string') return;
     setFieldValue(ID, uploadedFile);
   }, [uploadedFile]);
 
@@ -108,38 +107,10 @@ const PhotoQuestion = ({ question, formik }) => {
     setCameraOpen(false);
   };
 
-  const handleStoreChange = async (answer, description) => {
-    setDescriptionText(description);
-    setUploadedFile(answer);
-    setImageLoading(true);
-    if (typeof answer === 'string') {
-      setImageUrl(answer);
-    } else {
-      const fileReader = new FileReader();
-      fileReader.onload = async upload => {
-        const result = await upload.target.result;
-        setImageUrl(result);
-      };
-      fileReader.readAsDataURL(answer);
-    }
-  };
-
-  //   useEffect(() => {
-  //     setImageUrl('');
-  //     setDescriptionText('');
-  //     const availableAnswer = surveyAnswers?.find(answer => answer.uid === uid);
-  //     if (availableAnswer?.answer) {
-  //       const { answer, description } = availableAnswer;
-  //       handleStoreChange(answer, description);
-  //     }
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [uid]);
-
   useEffect(() => {
     if (!isCameraOpen && currentVideoStream) {
       currentVideoStream.forEach(current => current.stop());
     }
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCameraOpen]);
 
   return (
@@ -147,7 +118,6 @@ const PhotoQuestion = ({ question, formik }) => {
       <Box className={classes.wrapper}>
         <div className={classes.photoWrapper}>
           <div className={cs(classes.photoContent, { [classes.webCamera]: isCameraOpen })}>
-            {/* {isImageLoading && <CircularProgress />} */}
             {isCameraOpen && (
               <WebCamera
                 setCapturedData={handleWebCamUpload}
@@ -164,7 +134,7 @@ const PhotoQuestion = ({ question, formik }) => {
               />
             )}
             {!imageUrl && !isCameraOpen && !isImageLoading && (
-              <img src={photoPlaceholder} className={classes.uploadImage} alt="Upload" />
+              <img src={photoPlaceholder} className={classes.uploadImage} alt="Upload2" />
             )}
             {!isCameraOpen && !imageUrl && !isImageLoading && (
               <div className={classes.captureButton}>

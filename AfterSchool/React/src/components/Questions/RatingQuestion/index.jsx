@@ -16,42 +16,20 @@ const RatingQuestion = ({ question, formik }) => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
     return { key, value };
   });
-  const [loading, setLoading] = useState(false);
-  const [ratingValue, setRatingValue] = useState('');
   const [leastValue, setLeastValue] = useState('');
   const [highestValue, setHighestValue] = useState('');
 
   const handleRadioChange = ({ target: { value } }) => {
-    setRatingValue(value);
-    const selectedOption = options.filter(option => option.key === value);
+    const selectedOption = options.find(option => option.key === value);
     setFieldValue(ID, JSON.stringify(selectedOption));
   };
 
-  const handleAnswer = async () => {
-    if (!isRequired && !ratingValue) return true;
-    setLoading(true);
-    const selectedOption = options.filter(option => option.key === ratingValue);
-    const answerFormData = new FormData();
-    answerFormData.append('AnswerText', JSON.stringify(selectedOption));
-    setRatingValue('');
-    setLoading(false);
-    return [];
-  };
+  const ratingValue = values[ID] && values[ID] !== null ? JSON.parse(values[ID])?.value : '';
 
   useEffect(() => {
     setLeastValue(options[0].value);
     setHighestValue(options[options.length - 1].value);
   }, [options]);
-
-  //   useEffect(() => {
-  //     setRatingValue('');
-  //     const availableAnswer = surveyAnswers?.find(answer => answer.uid === uid);
-  //     if (availableAnswer?.answer) {
-  //       const ans = JSON.parse(availableAnswer?.answer);
-  //       setRatingValue(ans[0].key);
-  //     }
-  //     // // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [uid]);
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
