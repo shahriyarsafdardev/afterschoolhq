@@ -90,8 +90,8 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                int ?surveyResponseId = json.surveyResponseId;
-                var form = Form.Load(json.formId); // temporary
+                var surveyResponseId = json.surveyResponseId;
+                var form = Form.Load(json.formId);
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -103,7 +103,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        if (surveyResponseId.IsEmpty()) // Create survey response if not exist
+                        
+                        if (surveyResponseId.IsEmpty() || surveyResponseId < 1)
                         {
                             surveyRequest = new SurveyRequest
                             {
@@ -125,7 +126,11 @@ namespace AfterSchool.Areas.Api.Controllers
                             };
                             msgs.AddRange(surveyResponse.Save(adc));
                         }
-                        if(msgs.HasNoErrors())
+                        else
+                        {
+                            surveyResponse = SurveyResponse.Load(surveyResponseId);
+                        }
+                        if(msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -134,7 +139,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 );
                 
                 return Json(
-                    new ApiResponse(msgs,new {SurveyResponseId = surveyResponse.ID.Value, FormId = form.ID}),
+                    new ApiResponse(msgs,new {SurveyResponseId = surveyResponse?.ID, FormId = form?.ID}),
                     JsonRequestBehavior.AllowGet);
 
             }
