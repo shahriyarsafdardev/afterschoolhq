@@ -72,10 +72,11 @@ namespace AfterSchool.Areas.Api.Controllers
                     var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponseId)
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
-                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId, 
-                            QuestionText = questionAnswer.QuestionText, Text = questionAnswer.Text,
+                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
                         })
                         .ToList();
+                    
                     response = new
                     {
                         FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
@@ -174,7 +175,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 .ToList()
                 .ForEach(qvm =>
                 {
-                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo || 
+                        qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)
                     {
                         if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
                         {
@@ -201,6 +203,16 @@ namespace AfterSchool.Areas.Api.Controllers
                             dc);
                     }
                 });
+        }
+
+        private static string MapToAmazonFilePath(FormQuestionAnswer question)
+        {
+            if (question.FormQuestionQuestionTypeId != QuestionType.Photo &&
+                question.FormQuestionQuestionTypeId != QuestionType.Audio &&
+                question.FormQuestionQuestionTypeId != QuestionType.Video) 
+                return question.Text;
+            var amazonHelper = Utilities.GetNewAmazonHelper();
+            return amazonHelper.GetFileLink(question.Text);
         }
 
     }
