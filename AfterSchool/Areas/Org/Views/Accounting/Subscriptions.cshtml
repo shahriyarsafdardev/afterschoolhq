@@ -85,9 +85,14 @@
 
                                 if (!plan.DateCancelled.HasValue)
                                 {
-                                    if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                    if (payments.Any() && @payments.Count < @plan.TotalPeriods.Value)
                                     {
-                                        nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                        //nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                        nextPaymentDate = new SubscriptionPlan
+                                        {
+                                            BillingPeriodTypeId = (BillingPeriodType)billingPeriodTypeId
+                                        }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? DateTime.Now, payments.Count).ToShortDateString();
+
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
