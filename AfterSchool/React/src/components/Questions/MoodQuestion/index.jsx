@@ -5,10 +5,12 @@ import cs from 'classnames';
 
 import useStyles from './styles';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import ErrorBand from 'components/common/ErrorBand';
 
 const MoodQuestion = ({ question, formik }) => {
   const classes = useStyles();
-  const { setFieldValue } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
+
   const { ID, Options, Text: title, IsRequired: isRequired } = question;
   const options = Options.split(',').map(option => {
     const [key, value] = option.includes('|') ? option.split('|') : [option, option];
@@ -66,6 +68,7 @@ const MoodQuestion = ({ question, formik }) => {
           {currentMood && <div className={classes.moodName}>{currentMood.value}</div>}
         </div>
       </Box>
+      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

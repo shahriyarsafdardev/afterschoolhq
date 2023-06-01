@@ -6,6 +6,7 @@ import videoPlaceholder from 'assets/videoPlaceholder.svg';
 import DescriptionModal from 'components/DescriptionModal';
 import playButtonWhite from 'assets/playButtonWhite.svg';
 import VideoRecorder from 'components/VideoRecorder';
+import ErrorBand from 'components/common/ErrorBand';
 import recordButton from 'assets/recordButton.svg';
 import pauseButton from 'assets/pauseWhite.svg';
 import useStyles from './styles';
@@ -14,7 +15,8 @@ const VideoQuestion = ({ question, formik }) => {
   const classes = useStyles();
   const playVideoRef = useRef();
   const inputVideoRef = useRef();
-  const { setFieldValue } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
+
   const { ID, Text: title, IsRequired: isRequired, Description: description } = question;
 
   const [loading, setLoading] = useState(false);
@@ -174,7 +176,6 @@ const VideoQuestion = ({ question, formik }) => {
             {videoUrl && !isCameraOpen && (
               <video
                 src={videoUrl}
-                style={{ width: 720 }}
                 className={classes.videoPlayer}
                 ref={playVideoRef}
                 onEnded={handleVideoPlay}
@@ -278,6 +279,7 @@ const VideoQuestion = ({ question, formik }) => {
           onChange={handleVideoChange}
         />
       </Box>
+      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

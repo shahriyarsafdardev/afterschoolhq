@@ -9,11 +9,12 @@ import playButton from 'assets/playButton.svg';
 import pauseButton from 'assets/pauseGreen.svg';
 import DescriptionModal from 'components/DescriptionModal';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import ErrorBand from 'components/common/ErrorBand';
 
 const AudioQuestion = ({ question, formik }) => {
   const classes = useStyles();
   const audioRef = useRef();
-  const { setFieldValue } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired, Description: description } = question;
 
   const [audioAnswer, setAudioAnswer] = useState('');
@@ -208,6 +209,7 @@ const AudioQuestion = ({ question, formik }) => {
           title={descriptionText ? 'Edit Description' : 'Add Description'}
         />
       </Box>
+      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

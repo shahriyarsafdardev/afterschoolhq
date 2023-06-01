@@ -5,6 +5,7 @@ import cs from 'classnames';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import photoPlaceholder from 'assets/photoPlaceholder.svg';
 import DescriptionModal from 'components/DescriptionModal';
+import ErrorBand from 'components/common/ErrorBand';
 import WebCamera from 'components/WebCamera';
 import capture from 'assets/capture.svg';
 import useStyles from './styles';
@@ -13,7 +14,8 @@ const PhotoQuestion = ({ question, formik }) => {
   const classes = useStyles();
   const captureInputRef = useRef();
   const uploadInputRef = useRef();
-  const { setFieldValue } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
+
   const { ID, Text: title, IsRequired: isRequired, Description: description } = question;
 
   const [isDescriptionModal, setDescriptionModal] = useState(false);
@@ -242,6 +244,7 @@ const PhotoQuestion = ({ question, formik }) => {
           </div>
         </Dialog>
       </Box>
+      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

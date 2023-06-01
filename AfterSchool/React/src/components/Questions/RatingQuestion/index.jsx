@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { RadioGroup, Radio, FormControlLabel, Box } from '@material-ui/core';
 
 import useStyles from './styles';
+import ErrorBand from 'components/common/ErrorBand';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 
 const RatingQuestion = ({ question, formik }) => {
   const classes = useStyles();
-  const { setFieldValue } = formik;
+  const { touched, values, errors, setFieldValue } = formik;
+
   const { ID, Options, Text: title, IsRequired: isRequired } = question;
 
   const options = Options.split(',').map(option => {
@@ -87,6 +89,7 @@ const RatingQuestion = ({ question, formik }) => {
           <div className={classes.ratingText}>{highestValue}</div>
         </div>
       </Box>
+      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

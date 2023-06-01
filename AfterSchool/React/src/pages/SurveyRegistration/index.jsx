@@ -6,35 +6,31 @@ import { useFormik } from 'formik';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useSurveyRegistration } from 'redux/hooks';
-import apiRoutes from 'routes';
 import utils from 'utils';
 
 export default function SurveyRegistration() {
   const navigate = useNavigate();
+  const { formId } = useParams();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    exit,
     msgs,
-    school,
     loading,
     questions,
     loadFormData,
-    registrationId,
     questionsGroups,
+    surveyResponseId,
     answeredQuestions = [],
-    setSchoolFieldValue,
     submitFormSectionData,
     clearMessages
   } = useSurveyRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
+  const [responseId, setResponseId] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { formId, regUid } = useParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
   const registrationService = new RegistrationService(
@@ -70,26 +66,18 @@ export default function SurveyRegistration() {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
-  useEffect(() => {
-    if (registrationId) handleRedirection();
-  }, [registrationId]);
-
-  const handleRedirection = () => {
-    if (IsFree) navigate(thankyouUrl(registrationId));
-    else redirect(paymentScreenPath(registrationId));
-  };
-
-  const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => {}, //validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
-    onSubmit: async (values, { resetForm }) => {
+    validate: values => validator(values),
+    onSubmit: async values => {
       const submitObj = formSectionSubmitObject(values, activeGroupId);
-      await submitFormSectionData(submitObj, formId);
+      await submitFormSectionData(submitObj, formId, responseId).then(respId =>
+        setResponseId(respId)
+      );
       handleSection('next');
     }
   });
@@ -98,7 +86,7 @@ export default function SurveyRegistration() {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(64);
+    loadFormData(formId, searchParams.get('surveyResponseId'));
   }, []);
 
   useEffect(() => {
@@ -131,9 +119,6 @@ export default function SurveyRegistration() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
-  const exitHandler = () => {
-    exit(regUid);
-  };
   return (
     <RegistrationForm
       loading={loading}
@@ -148,10 +133,7 @@ export default function SurveyRegistration() {
       formik={formik}
       handleSubmit={handleSubmit}
       skipAble={skipAble}
-      registrantType={'RegistrantType'} //Need to change
-      isFree={true} //Need to change
       firstSection={activeGroup === 0}
-      exitHandler={exitHandler}
     ></RegistrationForm>
   );
 }
