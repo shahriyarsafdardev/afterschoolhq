@@ -117,12 +117,10 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var surveyResponseId = json.surveyResponseId;
+                SurveyResponse surveyResponse = null;
                 var form = Form.Load(json.formId);
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
-                
-                SurveyRequest surveyRequest;
-                SurveyResponse surveyResponse = null;
                 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 Database.ExecuteTransaction
@@ -132,20 +130,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         
                         if (surveyResponseId.IsEmpty() || surveyResponseId < 1)
                         {
-                            surveyRequest = new SurveyRequest
-                            {
-                                FormId = form.ID.Value,
-                                CreateDate = DateTime.Now,
-                                LastModifiedDate = DateTime.Now,
-                                Uid = Guid.NewGuid(),
-                            };
-                            msgs.AddRange(surveyRequest.Save(adc));
-                            
                             surveyResponse = new SurveyResponse()
                             {
                                 CreateDate = DateTime.Now,
                                 LastModifiedDate = DateTime.Now,
-                                SurveyRequestId = surveyRequest.ID,
+                                SurveyRequestId = form.ID,
                                 IsDeleted = false,
                                 Uid = Guid.NewGuid(),
                                 SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed,
