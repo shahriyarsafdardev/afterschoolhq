@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -22,7 +23,7 @@ namespace AfterSchool.Areas.Api.Controllers
     public class SurveyFormController : BaseController
     {
         [HttpGet]
-        public ActionResult GetForm(int formId)
+        public ActionResult GetForm(int formId, int surveyResponseId = 0)
         {
             var msgs = new SystemMessages();
             try
@@ -65,11 +66,29 @@ namespace AfterSchool.Areas.Api.Controllers
                     })
                     .ToList();
 
-                dynamic response = new
+                dynamic response;
+                if (surveyResponseId > 0)
                 {
-                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList),
-                };
-
+                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponseId)
+                        .Select(questionAnswer => new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId, 
+                            QuestionText = questionAnswer.QuestionText, Text = questionAnswer.Text,
+                        })
+                        .ToList();
+                    response = new
+                    {
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                    };
+                }
+                else
+                {
+                    response = new
+                    {
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, null),
+                    };
+                }
+                
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
@@ -82,6 +101,13 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
             }
+        }
+        
+        [HttpGet]
+        public ActionResult Index(int id)
+        {
+            var form = Form.Load(id);
+            return Redirect(form.FormTypeId == FormType.Survey ? $"~/ReactApp/survey/{form.ID}" : "~/login");
         }
         
         [HttpPost]
