@@ -53,6 +53,7 @@ export const useSurveyRegistrationActions = () => {
   const dispatch = useDispatch();
 
   const loadFormData = async (formId, surveyResponseId) => {
+    dispatch(setResponseId(surveyResponseId));
     dispatch(loadingFormData());
     await SurveyRegistrationRepository.getSurveyFormData(formId, surveyResponseId).then(
       ({ obj, msgs }) => {

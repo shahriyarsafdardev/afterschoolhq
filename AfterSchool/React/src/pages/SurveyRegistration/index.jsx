@@ -1,5 +1,5 @@
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
@@ -25,9 +25,9 @@ export default function SurveyRegistration() {
     clearMessages
   } = useSurveyRegistration();
 
+  const responseId = useRef('');
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
-  const [responseId, setResponseId] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,7 +47,11 @@ export default function SurveyRegistration() {
   } = registrationService;
 
   const buildQueryParams = (index = activeGroup) =>
-    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
+    responseId.current
+      ? `section=${encodeURIComponent(questionsGroups[index].Name)}&surveyResponseId=${
+          responseId.current
+        }`
+      : `section=${encodeURIComponent(questionsGroups[index].Name)}`;
 
   const handleSection = action => {
     if (action === 'next') {
@@ -75,8 +79,8 @@ export default function SurveyRegistration() {
     validate: values => validator(values),
     onSubmit: async values => {
       const submitObj = formSectionSubmitObject(values, activeGroupId);
-      await submitFormSectionData(submitObj, formId, responseId).then(respId =>
-        setResponseId(respId)
+      await submitFormSectionData(submitObj, formId, responseId.current).then(
+        respId => (responseId.current = respId)
       );
       handleSection('next');
     }
@@ -88,6 +92,10 @@ export default function SurveyRegistration() {
   useEffect(() => {
     loadFormData(formId, searchParams.get('surveyResponseId'));
   }, []);
+
+  useEffect(() => {
+    responseId.current = searchParams.get('surveyResponseId');
+  }, [searchParams.get('surveyResponseId')]);
 
   useEffect(() => {
     if (questionsGroups.length)
