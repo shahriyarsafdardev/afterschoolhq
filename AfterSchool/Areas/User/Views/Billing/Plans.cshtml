@@ -1,4 +1,4 @@
-﻿@model List<RegistrantSubscriptionPlan>
+@model List<RegistrantSubscriptionPlan>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
 }
@@ -52,7 +52,7 @@
                                     {
                                         regStatus = RegistrationStatus.Past;
                                     }
-                                } 
+                                }
                                 else
                                 {
                                     if (participationObject.StartDate.Value.IsAfter(DateTime.UtcNow))
@@ -81,9 +81,12 @@
 
                                 if (!plan.DateCancelled.HasValue)
                                 {
-                                    if (payments.Any() && payments.Last().CreateDate.Value.AddMonths(1).IsOnOrAfter(DateTime.UtcNow))
+                                    if (payments?.Count < (plan.TotalPeriods ?? 0))
                                     {
-                                        nextPaymentDate = payments.Last().CreateDate.Value.AddMonths(1).ToShortDateString();
+                                        nextPaymentDate = new SubscriptionPlan
+                                        {
+                                            BillingPeriodTypeId = (BillingPeriodType)billingPeriodTypeId
+                                        }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? DateTime.Now, payments.Count).ToShortDateString();
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
