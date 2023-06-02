@@ -96,7 +96,7 @@ namespace AfterSchoolLibrary.Integrations
 
                         var candidateId = await candidateQuery.GetByEmailAsync(credentials, token.Token, webUser);
 
-                        if (candidateId.IsNotEmpty() && backgroundCheck.IsActive)
+                        if (candidateId.IsNotEmpty() && backgroundCheck.IsNotEmpty() && backgroundCheck.IsActive)
                         {
 
                             var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
