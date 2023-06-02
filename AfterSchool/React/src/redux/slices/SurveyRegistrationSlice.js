@@ -1,6 +1,8 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
+import utils from 'utils';
+import apiRoutes from 'routes';
 import { responseMapper } from './helper';
 import SurveyRegistrationRepository from 'repository/SurveyRegistrationRepository';
 
@@ -57,6 +59,9 @@ export const useSurveyRegistrationActions = () => {
     dispatch(loadingFormData());
     await SurveyRegistrationRepository.getSurveyFormData(formUid, surveyResponseUid).then(
       ({ obj, msgs }) => {
+        if (obj.SurveyResponseStatus === 'Completed') {
+          return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
+        }
         if (obj) dispatch(setFormData(obj));
         dispatch(setMsgs(msgs));
         if (!msgs.length) dispatch(formDataLoaded());
