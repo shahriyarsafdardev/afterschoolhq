@@ -58,7 +58,7 @@ function Router() {
       element: <RedirectToExternal />
     },
     {
-      path: 'reactapp/survey/:formId',
+      path: 'reactapp/survey/:formUid',
       element: <SurveyRegistration />
     }
   ]);

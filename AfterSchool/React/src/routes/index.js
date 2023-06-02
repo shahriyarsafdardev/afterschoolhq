@@ -24,8 +24,8 @@ export default {
     `Api/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
 
   // Survey Form APIs
-  getSurveyFormDataAPI: (formId, surveyResponseId) =>
-    `Api/SurveyForm/GetForm?formId=${formId}&surveyResponseId=${surveyResponseId}`,
+  getSurveyFormDataAPI: (formUid, surveyResponseUid) =>
+    `Api/SurveyForm/GetForm?formUid=${formUid}&surveyResponseUid=${surveyResponseUid}`,
   submitSurveyFormDataAPI: 'Api/SurveyForm/AddUpdateAnswers',
 
   paymentScreenPath: uId => `/account/payment/${uId}`,

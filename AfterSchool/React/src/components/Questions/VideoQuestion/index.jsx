@@ -9,6 +9,7 @@ import VideoRecorder from 'components/VideoRecorder';
 import ErrorBand from 'components/common/ErrorBand';
 import recordButton from 'assets/recordButton.svg';
 import pauseButton from 'assets/pauseWhite.svg';
+import { validFileSize } from 'constants';
 import useStyles from './styles';
 
 const VideoQuestion = ({ question, formik }) => {
@@ -27,6 +28,7 @@ const VideoQuestion = ({ question, formik }) => {
   const [descriptionText, setDescriptionText] = useState(description);
   const [isCameraOpen, setCameraOpen] = useState(false);
   const [currentVideoStream, setCurrentStream] = useState([]);
+  const [uploadingStatus, setUploadingStatus] = useState('');
   const [recordingError, setRecordingError] = useState('');
   const [isRecording, setRecording] = useState(false);
   const [isVideoLoading, setVideoLoading] = useState(false);
@@ -36,9 +38,19 @@ const VideoQuestion = ({ question, formik }) => {
     setDescriptionModal(!isDescriptionModal);
   };
 
+  function isValidUpload(file) {
+    if (!validFileSize(file)) {
+      setUploadVideoModal(false);
+      setUploadingStatus('FAILED');
+      return false;
+    }
+    return true;
+  }
+
   useEffect(() => {
     if (typeof uploadedVideo === 'string') return;
     setFieldValue(ID, uploadedVideo);
+    setUploadingStatus('SUCCESS');
   }, [uploadedVideo]);
 
   useEffect(() => {
@@ -99,6 +111,8 @@ const VideoQuestion = ({ question, formik }) => {
 
   const handleVideoChange = event => {
     const file = event.target.files[0];
+    if (!isValidUpload(file)) return;
+
     setUploadedVideo(file);
     const reader = new FileReader();
     reader.onload = async upload => {
@@ -126,6 +140,9 @@ const VideoQuestion = ({ question, formik }) => {
         blobFile =>
           new File([blobFile], `formQuestionAnswer_${ID}_video.mp4`, { type: 'video/mp4' })
       );
+
+    if (!isValidUpload(videoFile)) return;
+
     setUploadedVideo(videoFile);
     setVideoUrl(videoUrl);
     setCameraOpen(false);
@@ -251,6 +268,7 @@ const VideoQuestion = ({ question, formik }) => {
         />
       </Box>
       {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

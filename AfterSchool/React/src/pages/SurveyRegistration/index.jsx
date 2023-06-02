@@ -10,7 +10,7 @@ import utils from 'utils';
 
 export default function SurveyRegistration() {
   const navigate = useNavigate();
-  const { formId } = useParams();
+  const { formUid } = useParams();
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -19,7 +19,7 @@ export default function SurveyRegistration() {
     questions,
     loadFormData,
     questionsGroups,
-    surveyResponseId,
+    surveyResponseUid,
     answeredQuestions = [],
     submitFormSectionData,
     clearMessages
@@ -36,7 +36,8 @@ export default function SurveyRegistration() {
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
-    answeredQuestions
+    answeredQuestions,
+    true
   );
   const {
     validator,
@@ -48,7 +49,7 @@ export default function SurveyRegistration() {
 
   const buildQueryParams = (index = activeGroup) =>
     responseId.current
-      ? `section=${encodeURIComponent(questionsGroups[index].Name)}&surveyResponseId=${
+      ? `section=${encodeURIComponent(questionsGroups[index].Name)}&surveyResponseUid=${
           responseId.current
         }`
       : `section=${encodeURIComponent(questionsGroups[index].Name)}`;
@@ -78,11 +79,13 @@ export default function SurveyRegistration() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async values => {
+      setSaveDisabled(true);
       const submitObj = formSectionSubmitObject(values, activeGroupId);
-      await submitFormSectionData(submitObj, formId, responseId.current).then(
+      await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
         respId => (responseId.current = respId)
       );
       handleSection('next');
+      setSaveDisabled(true);
     }
   });
   const { handleSubmit, dirty, values } = formik;
@@ -90,12 +93,12 @@ export default function SurveyRegistration() {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(formId, searchParams.get('surveyResponseId'));
+    loadFormData(formUid, searchParams.get('surveyResponseUid'));
   }, []);
 
   useEffect(() => {
-    responseId.current = searchParams.get('surveyResponseId');
-  }, [searchParams.get('surveyResponseId')]);
+    responseId.current = searchParams.get('surveyResponseUid');
+  }, [searchParams.get('surveyResponseUid')]);
 
   useEffect(() => {
     if (questionsGroups.length)
@@ -141,7 +144,8 @@ export default function SurveyRegistration() {
       formik={formik}
       handleSubmit={handleSubmit}
       skipAble={skipAble}
-      firstSection={activeGroup === 0}
+      isSurvey={true}
+      showExit={false}
     ></RegistrationForm>
   );
 }

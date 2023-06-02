@@ -5,6 +5,7 @@ import { useReactMediaRecorder } from 'react-media-recorder';
 import useStyles from './styles';
 import Timer from 'components/Timer';
 import audioWave from 'assets/audio.svg';
+import { validFileSize } from 'constants';
 import playButton from 'assets/playButton.svg';
 import pauseButton from 'assets/pauseGreen.svg';
 import DescriptionModal from 'components/DescriptionModal';
@@ -21,6 +22,7 @@ const AudioQuestion = ({ question, formik }) => {
   const [isTimerRunning, setTimerRunning] = useState(false);
   const [isDescriptionModal, setDescriptionModal] = useState(false);
   const [descriptionText, setDescriptionText] = useState(description || 'description');
+  const [uploadingStatus, setUploadingStatus] = useState('');
   const [isPlaying, setPlaying] = useState(false);
   const [audioUrl, setAudioUrl] = useState();
   const {
@@ -39,9 +41,18 @@ const AudioQuestion = ({ question, formik }) => {
   });
   const [loading, setLoading] = useState(false);
 
+  function isValidUpload(file) {
+    if (!validFileSize(file)) {
+      setUploadingStatus('FAILED');
+      return false;
+    }
+    return true;
+  }
+
   useEffect(() => {
     if (typeof audioAnswer === 'string') return;
     setFieldValue(ID, audioAnswer);
+    setUploadingStatus('SUCCESS');
   }, [audioAnswer]);
 
   useEffect(() => {
@@ -103,6 +114,9 @@ const AudioQuestion = ({ question, formik }) => {
         blobFile =>
           new File([blobFile], `formQuestionAnswer.${ID}_audio.mp3`, { type: 'audio/mp3' })
       );
+
+    if (!isValidUpload(audioFile)) return;
+
     setAudioAnswer(audioFile);
     setAudioUrl(media);
   };
@@ -189,6 +203,7 @@ const AudioQuestion = ({ question, formik }) => {
         />
       </Box>
       {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

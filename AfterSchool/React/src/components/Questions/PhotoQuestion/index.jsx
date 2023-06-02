@@ -7,6 +7,7 @@ import photoPlaceholder from 'assets/photoPlaceholder.svg';
 import DescriptionModal from 'components/DescriptionModal';
 import ErrorBand from 'components/common/ErrorBand';
 import WebCamera from 'components/WebCamera';
+import { validFileSize } from 'constants';
 import capture from 'assets/capture.svg';
 import useStyles from './styles';
 
@@ -26,6 +27,7 @@ const PhotoQuestion = ({ question, formik }) => {
   const [isCameraOpen, setCameraOpen] = useState(false);
   const [currentVideoStream, setCurrentStream] = useState([]);
   const [isImageLoading, setImageLoading] = useState(false);
+  const [uploadingStatus, setUploadingStatus] = useState('');
 
   useEffect(() => {
     if (typeof values[ID] !== 'string') return;
@@ -72,10 +74,22 @@ const PhotoQuestion = ({ question, formik }) => {
   useEffect(() => {
     if (typeof uploadedFile === 'string') return;
     setFieldValue(ID, uploadedFile);
+    setUploadingStatus('SUCCESS');
   }, [uploadedFile]);
+
+  function isValidUpload(file) {
+    if (!validFileSize(file)) {
+      setUploadImageModal(false);
+      setUploadingStatus('FAILED');
+      return false;
+    }
+    return true;
+  }
 
   const handleUploadChange = event => {
     const file = event.target.files[0];
+    if (!isValidUpload(file)) return;
+
     setUploadedFile(file);
     const reader = new FileReader();
     reader.onload = async upload => {
@@ -102,6 +116,9 @@ const PhotoQuestion = ({ question, formik }) => {
         blobFile =>
           new File([blobFile], `formQuestionAnswer.${ID}_photo.jpg`, { type: 'image/png' })
       );
+
+    if (!isValidUpload(imageFile)) return;
+
     setUploadedFile(imageFile);
     setDescriptionModal(true);
     setCameraOpen(false);
@@ -215,6 +232,7 @@ const PhotoQuestion = ({ question, formik }) => {
         </Dialog>
       </Box>
       {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

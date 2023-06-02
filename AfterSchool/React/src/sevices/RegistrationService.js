@@ -4,7 +4,8 @@ import questionType from 'constants/questionType';
 import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
 
 export default class RegistrationService {
-  constructor(questions = [], currentQuestions = [], answeredQuestions = []) {
+  constructor(questions = [], currentQuestions = [], answeredQuestions = [], isSurvey = false) {
+    this.isSurvey = isSurvey;
     this.questions = questions;
     this.answeredQuestions = answeredQuestions;
     this.currentQuestions = currentQuestions;
@@ -23,7 +24,9 @@ export default class RegistrationService {
   initialValues = () => {
     const initialvalues = {};
     this.currentQuestions?.forEach(question => {
-      initialvalues[question.ID] = this.submittedAnswer(question.QuestionDataTypeId, question.Text);
+      initialvalues[question.ID] = this.isSurvey
+        ? this.surveySubmittedAnswer(question.ID)
+        : this.submittedAnswer(question.QuestionDataTypeId, question.Text);
     });
     return initialvalues;
   };
@@ -129,6 +132,11 @@ export default class RegistrationService {
     const answer =
       this.answeredQuestions?.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
         ?.Text || '';
+    return answer === 'null' ? '' : answer;
+  };
+
+  surveySubmittedAnswer = id => {
+    const answer = this.answeredQuestions?.find(q => q.FormQuestionId === id)?.Text || '';
     return answer === 'null' ? '' : answer;
   };
 

@@ -12,7 +12,7 @@ const SurveyRegistrationSlice = createSlice({
     loading: true,
     questionsGroups: [],
     answeredQuestions: [],
-    surveyResponseId: null
+    surveyResponseUid: null
   },
   reducers: {
     loadingFormData: state => {
@@ -25,7 +25,7 @@ const SurveyRegistrationSlice = createSlice({
       state.loading = false;
     },
     setResponseId: (state, { payload }) => {
-      if (state.surveyResponseId !== payload) state.surveyResponseId = payload;
+      if (state.surveyResponseUid !== payload) state.surveyResponseUid = payload;
     },
     setFormData: (state, { payload: { FormDto } }) => {
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
@@ -52,10 +52,10 @@ export const useSurveyRegistrationActions = () => {
   } = SurveyRegistrationSlice.actions;
   const dispatch = useDispatch();
 
-  const loadFormData = async (formId, surveyResponseId) => {
-    dispatch(setResponseId(surveyResponseId));
+  const loadFormData = async (formUid, surveyResponseUid) => {
+    dispatch(setResponseId(surveyResponseUid));
     dispatch(loadingFormData());
-    await SurveyRegistrationRepository.getSurveyFormData(formId, surveyResponseId).then(
+    await SurveyRegistrationRepository.getSurveyFormData(formUid, surveyResponseUid).then(
       ({ obj, msgs }) => {
         if (obj) dispatch(setFormData(obj));
         dispatch(setMsgs(msgs));
@@ -66,17 +66,19 @@ export const useSurveyRegistrationActions = () => {
 
   const submitFormSectionData = async (
     { answers, answerQuery: { answerQuery }, formData },
-    formId,
-    surveyResponseId
+    formUid,
+    surveyResponseUid,
+    isLastSection
   ) => {
-    formData.append('formId', formId);
-    formData.append('surveyResponseId', surveyResponseId);
+    formData.append('formUid', formUid);
+    formData.append('isLastSection', isLastSection);
+    formData.append('surveyResponseUid', surveyResponseUid);
     formData.append('answers', new URLSearchParams(answerQuery).toString());
     return await SurveyRegistrationRepository.submitFormSection(formData).then(
       ({ data: { msgs, obj } }) => {
-        dispatch(setResponseId(obj?.SurveyResponseId));
+        dispatch(setResponseId(obj?.SurveyResponseUid));
         dispatch(setMsgs(msgs));
-        return obj?.SurveyResponseId;
+        return obj?.SurveyResponseUid;
       }
     );
   };

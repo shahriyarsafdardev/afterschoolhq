@@ -16,3 +16,6 @@ export const gradeIds = {
   '11th': 12,
   '12th': 13
 };
+
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+export const validFileSize = file => file && file.size <= MAX_FILE_SIZE;
