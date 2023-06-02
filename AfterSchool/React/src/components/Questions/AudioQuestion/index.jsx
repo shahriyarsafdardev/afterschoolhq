@@ -64,6 +64,7 @@ const AudioQuestion = ({ question, formik }) => {
   const handleDiscard = () => {
     setAudioAnswer('');
     setDescriptionText('');
+    setFieldValue(ID, '');
     clearBlobUrl();
     audioRef.current.src = '';
   };

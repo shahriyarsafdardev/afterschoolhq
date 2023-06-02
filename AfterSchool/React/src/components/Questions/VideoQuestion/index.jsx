@@ -62,6 +62,7 @@ const VideoQuestion = ({ question, formik }) => {
 
   const handleDiscard = () => {
     setVideoUrl('');
+    setFieldValue(ID, '');
     setDescriptionText('');
     setCurrentStream([]);
     setUploadedVideo('');

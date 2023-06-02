@@ -6,11 +6,13 @@ import { useFormik } from 'formik';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useSurveyRegistration } from 'redux/hooks';
+import routes from 'routes';
 import utils from 'utils';
 
 export default function SurveyRegistration() {
   const navigate = useNavigate();
   const { formUid } = useParams();
+  const { surveyThankyouUrl } = routes;
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -80,17 +82,26 @@ export default function SurveyRegistration() {
     validate: values => validator(values),
     onSubmit: async values => {
       setSaveDisabled(true);
-      const submitObj = formSectionSubmitObject(values, activeGroupId);
-      await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
-        respId => (responseId.current = respId)
-      );
+      if (dirty || lastSection) {
+        const submitObj = formSectionSubmitObject(values, activeGroupId);
+        await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
+          respId => {
+            responseId.current = respId;
+            if (!msgs.length) {
+              enqueueSnackbar('Submitted.', { variant: 'success' });
+              lastSection && navigate(surveyThankyouUrl(formUid));
+            }
+          }
+        );
+      }
+
       handleSection('next');
-      setSaveDisabled(true);
+      setSaveDisabled(false);
     }
   });
   const { handleSubmit, dirty, values } = formik;
   const isEmpty = !Object.values(values).some(x => x !== '');
-  const skipAble = sectionSkipAble && isEmpty && !dirty;
+  const skipAble = sectionSkipAble && isEmpty && !dirty && !lastSection;
 
   useEffect(() => {
     loadFormData(formUid, searchParams.get('surveyResponseUid'));

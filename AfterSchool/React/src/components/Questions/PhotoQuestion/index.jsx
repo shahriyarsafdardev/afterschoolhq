@@ -39,6 +39,7 @@ const PhotoQuestion = ({ question, formik }) => {
     setImageUrl('');
     setUploadedFile('');
     setDescriptionText('');
+    setFieldValue(ID, '');
     setCurrentStream([]);
     uploadInputRef.current.value = '';
     captureInputRef.current.value = '';
