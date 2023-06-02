@@ -1242,6 +1242,23 @@ namespace AfterSchoolLibrary.Services
 
             return qhs;
         }
+        public static string BuildShortHomePageUrlForm(Guid formUid)
+        {
+            return
+                $"{Helpers.Utilities.ShortBaseUrl()}/reactapp/survey/{formUid}";
+        }
+        public static void Publish(this Form form, WebUser loggedInUser, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if (form.IsNotEmpty())
+            {
+                form.IsPublished = !(form.IsPublished ?? false);
+                form.LastModifiedBy = loggedInUser.ID;
+                form.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(form.Save(dc));
+            }
+            
+        }
 
         public static List<QuestionHolder> CreateStudentInformationGroup()
         {
