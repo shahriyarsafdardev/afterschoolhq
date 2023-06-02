@@ -132,6 +132,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
+                List<FormQuestionAnswerDto> formQuestionAnswers =null;
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -167,6 +168,17 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                         if(msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
+
+                        if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+                        {
+                            formQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                                .Select(questionAnswer => new FormQuestionAnswerDto()
+                                {
+                                    FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                                    QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                                })
+                                .ToList();
+                        }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -175,7 +187,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 return Json(
                     new ApiResponse(msgs,new {SurveyResponseUid = surveyResponse?.Uid, FormUid = form?.Uid, 
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString()}),
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(), FormQuestionAnswers = formQuestionAnswers}),
                     JsonRequestBehavior.AllowGet);
 
             }
