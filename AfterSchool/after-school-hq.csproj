@@ -751,6 +751,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about.html" />
+    <Content Include="ahq-raises-seed-round.html" />
     <Content Include="afterschoolhq-partners-with-ips.html" />
     <Content Include="ahq-partners-with-mccoy.html" />
     <Content Include="appsettings.json" />
