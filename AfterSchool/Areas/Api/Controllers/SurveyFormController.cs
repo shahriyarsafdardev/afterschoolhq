@@ -132,7 +132,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
-                List<FormQuestionAnswerDto> formQuestionAnswers =null;
+                var formQuestionAnswerDto = new List<FormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -168,26 +168,26 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                         if(msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
-
-                        if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
-                        {
-                            formQuestionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
-                                .Select(questionAnswer => new FormQuestionAnswerDto()
-                                {
-                                    FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                                    QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
-                                })
-                                .ToList();
-                        }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
+                
+                if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+                {
+                    formQuestionAnswerDto = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                        .Select(questionAnswer => new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                        })
+                        .ToList();
+                }
                 
                 return Json(
                     new ApiResponse(msgs,new {SurveyResponseUid = surveyResponse?.Uid, FormUid = form?.Uid, 
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(), FormQuestionAnswers = formQuestionAnswers}),
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(), FormQuestionAnswers = formQuestionAnswerDto}),
                     JsonRequestBehavior.AllowGet);
 
             }
