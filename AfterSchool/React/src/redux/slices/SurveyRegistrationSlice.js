@@ -38,6 +38,9 @@ const SurveyRegistrationSlice = createSlice({
       state.questionsGroups = formQuestionGroupUpdated;
       state.answeredQuestions = formQuestionAnswer;
     },
+    setAnsweredQuestions: (state, { payload }) => {
+      state.answeredQuestions = payload;
+    },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
     }
@@ -50,7 +53,8 @@ export const useSurveyRegistrationActions = () => {
     setFormData,
     setResponseId,
     formDataLoaded,
-    loadingFormData
+    loadingFormData,
+    setAnsweredQuestions
   } = SurveyRegistrationSlice.actions;
   const dispatch = useDispatch();
 
@@ -81,6 +85,7 @@ export const useSurveyRegistrationActions = () => {
     formData.append('answers', new URLSearchParams(answerQuery).toString());
     return await SurveyRegistrationRepository.submitFormSection(formData).then(
       ({ data: { msgs, obj } }) => {
+        dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
         dispatch(setResponseId(obj?.SurveyResponseUid));
         dispatch(setMsgs(msgs));
         return obj?.SurveyResponseUid;

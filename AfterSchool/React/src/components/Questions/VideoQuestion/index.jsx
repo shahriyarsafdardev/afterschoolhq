@@ -23,7 +23,7 @@ const VideoQuestion = ({ question, formik }) => {
   const [isDescriptionModal, setDescriptionModal] = useState(false);
   const [uploadVideoModal, setUploadVideoModal] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
-  const [uploadedVideo, setUploadedVideo] = useState();
+  const [uploadedVideo, setUploadedVideo] = useState('');
   const [isVideoPlaying, setVideoPlaying] = useState(false);
   const [descriptionText, setDescriptionText] = useState(description);
   const [isCameraOpen, setCameraOpen] = useState(false);
