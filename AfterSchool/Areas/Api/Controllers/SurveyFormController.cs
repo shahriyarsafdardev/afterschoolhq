@@ -23,18 +23,23 @@ namespace AfterSchool.Areas.Api.Controllers
     public class SurveyFormController : BaseController
     {
         [HttpGet]
-        public ActionResult GetForm(int formId, int surveyResponseId = 0)
+        public ActionResult GetForm(Guid? formUid, Guid? surveyResponseUid)
         {
             var msgs = new SystemMessages();
             try
             {
-                if (formId < 1)
+                if (formUid.IsEmpty())
                     throw new Exception("Invalid Form Id.");
 
-                var form = Form.Load(formId);
+                var form = Form.LoadByUid(formUid.Value);
                 
                 if (form.FormTypeId != FormType.Survey) //|| !(form.IsPublished ?? false) 
                     throw new Exception("Invalid Form.");
+                
+                SurveyResponse surveyResponse = null;
+                
+                if(surveyResponseUid.IsNotEmpty())
+                    surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value);
                 
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
@@ -67,9 +72,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ToList();
 
                 dynamic response;
-                if (surveyResponseId > 0)
+                if (surveyResponse.IsNotEmpty())
                 {
-                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponseId)
+                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
@@ -80,6 +85,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     response = new
                     {
                         FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
                     };
                 }
                 else
@@ -105,9 +111,10 @@ namespace AfterSchool.Areas.Api.Controllers
         }
         
         [HttpGet]
-        public ActionResult Index(int id)
+        public ActionResult Index(Guid? Uid)
         {
-            var form = Form.Load(id);
+            if (Uid.IsEmpty()) return Redirect("~/login");
+            var form = Form.LoadByUid(Uid.Value);
             return Redirect(form.FormTypeId == FormType.Survey ? $"~/ReactApp/survey/{form.ID}" : "~/login");
         }
         
@@ -117,9 +124,14 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                var surveyResponseId = json.surveyResponseId;
+                var surveyResponseUid = json.surveyResponseUid;
+                var formUid = json.formUid;
+                var isLastSection = json.isLastSection ?? false;
+                if(formUid.IsEmpty())
+                    throw new Exception("Invalid Form Uid.");
+                
+                var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
-                var form = Form.Load(json.formId);
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -129,7 +141,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         
-                        if (surveyResponseId.IsEmpty() || surveyResponseId < 1)
+                        if (surveyResponseUid.IsEmpty())
                         {
                             surveyResponse = new SurveyResponse()
                             {
@@ -138,13 +150,20 @@ namespace AfterSchool.Areas.Api.Controllers
                                 SurveyRequestId = form.ID,
                                 IsDeleted = false,
                                 Uid = Guid.NewGuid(),
-                                SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed,
+                                SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.InProgress,
                             };
                             msgs.AddRange(surveyResponse.Save(adc));
                         }
                         else
                         {
-                            surveyResponse = SurveyResponse.Load(surveyResponseId);
+                            surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value);
+                            if (isLastSection)
+                            {
+                                surveyResponse.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed;
+                                surveyResponse.LastModifiedDate = DateTime.Now;
+                                msgs.AddRange(surveyResponse.Save(adc));
+                            }
+
                         }
                         if(msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
@@ -155,7 +174,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 );
                 
                 return Json(
-                    new ApiResponse(msgs,new {SurveyResponseId = surveyResponse?.ID, FormId = form?.ID}),
+                    new ApiResponse(msgs,new {SurveyResponseUid = surveyResponse?.Uid, FormUid = form?.Uid, 
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString()}),
                     JsonRequestBehavior.AllowGet);
 
             }
