@@ -1,9 +1,12 @@
-﻿namespace AfterSchool.Areas.Api.Models
+﻿using System;
+
+namespace AfterSchool.Areas.Api.Models
 {
     public class SurveyQuestionAnswerResponse
     {
-        public int surveyResponseId { get; set; }
-        public int formId { get; set; }
+        public Guid? surveyResponseUid { get; set; }
+        public Guid? formUid { get; set; }
         public string answers { get; set; }
+        public bool? isLastSection { get; set; }
     }
 }
