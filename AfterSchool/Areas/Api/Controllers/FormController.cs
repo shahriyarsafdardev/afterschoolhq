@@ -281,18 +281,21 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                 NewQuestion.QuestionSettings.ForEach(Setting =>
                                 {
-                                    var questionSetting = new FormQuestionSettings()
+                                    if (!NewQuestion.IsLocked)
                                     {
-                                        QuestionId = NewQuestion.ID,
-                                        Audience = Setting.Audience,
-                                        Show = Setting.Show,
-                                        Required = Setting.Required,
-                                        CreateDate = DateTime.UtcNow,
-                                        LastModifiedDate = DateTime.UtcNow,
-                                        CreatedBy = CurrentUser.ID,
-                                        LastModifiedBy = CurrentUser.ID,
-                                    };
-                                    msgs.AddRange(questionSetting.Save(adc));
+                                        var questionSetting = new FormQuestionSettings()
+                                        {
+                                            QuestionId = NewQuestion.ID,
+                                            Audience = Setting.Audience,
+                                            Show = Setting.Show,
+                                            Required = Setting.Required,
+                                            CreateDate = DateTime.UtcNow,
+                                            LastModifiedDate = DateTime.UtcNow,
+                                            CreatedBy = CurrentUser.ID,
+                                            LastModifiedBy = CurrentUser.ID,
+                                        };
+                                        msgs.AddRange(questionSetting.Save(adc));
+                                    }
                                 });
 
                             });

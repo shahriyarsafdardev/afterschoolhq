@@ -1036,7 +1036,7 @@ namespace AfterSchool.Areas.Api.Controllers
             foreach (var question in questions)
             {
                 var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType);
-                if (audienceSettings?.Show ?? true)
+                if (audienceSettings?.Show ?? question.IsActive)
                 {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
@@ -1047,7 +1047,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             Description = question.Description,
                             GroupTitle = question.FormQuestionGroupName,
                             Options = question.Options,
-                            IsRequired = audienceSettings?.Required ?? true,
+                            IsRequired = audienceSettings?.Required ?? question.IsRequired,
                             DisplayOrder = question.DisplayOrder,
                             IsActive = question.IsActive,
                             IsDeleted = question.IsDeleted,
