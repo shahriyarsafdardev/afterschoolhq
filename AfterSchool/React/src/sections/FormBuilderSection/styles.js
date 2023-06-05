@@ -283,7 +283,7 @@ export default makeStyles(theme => ({
     padiing: '5px',
     display: 'flex',
     alignItems: 'center',
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('md')]: {
       maxWidth: 'fit-content'
     }
   },
