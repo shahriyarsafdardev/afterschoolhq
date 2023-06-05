@@ -59,15 +59,9 @@ export default makeStyles(theme => ({
     display: 'flex',
     paddingLeft: 20
   },
-  maxWidth: {
-    width: '100%',
-    maxWidth: 500
-  },
   helperText: {
-    fontSize: '14.88px',
-    margin: '0',
-    '&.MuiFormHelperText-root.Mui-error': {
-      color: '#DF1B41'
-    }
+    width: '95%',
+    maxWidth: 600,
+    textAlign: 'right'
   }
 }));

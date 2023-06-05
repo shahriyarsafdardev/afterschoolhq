@@ -5,7 +5,7 @@ import useStyles from './styles';
 
 export default function TextAreaQuestion({ formikProps, label }) {
   const classes = useStyles();
-  const { error, errorMsg, value } = formikProps;
+  const { error, value } = formikProps;
 
   return (
     <Grid className={classes.textFieldBox} xs={12}>
@@ -26,7 +26,7 @@ export default function TextAreaQuestion({ formikProps, label }) {
           />
           {
             <Box className={classes.flexCenter}>
-              <FormHelperText className={classes.maxWidth} error={error}>
+              <FormHelperText className={classes.helperText} error={error}>
                 {`${value?.length || 0}/400`}
               </FormHelperText>
             </Box>

@@ -96,6 +96,12 @@ export default makeStyles(theme => ({
     color: '#777777',
     '& .MuiOutlinedInput-root': {
       width: '100%'
+    },
+    '& .MuiFormHelperText-root': {
+      textAlign: 'right'
+    },
+    '& .MuiFormHelperText-root.Mui-error': {
+      textAlign: 'left'
     }
   },
   sectionsListHeading: {
