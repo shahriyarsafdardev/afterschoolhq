@@ -40,6 +40,8 @@ function ShowQuestion({ formik, isUpdating, currentQuestion, currentQuestions })
       );
     case questionType.email:
       return <TextField question={currentQuestion} formik={formik} />;
+    case questionType.number:
+      return <TextField question={currentQuestion} formik={formik} type={'number'} />;
     case questionType.date:
       return <DateQuestion question={currentQuestion} formik={formik} />;
     case questionType.dropdown:

@@ -3,7 +3,7 @@ import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
 
 import useStyles from './styles';
 
-export default function TextField({ formik, question }) {
+export default function TextField({ formik, question, type = 'text' }) {
   const classes = useStyles();
   const { ID, Text: label, IsRequired: required = false, QuestionDataTypeId } = question;
   const [typeClass, typeText] = required
@@ -36,6 +36,7 @@ export default function TextField({ formik, question }) {
           }}
           className={classes.formControlClass}
           fullWidth
+          type={type}
           variant="outlined"
           {...formik.getFieldProps(question.ID)}
           error={formik.touched[ID] && formik.errors[ID]}
