@@ -184,10 +184,17 @@ namespace AfterSchool.Areas.Api.Controllers
                         })
                         .ToList();
                 }
+
+                dynamic response = new
+                {
+                    SurveyResponseUid = surveyResponse?.Uid,
+                    FormUid = form?.Uid,
+                    SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                    FormQuestionAnswers = formQuestionAnswerDto,
+                };
                 
                 return Json(
-                    new ApiResponse(msgs,new {SurveyResponseUid = surveyResponse?.Uid, FormUid = form?.Uid, 
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(), FormQuestionAnswers = formQuestionAnswerDto}),
+                    new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
 
             }
