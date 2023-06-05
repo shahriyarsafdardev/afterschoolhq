@@ -33,7 +33,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var form = Form.LoadByUid(formUid.Value);
                 
-                if (form.FormTypeId != FormType.Survey) //|| !(form.IsPublished ?? false) 
+                if (form.FormTypeId != FormType.Survey || !(form.IsPublished ?? false))
                     throw new Exception("Invalid Form.");
                 
                 SurveyResponse surveyResponse = null;

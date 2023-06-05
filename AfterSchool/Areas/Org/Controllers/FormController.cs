@@ -130,7 +130,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             
             if (msgs.HasNoErrors())
-                if (form.IsPublished==true)
+                if (form.IsPublished ?? false)
                    msgs.Add(string.Format("Survey form has been published", form.Name), MessageType.Success);
             TempData["msgs"] = msgs;
             return RedirectToAction("edit", new { id = form.ID.ToString() });
