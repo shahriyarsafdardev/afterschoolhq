@@ -274,11 +274,19 @@ export default makeStyles(theme => ({
   },
   applyToAllControlsContainer: {
     maxWidth: '340px',
+    justifyContent: 'space-between',
     [theme.breakpoints.down('sm')]: {
       maxWidth: '235px'
     }
   },
-  applyToAllControlsItem: { padiing: '5px', display: 'flex', alignItems: 'center' },
+  applyToAllControlsItem: {
+    padiing: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    [theme.breakpoints.up('sm')]: {
+      maxWidth: 'fit-content'
+    }
+  },
   controlsContainer: { display: 'block', maxWidth: '454px', marginTop: '10px' },
   questionIconsWrapper: {
     display: 'flex',
