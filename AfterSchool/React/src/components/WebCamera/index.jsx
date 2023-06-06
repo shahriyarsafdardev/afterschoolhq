@@ -19,7 +19,7 @@ const WebCamera = ({
   const [currentVideoStream, setCurrentStream] = useState([]);
 
   const getWidth = () => {
-    if (isDesktop) return 640;
+    if (isDesktop) return 510;
     if (isTablet) return 480;
   };
 
@@ -63,7 +63,7 @@ const WebCamera = ({
         ref={webCamRef}
         screenshotFormat="image/jpeg"
         width={getWidth()}
-        height={getHeight()}
+        height={'auto'}
         videoConstraints={videoConstraints}
         onUserMedia={handleUserMedia}
         screenshotQuality={1}

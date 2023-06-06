@@ -4,7 +4,6 @@ const useStyles = makeStyles(theme => ({
   videoWrapper: {
     padding: '8px 12px',
     marginTop: 35,
-    // paddingBottom: 90,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -15,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   imgWrapper: {
-    width: 520,
+    width: 510,
     height: 'auto',
     position: 'relative',
     [theme.breakpoints.down('sm')]: {
@@ -24,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   videoPlayer: {
-    width: 520,
+    width: 510,
     height: '100%',
     maxHeight: 455,
     [theme.breakpoints.down('sm')]: {
@@ -66,8 +65,7 @@ const useStyles = makeStyles(theme => ({
   },
   recordButton: {
     position: 'absolute',
-    bottom: 0,
-    left: '45%'
+    bottom: 0
   },
   orText: {
     fontFamily: 'Montserrat',

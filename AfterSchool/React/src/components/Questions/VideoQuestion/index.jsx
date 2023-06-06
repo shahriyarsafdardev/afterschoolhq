@@ -200,9 +200,11 @@ const VideoQuestion = ({ question, formik }) => {
               </div>
             )}
             {!videoUrl && !isCameraOpen && !isVideoLoading && (
-              <IconButton className={classes.recordButton} onClick={handleVideo(true)}>
-                <img src={recordButton} alt="Record Button" />
-              </IconButton>
+              <Box style={{ display: 'flex', justifyContent: 'center' }}>
+                <IconButton className={classes.recordButton} onClick={handleVideo(true)}>
+                  <img src={recordButton} alt="Record Button" />
+                </IconButton>
+              </Box>
             )}
           </div>
           {videoUrl && !isVideoLoading && (

@@ -35,12 +35,7 @@ const VideoRecorder = ({
 
   const device = useMemo(getDeviceType, []);
   const getWidth = () => {
-    if (isDesktop) return 640;
-    if (isTablet) return 480;
-  };
-
-  const getHeight = () => {
-    if (isDesktop) return 432;
+    if (isDesktop) return 510;
     if (isTablet) return 480;
   };
 
@@ -57,13 +52,10 @@ const VideoRecorder = ({
       .getUserMedia({
         video: {
           width: {
-            min: 640,
+            min: 510,
             max: 1920
           },
-          height: {
-            min: 480,
-            max: 1080
-          }
+          height: 'auto'
         },
         audio: {
           echoCancellation: true
@@ -106,7 +98,7 @@ const VideoRecorder = ({
   return (
     <div className={classes.webCamWrapper}>
       {device === 'desktop' && (
-        <video width={getWidth()} height={getHeight()} autoPlay ref={videoElement} />
+        <video width={getWidth()} height={'auto'} autoPlay ref={videoElement} />
       )}
 
       {isVideo ? (
