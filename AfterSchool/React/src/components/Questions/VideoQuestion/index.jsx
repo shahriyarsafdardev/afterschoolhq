@@ -49,13 +49,15 @@ const VideoQuestion = ({ question, formik }) => {
 
   useEffect(() => {
     if (typeof uploadedVideo === 'string') return;
-    setFieldValue(ID, uploadedVideo);
+    setFieldValue(ID, { File: uploadedVideo, Description: values[ID]?.Description });
     setUploadingStatus('SUCCESS');
   }, [uploadedVideo]);
 
   useEffect(() => {
-    if (typeof values[ID] !== 'string') return;
-    setVideoUrl(values[ID]);
+    if (typeof values[ID]?.Text !== 'string') return;
+
+    setVideoUrl(values[ID]?.Text || values[ID]?.File);
+    setDescriptionText(values[ID]?.Description);
   }, [values[ID]]);
 
   const handleVideoLoading = () => setVideoLoading(!isVideoLoading);
@@ -86,6 +88,7 @@ const VideoQuestion = ({ question, formik }) => {
 
   const handleDescriptionSave = value => {
     setDescriptionText(value);
+    setFieldValue(ID, { ...values[ID], Description: value });
   };
 
   const handlePlayRecording = () => {

@@ -7,7 +7,7 @@ const useStyles = makeStyles(theme => ({
   photoWrapper: {
     padding: '8px 12px',
     marginTop: 30,
-    // paddingBottom: 90,
+    width: 510,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

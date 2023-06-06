@@ -30,8 +30,10 @@ const PhotoQuestion = ({ question, formik }) => {
   const [uploadingStatus, setUploadingStatus] = useState('');
 
   useEffect(() => {
-    if (typeof values[ID] !== 'string') return;
-    setImageUrl(values[ID]);
+    if (typeof values[ID]?.Text !== 'string') return;
+    setImageUrl(values[ID]?.Text || values[ID]?.File);
+    setDescriptionText(values[ID]?.Description);
+
     setCameraOpen(false);
   }, [values[ID]]);
 
@@ -66,6 +68,7 @@ const PhotoQuestion = ({ question, formik }) => {
 
   const handleDescriptionSave = value => {
     setDescriptionText(value);
+    setFieldValue(ID, { ...values[ID], Description: value });
   };
 
   const handleImageUpload = () => {
@@ -74,7 +77,7 @@ const PhotoQuestion = ({ question, formik }) => {
 
   useEffect(() => {
     if (typeof uploadedFile === 'string') return;
-    setFieldValue(ID, uploadedFile);
+    setFieldValue(ID, { File: uploadedFile, Description: values[ID]?.Description });
     setUploadingStatus('SUCCESS');
   }, [uploadedFile]);
 

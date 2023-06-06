@@ -51,14 +51,18 @@ const AudioQuestion = ({ question, formik }) => {
 
   useEffect(() => {
     if (typeof audioAnswer === 'string') return;
-    setFieldValue(ID, audioAnswer);
+    setFieldValue(ID, { File: audioAnswer, Description: values[ID]?.Description });
+
     setUploadingStatus('SUCCESS');
   }, [audioAnswer]);
 
   useEffect(() => {
-    if (typeof values[ID] !== 'string') return;
-    setAudioUrl(values[ID]);
-    setAudioAnswer(values[ID]);
+    if (typeof values[ID]?.Text !== 'string') return;
+
+    setAudioUrl(values[ID]?.Text || values[ID]?.File);
+    setDescriptionText(values[ID]?.Description);
+
+    setAudioAnswer(values[ID]?.Text);
   }, [values[ID]]);
 
   const handleDiscard = () => {
@@ -95,6 +99,7 @@ const AudioQuestion = ({ question, formik }) => {
 
   const handleDescriptionSave = value => {
     setDescriptionText(value);
+    setFieldValue(ID, { ...values[ID], Description: value });
   };
 
   const handleStopPlaying = () => {
