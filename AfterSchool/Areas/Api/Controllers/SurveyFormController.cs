@@ -175,11 +175,10 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 dynamic response;
 
-                /*if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+                if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
                     var questionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value);
                     foreach (var questionAnswer in questionAnswers)
-                    {
                         formQuestionAnswerDtoList.Add(
                             new FormQuestionAnswerDto()
                             {
@@ -189,8 +188,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 Text = MapToAmazonFilePath(questionAnswer),
                             }
                         );
-                    }
-                    
+
                     response = new
                     {
                         SurveyResponseUid = surveyResponse?.Uid,
@@ -200,14 +198,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     };
                 }
                 else
-                {*/
-                response = new
                 {
-                    SurveyResponseUid = surveyResponse?.Uid,
-                    FormUid = form?.Uid,
-                    SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
-                };
-                // }
+                    response = new
+                    {
+                        SurveyResponseUid = surveyResponse?.Uid,
+                        FormUid = form?.Uid,
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                    };
+                }
 
                 return Json(
                     new ApiResponse(msgs, response),
