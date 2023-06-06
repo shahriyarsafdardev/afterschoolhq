@@ -78,6 +78,7 @@ export default function Survey() {
   }, [searchParams.get('surveyResponseUid')]);
 
   const lastSection = activeGroup === totalGroups - 1;
+  const firstSection = activeGroup === 0;
   const initialvalues = initialValues();
 
   const formik = useFormik({
@@ -86,7 +87,7 @@ export default function Survey() {
     validate: values => validator(values),
     onSubmit: async values => {
       setSaveDisabled(true);
-      if (dirty || lastSection) {
+      if (dirty || lastSection || firstSection) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
         await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
           respId => {

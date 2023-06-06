@@ -90,7 +90,7 @@ export default class RegistrationService {
         if (this.isFile(answer.QuestionTypeId, false)) {
           if (this.isFile(answer.QuestionTypeId, true)) {
             addInFiles(ID, answer);
-            addToAnswerQuery(ID, answer?.Description);
+            addToAnswerQuery(ID, answer?.Description || '');
             answers.push({ ...answer, Text: { name: answer?.Text } });
           } else {
             addInFiles(ID, answer);
