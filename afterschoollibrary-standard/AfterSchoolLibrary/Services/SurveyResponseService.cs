@@ -126,6 +126,7 @@ namespace AfterSchoolLibrary.Services
                         question.ID.Value,
                         question.QuestionDataTypeId,
                         question.Text,
+                        question.Description,
                         msgs,
                         dc);
             }
@@ -163,13 +164,14 @@ namespace AfterSchoolLibrary.Services
                     question.ID.Value,
                     question.QuestionDataTypeId,
                     question.Text,
+                    question.Description,
                     msgs,
                     dc);
             }
         }
 
         private static void AddOrUpdateAnswer(int surveyResponseId, string answerText, int questionId, QuestionDataType questionDataType,
-            string questionText, SystemMessages msgs, DatabaseConnection dc = null)
+            string questionText, string questionDescription, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             FormQuestionAnswer answer = null;
@@ -185,7 +187,7 @@ namespace AfterSchoolLibrary.Services
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
                 };
-
+            answer.Description = questionDescription;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
 

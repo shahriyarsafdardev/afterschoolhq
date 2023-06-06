@@ -74,17 +74,18 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response;
                 if (surveyResponse.IsNotEmpty())
                 {
-                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
-                        .Select(questionAnswer => new FormQuestionAnswerDto()
+                    var surveyFormQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                        .Select(questionAnswer => new SurveyFormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                            Description = questionAnswer.Description,
                         })
                         .ToList();
                     
                     response = new
                     {
-                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, surveyFormQuestionAnswerDtoList),
                         SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
                     };
                 }
@@ -92,7 +93,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     response = new
                     {
-                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, null),
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList),
                     };
                 }
                 
@@ -132,7 +133,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
-                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                var surveyFormQuestionAnswerDtoList = new List<SurveyFormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
@@ -177,35 +178,22 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
-                    var questionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value);
-                    foreach (var questionAnswer in questionAnswers)
-                        formQuestionAnswerDtoList.Add(
-                            new FormQuestionAnswerDto()
-                            {
-                                FormQuestionId = questionAnswer.FormQuestionId,
-                                QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                                QuestionText = questionAnswer.QuestionText,
-                                Text = MapToAmazonFilePath(questionAnswer),
-                            }
-                        );
-
-                    response = new
-                    {
-                        SurveyResponseUid = surveyResponse?.Uid,
-                        FormUid = form?.Uid,
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
-                        FormQuestionAnswers = formQuestionAnswerDtoList,
-                    };
+                    surveyFormQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                        .Select(questionAnswer => new SurveyFormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                            Description = questionAnswer.Description,
+                        })
+                        .ToList();
                 }
-                else
+                response = new
                 {
-                    response = new
-                    {
-                        SurveyResponseUid = surveyResponse?.Uid,
-                        FormUid = form?.Uid,
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
-                    };
-                }
+                    SurveyResponseUid = surveyResponse?.Uid,
+                    FormUid = form?.Uid,
+                    SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                    FormQuestionAnswers = surveyFormQuestionAnswerDtoList,
+                };
 
                 return Json(
                     new ApiResponse(msgs, response),
