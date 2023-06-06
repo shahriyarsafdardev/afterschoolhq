@@ -228,10 +228,19 @@ namespace AfterSchool.Areas.Api.Controllers
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,
                                     qvm.Question,
+                                    qvm.Value,
                                     msgs,
                                     dc);
                             else
                                 msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                        else
+                        {
+                            surveyResponse.UpdateDescription(
+                                qvm.Value,
+                                qvm.Question.ID.Value,
+                                msgs,
+                                dc);
                         }
                     }
                     else

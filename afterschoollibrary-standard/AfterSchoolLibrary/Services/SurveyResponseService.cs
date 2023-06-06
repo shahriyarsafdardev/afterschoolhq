@@ -112,7 +112,7 @@ namespace AfterSchoolLibrary.Services
             return $"[{s}]";
         }
 
-        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Stream file, string filename, FormQuestion question,
+        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Stream file, string filename, FormQuestion question, string description,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
@@ -126,9 +126,9 @@ namespace AfterSchoolLibrary.Services
                         question.ID.Value,
                         question.QuestionDataTypeId,
                         question.Text,
-                        question.Description,
                         msgs,
-                        dc);
+                        dc,
+                        description);
             }
         }
 
@@ -164,14 +164,13 @@ namespace AfterSchoolLibrary.Services
                     question.ID.Value,
                     question.QuestionDataTypeId,
                     question.Text,
-                    question.Description,
                     msgs,
                     dc);
             }
         }
 
         private static void AddOrUpdateAnswer(int surveyResponseId, string answerText, int questionId, QuestionDataType questionDataType,
-            string questionText, string questionDescription, SystemMessages msgs, DatabaseConnection dc = null)
+            string questionText, SystemMessages msgs, DatabaseConnection dc = null, string description = "")
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             FormQuestionAnswer answer = null;
@@ -187,12 +186,27 @@ namespace AfterSchoolLibrary.Services
                     QuestionText = questionText,
                     CreateDate = DateTime.UtcNow,
                 };
-            answer.Description = questionDescription;
+            if(description.IsNotEmpty())
+                answer.Description = description;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
 
             msgs.AddRange(answer.Save(dc));
         }
+        public static void UpdateDescription(this SurveyResponse surveyResponse, string description, int questionId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            FormQuestionAnswer answer = null;
 
+            answer = FormQuestionAnswer.LoadBySurveyResponseIdByQuestionId(surveyResponse.ID.Value, questionId, msgs, dc);
+
+            if (answer.IsNotEmpty())
+            {
+                answer.Description = description;
+                answer.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(answer.Save(dc));
+            }
+
+        }
     }
 }
