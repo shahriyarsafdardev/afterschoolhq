@@ -585,7 +585,6 @@
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
-    <Compile Include="Areas\Api\Models\SurveyFormQuestionAnswerDto.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
