@@ -72,6 +72,11 @@ export default function Survey() {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
+  useEffect(() => {
+    if (responseId.current && !searchParams.get('surveyResponseUid'))
+      location.search = location.search + `&surveyResponseUid=${responseId.current}`;
+  }, [searchParams.get('surveyResponseUid')]);
+
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
 
