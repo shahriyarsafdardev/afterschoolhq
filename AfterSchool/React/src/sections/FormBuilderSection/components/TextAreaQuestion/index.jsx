@@ -16,22 +16,18 @@ export default function TextAreaQuestion({ formikProps, label }) {
         </Typography>
       </Grid>
       <Grid xs={12} md={8} item className={classes.textFieldGrid}>
-        <>
-          <TextareaAutosize
-            data-testid={`${label}`}
-            minRows={4}
-            className={classes.formControlClass}
-            variant="outlined"
-            {...formikProps}
-          />
-          {
-            <Box className={classes.flexCenter}>
-              <FormHelperText className={classes.helperText} error={error}>
-                {`${value?.length || 0}/400`}
-              </FormHelperText>
-            </Box>
-          }
-        </>
+        <TextareaAutosize
+          data-testid={`${label}`}
+          minRows={4}
+          className={classes.formControlClass}
+          variant="outlined"
+          {...formikProps}
+        />
+        <Box className={classes.flexCenter}>
+          <FormHelperText className={classes.helperText} error={error}>
+            {`${value?.length || 0}/400`}
+          </FormHelperText>
+        </Box>
       </Grid>
     </Grid>
   );

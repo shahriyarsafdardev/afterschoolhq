@@ -629,7 +629,6 @@ function FormSectionSettings() {
                 color="primary"
                 variant="outlined"
                 className={classes.addNewQuestionButton}
-                disabled={false}
                 onClick={event => {
                   event.preventDefault();
                   addNewQuestionHandler();

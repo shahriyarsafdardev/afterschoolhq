@@ -85,7 +85,6 @@ function FormSettings() {
                 variant="outlined"
                 className={classes.backButton}
                 type="submit"
-                disabled={false}
                 onClick={event => {
                   event.preventDefault();
                   handleSubmit();
