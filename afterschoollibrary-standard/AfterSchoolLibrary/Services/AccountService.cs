@@ -4686,8 +4686,7 @@ namespace AfterSchoolLibrary.Services
             if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
                 var discountValue = coupon.Amount;
-                if (coupon.AmountTypeId ==
-                    CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
+                if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
                     discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) /
                                     checkoutObject.PaymentPlan.TotalPeriods;
 
@@ -4822,8 +4821,18 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     // invalidate coupon
-                    if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
+                    // saving coupon in Registration here.
+                    // This needs refactoring (finding a better place to save coupon in registration)
+                    if ((bool) checkoutObject.Coupon?.ID.HasValue)
+                    {
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
+                        checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
+                        // This needs to look in that if I'm storing value here correctly.
+                        // The value which needs to go here is the maximum amount of coupon applied (either activity total payment or coupon value)
+                        checkoutObject.Registration.CouponValue = checkoutObject.Coupon?.GetValue(checkoutObject.ParticipationObject?.Cost ?? new decimal(0));
+                        msgs.AddRange(checkoutObject.Registration.Save());
+                        
+                    }
 
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
