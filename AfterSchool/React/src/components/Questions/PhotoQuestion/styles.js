@@ -7,7 +7,6 @@ const useStyles = makeStyles(theme => ({
   photoWrapper: {
     padding: '8px 12px',
     marginTop: 30,
-    width: 510,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -17,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   photoContent: {
-    maxWidth: 510,
+    width: 510,
     maxHeight: 480,
     position: 'relative',
     [theme.breakpoints.down('sm')]: {

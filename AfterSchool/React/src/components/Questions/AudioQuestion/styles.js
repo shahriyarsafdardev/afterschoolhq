@@ -3,14 +3,13 @@ import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(theme => ({
   wrapper: { display: 'flex', maxWidth: '540px' },
   audioWrapper: {
-    // marginTop: 125,
+    marginTop: 30,
     padding: '8px 12px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     fontFamily: 'Montserrat',
     color: theme.palette.text.primary,
-    // paddingBottom: 90,
     [theme.breakpoints.down('sm')]: {
       marginLeft: 0
     }
