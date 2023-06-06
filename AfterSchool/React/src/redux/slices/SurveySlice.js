@@ -4,10 +4,10 @@ import { createSlice } from '@reduxjs/toolkit';
 import utils from 'utils';
 import apiRoutes from 'routes';
 import { responseMapper } from './helper';
-import SurveyRegistrationRepository from 'repository/SurveyRegistrationRepository';
+import SurveyRepository from 'repository/SurveyRepository';
 
-const SurveyRegistrationSlice = createSlice({
-  name: 'surveyRegistrationSlice',
+const SurveySlice = createSlice({
+  name: 'surveySlice',
   initialState: {
     msgs: [],
     questions: [],
@@ -47,7 +47,7 @@ const SurveyRegistrationSlice = createSlice({
   }
 });
 
-export const useSurveyRegistrationActions = () => {
+export const useSurveyActions = () => {
   const {
     setMsgs,
     setFormData,
@@ -55,26 +55,24 @@ export const useSurveyRegistrationActions = () => {
     formDataLoaded,
     loadingFormData,
     setAnsweredQuestions
-  } = SurveyRegistrationSlice.actions;
+  } = SurveySlice.actions;
   const dispatch = useDispatch();
 
   const loadFormData = async (formUid, surveyResponseUid) => {
     dispatch(setResponseId(surveyResponseUid));
     dispatch(loadingFormData());
-    await SurveyRegistrationRepository.getSurveyFormData(formUid, surveyResponseUid).then(
-      ({ obj, msgs }) => {
-        if (obj.SurveyResponseStatus === 'Completed') {
-          return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
-        }
-        if (obj) dispatch(setFormData(obj));
-        dispatch(setMsgs(msgs));
-        if (!msgs.length) dispatch(formDataLoaded());
+    await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid).then(({ obj, msgs }) => {
+      if (obj.SurveyResponseStatus === 'Completed') {
+        return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
       }
-    );
+      if (obj) dispatch(setFormData(obj));
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) dispatch(formDataLoaded());
+    });
   };
 
   const submitFormSectionData = async (
-    { answers, answerQuery: { answerQuery }, formData },
+    { answerQuery: { answerQuery }, formData },
     formUid,
     surveyResponseUid,
     isLastSection
@@ -83,14 +81,12 @@ export const useSurveyRegistrationActions = () => {
     formData.append('isLastSection', isLastSection);
     formData.append('surveyResponseUid', surveyResponseUid);
     formData.append('answers', new URLSearchParams(answerQuery).toString());
-    return await SurveyRegistrationRepository.submitFormSection(formData).then(
-      ({ data: { msgs, obj } }) => {
-        dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
-        dispatch(setResponseId(obj?.SurveyResponseUid));
-        dispatch(setMsgs(msgs));
-        return obj?.SurveyResponseUid;
-      }
-    );
+    return await SurveyRepository.submitFormSection(formData).then(({ data: { msgs, obj } }) => {
+      dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
+      dispatch(setResponseId(obj?.SurveyResponseUid));
+      dispatch(setMsgs(msgs));
+      return obj?.SurveyResponseUid;
+    });
   };
 
   return {
@@ -99,4 +95,4 @@ export const useSurveyRegistrationActions = () => {
   };
 };
 
-export default SurveyRegistrationSlice;
+export default SurveySlice;

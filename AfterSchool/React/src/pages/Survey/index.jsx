@@ -5,27 +5,26 @@ import { useFormik } from 'formik';
 
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useSurveyRegistration } from 'redux/hooks';
+import { useSurvey } from 'redux/hooks';
 import routes from 'routes';
 import utils from 'utils';
 
-export default function SurveyRegistration() {
+export default function Survey() {
   const navigate = useNavigate();
   const { formUid } = useParams();
   const { surveyThankyouUrl } = routes;
-  const { scrollToTop, redirect } = utils;
+  const { scrollToTop } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
     loading,
     questions,
     loadFormData,
+    clearMessages,
     questionsGroups,
-    surveyResponseUid,
-    answeredQuestions = [],
     submitFormSectionData,
-    clearMessages
-  } = useSurveyRegistration();
+    answeredQuestions = []
+  } = useSurvey();
 
   const responseId = useRef('');
   const totalGroups = questionsGroups?.length || 1;
