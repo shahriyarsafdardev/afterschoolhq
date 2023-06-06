@@ -4825,7 +4825,7 @@ namespace AfterSchoolLibrary.Services
                     if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
 
-                    //checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
+                    checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },
                 onFailure: (SystemMessages amsgs) => msgs.AddRange(amsgs),
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
