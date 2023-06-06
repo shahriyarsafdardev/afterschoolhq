@@ -2119,7 +2119,7 @@ namespace AfterSchool.Controllers
         }
 
         private ActionResult PaymentActionPost(string id, string stripetoken, string plaidtoken, string plaidaccountid,
-            string ccSourceId, string bankSourceId, string savepaymentinfo, string paymentoption, string couponCode)
+            string ccSourceId, string bankSourceId, string savepaymentinfo, string paymentoption, string couponCode, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
@@ -2239,6 +2239,13 @@ namespace AfterSchool.Controllers
                 indirectObjectId: participationObject.ObjectID.Value,
                 indirectObjectText: activity.Name
             );
+
+            if (coupon.IsNotEmpty() && coupon.ID.IsNotEmpty() && coupon.Amount.IsNotEmpty())
+            {
+                registration.CouponId = coupon.ID;
+                registration.CouponValue = coupon.Amount;
+                msgs.AddRange(registration.Save(dc));
+            }
 
             return RedirectToAction("thankyou", new {id = registration.Uid});
         }
