@@ -127,21 +127,20 @@ namespace AfterSchool.Areas.Api.Controllers
                 var surveyResponseUid = json.surveyResponseUid;
                 var formUid = json.formUid;
                 var isLastSection = json.isLastSection ?? false;
-                if(formUid.IsEmpty())
+                if (formUid.IsEmpty())
                     throw new Exception("Invalid Form Uid.");
-                
+
                 var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
-                
+
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 Database.ExecuteTransaction
                 (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        
                         if (surveyResponseUid.IsEmpty())
                         {
                             surveyResponse = new SurveyResponse()
@@ -164,19 +163,19 @@ namespace AfterSchool.Areas.Api.Controllers
                                 surveyResponse.LastModifiedDate = DateTime.Now;
                                 msgs.AddRange(surveyResponse.Save(adc));
                             }
-
                         }
-                        if(msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+
+                        if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
 
                 dynamic response;
-                
-                if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+
+                /*if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
                     var questionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value);
                     foreach (var questionAnswer in questionAnswers)
@@ -185,7 +184,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             new FormQuestionAnswerDto()
                             {
                                 FormQuestionId = questionAnswer.FormQuestionId,
-                                QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
+                                QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
                                 QuestionText = questionAnswer.QuestionText,
                                 Text = MapToAmazonFilePath(questionAnswer),
                             }
@@ -201,25 +200,24 @@ namespace AfterSchool.Areas.Api.Controllers
                     };
                 }
                 else
+                {*/
+                response = new
                 {
-                    response = new
-                    {
-                        SurveyResponseUid = surveyResponse?.Uid,
-                        FormUid = form?.Uid,
-                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
-                    };                    
-                }
+                    SurveyResponseUid = surveyResponse?.Uid,
+                    FormUid = form?.Uid,
+                    SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                };
+                // }
 
                 return Json(
-                    new ApiResponse(msgs,response),
+                    new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
-
             }
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
                 return Json(
-                    new ApiResponse(msgs,null),
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
         }
