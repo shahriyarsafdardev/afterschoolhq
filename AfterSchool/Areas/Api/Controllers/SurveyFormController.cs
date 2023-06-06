@@ -132,7 +132,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 
                 var form = Form.LoadByUid(formUid.Value);
                 SurveyResponse surveyResponse = null;
-                var formQuestionAnswerDto = new List<FormQuestionAnswerDto>();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 
@@ -173,26 +173,43 @@ namespace AfterSchool.Areas.Api.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
+
+                dynamic response;
                 
                 if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
-                    formQuestionAnswerDto = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
-                        .Select(questionAnswer => new FormQuestionAnswerDto()
-                        {
-                            FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
-                        })
-                        .ToList();
+                    var questionAnswers = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value);
+                    foreach (var questionAnswer in questionAnswers)
+                    {
+                        formQuestionAnswerDtoList.Add(
+                            new FormQuestionAnswerDto()
+                            {
+                                FormQuestionId = questionAnswer.FormQuestionId,
+                                QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
+                                QuestionText = questionAnswer.QuestionText,
+                                Text = MapToAmazonFilePath(questionAnswer),
+                            }
+                        );
+                    }
+                    
+                    response = new
+                    {
+                        SurveyResponseUid = surveyResponse?.Uid,
+                        FormUid = form?.Uid,
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                        FormQuestionAnswers = formQuestionAnswerDtoList,
+                    };
+                }
+                else
+                {
+                    response = new
+                    {
+                        SurveyResponseUid = surveyResponse?.Uid,
+                        FormUid = form?.Uid,
+                        SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
+                    };                    
                 }
 
-                dynamic response = new
-                {
-                    SurveyResponseUid = surveyResponse?.Uid,
-                    FormUid = form?.Uid,
-                    SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
-                    FormQuestionAnswers = formQuestionAnswerDto,
-                };
-                
                 return Json(
                     new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
