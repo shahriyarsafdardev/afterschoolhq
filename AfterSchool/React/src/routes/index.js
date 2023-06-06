@@ -45,6 +45,7 @@ export default {
 
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
+  formSettingsPath: formId => `/Org/form/edit/${formId}`,
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   surveyUrl: formUid => `/reactapp/survey/${formUid}`,

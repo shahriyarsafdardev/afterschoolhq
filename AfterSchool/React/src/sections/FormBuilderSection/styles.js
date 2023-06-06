@@ -29,7 +29,9 @@ export default makeStyles(theme => ({
   },
   sectionListWrapper: {
     paddingLeft: '10px',
-    marginTop: '104px',
+    [theme.breakpoints.up('sm')]: {
+      marginTop: '104px'
+    },
     [theme.breakpoints.down('sm')]: {
       backgroundColor: '#F9F9F9',
       boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
@@ -351,5 +353,40 @@ export default makeStyles(theme => ({
     '& .MuiPaper-root': {
       padding: 0
     }
+  },
+  dialogContentText: { fontSize: '16px', padding: '20px', textAlign: 'center' },
+  dialogActions: { display: 'flex', justifyContent: 'center' },
+  addNewSectionButton: {
+    color: '#494949',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    marginTop: '25px',
+    border: '1px solid #E4E4E4'
+  },
+  addNewQuestionButton: {
+    color: '#494949',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    border: '1px solid #E4E4E4'
+  },
+  dropDownIcon: { width: '20px', height: 'auto', marginLeft: '2px' },
+  checkboxWrapper: {
+    padding: '0px 6px'
+  },
+  formControlLabelRoot: {
+    margin: '10px 0px',
+    '& .MuiTypography-root': {
+      marginLeft: 18
+    }
+  },
+  formControlLabelDisabled: {
+    opacity: '0.5',
+    color: 'black !important'
+  },
+  adddNewOption: {
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    padding: '12px 0px',
+    width: 'fit-content'
   }
 }));

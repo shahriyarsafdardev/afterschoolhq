@@ -99,8 +99,6 @@ function FormSettings() {
                 color="primary"
                 className={classes.getStartedButton}
                 variant="contained"
-                disabled={false}
-                key={'activeGroup'}
                 onClick={() => {
                   dirty && handleSubmit();
                   isEmpty(errors) && setSearchParams(`qg=${firstSectionQuestionGroupId}`);

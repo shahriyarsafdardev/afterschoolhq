@@ -20,6 +20,7 @@ import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
 import useStyles from './styles';
 import Dialog from './Dialog';
+import paths from 'routes';
 
 function FormSectionList() {
   const theme = useTheme();
@@ -27,6 +28,7 @@ function FormSectionList() {
   const ref = useRef(null);
   const { formId } = useParams();
   const navigate = useNavigate();
+  const { formSettingsPath } = paths;
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -86,7 +88,7 @@ function FormSectionList() {
       if (questionsGroupsToShow.length > 0) {
         setSearchParams(`qg=${firstSectionId}`);
       } else {
-        navigate(`/Org/form/edit/${formId}`);
+        navigate(formSettingsPath(formId));
       }
     }
   };
@@ -108,10 +110,10 @@ function FormSectionList() {
     if (newSectionName.length === 0) setNewSectionError('Section Name cannot be empty');
     else if (!isNameUnique) setNewSectionError('Section Name must be unique');
     else {
+      await addNewSectionHandler();
       setShowNewSectionField(false);
       setNewSectionError('');
       setNewSectionName('');
-      await addNewSectionHandler();
     }
   };
 
@@ -128,7 +130,7 @@ function FormSectionList() {
             variant="h6"
             className={classes.settingsLink}
             onClick={() => {
-              navigate(`/Org/form/edit/${formId}`);
+              navigate(formSettingsPath(formId));
               toggleShowSettings();
             }}
           >
@@ -244,13 +246,7 @@ function FormSectionList() {
           color="primary"
           variant="outlined"
           data-testid="addNewSectionButton"
-          style={{
-            color: '#494949',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            marginTop: '25px',
-            border: '1px solid #E4E4E4'
-          }}
+          className={classes.addNewSectionButton}
           onClick={async event => {
             event.preventDefault();
             setShowNewSectionField(true);
@@ -265,7 +261,7 @@ function FormSectionList() {
   if (isMobile) {
     return (
       <Box>
-        <Typography className={classes.link} onClick={() => navigate(`/Org/form/edit/${formId}`)}>
+        <Typography className={classes.link} onClick={() => navigate(formSettingsPath(formId))}>
           Return to Edit Settings
         </Typography>
         <Button
@@ -276,7 +272,7 @@ function FormSectionList() {
           ref={ref}
         >
           Form Settings
-          <ArrowDropDownOutlined style={{ width: '20px', height: 'auto', marginLeft: '2px' }} />
+          <ArrowDropDownOutlined className={classes.dropDownIcon} />
         </Button>
         <Popover
           anchorEl={ref.current}

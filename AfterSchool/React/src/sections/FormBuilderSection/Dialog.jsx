@@ -36,14 +36,11 @@ const Dialog = props => {
       <DialogTitle id="alert-dialog-title" className={classes.dialogTitle}>
         {title}
       </DialogTitle>
-      <DialogContentText
-        id="alert-dialog-title"
-        style={{ fontSize: '16px', padding: '20px', textAlign: 'center' }}
-      >
+      <DialogContentText id="alert-dialog-title" className={classes.dialogContentText}>
         <b>Caution: </b>
         {text}
       </DialogContentText>
-      <DialogActions style={{ display: 'flex', justifyContent: 'center' }}>
+      <DialogActions className={classes.dialogActions}>
         <Button
           onClick={onSubmit}
           variant="outlined"

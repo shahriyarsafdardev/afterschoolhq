@@ -278,19 +278,11 @@ const RenderQuestion = ({
                           index={Number(index)}
                           key={index}
                         >
-                          {(provided, snapshot) => (
-                            <Box
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={
-                                snapshot.isDragging
-                                  ? classes.whiteBorder
-                                  : classes.transparentBorder
-                              }
-                            >
+                          {provided => (
+                            <Box ref={provided.innerRef} {...provided.draggableProps}>
                               {renderOption({
-                                option: { key, value },
                                 index,
+                                option: { key, value },
                                 dragHandleProps: { ...provided.dragHandleProps },
                                 errors: errors?.Options && errors?.Options[index],
                                 touched: touched?.Options && touched?.Options[index]
@@ -310,17 +302,7 @@ const RenderQuestion = ({
                 </FormHelperText>
               )}
               {!(!customQuestion || IsLocked) && (
-                <Typography
-                  style={{
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    padding: '12px 0px',
-                    width: 'fit-content'
-                  }}
-                  onClick={() => {
-                    handleAddNewOption();
-                  }}
-                >
+                <Typography className={classes.adddNewOption} onClick={handleAddNewOption}>
                   Add new option
                 </Typography>
               )}
@@ -383,9 +365,7 @@ const RenderQuestion = ({
                     data-testid={`audienceButtonForQuestion-${ID}-${index}`}
                   >
                     Audience
-                    <ArrowDropDownOutlinedIcon
-                      style={{ width: '20px', height: 'auto', marginLeft: '2px' }}
-                    />
+                    <ArrowDropDownOutlinedIcon className={classes.dropDownIcon} />
                   </Button>
                   {showAudience && (
                     <RenderAudienceList
@@ -399,14 +379,7 @@ const RenderQuestion = ({
                   )}
                 </Grid>
                 {!isMobile && (
-                  <Grid
-                    item
-                    lg={9}
-                    md={6}
-                    sm={0}
-                    xs={0}
-                    className={cs(classes.displayFlex, classes.flexWrap)}
-                  >
+                  <Grid item lg={9} md={6} className={cs(classes.displayFlex, classes.flexWrap)}>
                     {QuestionSettings.map(({ Audience, Show, Required }) => {
                       if (!(Show || Required)) return;
 

@@ -628,12 +628,7 @@ function FormSectionSettings() {
               <Button
                 color="primary"
                 variant="outlined"
-                style={{
-                  color: '#494949',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  border: '1px solid #E4E4E4'
-                }}
+                className={classes.addNewQuestionButton}
                 disabled={false}
                 onClick={event => {
                   event.preventDefault();
