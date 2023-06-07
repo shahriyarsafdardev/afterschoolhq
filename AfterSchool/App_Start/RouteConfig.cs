@@ -110,6 +110,12 @@ namespace AfterSchool
                 "volunteerregistration/{action}/{id}",
                 new {controller = "VolunteerRegistration", action = "GetStarted", id = UrlParameter.Optional},
                 new[] {"AfterSchool.Controllers"});
+            
+            routes.MapRoute(
+                "Survey",
+                "survey/{action}/{id}",
+                new {controller = "Survey", action = "Index", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
                 "LeagueHome1",

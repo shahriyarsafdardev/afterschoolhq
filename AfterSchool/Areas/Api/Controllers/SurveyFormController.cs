@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.UI.WebControls;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
@@ -75,7 +76,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response;
                 if (surveyResponse.IsNotEmpty())
                 {
-                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                    var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
@@ -111,15 +112,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
-        [HttpGet]
-        public ActionResult Index(Guid? Uid)
-        {
-            if (Uid.IsEmpty()) return Redirect("~/login");
-            var form = Form.LoadByUid(Uid.Value);
-            return Redirect(form.FormTypeId == FormType.Survey ? $"~/ReactApp/survey/{form.ID}" : "~/login");
-        }
-        
+
         [HttpPost]
         public ActionResult AddUpdateAnswers(SurveyQuestionAnswerResponse json)
         {
@@ -129,10 +122,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 var surveyResponseUid = json.surveyResponseUid;
                 var formUid = json.formUid;
                 var isLastSection = json.isLastSection ?? false;
-                if (formUid.IsEmpty())
+                if (!formUid.IsGuid())
                     throw new Exception("Invalid Form Uid.");
 
-                var form = Form.LoadByUid(formUid.Value);
+                var form = Form.LoadByUid(formUid.ToGuid(), msgs);
                 SurveyResponse surveyResponse = null;
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
@@ -155,20 +148,20 @@ namespace AfterSchool.Areas.Api.Controllers
                                 Uid = Guid.NewGuid(),
                                 SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.InProgress,
                             };
-                            msgs.AddRange(surveyResponse.Save(adc));
+                            amsgs.AddRange(surveyResponse.Save(adc));
                         }
                         else
                         {
-                            surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value);
+                            surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value, amsgs, adc);
                             if (isLastSection)
                             {
                                 surveyResponse.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed;
-                                surveyResponse.LastModifiedDate = DateTime.Now;
-                                msgs.AddRange(surveyResponse.Save(adc));
+                                surveyResponse.LastModifiedDate = DateTime.UtcNow;
+                                amsgs.AddRange(surveyResponse.Save(adc));
                             }
                         }
 
-                        if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
+                        if (amsgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                             AddCustomQuestions(surveyResponse, qvms, Request, amsgs, adc);
                     },
                     (SystemMessages smsgs) => msgs.AddRange(smsgs),
@@ -180,7 +173,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
-                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value)
+                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value,msgs)
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
@@ -225,7 +218,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
                             //5 MB = 5242880 Bytes
                             //File uploaded here should be less than of 5MB
-                            if (currentFileSizeInBytes <= 5242880)
+                            const int maxFileSize = Utilities.MaxFileSize;
+                            if (currentFileSizeInBytes <= maxFileSize)
                                 surveyResponse.AddOrUpdateAnswer(
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,
@@ -260,7 +254,8 @@ namespace AfterSchool.Areas.Api.Controllers
         {
             if (question.FormQuestionQuestionTypeId != QuestionType.Photo &&
                 question.FormQuestionQuestionTypeId != QuestionType.Audio &&
-                question.FormQuestionQuestionTypeId != QuestionType.Video) 
+                question.FormQuestionQuestionTypeId != QuestionType.Video &&
+                question.FormQuestionQuestionTypeId != QuestionType.FileUpload) 
                 return question.Text;
             var amazonHelper = Utilities.GetNewAmazonHelper();
             return amazonHelper.GetFileLink(question.Text);

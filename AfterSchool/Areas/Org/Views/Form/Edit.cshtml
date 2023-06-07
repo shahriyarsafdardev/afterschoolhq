@@ -19,7 +19,7 @@
     var count = 1;
 
     var publishClass = "btn-success";
-    if (Model.IsPublished==true)
+    if (Model.IsPublished ?? false)
     {
         publishClass = "btn-danger";
     }

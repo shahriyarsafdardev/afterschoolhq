@@ -1244,10 +1244,10 @@ namespace AfterSchoolLibrary.Services
         }
         public static string BuildShortHomePageUrlForm(Guid formUid)
         {
-            return
-                $"{Helpers.Utilities.ShortBaseUrl()}/reactapp/survey/{formUid}";
+            return 
+                $"{Helpers.Utilities.ShortBaseUrl()}/survey?uid={formUid}";
         }
-        public static void Publish(this Form form, WebUser loggedInUser, SystemMessages msgs = null,
+        public static void SetIsPublished(this Form form, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             if (form.IsNotEmpty())

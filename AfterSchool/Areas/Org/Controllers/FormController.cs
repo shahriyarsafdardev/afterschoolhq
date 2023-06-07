@@ -77,7 +77,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
             
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
-            // string str = string.Join("", form.Name.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
             var formUrl = FormService.BuildShortHomePageUrlForm(form.Uid);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
@@ -125,12 +124,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
 
             if (msgs.HasNoErrors())
-            {
-                form.Publish(currentUser, msgs);
-            }
+                form.SetIsPublished(currentUser, msgs);
             
-            if (msgs.HasNoErrors())
-                if (form.IsPublished ?? false)
+            if (msgs.HasNoErrors() && (form.IsPublished ?? false))
                    msgs.Add(string.Format("Survey form has been published", form.Name), MessageType.Success);
             TempData["msgs"] = msgs;
             return RedirectToAction("edit", new { id = form.ID.ToString() });

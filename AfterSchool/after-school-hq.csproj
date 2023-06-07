@@ -666,6 +666,7 @@
     <Compile Include="Assemblers\VolunteerProfileQuestionsAssembler.cs" />
     <Compile Include="Assemblers\VolunteerRegisterAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
+    <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />

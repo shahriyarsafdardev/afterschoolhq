@@ -29,6 +29,7 @@ namespace AfterSchoolLibrary.Helpers
         };
 
         public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
+        public const int MaxFileSize = 5242880;
 
         public static string SurveyBaseUrl => Environment switch
         {
