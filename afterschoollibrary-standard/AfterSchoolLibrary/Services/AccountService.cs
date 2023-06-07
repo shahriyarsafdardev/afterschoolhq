@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -4827,7 +4827,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
                         checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
-                        msgs.AddRange(checkoutObject.Registration.Save());
+                        msgs.AddRange(checkoutObject.Registration.Save(dc));
                     }
 
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
