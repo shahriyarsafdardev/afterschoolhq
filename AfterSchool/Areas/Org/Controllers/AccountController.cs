@@ -415,7 +415,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs.Add("Saved Successfully", MessageType.Success);
                     SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage();
                 },
-                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
             );
 
             ViewBag.Features = currentAccount.GetAccountPackageFeatures(msgs);
