@@ -62,11 +62,11 @@ export const useSurveyActions = () => {
     dispatch(setResponseId(surveyResponseUid));
     dispatch(loadingFormData());
     await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid).then(({ obj, msgs }) => {
-      if (obj.SurveyResponseStatus === 'Completed') {
+      dispatch(setMsgs(msgs));
+      if (obj?.SurveyResponseStatus === 'Completed') {
         return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
       }
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
