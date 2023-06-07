@@ -64,6 +64,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var formQuestionGroupDtoList = questionGroups.Select(questionGroup => new FormQuestionGroupDto
                     {
+                        Id = questionGroup.ID ?? 0,
                         FormId = questionGroup.FormId,
                         Name = questionGroup.Name,
                         DisplayOrder = questionGroup.DisplayOrder,
@@ -135,6 +136,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 SurveyResponse surveyResponse = null;
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var questions = form.GetAllQuestions(msgs);
+                questions = questions.Where(question => question.FormQuestionGroupId == json.groupId.ToInteger()).ToList();
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();

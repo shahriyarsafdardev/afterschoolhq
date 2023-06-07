@@ -72,11 +72,12 @@ export const useSurveyActions = () => {
   };
 
   const submitFormSectionData = async (
-    { answerQuery: { answerQuery }, formData },
+    { answerQuery: { answerQuery, groupId }, formData },
     formUid,
     surveyResponseUid,
     isLastSection
   ) => {
+    formData.append('groupId', groupId);
     formData.append('formUid', formUid);
     formData.append('isLastSection', isLastSection);
     formData.append('surveyResponseUid', surveyResponseUid);
@@ -89,8 +90,13 @@ export const useSurveyActions = () => {
     });
   };
 
+  const clearMessages = () => {
+    dispatch(setMsgs([]));
+  };
+
   return {
     loadFormData,
+    clearMessages,
     submitFormSectionData
   };
 };

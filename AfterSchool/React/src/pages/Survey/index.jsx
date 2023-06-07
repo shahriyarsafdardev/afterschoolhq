@@ -57,11 +57,11 @@ export default function Survey() {
 
   const handleSection = action => {
     if (action === 'next') {
-      setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
+      setActiveGroupId(questionsGroups[activeGroup + 1].Id);
       setSearchParams(buildQueryParams(activeGroup + 1));
       setActiveGroup(activeGroup + 1);
     } else if (action === 'previous') {
-      setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
+      setActiveGroupId(questionsGroups[activeGroup - 1].Id);
       setSearchParams(buildQueryParams(activeGroup - 1));
       setActiveGroup(activeGroup - 1);
       clearMessages();
@@ -117,21 +117,20 @@ export default function Survey() {
   }, [searchParams.get('surveyResponseUid')]);
 
   useEffect(() => {
-    if (questionsGroups.length)
-      setActiveGroupId(questionsGroups[activeGroup].QuestionGroupDataTypeId);
+    if (questionsGroups.length) setActiveGroupId(questionsGroups[activeGroup].Id);
   }, [questionsGroups.length]);
 
   useEffect(() => {
     if (questions.length) {
-      let QuestionGroupDataTypeId = '';
+      let Id = '';
       const paramsQuery = buildQueryParams();
       if (searchParams.get('section')) {
         const groupIndex = questionsGroups.findIndex(
           section => section.Name === decodeURI(searchParams.get('section'))
         );
         if (groupIndex < 0) return setSearchParams(paramsQuery);
-        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
-        setActiveGroupId(QuestionGroupDataTypeId);
+        Id = questionsGroups[groupIndex].Id;
+        setActiveGroupId(Id);
         setActiveGroup(groupIndex);
       } else setSearchParams(paramsQuery);
     }
