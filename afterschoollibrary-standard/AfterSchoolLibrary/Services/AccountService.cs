@@ -4828,7 +4828,6 @@ namespace AfterSchoolLibrary.Services
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
                         checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
                         msgs.AddRange(checkoutObject.Registration.Save());
-                        
                     }
 
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
