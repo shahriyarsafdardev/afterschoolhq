@@ -7,8 +7,6 @@ const useStyles = makeStyles(theme => ({
   moodWrapper: {
     padding: '8px 12px',
     maxWidth: '540px',
-    // marginTop: 100,
-    // paddingBottom: 90,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
