@@ -2,6 +2,7 @@ import { calculateAge } from './helper';
 import Validations from 'constants/regex';
 import questionType from 'constants/questionType';
 import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
+import { isEqual } from 'lodash';
 
 export default class RegistrationService {
   constructor(questions = [], currentQuestions = [], answeredQuestions = [], isSurvey = false) {
@@ -50,6 +51,11 @@ export default class RegistrationService {
       if (IsRequired && QuestionTypeId === questionType.email && value) {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid Email address');
       } else if (IsRequired && !value) addToErrors(ID, `${Text} is required`);
+
+      if (IsRequired && this.isFile(question.QuestionTypeId, true)) {
+        isEqual(value, { Text: '', Description: undefined }) &&
+          addToErrors(ID, `${Text} is required`);
+      }
 
       if (!value) return;
 
