@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash';
 import { useSnackbar } from 'notistack';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@material-ui/core';
 
@@ -14,6 +14,7 @@ import { Loader } from 'components';
 import { useFormBuilder } from 'redux/hooks';
 import RenderQuestion from './RenderQuestion';
 import RenderCheckbox from './RenderCheckbox';
+import { usePrompt } from 'utils/hooks/usePrompt';
 import { audienceTypes, questionType } from 'constants';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { newQuestion, unSavedDialogProps, infoText } from './helper';
@@ -29,10 +30,8 @@ function FormSectionSettings() {
   const [validationSchema, setValidationSchema] = useState({});
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [initialValues, setInitialValues] = useState({});
-  const [openModal, setOpenModal] = useState(false);
   const [reRender, setReRender] = useState(false);
   const questionGroup = searchParams.get('qg');
-  const backUrl = useRef();
 
   const {
     submitFormSectionData,
@@ -126,27 +125,7 @@ function FormSectionSettings() {
 
   const { handleSubmit, values, setFieldValue, setValues, errors, dirty, touched } = formik;
   const formDirty = dirty || currentSection?.Name !== sectionName;
-
-  useEffect(() => {
-    const backButtonClicked = e => {
-      e.preventDefault();
-      setOpenModal(true);
-    };
-
-    if (formDirty) {
-      if (backUrl.current !== window.location.href) {
-        backUrl.current = window.location.href;
-        window.history.pushState(null, null, window.location.href);
-      }
-
-      window.addEventListener('popstate', backButtonClicked);
-    } else {
-      setOpenModal(false);
-      window.removeEventListener('popstate', backButtonClicked);
-    }
-
-    return () => window.removeEventListener('popstate', backButtonClicked);
-  }, [window.location.href, formDirty]);
+  const [ showPrompt, cancelNavigation, confirmNavigation ] = usePrompt(formDirty);
 
   useEffect(() => {
     if (unsavedChanges) {
@@ -544,15 +523,9 @@ function FormSectionSettings() {
       <FormikProvider value={formik}>
         <Form autoComplete="off" noValidate className={classes.form}>
           <Dialog
-            open={openModal}
-            onClose={() => {
-              window.history.pushState(null, null, window.location.href);
-              setOpenModal(false);
-            }}
-            onSubmit={() => {
-              setOpenModal(false);
-              window.history.back();
-            }}
+            open={showPrompt}
+            onClose={confirmNavigation}
+            onSubmit={cancelNavigation}
             {...unSavedDialogProps}
           />
           <Box>

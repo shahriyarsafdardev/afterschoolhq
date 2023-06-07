@@ -1,6 +1,6 @@
-import React from 'react';
 import * as Yup from 'yup';
 import { isEmpty } from 'lodash';
+import React, {useEffect} from 'react';
 import { useSnackbar } from 'notistack';
 import { useSearchParams } from 'react-router-dom';
 import { useFormik, FormikProvider, Form } from 'formik';
@@ -8,6 +8,7 @@ import { Grid, Typography, Box, Button } from '@material-ui/core';
 
 import TextField from './components/TextField/TextField';
 import TextAreaQuestion from './components/TextAreaQuestion';
+import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
 import { formTypes } from 'constants';
 import useStyles from './styles';
@@ -17,6 +18,7 @@ function FormSettings() {
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const { form, questionsGroups, updateFormSettings } = useFormBuilder();
+  const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
   const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].ID : -1;
 
   const validationSchema = Yup.object().shape({
@@ -36,6 +38,14 @@ function FormSettings() {
   });
 
   const { handleSubmit, values, getFieldProps, touched, errors, dirty } = formik;
+
+  useEffect(() => {
+    if (dirty) {
+      markChangesAsUnsaved();
+    } else {
+      markChangesAsSaved();
+    }
+  }, [dirty]);
 
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
