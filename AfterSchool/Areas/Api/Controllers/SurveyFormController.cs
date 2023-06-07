@@ -32,7 +32,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (formUid.IsEmpty())
                     throw new Exception("Invalid Form Id.");
 
-                var form = Form.LoadByUid(formUid.Value);
+                var form = Form.LoadByUid(formUid.Value,msgs);
                 
                 if (form.FormTypeId != FormType.Survey || !(form.IsPublished ?? false))
                     throw new Exception("Invalid Form.");
@@ -40,7 +40,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 SurveyResponse surveyResponse = null;
                 
                 if(surveyResponseUid.IsNotEmpty())
-                    surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value);
+                    surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value, msgs);
                 
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
