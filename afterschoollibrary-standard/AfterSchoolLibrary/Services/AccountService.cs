@@ -4827,9 +4827,6 @@ namespace AfterSchoolLibrary.Services
                     {
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
                         checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
-                        // This needs to look in that if I'm storing value here correctly.
-                        // The value which needs to go here is the maximum amount of coupon applied (either activity total payment or coupon value)
-                        checkoutObject.Registration.CouponValue = checkoutObject.Coupon?.GetValue(checkoutObject.ParticipationObject?.Cost ?? new decimal(0));
                         msgs.AddRange(checkoutObject.Registration.Save());
                         
                     }
