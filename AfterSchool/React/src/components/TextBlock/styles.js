@@ -7,6 +7,7 @@ export default makeStyles(theme => ({
     display: 'flex',
     textAlign: 'justify',
     justifyContent: 'start',
+    wordBreak: 'break-word',
     padding: '0px 12px',
 
     [theme.breakpoints.down('sm')]: {
