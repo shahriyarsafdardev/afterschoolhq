@@ -1,28 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect, useCallback, useState } from 'react';
-import { UNSAFE_NavigationContext as NavigationContext } from 'react-router-dom';
-
-function useBlocker( blocker, when = true ) {
-	const { navigator } = useContext( NavigationContext );
-
-	useEffect( () => {
-		if ( !when ) return;
-
-		const unblock = navigator.block( ( tx ) => {
-			const autoUnblockingTx = {
-				...tx,
-				retry() {
-					unblock();
-					tx.retry();
-				},
-			};
-
-			blocker( autoUnblockingTx );
-		} );
-
-		return unblock;
-	}, [ navigator, blocker, when ] );
-}
+import { useEffect, useCallback, useState } from 'react';
+import { useBlocker } from './useBlocker';
 
 export function usePrompt( when = true ) {
 	const navigate = useNavigate();
