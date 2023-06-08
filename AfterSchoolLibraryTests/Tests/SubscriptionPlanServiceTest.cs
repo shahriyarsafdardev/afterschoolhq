@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Xunit.Abstractions;
 using System;
 using AfterSchoolLibrary.Models;
@@ -84,6 +84,7 @@ namespace AfterSchoolLibraryTests.Tests
                                ParticipationObjectType.Activity,
                                activity.ID.Value,
                                100, 
+                               null,
                                BillingPeriodType.Month,
                                PlanPaymentStartType.OnCheckout, 
                                null, 

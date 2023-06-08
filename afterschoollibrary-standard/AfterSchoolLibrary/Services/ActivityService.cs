@@ -1358,10 +1358,11 @@ namespace AfterSchoolLibrary.Services
             var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule();
+            int? periodNumber = null;
 
-            if(!activitySchedule.IsOngoing)
+            if (!activitySchedule.IsOngoing)
             {
-                if (int.TryParse(subscriptionPlanPeriodNumber, out int n))
+                if (!string.IsNullOrEmpty(subscriptionPlanPeriodNumber) && int.TryParse(subscriptionPlanPeriodNumber, out int n))
                 {
                     if (int.Parse(subscriptionPlanPeriodNumber) >= 2)
                     {
@@ -1370,15 +1371,12 @@ namespace AfterSchoolLibrary.Services
                             BillingPeriodTypeId = (BillingPeriodType) subscriptionplanperiod.ToInteger()
                         }
                         .CalculateEndDateFromNumberOfPeriods(activitySchedule.StartDate ?? DateTime.Now, subscriptionPlanPeriodNumber.ToInteger());
+                        periodNumber = int.Parse(subscriptionPlanPeriodNumber);
                     }
                     else
                     {
                         msgs.Add("Period number should be greater than 2", MessageType.UserError);
                     }
-                }
-                else
-                {
-                    msgs.Add("Period number should be a number", MessageType.UserError);
                 }
             }
             
@@ -1412,6 +1410,7 @@ namespace AfterSchoolLibrary.Services
                     participationObjectType: ParticipationObjectType.Activity,
                     participationObjectId: activity.ID.Value,
                     costPerPeriod: subscriptionplancost.ToDecimal(),
+                    totalPeriods: periodNumber,
                     billingPeriodType: (BillingPeriodType) subscriptionplanperiod.ToInteger(),
                     paymentStartType: paymentStartType,
                     subscriptionStartDate: subscriptionStartDate,

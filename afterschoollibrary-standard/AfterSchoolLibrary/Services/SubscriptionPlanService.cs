@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SubscriptionPlan CreateNewSubscriptionPlan(Account planOwner, ParticipationObjectType participationObjectType, int participationObjectId,
-            decimal costPerPeriod, BillingPeriodType billingPeriodType,
+            decimal costPerPeriod, int? totalPeriods, BillingPeriodType billingPeriodType,
             PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription,
             bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment,
             bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -72,6 +72,7 @@ namespace AfterSchoolLibrary.Services
                 PlanOwnerAccountId = planOwner.ID,
                 BillingPeriodTypeId = billingPeriodType,
                 CostPerPeriod = costPerPeriod,
+                TotalPeriods = totalPeriods,
                 CreateDate = DateTime.UtcNow,
                 CreatedBy = loggedInUserId,
                 LastModifiedDate = DateTime.UtcNow,
