@@ -439,7 +439,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 {
                     var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id, msgs); 
 
-                    if (registrantSubscription.IsNotEmpty())
+                    if (registrantSubscription.IsNotEmpty() && msgs.HasNoErrors())
                     {
                         registrantSubscription.DateCancelled = DateTime.UtcNow; 
                         registrantSubscription.ValidUntil = DateTime.UtcNow; 
