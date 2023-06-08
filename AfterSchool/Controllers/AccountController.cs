@@ -2239,7 +2239,7 @@ namespace AfterSchool.Controllers
                 indirectObjectId: participationObject.ObjectID.Value,
                 indirectObjectText: activity.Name
             );
-
+            
             return RedirectToAction("thankyou", new {id = registration.Uid});
         }
 
