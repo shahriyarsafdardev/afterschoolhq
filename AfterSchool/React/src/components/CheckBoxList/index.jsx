@@ -31,8 +31,12 @@ function CheckBoxList({ formik, question }) {
 
   useEffect(() => {
     if (values[ID]) {
-      const obj = flattenDeep(JSON.parse(values[ID]));
-      setCheckBoxListValue(obj[0] === null ? [] : obj);
+      try {
+        const obj = flattenDeep(JSON.parse(values[ID]));
+        setCheckBoxListValue(obj[0] === null ? [] : obj);
+      } catch (e) {
+        setCheckBoxListValue([]);
+      }
     }
   }, [values[ID]]);
 
