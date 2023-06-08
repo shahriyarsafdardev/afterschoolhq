@@ -24,7 +24,7 @@ const RatingQuestion = ({ question, formik }) => {
     setFieldValue(ID, JSON.stringify(selectedOption));
   };
 
-  const ratingValue = values[ID] && values[ID] !== null ? JSON.parse(values[ID])?.value : '';
+  const ratingValue = values[ID] && values[ID] !== null ? JSON.parse(values[ID])?.key : '';
 
   useEffect(() => {
     setLeastValue(options[0].value);
