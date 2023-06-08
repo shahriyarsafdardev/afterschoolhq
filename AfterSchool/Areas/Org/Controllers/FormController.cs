@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -74,8 +75,9 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (id.IsEmpty())
                 return HttpNotFound();
-
+            
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
+            var formUrl = FormService.BuildShortHomePageUrlForm(form.Uid);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
@@ -107,13 +109,36 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
+            ViewBag.FormUrl = formUrl;
             return View(form);
         }
 
+        //Changes BELOW
+
+        [HttpGet]
+        public ActionResult Publish(string id)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var form = currentAccount.GetForm(id.ToInteger(), msgs);
+
+            if (msgs.HasNoErrors())
+                form.SetIsPublished(currentUser, msgs);
+            
+            if (msgs.HasNoErrors() && (form.IsPublished ?? false))
+                   msgs.Add(string.Format("Survey form has been published", form.Name), MessageType.Success);
+            TempData["msgs"] = msgs;
+            return RedirectToAction("edit", new { id = form.ID.ToString() });
+        }
+
+
+        //CHANGES ABOVE
+
         [HttpPost]
         public ActionResult Edit(string id, string copyfrom, string qg, string name, string description, string cmd,
-            string formtype)
-        {
+            string formtype, string formUrl)
+        {   
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
@@ -291,7 +316,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (questionGroup.IsNotEmpty())
                 currentIndex = questionGroups.FindIndex(x => x.ID.Value == questionGroup.ID.Value);
-            if (msgs.HasErrors() && questions.Count() == 0)
+            if (msgs.HasErrors() && questionGroup.IsNotEmpty() && questions.Count() == 0)
                 questionGroup.ID = 0;
 
             switch (cmd)
@@ -307,6 +332,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroups = questionGroups;
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
+            ViewBag.FormUrl = formUrl;
             ViewBag.Messages = msgs;
             return View(form);
         }

@@ -2,9 +2,11 @@ import { calculateAge } from './helper';
 import Validations from 'constants/regex';
 import questionType from 'constants/questionType';
 import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
+import { isEqual } from 'lodash';
 
 export default class RegistrationService {
-  constructor(questions = [], currentQuestions = [], answeredQuestions = []) {
+  constructor(questions = [], currentQuestions = [], answeredQuestions = [], isSurvey = false) {
+    this.isSurvey = isSurvey;
     this.questions = questions;
     this.answeredQuestions = answeredQuestions;
     this.currentQuestions = currentQuestions;
@@ -23,7 +25,9 @@ export default class RegistrationService {
   initialValues = () => {
     const initialvalues = {};
     this.currentQuestions?.forEach(question => {
-      initialvalues[question.ID] = this.submittedAnswer(question.QuestionDataTypeId, question.Text);
+      initialvalues[question.ID] = this.isSurvey
+        ? this.surveySubmittedAnswer(question.ID, this.isFile(question.QuestionTypeId, true))
+        : this.submittedAnswer(question.QuestionDataTypeId, question.Text);
     });
     return initialvalues;
   };
@@ -48,6 +52,11 @@ export default class RegistrationService {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid Email address');
       } else if (IsRequired && !value) addToErrors(ID, `${Text} is required`);
 
+      if (IsRequired && this.isFile(question.QuestionTypeId, true)) {
+        isEqual(value, { Text: '', Description: undefined }) &&
+          addToErrors(ID, `${Text} is required`);
+      }
+
       if (!value) return;
 
       if (QuestionTypeId === questionType.email) {
@@ -62,8 +71,8 @@ export default class RegistrationService {
   formSectionSubmitObject = (values, activeGroupId) => {
     const filteredValues = Object.keys(values).filter(key => key !== 99999); //SchoolField value is removed from query string as it is being sent separately
     const [answerQuery, answers, keys, answerCompiled] = [{}, [], filteredValues, []];
-    const formData = new FormData();
 
+    const formData = new FormData();
     const getQuestionID = answer =>
       this.questions.find(
         q => q.QuestionDataTypeId === answer.QuestionDataTypeId && q.Text === answer.QuestionText
@@ -76,7 +85,7 @@ export default class RegistrationService {
       formData.append(`question-${ID}`, answer.Text);
     }
 
-    function composeAnswers(answer, ID) {
+    const composeAnswers = (answer, ID) => {
       const alreadyAnswered = answerCompiled.find(
         ans =>
           ans.QuestionDataTypeId === answer.QuestionDataTypeId &&
@@ -84,20 +93,26 @@ export default class RegistrationService {
       );
 
       if (answer && !alreadyAnswered) {
-        if (answer.QuestionTypeId === questionType.fileUpload) {
-          addInFiles(ID, answer);
-          answers.push({ ...answer, Text: { name: answer.Text.name } });
+        if (this.isFile(answer.QuestionTypeId, false)) {
+          if (this.isFile(answer.QuestionTypeId, true)) {
+            addInFiles(ID, answer);
+            addToAnswerQuery(ID, answer?.Description || '');
+            answers.push({ ...answer, Text: { name: answer?.Text } });
+          } else {
+            addInFiles(ID, answer);
+            answers.push({ ...answer, Text: { name: answer.Text.name } });
+          }
         } else {
           addToAnswerQuery(ID, answer.Text);
           answers.push(answer);
         }
         answerCompiled.push(answer);
       }
-    }
+    };
 
     keys.forEach(key => composeAnswers(this.answerObject(key, values), key));
 
-    this.answeredQuestions.forEach(answer => composeAnswers(answer, getQuestionID(answer)));
+    this.answeredQuestions?.forEach(answer => composeAnswers(answer, getQuestionID(answer)));
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId }, formData };
   };
 
@@ -126,9 +141,24 @@ export default class RegistrationService {
   //Private methods, only being called within the class
   submittedAnswer = (id, text) => {
     const answer =
-      this.answeredQuestions.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
+      this.answeredQuestions?.find(q => q.QuestionDataTypeId === id && q.QuestionText === text)
         ?.Text || '';
     return answer === 'null' ? '' : answer;
+  };
+
+  surveySubmittedAnswer = (id, isFile) => {
+    const answer = this.answeredQuestions?.find(q => q.FormQuestionId === id);
+    const text = answer?.Text === 'null' ? '' : answer?.Text || '';
+    if (!isFile) return text;
+
+    return { Text: text, Description: answer?.Description };
+  };
+
+  isFile = (type, withDescription) => {
+    const { fileUpload, audio, video, photo } = questionType;
+    if (withDescription) return [audio, video, photo].includes(type);
+
+    return [fileUpload, audio, video, photo].includes(type);
   };
 
   answerObject = (key, values) => {
@@ -136,12 +166,17 @@ export default class RegistrationService {
 
     const question = this.questionObjectFindById(key);
 
-    return {
+    const answer = {
       QuestionDataTypeId: question.QuestionDataTypeId,
       QuestionTypeId: question.QuestionTypeId,
       QuestionText: question.Text,
       Text: values[key]
     };
+
+    if (this.isFile(question.QuestionTypeId, true))
+      return { ...answer, Text: values[key]?.File, Description: values[key].Description };
+
+    return answer;
   };
   questionObjectFindById = id => this.currentQuestions.find(q => q.ID === Number(id)) || {};
 

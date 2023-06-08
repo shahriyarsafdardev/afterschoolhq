@@ -3,8 +3,13 @@ import questionType from 'constants/questionType';
 
 import {
   FileUpload,
+  MoodQuestion,
   DateQuestion,
   RadioQuestion,
+  AudioQuestion,
+  VideoQuestion,
+  PhotoQuestion,
+  RatingQuestion,
   TextAreaQuestion,
   DropdownQuestion
 } from 'components/Questions';
@@ -35,6 +40,8 @@ function ShowQuestion({ formik, isUpdating, currentQuestion, currentQuestions })
       );
     case questionType.email:
       return <TextField question={currentQuestion} formik={formik} />;
+    case questionType.number:
+      return <TextField question={currentQuestion} formik={formik} type={'number'} />;
     case questionType.date:
       return <DateQuestion question={currentQuestion} formik={formik} />;
     case questionType.dropdown:
@@ -49,6 +56,16 @@ function ShowQuestion({ formik, isUpdating, currentQuestion, currentQuestions })
       return <CheckBox question={currentQuestion} formik={formik} />;
     case questionType.fileUpload:
       return <FileUpload question={currentQuestion} formik={formik} />;
+    case questionType.audio:
+      return <AudioQuestion question={currentQuestion} formik={formik} />;
+    case questionType.video:
+      return <VideoQuestion question={currentQuestion} formik={formik} />;
+    case questionType.rating:
+      return <RatingQuestion question={currentQuestion} formik={formik} />;
+    case questionType.photo:
+      return <PhotoQuestion question={currentQuestion} formik={formik} />;
+    case questionType.mood:
+      return <MoodQuestion question={currentQuestion} formik={formik} />;
     case questionType.textBlock:
       return <TextBlock question={currentQuestion} />;
     default:

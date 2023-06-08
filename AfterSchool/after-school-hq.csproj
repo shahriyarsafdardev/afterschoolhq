@@ -595,6 +595,8 @@
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
+    <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
+    <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
@@ -675,6 +677,7 @@
     <Compile Include="Assemblers\VolunteerProfileQuestionsAssembler.cs" />
     <Compile Include="Assemblers\VolunteerRegisterAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
+    <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />

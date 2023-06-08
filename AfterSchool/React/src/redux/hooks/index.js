@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useUserActions } from 'redux/slices/UserSlice';
+import { useSurveyActions } from 'redux/slices/SurveySlice';
 import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
@@ -14,6 +15,11 @@ export const useUser = () => ({
 export const useRegistration = () => ({
   ...useSelector(state => state.registrationSlice),
   ...useRegistrationActions()
+});
+
+export const useSurvey = () => ({
+  ...useSelector(state => state.surveySlice),
+  ...useSurveyActions()
 });
 
 export const useVolunteerRegistration = () => ({

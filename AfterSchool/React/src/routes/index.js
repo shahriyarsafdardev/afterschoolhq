@@ -23,6 +23,12 @@ export default {
   getVolunteerFormDataAPI: (accountName, activityName, regUid) =>
     `Api/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
 
+  // Survey Form APIs
+  getSurveyFormDataAPI: (formUid, surveyResponseUid) =>
+    `Api/SurveyForm/GetForm?formUid=${formUid}&surveyResponseUid=${surveyResponseUid}`,
+  submitSurveyFormDataAPI: 'Api/SurveyForm/AddUpdateAnswers',
+
+  //Paths & URLs
   paymentScreenPath: uId => `/account/payment/${uId}`,
   thankyouScreenPath: uId => `/account/thankyou/${uId}`,
 
@@ -30,6 +36,8 @@ export default {
   accountUrl: `${window.location.origin}/User/home`,
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
+  surveyUrl: formUid => `/reactapp/survey/${formUid}`,
+  surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,
   facebookShareUrl: (activityUrl, textToShare = '') =>

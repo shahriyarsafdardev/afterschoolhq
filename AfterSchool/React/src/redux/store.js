@@ -4,11 +4,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import ThankYouSlice from './slices/ThankYouSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
+import SurveySlice from './slices/SurveySlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
 
 export default configureStore({
   reducer: {
     [UserSlice.name]: UserSlice.reducer,
+    [SurveySlice.name]: SurveySlice.reducer,
     [ProfileSlice.name]: ProfileSlice.reducer,
     [ThankYouSlice.name]: ThankYouSlice.reducer,
     [RegistrationSlice.name]: RegistrationSlice.reducer,

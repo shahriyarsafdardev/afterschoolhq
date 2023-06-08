@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace AfterSchool
@@ -109,6 +109,12 @@ namespace AfterSchool
                 "VolunteerRegistration",
                 "volunteerregistration/{action}/{id}",
                 new {controller = "VolunteerRegistration", action = "GetStarted", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
+            
+            routes.MapRoute(
+                "Survey",
+                "survey/{id}",
+                new {controller = "Survey", action = "Index", id = UrlParameter.Optional},
                 new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(

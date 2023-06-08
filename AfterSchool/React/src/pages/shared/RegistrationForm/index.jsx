@@ -25,13 +25,16 @@ export default function RegistrationForm(props) {
     handleSection,
     registrantType,
     saveButtonText,
+    showExit = true,
+    isSurvey = false,
     currentQuestions,
     handleRedirection,
     isUpdating = false
   } = props;
-  const outerWrapperClass = isUpdating
-    ? classes.outerWrapper
-    : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
+  const outerWrapperClass =
+    isUpdating || isSurvey
+      ? classes.outerWrapper
+      : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
   return (
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
@@ -39,33 +42,34 @@ export default function RegistrationForm(props) {
           <Loader />
         ) : (
           <Box className={outerWrapperClass}>
-            {isUpdating ? (
-              <Box className={classes.exitButtonWrapper}>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  className={classes.backButton}
-                  onClick={() => handleRedirection()}
-                  data-testid={`Exit-${Name}`}
-                >
-                  Exit
-                </Button>
-              </Box>
-            ) : (
-              firstSection && (
+            {showExit &&
+              (isUpdating ? (
                 <Box className={classes.exitButtonWrapper}>
                   <Button
                     color="primary"
                     variant="outlined"
                     className={classes.backButton}
-                    onClick={exitHandler}
+                    onClick={() => handleRedirection()}
                     data-testid={`Exit-${Name}`}
                   >
                     Exit
                   </Button>
                 </Box>
-              )
-            )}
+              ) : (
+                firstSection && (
+                  <Box className={classes.exitButtonWrapper}>
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      className={classes.backButton}
+                      onClick={exitHandler}
+                      data-testid={`Exit-${Name}`}
+                    >
+                      Exit
+                    </Button>
+                  </Box>
+                )
+              ))}
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>

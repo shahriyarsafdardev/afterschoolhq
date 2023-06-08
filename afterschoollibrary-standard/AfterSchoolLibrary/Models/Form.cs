@@ -34,6 +34,7 @@ namespace AfterSchoolLibrary.Models
         /// </summary>
         public FormType FormTypeId { get { return (FormType)MDV["FormTypeId"].Value; } set { MDV["FormTypeId"].Value = value; } }
 		public string AccountName { get { return (string)MDV["AccountName"].Value; } }
+        public bool? IsPublished { get { return (bool?) MDV["IsPublished"].Value; } set { MDV["IsPublished"].Value = value; } }
 		
 
         public Form()
@@ -61,6 +62,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
                 _dp.Add(className, "IsArchived", System.Data.SqlDbType.Bit);
                 _dp.Add(className, "FormTypeId", System.Data.SqlDbType.Int);
+                _dp.Add(className, "IsPublished", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "AccountName", typeof(Account).Name, "Name", System.Data.SqlDbType.NVarChar, "Account");
 				
                 return _dp;
@@ -165,6 +167,10 @@ namespace AfterSchoolLibrary.Models
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["FormTypeId"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+			
+			dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsPublished"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
 
