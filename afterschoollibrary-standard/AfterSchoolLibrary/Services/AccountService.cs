@@ -4825,7 +4825,7 @@ namespace AfterSchoolLibrary.Services
                     // This needs refactoring (finding a better place to save coupon in registration)
                     if ((bool) checkoutObject.Coupon?.ID.HasValue)
                     {
-                        checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
+                        checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon, msgs,dc);
                         checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
                         msgs.AddRange(checkoutObject.Registration.Save(dc));
                     }
