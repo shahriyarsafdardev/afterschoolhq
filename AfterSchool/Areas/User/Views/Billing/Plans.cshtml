@@ -86,7 +86,7 @@
                                         nextPaymentDate = new SubscriptionPlan
                                         {
                                             BillingPeriodTypeId = (BillingPeriodType)billingPeriodTypeId
-                                        }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? DateTime.Now, payments.Count).ToShortDateString();
+                                        }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? DateTime.UtcNow, payments.Count).ToShortDateString();
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
