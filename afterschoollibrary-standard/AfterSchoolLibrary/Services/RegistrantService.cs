@@ -1217,7 +1217,6 @@ namespace AfterSchoolLibrary.Services
             {
                 if (question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
                     answerText = GetFormattedAnswerForCheckboxList(answerText);
-
                 return registrant.AddOrUpdateAnswer(
                     answerText,
                     question.ID,
@@ -1738,7 +1737,7 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        private static string GetFormattedAnswerForCheckboxList(string s) => $"[{s}]";
+        private static string GetFormattedAnswerForCheckboxList(string s) => $"{s}";
 
         public static RegistrantHelper PrepareRegistrantDetails(this List<Registrant> registrants, Registrant masterRegistrant, SystemMessages msgs,
             DatabaseConnection dc = null)
