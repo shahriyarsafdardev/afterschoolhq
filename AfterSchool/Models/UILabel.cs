@@ -162,7 +162,7 @@ namespace AfterSchool.Models
 
         public static string GetFormattedAnswerForFlattenedArray(string input)
         {
-            string pattern = @"^\[+|\]+$"; // Matches one or more opening or closing brackets at the start or end of the string
+            string pattern = @"^\[+|\]+$";
             string flattened = Regex.Replace(input, pattern, string.Empty);
             return GetFormattedAnswerForArray(flattened);
         }
