@@ -437,7 +437,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
     
                 if (subscription.Items.FirstOrDefault().IsNotEmpty() && subscription.Items.FirstOrDefault().Plan.IsNotEmpty() && subscription.Items.First().Plan.Id.IsNotEmpty())
                 {
-                    var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id); 
+                    var registrantSubscription = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(subscription.Id, msgs); 
 
                     if (registrantSubscription.IsNotEmpty())
                     {
