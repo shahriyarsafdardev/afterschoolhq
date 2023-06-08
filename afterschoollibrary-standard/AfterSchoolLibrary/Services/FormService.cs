@@ -1245,7 +1245,7 @@ namespace AfterSchoolLibrary.Services
         public static string BuildShortHomePageUrlForm(Guid formUid)
         {
             return 
-                $"{Helpers.Utilities.ShortBaseUrl()}/survey?uid={formUid}";
+                $"{Helpers.Utilities.ShortBaseUrl()}/survey/{formUid}";
         }
         public static void SetIsPublished(this Form form, WebUser loggedInUser, SystemMessages msgs = null,
             DatabaseConnection dc = null)
