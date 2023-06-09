@@ -181,7 +181,22 @@ namespace AfterSchoolLibrary.Services
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
-            var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+            var endDateTime = (DateTime?) null;
+
+            if (subscriptionPlanType == SubscriptionPlanType.Subscription)
+            {
+                if(plan.TotalPeriods.HasValue && plan.TotalPeriods > 2)
+                {
+                    endDateTime = new SubscriptionPlan
+                    {
+                        BillingPeriodTypeId = plan.BillingPeriodTypeId
+
+                    }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? (DateTime) participationObject.StartDate, plan.TotalPeriods ?? 0);
+                }
+            }
+            else
+                endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+
             var stripeMetaData = new Dictionary<string, string>
                             {
                                 {"BillingAccountUid", billingAccount.Uid.ToString()},
