@@ -58,12 +58,6 @@
                             else if (answer.FormQuestionQuestionTypeId == QuestionType.FileUpload && answer.Text.IsNotBlank())
                             {
                                 <span>
-                                    @*
-                                        <a href="@Url.Action("downloadfile", "registration", new { id = Model.Uid, r = selectedRegistration.Uid, file = answer.ID, returnUrl = Request["returnurl"] })"
-                                           target="_blank">
-                                            Download File
-                                        </a>
-                                    *@
                                     <a href="@answer.GetFileDownloadLink()" target="_blank">
                                         Download File
                                     </a>
