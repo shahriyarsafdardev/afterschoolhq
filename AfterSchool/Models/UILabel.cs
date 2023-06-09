@@ -162,9 +162,16 @@ namespace AfterSchool.Models
 
         public static string GetFormattedAnswerForFlattenedArray(string input)
         {
-            string pattern = @"^\[+|\]+$";
-            string flattened = Regex.Replace(input, pattern, string.Empty);
-            return GetFormattedAnswerForArray(flattened);
+            try
+            {
+                string pattern = @"^\[+|\]+$";
+                string flattened = Regex.Replace(input, pattern, string.Empty);
+                return GetFormattedAnswerForArray(flattened);
+            }
+            catch
+            {
+                return "";
+            }
         }
         public static string GetFormattedAnswerForArray(string text)
         {
@@ -193,7 +200,7 @@ namespace AfterSchool.Models
 
             return false;
         }
-        
+
         public static bool IsBeamerProvider()
         {
             return SessionVariables.CurrentUser.IsNotEmpty() && FeatureFlag.CheckFlagIsEnabled("beamer_provider");
