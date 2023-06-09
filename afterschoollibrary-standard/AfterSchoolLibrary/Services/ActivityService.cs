@@ -1360,7 +1360,7 @@ namespace AfterSchoolLibrary.Services
             var activitySchedule = activity.GetSchedule();
             int? periodNumber = null;
 
-            if (!activitySchedule.IsOngoing)
+            if ((bool)!activitySchedule?.IsOngoing)
             {
                 if (!string.IsNullOrEmpty(subscriptionPlanPeriodNumber) && int.TryParse(subscriptionPlanPeriodNumber, out int n))
                 {

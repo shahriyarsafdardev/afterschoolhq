@@ -183,16 +183,13 @@ namespace AfterSchoolLibrary.Services
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = (DateTime?) null;
 
-            if (subscriptionPlanType == SubscriptionPlanType.Subscription)
+            if (subscriptionPlanType == SubscriptionPlanType.Subscription && plan.TotalPeriods.HasValue && plan.TotalPeriods > 2)
             {
-                if(plan.TotalPeriods.HasValue && plan.TotalPeriods > 2)
+                endDateTime = new SubscriptionPlan
                 {
-                    endDateTime = new SubscriptionPlan
-                    {
-                        BillingPeriodTypeId = plan.BillingPeriodTypeId
+                    BillingPeriodTypeId = plan.BillingPeriodTypeId
 
-                    }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? (DateTime) participationObject.StartDate, plan.TotalPeriods ?? 0);
-                }
+                }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? (DateTime) participationObject.StartDate, plan.TotalPeriods ?? 0);
             }
             else
                 endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
