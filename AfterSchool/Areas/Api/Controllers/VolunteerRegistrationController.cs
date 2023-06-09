@@ -255,9 +255,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         qvms.ForEach(qvm =>
                         {
                             if (qvm.Question.QuestionTypeId != QuestionType.CheckboxList)
-                            {
-                                qvm.Value = UILabel.GetFormattedAnswerForFlattenedArray(qvm.Value);
-                            }
+                                qvm.Value = qvm.Value.Substring(1, qvm.Value.Length - 2);
 
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
                             {
