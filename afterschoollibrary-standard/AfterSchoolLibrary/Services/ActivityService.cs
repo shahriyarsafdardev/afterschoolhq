@@ -1370,7 +1370,7 @@ namespace AfterSchoolLibrary.Services
                         {
                             BillingPeriodTypeId = (BillingPeriodType) subscriptionplanperiod.ToInteger()
                         }
-                        .CalculateEndDateFromNumberOfPeriods(activitySchedule.StartDate ?? DateTime.Now, subscriptionPlanPeriodNumber.ToInteger());
+                        .CalculateEndDateFromNumberOfPeriods(activitySchedule.StartDate ?? DateTime.UtcNow, subscriptionPlanPeriodNumber.ToInteger());
                         periodNumber = int.Parse(subscriptionPlanPeriodNumber);
                     }
                     else
