@@ -1215,8 +1215,9 @@ namespace AfterSchoolLibrary.Services
         {
             if (question.IsNotEmpty())
             {
-                if (question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
+                if (registrant.GetAccount().HasAccountPackageFeature(FeatureType.AllAgeRegistration) && question.QuestionTypeId == QuestionType.CheckboxList && answerText.IsNotEmpty())
                     answerText = GetFormattedAnswerForCheckboxList(answerText);
+
                 return registrant.AddOrUpdateAnswer(
                     answerText,
                     question.ID,
