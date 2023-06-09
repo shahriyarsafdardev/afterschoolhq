@@ -62,7 +62,7 @@
                     <div class="surveyCheck">@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
                 </div>
                 <div class="col-lg-3">
-                    <div class="pull-right">
+                    <div class="pull-right hide">
                         @if (surveyResponses.Count(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed) != surveyResponses.Count)
                         {
                             <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
@@ -78,8 +78,8 @@
                         <th></th>
                         <th>Name</th>
                         <th>Status</th>
+                        <th>PIN</th>
                         <th>Last Modified</th>
-                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -99,13 +99,10 @@
                                 @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
                             </td>
                             <td>
-                                @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
+                                @surveyResponse.Pin
                             </td>
                             <td>
-                                @if (surveyResponse.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
-                                {
-                                    <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyResponse.ID">Send Reminder</a>
-                                }
+                                @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
                             </td>
                         </tr>
                     }

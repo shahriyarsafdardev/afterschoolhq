@@ -19,7 +19,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             SurveyResponse surveyResponse = null;
-
+            var pinGenerator = new Random();
+            var pinCode = pinGenerator.Next(0, 1000000).ToString("D6");
             Database.ExecuteTransaction
             (
                action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -34,7 +35,8 @@ namespace AfterSchoolLibrary.Services
                        LastModifiedBy = userId,
                        Uid = Guid.NewGuid(),
                        SurveyFeedbackStatusTypeId = surveyFeedbackStatus,
-                       LastAttendedFormQuestionAnswerUid = null
+                       LastAttendedFormQuestionAnswerUid = null,
+                       Pin = pinCode,
                    };
 
                    msgs.AddRange(surveyResponse.Save(dc));
