@@ -125,7 +125,7 @@ function FormSectionSettings() {
 
   const { handleSubmit, values, setFieldValue, setValues, errors, dirty, touched } = formik;
   const formDirty = dirty || currentSection?.Name !== sectionName;
-  const [ showPrompt, cancelNavigation, confirmNavigation ] = usePrompt(formDirty);
+  const [showPrompt, cancelNavigation, confirmNavigation] = usePrompt(formDirty);
 
   useEffect(() => {
     if (unsavedChanges) {
@@ -226,6 +226,7 @@ function FormSectionSettings() {
 
     updatedValues[newDisplayOrder] = newQuest;
     setValues({ ...updatedValues }, false);
+    setReRender(!reRender);
   };
 
   const handleDelete = (key, removeFromList = false) => {
