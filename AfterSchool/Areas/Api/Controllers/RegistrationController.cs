@@ -791,7 +791,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         
                         qvms.ForEach(qvm =>
                         {
-                            if (qvm.Question.QuestionTypeId == QuestionType.CheckboxList) 
+                            if (qvm.Question.QuestionTypeId == QuestionType.CheckboxList && qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
                             {
                                 qvm.Value = UILabel.GetFormattedAnswerForFlattenedArray(qvm.Value);
                             }
@@ -799,7 +799,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
                             {
                                 currentRegistrant.AddOrUpdateAnswer(
-                                    qvm.IfEmpty("").Trim(),
+                                    qvm.Value.IfEmpty("").Trim(),
                                     qvm.Question,
                                     currentUser,
                                     amsgs,
