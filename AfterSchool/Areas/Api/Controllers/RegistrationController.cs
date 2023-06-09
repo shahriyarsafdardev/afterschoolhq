@@ -549,6 +549,9 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 qvms.ForEach(qvm =>
                                 {
+                                    if (qvm.Value.IsNotEmpty() && qvm.Question.QuestionTypeId == QuestionType.CheckboxList)
+                                        qvm.Value = qvm.Value.Substring(1, qvm.Value.Length - 2);
+
                                     registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
@@ -791,7 +794,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         
                         qvms.ForEach(qvm =>
                         {
-                            if (qvm.Question.QuestionTypeId == QuestionType.CheckboxList && qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                            if (qvm.Value.IsNotEmpty() && qvm.Question.QuestionTypeId == QuestionType.CheckboxList)
                                 qvm.Value = qvm.Value.Substring(1, qvm.Value.Length - 2);
 
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
