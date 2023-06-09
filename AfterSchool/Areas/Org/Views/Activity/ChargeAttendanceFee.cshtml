@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     ViewBag.Title = Model.AccountName;
     var attendancesToBillRegistrants = (Dictionary<RegistrantActivity, List<Attendance>>)ViewBag.AttendancesToBillRegistrants;
@@ -71,17 +71,29 @@
                             {
                                 var registrant = attendancesToBillRegistrant.Key.GetRegistrant();
                                 var registration = attendancesToBillRegistrant.Key.GetRegistration();
+                                var attendanceList = attendancesToBillRegistrant.Value;
+                                AttendanceRegistrant attendanceRegistrant = null;
+                                var prePaymentCount = 0; 
+
+                                if (attendanceList.Count > 0)
+                                {
+                                    attendanceRegistrant = currentAccount.GetAttendanceRegistrant(Model, attendanceList.First().ID.Value, registrant.ID.Value, msgs);
+                                    prePaymentCount = attendanceRegistrant.GetAvailablePrePayments(msgs).Count();
+                                }
+
                                 var presentCount = attendancesToBillRegistrant.Value.Count;
+                                var daysUnpaid = presentCount - prePaymentCount > 0 ? presentCount - prePaymentCount : 0 ;
+
                                 var costPerClass = registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0;
-                                var totalAmount = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
-                                var couponDiscount = (decimal)(presentCount * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
+                                var totalAmount = (decimal)(daysUnpaid * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
+                                var couponDiscount = (decimal)(daysUnpaid * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
                                 var totalAmountToCharge = (decimal)totalAmount - couponDiscount;
 
                                 <tr>
                                     <td>@registrant.FirstName @registrant.LastName</td>
 
-                                    <td>@presentCount</td>
-
+                                    <td>@daysUnpaid</td>
+                                   
                                     <td>@totalAmount.ToCurrency()</td>
 
                                     <td>@couponDiscount.ToCurrency()</td>
