@@ -3306,7 +3306,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name,
+                var surveyRequest = SurveyRequestService.AddSurvey  (formId.ToInteger(), activityId.ToInteger(), name,
                     dueDate, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value,
                     msgs);
 
@@ -3368,22 +3368,22 @@ namespace AfterSchool.Areas.Org.Controllers
                     student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
                 var masterRegistrant = Registrant.Load(student.Value.ToInteger())?.GetMasterRegistrant(msgs, dc);
 
-                if (masterRegistrant.IsNotEmpty() && masterRegistrant.WebUserId.IsEmpty())
-                {
-                    var inviteCode = RegistrantInviteCodeService.GetInviteCode(
-                        surveyResponseId: surveyResponse.ID.Value,
-                        registrantId: surveyResponse.RegistrantId.Value,
-                        currentUserId: currentUserId,
-                        msgs: msgs,
-                        dc: dc);
+                //if (masterRegistrant.IsNotEmpty() && masterRegistrant.WebUserId.IsEmpty())
+                //{
+                //    var inviteCode = RegistrantInviteCodeService.GetInviteCode(
+                //        surveyResponseId: surveyResponse.ID.Value,
+                //        registrantId: surveyResponse.RegistrantId.Value,
+                //        currentUserId: currentUserId,
+                //        msgs: msgs,
+                //        dc: dc);
 
-                    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
-                        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code,
-                        inviteCode.ID.Value, null));
-                }
-                else
-                    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
-                        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
+                //    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
+                //        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code,
+                //        inviteCode.ID.Value, null));
+                //}
+                //else
+                //    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
+                //        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
             });
         }
 
