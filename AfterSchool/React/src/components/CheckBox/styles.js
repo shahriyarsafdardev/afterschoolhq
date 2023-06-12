@@ -8,7 +8,11 @@ const useStyles = makeStyles(theme => ({
     overflowWrap: 'anywhere',
     marginLeft: '14px',
     width: '100%',
-    marginBottom: 15
+    marginBottom: 15,
+    [theme.breakpoints.down('sm')]: {
+      padding:'0px 12px',
+      marginLeft: '0',
+    }
   },
   formControlLabelRoot: {
     margin: '10px 0px',
