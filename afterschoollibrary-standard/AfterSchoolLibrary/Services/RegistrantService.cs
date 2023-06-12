@@ -1231,6 +1231,22 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+        
+        public static void UpdateDescription(this Registrant registrant, string description, FormQuestion question, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            FormQuestionAnswer answer = null;
+
+            answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(registrant.ID.Value, question.QuestionDataTypeId, msgs, dc);
+
+            if (answer.IsNotEmpty())
+            {
+                answer.Description = description;
+                answer.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(answer.Save(dc));
+            }
+
+        }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType,
             string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

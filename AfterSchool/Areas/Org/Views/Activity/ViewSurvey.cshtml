@@ -77,8 +77,8 @@
                     <tr>
                         <th></th>
                         <th>Name</th>
+                        <th>Student PIN</th>
                         <th>Status</th>
-                        <th>PIN</th>
                         <th>Last Modified</th>
                     </tr>
                     </thead>
@@ -96,10 +96,10 @@
                                 @surveyResponse.GetRegistrantName()
                             </td>
                             <td>
-                                @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
+                                @surveyResponse.Pin
                             </td>
                             <td>
-                                @surveyResponse.Pin
+                                @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
                             </td>
                             <td>
                                 @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
