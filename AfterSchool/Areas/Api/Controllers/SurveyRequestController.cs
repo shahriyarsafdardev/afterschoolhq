@@ -17,7 +17,7 @@ namespace AfterSchool.Areas.Api.Controllers
     public class SurveyRequestController : Controller
     {
         [HttpGet]
-        public ActionResult GetForm(string uid, int pin)
+        public ActionResult GetForm(string uid, string pin)
         {
             var msgs = new SystemMessages();
             try

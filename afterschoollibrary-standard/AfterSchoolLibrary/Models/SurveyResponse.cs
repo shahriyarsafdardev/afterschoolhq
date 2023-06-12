@@ -217,7 +217,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
-        public static SurveyResponse LoadByPin(int pin, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SurveyResponse LoadByPin(string pin, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
