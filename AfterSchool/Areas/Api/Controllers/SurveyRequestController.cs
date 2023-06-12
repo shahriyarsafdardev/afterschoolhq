@@ -72,7 +72,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 foreach (var question in questions)
                 {
-                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value);
+                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value, msgs);
                     if (questionAnswer.IsNotEmpty())
                         formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
                         {
@@ -161,7 +161,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 foreach (var question in questions)
                 {
-                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value);
+                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value, msgs);
                     if (questionAnswer.IsNotEmpty())
                         formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
                         {
