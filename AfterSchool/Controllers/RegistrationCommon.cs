@@ -407,14 +407,16 @@ namespace AfterSchool.Controllers
                 .ToList()
                 .ForEach(qvm =>
                 {
-                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload)
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo || 
+                        qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)
                     {
                         if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
                         {
                             var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
                             //5 MB = 5242880 Bytes
                             //File uploaded here should be less than of 5MB
-                            if (currentFileSizeInBytes <= 5242880)
+                            const int maxFileSize = Utilities.MaxFileSize;
+                            if (currentFileSizeInBytes <= maxFileSize)
                                 submittedRecord.AddOrUpdateAnswer(
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,

@@ -69,14 +69,20 @@ namespace AfterSchool.Areas.Api.Controllers
                         QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                     })
                     .ToList();
-                var formQuestionAnswerDtoList = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs)
-                    .Select(questionAnswer => new FormQuestionAnswerDto()
-                    {
-                        FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                        QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
-                        Description = questionAnswer.Description,
-                    })
-                    .ToList();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                foreach (var question in questions)
+                {
+                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value);
+                    if (questionAnswer.IsNotEmpty())
+                        formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText,
+                            Text = MapToAmazonFilePath(questionAnswer),
+                            Description = questionAnswer.Description,
+                        });
+                }
 
                 dynamic response = new
                 {
@@ -152,14 +158,20 @@ namespace AfterSchool.Areas.Api.Controllers
                     (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
 
-                var formQuestionAnswerDtoList = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs)
-                    .Select(questionAnswer => new FormQuestionAnswerDto()
-                    {
-                        FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                        QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
-                        Description = questionAnswer.Description,
-                    })
-                    .ToList();
+                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+                foreach (var question in questions)
+                {
+                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value);
+                    if (questionAnswer.IsNotEmpty())
+                        formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
+                        {
+                            FormQuestionId = questionAnswer.FormQuestionId,
+                            QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                            QuestionText = questionAnswer.QuestionText,
+                            Text = MapToAmazonFilePath(questionAnswer),
+                            Description = questionAnswer.Description,
+                        });
+                }
 
                 dynamic response = new
                 {
