@@ -64,6 +64,10 @@ function Router() {
     {
       path: 'reactapp/survey/:formUid',
       element: <Survey />
+    },
+    {
+      path: 'reactapp/sr/:srUid',
+      element: <SurveyPinModal />
     }
   ]);
 }
@@ -76,6 +80,7 @@ const RedirectToExternal = () => {
 };
 const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
+const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
