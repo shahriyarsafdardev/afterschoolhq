@@ -1976,50 +1976,8 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
 
-            // CC Support Team
-            // mailMsgs.AddRange(SendGridHelper.SendMail(
-            //     Email.SendGridNoReplyEmailAddress(),
-            //     Email.SendGridSupportEmailAddress,
-            //     $"BCC: {subject}",
-            //     body,
-            //     emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            // ));
-
             Utilities.SystemErrorLog(mailMsgs);
         }
-
-        /*public static void SendRefundRequestToSupport(RefundRequest request, WebUser loggedInUser, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            var model = new NameValueCollection
-            {
-                {"FirstName", "Support"},
-                {"ProductName", Utilities.AppName()},
-                {"RequesterFirstName", loggedInUser.FirstName},
-                {"RequestAmount", request.Amount.Value.ToCurrency()},
-                {"RequestReason", request.RequestReason},
-                {"RequestViewUrl", $"{Utilities.BaseUrl()}/admin/transaction/refundrequests/"},
-            };
-
-            var body = ProcessTemplate(
-                EmailTemplates.Refund_Requested,
-                model,
-                "refund_requested-1.0.1",
-                msgs
-            );
-
-            var subject = $"A refund has been requested/approved by {loggedInUser.DisplayName}";
-
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            );
-
-            Utilities.SystemErrorLog(mailMsgs);
-        }*/
 
         public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
@@ -2106,15 +2064,6 @@ namespace AfterSchoolLibrary.Helpers
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
-
-            // // CC Support Team
-            // mailMsgs.AddRange(SendGridHelper.SendMail(
-            //     Email.SendGridNoReplyEmailAddress(),
-            //     Email.SendGridSupportEmailAddress,
-            //     $"CC: {subject}",
-            //     body,
-            //     emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            // ));
 
             Utilities.SystemErrorLog(mailMsgs);
         }

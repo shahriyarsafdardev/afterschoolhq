@@ -479,10 +479,10 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
-            if (transactionUid.IsEmpty())
+            if (String.IsNullOrEmpty(transactionUid))
                 msgs.Add("Invalid Transaction ID", MessageType.UserError);
             
-            if (requestUid.IsEmpty())
+            if (String.IsNullOrEmpty(requestUid))
                 msgs.Add("Invalid Request ID",MessageType.UserError);
             
             if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
@@ -492,18 +492,18 @@ namespace AfterSchool.Areas.Org.Controllers
                 return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
             
             var transaction = currentAccount.GetBillerTransaction(transactionUid.ToGuid(), msgs);
-            var request = currentAccount.GetRefundRequest(requestUid.ToGuid(), msgs);
+            var refundRequest = currentAccount.GetRefundRequest(requestUid.ToGuid(), msgs);
                 
             if (transaction.IsNotEmpty())
                 transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
 
-            if (request.IsNotEmpty())
-                request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
+            if (refundRequest.IsNotEmpty())
+                refundRequest.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
 
             if (msgs.HasNoErrors())
             {
                 SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
-                    WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
+                    WebSessionActionType.Approved, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
                 return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
             }
 
@@ -539,19 +539,17 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             if (id.IsEmpty())
-            {
                 msgs.Add("Invalid ID", MessageType.UserError);
-            }
+            
             if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
-            {
                 msgs.Add("Invalid Amount", MessageType.UserError);
-            }
 
-            if (msgs.HasErrors()) return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
-                JsonRequestBehavior.AllowGet);
+            if (msgs.HasErrors())
+                return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
+                    JsonRequestBehavior.AllowGet);
             
             var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
-            PaymentSourceType? paymentSource = transaction.PaymentSourceTypeId;
+            var paymentSource = transaction.PaymentSourceTypeId;
             var refund = new Transaction();
                 
             if (request.IsNotEmpty())
@@ -566,7 +564,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             false, 
                             false,
                             amount.ToDecimal(),
-                            paymentSource.Value,
+                            paymentSource,
                             SessionVariables.CurrentUser, 
                             msgs);
                 }

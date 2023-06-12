@@ -1492,7 +1492,7 @@ namespace AfterSchoolLibrary.Services
             WebUser loggedInUser, Account account, bool requirePayment, string paidCost, string costToPay, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
-            var ras = registrant.GetRegistrantActivities(msgs, dc); // Need to look into this, why it is picking all
+            var ras = registrant.GetRegistrantActivities(msgs, dc);
             var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && 
                                       item.ParticipationObjectTypeId == participationObjectType);
             var newRegistrationAssignment = RegistrationAssignmentType.ReservedPendingPayment;

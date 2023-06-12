@@ -444,6 +444,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             // something went wrong, error occured
+            //returning all the messages in a single string 
             var dataString = msgs.ToList().Aggregate("", (current, msg) => current + (msg.Text + ". "));
             return Json(new {success = false, status = "error", data = dataString},
                 JsonRequestBehavior.AllowGet);

@@ -312,7 +312,8 @@
                         }
                     </td>
                     <td class="text-center">
-                        @if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))
+                        @*@if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))*@
+                        @if (!transaction.IsTotallyRefunded(false))
                         {
                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
                             var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
@@ -320,7 +321,7 @@
                             <button onclick="manualRefund('@transaction.Uid'); showModal('modal-process-refund'); requestRefund('@transaction.Uid',
                              @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"), @((int)transaction.PaymentSourceTypeId))"
                                     class="md-trigger btn btn-sm btn-default">
-                                    Refund
+                                Refund
                             </button>
                         }
                     </td>
@@ -494,7 +495,7 @@
         $('#refund-request-amount').attr('max', maxAmount);
         $('#refund-request-amount').val(maxAmount);
         let btnStripe = $('#btn-stripe-payment');
-        paymentType !== 1 ? btnStripe.prop('disabled',true) : btnStripe.prop('disabled',false); 
+        paymentType !== @((int)PaymentType.CreditCard) ?btnStripe.prop('disabled',true) : btnStripe.prop('disabled',false);
     }
 
     function canProcessRequest() {
@@ -536,7 +537,7 @@
                 'uid=' + uid + '&amount=' + amount + '&reason=' + encodeURIComponent(reason),
                 function (data) {
                     if (data && data.status == 'ok') {
-                        refundTransaction(uid,amount,data.uid, $('#refund-request-payment-source-type').val());                  
+                        refundTransaction(uid,amount,data.uid, $('#refund-request-payment-source-type').val());
                     } else {
                         Notifications.showErrors(data.messages);
                     }
@@ -595,8 +596,8 @@ function refundTransaction(transactionUid,amount,uid) {
             $("#request-payout").attr("disabled", false);
         else
             $("#request-payout").attr("disabled", true);
-    }                                                              
-    
+    }
+
     function selectAllTransaction(event) {
         var allChkBoxes = $(".chkTransaction");
         allChkBoxes.map(function (e) {
