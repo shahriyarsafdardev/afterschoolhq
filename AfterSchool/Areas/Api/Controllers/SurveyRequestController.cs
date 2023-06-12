@@ -202,7 +202,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 question.FormQuestionQuestionTypeId != QuestionType.FileUpload)
                 return question.Text;
             var amazonHelper = Utilities.GetNewAmazonHelper();
-            return amazonHelper.GetFileLink(question.Text);
+            return amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), true);
         }
     }
 }

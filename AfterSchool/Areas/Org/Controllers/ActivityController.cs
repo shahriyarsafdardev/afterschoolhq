@@ -3428,8 +3428,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
-            var survey = SurveyRequest.Load(id);
-
+            var survey = SurveyRequest.Load(id, msgs);
             var surveyUrl = SurveyRequestService.BuildShortHomePageUrlForm(survey.Uid);
 
             ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs)
