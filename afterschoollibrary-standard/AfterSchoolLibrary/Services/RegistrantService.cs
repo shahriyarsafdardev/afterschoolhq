@@ -1237,7 +1237,7 @@ namespace AfterSchoolLibrary.Services
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             FormQuestionAnswer answer = null;
 
-            answer = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(registrant.ID.Value, question.QuestionDataTypeId, msgs, dc);
+            answer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value, registrant.ID.Value, msgs, dc);
 
             if (answer.IsNotEmpty())
             {
