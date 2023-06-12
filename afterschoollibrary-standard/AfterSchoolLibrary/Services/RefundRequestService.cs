@@ -46,7 +46,7 @@ namespace AfterSchoolLibrary.Services
             return request.GetTransaction(msgs, dc).IsAmountRefundable(request.Amount.Value, true, msgs, dc);
         }
 
-        public static Transaction ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, decimal amount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction ApproveAndProcessRequest(this RefundRequest request, bool allowFullRefundAmount, bool refundCCFees, bool refundConvenienceFees, decimal? amount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var transaction = request.GetTransaction(msgs, dc);
             Transaction refund = new Transaction();
@@ -58,7 +58,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (request?.Amount != null)
                         {
-                            var refundAmount = amount;
+                            var refundAmount = amount ?? request?.Amount;
                             var convenienceFee = new decimal?();
                             var paymentTypeFee = new decimal?();
 

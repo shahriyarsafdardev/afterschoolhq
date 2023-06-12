@@ -419,7 +419,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
-
+            else
+            {
+                msgs.Add("Amount is not a valid number", MessageType.UserError);
+            }
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
@@ -479,6 +482,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            
             if (String.IsNullOrEmpty(transactionUid))
                 msgs.Add("Invalid Transaction ID", MessageType.UserError);
             
@@ -574,7 +578,7 @@ namespace AfterSchool.Areas.Org.Controllers
             else
             {
                 if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                    refund = transaction.RefundPayerFullAmount(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+                    refund = transaction.RefundPayer(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
                 else
                     msgs.Add("Invalid Request", MessageType.UserError);
             }

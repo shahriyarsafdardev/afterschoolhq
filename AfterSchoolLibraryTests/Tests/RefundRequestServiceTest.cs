@@ -50,7 +50,7 @@ namespace AfterSchoolLibraryTests.Tests
         {
             var amount = 25;
             var refundRequest = RefundRequestFactory.Create(amount, TestTransaction, BillingAccount, "i want my money back", PayingWebUser, msgs, dc);
-            refundRequest.ApproveAndProcessRequest(true, true, true, 0, PaymentSourceType.AfterSchoolPlatform, BillingWebUser, msgs, dc);
+            refundRequest.ApproveAndProcessRequest(true, true, true, null, PaymentSourceType.AfterSchoolPlatform, BillingWebUser, msgs, dc);
 
             Assert.Equal(RefundRequestStatus.Completed, refundRequest.RefundRequestStatusId);
         }   

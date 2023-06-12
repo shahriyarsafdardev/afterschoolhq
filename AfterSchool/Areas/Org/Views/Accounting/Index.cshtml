@@ -312,7 +312,6 @@
                         }
                     </td>
                     <td class="text-center">
-                        @*@if (transaction.IsCharge() && !transaction.IsTotallyRefunded(false))*@
                         @if (!transaction.IsTotallyRefunded(false))
                         {
                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
