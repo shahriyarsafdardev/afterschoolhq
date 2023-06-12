@@ -57,6 +57,10 @@ export const useSurveyActions = () => {
     setAnsweredQuestions
   } = SurveySlice.actions;
   const dispatch = useDispatch();
+  const redirectToThankYou = (pin, uid) => {
+    if (Number(pin)) utils.navigateTo(apiRoutes.pinSurveyThankyouUrl(uid));
+    else utils.navigateTo(apiRoutes.surveyThankyouUrl(uid));
+  };
 
   const loadFormData = async (formUid, surveyResponseUid, pin) => {
     dispatch(setResponseId(surveyResponseUid));
@@ -64,9 +68,7 @@ export const useSurveyActions = () => {
     await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid, pin).then(
       ({ obj, msgs }) => {
         dispatch(setMsgs(msgs));
-        if (obj?.SurveyResponseStatus === 'Completed') {
-          return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
-        }
+        if (obj?.SurveyResponseStatus === 'Completed') return redirectToThankYou(obj?.Pin, formUid);
         if (obj) dispatch(setFormData(obj));
         if (!msgs.length) dispatch(formDataLoaded());
       }

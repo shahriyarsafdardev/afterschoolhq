@@ -62,6 +62,10 @@ function Router() {
       element: <SurveyThankYouSection />
     },
     {
+      path: 'reactapp/sr/:srUid/thankyou',
+      element: <PinSurveyThankYouSection />
+    },
+    {
       path: 'reactapp/survey/:formUid',
       element: <Survey />
     },
@@ -85,6 +89,7 @@ const Registration = Loadable(lazy(() => import('pages/Registration/Registration
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
+const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

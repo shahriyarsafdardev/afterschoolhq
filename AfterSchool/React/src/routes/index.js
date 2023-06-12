@@ -39,6 +39,7 @@ export default {
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   surveyUrl: formUid => `/reactapp/survey/${formUid}`,
+  pinSurveyThankyouUrl: srUid => `/reactapp/sr/${srUid}/thankyou`,
   pinSurveyUrl: (srUid, pin) => `/reactapp/sr/${srUid}?pin=${pin}`,
   surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,

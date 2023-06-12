@@ -10,10 +10,10 @@ import routes from 'routes';
 import utils from 'utils';
 
 export default function Survey() {
-  const navigate = useNavigate();
-  const { srUid } = useParams();
-  const { surveyThankyouUrl } = routes;
   const { scrollToTop } = utils;
+  const { srUid } = useParams();
+  const navigate = useNavigate();
+  const { pinSurveyThankyouUrl } = routes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     msgs,
@@ -87,7 +87,7 @@ export default function Survey() {
         await submitFormSectionData(submitObj, null, null, lastSection, srUid, pin).then(() => {
           if (!msgs.length) {
             enqueueSnackbar('Submitted.', { variant: 'success' });
-            lastSection && navigate(surveyThankyouUrl(srUid));
+            lastSection && navigate(pinSurveyThankyouUrl(srUid));
           }
         });
       }
