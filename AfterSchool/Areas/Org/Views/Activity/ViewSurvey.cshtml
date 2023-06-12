@@ -4,6 +4,7 @@
     var msgs = (SystemMessages) ViewBag.Messages;
     var surveyResponses = (List<SurveyResponse>) ViewBag.GetSurveyFeedback;
     var survey = (SurveyRequest) ViewBag.Survey;
+    var surveyUrl = ViewBag.SurveyUrl;
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
@@ -62,6 +63,7 @@
                     <div class="surveyCheck">@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
                 </div>
                 <div class="col-lg-3">
+                        <button class="btn btn-success text-muted md-trigger" data-modal="modal-survey-url">Share <i class="s7-right-arrow"></i></button>
                     <div class="pull-right hide">
                         @if (surveyResponses.Count(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed) != surveyResponses.Count)
                         {
@@ -128,7 +130,41 @@
         </div>
     </div>
 </div>
+<div id="modal-survey-url" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Share Survey</h3>
+        </div>
+        <div class="modal-body form text-center">
+            <div class="flex-row">
+                <div class="m-5 p-5">
+                    <p>Copy the link below to invite more participants to take your survey.</p>
+                </div>
+                <div class="form-group p-5">
+                    <div class="col-md-11">
+                        <input type="text" value="@surveyUrl" id="account-reg-url" onclick="this.select()" class="form-control inline col-md-4 "/>
+                    </div>
+                    <div class="col-md-1 pt-1" style="margin-top:5px">
+                        <span onclick="WebPage.copySelection('@surveyUrl', 'URL has been copied')" title="Copy Url">
+                            <i class="s7-copy-file icon-large text-success pointer"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
+        </div>
+        <div class="modal-footer ">
+            <div class="col-md-12 text-center">
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close btn-group-lg">Done</button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 @section scripts{
     <script src="~/Assets/lib/customTableSorter.js"></script>
     <script>

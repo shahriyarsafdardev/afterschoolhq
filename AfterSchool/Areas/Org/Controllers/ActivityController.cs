@@ -3306,7 +3306,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                var surveyRequest = SurveyRequestService.AddSurvey  (formId.ToInteger(), activityId.ToInteger(), name,
+                var surveyRequest = SurveyRequestService.AddSurvey(formId.ToInteger(), activityId.ToInteger(), name,
                     dueDate, optionalText, isAllowMultiple.ToBoolean(), currentAccount.ID.Value, currentUser.ID.Value,
                     msgs);
 
@@ -3428,10 +3428,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 return HttpNotFound();
 
             var activity = currentAccount.GetActivity(activityId.ToGuid(), msgs);
+            var survey = SurveyRequest.Load(id);
+
+            var surveyUrl = SurveyRequestService.BuildShortHomePageUrlForm(survey.Uid);
 
             ViewBag.GetSurveyFeedback = SurveyResponse.LoadBySurveyRequestId(id, msgs)
                 .OrderByDescending(a => a.CreateDate).ToList();
-            ViewBag.Survey = SurveyRequest.Load(id);
+            ViewBag.Survey = survey;
+            ViewBag.SurveyUrl = surveyUrl;
             ViewBag.Messages = msgs;
 
             return View(activity);

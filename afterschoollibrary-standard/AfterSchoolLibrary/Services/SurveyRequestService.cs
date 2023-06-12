@@ -119,6 +119,11 @@ namespace AfterSchoolLibrary.Services
 
             return row;
         }
+        public static string BuildShortHomePageUrlForm(Guid surveyReqUid)
+        {
+            return
+                $"{Helpers.Utilities.ShortBaseUrl()}/sr/{surveyReqUid}";
+        }
 
         private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate,
             string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)

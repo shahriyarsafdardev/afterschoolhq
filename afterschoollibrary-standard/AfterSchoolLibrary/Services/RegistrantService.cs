@@ -1188,14 +1188,14 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, Stream file, string filename, FormQuestion question, int? registrationId,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (question.IsNotEmpty())
             {
                 var amazonFilePath = registrant.UploadFile(file, filename, question, msgs, dc);
 
                 if (msgs.HasNoErrors())
-                    return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
+                    return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc, description);
             }
 
             return null;
@@ -1211,7 +1211,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (question.IsNotEmpty())
             {
@@ -1226,7 +1226,8 @@ namespace AfterSchoolLibrary.Services
                     registrationId,
                     loggedInUser,
                     msgs,
-                    dc);
+                    dc,
+                    description);
             }
 
             return null;
@@ -1249,7 +1250,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType,
-            string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1291,7 +1292,8 @@ namespace AfterSchoolLibrary.Services
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID,
                 };
-
+            if (description != "")
+                answer.Description = description;
             answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
