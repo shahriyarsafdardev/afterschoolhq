@@ -598,6 +598,7 @@
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
+    <Compile Include="Areas\Api\Models\SurveyRequestQuestionAnswerResponse.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />

@@ -120,7 +120,7 @@ namespace AfterSchool
             routes.MapRoute(
                 "SurveyRequest",
                 "{action}/{id}",
-                new {controller = "Survey", action = "SurveyRequest", id = UrlParameter.Optional},
+                new {controller = "Survey", action = "Sr", id = UrlParameter.Optional},
                 new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(

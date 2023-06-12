@@ -15,9 +15,11 @@ namespace AfterSchool.Controllers
         }
 
         [HttpGet]
-        public ActionResult SurveyRequest(string id)
+        // Get SurveyRequest/uid
+        public ActionResult Sr(string id)
         {
-            return View();
+            if (!id.IsGuid()) return Redirect($"~/404.html");
+            return Redirect($"~/reactapp/sr/{id.ToGuid()}");
         }
     }
 }
