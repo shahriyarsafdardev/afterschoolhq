@@ -426,6 +426,14 @@ namespace AfterSchool.Controllers
                             else
                                 msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
                         }
+                        else
+                        {
+                            submittedRecord.UpdateDescription(
+                                qvm.Value,
+                                qvm.Question,
+                                msgs,
+                                dc);
+                        }
                     }
                     else
                     {
