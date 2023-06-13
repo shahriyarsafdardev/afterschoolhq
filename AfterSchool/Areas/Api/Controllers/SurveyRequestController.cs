@@ -77,12 +77,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     })
                     .ToList();
 
-                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
-
-                foreach (var question in questions)
-                {
-
-                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
+                var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
                        .Select(questionAnswer => new FormQuestionAnswerDto()
                        {
                            FormQuestionId = questionAnswer.FormQuestionId, 
@@ -92,8 +87,6 @@ namespace AfterSchool.Areas.Api.Controllers
                            Description = questionAnswer.Description,
                        })
                        .ToList();
-
-                }
 
                 dynamic response = new
                 {
@@ -180,22 +173,17 @@ namespace AfterSchool.Areas.Api.Controllers
                     (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
-
-                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
-                       .Select(questionAnswer => new FormQuestionAnswerDto()
-                       {
-                           FormQuestionId = questionAnswer.FormQuestionId,
-                           QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                           QuestionText = questionAnswer.QuestionText,
-                           Text = MapToAmazonFilePath(questionAnswer),
-                           Description = questionAnswer.Description,
-                       })
-                       .ToList();
-                }
+                
+                var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
+                    .Select(questionAnswer => new FormQuestionAnswerDto()
+                    {
+                        FormQuestionId = questionAnswer.FormQuestionId, 
+                        QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                        QuestionText = questionAnswer.QuestionText, 
+                        Text = MapToAmazonFilePath(questionAnswer),
+                        Description = questionAnswer.Description,
+                    })
+                    .ToList();
 
                 dynamic response = new
                 {
