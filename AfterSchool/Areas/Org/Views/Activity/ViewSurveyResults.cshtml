@@ -1,10 +1,12 @@
-﻿@model Activity
+@model Activity
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var surveyResponse = (SurveyResponse)ViewBag.SurveyFeedback;
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
+    var amazonHelper = Utilities.GetNewAmazonHelper();
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -46,8 +48,9 @@
                                         <div class="viewSurveyHead">@question.QuestionText</div>
                                         @if (question.Text.IsNotEmpty())
                                         {
-                                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
-                                            <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                            @*dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text.ToJSON());
+                                            <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>*@
+                                            <div class="viewSurveyAnswer">@Html.Raw(question.Text)</div>
                                         }
                                     </div>
                                 </div>
@@ -72,15 +75,15 @@
                                         dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
                                         if (question.FormQuestionQuestionTypeId == QuestionType.Rating)
                                         {
-                                            <div class="viewSurveyAnswer">@Html.Raw(json[0].key)</div>
+                                            <div class="viewSurveyAnswer">@Html.Raw(json.key)</div>
                                         }
                                         else if (question.FormQuestionQuestionTypeId == QuestionType.Emoji)
                                         {
-                                            <div class="viewSurveyAnswer emoji">@Html.Raw(json[0].key)</div>
+                                            <div class="viewSurveyAnswer emoji">@Html.Raw(json.key)</div>
                                         }
                                         else
                                         {
-                                            <div class="viewSurveyAnswer">@Html.Raw(json[0].value)</div>
+                                            <div class="viewSurveyAnswer">@Html.Raw(json.value)</div>
                                         }
                                     }
                                 </div>
@@ -150,7 +153,7 @@
                                     <div class="waveformMain" style="max-width: 350px;height: 30px;overflow: hidden;">
                                         <div class="waveform"></div>
                                     </div>
-                                    <input type="hidden" value="@question.Text" class="waveValue">
+                                    <input type="hidden" value="@amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false)" class="waveValue">
                                 </div>
                             </div>
                         </div>
@@ -161,7 +164,7 @@
                             <div class="viewSurvey">
                                 <div class="viewSurveyHead">@question.QuestionText</div>
                                 <div class="viewSurveyAnswer">
-                                    <iframe width="420" height="315" src="@question.Text" style="max-width: 100%;"></iframe>
+                                    <iframe width="420" height="315" src="@amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false)" style="max-width: 100%;"></iframe>
                                 </div>
                             </div>
                         </div>

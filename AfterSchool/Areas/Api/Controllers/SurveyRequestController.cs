@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -72,16 +72,18 @@ namespace AfterSchool.Areas.Api.Controllers
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 foreach (var question in questions)
                 {
-                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value, msgs);
-                    if (questionAnswer.IsNotEmpty())
-                        formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
-                        {
-                            FormQuestionId = questionAnswer.FormQuestionId,
-                            QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText,
-                            Text = MapToAmazonFilePath(questionAnswer),
-                            Description = questionAnswer.Description,
-                        });
+
+                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
+                       .Select(questionAnswer => new FormQuestionAnswerDto()
+                       {
+                           FormQuestionId = questionAnswer.FormQuestionId, 
+                           QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                           QuestionText = questionAnswer.QuestionText, 
+                           Text = MapToAmazonFilePath(questionAnswer),
+                           Description = questionAnswer.Description,
+                       })
+                       .ToList();
+
                 }
 
                 dynamic response = new
@@ -113,15 +115,22 @@ namespace AfterSchool.Areas.Api.Controllers
                 var isLastSection = json.isLastSection ?? false;
                 var pin = json.pin;
                 var surveyRequestUid = json.surveyRequestUid;
+
                 if (!surveyRequestUid.IsGuid())
                     throw new Exception("Invalid Id.");
+
                 var surveyRequest = SurveyRequest.LoadByUid(surveyRequestUid.ToGuid(), msgs);
+
                 if (surveyRequest.IsEmpty())
                     throw new Exception("Invalid Request.");
+
                 var surveyResponse = SurveyResponse.LoadByPin(pin, msgs);
+
                 if (surveyResponse.IsEmpty())
                     throw new Exception("Invalid Pin.");
+
                 var currentRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value, msgs);
+
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant.");
                 var registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
@@ -145,13 +154,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             amsgs.AddRange(surveyResponse.Save(adc));
                         }
                         if (amsgs.HasNoErrors())
-                            RegistrationCommon.AddCustomQuestions(
-                            qvms,
-                            currentRegistrant,
-                            registration,
-                            null, 
-                            Request,
-                            amsgs, adc);
+                            AddCustomQuestions(surveyResponse, currentRegistrant, qvms, Request, amsgs, adc);
                     },
                     (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -192,6 +195,55 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
+        }
+
+        public static void AddCustomQuestions(SurveyResponse surveyResponse, Registrant registrant, List<FormQuestionViewModel> qvms, HttpRequestBase request, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo ||
+                        qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)
+                    {
+                        if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
+                        {
+                            var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
+                            //5 MB = 5242880 Bytes
+                            //File uploaded here should be less than of 5MB
+                            const int maxFileSize = Utilities.MaxFileSize;
+                            if (currentFileSizeInBytes <= maxFileSize)
+                                surveyResponse.AddOrUpdateAnswer(
+                                    registrant,
+                                    request.Files[qvm.Name].InputStream,
+                                    request.Files[qvm.Name].FileName,
+                                    qvm.Question,
+                                    qvm.Value,
+                                    msgs,
+                                    dc);
+                            else
+                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                        else
+                        {
+                            surveyResponse.UpdateDescription(
+                                qvm.Value,
+                                qvm.Question.ID.Value,
+                                msgs,
+                                dc);
+                        }
+                    }
+                    else
+                    {
+                        surveyResponse.AddOrUpdateAnswer(
+                            registrant,
+                            qvm.Value,
+                            qvm.Question,
+                            msgs,
+                            dc);
+                    }
+                });
         }
 
         private static string MapToAmazonFilePath(FormQuestionAnswer question)

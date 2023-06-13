@@ -14,13 +14,14 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SurveyResponseService
     {
+        private static readonly Random random = new Random();
+        private static readonly object syncLock = new object();
+
         public static SurveyResponse CreateSurveyFeedback(int surveyId, int registrantId, SurveyFeedbackStatus surveyFeedbackStatus, int userId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
             SurveyResponse surveyResponse = null;
-            var pinGenerator = new Random();
-            var pinCode = pinGenerator.Next(0, 1000000).ToString("D6");
             Database.ExecuteTransaction
             (
                action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -36,7 +37,7 @@ namespace AfterSchoolLibrary.Services
                        Uid = Guid.NewGuid(),
                        SurveyFeedbackStatusTypeId = surveyFeedbackStatus,
                        LastAttendedFormQuestionAnswerUid = null,
-                       Pin = pinCode,
+                       Pin = RandomNumber(0, 1000000),
                    };
 
                    msgs.AddRange(surveyResponse.Save(dc));
@@ -114,7 +115,7 @@ namespace AfterSchoolLibrary.Services
             return $"[{s}]";
         }
 
-        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Stream file, string filename, FormQuestion question, string description,
+        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Registrant registrant, Stream file, string filename, FormQuestion question, string description,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
@@ -124,6 +125,7 @@ namespace AfterSchoolLibrary.Services
                 if (msgs.HasNoErrors())
                     AddOrUpdateAnswer(
                         surveyResponse.ID.Value,
+                        registrant?.ID,
                         amazonFilePath,
                         question.ID.Value,
                         question.QuestionDataTypeId,
@@ -152,7 +154,7 @@ namespace AfterSchoolLibrary.Services
             return amazonFilePath;
         }
 
-        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, string answerText, FormQuestion question,
+        public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Registrant registrant,string answerText, FormQuestion question,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (question.IsNotEmpty())
@@ -162,6 +164,7 @@ namespace AfterSchoolLibrary.Services
 
                 AddOrUpdateAnswer(
                     surveyResponse.ID.Value,
+                    registrant?.ID.Value,
                     answerText,
                     question.ID.Value,
                     question.QuestionDataTypeId,
@@ -171,7 +174,7 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        private static void AddOrUpdateAnswer(int surveyResponseId, string answerText, int questionId, QuestionDataType questionDataType,
+        private static void AddOrUpdateAnswer(int surveyResponseId,int? registrantId, string answerText, int questionId, QuestionDataType questionDataType,
             string questionText, SystemMessages msgs, DatabaseConnection dc = null, string description = "")
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -182,6 +185,7 @@ namespace AfterSchoolLibrary.Services
             if (answer.IsEmpty())
                 answer = new FormQuestionAnswer
                 {
+                    RegistrantId = registrantId,
                     SurveyResponseId = surveyResponseId,
                     FormQuestionId = questionId,
                     QuestionDataTypeId = questionDataType,
@@ -209,6 +213,14 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(answer.Save(dc));
             }
 
+        }
+
+        public static string RandomNumber(int min, int max)
+        {
+            lock (syncLock)
+            { // synchronize
+                return random.Next(min, max).ToString("D6");
+            }
         }
     }
 }

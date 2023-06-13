@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
@@ -221,6 +221,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             const int maxFileSize = Utilities.MaxFileSize;
                             if (currentFileSizeInBytes <= maxFileSize)
                                 surveyResponse.AddOrUpdateAnswer(
+                                    null,
                                     request.Files[qvm.Name].InputStream,
                                     request.Files[qvm.Name].FileName,
                                     qvm.Question,
@@ -242,6 +243,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     else
                     {
                         surveyResponse.AddOrUpdateAnswer(
+                            null,
                             qvm.Value,
                             qvm.Question,
                             msgs,

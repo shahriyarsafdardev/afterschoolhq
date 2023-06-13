@@ -3366,7 +3366,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId,
                     student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
-                var masterRegistrant = Registrant.Load(student.Value.ToInteger())?.GetMasterRegistrant(msgs, dc);
+                //var masterRegistrant = Registrant.Load(student.Value.ToInteger())?.GetMasterRegistrant(msgs, dc);
 
                 //if (masterRegistrant.IsNotEmpty() && masterRegistrant.WebUserId.IsEmpty())
                 //{

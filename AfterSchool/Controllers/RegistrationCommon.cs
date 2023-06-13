@@ -451,6 +451,58 @@ namespace AfterSchool.Controllers
                 });
         }
 
+        public static void AddSurveyQuestions(List<FormQuestionViewModel> qvms, Registrant submittedRecord,
+            Registration registration, WebUser currentUser, HttpRequestBase request, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            // add custom answers to questions directly to this registration
+            qvms.Where(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.NotSet)
+                .ToList()
+                .ForEach(qvm =>
+                {
+                    if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo ||
+                        qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)
+                    {
+                        if (request.Files[qvm.Name].IsNotEmpty() && request.Files[qvm.Name].ContentLength > 0)
+                        {
+                            var currentFileSizeInBytes = request.Files[qvm.Name].ContentLength;
+                            //5 MB = 5242880 Bytes
+                            //File uploaded here should be less than of 5MB
+                            const int maxFileSize = Utilities.MaxFileSize;
+                            if (currentFileSizeInBytes <= maxFileSize)
+                                submittedRecord.AddOrUpdateAnswer(
+                                    request.Files[qvm.Name].InputStream,
+                                    request.Files[qvm.Name].FileName,
+                                    qvm.Question,
+                                    registration?.ID,
+                                    currentUser,
+                                    msgs,
+                                    dc,
+                                    qvm.Value);
+                            else
+                                msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
+                        }
+                        else
+                        {
+                            submittedRecord.UpdateDescription(
+                                qvm.Value,
+                                qvm.Question,
+                                msgs,
+                                dc);
+                        }
+                    }
+                    else
+                    {
+                        submittedRecord.AddOrUpdateAnswer(
+                            qvm.Value,
+                            qvm.Question,
+                            registration?.ID,
+                            currentUser,
+                            msgs,
+                            dc);
+                    }
+                });
+        }
+
         public static void AddSessionActivitiesToRegistration(ParticipationObject participationObject, Registration registration, Registrant submittedRecord,
             RegistrationPeriod period, HttpRequestBase request, SystemMessages msgs, DatabaseConnection dc = null)
         {
