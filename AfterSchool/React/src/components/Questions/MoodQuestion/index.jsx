@@ -9,6 +9,7 @@ import ErrorBand from 'components/common/ErrorBand';
 
 const MoodQuestion = ({ question, formik }) => {
   const classes = useStyles();
+  const defaultValue = { key: '', value: '' };
   const { touched, values, errors, setFieldValue } = formik;
 
   const { ID, Options, Text: title, IsRequired: isRequired } = question;
@@ -18,11 +19,18 @@ const MoodQuestion = ({ question, formik }) => {
   });
 
   const handleMoodChange = mood => () => {
-    setFieldValue(ID, JSON.stringify(mood));
+    setFieldValue(ID, JSON.stringify([mood]));
   };
 
-  const currentMood =
-    values[ID] && values[ID] !== null ? JSON.parse(values[ID]) : { key: '', value: '' };
+  const currentMood = (() => {
+    if (values[ID] && values[ID] !== null) {
+      try {
+        return JSON.parse(values[ID])[0];
+      } catch (e) {
+        return defaultValue;
+      }
+    } else return defaultValue;
+  })();
 
   const getClassName = moodName => {
     return moodName === currentMood?.value
