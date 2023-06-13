@@ -1,4 +1,5 @@
 @model Activity
+@using System.Text.RegularExpressions
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -7,6 +8,7 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
     var amazonHelper = Utilities.GetNewAmazonHelper();
+    string pattern = @"^\[+|\]+$";
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -36,18 +38,19 @@
             <div style="clear:both"></div>
             <div class="row">
                 @foreach (var question in (List<FormQuestionAnswer>)ViewBag.FormQuestionAnswers)
-                {
-                    if (question.FormQuestionQuestionTypeId != QuestionType.Audio && question.FormQuestionQuestionTypeId != QuestionType.Video && question.FormQuestionQuestionTypeId != QuestionType.FileUpload)
                     {
-                        if (question.FormQuestionQuestionTypeId == QuestionType.TextArea || question.FormQuestionQuestionTypeId == QuestionType.TextBlock)
+                        question.Text = Regex.Replace(question.Text, pattern, String.Empty);
+                        if (question.FormQuestionQuestionTypeId != QuestionType.Audio && question.FormQuestionQuestionTypeId != QuestionType.Video && question.FormQuestionQuestionTypeId != QuestionType.FileUpload)
                         {
-                            if (question.QuestionText.IsNotEmpty())
+                            if (question.FormQuestionQuestionTypeId == QuestionType.TextArea || question.FormQuestionQuestionTypeId == QuestionType.TextBlock)
                             {
+                                if (question.QuestionText.IsNotEmpty())
+                                {
                                 <div class="col-lg-12">
                                     <div class="viewSurvey">
                                         <div class="viewSurveyHead">@question.QuestionText</div>
                                         @if (question.Text.IsNotEmpty())
-                                        {
+                {
                                             @*dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text.ToJSON());
                                             <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>*@
                                             <div class="viewSurveyAnswer">@Html.Raw(question.Text)</div>
@@ -83,7 +86,7 @@
                                         }
                                         else
                                         {
-                                            <div class="viewSurveyAnswer">@Html.Raw(json.value)</div>
+                                            <div class="viewSurveyAnswer">@Html.Raw(json.key)</div>
                                         }
                                     }
                                 </div>
@@ -95,7 +98,7 @@
                             var str = "";
                             if (question.Text.IsNotEmpty())
                             {
-                                dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                                dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject("[" + question.Text + "]");
 
                                 foreach (var item in json)
                                 {
@@ -125,7 +128,7 @@
                                     <div class="viewSurveyAnswer">
                                         @if (question.Text.IsNotEmpty())
                                         {
-                                            <img src="@question.Text" style="max-height:350px;max-width: 100%;" />
+                                            <img src="@amazonHelper.GetFileLink(question.Text,System.DateTime.UtcNow.AddMinutes(5), false)" style="max-height:350px;max-width: 100%;" />
                                         }
                                     </div>
                                 </div>
@@ -153,7 +156,7 @@
                                     <div class="waveformMain" style="max-width: 350px;height: 30px;overflow: hidden;">
                                         <div class="waveform"></div>
                                     </div>
-                                    <input type="hidden" value="@amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false)" class="waveValue">
+                                    <input type="hidden" value="@amazonHelper.GetFileLink(question.Text,System.DateTime.UtcNow.AddMinutes(5), false)" class="waveValue">
                                 </div>
                             </div>
                         </div>
@@ -175,7 +178,7 @@
                             <div class="viewSurvey">
                                 <div class="viewSurveyHead">@question.QuestionText</div>
                                 <div class="viewSurveyAnswer">
-                                    <a href="@question.Text" target="_blank">@question.Text</a>
+                                    <a href="@amazonHelper.GetFileLink(question.Text,System.DateTime.UtcNow.AddMinutes(5), false)" target="_blank">@question.Text</a>
                                 </div>
                             </div>
                         </div>
