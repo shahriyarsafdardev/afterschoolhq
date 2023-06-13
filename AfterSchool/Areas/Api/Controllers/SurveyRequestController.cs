@@ -153,6 +153,12 @@ namespace AfterSchool.Areas.Api.Controllers
                             surveyResponse.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(surveyResponse.Save(adc));
                         }
+                        else if (surveyResponse.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.New)
+                        {
+                            surveyResponse.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.InProgress;
+                            surveyResponse.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(surveyResponse.Save(adc));
+                        }
                         if (amsgs.HasNoErrors())
                             AddCustomQuestions(surveyResponse, currentRegistrant, qvms, Request, amsgs, adc);
                     },

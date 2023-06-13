@@ -773,6 +773,7 @@
     <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\EditSurvey.cshtml" />
     <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\Activity\VolunteerRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishWizard4.cshtml" />

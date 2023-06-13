@@ -3283,6 +3283,35 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(activity);
         }
 
+        [HttpGet]
+        public ActionResult EditSurvey(string id)
+        {
+            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            
+            if (currentAccount.IsEmpty() || currentUser.IsEmpty() || !id.IsGuid())
+                return HttpNotFound();
+            
+            var surveyRequest = SurveyRequest.LoadByUid(id.ToGuid(), msgs);
+            var activity = currentAccount.GetActivity(surveyRequest.ActivityId, msgs);
+            var activityRegistrants = activity.GetRegistrantActivitiesForSurvey(msgs);
+            var selectedRegistrantIds = SurveyResponse.LoadBySurveyRequestId(surveyRequest.ID.Value, msgs).Select(sr => sr.RegistrantId).ToList();
+            
+            var studentList = activityRegistrants.Select(m => new SelectListItem
+            {
+                Text = m.RegistrantName,
+                Value = m.RegistrantId.Value.ToString(),
+                Disabled = selectedRegistrantIds.Contains(m.RegistrantId),
+                Selected = selectedRegistrantIds.Contains(m.RegistrantId),
+            });
+            
+            ViewBag.Messages = msgs;
+            ViewBag.SurveyRequest = surveyRequest;
+            ViewBag.Students = studentList.ToList();
+            
+            return View(activity);
+        }
 
         [HttpPost]
         public ActionResult SaveSurvey(string id, string activityId, string formId, string name, string optionalText,
@@ -3318,7 +3347,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (msgs.HasNoErrors())
                 {
-                    msgs.Add("Survey notifications sent successfully<br/>", MessageType.Success);
+                    msgs.Add("Saved successfully.", MessageType.Success);
 
                     TempData["msgs"] = msgs;
                     return RedirectToAction("Surveys", new { id, msgs });
@@ -3336,6 +3365,48 @@ namespace AfterSchool.Areas.Org.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult UpdateSurvey(int id, string activityId)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            var students = ToDictionary(Request.Form.Filter("studentList"));
+            var studentList = ConvertToStudentsList(students);
+            var surveyRequest = SurveyRequest.Load(id, msgs);
+            
+            if (currentAccount.IsEmpty() || currentUser.IsEmpty() || surveyRequest.IsEmpty())
+                return HttpNotFound();
+
+            if (!studentList.Any(a => a.Selected) && Request.Form["students"].ToString() == "false")
+                msgs.Add("Select Students", MessageType.Error);
+
+            if (msgs.HasNoErrors())
+            {
+                CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected && !a.Disabled).ToList(),
+                        currentUser.ID.Value, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    msgs.Add("Updated successfully.", MessageType.Success);
+
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("ViewSurvey", new { id, activityId });
+                }
+                else
+                {
+                    TempData["msgs"] = msgs;
+                    return RedirectToAction("EditSurvey", new { id = surveyRequest.Uid, msgs });
+                }
+            }
+            else
+            {
+                TempData["msgs"] = msgs;
+                return RedirectToAction("EditSurvey", new { id = surveyRequest.Uid, msgs });
+            }
+        }
+        
         private static IDictionary<string, string> ToDictionary(NameValueCollection source)
         {
             return source.Cast<string>().Select(s => new { Key = s, Value = source[s] })

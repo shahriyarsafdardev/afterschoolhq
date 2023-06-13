@@ -63,12 +63,9 @@
                     <div class="surveyCheck">@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed).Count() Completed</div>
                 </div>
                 <div class="col-lg-3">
-                        <button class="btn btn-success text-muted md-trigger" data-modal="modal-survey-url">Share <i class="s7-right-arrow"></i></button>
-                    <div class="pull-right hide">
-                        @if (surveyResponses.Count(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed) != surveyResponses.Count)
-                        {
-                            <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
-                        }
+                    <div class="pull-right">
+                        <a href="@Url.Action("EditSurvey", "activity", new { id = survey.Uid })" class="btn btn-primary searchActivitiesBtn">Edit</a>
+                        <button class="btn btn-success text-muted md-trigger" style="padding: 9px 29px;margin-left: 10px;" data-modal="modal-survey-url">Share</button>
                     </div>
                 </div>
             </div>
