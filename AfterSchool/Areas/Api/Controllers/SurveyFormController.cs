@@ -210,8 +210,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 .ToList()
                 .ForEach(qvm =>
                 {
-                    if (qvm.Value.IsNotEmpty() && qvm.Question.QuestionTypeId == QuestionType.CheckboxList)
-                        qvm.Value = qvm.Value.Substring(1, qvm.Value.Length - 2);
 
                     if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo || 
                         qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)

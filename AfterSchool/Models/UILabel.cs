@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Configuration;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -160,19 +159,6 @@ namespace AfterSchool.Models
             }
         }
 
-        public static string GetFormattedAnswerForFlattenedArray(string input)
-        {
-            try
-            {
-                string pattern = @"^\[+|\]+$";
-                string flattened = Regex.Replace(input, pattern, string.Empty);
-                return GetFormattedAnswerForArray(flattened);
-            }
-            catch
-            {
-                return "";
-            }
-        }
         public static string GetFormattedAnswerForArray(string text)
         {
             try
