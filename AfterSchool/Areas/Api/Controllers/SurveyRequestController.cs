@@ -170,16 +170,16 @@ namespace AfterSchool.Areas.Api.Controllers
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 foreach (var question in questions)
                 {
-                    var questionAnswer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value,currentRegistrant.ID.Value, msgs);
-                    if (questionAnswer.IsNotEmpty())
-                        formQuestionAnswerDtoList.Add(new FormQuestionAnswerDto()
-                        {
-                            FormQuestionId = questionAnswer.FormQuestionId,
-                            QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText,
-                            Text = MapToAmazonFilePath(questionAnswer),
-                            Description = questionAnswer.Description,
-                        });
+                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
+                       .Select(questionAnswer => new FormQuestionAnswerDto()
+                       {
+                           FormQuestionId = questionAnswer.FormQuestionId,
+                           QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                           QuestionText = questionAnswer.QuestionText,
+                           Text = MapToAmazonFilePath(questionAnswer),
+                           Description = questionAnswer.Description,
+                       })
+                       .ToList();
                 }
 
                 dynamic response = new
