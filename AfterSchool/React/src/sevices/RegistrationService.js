@@ -187,13 +187,25 @@ export default class RegistrationService {
       return;
     }
 
-    const age = calculateAge(value);
-    const error = `Age should be between ${minAge} and ${maxAge}`;
-
-    if (age < minAge) {
-      addToErrors(id, error);
-    } else if (age > maxAge) {
-      addToErrors(id, error);
+    if (typeof value === 'object') {
+      addToErrors(id, 'Invalid Date Format');
+    } else if (value === '') {
+      addToErrors(id, 'Date of Birth is required');
+    } else {
+      const currentDate = new Date();
+      const inputDate = new Date(value);
+      const minimalDate = new Date('01/01/1900');
+      if (inputDate > currentDate) {
+        addToErrors(id, 'Date should not be after maximal date');
+      } else if (inputDate < minimalDate) {
+        addToErrors(id, 'Date should not be before minimal date');
+      } else {
+        const age = calculateAge(value);
+        const error = `Age should be between ${minAge} and ${maxAge}`;
+        if (age < minAge || age > maxAge) {
+          addToErrors(id, error);
+        }
+      }
     }
   }
 
