@@ -3434,24 +3434,6 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var surveyResponse = SurveyResponseService.CreateSurveyFeedback(surveyRequestId,
                     student.Value.ToInteger(), SurveyFeedbackStatus.New, currentUserId, msgs);
-                //var masterRegistrant = Registrant.Load(student.Value.ToInteger())?.GetMasterRegistrant(msgs, dc);
-
-                //if (masterRegistrant.IsNotEmpty() && masterRegistrant.WebUserId.IsEmpty())
-                //{
-                //    var inviteCode = RegistrantInviteCodeService.GetInviteCode(
-                //        surveyResponseId: surveyResponse.ID.Value,
-                //        registrantId: surveyResponse.RegistrantId.Value,
-                //        currentUserId: currentUserId,
-                //        msgs: msgs,
-                //        dc: dc);
-
-                //    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
-                //        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, inviteCode.Code,
-                //        inviteCode.ID.Value, null));
-                //}
-                //else
-                //    BackgroundJob.Enqueue(() => SurveyResponseService.NotifyStudents(surveyResponse.ID.Value,
-                //        surveyResponse.RegistrantId.Value, surveyResponse.SurveyRequestId.Value, null, 0, null));
             });
         }
 
