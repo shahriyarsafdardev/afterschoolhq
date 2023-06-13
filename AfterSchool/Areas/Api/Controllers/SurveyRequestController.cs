@@ -24,18 +24,25 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 if (!uid.IsGuid())
                     throw new Exception("Invalid Id.");
+
                 var surveyRequest = SurveyRequest.LoadByUid(uid.ToGuid(), msgs);
+
                 if (surveyRequest.IsEmpty())
                     throw new Exception("Invalid Request.");
+
                 var surveyResponse = SurveyResponse.LoadByPin(pin, msgs);
+
                 if (surveyResponse.IsEmpty())
                     throw new Exception("Invalid Pin.");
+
                 var currentRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value, msgs);
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant.");
+
                 var form = Form.Load(surveyRequest.FormId, msgs);
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form.");
+
                 if (form.FormTypeId != FormType.Survey || !(form.IsPublished ?? false))
                     throw new Exception("Invalid Form.");
 
@@ -69,7 +76,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                     })
                     .ToList();
+
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+
                 foreach (var question in questions)
                 {
 
@@ -93,6 +102,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     Pin = pin,
                     SurveyRequestUid = uid,
                 };
+
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
@@ -133,8 +143,11 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant.");
+
                 var registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
+
                 var form = Form.Load(surveyRequest.FormId, msgs);
+
                 if (form.IsEmpty())
                     throw new Exception("Invalid Form.");
 
@@ -143,6 +156,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
                 Database.ExecuteTransaction
                 (
                     (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -168,6 +182,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 );
 
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
+
                 foreach (var question in questions)
                 {
                     formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
@@ -232,23 +247,19 @@ namespace AfterSchool.Areas.Api.Controllers
                                 msgs.Add("Upload a file less than or equal to 5 megabytes", MessageType.UserError);
                         }
                         else
-                        {
                             surveyResponse.UpdateDescription(
-                                qvm.Value,
-                                qvm.Question.ID.Value,
-                                msgs,
-                                dc);
-                        }
+                                    qvm.Value,
+                                    qvm.Question.ID.Value,
+                                    msgs,
+                                    dc);
                     }
                     else
-                    {
                         surveyResponse.AddOrUpdateAnswer(
-                            registrant,
-                            qvm.Value,
-                            qvm.Question,
-                            msgs,
-                            dc);
-                    }
+                                registrant,
+                                qvm.Value,
+                                qvm.Question,
+                                msgs,
+                                dc);
                 });
         }
 
