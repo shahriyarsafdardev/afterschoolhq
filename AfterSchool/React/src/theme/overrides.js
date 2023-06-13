@@ -35,14 +35,12 @@ export default {
     root: {
       '&.Mui-error': {
         color: '#FF7070'
-        // fontSize: 12
       }
     }
   },
   MuiPaper: {
     root: {
-      width: 'fit-content',
-      padding: '0px 15px'
+      width: 'fit-content'
     }
   },
   MuiDialogTitle: {
