@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -147,8 +147,8 @@ namespace AfterSchoolLibrary.Services
                         
                         if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                         {
-                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                            row.Add(Convert.ToString(json.blocks[0].text));
+                            //dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                            row.Add(Convert.ToString(formQuestionAnswer.Text));
                         }
                         else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                         {
