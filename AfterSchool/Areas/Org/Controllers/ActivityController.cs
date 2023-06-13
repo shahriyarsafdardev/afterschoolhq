@@ -3286,9 +3286,11 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult EditSurvey(string id)
         {
-            var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages) TempData["msgs"] : new SystemMessages();
+            var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+
+            HandleTempMessages(msgs);
             
             if (currentAccount.IsEmpty() || currentUser.IsEmpty() || !id.IsGuid())
                 return HttpNotFound();
@@ -3305,7 +3307,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 Disabled = selectedRegistrantIds.Contains(m.RegistrantId),
                 Selected = selectedRegistrantIds.Contains(m.RegistrantId),
             });
-            
+
             ViewBag.Messages = msgs;
             ViewBag.SurveyRequest = surveyRequest;
             ViewBag.Students = studentList.ToList();
@@ -3382,6 +3384,8 @@ namespace AfterSchool.Areas.Org.Controllers
             if (!studentList.Any(a => a.Selected) && Request.Form["students"].ToString() == "false")
                 msgs.Add("Select Students", MessageType.Error);
 
+            SetTempMessages(msgs);
+
             if (msgs.HasNoErrors())
             {
                 CreateSurveys(surveyRequest.ID.Value, studentList.Where(a => a.Selected && !a.Disabled).ToList(),
@@ -3390,21 +3394,14 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (msgs.HasNoErrors())
                 {
                     msgs.Add("Updated successfully.", MessageType.Success);
-
-                    TempData["msgs"] = msgs;
+                    SetTempMessages(msgs);
                     return RedirectToAction("ViewSurvey", new { id, activityId });
                 }
                 else
-                {
-                    TempData["msgs"] = msgs;
                     return RedirectToAction("EditSurvey", new { id = surveyRequest.Uid, msgs });
-                }
             }
             else
-            {
-                TempData["msgs"] = msgs;
                 return RedirectToAction("EditSurvey", new { id = surveyRequest.Uid, msgs });
-            }
         }
         
         private static IDictionary<string, string> ToDictionary(NameValueCollection source)
