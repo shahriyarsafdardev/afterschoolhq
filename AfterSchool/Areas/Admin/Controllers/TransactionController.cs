@@ -234,7 +234,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        refund = transaction.RefundPayer(0, SessionVariables.CurrentUser, msgs);
+                        refund = transaction.RefundPayer(null, SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }
