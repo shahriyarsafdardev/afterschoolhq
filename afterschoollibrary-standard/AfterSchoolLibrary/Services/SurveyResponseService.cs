@@ -126,7 +126,7 @@ namespace AfterSchoolLibrary.Services
                     AddOrUpdateAnswer(
                         surveyResponse.ID.Value,
                         registrant?.ID,
-                        amazonFilePath,
+                        Utilities.GetNewAmazonHelper().GetFileLink(amazonFilePath),
                         question.ID.Value,
                         question.QuestionDataTypeId,
                         question.Text,
@@ -149,10 +149,11 @@ namespace AfterSchoolLibrary.Services
             var formFolder = $"{form.Name.Replace(regEx, "")}-{form.ID}";
             var amazonFilePath = $"{formFolder}/{filename}".ToLower();
 
-            msgs.AddRange(ah.AddFile(file, amazonFilePath));
+            msgs.AddRange(ah.AddFile(file, amazonFilePath, true));
 
             return amazonFilePath;
         }
+
 
         public static void AddOrUpdateAnswer(this SurveyResponse surveyResponse, Registrant registrant,string answerText, FormQuestion question,
             SystemMessages msgs, DatabaseConnection dc = null)

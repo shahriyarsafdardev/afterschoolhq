@@ -83,7 +83,7 @@ namespace AfterSchool.Areas.Api.Controllers
                            FormQuestionId = questionAnswer.FormQuestionId, 
                            QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
                            QuestionText = questionAnswer.QuestionText, 
-                           Text = MapToAmazonFilePath(questionAnswer),
+                           Text = questionAnswer.Text,
                            Description = questionAnswer.Description,
                        })
                        .ToList();
@@ -180,7 +180,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         FormQuestionId = questionAnswer.FormQuestionId, 
                         QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
                         QuestionText = questionAnswer.QuestionText, 
-                        Text = MapToAmazonFilePath(questionAnswer),
+                        Text = questionAnswer.Text,
                         Description = questionAnswer.Description,
                     })
                     .ToList();

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -129,9 +129,8 @@ namespace AfterSchoolLibrary.Services
         private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate,
             string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)
         {
-            string pattern = @"^\[+|\]+$";
             var row = new List<string>();
-            
+
             row.Add(createDate.IsNotEmpty() ? createDate.Value.ToString("MM/dd/yyyy") : "");
             row.Add(lastModifiedDate.IsNotEmpty() ? lastModifiedDate.Value.ToString("MM/dd/yyyy") : "");
             row.Add(firstName);
@@ -142,13 +141,19 @@ namespace AfterSchoolLibrary.Services
                 {
                     if (formQuestionAnswer.Text.IsNotBlank())
                     {
-                        
-                        formQuestionAnswer.Text = Regex.Replace(formQuestionAnswer.Text, pattern, String.Empty);
-                        
                         if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                         {
-                            //dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                            row.Add(Convert.ToString(formQuestionAnswer.Text));
+                            var checkJson = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text);
+
+                            if (checkJson)
+                            {
+                                dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                                row.Add(Convert.ToString(json.blocks[0].text));   
+                            }
+                            else
+                            {
+                                row.Add(Convert.ToString(formQuestionAnswer.Text));  
+                            }
                         }
                         else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                         {
@@ -159,14 +164,20 @@ namespace AfterSchoolLibrary.Services
                         {
                             dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                             if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Rating)
-                                row.Add(Convert.ToString(json.key));
+                                row.Add(Convert.ToString(json[0].key));
                             else
-                                row.Add(Convert.ToString(json.value));
+                                row.Add(Convert.ToString(json[0].value));
                         }
                         else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                         {
                             var str = "";
-                            dynamic json = JsonConvert.DeserializeObject("[" + formQuestionAnswer.Text + "]");
+                            
+                            if (formQuestionAnswer.Text.StartsWith("[["))
+                            {
+                                formQuestionAnswer.Text = formQuestionAnswer.Text.Substring(1, formQuestionAnswer.Text.Length - 2);
+                            }
+                            
+                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                             foreach (var item in json)
                                 if (str.IsNotEmpty())
                                     str = str + ", " + item.value;
