@@ -1,4 +1,4 @@
-export { default as questionType } from './questionType';
+export { simpleQuestionTypes as questionType } from './questionType';
 export const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
 
 export const gradeIds = {

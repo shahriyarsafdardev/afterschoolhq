@@ -1,4 +1,4 @@
-export default {
+export const simpleQuestionTypes = {
   date: 8,
   text: 1,
   email: 7,
@@ -11,3 +11,14 @@ export default {
   fileUpload: 12,
   checkBoxList: 4
 };
+
+const questionTypes = {
+  ...simpleQuestionTypes,
+  video: 13,
+  audio: 14,
+  rating: 17,
+  mood: 16,
+  photo: 15
+};
+
+export default questionTypes;
