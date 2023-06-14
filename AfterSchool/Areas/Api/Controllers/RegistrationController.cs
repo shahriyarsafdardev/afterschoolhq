@@ -80,12 +80,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
                 
-                if (currentRegistrant.IsAdult)
-                {
+                if (currentRegistrant.IsAdult) 
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
                     ).ToList();
-                }
                 
                 var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
@@ -103,7 +101,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     );
                 }
                 
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value))
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -288,10 +286,10 @@ namespace AfterSchool.Areas.Api.Controllers
                                 dc : adc);
                             
                             if(parentRegistrant.IsNotEmpty())
-                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                     
                             if(parent2Registrant.IsNotEmpty())
-                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
                         },
                         smsgs =>
                         {
@@ -515,7 +513,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
                                     };
 
-                                    var children = currentAccount.GetStudentRegistrants(msgs, adc);
+                                    var children = currentAccount.GetStudentRegistrants(amsgs, adc);
 
                                     children.ForEach(child =>
                                     {
@@ -721,22 +719,18 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                         
                         if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
-                        {
                             currentRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Started, currentUser, amsgs, adc);
-                        }
                         
                         qvms.ForEach(qvm =>
                         {
 
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
-                            {
                                 currentRegistrant.AddOrUpdateAnswer(
                                     qvm.Value.IfEmpty("").Trim(),
                                     qvm.Question,
                                     currentUser,
                                     amsgs,
                                     adc);
-                            }
                         });
                         
                         RegistrationCommon.AddCustomQuestions(
@@ -764,7 +758,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
 
                 return Json(
@@ -1031,11 +1025,12 @@ namespace AfterSchool.Areas.Api.Controllers
 
         private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
         {
+            var msgs = new SystemMessages();
             var formQuestionDtoList = new List<FormQuestionDto>();
             var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
             foreach (var question in questions)
             {
-                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType);
+                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
                 if (audienceSettings?.Show ?? question.IsActive)
                 {
                     formQuestionDtoList.Add(

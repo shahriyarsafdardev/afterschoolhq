@@ -68,25 +68,20 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("formedit", "account", new { id, qg });
-
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
-
             if (id.IsEmpty())
                 return HttpNotFound();
-            
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var formUrl = FormService.BuildShortHomePageUrlForm(form.Uid);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
             questionGroups.AddRange(individualGroups);
-
             FormQuestionGroup questionGroup;
 
             if (qg.IsNumber())

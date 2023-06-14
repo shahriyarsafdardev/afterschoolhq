@@ -12,39 +12,39 @@ namespace AfterSchool.Areas.Api.Models
         public bool Show { get; set; }
         public bool Required { get; set; }
 
-        public static FormQuestionSettingDto MapToDto(FormQuestionSettings QuestionSettings)
+        public static FormQuestionSettingDto MapToDto(FormQuestionSettings questionSettings)
         {
             return new FormQuestionSettingDto()
             {
-                Audience = QuestionSettings.Audience,
-                Show = QuestionSettings.Show,
-                Required = QuestionSettings.Required,
+                Audience = questionSettings.Audience,
+                Show = questionSettings.Show,
+                Required = questionSettings.Required,
             };
         }
 
-        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> QuestionSettingsList, int QuestionId = 0, FormType currFormType = FormType.NotSet)
+        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> questionSettingsList, int questionId = 0, FormType currFormType = FormType.NotSet)
         {
             var audienceTypes = currFormType.Equals(FormType.VolunteerForm) ? new List<AudienceType>(){AudienceType.Volunteer} :
                 new List<AudienceType>(){ AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
-            if (QuestionSettingsList.Count != audienceTypes.Count())
+            if (questionSettingsList.Count != audienceTypes.Count())
             {
-                audienceTypes.ForEach(AudienceType =>
+                audienceTypes.ForEach(audienceType =>
                                 {
-                                    var exists = QuestionSettingsList.Any(QuestionSetting => QuestionSetting.Audience.Equals(AudienceType));
+                                    var exists = questionSettingsList.Any(questionSetting => questionSetting.Audience.Equals(audienceType));
                                     if (!exists)
                                     {
-                                        QuestionSettingsList.Add(new FormQuestionSettings()
+                                        questionSettingsList.Add(new FormQuestionSettings()
                                         {
-                                            Audience = AudienceType,
+                                            Audience = audienceType,
                                             Show = true,
                                             Required = true,
                                         });
                                     }
                                 });
             }
-            return QuestionSettingsList.Select(
-                QuestionSetting =>
-                MapToDto(QuestionSetting))
+            return questionSettingsList.Select(
+                questionSetting =>
+                MapToDto(questionSetting))
                 .ToList();
         }
     }

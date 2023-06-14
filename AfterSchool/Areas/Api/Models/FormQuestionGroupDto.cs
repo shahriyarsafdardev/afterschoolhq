@@ -35,24 +35,24 @@ namespace AfterSchool.Areas.Api.Models
             return !IsNull();
         }
 
-        public static FormQuestionGroupDto MapToDto(FormQuestionGroup QuestionGroup)
+        public static FormQuestionGroupDto MapToDto(FormQuestionGroup questionGroup)
         {
             return new FormQuestionGroupDto()
             {
-                ID = QuestionGroup.ID,
-                FormId = QuestionGroup.FormId,
-                Name = QuestionGroup.Name,
-                DisplayOrder = QuestionGroup.DisplayOrder,
-                QuestionGroupDataTypeId = QuestionGroup.QuestionGroupDataTypeId,
-                IsDeleted = QuestionGroup.IsDeleted,
+                ID = questionGroup.ID,
+                FormId = questionGroup.FormId,
+                Name = questionGroup.Name,
+                DisplayOrder = questionGroup.DisplayOrder,
+                QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                IsDeleted = questionGroup.IsDeleted,
             };
         }
 
-        public static List<FormQuestionGroupDto> MapToDtoList(List<FormQuestionGroup> QuestionGroupList)
+        public static List<FormQuestionGroupDto> MapToDtoList(List<FormQuestionGroup> questionGroupList)
         {
-            return QuestionGroupList
-                .Select(QuestionGroup => 
-                MapToDto(QuestionGroup))
+            return questionGroupList
+                .Select(questionGroup => 
+                MapToDto(questionGroup))
                 .ToList();
         }
 

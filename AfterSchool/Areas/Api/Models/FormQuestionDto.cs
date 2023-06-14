@@ -24,23 +24,23 @@ namespace AfterSchool.Areas.Api.Models
         public QuestionDataType QuestionDataTypeId { get; set; }
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId { get; set; }
 
-        public void UpdateNonDefaultFields(FormQuestion Question)
+        public void UpdateNonDefaultFields(FormQuestion question)
         {
-            Question.Text = this.Text;
-            Question.Description = this.Description;
-            Question.Options = this.Options;
-            Question.Link = this.Link;
-            Question.QuestionTypeId = this.QuestionTypeId;
-            Question.IsDeleted = this.IsDeleted;
-            Question.IsLocked = this.IsLocked;
+            question.Text = this.Text;
+            question.Description = this.Description;
+            question.Options = this.Options;
+            question.Link = this.Link;
+            question.QuestionTypeId = this.QuestionTypeId;
+            question.IsDeleted = this.IsDeleted;
+            question.IsLocked = this.IsLocked;
         }
 
-        public void UpdateDefaultFields(FormQuestion Question)
+        public void UpdateDefaultFields(FormQuestion question)
         {
-            Question.IsActive = IsActive;
-            Question.IsRequired = IsRequired;
-            Question.IsAnswerDescriptionEnabled = IsAnswerDescriptionEnabled;
-            Question.DisplayOrder = DisplayOrder;
+            question.IsActive = IsActive;
+            question.IsRequired = IsRequired;
+            question.IsAnswerDescriptionEnabled = IsAnswerDescriptionEnabled;
+            question.DisplayOrder = DisplayOrder;
         }
 
         public FormQuestionDto changeDispOrder(int dispOrder)
@@ -49,40 +49,40 @@ namespace AfterSchool.Areas.Api.Models
             return this;
         }
 
-        public static List<FormQuestionDto> validateByDisplayOrder(List<FormQuestionDto> FormQuestionsToValidate)
+        public static List<FormQuestionDto> validateByDisplayOrder(List<FormQuestionDto> formQuestionsToValidate)
         {
             var validatedQuestions = new List<FormQuestionDto>();
-            validatedQuestions.AddRange(FormQuestionsToValidate.Where(x=>x.IsLocked).ToList().OrderBy(x=>x.DisplayOrder).Select((obj,index)=>obj.changeDispOrder(index+1)));
-            foreach(var question in FormQuestionsToValidate.Where(x => !x.IsLocked).ToList())
+            validatedQuestions.AddRange(formQuestionsToValidate.Where(x=>x.IsLocked).ToList().OrderBy(x=>x.DisplayOrder).Select((obj,index)=>obj.changeDispOrder(index+1)));
+            foreach(var question in formQuestionsToValidate.Where(x => !x.IsLocked).ToList())
                 validatedQuestions.Add(question.changeDispOrder(validatedQuestions.Count + 1));
             return validatedQuestions;
         }
 
-        public static FormQuestionDto MapToDto(FormQuestion Question, FormType formType = FormType.NotSet)
+        public static FormQuestionDto MapToDto(FormQuestion question, FormType formType = FormType.NotSet)
         {
             return new FormQuestionDto()
             {
-                ID = Question.ID ?? 0,
-                FormQuestionGroupId = Question.FormQuestionGroupId,
-                Text = (Question.QuestionTypeId == QuestionType.TextBlock ? Question.Description : Question.Text),
-                Description = (Question.QuestionTypeId == QuestionType.TextBlock ? Question.Text : Question.Description),
-                GroupTitle = Question.FormQuestionGroupName,
-                Options = Question.Options,
-                IsRequired = Question.IsRequired,
-                DisplayOrder = Question.DisplayOrder,
-                IsActive = Question.IsActive,
-                IsDeleted = Question.IsDeleted,
-                QuestionTypeId = Question.QuestionTypeId,
-                QuestionDataTypeId = Question.QuestionDataTypeId,
-                FormQuestionGroupQuestionGroupDataTypeId = Question.FormQuestionGroupQuestionGroupDataTypeId,
-                QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(Question.ID), Question.ID??0,formType),
-                IsLocked = Question.IsLocked,
+                ID = question.ID ?? 0,
+                FormQuestionGroupId = question.FormQuestionGroupId,
+                Text = (question.QuestionTypeId == QuestionType.TextBlock ? question.Description : question.Text),
+                Description = (question.QuestionTypeId == QuestionType.TextBlock ? question.Text : question.Description),
+                GroupTitle = question.FormQuestionGroupName,
+                Options = question.Options,
+                IsRequired = question.IsRequired,
+                DisplayOrder = question.DisplayOrder,
+                IsActive = question.IsActive,
+                IsDeleted = question.IsDeleted,
+                QuestionTypeId = question.QuestionTypeId,
+                QuestionDataTypeId = question.QuestionDataTypeId,
+                FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(question.ID), question.ID??0,formType),
+                IsLocked = question.IsLocked,
             };
         }
 
-        public static List<FormQuestionDto> MapToDtoList(List<FormQuestion> QuestionList, FormType formType = FormType.NotSet)
+        public static List<FormQuestionDto> MapToDtoList(List<FormQuestion> questionList, FormType formType = FormType.NotSet)
         {
-            return QuestionList
+            return questionList
                 .Select(question=>
                 MapToDto(question, formType))
                 .ToList();
