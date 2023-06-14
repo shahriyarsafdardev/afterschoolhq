@@ -144,7 +144,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         var questionGroupExists = FormQuestionGroup.Exists(criterias:
                             new Hashtable{
-                                {"ID", formQuestionGroup.ID },
+                                {"ID", formQuestionGroup.Id },
                                 {"FormId", requestedForm.ID},
                                 {"IsDeleted", false},
                             },
@@ -156,7 +156,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             currentQuestionGroup = FormQuestionGroup
                                     .Load(criterias: new Hashtable{
-                                        {"ID", formQuestionGroup.ID },
+                                        {"ID", formQuestionGroup.Id },
                                         {"FormId", requestedForm.ID},
                                         {"IsDeleted", false},
                                     },
@@ -282,7 +282,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 msgs.Add(ex.Message, MessageType.Error);
             }
             if (saveQuestion ?? false)
-                return GetFormQuestions(formId ?? 0,formQuestionGroup.ID ?? 0);
+                return GetFormQuestions(formId ?? 0,formQuestionGroup.Id);
             
             return Json(
                         new ApiResponse(msgs, null),
