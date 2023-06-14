@@ -27,6 +27,8 @@ export default {
   getSurveyFormDataAPI: (formUid, surveyResponseUid) =>
     `Api/SurveyForm/GetForm?formUid=${formUid}&surveyResponseUid=${surveyResponseUid}`,
   submitSurveyFormDataAPI: 'Api/SurveyForm/AddUpdateAnswers',
+  getSurveyFormDataWithPinAPI: (uid, pin) => `Api/SurveyRequest/GetForm?uid=${uid}&pin=${pin}`,
+  submitSurveyFormDataWithPinAPI: 'Api/SurveyRequest/AddUpdateAnswers',
 
   //Paths & URLs
   paymentScreenPath: uId => `/account/payment/${uId}`,
@@ -37,6 +39,8 @@ export default {
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   surveyUrl: formUid => `/reactapp/survey/${formUid}`,
+  pinSurveyThankyouUrl: srUid => `/reactapp/sr/${srUid}/thankyou`,
+  pinSurveyUrl: (srUid, pin) => `/reactapp/sr/${srUid}?pin=${pin}`,
   surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,

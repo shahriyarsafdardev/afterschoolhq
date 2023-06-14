@@ -1196,6 +1196,9 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(
                 dq.ExecuteSql(
                     "CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
+            msgs.AddRange(
+                dq.ExecuteSql(
+                    "CREATE INDEX IX_SurveyResponse_SurveyRequestId_Pin ON [SurveyResponse] (Pin,SurveyRequestId)"));
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
             msgs.AddRange(dq.ExecuteSql(

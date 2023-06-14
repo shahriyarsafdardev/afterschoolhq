@@ -57,37 +57,50 @@ export const useSurveyActions = () => {
     setAnsweredQuestions
   } = SurveySlice.actions;
   const dispatch = useDispatch();
+  const redirectToThankYou = (pin, uid) => {
+    if (Number(pin)) utils.navigateTo(apiRoutes.pinSurveyThankyouUrl(uid));
+    else utils.navigateTo(apiRoutes.surveyThankyouUrl(uid));
+  };
 
-  const loadFormData = async (formUid, surveyResponseUid) => {
+  const loadFormData = async (formUid, surveyResponseUid, pin) => {
     dispatch(setResponseId(surveyResponseUid));
     dispatch(loadingFormData());
-    await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid).then(({ obj, msgs }) => {
-      dispatch(setMsgs(msgs));
-      if (obj?.SurveyResponseStatus === 'Completed') {
-        return utils.navigateTo(apiRoutes.surveyThankyouUrl(formUid));
+    await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid, pin).then(
+      ({ obj, msgs }) => {
+        dispatch(setMsgs(msgs));
+        if (obj?.SurveyResponseStatus === 'Completed') return redirectToThankYou(obj?.Pin, formUid);
+        if (obj) dispatch(setFormData(obj));
+        if (!msgs.length) dispatch(formDataLoaded());
       }
-      if (obj) dispatch(setFormData(obj));
-      if (!msgs.length) dispatch(formDataLoaded());
-    });
+    );
   };
 
   const submitFormSectionData = async (
     { answerQuery: { answerQuery, groupId }, formData },
     formUid,
     surveyResponseUid,
-    isLastSection
+    isLastSection,
+    srUid,
+    pin
   ) => {
+    if (pin) {
+      formData.append('surveyRequestUid', srUid);
+      formData.append('pin', pin);
+    } else {
+      formData.append('formUid', formUid);
+      formData.append('surveyResponseUid', surveyResponseUid);
+    }
     formData.append('groupId', groupId);
-    formData.append('formUid', formUid);
     formData.append('isLastSection', isLastSection);
-    formData.append('surveyResponseUid', surveyResponseUid);
     formData.append('answers', new URLSearchParams(answerQuery).toString());
-    return await SurveyRepository.submitFormSection(formData).then(({ data: { msgs, obj } }) => {
-      dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
-      dispatch(setResponseId(obj?.SurveyResponseUid));
-      dispatch(setMsgs(msgs));
-      return obj?.SurveyResponseUid;
-    });
+    return await SurveyRepository.submitFormSection(formData, pin).then(
+      ({ data: { msgs, obj } }) => {
+        dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
+        dispatch(setResponseId(obj?.SurveyResponseUid));
+        dispatch(setMsgs(msgs));
+        return obj?.SurveyResponseUid;
+      }
+    );
   };
 
   const clearMessages = () => {

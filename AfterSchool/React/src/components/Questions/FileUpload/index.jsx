@@ -30,7 +30,14 @@ const FileUpload = ({ formik, question }) => {
   };
 
   const parseFileName = () => {
-    if (typeof values[ID] === 'string') return values[ID].split('/').at(-1);
+    if (typeof values[ID] === 'string')
+      try {
+        return values[ID].split('?')[0]
+          .split('/')
+          .at(-1);
+      } catch {
+        return '';
+      }
   };
   const getFileName = () => values[ID]?.name || parseFileName() || '';
 

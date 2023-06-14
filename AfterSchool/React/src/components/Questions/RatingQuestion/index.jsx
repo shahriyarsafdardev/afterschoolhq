@@ -21,10 +21,18 @@ const RatingQuestion = ({ question, formik }) => {
 
   const handleRadioChange = ({ target: { value } }) => {
     const selectedOption = options.find(option => option.key === value);
-    setFieldValue(ID, JSON.stringify(selectedOption));
+    setFieldValue(ID, JSON.stringify([selectedOption]));
   };
 
-  const ratingValue = values[ID] && values[ID] !== null ? JSON.parse(values[ID])?.key : '';
+  const ratingValue = (() => {
+    if (values[ID] && values[ID] !== null) {
+      try {
+        return JSON.parse(values[ID])[0]?.key;
+      } catch (e) {
+        return '';
+      }
+    } else return '';
+  })();
 
   useEffect(() => {
     setLeastValue(options[0].value);

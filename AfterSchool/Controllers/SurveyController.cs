@@ -12,6 +12,14 @@ namespace AfterSchool.Controllers
         {
             if (!id.IsGuid()) return Redirect($"~/404.html");
             return Redirect($"~/reactapp/survey/{id.ToGuid()}");
-        }   
+        }
+
+        // Get SurveyRequest/uid
+        [HttpGet]
+        public ActionResult Sr(string id)
+        {
+            if (!id.IsGuid()) return Redirect($"~/404.html");
+            return Redirect($"~/reactapp/sr/{id.ToGuid()}");
+        }
     }
 }

@@ -4,6 +4,7 @@
     var msgs = (SystemMessages) ViewBag.Messages;
     var surveyResponses = (List<SurveyResponse>) ViewBag.GetSurveyFeedback;
     var survey = (SurveyRequest) ViewBag.Survey;
+    var surveyUrl = ViewBag.SurveyUrl;
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
@@ -63,10 +64,8 @@
                 </div>
                 <div class="col-lg-3">
                     <div class="pull-right">
-                        @if (surveyResponses.Count(a => a.SurveyFeedbackStatusTypeId == SurveyFeedbackStatus.Completed) != surveyResponses.Count)
-                        {
-                            <a href="javascript:void(0)" class="btn btn-success surveybtn reminder" data-count="@surveyResponses.Where(a => a.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed).Count()">Remind To All Incomplete</a>
-                        }
+                        <a href="@Url.Action("EditSurvey", "activity", new { id = survey.Uid })" class="btn btn-primary searchActivitiesBtn">Edit</a>
+                        <button class="btn btn-success text-muted md-trigger" style="padding: 9px 29px;margin-left: 10px;" data-modal="modal-survey-url">Share</button>
                     </div>
                 </div>
             </div>
@@ -77,9 +76,9 @@
                     <tr>
                         <th></th>
                         <th>Name</th>
+                        <th>Student PIN</th>
                         <th>Status</th>
                         <th>Last Modified</th>
-                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -96,16 +95,13 @@
                                 @surveyResponse.GetRegistrantName()
                             </td>
                             <td>
+                                @surveyResponse.Pin
+                            </td>
+                            <td>
                                 @surveyResponse.SurveyFeedbackStatusTypeId.ToString().SplitByUpperCase()
                             </td>
                             <td>
                                 @(surveyResponse.LastModifiedDate.IsNotEmpty() ? survey.LastModifiedDate.Value.ToString("MM/dd/yyyy") : "")
-                            </td>
-                            <td>
-                                @if (surveyResponse.SurveyFeedbackStatusTypeId != SurveyFeedbackStatus.Completed)
-                                {
-                                    <a href="javascript:void(0)" class="linkGreen reminder" data-count="1" data-id="@surveyResponse.ID">Send Reminder</a>
-                                }
                             </td>
                         </tr>
                     }
@@ -131,7 +127,41 @@
         </div>
     </div>
 </div>
+<div id="modal-survey-url" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Share Survey</h3>
+        </div>
+        <div class="modal-body form text-center">
+            <div class="flex-row">
+                <div class="m-5 p-5">
+                    <p>Copy the link below to invite more participants to take your survey.</p>
+                </div>
+                <div class="form-group p-5">
+                    <div class="col-md-11">
+                        <input type="text" value="@surveyUrl" id="account-reg-url" onclick="this.select()" class="form-control inline col-md-4 "/>
+                    </div>
+                    <div class="col-md-1 pt-1" style="margin-top:5px">
+                        <span onclick="WebPage.copySelection('@surveyUrl', 'URL has been copied')" title="Copy Url">
+                            <i class="s7-copy-file icon-large text-success pointer"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
+        </div>
+        <div class="modal-footer ">
+            <div class="col-md-12 text-center">
+                <button type="button" data-dismiss="modal" class="btn btn-primary md-close btn-group-lg">Done</button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 @section scripts{
     <script src="~/Assets/lib/customTableSorter.js"></script>
     <script>

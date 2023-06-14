@@ -1,0 +1,157 @@
+﻿@model Activity
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var studentList = (List<SelectListItem>)ViewBag.Students;
+    var surveyRequest = (SurveyRequest) ViewBag.SurveyRequest;
+    var accountPackage = SessionVariables.AccountPackage;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var currentUser = SessionVariables.CurrentUser;
+}
+<link href="~/Assets/css/survey.css" rel="stylesheet" />
+@{Html.RenderPartial("OrgAccountHeader");}
+
+<div class="main-content">
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
+       {
+           Activity = Model,
+           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+           IsFullScreen = (bool?) ViewData["IsFullScreen"],
+           AccountPackage = accountPackage,
+           CurrentAccount = currentAccount,
+           CurrentUser = currentUser,
+       }); }
+    <div class="panel panel-default">
+        <div class="panel-body surveypanelpadding">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div style="font-size:22px">Edit Survey</div>
+                    <div style="font-size:14px; color:#B2B2B4">@Model.Name</div>
+                </div>
+            </div>
+            @using (Html.BeginForm("UpdateSurvey", "Activity", FormMethod.Post, new { id = "surveyForm" }))
+            {
+                <input type="hidden" name="id" value="@(surveyRequest.ID)" />
+                <input type="hidden" name="activityId" value="@(Model.Uid)" />
+                <div style="clear:both"></div>
+                <div class="row margin-t-30 ">
+                    <div class="col-lg-4">
+                        <input id="students" name="students" type="checkbox" class="newCheckbox" value="" data-forerror="true" />
+                        <input type="hidden" value="false" name="students" />
+                        <label for="students" class="margin-h-10 mobile-padding">Students</label>
+                        <div class="studenterror"></div>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="hidden" name="isEveryIndividualSelected" class="selectedIndividuals" value="false" />
+                        <div class="" style="position:relative">
+                            <button class="btn selectStudents" id="selectStudents" data-toggle="off" type="button">Select Individual Students</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class=" studentDiv hide margin-t-10" style="margin-left: -10px;">
+                    <div class="col-lg-8 col-md-8">
+                        <div class="mainStudentDiv">
+                            @for (int i = 0; i < studentList.Count(); i++)
+                            {
+                                <div>
+                                    @if (studentList[i].Disabled)
+                                    {
+                                        @Html.CheckBoxFor(m => studentList[i].Selected, new
+                                        {
+                                            @class = "newCheckbox",
+                                            disabled = studentList[i].Disabled,
+                                        });   
+                                    }
+                                    else
+                                    {
+                                        @Html.CheckBoxFor(m => studentList[i].Selected, new
+                                        {
+                                            @class = "newCheckbox",
+                                        });   
+                                    }
+                                    <span class="margin-h-10 mobile-padding">@Html.DisplayFor(m => studentList[i].Text)</span>
+                                    @Html.HiddenFor(m => studentList[i].Value)
+                                    @Html.HiddenFor(m => studentList[i].Text)
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+
+                <div class=" margin-t-30 text-center">
+                    <input type="submit" class="btn btnNewColorSurvey" value="Update Survey" id="send" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+    @section scripts{
+        <script src="~/Scripts/jquery.validate.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("#selectStudents").on('click', function () {
+                    $('.studentDiv').toggleClass('hide');
+                    if ($(this).attr('data-toggle') == 'on') {
+                        $(this).attr('data-toggle', 'off');
+                        $(".selectedIndividuals").val("false")
+                    } else {
+                        $(this).attr('data-toggle', 'on');
+                        $(".selectedIndividuals").val("true")
+                    }
+                });
+
+                $("#dueDate").datetimepicker({
+                    format: "mm/dd/yyyy",
+                    autoclose: true,
+                    todayBtn: true,
+                    pickTime: false,
+                    minView: 2,
+                    viewSelect: 'month',
+                });
+                $('#dueDate').datetimepicker('setStartDate', new Date());
+
+                var form = $('form').validate({
+                    rules: {
+                        students: {
+                            required: true
+                        }
+                    },
+                    errorPlacement: function (error, element) {
+                        if (element.attr("data-forerror") == "true") {
+                            $(".error", $("#students")).remove();
+                            $(".studenterror").html(error);
+                        }
+                        else {
+                            error.insertAfter(element);
+                        }
+                    }
+                });
+
+                $("#send").on('click', function (e) {
+                    $("#modal-saving").addClass('hide');
+                    e.preventDefault();
+
+                    if ($("#surveyForm").valid()) {
+                        $("#surveyForm").submit();
+                        $("#modal-saving").addClass('position-fixed');
+                        $("#modal-saving").show();
+                    }
+                    
+                })
+
+                setTimeout(function () {
+                    $(".glyphicon-arrow-right").addClass('glyphicon-chevron-right');
+                    $(".glyphicon-arrow-right").removeClass('glyphicon-arrow-right');
+
+                    $(".glyphicon-arrow-left").addClass('glyphicon-chevron-left');
+                    $(".glyphicon-arrow-left").removeClass('glyphicon-arrow-left');
+
+                }, 500);
+            })
+        </script>
+    }
+

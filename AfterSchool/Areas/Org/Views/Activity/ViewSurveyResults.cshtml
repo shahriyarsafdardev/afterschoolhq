@@ -1,10 +1,12 @@
 ﻿@model Activity
+@using Newtonsoft.Json.Linq
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var surveyResponse = (SurveyResponse)ViewBag.SurveyFeedback;
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
+    string pattern = @"^\[+|\]+$";
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -46,8 +48,18 @@
                                         <div class="viewSurveyHead">@question.QuestionText</div>
                                         @if (question.Text.IsNotEmpty())
                                         {
-                                            dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
-                                            <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                            var checkJson = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(question.Text);
+
+                                            if (checkJson)
+                                            {
+                                                dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
+                                                <div class="viewSurveyAnswer">@Html.Raw(json.blocks[0].text)</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="viewSurveyAnswer">@Html.Raw(question.Text)</div>
+                                            }
+                                            
                                         }
                                     </div>
                                 </div>
@@ -92,6 +104,11 @@
                             var str = "";
                             if (question.Text.IsNotEmpty())
                             {
+                                if (question.Text.StartsWith("[["))
+                                {
+                                    question.Text = question.Text.Substring(1, question.Text.Length - 2);
+                                }
+                                
                                 dynamic json = Newtonsoft.Json.JsonConvert.DeserializeObject(question.Text);
 
                                 foreach (var item in json)

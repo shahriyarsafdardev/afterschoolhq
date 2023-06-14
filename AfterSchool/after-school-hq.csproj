@@ -596,7 +596,9 @@
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
+    <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
+    <Compile Include="Areas\Api\Models\SurveyRequestQuestionAnswerResponse.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />
@@ -771,6 +773,7 @@
     <Content Include="Areas\Org\Views\Account\ExtendTrialDone.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlan.cshtml" />
     <Content Include="Areas\Org\Views\Account\SelectPlanDone.cshtml" />
+    <Content Include="Areas\Org\Views\Activity\EditSurvey.cshtml" />
     <Content Include="Areas\Org\Views\Activity\PrintRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\Activity\VolunteerRegistrants.cshtml" />
     <Content Include="Areas\Org\Views\League\PublishWizard4.cshtml" />

@@ -118,6 +118,12 @@ namespace AfterSchool
                 new[] {"AfterSchool.Controllers"});
 
             routes.MapRoute(
+                "SurveyRequest",
+                "{action}/{id}",
+                new {controller = "Survey", action = "Sr", id = UrlParameter.Optional},
+                new[] {"AfterSchool.Controllers"});
+
+            routes.MapRoute(
                 "LeagueHome1",
                 "{accountname}/league/{leaguename}",
                 new

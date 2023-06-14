@@ -1,11 +1,13 @@
+import utils from 'utils';
 import UserSlice from './slices/UserSlice';
+import SurveySlice from './slices/SurveySlice';
 import ProfileSlice from './slices/ProfileSlice';
 import { configureStore } from '@reduxjs/toolkit';
 import ThankYouSlice from './slices/ThankYouSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
-import SurveySlice from './slices/SurveySlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
+const { getEnv } = utils;
 
 export default configureStore({
   reducer: {
@@ -16,5 +18,6 @@ export default configureStore({
     [RegistrationSlice.name]: RegistrationSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [VolunteerRegistrationSlice.name]: VolunteerRegistrationSlice.reducer
-  }
+  },
+  devTools: getEnv() === 'Local'
 });
