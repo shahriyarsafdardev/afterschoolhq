@@ -483,10 +483,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             
-            if (String.IsNullOrEmpty(transactionUid))
+            if (!transactionUid.IsGuid())
                 msgs.Add("Invalid Transaction ID", MessageType.UserError);
             
-            if (String.IsNullOrEmpty(requestUid))
+            if (!requestUid.IsGuid())
                 msgs.Add("Invalid Request ID",MessageType.UserError);
             
             if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
