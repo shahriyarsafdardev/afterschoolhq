@@ -29,7 +29,7 @@ import CopyIcon from 'assets/copy.svg';
 import LockIcon from 'assets/lock.svg';
 import DeleteIcon from 'assets/delete.svg';
 import LabeledCheckBox from './LabeledCheckBox';
-import { deleteItemDialogProps } from './helper';
+import { deleteItemDialogProps, getMaxLimit } from './helper';
 import RenderAudienceList from './RenderAudienceList';
 import { audienceTypes, questionType } from 'constants';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -61,7 +61,7 @@ const RenderQuestion = ({
   const [timeoutConst, setTimeoutConst] = useState(null);
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
-  const { dropdown, radioList, checkBoxList, textBlock } = questionType;
+  const { dropdown, radioList, checkBoxList } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
     ID,
@@ -74,7 +74,7 @@ const RenderQuestion = ({
   } = question;
 
   const volunteerQS = QuestionSettings[0];
-  const maxLimit = QuestionTypeId === textBlock ? 4000 : 400;
+  const maxLimit = getMaxLimit(QuestionTypeId);
   const questionHasOptions = (qTypeId = QuestionTypeId) =>
     [dropdown, radioList, checkBoxList].includes(qTypeId);
   const showOptions = questionHasOptions();

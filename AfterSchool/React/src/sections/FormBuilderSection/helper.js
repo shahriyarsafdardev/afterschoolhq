@@ -1,3 +1,5 @@
+import { questionType } from 'constants';
+
 export const newQuestion = formType => {
   const question = {
     ID: 0, //Need to set: Zero
@@ -44,3 +46,6 @@ export const deleteItemDialogProps = item => ({
 
 export const infoText =
   'Selecting one of these options will apply it to existing questions (except for locked questions). Changing or de-selecting an option will override and apply it to existing questions. New questions will be shown/required for all audiences bu default. If an option below is selected, you can still make changes to individual questuions.';
+
+export const getMaxLimit = questionTypeId =>
+  questionTypeId === questionType.textBlock ? 4000 : 400;
