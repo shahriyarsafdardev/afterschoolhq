@@ -210,6 +210,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 .ToList()
                 .ForEach(qvm =>
                 {
+
                     if (qvm.Question.QuestionTypeId == QuestionType.FileUpload || qvm.Question.QuestionTypeId == QuestionType.Photo || 
                         qvm.Question.QuestionTypeId == QuestionType.Audio || qvm.Question.QuestionTypeId == QuestionType.Video)
                     {

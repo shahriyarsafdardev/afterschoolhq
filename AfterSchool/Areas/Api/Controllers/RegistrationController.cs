@@ -549,6 +549,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 qvms.ForEach(qvm =>
                                 {
+
                                     registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
@@ -791,6 +792,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         
                         qvms.ForEach(qvm =>
                         {
+
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
                             {
                                 currentRegistrant.AddOrUpdateAnswer(

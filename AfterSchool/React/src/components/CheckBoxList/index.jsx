@@ -2,6 +2,7 @@ import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import React, { useState, useEffect } from 'react';
 import CheckIcon from '@material-ui/icons/Check';
+import { flattenDeep } from 'lodash';
 import useStyles from './styles';
 
 function CheckBoxList({ formik, question }) {
@@ -30,8 +31,12 @@ function CheckBoxList({ formik, question }) {
 
   useEffect(() => {
     if (values[ID]) {
-      const obj = JSON.parse(values[ID]);
-      setCheckBoxListValue(obj[0] instanceof Array ? obj[0] : obj);
+      try {
+        const obj = flattenDeep(JSON.parse(values[ID]));
+        setCheckBoxListValue(obj[0] === null ? [] : obj);
+      } catch (e) {
+        setCheckBoxListValue([]);
+      }
     }
   }, [values[ID]]);
 
