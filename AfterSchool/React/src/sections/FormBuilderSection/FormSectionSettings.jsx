@@ -44,7 +44,7 @@ function FormSectionSettings() {
     msgs
   } = useFormBuilder();
 
-  const currentSectionIndex = questionsGroups.findIndex(qg => qg.ID == questionGroup);
+  const currentSectionIndex = questionsGroups.findIndex(qg => qg.Id == questionGroup);
   const currentSection = questionsGroups[currentSectionIndex];
   const [sectionName, setSectionName] = useState(currentSection?.Name || '');
 
@@ -203,7 +203,7 @@ function FormSectionSettings() {
       ...cloneDeep(newQuestion(form?.FormType)),
       ID: 0,
       GroupTitle: sectionName,
-      FormQuestionGroupId: currentSection?.ID,
+      FormQuestionGroupId: currentSection?.Id,
       DisplayOrder: newDisplayOrder
     };
 
@@ -463,7 +463,7 @@ function FormSectionSettings() {
 
   const sectionNameChangeHandler = value => {
     const isNameUnique = questionsGroups.every(
-      ({ Name: name, ID }) => name !== value || ID == questionGroup
+      ({ Name: name, Id }) => name !== value || Id == questionGroup
     );
 
     if (value.length === 0) setSectionNameError('Section Name cannot be empty');

@@ -51,14 +51,14 @@ function FormSectionList() {
     questionsGroup => questionsGroup.IsDeleted === false
   );
 
-  const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].ID : -1;
+  const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].Id : -1;
 
   const toggleShowSettings = () => {
     if (isMobile) setShowSettings(!showSettings);
   };
 
   const handleDelete = async key => {
-    const index = questionsGroups.findIndex(questionGroup => questionGroup.ID === key);
+    const index = questionsGroups.findIndex(questionGroup => questionGroup.Id === key);
 
     const updatedQuestionGroups = [...questionsGroups];
     updatedQuestionGroups[index] = { ...questionsGroups[index], IsDeleted: true };
@@ -151,7 +151,7 @@ function FormSectionList() {
           </Typography>
         </>
       )}
-      {questionsGroupsToShow.map(({ ID: key, QuestionGroupDataTypeId, Name }) => (
+      {questionsGroupsToShow.map(({ Id: key, QuestionGroupDataTypeId, Name }) => (
         <Grid
           item
           lg={12}

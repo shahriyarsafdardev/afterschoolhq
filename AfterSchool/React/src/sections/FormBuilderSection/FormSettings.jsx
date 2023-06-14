@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import { isEmpty } from 'lodash';
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 import { useSearchParams } from 'react-router-dom';
 import { useFormik, FormikProvider, Form } from 'formik';
@@ -19,7 +19,7 @@ function FormSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { form, questionsGroups, updateFormSettings } = useFormBuilder();
   const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
-  const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].ID : -1;
+  const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].Id : -1;
 
   const validationSchema = Yup.object().shape({
     FormName: Yup.string().required('Form Name is required'),

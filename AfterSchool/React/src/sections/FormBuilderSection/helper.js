@@ -3,7 +3,7 @@ import { questionType } from 'constants';
 export const newQuestion = formType => {
   const question = {
     ID: 0, //Need to set: Zero
-    FormQuestionGroupId: null, //Need to set: Current Section ID
+    FormQuestionGroupId: null, //Need to set: Current Section Id
     Text: '',
     Link: null,
     Description: null,
