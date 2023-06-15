@@ -335,7 +335,7 @@ namespace AfterSchoolLibrary.Models
             if (endDate.HasValue)
                 sql += $" and SurveyResponse.LastModifiedDate <= '{endDate.ToShortDateTimeString()}'";
             
-            if (!isPublicSurvey && activityIds.IsNotEmpty() && activityIds.Any())
+            if (activityIds.IsNotEmpty() && activityIds.Any())
                 sql += @$"
                     and RegistrantActivity.ParticipationObjectId in ({activityIds.ToStrings().ToStringList()})
                     and RegistrantActivity.ParticipationObjectTypeId = {(int) ParticipationObjectType.Activity}";

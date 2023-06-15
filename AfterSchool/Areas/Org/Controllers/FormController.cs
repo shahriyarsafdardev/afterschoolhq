@@ -458,16 +458,16 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 responses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, start, length,
                     searchQuestionIds, searchQuestionTypeIds, msgs);
-                //adding public survey responses
-                var publicResponses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, start, length,
-                    searchQuestionIds, searchQuestionTypeIds, msgs, true);
-                responses.AddRange(publicResponses);
-                
                 totalRecordCount = SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
                     searchQuestionIds, searchQuestionTypeIds, msgs);
-                // adding public survey records count
-                totalRecordCount += SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
-                    searchQuestionIds, searchQuestionTypeIds, msgs, true);
+                //adding public survey responses
+                if (activityIds.Count < 1)
+                {
+                    responses.AddRange(SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, start,
+                        length, searchQuestionIds, searchQuestionTypeIds, msgs, true));
+                    totalRecordCount += SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
+                        searchQuestionIds, searchQuestionTypeIds, msgs, true);
+                }
 
                 if (responses.Any())
                 {

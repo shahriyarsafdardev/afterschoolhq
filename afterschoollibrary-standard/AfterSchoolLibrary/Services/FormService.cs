@@ -221,9 +221,9 @@ namespace AfterSchoolLibrary.Services
                     responses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
                                     searchQuestionIds, searchQuestionTypeIds, msgs);
                     //adding public survey responses
-                    var publicResponses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
-                    searchQuestionIds, searchQuestionTypeIds, msgs, true);
-                    responses.AddRange(publicResponses);   
+                    if (activityIds.Count < 1)
+                        responses.AddRange(SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
+                            searchQuestionIds, searchQuestionTypeIds, msgs, true));
                 }
                 else
                     registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null,
