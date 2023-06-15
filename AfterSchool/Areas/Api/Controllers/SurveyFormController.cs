@@ -80,7 +80,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                            QuestionText = questionAnswer.QuestionText, Text = questionAnswer.Text,
                             Description = questionAnswer.Description,
                         })
                         .ToList();
@@ -177,7 +177,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText, Text = MapToAmazonFilePath(questionAnswer),
+                            QuestionText = questionAnswer.QuestionText, Text = questionAnswer.Text,
                             Description = questionAnswer.Description,
                         })
                         .ToList();
