@@ -250,6 +250,26 @@ namespace AfterSchoolLibrary.Helpers
             }
             else
             {
+                var lastPara = "";
+                if (registrant.GetRegistrantActivity(participationObject, msgs).HasPaymentPlan(true, msgs))
+                {
+                    if (isProviderCancelled)
+                        lastPara = "Additional payments remaining on your payment plan " +
+                                   participationObject?.Provider?.Name +
+                                   " will be cancelled. If you need a refund, please request one through the AfterSchool HQ <a href='" +
+                                   Utilities.BaseUrl() + "/User/activity'>dashboard</a>";
+                    else
+                        lastPara =
+                            "The payment plan associated with this activity has not been cancelled and will continue for " +
+                            payments?.Count() +
+                            " payments. If you believe this is an error, please contact the provider.";
+                }
+
+                model.Add(new NameValueCollection
+                {
+                    {"LastParagraph", lastPara},
+                });
+
                 body = ProcessTemplate(
                     EmailTemplates.Registration_Withdrawal,
                     model,
@@ -1389,6 +1409,135 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendReEnrollConfirmation(Registrant masterRegistrant, RegistrantActivity ra,
+            ParticipationObject participationObject, bool requirePayment, string paidCost, string costToPay, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var purchaserAccount = masterRegistrant?.GetAccount(msgs);
+            var isAfterSchool = purchaserAccount.IsAfterSchool;
+            var purchaser = purchaserAccount.GetAccountOwner();
+            var billingAccount = participationObject.OwnerAccount;
+            var billingAccountOwner = billingAccount.GetAccountOwner();
+            var registration = ra.GetRegistration();
+            var registrantName = ra.RegistrantName;
+            var registrantEmail = ra.RegistrantEmail;
+            var totalPaidCost = paidCost;
+            var totalCostToPay = costToPay;
+
+            var model = new NameValueCollection
+            {
+                {"ParentName", purchaser.FirstName},
+                {"ProviderName", billingAccountOwner.FirstName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"PayNowLink", registration.GetPaymentUrl},
+                {"PaidCost", totalPaidCost},
+                {"CostToPay", totalCostToPay},
+                {"ActivityName", participationObject.Name},
+                {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                {"BillerAccountName", billingAccount.Name},
+                {"BillerAccountLink", billingAccount.HomePageUrl},
+                {"StudentName", registrantName},
+            };
+
+            var subject = $"{registrantName} is re-enrolled into {participationObject.Name}";
+            var body = ProcessTemplate(
+                requirePayment ? EmailTemplates.ReEnroll_Parent_Processed : EmailTemplates.ReEnroll_Free_Parent_Processed,
+                model,
+                "ReEnroll_Confirmation-1.2",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send emails to student and parent if have different emails
+            var emails = new List<string>() {purchaser.Email};
+            if(!emails.Contains(registrantEmail) && registrantEmail.IsNotEmpty()) emails.Add(registrantEmail);
+            
+            emails.ForEach(email => mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool))));
+
+            // Send email to provider as cc
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(billingAccountOwner.Email),
+                "ReEnrollment CC: " + subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
+        public static SystemMessages SendReEnrollConfirmation(Registrant masterRegistrant, RegistrantActivity ra,
+            ParticipationObject participationObject, bool requirePayment, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var purchaserAccount = masterRegistrant?.GetAccount(msgs);
+            var isAfterSchool = purchaserAccount.IsAfterSchool;
+            var purchaser = purchaserAccount.GetAccountOwner();
+            var billingAccount = participationObject.OwnerAccount;
+            var billingAccountOwner = billingAccount.GetAccountOwner();
+            var registration = ra.GetRegistration();
+            var registrantName = ra.RegistrantName;
+            var registrantEmail = ra.RegistrantEmail;
+
+            var model = new NameValueCollection
+            {
+                {"ParentName", purchaser.FirstName},
+                {"ProviderName", billingAccountOwner.FirstName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"PayNowLink", registration.GetPaymentUrl},
+                {"Cost", participationObject.Cost.ToCurrency()},
+                {"ActivityName", participationObject.Name},
+                {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
+                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
+                {"BillerAccountName", billingAccount.Name},
+                {"BillerAccountLink", billingAccount.HomePageUrl},
+                {"StudentName", registrantName},
+            };
+
+            var subject = $"{registrantName} is re-enrolled into {participationObject.Name}";
+            var body = ProcessTemplate(
+                requirePayment ? EmailTemplates.ReEnroll_Parent_Processed : EmailTemplates.ReEnroll_Free_Parent_Processed,
+                model,
+                "ReEnroll_Confirmation-1.0",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            // Send emails to student and parent if have different emails
+            var emails = new List<string>() {purchaser.Email};
+            if(!emails.Contains(registrantEmail) && registrantEmail.IsNotEmpty()) emails.Add(registrantEmail);
+            
+            emails.ForEach(email => mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool))));
+
+            // Send email to provider as cc
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(billingAccountOwner.Email),
+                "ReEnrollment CC: " + subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+
+            msgs.AddRange(mailMsgs);
+
+            return msgs;
+        }
+
         public static void SendAttendanceChargeConfirmation(
             Dictionary<Attendance, List<int>> attendanceRegistrantActivityCounts, Activity activity,
             decimal costPerClass, decimal couponDiscount, string customMessage, WebUser loggedInUser, bool sendBcc,
@@ -1827,81 +1976,59 @@ namespace AfterSchoolLibrary.Helpers
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
 
-            // CC Support Team
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                $"BCC: {subject}",
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            ));
-
-            Utilities.SystemErrorLog(mailMsgs);
-        }
-
-        public static void SendRefundRequestToSupport(RefundRequest request, WebUser loggedInUser, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            var model = new NameValueCollection
-            {
-                {"FirstName", "Support"},
-                {"ProductName", Utilities.AppName()},
-                {"RequesterFirstName", loggedInUser.FirstName},
-                {"RequestAmount", request.Amount.Value.ToCurrency()},
-                {"RequestReason", request.RequestReason},
-                {"RequestViewUrl", $"{Utilities.BaseUrl()}/admin/transaction/refundrequests/"},
-            };
-
-            var body = ProcessTemplate(
-                EmailTemplates.Refund_Requested,
-                model,
-                "refund_requested-1.0.1",
-                msgs
-            );
-
-            var subject = $"A refund has been requested/approved by {loggedInUser.DisplayName}";
-
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            );
-
             Utilities.SystemErrorLog(mailMsgs);
         }
 
         public static void SendRefundRequestProcessed(RefundRequest request, Transaction refund, WebUser loggedInUser,
             SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var requester = request.GetCreator(msgs, dc);
+            var parentAccountOwner = refund.GetBillerAccount(msgs).GetAccountOwner(msgs);
+            var providerAccount = refund.GetPayerAccount(msgs);
+            var providerAccountOwner = providerAccount.GetAccountOwner(msgs);
+            var isAfterSchool = refund.GetPayerAccount(msgs).IsAfterSchool;
+            var activityName = refund.Description.Substring(0, refund.Description.LastIndexOf(' ')).TrimEnd();
 
+            if (providerAccountOwner.Phone.IsEmpty())
+                providerAccountOwner.Phone = providerAccount.Phone;
+            
             var model = new NameValueCollection
             {
-                {"FirstName", requester.FirstName},
-                {"ProductName", Utilities.AppName()},
+                {"ParentName", parentAccountOwner.FirstName},
+                {"ProviderName", providerAccountOwner.FirstName},
                 {"RefundAmount", refund.Amount.ToCurrency()},
-                {"SupportEmail", Email.AppSupportEmailAddress},
+                {"ActivityName", activityName},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"ActivityContactEmail", providerAccountOwner.Email},
+                {"ActivityContactPhone", providerAccountOwner.Phone.IsNotEmpty() ? 
+                    $"either by phone ({providerAccountOwner.Phone}) or": "by"},
+                {"ActivityContactName", providerAccountOwner.FirstName},
+                {"BillerAccountName", providerAccount.Name},
+                {"BillerAccountLink", providerAccount.HomePageUrl},
             };
+            
+            SendRefundProcessedEmail(model, msgs, false, parentAccountOwner.Email); // To Parent
+            SendRefundProcessedEmail(model, msgs, true, providerAccountOwner.Email);  // To Provider
+        }
 
+        private static void SendRefundProcessedEmail(NameValueCollection model, SystemMessages msgs, bool isSendToProvider, string email)
+        {
             var body = ProcessTemplate(
-                EmailTemplates.Refund_Processed,
+                isSendToProvider ? EmailTemplates.Refund_Provider_Processed : EmailTemplates.Refund_Parent_Processed,
                 model,
-                "refund_processed-1.0.1",
+                "refund_processed-1.2.1",
                 msgs
             );
 
-            var subject = "Your refund request has been approved and processed";
+            var subject = "Refund Processed";
 
             var mailMsgs = SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
+                new EmailAddress(email),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId());
 
-            Utilities.SystemErrorLog(mailMsgs);
+            Utilities.SystemErrorLog(mailMsgs);   
         }
 
         public static void SendRefundRequestDeniedByProvider(RefundRequest request, WebUser loggedInUser,
@@ -1937,15 +2064,6 @@ namespace AfterSchoolLibrary.Helpers
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
-
-            // CC Support Team
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                $"CC: {subject}",
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            ));
 
             Utilities.SystemErrorLog(mailMsgs);
         }
@@ -2099,17 +2217,13 @@ namespace AfterSchoolLibrary.Helpers
             else
                 activityName = plan.GetActivityGroup().Name;
 
-            var billingAccount = plan.GetAccount().GetAccountOwner();
-
             var model = new NameValueCollection
             {
                 {"FirstName", user.FirstName},
-                {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"AccountName", account.Name},
                 {"Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly"},
                 {"PaymentAmount", plan.CostPerPeriod.ToCurrency()},
                 {"ActivityName", activityName},
-                {"SupportEmail", Email.AppSupportEmailAddress},
                 {"LoginLink", $"{Email.BaseUrl()}login"},
             };
 
@@ -2120,16 +2234,19 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var subject = $"Your payment failed for {activityName}";
-            var emails = new List<string> { user.Email, billingAccount.Email };
-            emails.ForEach(email =>
-                msgs.AddRange(SendGridHelper.SendMail(
-                    Email.SendGridNoReplyEmailAddress(),
-                    new EmailAddress(email),
-                    email.Equals(billingAccount.Email) ? $"Payment CC: {subject}" : subject,
-                    body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()
-                )));
+            var subject = $"Your payment failed for ${activityName}";
+
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool),
+                new EmailAddress(user.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
+                ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
+                replyTo: new EmailAddress(Email.AppSupportEmailAddress)
+            );
+
+            msgs.AddRange(mailMsgs);
             return msgs;
         }
 

@@ -158,10 +158,6 @@
                                                     participationVM,
                                                     new ViewDataDictionary() { { "ReturnUrl", Url.Action("plans", "billing") } });
                                             }
-                                            else if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.Withdrawn && registrantActivity.AssignmentTypeId.NotIn(Registration.ReservedStatuses))
-                                            {
-                                                <a href="@participationObject.GetRegistrationPageUrl()?reg=@masterRegistrant.Uid" class="btn btn-link">Re-Enroll &raquo;</a>
-                                            }
                                         }
                                     </td>
                                 </tr>

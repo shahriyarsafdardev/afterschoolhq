@@ -2137,10 +2137,12 @@ namespace AfterSchool.Controllers
                 msgs.Add("Please enter your payment information", MessageType.UserError);
 
             var registration = PaymentViewBag(id, participationObject, msgs);
-            var hasWithdrawn = currentRegistrant.HasWithdrawn(participationObject, msgs);
 
-            if (registration.IsAlreadyPaidFor(msgs) && !hasWithdrawn)
-                return RedirectToAction("thankyou", new {id = registration.Uid});
+            if (currentRegistrant.HasWithdrawn(participationObject, msgs))
+            {
+                ViewBag.ProviderEmail = participationObject.OwnerAccount.Email;
+                return View("AlreadyWithdrawn");
+            }
 
             if (msgs.HasErrors())
                 return View("Payment");
@@ -2274,31 +2276,28 @@ namespace AfterSchool.Controllers
 
             if (registration.IsEmpty())
                 return View("");
+            
+            var participationObject = registration.GetFirstParticipationObject(msgs);
 
-            // check if still owes money, load up variables
-            if (!registration.IsPaid(msgs))
-            {
-                var participationObject = registration.GetFirstParticipationObject(msgs);
+            if (participationObject.IsEmpty())
+                return HttpNotFound();
 
-                if (participationObject.IsEmpty())
-                    return HttpNotFound();
+            var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
+            var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+            var parentAccount = parentRegistrant.GetAccount(msgs);
 
-                var currentRegistrant = registration.GetRegistrant(msgs).GetMasterRegistrant(msgs);
-                var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
-                var parentAccount = parentRegistrant.GetAccount(msgs);
+            if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
+                return Logout(Request.Url.ToString());
 
-                if (parentAccount.ID != SessionVariables.CurrentAccount.ID)
-                    return Logout(Request.Url.ToString());
+            SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
+            SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
+            SessionVariables.CurrentRegistrant = currentRegistrant;
+            SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
 
-                SessionVariables.Cart = Cart.GetNewCart(loggedInUser: SessionVariables.CurrentUser, msgs: msgs);
-                SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
-                SessionVariables.CurrentRegistrant = currentRegistrant;
-                SessionVariables.RegistrationStartPageAccount = participationObject.OwnerAccount;
-
-                return RedirectToAction("payment", new {id = registration.Uid});
-            }
-
-            return RedirectToAction("thankyou", new {id = registration.Uid});
+            if (!currentRegistrant.HasWithdrawn(participationObject, msgs)) return RedirectToAction("payment", new {id = registration.Uid});
+            
+            ViewBag.ProviderEmail = participationObject.OwnerAccount.Email;
+            return View("AlreadyWithdrawn");
         }
 
         [HttpGet]

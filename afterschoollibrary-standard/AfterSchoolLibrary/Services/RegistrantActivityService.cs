@@ -144,14 +144,14 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
-        public static bool HasPaymentPlan(this RegistrantActivity registrantActivity, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool HasPaymentPlan(this RegistrantActivity registrantActivity, bool includeExpired, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlan.ExistsByParticipationObjectByRegistrantsByPlanType(
                 registrantActivity.ParticipationObjectId.Value,
                 registrantActivity.ParticipationObjectTypeId,
                 registrantActivity.RegistrantId.Value.AsList(),
                 SubscriptionPlanType.PaymentPlan,
-                true,
+                includeExpired,
                 msgs,
                 dc);
         }
@@ -395,6 +395,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrationAssignmentType.ReservedPendingParentalConsent,
                 RegistrationAssignmentType.ReservedPendingPayment,
                 RegistrationAssignmentType.Applied,
+                RegistrationAssignmentType.WaitingList,
             });
         }
 

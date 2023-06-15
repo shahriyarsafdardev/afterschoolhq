@@ -406,6 +406,50 @@ namespace AfterSchool.Areas.Org.Controllers
                 JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        public JsonResult ReEnrollRegistrant(string participationObjectId, string registrantUId, bool requirePayment, string paidCost, string costToPay, 
+            string participationObjectType)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var activityName = "";
+            var newRegistrationStatus = "";
+            if (currentAccount.IsEmpty())
+                return Json(new {success = false, status = "error", data = "Account not found."}, JsonRequestBehavior.AllowGet);
+
+            if (participationObjectId.IsEmpty() || registrantUId.IsEmpty() || participationObjectType.IsEmpty())
+                return Json(new {success = false, status = "error", data = "Registrant on this Activity not found."}, JsonRequestBehavior.AllowGet);
+
+            var registrant = currentAccount.GetRegistrant(registrantUId.ToGuid(), msgs);
+
+            if (registrant.IsNotEmpty())
+            {
+                (activityName,newRegistrationStatus) = registrant.ReEnrollCurrentRegistrant(
+                    participationObjectId: participationObjectId.ToInteger(),
+                    participationObjectType: (ParticipationObjectType) Enum.Parse(typeof(ParticipationObjectType), participationObjectType),
+                    loggedInUser: SessionVariables.CurrentUser,
+                    account: currentAccount,
+                    requirePayment: requirePayment,
+                    paidCost: paidCost,
+                    costToPay: costToPay,
+                    msgs: msgs);
+            }
+
+            if (msgs.HasNoErrors())
+            {
+                var successMessage = new SystemMessage($"{registrant.Name} has been re-enrolled in {activityName}. Their status will now be " +
+                                                       $"<b>{newRegistrationStatus.SplitByUpperCase()}</b>.", 
+                    MessageType.Success);
+                return Json(new {success = true, status = "ok", data = successMessage.Text}, JsonRequestBehavior.AllowGet);
+            }
+
+            // something went wrong, error occured
+            //returning all the messages in a single string 
+            var dataString = msgs.ToList().Aggregate("", (current, msg) => current + (msg.Text + ". "));
+            return Json(new {success = false, status = "error", data = dataString},
+                JsonRequestBehavior.AllowGet);
+        }
+
         private List<AttachedCoupon> GetAttachedCoupons(RegistrantActivity registrantActivity, SystemMessages msgs)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

@@ -1,0 +1,16 @@
+﻿<div>
+  <p>@Model.ParentName,</p>
+
+  <p>
+    @Model.ProviderName has refunded @Model.RefundAmount to your original payment method. If you have any questions or concerns, please contact @Model.ActivityContactName @Model.ActivityContactPhone email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+  </p>
+  
+  <p>
+    This activity is provided by <a href="@Model.BillerAccountLink">@Model.BillerAccountName</a>.
+  </p>
+  <br>
+  <p>
+    Thanks!<br />
+    @Model.ProductName
+  </p>
+</div>

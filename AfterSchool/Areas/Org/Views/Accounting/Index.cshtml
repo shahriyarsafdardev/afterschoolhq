@@ -214,10 +214,6 @@
             <th class="text-center">Status</th>
             <th class="text-center">Type</th>
             <th class="text-center">Refunds</th>
-            @if (SessionVariables.AccountUserType == UserType.TechSupport)
-            {
-                <th class="text-center">Xfers</th>
-            }
         </tr>
         </thead>
         <tbody>
@@ -321,33 +317,10 @@
                             var hasUnfulfilledRequest = transaction.HasUnfulfilledRefundRequests();
                             var disableRequest = hasUnfulfilledRequest || !transaction.CanRefundViaStripe();
 
-                            <button onclick="requestRefund('@transaction.Uid', @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"))"
-                                    class="md-trigger btn btn-sm btn-default"
-                                    data-modal="modal-request-refund"
-                                    @(disableRequest ? "disabled=\"disabled\"" : "")>
-
-                                @if (hasUnfulfilledRequest)
-                                {
-                                    if (transaction.HasManuallyApprovedRefundRequest())
-                                    {
-                                        @:Approved
-                                    }
-                                    else
-                                    {
-                                        @:Requested
-                                    }
-                                }
-                                else
-                                {
-                                    @:Request
-                                }
-
-                            </button>
-
-                            <button onclick="manualRefund('@transaction.Uid')"
-                                    class="md-trigger btn btn-sm btn-default"
-                                    data-modal="modal-manual-refund">
-                                Manual
+                            <button onclick="manualRefund('@transaction.Uid'); showModal('modal-process-refund'); requestRefund('@transaction.Uid',
+                             @transaction.GetRefundableAmount(isPartialRefundWithConvenienceFee: true).ToString("#.00"), @((int)transaction.PaymentSourceTypeId))"
+                                    class="md-trigger btn btn-sm btn-default">
+                                Refund
                             </button>
                         }
                     </td>
@@ -390,54 +363,78 @@
 </div>
 </div>
 
-<div id="modal-request-refund" class="md-modal colored-header custom-width md-effect-9">
+<div id="modal-process-refund" class="md-modal colored-header custom-width md-effect-9">
 
     <div class="md-content">
         <div class="modal-header">
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                 <i class="icon s7-close"></i>
             </button>
-            <h3 class="modal-title">Request Refund</h3>
+            <h3 class="modal-title">Process Refund</h3>
+        </div>
+        <div class="modal-body form text-center">
+            <p>Refunds via Stripe will send the registrant's refund back to their original payment method.</p>
+            <br/>
+            <p>Manual refunds are handled outside of the AfterSchool HQ platform (i.e. cash, check, PayPal, Venmo, etc.).</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="showModal('modal-manual-refund')" data-dismiss="modal" class="btn btn-default md-close">Record Manual Refund</button>
+            <button type="button" id="btn-stripe-payment" onclick="showModal('modal-stripe-refund')" data-dismiss="modal" class="btn btn-primary md-close">Refund via Stripe</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-stripe-refund" class="md-modal colored-header custom-width md-effect-9">
+
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
+                <i class="icon s7-close"></i>
+            </button>
+            <h3 class="modal-title">Submit Refund</h3>
         </div>
         <div class="modal-body form">
+            <p class="text-center">Refunds will send the registrant's refund back to their original payment method. You cannot refund more than their original 
+                payment amount.</p>
+            <br/>
             <div class="form-group">
-                <input type="number" id="refund-request-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01"/>
-                <p class="text-muted text-small" id="refund-request-notes">Please enter an amount between $1 and $<span class="refund-request-max-amount"></span></p>
+                <input type="number" id="refund-request-amount" class="form-control" required="required" max="" min="1" step=".01"/>
+                <p class="text-muted text-small" id="stripe-refund-notes">Refund Amount<span class="stripe-refund-max-amount"></span></p>
             </div>
             <div class="form-group">
-                <label for="request-reason">Reason</label>
                 <input type="text" id="refund-reason" maxlength="100" class="form-control" oninput="enableRequestRefundButton()"/>
-                <p class="text-muted text-small" id="refund-request-reason-notes">Please enter a reason</p>
+                <p class="text-muted text-small" id="stripe-refund-reason-notes">Refund Reason</p>
             </div>
             <input type="hidden" id="refund-request-transaction-uid" value=""/>
             <input type="hidden" id="refund-request-max-amount" value=""/>
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary">Request Refund &raquo;</button>
+            <button type="button" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary">Submit Refund</button>
         </div>
     </div>
-</div>
+</div>          
 
 <div id="modal-manual-refund" class="md-modal colored-header custom-width md-effect-9">
-
     <div class="md-content">
         <div class="modal-header">
             <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">
                 <i class="icon s7-close"></i>
             </button>
-            <h3 class="modal-title">Enter Manual Refund Amount</h3>
+            <h3 class="modal-title">Enter Manual Refund</h3>
         </div>
         <div class="modal-body form">
-            <p>NOTE: This is for you to track refunds that you manually handled through your own means such as cash, check, PayPal, Venmo, CashApp, etc.</p>
+            <p class="text-center">Manual refunds are handled outside of the AfterSchool HQ platform (i.e. cash, check, PayPal, Venmo, etc.).</p>      
+            <br/>
             <div class="form-group">
-                <input type="number" id="manual-refund-amount" class="form-control" placeholder="Refund Amount" required="required" max="" min="1" step=".01"/>
+                <input type="number" id="manual-refund-amount" class="form-control" required="required" max="" min="1" step=".01"/>
+                <p class="text-muted text-small" id="manual-refund-notes">Refund Amount<span class="stripe-refund-max-amount"></span></p>
             </div>
             <input type="hidden" id="manual-refund-transaction-uid" value=""/>
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-manual-refund" onclick="processManualRefund()" class="btn btn-primary">Add Manual Refund &raquo;</button>
+            <button type="button" id="btn-manual-refund" onclick="processManualRefund()" class="btn btn-primary">Record Manual Refund</button>
         </div>
     </div>
 </div>
@@ -461,6 +458,9 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#refund-request-amount').blur(function () {
             canProcessRequest();
+        });
+        $("#refund-request-amount").on('change', function(e){
+           this.value = Math.min(this.value, $("#refund-request-amount").attr('max'));
         });
     });
 
@@ -487,12 +487,14 @@
 
     }
 
-    function requestRefund(uid, maxAmount) {
+    function requestRefund(uid, maxAmount, paymentType) {
         $('#refund-request-transaction-uid').val(uid);
         $('#refund-request-max-amount').val(maxAmount);
         $('.refund-request-max-amount').html(maxAmount);
         $('#refund-request-amount').attr('max', maxAmount);
         $('#refund-request-amount').val(maxAmount);
+        let btnStripe = $('#btn-stripe-payment');
+        paymentType !== @((int)PaymentType.CreditCard) ?btnStripe.prop('disabled',true) : btnStripe.prop('disabled',false);
     }
 
     function canProcessRequest() {
@@ -534,8 +536,7 @@
                 'uid=' + uid + '&amount=' + amount + '&reason=' + encodeURIComponent(reason),
                 function (data) {
                     if (data && data.status == 'ok') {
-                        Notifications.showMessage('Success', 'Your refund request for <strong>$' + amount + '</strong> has been submitted and will be processed shortly', true);
-                        setTimeout(function () { location.reload() }, 500);
+                        refundTransaction(uid,amount,data.uid, $('#refund-request-payment-source-type').val());
                     } else {
                         Notifications.showErrors(data.messages);
                     }
@@ -543,6 +544,21 @@
             );
         }
 
+    }
+
+function refundTransaction(transactionUid,amount,uid) {
+        let url = '@Url.Action("refund", "accounting")/' + transactionUid + '?amount='+amount+'&request=' + uid;
+        $.get(
+            url,
+            function (data) {
+                if (data && data.status === 'ok') {
+                    Notifications.showMessage('Success', 'Transaction has been refunded', true);
+                    setTimeout(function () { location.reload() }, 500);
+                } else {
+                    Notifications.showErrors(data.messages);
+                }
+            }
+        );
     }
 
     var selectedTransactions = [];
@@ -671,5 +687,9 @@
                 }
             }
         );
+    }
+    function showModal(showModal)
+    {
+        $(showModal).modal('show');
     }
 </script>
