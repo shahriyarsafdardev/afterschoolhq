@@ -152,17 +152,8 @@ function FormSectionList() {
         </>
       )}
       {questionsGroupsToShow.map(({ Id: key, QuestionGroupDataTypeId, Name }) => (
-        <Grid
-          item
-          lg={12}
-          md={12}
-          xs={12}
-          sm={12}
-          key={key}
-          spacing={2}
-          className={classes.displayFlex}
-        >
-          <Grid lg={11} md={11} xs={11} sm={11}>
+        <Grid item lg={12} md={12} xs={12} sm={12} key={key} className={classes.displayFlex}>
+          <Grid item lg={11} md={11} xs={11} sm={11}>
             <Typography
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
@@ -177,7 +168,7 @@ function FormSectionList() {
               {Name}
             </Typography>
           </Grid>
-          <Grid lg={1} md={1} xs={1} sm={1}>
+          <Grid item lg={1} md={1} xs={1} sm={1}>
             {QuestionGroupDataTypeId === 0 && (
               <CloseOutlined
                 data-testid={`deleteFormSectionIcon-${Name}`}

@@ -1,4 +1,5 @@
 import { questionType } from 'constants';
+import { styled } from '@material-ui/core/styles';
 
 export const newQuestion = formType => {
   const question = {
@@ -49,3 +50,10 @@ export const infoText =
 
 export const getMaxLimit = questionTypeId =>
   questionTypeId === questionType.textBlock ? 4000 : 400;
+
+export const StyledImage = styled('img')(() => ({
+  width: '20px',
+  height: 'auto',
+  margin: '4px 6px',
+  cursor: 'pointer'
+}));

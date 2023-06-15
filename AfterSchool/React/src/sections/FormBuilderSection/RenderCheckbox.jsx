@@ -63,7 +63,7 @@ function RenderCheckbox({
           }}
         />
       }
-      IconStyle={{ fill: 'black' }}
+      iconstyle={{ fill: 'black' }}
     />
   );
 }
