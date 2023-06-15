@@ -588,7 +588,7 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-                <p id="ratingError" class="text-danger hide">Rating can't be greater than 10.</p>
+                <p id="ratingError" class="text-danger hide">Max rating value should not be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -1327,11 +1327,11 @@
             $('#ratingError').removeClass('hide');
             $('#btnRating').prop('disabled',true);
         }
-        else
-        {
+        else {
             $('#ratingError').addClass(' hide');
             $('#btnRating').prop('disabled',false);
         }
+        
         if ($.isNumeric($('#question-rating-min').val())) {
             $('#rating-min-label').empty();
             $('#rating-min-label').append($('#question-rating-min').val());
