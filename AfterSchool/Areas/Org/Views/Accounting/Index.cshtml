@@ -229,6 +229,7 @@
             {
                 var registrant = transaction.GetPurchase()?.GetRegistrant();
                 var currentStatus = transaction.GetStatus();
+                var showPartialRefundIcon = transaction.CouponId.HasValue && transaction.HasRefundableAmount(false, msgs);
                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
                 var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled && !transaction.HasRefundsAHQ() && transaction.TransactionTypeId == TransactionType.Charge;
 
@@ -304,6 +305,12 @@
                     </td>
                     <td class="text-center">
                         @currentStatus
+
+                        @if (showPartialRefundIcon)
+                        {
+                            <img src="~/Assets/img/coupon-discount.svg" class="tag-icon" style="height: 15px; width: 15px;" data-toggle="popover" data-trigger="hover" data-html="true"
+                                 data-placement="top" data-content="Discount: @transaction.CouponValue.ToCurrency()" />
+                        }
                     </td>
                     <td class="text-center">
                         @if (transaction.PaymentTypeId == PaymentType.NotSet)

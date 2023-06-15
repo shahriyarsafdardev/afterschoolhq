@@ -546,13 +546,11 @@ namespace AfterSchoolLibrary.Services
 
             if (!transaction.IsCharge())
                 return "Processed";
-            
+
             var hasRefundableAmount = transaction.HasRefundableAmount(false, msgs, dc);
 
-            if (transaction.CouponId.HasValue)
-            {
-                return !hasRefundableAmount ? "Coupon Applied" : "Incoming / Coupon Applied";
-            }
+            if (transaction.CouponId.HasValue && !hasRefundableAmount)
+                return "100% Coupon Applied";
             
             if (!hasRefundableAmount)
                 return "Refunded";
