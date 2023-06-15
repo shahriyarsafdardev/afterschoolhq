@@ -289,7 +289,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         var registrant = new Registrant() { ID = response.RegistrantId };
                         var ras = new List<RegistrantActivity>();
-                        if (registrant.IsNotEmpty())
+                        if (registrant.ID.IsNotEmpty())
                         {
                             ras = registrant.GetRegistrantActivities(msgs);
                             if (activityIds.Any())
