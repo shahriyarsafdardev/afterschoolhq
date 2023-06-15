@@ -10,7 +10,6 @@ import useStyles from './styles';
 function DateQuestion({ question, formik }) {
   const classes = useStyles();
   const datePicker = useRef();
-  const [error, setError] = useState('');
   const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 
@@ -35,26 +34,15 @@ function DateQuestion({ question, formik }) {
     try {
       if (date === null) {
         setFieldValue(ID, '');
-        setError(null);
         return;
       }
       const formattedDate = formatDate(date);
       setSelectedDate(formattedDate);
       setFieldValue(ID, formattedDate);
-      setError(null);
     } catch (e) {
-      setError(e.message);
       setFieldValue(ID, date);
     }
   };
-
-  const handleError = e => {
-    setError(e);
-  };
-
-  useEffect(() => {
-    setError(touched[ID] && errors[ID] ? errors[ID] : error);
-  }, [error, touched[ID], errors[ID]]);
 
   return (
     <>
@@ -69,7 +57,6 @@ function DateQuestion({ question, formik }) {
                 margin="normal"
                 id="date-picker-dialog"
                 value={values[ID] || null}
-                onError={handleError}
                 onChange={handleDateChange}
                 helperText=""
                 autoOk
@@ -91,10 +78,10 @@ function DateQuestion({ question, formik }) {
             </MuiPickersUtilsProvider>
           </div>
         </div>
-        {error && (
+        {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
             <FormHelperText className={classes.maxWidth} error>
-              {error}
+              {errors[ID]}
             </FormHelperText>
           </Box>
         )}

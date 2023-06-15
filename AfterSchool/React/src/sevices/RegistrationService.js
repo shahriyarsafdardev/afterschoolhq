@@ -63,6 +63,8 @@ export default class RegistrationService {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid email address');
       } else if (QuestionTypeId === questionType.text && Text.includes('Phone')) {
         if (!validatePhone(value)) addToErrors(ID, 'Please enter a valid phone number');
+      } else if (QuestionTypeId === questionType.date) {
+        this.checkDateValidity(value, addToErrors, ID);
       }
     });
     return errors;
@@ -187,24 +189,25 @@ export default class RegistrationService {
       return;
     }
 
+    const age = calculateAge(value);
+    const error = `Age should be between ${minAge} and ${maxAge}`;
+    if (age < minAge || age > maxAge) {
+      addToErrors(id, error);
+    }
+  }
+
+  checkDateValidity(value, addToErrors, id) {
     if (typeof value === 'object') {
       addToErrors(id, 'Invalid Date Format');
-    } else if (value === '') {
-      addToErrors(id, 'Date of Birth is required');
     } else {
       const currentDate = new Date();
       const inputDate = new Date(value);
       const minimalDate = new Date('01/01/1900');
+      const stringifyDate = date => date.toLocaleDateString();
       if (inputDate > currentDate) {
-        addToErrors(id, 'Date should not be after maximal date');
+        addToErrors(id, `Date should not be after ${stringifyDate(currentDate)}`);
       } else if (inputDate < minimalDate) {
-        addToErrors(id, 'Date should not be before minimal date');
-      } else {
-        const age = calculateAge(value);
-        const error = `Age should be between ${minAge} and ${maxAge}`;
-        if (age < minAge || age > maxAge) {
-          addToErrors(id, error);
-        }
+        addToErrors(id, `Date should not be before ${stringifyDate(minimalDate)}`);
       }
     }
   }
