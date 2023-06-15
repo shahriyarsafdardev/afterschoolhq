@@ -1,3 +1,4 @@
+using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -7,6 +8,7 @@ using Stripe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web.Http;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
@@ -419,13 +421,219 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
 
             if (msgs.HasNoErrors())
+            {
                 account.SendSubscriptionPaymentFailed(plan, null);
+
+                // add transaction
+                return ProcessInvoiceDetailsForFailedInvoices(stripeInvoice, msgs);
+            }
+
+            return Return500(msgs);
+        }
+
+        private IHttpActionResult ProcessInvoiceDetailsForFailedInvoices(Stripe.Invoice stripeInvoice, SystemMessages msgs)
+        {
+            var stripeSubscriptionId = stripeInvoice.SubscriptionId;
+            var chargeId = stripeInvoice.ChargeId;
+            var rsp = RegistrantSubscriptionPlan.LoadByStripeSubscriptionId(stripeSubscriptionId, msgs);
+
+            if (rsp.IsEmpty())
+            {
+                msgs.Add($"Ignoring - Registrant Subscription Plan not found - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                return ReturnOK(msgs);
+            }
+
+            var status = "failed";
+
+            if (stripeInvoice.PaymentIntent.IsNotEmpty())
+            {
+                msgs.Add($"Checking Payment Intent Status {stripeInvoice.PaymentIntent.Status} - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+                status = stripeInvoice.PaymentIntent.Status;
+            }
+
+            var plan = rsp.GetSubscriptionPlan(msgs);
+          
+            var registrant = rsp.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var purchasingAccount = masterRegistrant.GetAccount(msgs);
+            var billingAccount = plan.GetAccount(msgs);
+            var participationObject = plan.GetParticipationObject(msgs);
+            var registrantActivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
+                registrant.ID.Value, msgs);
+            var registration = registrantActivity.GetRegistration(msgs);
 
             if (msgs.HasErrors())
                 return Return500(msgs);
 
+            // check if this same charge has been posted already and tracked.
+            //var transaction = Transaction.LoadByStripeChargeOrRefundId(chargeId, msgs);
+            var isStripeInvoiceTransferData = stripeInvoice.TransferData.IsNotEmpty();
+            //if (transaction.IsNotEmpty())
+            //{
+            //    msgs.Add($"Ignoring - Transaction has already been processed - Stripe Sub ID {stripeSubscriptionId}", MessageType.Notice);
+            //    msgs.Add($"TransactionID {transaction.ID.Value}", MessageType.Notice);
+            //    return ReturnOK(msgs);
+            //}
+
+            AfterSchoolLibrary.Models.Account convenienceFeePayer;
+            AfterSchoolLibrary.Models.Account transactionFeePayer;
+
+            if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                convenienceFeePayer = purchasingAccount;
+            else
+                convenienceFeePayer = billingAccount;
+
+            if (rsp.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                transactionFeePayer = purchasingAccount;
+            else
+                transactionFeePayer = billingAccount;
+
+            var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(stripeInvoice.ChargeId, msgs);
+            var amountRefunded = charge.IsNotEmpty() && charge.AmountRefunded.IsNotEmpty() ? charge.AmountRefunded : 0m;
+            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal) stripeInvoice.AmountPaid / 100) : 0m;
+
+            // get the amount paid by the parent, and work out numbers from there regardless of what our system says should happen
+            // could be a good place to do some auditing
+            // just because numbers don't match doesn't mean the first payment was prorated
+            // if we can figure out proration from the total the parent was supposed to pay and what they did pay
+            // OR according to the date they paid that would be ideal
+            // but either way the numbers should be tracked as exactly what they paid via stripe regardless
+            // we can also check to see if the transfer amount is correct.
+
+            // get the original price
+            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(stripeInvoice.SubscriptionId, msgs);
+            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
+            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+            var paymentType = rsp.PaymentTypeId;
+            var isAmountProrated = false;
+
+            // TODO: potentially problematic as the plan may have changed
+            var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
+            var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
+            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
+
+            if (paymentType == PaymentType.ACH)
+                stripeSubscriptionPrice -= calculatedFullCCFee;
+
+            isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
+
+            if (isAmountProrated)
+            {
+                if (paymentType == PaymentType.CreditCard)
+                    paymentTypeFeeOverrideAmount = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(amountPaidByParent);
+                else
+                    paymentTypeFeeOverrideAmount = 0;
+
+                var calcObj = new FeeCalculationObject(
+                                amountPaidByParent - paymentTypeFeeOverrideAmount.Value,
+                                billingAccount,
+                                plan.IsConvenienceFeeTakenOutOfCost,
+                                msgs);
+
+                convenienceFeeOverrideAmount = calcObj.GetConvenienceFee();
+            }
+
+            var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
+
+            if (isStripeInvoiceTransferData)
+            {
+                amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
+
+                if (amountPaidByParent - paymentTypeFeeOverrideAmount - convenienceFeeOverrideAmount != amountReceivedByProvider)
+                    convenienceFeeOverrideAmount = amountPaidByParent - paymentTypeFeeOverrideAmount.Value - amountReceivedByProvider.Value;
+            }
+
+            
+
+            // save transaction info and track payment to the activity as well.
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                OverrideAmount = amountPaidByParent,
+                AmountPaidByParent = amountPaidByParent,
+                AmountReceivedByProvider = amountReceivedByProvider,
+                IsAmountProRated = isAmountProrated,
+                ConvenienceFeeOverrideAmount = convenienceFeeOverrideAmount,
+                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                ParticipationObject = participationObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = rsp.PaymentTypeId,
+                StripeChargeId = chargeId,
+                SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
+                PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                Registration = registration,
+                RegistrantSubscriptionPlan = rsp,
+                ConvenienceFeePayer = convenienceFeePayer,
+                CreditCardFeePayer = transactionFeePayer,
+            };
+
+            // dont process if we made a full refund, otherwise create a transaction with amount - amount refunded
+            if (amountRefunded != charge.Amount)
+            {
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+                msgs.Add($"New Transaction Created {checkoutObject.Transaction.ID.Value}", MessageType.Notice);
+
+                // only want to create a transfer if there isnt an existing one from stripe
+                if (msgs.HasNoErrors())
+                    checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
+
+                //if (amountRefunded > 0 && msgs.HasNoErrors())
+                //{
+                //    msgs.Add($"Partial Refund: {amountRefunded}", MessageType.Notice);
+
+                //    var stripeRefunds = StripeHelper.GetStripeHelperConnectAccount().GetRefunds(chargeId, msgs);
+                //    stripeRefunds.ForEach(stripeRefund =>
+                //    {
+                //        if (stripeRefund.TransferReversal.IsEmpty())
+                //        {
+
+                //        }
+                //        // NOTE: check if refund has a transfer, not sure how/if to handle
+
+                //        // check if transaction exists for refund
+                //        var refundOriginalTransaction = Transaction.LoadByStripeChargeOrRefundId(stripeRefund.Id, msgs);
+
+                //        // if no refund record exists in our db, create it from the transaction added to the checkoutObject
+                //        // NOTE: not sure how to handle fees on partial refunds??
+                //        if (refundOriginalTransaction.IsEmpty())
+                //            refundOriginalTransaction = checkoutObject.Transaction;
+
+                //        refundOriginalTransaction.CreateNewRefund(
+                //            stripeRefund.Amount,
+                //            0,
+                //            0,
+                //            stripeRefund.Id,
+                //            TransactionType.Refund,
+                //            refundOriginalTransaction.PaymentTypeId,
+                //            refundOriginalTransaction.PaymentSourceTypeId,
+                //            WebUser.Load(1, msgs),
+                //            msgs
+                //        );
+                //    });
+                //}
+            }
+            else
+                msgs.Add("Full refund already Made", MessageType.Notice);
+
+
+            if (msgs.HasErrors())
+                return Return500(msgs);
+
+            // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
+            var wasPaidToday = (bool) stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() &&
+                               stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
+
+            if (wasPaidToday && stripeInvoice.AmountPaid > 0)
+                purchasingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
+
             return ReturnOK(msgs);
         }
+
 
         private IHttpActionResult SubscriptionCompleted(Stripe.Event stripeEvent, SystemMessages msgs)
         {
