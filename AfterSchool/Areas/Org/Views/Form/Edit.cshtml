@@ -564,12 +564,9 @@
                     </div>
 
                     <div class="col">
-                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>5</option>
-                            <option>10</option>
-                            <option>25</option>
+                        <select class="form-control input-sm rating" id="question-rating-increment">
+                            <option value="1" selected="selected">1</option>
+                            <option value="2">2</option>
                         </select>
                     </div>
                 </div>
@@ -591,11 +588,11 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-
+                <p id="ratingError" class="text-danger hide">Rating can't be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateRating()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" id="btnRating" onclick="updateRating()">Done</button>
             </div>
         </div>
     </form>
@@ -1326,10 +1323,15 @@
     }
 
     function setOptionalLabelAndIncrement() {
-
-        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
-        var ratingMinValue = $('#question-rating-min').val().replace(/[^\d.-]/g, '');
-
+        if ($('#question-rating-max').val() > 10) {
+            $('#ratingError').removeClass('hide');
+            $('#btnRating').prop('disabled',true);
+        }
+        else
+        {
+            $('#ratingError').addClass(' hide');
+            $('#btnRating').prop('disabled',false);
+        }
         if ($.isNumeric($('#question-rating-min').val())) {
             $('#rating-min-label').empty();
             $('#rating-min-label').append($('#question-rating-min').val());
@@ -1338,15 +1340,6 @@
         if ($.isNumeric($('#question-rating-max').val())) {
             $('#rating-max-label').empty();
             $('#rating-max-label').append($('#question-rating-max').val());
-        }
-
-        $('#question-rating-increment').empty();
-
-        for (var i = ratingMinValue; i < ratingMaxValue; i++) {
-            if (ratingMaxValue % i == 0) {
-                var newOption = $('<option value="' + i + '">' + i + '</option>');
-                $('#question-rating-increment').append(newOption);
-            }
         }
     }
 
