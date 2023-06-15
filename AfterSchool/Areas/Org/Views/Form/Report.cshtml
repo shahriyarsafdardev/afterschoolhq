@@ -620,6 +620,9 @@
                     if (data.records.length == 0) {
                         var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
                         $('#answer-tbody').append(tableRow);
+                        $('#starting-record').html(0);
+                        $('#total-records-loaded').html(0);
+                        $('#total-records').html(0);
                     } else {
 
                         for (let record of data.records) {
