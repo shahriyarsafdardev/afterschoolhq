@@ -492,7 +492,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(stripeInvoice.ChargeId, msgs);
             var amountRefunded = charge.IsNotEmpty() && charge.AmountRefunded.IsNotEmpty() ? charge.AmountRefunded : 0m;
-            var amountPaidByParent = stripeInvoice.AmountPaid > 0 ? ((decimal) stripeInvoice.AmountPaid / 100) : 0m;
+            var amountPaidByParent = stripeInvoice.AmountRemaining;
 
             // get the amount paid by the parent, and work out numbers from there regardless of what our system says should happen
             // could be a good place to do some auditing
@@ -537,15 +537,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
 
-            if (isStripeInvoiceTransferData)
-            {
-                amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
+            //if (isStripeInvoiceTransferData)
+            //{
+            //    amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
 
-                if (amountPaidByParent - paymentTypeFeeOverrideAmount - convenienceFeeOverrideAmount != amountReceivedByProvider)
-                    convenienceFeeOverrideAmount = amountPaidByParent - paymentTypeFeeOverrideAmount.Value - amountReceivedByProvider.Value;
-            }
+            //    if (amountPaidByParent - paymentTypeFeeOverrideAmount - convenienceFeeOverrideAmount != amountReceivedByProvider)
+            //        convenienceFeeOverrideAmount = amountPaidByParent - paymentTypeFeeOverrideAmount.Value - amountReceivedByProvider.Value;
+            //}
 
-            
 
             // save transaction info and track payment to the activity as well.
             var checkoutObject = new CheckoutObject()
@@ -573,14 +572,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             };
 
             // dont process if we made a full refund, otherwise create a transaction with amount - amount refunded
-            if (amountRefunded != charge.Amount)
-            {
+            //if (amountRefunded != charge.Amount)
+            //{
                 billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
-                msgs.Add($"New Transaction Created {checkoutObject.Transaction.ID.Value}", MessageType.Notice);
+                msgs.Add($"New Transaction Created {checkoutObject.Transaction.ID.Value} For Failed Payment", MessageType.Notice);
 
                 // only want to create a transfer if there isnt an existing one from stripe
-                if (msgs.HasNoErrors())
-                    checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
+                //if (msgs.HasNoErrors())
+                //    checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
                 //if (amountRefunded > 0 && msgs.HasNoErrors())
                 //{
@@ -616,20 +615,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 //        );
                 //    });
                 //}
-            }
-            else
-                msgs.Add("Full refund already Made", MessageType.Notice);
+            //}
+            //else
+            //    msgs.Add("Full refund already Made", MessageType.Notice);
 
 
             if (msgs.HasErrors())
                 return Return500(msgs);
 
             // send payment succeeded email, unless payment was made before today (for previously failed webhooks)
-            var wasPaidToday = (bool) stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() &&
-                               stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
+            //var wasPaidToday = (bool) stripeInvoice.StatusTransitions?.PaidAt.IsNotEmpty() &&
+            //                   stripeInvoice.StatusTransitions.PaidAt.Value.Date >= DateTime.Today.Date;
 
-            if (wasPaidToday && stripeInvoice.AmountPaid > 0)
-                purchasingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
+            //if (wasPaidToday && stripeInvoice.AmountPaid > 0)
+            //    purchasingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
 
             return ReturnOK(msgs);
         }
