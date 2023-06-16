@@ -540,11 +540,12 @@
             </div>
             <div class="modal-body form fixed-height-modal-options">
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
-                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
+                <p class="minMaxValidation text-danger">Min rating value should be less than max value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="0" max="9" required id="question-rating-min" name="question-rating-min" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
                     <div class="col">
@@ -554,7 +555,8 @@
                     </div>
 
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="1" max="10" required id="question-rating-max" name="question-rating-max" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
                     <div class="col">
@@ -588,7 +590,7 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-                <p id="ratingError" class="text-danger hide">Max rating value should not be greater than 10.</p>
+                <p id="ratingError" class="text-danger">Max rating value should not be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -1322,24 +1324,34 @@
         $('#question-rating-increment').val($('#question-rating-increment').val());
     }
 
-    function setOptionalLabelAndIncrement() {
-        if ($('#question-rating-max').val() > 10) {
-            $('#ratingError').removeClass('hide');
-            $('#btnRating').prop('disabled',true);
+    function setOptionalLabelAndIncrement(isNan, input) {  
+        if (isNan) {
+            $(input).val('');
         }
         else {
-            $('#ratingError').addClass(' hide');
-            $('#btnRating').prop('disabled',false);
-        }
-        
-        if ($.isNumeric($('#question-rating-min').val())) {
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append($('#question-rating-min').val());
-        }
-
-        if ($.isNumeric($('#question-rating-max').val())) {
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append($('#question-rating-max').val());
+            let maxValue = 10;
+            let minRatingValue = parseInt($('#question-rating-min').val());
+            let maxRatingValue = parseInt($('#question-rating-max').val()); 
+            let minRatingError = $('.minMaxValidation');
+            let maxRatingError = $('#ratingError');
+            
+            $('#rating-min-label').html(minRatingValue);
+            $('#rating-max-label').html(maxRatingValue);
+            $(minRatingError).addClass(' hide');
+            $(maxRatingError).addClass(' hide');
+            
+            if (maxRatingValue > maxValue || minRatingValue >= maxRatingValue) {
+                $('#btnRating').prop('disabled', true);
+                if (maxRatingValue > maxValue) {
+                    $(maxRatingError).removeClass('hide');
+                } 
+                if (minRatingValue >= maxRatingValue) {
+                    $(minRatingError).removeClass('hide');
+                }
+            } 
+            else {
+                $('#btnRating').prop('disabled', false);
+            }
         }
     }
 
