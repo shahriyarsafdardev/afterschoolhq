@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
-import DayjsUtils from '@date-io/dayjs';
+import 'date-fns';
+import DateFnsUtils from '@date-io/date-fns';
 import { Box, FormHelperText } from '@material-ui/core';
+import React, { useRef, useState, useEffect } from 'react';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
@@ -12,38 +13,52 @@ function DateQuestion({ question, formik }) {
   const { touched, values, errors, setFieldValue } = formik;
   const { ID, Text: title, IsRequired: isRequired = false, QuestionDataTypeId } = question;
 
-  const handleDateChange = date => {
-    setFieldValue(
-      ID,
-      new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(date)
-    );
-  };
-
-  const handleError = () => {};
   const today = new Date();
   const datePickerProps = { maxDate: today };
+
+  const [selectedDate, setSelectedDate] = useState(values[ID] || null);
+
+  useEffect(() => {
+    setFieldValue(ID, selectedDate);
+  }, [selectedDate]);
+
+  const formatDate = date => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date);
+  };
+
+  const handleDateChange = date => {
+    try {
+      if (date === null) {
+        setFieldValue(ID, '');
+        return;
+      }
+      const formattedDate = formatDate(date);
+      setSelectedDate(formattedDate);
+      setFieldValue(ID, formattedDate);
+    } catch (e) {
+      setFieldValue(ID, date);
+    }
+  };
 
   return (
     <>
       <FieldWrapper label={title} isRequired={isRequired}>
         <div className={classes.dateWrapper}>
           <div className={classes.datePicker} ref={datePicker}>
-            <MuiPickersUtilsProvider utils={DayjsUtils}>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
               <KeyboardDatePicker
                 {...datePickerProps}
-                InputProps={{ readOnly: true }}
                 autoFocus
-                variant="inline"
-                format="MM/DD/YYYY"
+                format="MM/dd/yyyy"
                 margin="normal"
-                id="date-picker-inline"
+                id="date-picker-dialog"
                 value={values[ID] || null}
-                onError={handleError}
                 onChange={handleDateChange}
+                helperText=""
                 autoOk
                 classes={{
                   root: classes.dateInput
