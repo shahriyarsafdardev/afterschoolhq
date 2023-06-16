@@ -293,16 +293,17 @@ function FormSectionSettings() {
             />
           </Box>
           <Box>
-            {form?.FormType !== 3 && (
-              <ApplyToAllControls
-                values={values}
-                setValues={setValues}
-                reRender={reRender}
-                setReRender={setReRender}
-                questionGroup={questionGroup}
-                settingsForAll={settingsForAll}
-              />
-            )}
+            {form?.FormType !== 3 &&
+            false && ( //TODO: turned of Apply All Settings till further decided
+                <ApplyToAllControls
+                  values={values}
+                  setValues={setValues}
+                  reRender={reRender}
+                  setReRender={setReRender}
+                  questionGroup={questionGroup}
+                  settingsForAll={settingsForAll}
+                />
+              )}
             <QuestionsList
               reRender={reRender}
               setValues={setValues}
