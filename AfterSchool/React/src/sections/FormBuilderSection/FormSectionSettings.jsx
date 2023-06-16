@@ -179,7 +179,12 @@ function FormSectionSettings() {
         });
     }
 
-    updatedValues[newDisplayOrder] = newQuest;
+    const lastQuestion = updatedValues[Object.keys(updatedValues).at(-1)];
+    const QuestionSettings = lastQuestion?.QuestionSettings || newQuest.QuestionSettings;
+    updatedValues[newDisplayOrder] = {
+      ...newQuest,
+      QuestionSettings: [...cloneDeep(QuestionSettings)]
+    };
     setValues({ ...updatedValues }, false);
     setReRender(!reRender);
   };
