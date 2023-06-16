@@ -540,7 +540,7 @@
             </div>
             <div class="modal-body form fixed-height-modal-options">
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
-                <p class="minMaxValidation text-danger">Min rating value should be less than max value.</p>
+                <p class="minMaxValidation text-danger hide">Min rating value should be less than max value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
@@ -590,7 +590,7 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-                <p id="ratingError" class="text-danger">Max rating value should not be greater than 10.</p>
+                <p id="ratingError" class="text-danger hide">Max rating value should not be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
@@ -1337,20 +1337,24 @@
             
             $('#rating-min-label').html(minRatingValue);
             $('#rating-max-label').html(maxRatingValue);
-            $(minRatingError).addClass(' hide');
-            $(maxRatingError).addClass(' hide');
             
             if (maxRatingValue > maxValue || minRatingValue >= maxRatingValue) {
                 $('#btnRating').prop('disabled', true);
-                if (maxRatingValue > maxValue) {
-                    $(maxRatingError).removeClass('hide');
-                } 
-                if (minRatingValue >= maxRatingValue) {
-                    $(minRatingError).removeClass('hide');
-                }
-            } 
+            }    
             else {
                 $('#btnRating').prop('disabled', false);
+            }
+            if (maxRatingValue > maxValue) {
+                $(maxRatingError).removeClass('hide');
+            } 
+            else {
+                $(maxRatingError).addClass(' hide');
+            }    
+            if (minRatingValue >= maxRatingValue) {
+                $(minRatingError).removeClass('hide');
+            }
+            else {
+                $(minRatingError).addClass(' hide');
             }
         }
     }
