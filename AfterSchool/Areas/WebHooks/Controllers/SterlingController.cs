@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
@@ -18,6 +18,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         public IHttpActionResult Update([FromBody] dynamic json)
         {
             var msgs = new SystemMessages();
+
+            if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                return ReturnOK(msgs);
 
             try
             {
