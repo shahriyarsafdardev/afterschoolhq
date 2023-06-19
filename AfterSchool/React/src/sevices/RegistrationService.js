@@ -54,9 +54,13 @@ export default class RegistrationService {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid Email address');
       } else if (IsRequired && !value) addToErrors(ID, `${Text} is required`);
 
-      if (IsRequired && this.isFile(question.QuestionTypeId, true)) {
-        isEqual(value, { Text: '', Description: undefined }) &&
-          addToErrors(ID, `${Text} is required`);
+      if (
+        IsRequired &&
+        this.isFile(question.QuestionTypeId, true) &&
+        (isEqual(value, { Text: '', Description: undefined }) ||
+          isEqual(value, { Text: '', Description: '' }))
+      ) {
+        addToErrors(ID, `${Text} is required`);
       }
 
       if (!value) return;
