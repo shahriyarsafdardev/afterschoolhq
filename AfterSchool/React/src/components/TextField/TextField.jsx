@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
+import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -9,26 +9,20 @@ export default function TextField({ formik, question, type = 'text' }) {
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
+
   return (
-    <Grid
-      className={classes.textFieldBox}
-      xs={12}
-      data-testid={`${label}-${QuestionDataTypeId}-text-field`}
-    >
-      <Grid xs={12} md={4} item className={classes.titleGrid}>
+    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
+      <Box style={{ display: 'flex' }}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
-          <Typography className={typeClass}>{typeText}</Typography>
+          <Typography component="span" className={typeClass}>
+            {typeText}
+          </Typography>
         </Typography>
-      </Grid>
-      <Grid
-        xs={12}
-        md={8}
-        item
-        className={classes.textFieldGrid}
-        data-testid={`${label}-${QuestionDataTypeId}-text-field-input`}
-      >
+      </Box>
+
+      <Box style={{ display: 'flex', margin: 'auto' }}>
         <MuiTextField
           data-testid={`${label}-${QuestionDataTypeId}-form-control`}
           inputProps={{
@@ -39,10 +33,10 @@ export default function TextField({ formik, question, type = 'text' }) {
           type={type}
           variant="outlined"
           {...formik.getFieldProps(question.ID)}
-          error={formik.touched[ID] && formik.errors[ID]}
+          error={!!(formik.touched[ID] && formik.errors[ID])}
           helperText={formik.touched[ID] && formik.errors[ID]}
         />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

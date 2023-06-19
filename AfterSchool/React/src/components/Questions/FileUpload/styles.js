@@ -15,9 +15,8 @@ const useStyles = makeStyles(theme => ({
   photoWrapper: {
     height: '90px',
     width: '100%',
-    marginLeft: 12,
     display: 'flex',
-    maxWidth: '540px',
+    maxWidth: '675px',
     paddingBottom: 15,
     textAlign: 'initial',
     flexDirection: 'column',
@@ -46,11 +45,11 @@ const useStyles = makeStyles(theme => ({
   },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 25
+    paddingLeft: 14
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500
+    maxWidth: 675
   }
 }));
 

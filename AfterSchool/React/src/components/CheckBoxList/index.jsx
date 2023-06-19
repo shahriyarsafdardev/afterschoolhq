@@ -75,7 +75,7 @@ function CheckBoxList({ formik, question }) {
                           }}
                         />
                       }
-                      IconStyle={{ fill: 'black' }}
+                      iconstyle={{ fill: 'black' }}
                     />
                   }
                   label={value}

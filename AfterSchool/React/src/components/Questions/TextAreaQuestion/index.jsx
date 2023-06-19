@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, TextareaAutosize, FormHelperText } from '@material-ui/core';
+import { Box, Typography, TextareaAutosize, FormHelperText } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -11,15 +11,18 @@ export default function TextAreaQuestion({ formik, question }) {
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
-      <Grid xs={12} md={4} item className={classes.titleGrid}>
+    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
+      <Box style={{ display: 'flex' }}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
-          <Typography className={typeClass}>{typeText}</Typography>
+          <Typography component="span" className={typeClass}>
+            {typeText}
+          </Typography>
         </Typography>
-      </Grid>
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+      </Box>
+
+      <Box style={{ margin: 'auto' }}>
         <>
           <TextareaAutosize
             data-testid={`${label}-${QuestionDataTypeId}`}
@@ -28,7 +31,7 @@ export default function TextAreaQuestion({ formik, question }) {
             variant="outlined"
             {...formik.getFieldProps(question.ID)}
             error={formik.touched[ID] && formik.errors[ID]}
-            helperText={formik.touched[ID] && formik.errors[ID]}
+            helpertext={formik.touched[ID] && formik.errors[ID]}
           />
           {touched[ID] && errors[ID] && (
             <Box className={classes.flexCenter}>
@@ -38,7 +41,7 @@ export default function TextAreaQuestion({ formik, question }) {
             </Box>
           )}
         </>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

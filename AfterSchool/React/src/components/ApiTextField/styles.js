@@ -2,12 +2,11 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
   fieldLabel: {
-    display: 'flex',
-    justifyContent: 'end',
+    textAlign: 'left',
+    fontWeight: '600',
+    display: '-webkit-inline-box',
     [theme.breakpoints.down('sm')]: {
-      justifyContent: 'start',
-      textAlign: 'left',
-      padding: '0px 12px',
+      display: 'inline-block',
       fontSize: '14px'
     }
   },
@@ -17,30 +16,12 @@ export default makeStyles(theme => ({
   fieldLabelRequired: {
     color: 'red'
   },
-  textFieldGrid: {
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  titleGrid: {
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  textFieldBox: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      justifyContent: 'flex-start'
-    }
-  },
   formControlClass: {
     display: 'block',
-    maxWidth: 540,
+    maxWidth: 675,
     width: '100%',
-    padding: '8px 12px',
+    paddingTop: '8px',
+    marginBottom: '15px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',

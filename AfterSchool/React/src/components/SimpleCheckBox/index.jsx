@@ -1,4 +1,4 @@
-import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
+import { FormControlLabel, Checkbox, Box } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 import React from 'react';
@@ -12,9 +12,8 @@ function SimpleCheckBox({ value, setValue, question }) {
   };
 
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
-      <Grid xs={12} md={4} item className={classes.titleGrid} />
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
+      <Box style={{ display: 'flex', margin: 'auto' }}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
             data-testid={`${title}-${QuestionDataTypeId}-form`}
@@ -34,7 +33,7 @@ function SimpleCheckBox({ value, setValue, question }) {
                     }}
                   />
                 }
-                IconStyle={{ fill: 'black' }}
+                iconstyle={{ fill: 'black' }}
               />
             }
             label={title}
@@ -44,8 +43,8 @@ function SimpleCheckBox({ value, setValue, question }) {
             onChange={handleCheck}
           />
         </div>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
 

@@ -32,9 +32,6 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'space-between'
   },
-  navOptions: {
-    display: 'flex'
-  },
   navImage: {
     marginTop: '30px',
     height: '165px',

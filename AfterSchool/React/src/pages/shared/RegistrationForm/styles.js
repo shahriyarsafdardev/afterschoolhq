@@ -127,7 +127,7 @@ export default makeStyles(theme => ({
     display: 'block',
     width: '675px',
     maxWidth: 540,
-    padding: '8px 12px',
+    padding: '8px 0px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',

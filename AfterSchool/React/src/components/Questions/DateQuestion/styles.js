@@ -3,9 +3,10 @@ import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(theme => ({
   dateWrapper: {
     display: 'block',
-    maxWidth: 540,
+    maxWidth: 675,
     width: '100%',
-    padding: '8px 12px',
+    paddingTop: '8px',
+    marginBottom: '15px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',
@@ -20,7 +21,7 @@ const useStyles = makeStyles(theme => ({
   dateInput: {
     display: 'flex',
     justifyContent: 'center',
-    maxWidth: 540,
+    maxWidth: 675,
     border: '1px solid #c4c4c4',
     borderRadius: 5,
     paddingLeft: '14px',
@@ -47,11 +48,11 @@ const useStyles = makeStyles(theme => ({
   },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 25
+    paddingLeft: 14
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500
+    maxWidth: 675
   }
 }));
 

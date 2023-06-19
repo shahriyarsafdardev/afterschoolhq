@@ -33,6 +33,7 @@ export default {
   },
   MuiFormHelperText: {
     root: {
+      marginTop: 0,
       '&.Mui-error': {
         color: '#FF7070'
       }

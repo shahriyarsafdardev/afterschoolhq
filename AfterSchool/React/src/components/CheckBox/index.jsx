@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material-ui/core';
+import { FormControlLabel, Checkbox, Box, FormHelperText } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 
@@ -13,9 +13,8 @@ function CheckBox({ formik, question }) {
   };
 
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
-      <Grid xs={12} md={4} item className={classes.titleGrid} />
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
+      <Box style={{ margin: 'auto' }}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
             data-testid={`${title}-${QuestionDataTypeId}-form`}
@@ -35,7 +34,7 @@ function CheckBox({ formik, question }) {
                     }}
                   />
                 }
-                IconStyle={{ fill: 'black' }}
+                iconstyle={{ fill: 'black' }}
               />
             }
             label={title}
@@ -52,8 +51,8 @@ function CheckBox({ formik, question }) {
             </FormHelperText>
           </Box>
         )}
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
 

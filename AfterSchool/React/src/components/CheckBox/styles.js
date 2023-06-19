@@ -2,29 +2,36 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   checkboxWrapper: {
-    borderRadius: 12,
-    display: 'flex',
-    maxWidth: 515,
     overflowWrap: 'anywhere',
-    marginLeft: '14px',
+    borderRadius: 12,
+    marginBottom: 5,
+    display: 'flex',
+    maxWidth: 675,
     width: '100%',
-    marginBottom: 15,
-    [theme.breakpoints.down('sm')]: {
-      padding:'0px 12px',
-      marginLeft: '0',
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: '-34px',
+      maxWidth: 'unset',
+      width: 'unset'
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: '-24px'
     }
   },
   formControlLabelRoot: {
     margin: '10px 0px',
     alignItems: 'flex-start',
     '& .MuiTypography-root': {
-      marginLeft: 18
+      textAlign: 'left',
+      marginLeft: 18,
+      [theme.breakpoints.down('md')]: {
+        marginLeft: 8
+      }
     }
   },
   checked: {
-    color: '#494949 !important',
     padding: 0,
     borderRadius: 3,
+    color: '#494949 !important',
     background: 'transparent !important'
   },
   root: {
@@ -40,32 +47,13 @@ const useStyles = makeStyles(theme => ({
       width: '18px'
     }
   },
-  textFieldGrid: {
-    maxWidth: 540,
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  titleGrid: {
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  textFieldBox: {
-    display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      justifyContent: 'flex-start'
-    }
-  },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 25
+    paddingLeft: 14
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500
+    maxWidth: 675
   }
 }));
 

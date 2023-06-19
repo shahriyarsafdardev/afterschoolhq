@@ -19,7 +19,7 @@ const WebCamera = ({
   const [currentVideoStream, setCurrentStream] = useState([]);
 
   const getWidth = () => {
-    if (isDesktop) return 510;
+    if (isDesktop) return 675;
     if (isTablet) return 480;
   };
 
