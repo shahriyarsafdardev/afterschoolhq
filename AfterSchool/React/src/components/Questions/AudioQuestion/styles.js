@@ -4,7 +4,7 @@ const useStyles = makeStyles(theme => ({
   wrapper: { display: 'flex', maxWidth: '675px' },
   audioWrapper: {
     marginTop: 30,
-    padding: '8px 0px',
+    paddingTop: '8px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

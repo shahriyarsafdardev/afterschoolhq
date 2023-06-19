@@ -40,27 +40,29 @@ const MoodQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box className={classes.wrapper}>
-        <div className={classes.moodWrapper}>
-          <div className={classes.iconsWrapper}>
-            {options.map((mood, index) => (
-              <Box key={index}>
-                <IconButton
-                  key={mood.key}
-                  onClick={handleMoodChange(mood)}
-                  className={getClassName(mood.value)}
-                >
-                  <Emoji>{mood.key}</Emoji>
-                </IconButton>
-                {currentMood.value === mood.value && (
-                  <Box className={classes.moodName}>{currentMood.value}</Box>
-                )}
-              </Box>
-            ))}
+      <Box style={{ marginBottom: 15 }}>
+        <Box className={classes.wrapper}>
+          <div className={classes.moodWrapper}>
+            <div className={classes.iconsWrapper}>
+              {options.map((mood, index) => (
+                <Box key={index}>
+                  <IconButton
+                    key={mood.key}
+                    onClick={handleMoodChange(mood)}
+                    className={getClassName(mood.value)}
+                  >
+                    <Emoji>{mood.key}</Emoji>
+                  </IconButton>
+                  {currentMood.value === mood.value && (
+                    <Box className={classes.moodName}>{currentMood.value}</Box>
+                  )}
+                </Box>
+              ))}
+            </div>
           </div>
-        </div>
+        </Box>
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

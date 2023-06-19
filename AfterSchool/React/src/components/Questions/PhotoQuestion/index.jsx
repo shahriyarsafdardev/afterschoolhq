@@ -136,107 +136,109 @@ const PhotoQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box className={classes.wrapper}>
-        <div className={classes.photoWrapper}>
-          <div className={cs(classes.photoContent, { [classes.webCamera]: isCameraOpen })}>
-            {isCameraOpen && (
-              <WebCamera
-                setCapturedData={handleWebCamUpload}
-                handleCameraOpen={toggleCamera}
-                setVideoStream={setCurrentStream}
-              />
+      <Box style={{ marginBottom: 15 }}>
+        <Box className={classes.wrapper}>
+          <div className={classes.photoWrapper}>
+            <div className={cs(classes.photoContent, { [classes.webCamera]: isCameraOpen })}>
+              {isCameraOpen && (
+                <WebCamera
+                  setCapturedData={handleWebCamUpload}
+                  handleCameraOpen={toggleCamera}
+                  setVideoStream={setCurrentStream}
+                />
+              )}
+              {!isCameraOpen && imageUrl && (
+                <img
+                  src={imageUrl}
+                  className={classes.uploadImage}
+                  alt="Upload"
+                  onLoad={handleImageLoad}
+                />
+              )}
+              {!imageUrl && !isCameraOpen && !isImageLoading && (
+                <img src={photoPlaceholder} className={classes.uploadImage} alt="Upload2" />
+              )}
+              {!isCameraOpen && !imageUrl && !isImageLoading && (
+                <div className={classes.captureButton}>
+                  <IconButton onClick={handleCaptureClick}>
+                    <img src={capture} alt="Capture" />
+                  </IconButton>
+                </div>
+              )}
+            </div>
+            {imageUrl && !isImageLoading && (
+              <Button className={classes.uploadButton} onClick={handleDiscard}>
+                Discard & Retake
+              </Button>
             )}
-            {!isCameraOpen && imageUrl && (
-              <img
-                src={imageUrl}
-                className={classes.uploadImage}
-                alt="Upload"
-                onLoad={handleImageLoad}
-              />
-            )}
-            {!imageUrl && !isCameraOpen && !isImageLoading && (
-              <img src={photoPlaceholder} className={classes.uploadImage} alt="Upload2" />
-            )}
-            {!isCameraOpen && !imageUrl && !isImageLoading && (
-              <div className={classes.captureButton}>
-                <IconButton onClick={handleCaptureClick}>
-                  <img src={capture} alt="Capture" />
-                </IconButton>
+            {descriptionText && imageUrl && !isImageLoading && (
+              <div className={classes.descriptionWrapper}>
+                <div className={classes.descriptionText}>{descriptionText}</div>
+                <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
+                  Edit Caption
+                </Button>
               </div>
             )}
-          </div>
-          {imageUrl && !isImageLoading && (
-            <Button className={classes.uploadButton} onClick={handleDiscard}>
-              Discard & Retake
-            </Button>
-          )}
-          {descriptionText && imageUrl && !isImageLoading && (
-            <div className={classes.descriptionWrapper}>
-              <div className={classes.descriptionText}>{descriptionText}</div>
+            {!descriptionText && imageUrl && !isImageLoading && (
               <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
-                Edit Caption
+                Add Caption
+              </Button>
+            )}
+            {!descriptionText && !imageUrl && !isImageLoading && (
+              <>
+                <div className={classes.orText}>or</div>
+                <Button className={classes.uploadButton} onClick={handleUploadModal}>
+                  Upload Photo
+                </Button>
+              </>
+            )}
+          </div>
+          <input
+            type="file"
+            accept="image/*"
+            capture="user"
+            className={classes.inputFile}
+            ref={captureInputRef}
+            onChange={handleUploadChange}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={uploadInputRef}
+            className={classes.inputFile}
+            onChange={handleUploadChange}
+          />
+          <DescriptionModal
+            isOpen={isDescriptionModal}
+            handleClose={handleDescriptionModal}
+            handleDescriptionSave={handleDescriptionSave}
+            text={descriptionText}
+            title={descriptionText ? 'Edit Caption' : 'Add Caption'}
+          />
+          <Dialog
+            open={uploadImageModal}
+            onClose={handleUploadModal}
+            classes={{
+              paper: classes.modal
+            }}
+          >
+            <div className={classes.modalContent}>
+              <Typography variant="subtitle1">Upload Photo</Typography>
+              <Button
+                className={classes.selectImageButton}
+                color="primary"
+                variant="contained"
+                fullWidth
+                onClick={handleImageUpload}
+              >
+                Select Photo
               </Button>
             </div>
-          )}
-          {!descriptionText && imageUrl && !isImageLoading && (
-            <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
-              Add Caption
-            </Button>
-          )}
-          {!descriptionText && !imageUrl && !isImageLoading && (
-            <>
-              <div className={classes.orText}>or</div>
-              <Button className={classes.uploadButton} onClick={handleUploadModal}>
-                Upload Photo
-              </Button>
-            </>
-          )}
-        </div>
-        <input
-          type="file"
-          accept="image/*"
-          capture="user"
-          className={classes.inputFile}
-          ref={captureInputRef}
-          onChange={handleUploadChange}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          ref={uploadInputRef}
-          className={classes.inputFile}
-          onChange={handleUploadChange}
-        />
-        <DescriptionModal
-          isOpen={isDescriptionModal}
-          handleClose={handleDescriptionModal}
-          handleDescriptionSave={handleDescriptionSave}
-          text={descriptionText}
-          title={descriptionText ? 'Edit Caption' : 'Add Caption'}
-        />
-        <Dialog
-          open={uploadImageModal}
-          onClose={handleUploadModal}
-          classes={{
-            paper: classes.modal
-          }}
-        >
-          <div className={classes.modalContent}>
-            <Typography variant="subtitle1">Upload Photo</Typography>
-            <Button
-              className={classes.selectImageButton}
-              color="primary"
-              variant="contained"
-              fullWidth
-              onClick={handleImageUpload}
-            >
-              Select Photo
-            </Button>
-          </div>
-        </Dialog>
+          </Dialog>
+        </Box>
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+        {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
-      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   videoWrapper: {
-    padding: '8px 0px',
+    paddingTop: '8px',
     marginTop: 35,
     display: 'flex',
     flexDirection: 'column',

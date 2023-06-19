@@ -41,10 +41,16 @@ const useStyles = makeStyles(theme => ({
       content: '""'
     }
   },
+  outerWrapper: {
+    gap: 5,
+    display: 'flex',
+    marginBottom: 15,
+    flexDirection: 'column'
+  },
   ratingWrapper: {
     display: 'flex',
     justifyContent: 'space-between',
-    padding: '20px 0 15px',
+    paddingTop: '20px',
     alignItems: 'flex-start',
     maxWidth: 675
   },

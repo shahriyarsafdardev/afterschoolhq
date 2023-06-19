@@ -2,29 +2,18 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   uploadButtonWrapper: {
+    gap: 5,
     display: 'flex',
-    maxWidth: '90%',
     alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    [theme.breakpoints.down('sm')]: {
-      alignItems: 'start',
-      flexDirection: 'column'
-    }
+    flexDirection: 'column'
   },
   photoWrapper: {
-    height: '90px',
+    gap: 5,
     width: '100%',
     display: 'flex',
     maxWidth: '675px',
-    paddingBottom: 15,
     textAlign: 'initial',
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
-    [theme.breakpoints.down('sm')]: {
-      width: '100%',
-      height: '120px'
-    }
+    flexDirection: 'column'
   },
   uploadButton: {
     boxShadow: '0px 4px 13px #bababa',

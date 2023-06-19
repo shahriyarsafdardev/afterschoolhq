@@ -41,7 +41,7 @@ const RatingQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box>
+      <Box className={classes.outerWrapper}>
         <div className={classes.ratingWrapper}>
           <div className={classes.ratingText}>{leastValue}</div>
           <RadioGroup
@@ -74,8 +74,8 @@ const RatingQuestion = ({ question, formik }) => {
           </RadioGroup>
           <div className={classes.ratingText}>{highestValue}</div>
         </div>
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

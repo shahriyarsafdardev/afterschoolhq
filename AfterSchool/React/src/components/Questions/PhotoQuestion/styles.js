@@ -5,7 +5,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex'
   },
   photoWrapper: {
-    padding: '8px 0px',
+    paddingTop: '8px',
     marginTop: 30,
     display: 'flex',
     flexDirection: 'column',
