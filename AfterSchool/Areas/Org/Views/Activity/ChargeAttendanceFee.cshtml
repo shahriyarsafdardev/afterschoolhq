@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     ViewBag.Title = Model.AccountName;
     var attendancesToBillRegistrants = (Dictionary<RegistrantActivity, List<Attendance>>)ViewBag.AttendancesToBillRegistrants;
@@ -72,16 +72,19 @@
                                 var registrant = attendancesToBillRegistrant.Key.GetRegistrant();
                                 var registration = attendancesToBillRegistrant.Key.GetRegistration();
                                 var presentCount = attendancesToBillRegistrant.Value.Count;
+                                var availablePrePayments = registration.GetAvailablePrePayments( Model, msgs);
+                                var attendanceDaysToCharge = Math.Max(0, presentCount - availablePrePayments.Count);
+
                                 var costPerClass = registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0;
-                                var totalAmount = (decimal)(presentCount * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
-                                var couponDiscount = (decimal)(presentCount * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
+                                var totalAmount = (decimal)(attendanceDaysToCharge * (registration.CostPerClass.HasValue ? registration.CostPerClass.Value : 0));
+                                var couponDiscount = (decimal)(attendanceDaysToCharge * (registration.CouponValue.HasValue ? registration.CouponValue.Value : 0));
                                 var totalAmountToCharge = (decimal)totalAmount - couponDiscount;
 
                                 <tr>
                                     <td>@registrant.FirstName @registrant.LastName</td>
 
-                                    <td>@presentCount</td>
-
+                                    <td>@attendanceDaysToCharge</td>
+                                   
                                     <td>@totalAmount.ToCurrency()</td>
 
                                     <td>@couponDiscount.ToCurrency()</td>
