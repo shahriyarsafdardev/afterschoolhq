@@ -835,6 +835,7 @@
     <Content Include="Assets\img\view-bgcheck.svg" />
     <Content Include="Assets\img\warning.png" />
     <Content Include="Assets\img\welcome-back-arrow.png" />
+    <Content Include="Assets\img\coupon-discount.svg" />
     <Content Include="Assets\js\ahq-directory-map.js" />
     <Content Include="Assets\js\ahq-directory-search.js" />
     <Content Include="Assets\img\alert-2.svg" />
