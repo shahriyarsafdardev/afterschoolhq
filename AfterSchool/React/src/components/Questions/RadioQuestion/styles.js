@@ -10,8 +10,7 @@ const useStyles = makeStyles(() => ({
   },
   radio: {
     width: '100%',
-    display: 'flex',
-    marginBottom: '5px'
+    display: 'flex'
   },
   radioGroupRoot: {
     flexDirection: 'row',

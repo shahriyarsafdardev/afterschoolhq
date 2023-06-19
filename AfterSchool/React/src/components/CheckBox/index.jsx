@@ -14,7 +14,7 @@ function CheckBox({ formik, question }) {
 
   return (
     <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ margin: 'auto' }}>
+      <Box style={{ margin: 'auto auto 5px' }}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
             data-testid={`${title}-${QuestionDataTypeId}-form`}

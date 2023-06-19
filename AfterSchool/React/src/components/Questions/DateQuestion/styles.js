@@ -6,7 +6,6 @@ const useStyles = makeStyles(theme => ({
     maxWidth: 675,
     width: '100%',
     paddingTop: '8px',
-    marginBottom: '15px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',

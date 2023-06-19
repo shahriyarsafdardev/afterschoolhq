@@ -22,25 +22,23 @@ export default function TextAreaQuestion({ formik, question }) {
         </Typography>
       </Box>
 
-      <Box style={{ margin: 'auto' }}>
-        <>
-          <TextareaAutosize
-            data-testid={`${label}-${QuestionDataTypeId}`}
-            minRows={4}
-            className={classes.formControlClass}
-            variant="outlined"
-            {...formik.getFieldProps(question.ID)}
-            error={formik.touched[ID] && formik.errors[ID]}
-            helpertext={formik.touched[ID] && formik.errors[ID]}
-          />
-          {touched[ID] && errors[ID] && (
-            <Box className={classes.flexCenter}>
-              <FormHelperText className={classes.maxWidth} error>
-                {errors[ID]}
-              </FormHelperText>
-            </Box>
-          )}
-        </>
+      <Box style={{ margin: 'auto', marginBottom: 15 }}>
+        <TextareaAutosize
+          data-testid={`${label}-${QuestionDataTypeId}`}
+          minRows={4}
+          className={classes.formControlClass}
+          variant="outlined"
+          {...formik.getFieldProps(question.ID)}
+          error={formik.touched[ID] && formik.errors[ID]}
+          helpertext={formik.touched[ID] && formik.errors[ID]}
+        />
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText className={classes.maxWidth} error>
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
       </Box>
     </Box>
   );

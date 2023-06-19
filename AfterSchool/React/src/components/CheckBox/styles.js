@@ -4,7 +4,6 @@ const useStyles = makeStyles(theme => ({
   checkboxWrapper: {
     overflowWrap: 'anywhere',
     borderRadius: 12,
-    marginBottom: 5,
     display: 'flex',
     maxWidth: 675,
     width: '100%',

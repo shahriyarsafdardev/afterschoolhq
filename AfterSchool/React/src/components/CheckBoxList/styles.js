@@ -7,7 +7,6 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     borderRadius: 12,
-    marginBottom: 5,
     overflowWrap: 'anywhere'
   },
   formControlLabelRoot: {

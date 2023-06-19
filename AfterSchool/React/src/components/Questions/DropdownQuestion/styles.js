@@ -56,7 +56,6 @@ const useStyles = makeStyles(theme => ({
     display: 'block',
     maxWidth: 675,
     width: '100%',
-    marginBottom: '15px',
     paddingTop: '8px',
     fontSize: '13px',
     lineHeight: '1.42857143',

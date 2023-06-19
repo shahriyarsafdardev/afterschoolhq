@@ -45,7 +45,7 @@ function DateQuestion({ question, formik }) {
   };
 
   return (
-    <>
+    <Box style={{ marginBottom: 15 }}>
       <FieldWrapper label={title} isRequired={isRequired}>
         <div className={classes.dateWrapper}>
           <div className={classes.datePicker} ref={datePicker}>
@@ -86,7 +86,7 @@ function DateQuestion({ question, formik }) {
           </Box>
         )}
       </FieldWrapper>
-    </>
+    </Box>
   );
 }
 
