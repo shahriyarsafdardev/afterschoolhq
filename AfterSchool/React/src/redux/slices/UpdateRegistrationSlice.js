@@ -110,33 +110,22 @@ export const useUpdateRegistrationActions = () => {
     { answers, answerQuery, formData },
     lastSection,
     schoolLocationID,
-    newChild,
-    accountName,
-    activityName,
     regUid
   ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
     formData.append('groupId', groupId);
-    formData.append('newChild', newChild);
-    formData.append('registrantUid', regUid);
-    formData.append('accountName', accountName);
-    formData.append('activityName', activityName);
+    formData.append('registrationUid', regUid);
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
-      dispatch(loadingFormData());
-      UpdateRegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        dispatch(setRegistrationId(obj));
-        dispatch(setMsgs(msgs));
-      });
-    } else
-      await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-        dispatch(setMsgs(msgs))
-      );
+    }
+    await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
+      dispatch(setMsgs(msgs))
+    );
 
     dispatch(submitFormSection(answers));
   };

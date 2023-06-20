@@ -9,7 +9,7 @@ import { useUpdateRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
-export default function UpdateRegistration({ newChild = false }) {
+export default function UpdateRegistration() {
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouUrl } = apiRoutes;
@@ -130,9 +130,6 @@ export default function UpdateRegistration({ newChild = false }) {
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
-          newChild ? 1 : 0,
-          accountName,
-          activityName,
           regUid
         ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
       }
@@ -202,6 +199,7 @@ export default function UpdateRegistration({ newChild = false }) {
       isFree={IsFree}
       firstSection={activeGroup === 0}
       exitHandler={exitHandler}
+      isUpdatingRegistration={true}
     ></RegistrationForm>
   );
 }

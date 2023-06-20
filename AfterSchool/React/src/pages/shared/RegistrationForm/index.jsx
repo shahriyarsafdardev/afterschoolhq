@@ -29,7 +29,8 @@ export default function RegistrationForm(props) {
     isSurvey = false,
     currentQuestions,
     handleRedirection,
-    isUpdating = false
+    isUpdating = false,
+    isUpdatingRegistration = false
   } = props;
   const outerWrapperClass =
     isUpdating || isSurvey
@@ -83,6 +84,7 @@ export default function RegistrationForm(props) {
                         index,
                         formik,
                         isUpdating,
+                        isUpdatingRegistration,
                         currentQuestion: question,
                         currentQuestions: currentQuestions
                       })

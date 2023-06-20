@@ -1,10 +1,10 @@
 import cs from 'classnames';
 import useStyles from './styles';
 import SimpleCheckBox from 'components/SimpleCheckBox';
-import { useRegistration, useProfile } from 'redux/hooks';
 import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
+import { useRegistration, useProfile, useUpdateRegistration } from 'redux/hooks';
 
 export const locationObject = place => {
   const latitude = place?.geometry?.location?.lat();
@@ -81,13 +81,22 @@ export const locationObject = place => {
   };
 };
 
-function SchoolField({ question, formik, isUpdating = false }) {
+function SchoolField({
+  question,
+  formik,
+  isUpdatingRegistration = false,
+  isUpdating: isUpdatingProfile = false
+}) {
   const inputRef = useRef();
   const classes = useStyles();
   const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
   const { ID, Text, IsRequired: required = false, QuestionDataTypeId } = question;
-  const { school, noSchool, setSchoolFieldValue } = isUpdating ? useProfile() : useRegistration();
+  const { school, noSchool, setSchoolFieldValue } = isUpdatingRegistration
+    ? useUpdateRegistration()
+    : isUpdatingProfile
+    ? useProfile()
+    : useRegistration();
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
