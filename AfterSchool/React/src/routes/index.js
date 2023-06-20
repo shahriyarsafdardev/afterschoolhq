@@ -12,6 +12,8 @@ export default {
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+  getRegistrationFormDataAPI: regUid =>
+    `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
 
   //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
