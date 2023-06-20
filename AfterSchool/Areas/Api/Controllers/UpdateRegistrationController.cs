@@ -33,10 +33,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("No Registration");
                 
                 var currentRegistrant = registration.GetRegistrant(msgs);
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
                 
-                if(currentRegistrant.IsEmpty())
+                if(currentRegistrant.IsEmpty() || currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
+                if(!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
+                    throw new Exception("No Access");
+                
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
                 
@@ -116,7 +120,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsAgeRestricted = participationObject.AgeStart != null,
                         IsGenderRestricted = participationObject.IsGenderEnforced,
                         RegistrationIsCompleted = registration?.CompletionStatusId == RegistrationCompletionStatus.Completed,
-                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                        CanAccess = currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                         MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
