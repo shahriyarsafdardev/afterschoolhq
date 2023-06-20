@@ -460,6 +460,14 @@ namespace AfterSchool.Areas.Org.Controllers
                     searchQuestionIds, searchQuestionTypeIds, msgs);
                 totalRecordCount = SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
                     searchQuestionIds, searchQuestionTypeIds, msgs);
+                //adding public survey responses
+                if (activityIds.Count < 1)
+                {
+                    responses.AddRange(SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, start,
+                        length, searchQuestionIds, searchQuestionTypeIds, msgs, true));
+                    totalRecordCount += SurveyResponse.GetCountByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate,
+                        searchQuestionIds, searchQuestionTypeIds, msgs, true);
+                }
 
                 if (responses.Any())
                 {
@@ -470,17 +478,22 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     responses.ForEach(response =>
                     {
-                        var registrant = new Registrant() { ID = response.RegistrantId };
-                        var ras = registrant.GetRegistrantActivities(msgs);
+                        if (response.RegistrantId.IsNotEmpty())
+                        {
+                            var registrant = new Registrant() {ID = response.RegistrantId};
+                            var ras = registrant.GetRegistrantActivities(msgs);
 
-                        if (activityIds.Any())
-                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+                            if (activityIds.Any())
+                                ras = ras.Where(ra =>
+                                        ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds))
+                                    .ToList();
 
-                        if (!registrantActivities.ContainsKey(registrant.ID.Value))
-                            registrantActivities.Add(
-                                registrant.ID.Value,
-                                ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
-                            );
+                            if (!registrantActivities.ContainsKey(registrant.ID.Value))
+                                registrantActivities.Add(
+                                    registrant.ID.Value,
+                                    ras.Select(ra => ra.GetParticipationObject(msgs).Name).ToStringList(", ")
+                                );
+                        }
                     });
                 }
 
@@ -490,7 +503,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     ID = response.ID.ToString(),
                                     FirstRegistrantId = "",
                                     SubmissionDate = response.LastModifiedDate.ToShortDateTimeString(),
-                                    Activities = registrantActivities[response.RegistrantId.Value],
+                                    Activities = response.RegistrantId.HasValue ? registrantActivities[response.RegistrantId.Value] : "",
                                     RecordId = response.ID.ToString().PadLeft(9, '0'),
                                     FirstName = response.RegistrantFirstName,
                                     LastName = response.RegistrantLastName,
@@ -578,7 +591,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     Text = answer.GetAnswerText().IfEmpty(""), 
                                     QuestionId = answer.FormQuestionId.Value, 
                                     QuestionDataTypeId = (int)answer.QuestionDataTypeId, 
-                                    RegistrantId = answer.RegistrantId.Value,
+                                    RegistrantId = answer.RegistrantId,
                                     FirstRegistrantId = answer.RegistrantFirstRegistrantId,
                                     answer.SurveyResponseId,
                                 }),

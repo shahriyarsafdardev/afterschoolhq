@@ -232,7 +232,7 @@ namespace AfterSchoolLibrary.Models
 
 
         public static int GetCountByAnswered(int accountId, int formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate,
-            List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+            List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, bool isPublicSurvey = false, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -245,13 +245,13 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(searchCriteria);
             }
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, true, searchQuestionIds, searchQuestionTypeIds);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, true, searchQuestionIds, searchQuestionTypeIds, isPublicSurvey);
 
             return dq.ExecuteSelect(sql, msgs).Rows[0][0].ToString().ToInteger();
         }
 
         public static List<SurveyResponse> LoadByAnswered(int accountId, int formId, List<int> activityIds, string search, DateTime? startDate, DateTime? endDate, int? start, int? length,
-            List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, DatabaseConnection dc = null)
+            List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, SystemMessages msgs = null, bool isPublicSurvey = false, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -264,7 +264,7 @@ namespace AfterSchoolLibrary.Models
                 dq.Criterias.Add(searchCriteria);
             }
 
-            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, false, searchQuestionIds, searchQuestionTypeIds);
+            var sql = LoadByAnsweredQuery(accountId, formId, activityIds, searchCriteria, startDate, endDate, false, searchQuestionIds, searchQuestionTypeIds, isPublicSurvey);
 
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
@@ -273,9 +273,12 @@ namespace AfterSchoolLibrary.Models
         }
 
         private static string LoadByAnsweredQuery(int accountId, int formId, List<int> activityIds, DatabaseCriteria search, DateTime? startDate, DateTime? endDate, 
-            bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds)
+            bool getCountOnly, List<int> searchQuestionIds, List<QuestionDataType> searchQuestionTypeIds, bool isPublicSurvey = false)
         {
-            string sql = @$"
+            string sql = "";
+            if (!isPublicSurvey)
+            {
+                sql = @$"
                 select {(getCountOnly ? "count(distinct SurveyResponse.ID)" : "distinct SurveyResponse.*, Registrant.FirstName as RegistrantFirstName, Registrant.LastName as RegistrantLastName, Registrant.Email as RegistrantEmail")} 
                 from 
                     SurveyRequest inner join
@@ -283,16 +286,30 @@ namespace AfterSchoolLibrary.Models
                     FormQuestionAnswer on SurveyResponse.ID = FormQuestionAnswer.SurveyResponseId inner join
                     Registrant on SurveyResponse.RegistrantId = Registrant.ID";
 
-            if (activityIds.IsNotEmpty() && activityIds.Any())
-                sql += @"
+                if (activityIds.IsNotEmpty() && activityIds.Any())
+                    sql += @"
                     left outer join 
                     RegistrantActivity on Registrant.ID = RegistrantActivity.RegistrantId";
 
-            sql += @$"
+                sql += @$"
                 where 
                     SurveyRequest.AccountId = {accountId} and 
                     SurveyRequest.FormId = {formId} and
                     SurveyResponse.SurveyFeedbackStatusTypeId = 3";
+            }
+            else
+            {
+                sql = @$"
+                select {(getCountOnly ? "count(distinct SurveyResponse.ID)" : "distinct SurveyResponse.*, '' as RegistrantFirstName, '' as RegistrantLastName, " + "'' as RegistrantEmail")}
+                from
+                    SurveyResponse inner join
+                    FormQuestionAnswer on SurveyResponse.ID = FormQuestionAnswer.SurveyResponseId";
+
+                sql += @$"
+                where 
+                    SurveyResponse.SurveyRequestId = {formId} and
+                    SurveyResponse.SurveyFeedbackStatusTypeId = 3";
+            }
 
             if (search.IsNotEmpty())
             {

@@ -47,8 +47,13 @@ namespace AfterSchoolLibrary.Services
         public static int GetTotalSubmissionCount(this Form form, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (form.FormTypeId == FormType.Survey)
-                return SurveyResponse.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
+            {
+                var count = SurveyResponse.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
                     null, null, msgs);
+                count += SurveyResponse.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
+                    null, null, msgs, true);
+                return count;
+            }
 
             return Registrant.GetCountByAnswered(form.AccountId.Value, form.ID.Value, null, null, null, null,
                     false, null, null, RegistrantPersonType.NotSet, msgs);
@@ -212,8 +217,14 @@ namespace AfterSchoolLibrary.Services
                 var responses = new List<SurveyResponse>();
 
                 if (formType == FormType.Survey)
+                {
                     responses = SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
                                     searchQuestionIds, searchQuestionTypeIds, msgs);
+                    //adding public survey responses
+                    if (activityIds.Count < 1)
+                        responses.AddRange(SurveyResponse.LoadByAnswered(currentAccount.ID.Value, formId.Value, activityIds, search, startDate, endDate, null, null,
+                            searchQuestionIds, searchQuestionTypeIds, msgs, true));
+                }
                 else
                     registrants = Registrant.LoadByAnswered(currentAccount.ID.Value, formId, activityIds, search, startDate, endDate, null, null,
                                     collapseRecords, searchQuestionIds, searchQuestionTypeIds, registrantPersonType, msgs);
@@ -277,10 +288,14 @@ namespace AfterSchoolLibrary.Services
                     foreach (var response in responses)
                     {
                         var registrant = new Registrant() { ID = response.RegistrantId };
-                        var ras = registrant.GetRegistrantActivities(msgs);
-
-                        if (activityIds.Any())
-                            ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+                        var ras = new List<RegistrantActivity>();
+                        if (registrant.ID.IsNotEmpty())
+                        {
+                            ras = registrant.GetRegistrantActivities(msgs);
+                            if (activityIds.Any())
+                                ras = ras.Where(ra => ra.ParticipationObjectTypeId == ParticipationObjectType.Activity && ra.ParticipationObjectId.Value.In(activityIds)).ToList();
+                        }
+                        
 
                         var answers = response.GetAnswers(msgs);
 
