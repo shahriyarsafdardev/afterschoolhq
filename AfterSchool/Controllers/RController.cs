@@ -1004,5 +1004,12 @@ namespace AfterSchool.Controllers
 
             return Redirect($"/{uniqueName}");
         }
+        
+        [HttpGet]
+        public ActionResult Update(string regUid)
+        {
+            if (!regUid.IsGuid()) return Redirect($"~/404.html");
+            return Redirect($"~/reactapp/reg/update/{regUid.ToGuid()}");
+        }
     }
 }
