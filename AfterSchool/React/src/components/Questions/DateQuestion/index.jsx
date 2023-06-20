@@ -16,7 +16,7 @@ function DateQuestion({ question, formik }) {
   const today = new Date();
   const datePickerProps = { maxDate: today };
 
-  const [selectedDate, setSelectedDate] = useState(values[ID] || null);
+  const [selectedDate, setSelectedDate] = useState(values[ID] || '');
 
   useEffect(() => {
     setFieldValue(ID, selectedDate);
