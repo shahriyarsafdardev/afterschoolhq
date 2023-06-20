@@ -21,7 +21,7 @@
                     <input type="text" id="search" placeholder="Search" class="form-control" />
                 </div>
                 <div class="col-md-4">
-                    <button type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
+                    <button id="btnSearch" type="button" class="btn btn-primary" onclick="searchClick()">Search</button>
                     <button type="button" class="btn btn-default" onclick="location.href=location.href">Reset</button>
                     <button type="button" class="btn btn-default" onclick="emailReport()" id="btn-email-report">Email Report</button>
                 </div>
@@ -54,6 +54,8 @@
                 <div class="row">&nbsp;</div>
             }
 
+            <p id="dateFutureError" class="text-danger hide"> From date can't be set for future.</p>
+            <p id="dateRangeError" class="text-danger hide"> From date can't be greater than to-date.</p>
             <div class="row">
                 <div class="col-md-12">
                     <button type="button" class="btn btn-link" onclick="toggleDateSelection()"><i class="s7-date"></i> Date Filter</button>
@@ -350,6 +352,12 @@
 
         loadRegistrants(pageStart, pageSize);
 
+        $("#startdate").change(function () {
+            validateDate($("#startdate").val(), $("#enddate").val());
+        })
+        $("#enddate").change(function () {
+            validateDate($("#startdate").val(), $("#enddate").val());
+        })
     });
 
     function resetScreen() {
@@ -360,6 +368,39 @@
     function searchClick() {
         hideToggles();
         search();
+    }
+
+    function validateDate(fDate, tDate) {
+        let fromDate = new Date(fDate);
+        let toDate = new Date(tDate);
+        let currentDate = new Date();
+        let isFutureDate = false;
+        let isInvalidRange = false;
+
+        if (fromDate > currentDate) {
+            $("#dateFutureError").removeClass('hide');
+            isFutureDate = true;
+        }
+        else {
+            $('#dateFutureError').addClass('hide');
+            isFutureDate = false;
+        }
+        if (fromDate > toDate) {
+            $('#dateRangeError').removeClass('hide');
+            isInvalidRange = true;
+        }
+        else {
+            $('#dateRangeError').addClass('hide');
+            isInvalidRange = false;
+        }
+
+        if (isFutureDate || isInvalidRange) {
+            $('#btnSearch').prop('disabled', true);
+        } else {
+            $('#btnSearch').prop('disabled', false);
+        }
+
+          
     }
 
     function search() {
@@ -620,6 +661,9 @@
                     if (data.records.length == 0) {
                         var tableRow = `<tr class="no-results"><td colspan="${questions.length}">There are no results</td></tr>`;
                         $('#answer-tbody').append(tableRow);
+                        $('#starting-record').html(0);
+                        $('#total-records-loaded').html(0);
+                        $('#total-records').html(0);
                     } else {
 
                         for (let record of data.records) {
