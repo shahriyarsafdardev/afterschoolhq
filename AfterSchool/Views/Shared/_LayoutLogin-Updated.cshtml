@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -29,10 +29,11 @@
 
 </head>
 <body class="" style="background-color: #fff;">
-@RenderBody()
+    @Html.Partial("_Scheduled_Downtime")
+    @RenderBody()
 
-@{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
-@RenderSection("scripts", false)
+    @{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
+    @RenderSection("scripts", false)
 
 </body>
 </html>

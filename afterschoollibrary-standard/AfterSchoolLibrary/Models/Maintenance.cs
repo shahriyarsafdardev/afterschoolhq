@@ -8,7 +8,7 @@ using System.Collections;
 
 namespace AfterSchoolLibrary.Models
 {
-    internal class Maintenance : BasicObject
+    public class Maintenance : BasicObject
     {
         public Maintenance()
         {

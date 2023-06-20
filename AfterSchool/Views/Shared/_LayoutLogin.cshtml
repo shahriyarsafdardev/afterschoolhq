@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="/assets/css/style.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/style-mods.css?v=1.30" />
     <link href="~/Assets/css/font-awesome-4.6.3/css/font-awesome.min.css" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="/Assets/css/common.css">
     <script src="/assets/js/init.js?v=1.02"></script>
 
     @{ Html.RenderPartial("~/Views/Shared/_Rollbar.cshtml"); }
@@ -29,8 +30,9 @@
 
 </head>
 <body class="am-splash-screen">
-@RenderBody()
+    @Html.Partial("_Scheduled_Downtime")
+    @RenderBody()
 
-@{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
+    @{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
 </body>
 </html>

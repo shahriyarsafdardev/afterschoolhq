@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -26,12 +26,13 @@
 
 </head>
 <body class="am-box-layout">
-<div class="am-wrapper am-nosidebar-left am-box-layout">
-    <!-- Main section-->
-    <div class="am-content">
-        @RenderBody()
+    <div class="am-wrapper am-nosidebar-left am-box-layout">
+        @Html.Partial("_Scheduled_Downtime")
+        <!-- Main section-->
+        <div class="am-content">
+            @RenderBody()
+        </div>
     </div>
-</div>
 
 @{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
 @RenderSection("scripts", false)

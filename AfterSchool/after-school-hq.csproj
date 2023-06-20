@@ -2593,6 +2593,7 @@
     <Content Include="Views\Shared\Registration\_AuthCodeModal.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBar.cshtml" />
     <Content Include="Views\Shared\_PasswordStrengthBarLight.cshtml" />
+    <Content Include="Views\Shared\_Scheduled_Downtime.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
