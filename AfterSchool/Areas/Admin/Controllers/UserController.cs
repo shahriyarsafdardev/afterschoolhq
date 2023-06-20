@@ -58,6 +58,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("This is API error", MessageType.ApiError);
                 msgs.Add("This is Warning error", MessageType.Warning);
                 msgs.Add("This is Success error", MessageType.Success);
+
+                AfterSchoolLibrary.Helpers.Utilities.SystemAbcLog(msgs); 
             }
             ViewBag.Messages = msgs;
 
