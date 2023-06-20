@@ -284,12 +284,14 @@ namespace AfterSchool.Areas.Api.Controllers
                                 loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc : adc);
-                            
-                            if(parentRegistrant.IsNotEmpty())
-                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
+
+                            var formQuestions = participationObject.Form.GetAllQuestions(amsgs, adc);
+
+                            if (parentRegistrant.IsNotEmpty())
+                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, formQuestions, currentUser, amsgs, adc);
                     
                             if(parent2Registrant.IsNotEmpty())
-                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(amsgs), currentUser, amsgs, adc);
+                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, formQuestions, currentUser, amsgs, adc);
                         },
                         smsgs =>
                         {
