@@ -147,7 +147,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentRegistrant = registration.GetRegistrant(msgs);
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-                
+
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
                 if(participationObject.IsEmpty())
@@ -232,11 +232,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                     onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
-
+                
                 return Json(
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
-
             }
             catch (Exception ex)
             {
@@ -319,6 +318,52 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+        [HttpPost]
+        public ActionResult UpdateRegistrationWithESignature(UpdateQuestionAnswerResponse json)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized");
+                
+                if(!json.registrationUid.IsGuid())
+                    throw new Exception("Invalid Id");
+                
+                if(string.IsNullOrEmpty(json.esignature))
+                    throw new Exception("Invalid E-Signature");
+                
+                var registration = Registration.LoadByUid(json.registrationUid.ToGuid(), msgs);
+                if(registration.IsEmpty())
+                    throw new Exception("No Registration");
+                
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        registration.ESignature = json.esignature;
+                        registration.ESignatureUserAgent = Request.UserAgent;
+                        registration.ESignatureIPAddress = Request.GetUserHostAddress();
+                        registration.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(registration.Save(adc));
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+                
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs,null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }
