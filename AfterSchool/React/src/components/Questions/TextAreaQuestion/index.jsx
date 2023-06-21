@@ -34,7 +34,11 @@ export default function TextAreaQuestion({ formik, question }) {
         />
         {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
-            <FormHelperText className={classes.maxWidth} error>
+            <FormHelperText
+              data-testid={`${label}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
               {errors[ID]}
             </FormHelperText>
           </Box>

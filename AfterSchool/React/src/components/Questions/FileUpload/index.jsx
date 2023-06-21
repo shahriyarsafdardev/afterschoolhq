@@ -79,7 +79,11 @@ const FileUpload = ({ formik, question }) => {
         </div>
         {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
           <Box className={classes.flexCenter}>
-            <FormHelperText className={classes.maxWidth} error>
+            <FormHelperText
+              data-testid={`${title}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
               {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
             </FormHelperText>
           </Box>

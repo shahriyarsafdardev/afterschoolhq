@@ -189,7 +189,11 @@ function RenderOptions(props) {
               </Droppable>
             </DragDropContext>
             {touched?.Options && errors?.Options && typeof errors?.Options === 'string' && (
-              <FormHelperText className={classes.maxWidth} error>
+              <FormHelperText
+                data-testid={`${ID}-${QuestionDataTypeId}-error`}
+                className={classes.maxWidth}
+                error
+              >
                 {errors?.Options}
               </FormHelperText>
             )}

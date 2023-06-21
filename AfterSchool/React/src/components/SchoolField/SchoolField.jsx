@@ -142,6 +142,9 @@ function SchoolField({ question, formik, isUpdating = false }) {
                   className={cs('form-control', classes.formControlClass)}
                   placeholder={`Enter your ${Text}`}
                   disabled={noSchool}
+                  FormHelperTextProps={{
+                    'data-testid': `${Text}-${QuestionDataTypeId}-error`
+                  }}
                 />
               </StandaloneSearchBox>
             </LoadScript>

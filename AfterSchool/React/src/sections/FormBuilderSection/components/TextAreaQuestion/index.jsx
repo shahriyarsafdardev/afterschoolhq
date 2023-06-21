@@ -24,7 +24,11 @@ export default function TextAreaQuestion({ formikProps, label }) {
           {...formikProps}
         />
         <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.helperText} error={error}>
+          <FormHelperText
+            data-testid={`${label}s-error`}
+            className={classes.helperText}
+            error={error}
+          >
             {`${value?.length || 0}/400`}
           </FormHelperText>
         </Box>

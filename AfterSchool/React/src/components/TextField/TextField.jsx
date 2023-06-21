@@ -35,6 +35,9 @@ export default function TextField({ formik, question, type = 'text' }) {
           {...formik.getFieldProps(question.ID)}
           error={!!(formik.touched[ID] && formik.errors[ID])}
           helperText={formik.touched[ID] && formik.errors[ID]}
+          FormHelperTextProps={{
+            'data-testid': `${label}-${QuestionDataTypeId}-error`
+          }}
         />
       </Box>
     </Box>
