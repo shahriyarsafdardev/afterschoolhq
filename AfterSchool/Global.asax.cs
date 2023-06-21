@@ -39,13 +39,13 @@ namespace AfterSchool
         {
             var maintenanceSchedule = Maintenance.Load().FirstOrDefault();
 
-            if (maintenanceSchedule != null && DateTime.Now >= maintenanceSchedule.StartTime && DateTime.Now <= maintenanceSchedule.EndTime)
+            if (maintenanceSchedule != null && DateTime.UtcNow >= maintenanceSchedule.StartTime && DateTime.UtcNow <= maintenanceSchedule.EndTime)
                 HttpContext.Current.Response.Redirect("~/scheduled-maintenance.html");
         }
 
         protected void Application_PostAcquireRequestState()
         {
-            var maintenanceSchedules = Maintenance.Load().Where(schedule => DateTime.Now <= schedule.EndTime).ToList();
+            var maintenanceSchedules = Maintenance.Load().Where(schedule => DateTime.UtcNow <= schedule.EndTime).ToList();
 
             if (maintenanceSchedules.Count > 0)
             {
@@ -59,14 +59,14 @@ namespace AfterSchool
                     if (duration.Minutes > 0)
                         hours = $"{duration.Hours} hour {duration.Minutes} minutes";
                     else
-                        hours = $"{duration.TotalHours} hour";
+                        hours = $"{duration.Hours} hour";
                 }
                 else
                     hours = $"{duration.TotalMinutes} minutes";
 
-                if (DateTime.Now <= upcomingMaintenance.StartTime)
+                if (DateTime.UtcNow <= upcomingMaintenance.StartTime)
                 {
-                    var maintenanceBarMessage = $"{UILabel.ProductName()} will be undergoing scheduled maintenance on {formattedTime} for approximately {hours}. We apologize for any inconvenience. If you need assistance during this time, please <a href=\"https://afterschoolhq.zendesk.com/hc/en-us/requests/new\">contact support</a>.";
+                    var maintenanceBarMessage = $"{UILabel.ProductName()} will be undergoing scheduled maintenance on {formattedTime} for \napproximately {hours}. We apologize for any inconvenience. If you need assistance during this time, please <a href=\"https://afterschoolhq.zendesk.com/hc/en-us/requests/new\">contact support</a>.";
                     SessionVariables.MaintenanceMessage = maintenanceBarMessage;
                 }
             }

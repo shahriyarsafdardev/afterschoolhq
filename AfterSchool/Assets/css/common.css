@@ -63,20 +63,19 @@
 
 .maintenance-bar {
     width: 100%;
-    padding: 10px 5%;
-    color: #31708f;
+    padding: 15px 5%;
+    color: #333;
     background: #d9edf7;
     position: relative;
     box-sizing: border-box;
     font-size: 13px;
-    z-index: 9999;
     top: 0;
     left: 0;
     text-align: center;
 }
 
 .maintenance-bar a {
-    color: #333;
+    color: #31708f;
     text-decoration: none;
 }
 
