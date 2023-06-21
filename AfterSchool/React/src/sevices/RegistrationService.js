@@ -41,6 +41,8 @@ export default class RegistrationService {
 
     this.currentQuestions?.forEach(question => {
       const { ID, IsRequired, QuestionTypeId, QuestionDataTypeId, Text, Options } = question;
+      if (QuestionTypeId === questionType.textBlock) return;
+
       const value = values[ID];
       const restrictionParams = [QuestionDataTypeId, value, addToErrors, ID];
 

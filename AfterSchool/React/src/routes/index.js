@@ -1,4 +1,5 @@
 export default {
+  //Registration
   RegisterAPI: 'Api/Registration/Register',
   currentUserAPI: 'Api/Registration/GetCurrentUser',
   submitFormDataAPI: 'Api/Registration/AddUpdateAnswers',
@@ -12,6 +13,7 @@ export default {
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
+  //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
   submitVolunteerFormDataAPI: 'Api/VolunteerRegistration/AddUpdateAnswers',
   updateVolunteerProfileFormDataAPI: 'Api/VolunteerRegistration/UpdateProfile',
@@ -22,6 +24,13 @@ export default {
     `/reactapp/volunteer-registration/thankyou/${registrationId}`,
   getVolunteerFormDataAPI: (accountName, activityName, regUid) =>
     `Api/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
+
+  //FormBuilder API
+  getFormBuilderDataAPI: formId => `Api/Form/GetFormData/?FormId=${formId}`,
+  getFormBuilderSectionDataAPI: (formId, sectionId) =>
+    `Api/Form/GetFormQuestions/?FormId=${formId}&SectionId=${sectionId}`,
+  submitFormBuilderDataAPI: 'Api/Form/SaveFormData',
+  saveNewSectionDataAPI: 'Api/Form/SaveNewSection',
 
   // Survey Form APIs
   getSurveyFormDataAPI: (formUid, surveyResponseUid) =>
@@ -36,6 +45,7 @@ export default {
 
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
+  formSettingsPath: formId => `/Org/form/edit/${formId}`,
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   surveyUrl: formUid => `/reactapp/survey/${formUid}`,

@@ -1,4 +1,10 @@
 export default {
+  MuiChip: {
+    root: {
+      fontSize: '14px',
+      minWidth: '100px'
+    }
+  },
   MuiLink: {
     underlineHover: {
       textDecoration: 'underline',
@@ -20,8 +26,6 @@ export default {
   MuiButton: {
     root: {
       borderRadius: '6px'
-      //   minHeight: '52px'
-      //   minWidth: '200px'
     },
     containedPrimary: {
       color: '#ffffff'
@@ -30,14 +34,24 @@ export default {
   MuiFormHelperText: {
     root: {
       '&.Mui-error': {
-        color: '#d32f2f'
+        color: '#FF7070'
       }
+    }
+  },
+  MuiPaper: {
+    root: {
+      width: 'fit-content'
+    }
+  },
+  MuiDialogTitle: {
+    root: {
+      padding: '16px 0px !important'
     }
   },
   MuiOutlinedInput: {
     root: {
       '&.Mui-error .MuiOutlinedInput-notchedOutline': {
-        borderColor: '#d32f2f'
+        borderColor: '#FF7070'
       }
     },
     input: {
@@ -45,5 +59,8 @@ export default {
         '-webkit-box-shadow': '0 0 0 100px #ffffff inset'
       }
     }
+  },
+  MuiInputBase: {
+    root: { '&.Mui-disabled': { color: 'gray' } }
   }
 };

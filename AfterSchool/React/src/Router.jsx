@@ -54,6 +54,10 @@ function Router() {
       element: <UpdateVolunteerProfile />
     },
     {
+      path: '/Org/form/edit/:formId',
+      element: <FormBuilderSection />
+    },
+    {
       path: '*',
       element: <RedirectToExternal />
     },
@@ -75,7 +79,6 @@ function Router() {
     }
   ]);
 }
-
 const RedirectToExternal = () => {
   const { pathWithOrigin, redirect } = utils;
 
@@ -86,6 +89,7 @@ const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
+const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));

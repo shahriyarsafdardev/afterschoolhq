@@ -60,32 +60,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormVolunteerQuestions(questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -248,9 +225,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
-                        {
                             currentRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Started, currentUser, amsgs, adc);
-                        }
                         
                         qvms.ForEach(qvm =>
                         {
@@ -365,7 +340,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
                 
-                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
                 
                 dynamic response = new
                 {
@@ -407,30 +382,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormVolunteerQuestions(questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -592,9 +546,7 @@ namespace AfterSchool.Areas.Api.Controllers
             var backgroundCheckResult = await backgroundCheckWorkflow.RequestBackgroundCheck(webUser, (int) participationObject.OwnerAccount.FiscalAccountId, msgs);
 
             if (msgs.HasNoErrors())
-            {
                 SendLinkToVolunteer(backgroundCheckResult.BackgroundCheckUrl, webUser, participationObject, msgs);
-            }
 
             return msgs;
         }
@@ -602,6 +554,39 @@ namespace AfterSchool.Areas.Api.Controllers
         private void SendLinkToVolunteer(string link, WebUser webUser, ParticipationObject participationObject, SystemMessages msgs)
         {
             EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, link, msgs);
+        }
+        
+        private static List<FormQuestionDto> GetAllFormVolunteerQuestions(List<FormQuestion> questions)
+        {
+            var formQuestionDtoList = new List<FormQuestionDto>();
+            var msgs = new SystemMessages();
+            foreach (var question in questions)
+            {
+                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, AudienceType.Volunteer, msgs);
+                if (audienceSettings?.Show ?? question.IsActive)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                            ID = question.ID.Value,
+                            FormQuestionGroupId = question.FormQuestionGroupId,
+                            Text = question.Text,
+                            Description = question.Description,
+                            GroupTitle = question.FormQuestionGroupName,
+                            Options = question.Options,
+                            IsRequired = audienceSettings?.Required ?? question.IsRequired,
+                            DisplayOrder = question.DisplayOrder,
+                            IsActive = question.IsActive,
+                            IsDeleted = question.IsDeleted,
+                            QuestionTypeId = question.QuestionTypeId,
+                            QuestionDataTypeId = question.QuestionDataTypeId,
+                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+            }
+
+            return formQuestionDtoList;
         }
         
     }

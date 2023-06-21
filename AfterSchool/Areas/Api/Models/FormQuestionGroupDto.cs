@@ -1,3 +1,8 @@
+using AfterSchoolLibrary.Models;
+using RestSharp.Extensions;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace AfterSchool.Areas.Api.Models
 {
     public class FormQuestionGroupDto
@@ -6,6 +11,50 @@ namespace AfterSchool.Areas.Api.Models
         public int? FormId { get; set; }
         public string Name { get; set; }
         public int? DisplayOrder { get; set; }
+        public bool? IsDeleted { get; set; }
         public QuestionGroupDataType QuestionGroupDataTypeId { get; set; }
+
+        public bool IsNull()
+        {
+            return 
+                FormId == null &&
+                Name == null &&
+                DisplayOrder == null &&
+                IsDeleted == null &&
+                QuestionGroupDataTypeId == QuestionGroupDataType.NotSet;
+        }
+
+        public bool IsValid()
+        {
+            return Name.HasValue() || !Name.Equals("") || DisplayOrder.HasValue || IsDeleted.HasValue ;
+        }
+
+        public bool IsNotNull()
+        {
+            return !IsNull();
+        }
+
+        public static FormQuestionGroupDto MapToDto(FormQuestionGroup questionGroup)
+        {
+            return new FormQuestionGroupDto()
+            {
+                Id = questionGroup.ID.Value,
+                FormId = questionGroup.FormId,
+                Name = questionGroup.Name,
+                DisplayOrder = questionGroup.DisplayOrder,
+                QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                IsDeleted = questionGroup.IsDeleted,
+            };
+        }
+
+        public static List<FormQuestionGroupDto> MapToDtoList(List<FormQuestionGroup> questionGroupList)
+        {
+            return questionGroupList
+                .Select(questionGroup => 
+                MapToDto(questionGroup))
+                .ToList();
+        }
+
+
     }
 }

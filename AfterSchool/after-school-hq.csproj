@@ -166,7 +166,7 @@
       <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Options, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.Options.2.0.0\lib\netstandard2.0\Microsoft.Extensions.Options.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Extensions.Options.2.2.0\lib\netstandard2.0\Microsoft.Extensions.Options.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Primitives, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Extensions.Primitives.2.2.0\lib\netstandard2.0\Microsoft.Extensions.Primitives.dll</HintPath>
@@ -595,6 +595,9 @@
     <Compile Include="Areas\Admin\Controllers\StripeHooksController.cs" />
     <Compile Include="Areas\Admin\Controllers\TransactionController.cs" />
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
+    <Compile Include="Areas\Api\Controllers\AuthController.cs" />
+    <Compile Include="Areas\Api\Controllers\FormController.cs" />
+    <Compile Include="Areas\Api\Models\FormQuestionSettingDto.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
@@ -669,6 +672,7 @@
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\TwilioController.cs" />
+    <Compile Include="Areas\Api\Models\FormSettingsDto.cs" />
     <Compile Include="Areas\WebHooks\WebHooksAreaRegistration.cs" />
     <Compile Include="Assemblers\AddEmergencyContactAssembler.cs" />
     <Compile Include="Assemblers\AddHomeAddressAssembler.cs" />
@@ -2093,6 +2097,7 @@
     <Content Include="Areas\Org\Views\Form\Report.cshtml" />
     <Content Include="Areas\Org\Views\Activity\RegistrantImport.cshtml" />
     <Content Include="Areas\Org\Views\Activity\AttendanceSummary.cshtml" />
+    <Content Include="Areas\Org\Views\Form\EditNew.cshtml" />
     <None Include="Scripts\jquery-3.0.0-vsdoc.js" />
     <Content Include="Scripts\jquery-3.0.0.js" />
     <Content Include="Scripts\jquery-3.0.0.min.js" />
@@ -2605,6 +2610,8 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Areas\Admin\Views\StripeHooks\" />
+    <Folder Include="Areas\Api\Views\Auth\" />
+    <Folder Include="Areas\Api\Views\Form\" />
     <Folder Include="Areas\Org\Views\Period\" />
     <Folder Include="Areas\Org\Views\Registrant\" />
     <Folder Include="Areas\WebHooks\Models\" />

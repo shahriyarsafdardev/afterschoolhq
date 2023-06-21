@@ -1,7 +1,7 @@
-import React from 'react';
 import { FormControlLabel, Checkbox, Grid } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
+import React from 'react';
 
 function SimpleCheckBox({ value, setValue, question }) {
   const classes = useStyles();

@@ -68,25 +68,20 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             if (!FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
                 return RedirectToAction("formedit", "account", new { id, qg });
-
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
-
             if (id.IsEmpty())
                 return HttpNotFound();
-            
             var form = currentAccount.GetForm(id.ToInteger(), msgs);
             var formUrl = FormService.BuildShortHomePageUrlForm(form.Uid);
             var questionGroups = form.GetQuestionGroups(msgs);
             var individualGroups = questionGroups
                 .Where(x => x.RegistrantTypeId == RegistrantType.Individual)
                 .OrderBy(x => x.DisplayOrder).ToList();
-
             //make sure only question groups with a setting of individual or organization are added to the final count
             questionGroups.Clear();
             questionGroups.AddRange(individualGroups);
-
             FormQuestionGroup questionGroup;
 
             if (qg.IsNumber())
@@ -110,6 +105,8 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form.FormTypeId != FormType.Survey)
+                return View("EditNew", form);
             return View(form);
         }
 
@@ -248,14 +245,14 @@ namespace AfterSchool.Areas.Org.Controllers
                                 var link = Request.Params[$"link-text-{question.ID}"];
                                 var isActive = Request.Params[$"active-{question.ID}"].IsBoolean();
                                 var isRequired = Request.Params[$"required-{question.ID}"].IsBoolean();
-                                var isAnswerDescriptionEnabled =Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
+                                var isAnswerDescriptionEnabled = Request.Params[$"answerDescription-{question.ID}"].IsBoolean();
 
                                 if (text != null && text.Length > 400)
-                                amsgs.Add("Question should not exceed 400 characters", MessageType.UserError);
-                                
+                                    amsgs.Add("Question should not exceed 400 characters", MessageType.UserError);
+
                                 if (desc != null && desc.Length > 4000)
-                                amsgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
-                                
+                                    amsgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
+
 
                                 // this extra conditions are to prevent null entry in db from refresh-post calls
                                 if (!question.IsLocked &&
@@ -334,6 +331,10 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
             ViewBag.Messages = msgs;
+            if (id.ToInteger() == 0)
+                return RedirectToAction("Edit", new { id = form.ID });
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form?.FormTypeId != FormType.Survey)
+                return View("EditNew", form);
             return View(form);
         }
 
@@ -370,7 +371,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var activityIds = activities.Split(',').ToIntegerArray().ToList();
                 selectedActivities = currentAccount.GetActivities(activityIds, msgs);
-                selectedActivities.ForEach(x => forms.Add(x.GetActiveForm(msgs)));                
+                selectedActivities.ForEach(x => forms.Add(x.GetActiveForm(msgs)));
             }
 
             if (!forms.Any())
@@ -408,7 +409,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities, 
+        public ActionResult GetReportPage(int? form, int start, int length, string sdate, string edate, string search, string activities,
             string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -567,7 +568,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     RegistrantId = registrant.ID.ToString(),
                                     SurveyResponseId = "",
                                     School = BaseLocation.BuildLocationString(
-                                                registrant.LocationName, 
+                                                registrant.LocationName,
                                                 registrant.LocationAddress1,
                                                 registrant.LocationAddress2,
                                                 registrant.LocationCity,
@@ -585,13 +586,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     status = "ok",
                     records,
                     answers = answers.Select(answer =>
-                                new 
-                                { 
-                                    ID = answer.ID.Value, 
-                                    Text = answer.GetAnswerText().IfEmpty(""), 
-                                    QuestionId = answer.FormQuestionId.Value, 
-                                    QuestionDataTypeId = (int)answer.QuestionDataTypeId, 
-                                    RegistrantId = answer.RegistrantId,
+                                new
+                                {
+                                    ID = answer.ID.Value,
+                                    Text = answer.GetAnswerText().IfEmpty(""),
+                                    QuestionId = answer.FormQuestionId.Value,
+                                    QuestionDataTypeId = (int) answer.QuestionDataTypeId,
+                                    RegistrantId = answer.RegistrantId.Value,
                                     FirstRegistrantId = answer.RegistrantFirstRegistrantId,
                                     answer.SurveyResponseId,
                                 }),
@@ -607,7 +608,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities, 
+        public ActionResult EmailReport(int? form, string sdate, string edate, string search, string hidden, string activities,
             string searchquestions, bool collapseRecords = false, RegistrantPersonType personType = RegistrantPersonType.NotSet)
         {
             var currentAccount = SessionVariables.CurrentAccount;
@@ -645,11 +646,11 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentAccount.ID.Value,
                     formId,
                     activityIds,
-                    search, 
-                    startDate, 
-                    endDate, 
+                    search,
+                    startDate,
+                    endDate,
                     hidden.IsNotEmpty() ? hidden.Split(',').Select(x => x.ToInteger()).ToArray() : new int[] { },
-                    searchQuestionIds, 
+                    searchQuestionIds,
                     searchQuestionTypeIds,
                     collapseRecords,
                     personType,
@@ -670,7 +671,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 messages = msgs
             }, JsonRequestBehavior.AllowGet);
 
-        }        
+        }
 
         private void SaveNewQuestions(int? formId, int? currentUserId, int? formQuestionGroupId, SystemMessages msgs, DatabaseConnection dc)
         {
@@ -682,11 +683,11 @@ namespace AfterSchool.Areas.Org.Controllers
                 var description = Request.Params[$"new-description-{question}"];
 
                 if (text != null && text.Length > 400)
-                msgs.Add("Question should not exceed 400 characters", MessageType.UserError);
-                
+                    msgs.Add("Question should not exceed 400 characters", MessageType.UserError);
+
                 if (description != null && description.Length > 4000)
-                msgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
-                
+                    msgs.Add("Description should not exceed 4,000 characters", MessageType.UserError);
+
                 var formQuestion = new FormQuestion
                 {
                     FormId = formId,
