@@ -22,7 +22,7 @@ function DropdownQuestion({ question, formik }) {
   const value = values[ID] && values[ID] != 'null' ? JSON.parse(values[ID])[0]?.value : 'Select';
 
   return (
-    <Box style={{ marginBottom: 15 }}>
+    <Box className={classes.outerWrapper}>
       <FieldWrapper label={title} isRequired={isRequired}>
         <div className={classes.wrapper}>
           <div className={classes.dropdownWrapper}>

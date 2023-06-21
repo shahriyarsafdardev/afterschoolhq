@@ -142,7 +142,7 @@ const AudioQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 15 }}>
+      <Box className={classes.outerWrapper}>
         <Box className={classes.wrapper}>
           <Box className={classes.audioWrapper}>
             <img src={audioWave} className={classes.audioWave} alt="Audio Wave" />

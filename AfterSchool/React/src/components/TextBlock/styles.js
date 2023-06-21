@@ -14,5 +14,13 @@ export default makeStyles(theme => ({
       justifyContent: 'start',
       fontSize: '14px'
     }
+  },
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto',
+    marginBottom: '15px'
+  },
+  innerWrapper: {
+    margin: 'auto'
   }
 }));

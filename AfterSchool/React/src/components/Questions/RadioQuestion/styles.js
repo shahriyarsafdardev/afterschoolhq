@@ -25,6 +25,9 @@ const useStyles = makeStyles(() => ({
   maxWidth: {
     width: '100%',
     maxWidth: 675
+  },
+  outerWrapper: {
+    marginBottom: '5px'
   }
 }));
 

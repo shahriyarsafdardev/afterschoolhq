@@ -41,5 +41,16 @@ export default makeStyles(theme => ({
   maxWidth: {
     width: '100%',
     maxWidth: 675
+  },
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto'
+  },
+  fieldLabelWrapper: {
+    display: 'flex'
+  },
+  textfieldWrapper: {
+    margin: 'auto',
+    marginBottom: '15px'
   }
 }));

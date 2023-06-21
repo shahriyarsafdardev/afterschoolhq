@@ -53,6 +53,17 @@ const useStyles = makeStyles(theme => ({
   maxWidth: {
     width: '100%',
     maxWidth: 675
+  },
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto'
+  },
+  innerWrapper: {
+    margin: 'auto auto 5px'
+  },
+  checkBoxIcon: {
+    height: '18px',
+    width: '18px'
   }
 }));
 

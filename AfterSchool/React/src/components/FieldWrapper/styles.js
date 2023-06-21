@@ -15,5 +15,15 @@ export default makeStyles(theme => ({
   },
   fieldLabelRequired: {
     color: 'red'
+  },
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto'
+  },
+  textFieldWrapper: {
+    display: 'flex'
+  },
+  childWrapper: {
+    margin: 'auto'
   }
 }));

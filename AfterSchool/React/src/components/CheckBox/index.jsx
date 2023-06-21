@@ -13,8 +13,8 @@ function CheckBox({ formik, question }) {
   };
 
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ margin: 'auto auto 5px' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.innerWrapper}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
             data-testid={`${title}-${QuestionDataTypeId}-form`}
@@ -26,14 +26,7 @@ function CheckBox({ formik, question }) {
                   checked: classes.checked,
                   root: classes.root
                 }}
-                checkedIcon={
-                  <CheckIcon
-                    style={{
-                      height: '18px',
-                      width: '18px'
-                    }}
-                  />
-                }
+                checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
                 iconstyle={{ fill: 'black' }}
               />
             }

@@ -140,6 +140,16 @@ const useStyles = makeStyles(theme => ({
     fontSize: 18,
     color: '#FFFFFF',
     marginTop: 30
+  },
+  outerWrapper: {
+    marginBottom: '15px'
+  },
+  innerWrapper: {
+    display: 'flex'
+  },
+  recordButtonWrapper: {
+    display: 'flex',
+    justifyContent: 'center'
   }
 }));
 

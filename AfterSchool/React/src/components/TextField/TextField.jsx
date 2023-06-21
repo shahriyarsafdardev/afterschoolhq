@@ -11,8 +11,8 @@ export default function TextField({ formik, question, type = 'text' }) {
     : [classes.fieldLabelOptional, '(Optional)'];
 
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ display: 'flex' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
@@ -22,7 +22,7 @@ export default function TextField({ formik, question, type = 'text' }) {
         </Typography>
       </Box>
 
-      <Box style={{ display: 'flex', margin: 'auto' }}>
+      <Box className={classes.textfieldWrapper}>
         <MuiTextField
           data-testid={`${label}-${QuestionDataTypeId}-form-control`}
           inputProps={{

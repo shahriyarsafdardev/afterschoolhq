@@ -162,8 +162,8 @@ const VideoQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 15 }}>
-        <Box style={{ display: 'flex' }}>
+      <Box className={classes.outerWrapper}>
+        <Box className={classes.innerWrapper}>
           <Box className={classes.videoWrapper}>
             <div className={classes.imgWrapper}>
               {videoUrl && !isCameraOpen && (
@@ -208,7 +208,7 @@ const VideoQuestion = ({ question, formik }) => {
                 </div>
               )}
               {!videoUrl && !isCameraOpen && !isVideoLoading && (
-                <Box style={{ display: 'flex', justifyContent: 'center' }}>
+                <Box className={classes.recordButtonWrapper}>
                   <IconButton className={classes.recordButton} onClick={handleVideo(true)}>
                     <img src={recordButton} alt="Record Button" />
                   </IconButton>

@@ -26,7 +26,7 @@ function RadioQuestion({ question, formik }) {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 5 }}>
+      <Box className={classes.outerWrapper}>
         <div className={classes.radioGroupWrapper}>
           <div className={classes.radio}>
             <RadioGroup

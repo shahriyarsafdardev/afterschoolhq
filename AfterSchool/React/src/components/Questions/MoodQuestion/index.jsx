@@ -40,7 +40,7 @@ const MoodQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 15 }}>
+      <Box className={classes.outerWrapper}>
         <Box className={classes.wrapper}>
           <div className={classes.moodWrapper}>
             <div className={classes.iconsWrapper}>

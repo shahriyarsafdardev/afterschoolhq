@@ -11,8 +11,8 @@ export default function TextAreaQuestion({ formik, question }) {
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ display: 'flex' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
@@ -22,7 +22,7 @@ export default function TextAreaQuestion({ formik, question }) {
         </Typography>
       </Box>
 
-      <Box style={{ margin: 'auto', marginBottom: 15 }}>
+      <Box className={classes.textfieldWrapper}>
         <TextareaAutosize
           data-testid={`${label}-${QuestionDataTypeId}`}
           minRows={4}

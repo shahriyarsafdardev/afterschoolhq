@@ -114,6 +114,9 @@ const useStyles = makeStyles(theme => ({
     width: 280,
     color: theme.palette.text.primary,
     marginTop: 5
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

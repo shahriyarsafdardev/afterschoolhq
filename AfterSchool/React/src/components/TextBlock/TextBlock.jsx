@@ -7,8 +7,8 @@ export default function TextBlock({ question }) {
   const classes = useStyles();
   const { Description } = question;
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto', marginBottom: 15 }}>
-      <Box style={{ margin: 'auto' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.innerWrapper}>
         <Typography className={classes.fieldLabel}>{Description}</Typography>
       </Box>
     </Box>

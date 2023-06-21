@@ -30,5 +30,20 @@ export default makeStyles(theme => ({
       width: '100%',
       height: '40px'
     }
+  },
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto'
+  },
+  fieldLabelWrapper: {
+    display: 'flex'
+  },
+  textFieldWrapper: {
+    display: 'flex',
+    margin: 'auto'
+  },
+  searchBoxWrapper: {
+    maxWidth: '675px',
+    width: '100%'
   }
 }));

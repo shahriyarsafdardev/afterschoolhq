@@ -154,5 +154,8 @@ export default makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       paddingLeft: '0rem'
     }
+  },
+  sectionName: {
+    padding: '30px 0px'
   }
 }));

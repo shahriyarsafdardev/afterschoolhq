@@ -49,7 +49,7 @@ function CheckBoxList({ formik, question }) {
 
   return (
     <FieldWrapper label={title} isRequired={IsRequired}>
-      <Box style={{ marginBottom: 5 }}>
+      <Box className={classes.outerWrapper}>
         <Grid xs={12} md={8} item className={classes.textFieldGrid}>
           <div className={classes.checkboxWrapper}>
             <>
@@ -68,14 +68,7 @@ function CheckBoxList({ formik, question }) {
                           checked: classes.checked,
                           root: classes.root
                         }}
-                        checkedIcon={
-                          <CheckIcon
-                            style={{
-                              height: '18px',
-                              width: '18px'
-                            }}
-                          />
-                        }
+                        checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
                         iconstyle={{ fill: 'black' }}
                       />
                     }

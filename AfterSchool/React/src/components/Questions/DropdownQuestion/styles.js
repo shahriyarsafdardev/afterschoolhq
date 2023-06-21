@@ -71,6 +71,9 @@ const useStyles = makeStyles(theme => ({
   maxWidth: {
     width: '100%',
     maxWidth: 675
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

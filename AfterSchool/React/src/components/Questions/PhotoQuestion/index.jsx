@@ -136,7 +136,7 @@ const PhotoQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 15 }}>
+      <Box className={classes.outerWrapper}>
         <Box className={classes.wrapper}>
           <div className={classes.photoWrapper}>
             <div className={cs(classes.photoContent, { [classes.webCamera]: isCameraOpen })}>

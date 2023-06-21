@@ -54,19 +54,21 @@ function ApiTextField({ formik, question, currentQuestions }) {
   }, [values[11111]]);
 
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ display: 'flex' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {Text} &nbsp;
-          <Typography className={typeClass}>{typeText}</Typography>
+          <Typography component="span" className={typeClass}>
+            {typeText}
+          </Typography>
         </Typography>
       </Box>
 
-      <Box style={{ display: 'flex', margin: 'auto' }}>
-        <Box style={{ maxWidth: '675px', width: '100%' }}>
+      <Box className={classes.textFieldOuterWrapper}>
+        <Box className={classes.textFieldContainer}>
           <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={['places']}>
             <StandaloneSearchBox
-              style={{ display: 'flex', margin: 'auto' }}
+              className={classes.searchBox}
               onLoad={ref => {
                 inputRef.current = ref;
               }}

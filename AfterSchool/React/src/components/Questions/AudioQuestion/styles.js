@@ -73,6 +73,9 @@ const useStyles = makeStyles(theme => ({
   },
   audioInput: {
     display: 'none'
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

@@ -9,8 +9,8 @@ export default function FieldWrapper({ label, isRequired = false, children }) {
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
   return (
-    <Box style={{ maxWidth: '675px', margin: 'auto' }}>
-      <Box style={{ display: 'flex' }}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.textFieldWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
@@ -19,7 +19,7 @@ export default function FieldWrapper({ label, isRequired = false, children }) {
           </Typography>
         </Typography>
       </Box>
-      <Box style={{ margin: 'auto' }}>{children}</Box>
+      <Box className={classes.childWrapper}>{children}</Box>
     </Box>
   );
 }

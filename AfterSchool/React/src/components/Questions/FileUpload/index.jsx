@@ -51,7 +51,7 @@ const FileUpload = ({ formik, question }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ marginBottom: 15 }}>
+      <Box className={classes.outerWrapper}>
         <div className={classes.photoWrapper}>
           <div>Supported file types are .pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3</div>
           <Box className={classes.uploadButtonWrapper}>

@@ -73,13 +73,7 @@ export default function RegistrationForm(props) {
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>
-                <Typography
-                  style={{
-                    padding: '30px 0px'
-                  }}
-                  variant="h6"
-                  color="primary"
-                >
+                <Typography className={classes.sectionName} variant="h6" color="primary">
                   {Name}
                 </Typography>
                 <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>

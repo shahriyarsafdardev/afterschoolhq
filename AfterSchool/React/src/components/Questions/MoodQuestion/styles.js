@@ -36,6 +36,9 @@ const useStyles = makeStyles(theme => ({
     fontFamily: 'Montserrat',
     fontSize: 14,
     color: theme.palette.text.hint
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 
