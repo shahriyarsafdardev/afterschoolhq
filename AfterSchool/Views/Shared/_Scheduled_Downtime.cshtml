@@ -1,9 +1,7 @@
 @if (SessionVariables.MaintenanceMessage != null)
 {
-    var message = SessionVariables.MaintenanceMessage.Split('\n');
     <div class="maintenance-bar" id="textContainer">
         <strong>Scheduled Maintenance - </strong>
-        <span>@Html.Raw(message[0])</span><br/>
-        <span>@Html.Raw(message[1])</span>
+        <span>@Html.Raw(SessionVariables.MaintenanceMessage)</span>
     </div>
 }

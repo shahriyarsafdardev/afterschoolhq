@@ -63,7 +63,7 @@
 
 .maintenance-bar {
     width: 100%;
-    padding: 15px 5%;
+    padding: 15px 0 15px 0;
     color: #333;
     background: #d9edf7;
     position: relative;
@@ -72,6 +72,41 @@
     top: 0;
     left: 0;
     text-align: center;
+}
+
+@media (min-width: 1201px) {
+    .maintenance-bar {
+        padding-right: 200px;
+        padding-left: 200px;
+    }
+}
+
+@media (min-width: 1025px) and (max-width: 1200px) {
+    .maintenance-bar {
+        padding-right: 110px;
+        padding-left: 110px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .maintenance-bar {
+        padding-right: 80px;
+        padding-left: 80px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .maintenance-bar {
+        padding-right: 40px;
+        padding-left: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .maintenance-bar {
+        padding-right: 20px;
+        padding-left: 20px;
+    }
 }
 
 .maintenance-bar a {
