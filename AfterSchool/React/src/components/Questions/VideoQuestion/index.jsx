@@ -162,119 +162,125 @@ const VideoQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box style={{ display: 'flex' }}>
-        <Box className={classes.videoWrapper}>
-          <div className={classes.imgWrapper}>
-            {videoUrl && !isCameraOpen && (
-              <video
-                src={videoUrl}
-                className={classes.videoPlayer}
-                ref={playVideoRef}
-                onEnded={handleVideoPlay}
-                onLoadStart={handleVideoLoading}
-                onLoadedData={handleVideoLoading}
-                onClick={handleVideoPause}
-              />
+      <Box className={classes.outerWrapper}>
+        <Box className={classes.innerWrapper}>
+          <Box className={classes.videoWrapper}>
+            <div className={classes.imgWrapper}>
+              {videoUrl && !isCameraOpen && (
+                <video
+                  src={videoUrl}
+                  className={classes.videoPlayer}
+                  ref={playVideoRef}
+                  onEnded={handleVideoPlay}
+                  onLoadStart={handleVideoLoading}
+                  onLoadedData={handleVideoLoading}
+                  onClick={handleVideoPause}
+                />
+              )}
+              {!videoUrl && isCameraOpen && (
+                <VideoRecorder
+                  setCapturedData={handleWebCamUpload}
+                  isVideo={true}
+                  setVideoStream={setCurrentStream}
+                  setRecording={setRecording}
+                  recording={isRecording}
+                />
+              )}
+              {!videoUrl && !isCameraOpen && (
+                <img
+                  src={videoPlaceholder}
+                  className={classes.videoPlayer}
+                  alt="Video Placeholder"
+                />
+              )}
+              {videoUrl && isVideoPlaying && !isVideoLoading && (
+                <div className={classes.iconWrapper}>
+                  <IconButton onClick={handleVideoPause} className={classes.pauseButton}>
+                    <img src={pauseButton} alt="Pause Button" />
+                  </IconButton>
+                </div>
+              )}
+              {videoUrl && !isVideoPlaying && !isVideoLoading && (
+                <div className={classes.playButtonWrapper}>
+                  <IconButton className={classes.playButton} onClick={handlePlayRecording}>
+                    <img src={playButtonWhite} alt="Play Button" />
+                  </IconButton>
+                </div>
+              )}
+              {!videoUrl && !isCameraOpen && !isVideoLoading && (
+                <Box className={classes.recordButtonWrapper}>
+                  <IconButton className={classes.recordButton} onClick={handleVideo(true)}>
+                    <img src={recordButton} alt="Record Button" />
+                  </IconButton>
+                </Box>
+              )}
+            </div>
+            {videoUrl && !isVideoLoading && (
+              <Button className={classes.uploadButton} onClick={handleDiscard}>
+                Discard & Record Again
+              </Button>
             )}
-            {!videoUrl && isCameraOpen && (
-              <VideoRecorder
-                setCapturedData={handleWebCamUpload}
-                isVideo={true}
-                setVideoStream={setCurrentStream}
-                setRecording={setRecording}
-                recording={isRecording}
-              />
-            )}
-            {!videoUrl && !isCameraOpen && (
-              <img src={videoPlaceholder} className={classes.videoPlayer} alt="Video Placeholder" />
-            )}
-            {videoUrl && isVideoPlaying && !isVideoLoading && (
-              <div className={classes.iconWrapper}>
-                <IconButton onClick={handleVideoPause} className={classes.pauseButton}>
-                  <img src={pauseButton} alt="Pause Button" />
-                </IconButton>
+            {descriptionText && (
+              <div className={classes.descriptionWrapper}>
+                <div className={classes.descriptionText}>{descriptionText}</div>
+                <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
+                  Edit description
+                </Button>
               </div>
             )}
-            {videoUrl && !isVideoPlaying && !isVideoLoading && (
-              <div className={classes.playButtonWrapper}>
-                <IconButton className={classes.playButton} onClick={handlePlayRecording}>
-                  <img src={playButtonWhite} alt="Play Button" />
-                </IconButton>
-              </div>
-            )}
-            {!videoUrl && !isCameraOpen && !isVideoLoading && (
-              <Box style={{ display: 'flex', justifyContent: 'center' }}>
-                <IconButton className={classes.recordButton} onClick={handleVideo(true)}>
-                  <img src={recordButton} alt="Record Button" />
-                </IconButton>
-              </Box>
-            )}
-          </div>
-          {videoUrl && !isVideoLoading && (
-            <Button className={classes.uploadButton} onClick={handleDiscard}>
-              Discard & Record Again
-            </Button>
-          )}
-          {descriptionText && (
-            <div className={classes.descriptionWrapper}>
-              <div className={classes.descriptionText}>{descriptionText}</div>
+            {!descriptionText && videoUrl && !isVideoLoading && (
               <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
-                Edit description
+                Add description
+              </Button>
+            )}
+            {!descriptionText && !videoUrl && (
+              <>
+                <div className={classes.orText}>OR</div>
+                <Button className={classes.uploadButton} onClick={handleVideoModal}>
+                  Upload Video
+                </Button>
+              </>
+            )}
+          </Box>
+          <DescriptionModal
+            isOpen={isDescriptionModal}
+            handleClose={handleDescriptionModal}
+            handleDescriptionSave={handleDescriptionSave}
+            text={descriptionText}
+            title={descriptionText ? 'Edit Description' : 'Add Description'}
+          />
+          <Dialog
+            open={uploadVideoModal}
+            onClose={handleVideoModal}
+            classes={{
+              paper: classes.modal
+            }}
+          >
+            <div className={classes.modalContent}>
+              <Typography variant="subtitle1">Upload Video</Typography>
+              <Button
+                className={classes.selectVideoButton}
+                color="primary"
+                variant="contained"
+                fullWidth
+                onClick={handleVideo(false)}
+              >
+                Select Video
               </Button>
             </div>
-          )}
-          {!descriptionText && videoUrl && !isVideoLoading && (
-            <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
-              Add description
-            </Button>
-          )}
-          {!descriptionText && !videoUrl && (
-            <>
-              <div className={classes.orText}>OR</div>
-              <Button className={classes.uploadButton} onClick={handleVideoModal}>
-                Upload Video
-              </Button>
-            </>
-          )}
+          </Dialog>
+          <input
+            type="file"
+            accept="video/*"
+            capture={isCapture}
+            className={classes.videoInput}
+            ref={inputVideoRef}
+            onChange={handleVideoChange}
+          />
         </Box>
-        <DescriptionModal
-          isOpen={isDescriptionModal}
-          handleClose={handleDescriptionModal}
-          handleDescriptionSave={handleDescriptionSave}
-          text={descriptionText}
-          title={descriptionText ? 'Edit Description' : 'Add Description'}
-        />
-        <Dialog
-          open={uploadVideoModal}
-          onClose={handleVideoModal}
-          classes={{
-            paper: classes.modal
-          }}
-        >
-          <div className={classes.modalContent}>
-            <Typography variant="subtitle1">Upload Video</Typography>
-            <Button
-              className={classes.selectVideoButton}
-              color="primary"
-              variant="contained"
-              fullWidth
-              onClick={handleVideo(false)}
-            >
-              Select Video
-            </Button>
-          </div>
-        </Dialog>
-        <input
-          type="file"
-          accept="video/*"
-          capture={isCapture}
-          className={classes.videoInput}
-          ref={inputVideoRef}
-          onChange={handleVideoChange}
-        />
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+        {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
-      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

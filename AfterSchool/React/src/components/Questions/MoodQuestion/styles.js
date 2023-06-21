@@ -5,8 +5,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex'
   },
   moodWrapper: {
-    padding: '8px 12px',
-    maxWidth: '540px',
+    paddingTop: '8px',
+    maxWidth: '675px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   iconsWrapper: {
-    maxWidth: 520,
+    maxWidth: 675,
     display: 'flex',
     flexWrap: 'wrap'
   },
@@ -34,12 +34,11 @@ const useStyles = makeStyles(theme => ({
   },
   moodName: {
     fontFamily: 'Montserrat',
-    fontSize: 20,
-    color: theme.palette.text.hint,
-    marginTop: 70,
-    [theme.breakpoints.down('xs')]: {
-      marginTop: 20
-    }
+    fontSize: 14,
+    color: theme.palette.text.hint
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

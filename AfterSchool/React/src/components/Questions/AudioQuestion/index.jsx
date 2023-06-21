@@ -142,74 +142,79 @@ const AudioQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box className={classes.wrapper}>
-        <Box className={classes.audioWrapper}>
-          <img src={audioWave} className={classes.audioWave} alt="Audio Wave" />
-          {audioAnswer ? (
-            <>
-              {isPlaying ? (
-                <IconButton onClick={pauseRecorderAudio}>
-                  <img src={pauseButton} alt="Pause Button" className={classes.pauseButton} />
-                </IconButton>
-              ) : (
-                <IconButton onClick={playRecorderAudio}>
-                  <img src={playButton} alt="Play Button" />
-                </IconButton>
-              )}
-              <Button onClick={handleDiscard} className={classes.recordButton}>
-                Discard & Record Again
-              </Button>
-              {descriptionText && (
-                <div className={classes.descriptionWrapper}>
-                  <div className={classes.descriptionText}>{descriptionText}</div>
+      <Box className={classes.outerWrapper}>
+        <Box className={classes.wrapper}>
+          <Box className={classes.audioWrapper}>
+            <img src={audioWave} className={classes.audioWave} alt="Audio Wave" />
+            {audioAnswer ? (
+              <>
+                {isPlaying ? (
+                  <IconButton onClick={pauseRecorderAudio}>
+                    <img src={pauseButton} alt="Pause Button" className={classes.pauseButton} />
+                  </IconButton>
+                ) : (
+                  <IconButton onClick={playRecorderAudio}>
+                    <img src={playButton} alt="Play Button" />
+                  </IconButton>
+                )}
+                <Button onClick={handleDiscard} className={classes.recordButton}>
+                  Discard & Record Again
+                </Button>
+                {descriptionText && (
+                  <div className={classes.descriptionWrapper}>
+                    <div className={classes.descriptionText}>{descriptionText}</div>
+                    <Button
+                      onClick={handleDescriptionModal}
+                      className={classes.editDescriptionButton}
+                    >
+                      Edit description
+                    </Button>
+                  </div>
+                )}
+                {!descriptionText && (
                   <Button
                     onClick={handleDescriptionModal}
                     className={classes.editDescriptionButton}
                   >
-                    Edit description
+                    Add description
                   </Button>
-                </div>
-              )}
-              {!descriptionText && (
-                <Button onClick={handleDescriptionModal} className={classes.editDescriptionButton}>
-                  Add description
-                </Button>
-              )}
-            </>
-          ) : (
-            <>
-              <Timer isRunning={isTimerRunning} />
-              {isTimerRunning ? (
-                <Button onClick={stopRecordingAudio} className={classes.recordButton}>
-                  Stop
-                </Button>
-              ) : (
-                <>
-                  <Button onClick={startRecordingAudio} className={classes.recordButton}>
-                    Record
+                )}
+              </>
+            ) : (
+              <>
+                <Timer isRunning={isTimerRunning} />
+                {isTimerRunning ? (
+                  <Button onClick={stopRecordingAudio} className={classes.recordButton}>
+                    Stop
                   </Button>
-                </>
-              )}
-            </>
-          )}
+                ) : (
+                  <>
+                    <Button onClick={startRecordingAudio} className={classes.recordButton}>
+                      Record
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+          </Box>
+          <audio
+            src={audioUrl}
+            controls
+            ref={audioRef}
+            className={classes.audioInput}
+            onEnded={handleStopPlaying}
+          />
+          <DescriptionModal
+            isOpen={isDescriptionModal}
+            handleClose={handleDescriptionModal}
+            handleDescriptionSave={handleDescriptionSave}
+            text={descriptionText}
+            title={descriptionText ? 'Edit Description' : 'Add Description'}
+          />
         </Box>
-        <audio
-          src={audioUrl}
-          controls
-          ref={audioRef}
-          className={classes.audioInput}
-          onEnded={handleStopPlaying}
-        />
-        <DescriptionModal
-          isOpen={isDescriptionModal}
-          handleClose={handleDescriptionModal}
-          handleDescriptionSave={handleDescriptionSave}
-          text={descriptionText}
-          title={descriptionText ? 'Edit Description' : 'Add Description'}
-        />
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
+        {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
-      {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
     </FieldWrapper>
   );
 };

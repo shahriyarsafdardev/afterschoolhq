@@ -49,51 +49,46 @@ function CheckBoxList({ formik, question }) {
 
   return (
     <FieldWrapper label={title} isRequired={IsRequired}>
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
-        <div className={classes.checkboxWrapper}>
-          <>
-            {options.length &&
-              options.map(({ key, value }) => (
-                <FormControlLabel
-                  data-testid={`${title}-${QuestionDataTypeId}-${value}-form`}
-                  key={key}
-                  control={
-                    <Checkbox
-                      data-testid={`${title}-${QuestionDataTypeId}-${value}-checkbox`}
-                      checked={checkBoxListValue ? isChecked(checkBoxListValue, value) : false}
-                      value={value}
-                      onChange={handleCheck}
-                      classes={{
-                        checked: classes.checked,
-                        root: classes.root
-                      }}
-                      checkedIcon={
-                        <CheckIcon
-                          style={{
-                            height: '18px',
-                            width: '18px'
-                          }}
-                        />
-                      }
-                      IconStyle={{ fill: 'black' }}
-                    />
-                  }
-                  label={value}
-                  classes={{
-                    root: classes.formControlLabelRoot
-                  }}
-                />
-              ))}
-          </>
-        </div>
-      </Grid>
-      {touched[ID] && errors[ID] && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.maxWidth} error>
-            {errors[ID]}
-          </FormHelperText>
-        </Box>
-      )}
+      <Box className={classes.outerWrapper}>
+        <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+          <div className={classes.checkboxWrapper}>
+            <>
+              {options.length &&
+                options.map(({ key, value }) => (
+                  <FormControlLabel
+                    data-testid={`${title}-${QuestionDataTypeId}-${value}-form`}
+                    key={key}
+                    control={
+                      <Checkbox
+                        data-testid={`${title}-${QuestionDataTypeId}-${value}-checkbox`}
+                        checked={checkBoxListValue ? isChecked(checkBoxListValue, value) : false}
+                        value={value}
+                        onChange={handleCheck}
+                        classes={{
+                          checked: classes.checked,
+                          root: classes.root
+                        }}
+                        checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
+                        iconstyle={{ fill: 'black' }}
+                      />
+                    }
+                    label={value}
+                    classes={{
+                      root: classes.formControlLabelRoot
+                    }}
+                  />
+                ))}
+            </>
+          </div>
+        </Grid>
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText className={classes.maxWidth} error>
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
+      </Box>
     </FieldWrapper>
   );
 }

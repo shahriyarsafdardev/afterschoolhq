@@ -16,7 +16,7 @@ function DateQuestion({ question, formik }) {
   const today = new Date();
   const datePickerProps = { maxDate: today };
 
-  const [selectedDate, setSelectedDate] = useState(values[ID] || null);
+  const [selectedDate, setSelectedDate] = useState(values[ID] || '');
 
   useEffect(() => {
     setFieldValue(ID, selectedDate);
@@ -45,7 +45,7 @@ function DateQuestion({ question, formik }) {
   };
 
   return (
-    <>
+    <Box className={classes.outerWrapper}>
       <FieldWrapper label={title} isRequired={isRequired}>
         <div className={classes.dateWrapper}>
           <div className={classes.datePicker} ref={datePicker}>
@@ -86,7 +86,7 @@ function DateQuestion({ question, formik }) {
           </Box>
         )}
       </FieldWrapper>
-    </>
+    </Box>
   );
 }
 

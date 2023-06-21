@@ -40,23 +40,29 @@ const MoodQuestion = ({ question, formik }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <Box className={classes.wrapper}>
-        <div className={classes.moodWrapper}>
-          <div className={classes.iconsWrapper}>
-            {options.map(mood => (
-              <IconButton
-                key={mood.key}
-                onClick={handleMoodChange(mood)}
-                className={getClassName(mood.value)}
-              >
-                <Emoji>{mood.key}</Emoji>
-              </IconButton>
-            ))}
+      <Box className={classes.outerWrapper}>
+        <Box className={classes.wrapper}>
+          <div className={classes.moodWrapper}>
+            <div className={classes.iconsWrapper}>
+              {options.map((mood, index) => (
+                <Box key={index}>
+                  <IconButton
+                    key={mood.key}
+                    onClick={handleMoodChange(mood)}
+                    className={getClassName(mood.value)}
+                  >
+                    <Emoji>{mood.key}</Emoji>
+                  </IconButton>
+                  {currentMood.value === mood.value && (
+                    <Box className={classes.moodName}>{currentMood.value}</Box>
+                  )}
+                </Box>
+              ))}
+            </div>
           </div>
-          {currentMood && <div className={classes.moodName}>{currentMood.value}</div>}
-        </div>
+        </Box>
+        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
       </Box>
-      {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
     </FieldWrapper>
   );
 };

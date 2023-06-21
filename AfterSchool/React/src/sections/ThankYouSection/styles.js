@@ -51,5 +51,8 @@ export default makeStyles(theme => ({
   },
   ShareButtonsWrapper: {
     display: 'flex'
+  },
+  sharingActivity: {
+    padding: '0px 10px'
   }
 }));

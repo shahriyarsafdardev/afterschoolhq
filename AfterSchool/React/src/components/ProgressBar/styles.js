@@ -1,9 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(() => ({
-  progressBar: {
-    position: 'relative'
-  },
   progressNumber: {
     position: 'absolute',
     color: '#ffffff'

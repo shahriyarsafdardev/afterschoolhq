@@ -5,7 +5,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex'
   },
   photoWrapper: {
-    padding: '8px 12px',
+    paddingTop: '8px',
     marginTop: 30,
     display: 'flex',
     flexDirection: 'column',
@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   photoContent: {
-    width: 510,
+    width: 675,
     maxHeight: 480,
     position: 'relative',
     [theme.breakpoints.down('sm')]: {
@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     maxHeight: 'none'
   },
   uploadImage: {
-    maxWidth: 510,
+    maxWidth: 675,
     maxHeight: 455,
     position: 'relative',
     [theme.breakpoints.down('sm')]: {
@@ -114,6 +114,9 @@ const useStyles = makeStyles(theme => ({
     width: 280,
     color: theme.palette.text.primary,
     marginTop: 5
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

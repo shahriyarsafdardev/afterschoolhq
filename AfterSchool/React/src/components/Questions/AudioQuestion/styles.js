@@ -1,10 +1,10 @@
 import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-  wrapper: { display: 'flex', maxWidth: '540px' },
+  wrapper: { display: 'flex', maxWidth: '675px' },
   audioWrapper: {
     marginTop: 30,
-    padding: '8px 12px',
+    paddingTop: '8px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   audioWave: {
-    width: 520,
+    width: 675,
 
     [theme.breakpoints.down('sm')]: {
       width: '100%'
@@ -73,6 +73,9 @@ const useStyles = makeStyles(theme => ({
   },
   audioInput: {
     display: 'none'
+  },
+  outerWrapper: {
+    marginBottom: '15px'
   }
 }));
 

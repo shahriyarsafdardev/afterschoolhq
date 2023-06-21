@@ -125,7 +125,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
         )}
       </Box>
       <Box className={classes.shareBoxesWrapper}>
-        <Typography variant="body1" style={{ padding: '0px 10px' }}>
+        <Typography variant="body1" className={classes.sharingActivity}>
           Share <b>{ActivityName}</b> with your friends and family via link, Twitter, or Facebook!
         </Typography>
         <Box className={classes.ShareButtonsWrapper}>

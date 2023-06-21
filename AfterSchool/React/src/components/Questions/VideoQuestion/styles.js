@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   videoWrapper: {
-    padding: '8px 12px',
+    paddingTop: '8px',
     marginTop: 35,
     display: 'flex',
     flexDirection: 'column',
@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   imgWrapper: {
-    width: 510,
+    width: 675,
     height: 'auto',
     position: 'relative',
     [theme.breakpoints.down('sm')]: {
@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   videoPlayer: {
-    width: 510,
+    width: 675,
     height: '100%',
     maxHeight: 455,
     [theme.breakpoints.down('sm')]: {
@@ -140,6 +140,16 @@ const useStyles = makeStyles(theme => ({
     fontSize: 18,
     color: '#FFFFFF',
     marginTop: 30
+  },
+  outerWrapper: {
+    marginBottom: '15px'
+  },
+  innerWrapper: {
+    display: 'flex'
+  },
+  recordButtonWrapper: {
+    display: 'flex',
+    justifyContent: 'center'
   }
 }));
 

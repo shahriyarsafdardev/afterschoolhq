@@ -3,19 +3,18 @@ import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(theme => ({
   checkboxWrapper: {
     width: '100%',
-    maxWidth: 515,
+    maxWidth: 675,
     display: 'flex',
     flexWrap: 'wrap',
     borderRadius: 12,
-    marginLeft: '14px',
     overflowWrap: 'anywhere'
   },
   formControlLabelRoot: {
     margin: '10px 0px',
     minWidth: 'fit-content',
-    marginRight: '10px',
+    marginRight: '25px',
     '& .MuiTypography-root': {
-      marginLeft: 18
+      marginLeft: 15
     }
   },
   checked: {
@@ -38,7 +37,7 @@ const useStyles = makeStyles(theme => ({
     }
   },
   textFieldGrid: {
-    maxWidth: 540,
+    maxWidth: 675,
     [theme.breakpoints.down('sm')]: {
       width: '100%'
     }
@@ -58,11 +57,19 @@ const useStyles = makeStyles(theme => ({
   },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 25
+    paddingLeft: 14,
+    marginBottom: 10
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500
+    maxWidth: 675
+  },
+  outerWrapper: {
+    marginBottom: '5px'
+  },
+  checkBoxIcon: {
+    height: '18px',
+    width: '18px'
   }
 }));
 
