@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -23,7 +22,6 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                var currentAccount = SessionVariables.CurrentAccount;
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
@@ -37,75 +35,57 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("No Registration");
                 
                 var currentRegistrant = registration.GetRegistrant(msgs);
-                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
-                
-                if(currentRegistrant.IsEmpty() || currentMasterRegistrant.IsEmpty())
+                if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-
+                
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if(currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
+                
                 if(!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
-                    throw new Exception("No Access");
+                    throw new Exception("You are not authorized to access this page");
                 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
-                
                 if(participationObject.IsEmpty())
                     throw new Exception("Invalid Object");
                 
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
-                
-                var formQuestionDtoList = new List<FormQuestionDto>();
-                var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
-                var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
-                        }
-                    );
-                }
+                var formQuestionDtoList = questions.Select(question => new FormQuestionDto()
+                    {
+                        ID = question.ID.Value,
+                        FormQuestionGroupId = question.FormQuestionGroupId,
+                        Text = question.Text,
+                        Description = question.Description,
+                        GroupTitle = question.FormQuestionGroupName,
+                        Options = question.Options,
+                        IsRequired = question.IsRequired,
+                        DisplayOrder = question.DisplayOrder,
+                        IsActive = question.IsActive,
+                        IsDeleted = question.IsDeleted,
+                        QuestionTypeId = question.QuestionTypeId,
+                        QuestionDataTypeId = question.QuestionDataTypeId,
+                        FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                    })
+                    .ToList();
+
+                var formQuestionGroupDtoList = questionGroups.Select(questionGroup => new FormQuestionGroupDto()
+                    {
+                        FormId = questionGroup.FormId, Name = questionGroup.Name, DisplayOrder = questionGroup.DisplayOrder,
+                        QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                    })
+                    .ToList();
                 
-                foreach (var questionGroup in questionGroups)
-                {
-                    formQuestionGroupDtoList.Add(
-                        new FormQuestionGroupDto()
-                        {
-                            FormId = questionGroup.FormId,
-                            Name = questionGroup.Name,
-                            DisplayOrder = questionGroup.DisplayOrder,
-                            QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
-                        }
-                    );
-                }
-                
-                foreach (var questionAnswer in registration.GetAnswers(msgs))
-                {
-                    formQuestionAnswerDtoList.Add(
-                        new FormQuestionAnswerDto()
-                        {
-                            FormQuestionId = questionAnswer.FormQuestionId,
-                            QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
-                            QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text,
-                        }
-                    );
-                }
+                var answers = registration.GetAnswers(msgs);
+                var formQuestionAnswerDtoList = answers.Select(questionAnswer => new FormQuestionAnswerDto()
+                    {
+                        FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId, 
+                        QuestionText = questionAnswer.QuestionText, Text = questionAnswer.Text,
+                    })
+                    .ToList();
 
                 dynamic response = new
                 {
@@ -151,12 +131,14 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult AddUpdateAnswers(UpdateQuestionAnswerResponse json)
         {
             var msgs = new SystemMessages();
-
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
+                
+                if(!json.registrationUid.IsGuid())
+                    throw new Exception("Invalid Id");
                 
                 var registration = Registration.LoadByUid(json.registrationUid.ToGuid(), msgs);
                 if(registration.IsEmpty())
@@ -167,15 +149,12 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("No Registrant");
                 
                 var collection = HttpUtility.ParseQueryString(json.answers);
-                
                 var participationObject = registration.GetFirstParticipationObject(msgs);
-                
                 if(participationObject.IsEmpty())
                     throw new Exception("Invalid Object");
                 
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
-                
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
@@ -318,14 +297,13 @@ namespace AfterSchool.Areas.Api.Controllers
                     location.LastModifiedDate = DateTime.UtcNow;
                     location.LastModifiedBy = currentUser?.ID;
 
-                    //..co-ordiantes can be negative
                     if (json.longitude.IsNotEmpty() && json.latitude.IsNotEmpty())
                     {
-                        var distance = DistanceAlgorithm.DistanceBetweenPlaces(Convert.ToDouble(json.longitude), Convert.ToDouble(json.latitude), 0, 0);
+                        var distance = DistanceAlgorithm.DistanceBetweenPlaces(Convert.ToDouble(json.longitude), Convert.ToDouble(json.latitude), 
+                            0, 0);
                         if (distance.IsNotEmpty())
                             location.DistanceFromOrigin = Convert.ToDecimal(distance);
                     }
-                
                     msgs.AddRange(location.Save());
                 }
                 
