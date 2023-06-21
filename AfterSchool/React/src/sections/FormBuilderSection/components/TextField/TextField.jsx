@@ -34,7 +34,8 @@ export default function TextField({ formikProps, label }) {
           variant="outlined"
           {...formikProps}
           FormHelperTextProps={{
-            className: classes.helperText
+            className: classes.helperText,
+            'data-testid': `${label}-error`
           }}
         />
       </Grid>

@@ -83,7 +83,11 @@ function CheckBoxList({ formik, question }) {
         </Grid>
         {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
-            <FormHelperText className={classes.maxWidth} error>
+            <FormHelperText
+              data-testid={`${title}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
               {errors[ID]}
             </FormHelperText>
           </Box>
