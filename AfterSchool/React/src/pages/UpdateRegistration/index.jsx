@@ -1,4 +1,4 @@
-import { useSearchParams, useParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
@@ -10,9 +10,10 @@ import apiRoutes from 'routes';
 import utils from 'utils';
 
 export default function UpdateRegistration() {
-  const { accountUrl } = apiRoutes;
-  const { scrollToTop, navigateTo } = utils;
+  const { scrollToTop } = utils;
+  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { thankyouUrl, volunteerThankYouUrl } = apiRoutes;
   const {
     msgs,
     school,
@@ -79,6 +80,11 @@ export default function UpdateRegistration() {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
+  const handleRedirection = () => {
+    const url = RegistrantType === 'Volunteer' ? volunteerThankYouUrl(regUid) : thankyouUrl(regUid);
+    navigate(`${url}?update=1`);
+  };
+
   const gradeRestrictions = {
     minGrade: MinGrade,
     maxGrade: MaxGrade,
@@ -124,7 +130,7 @@ export default function UpdateRegistration() {
         handleSection('next');
         resetForm();
       } else {
-        lastSection && !msgs.length && navigateTo(accountUrl);
+        lastSection && !msgs.length && handleRedirection();
         setSaveDisabled(false);
       }
     }

@@ -16,7 +16,8 @@ export default {
   getRegistrationFormDataAPI: regUid =>
     `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
   submitRegistrationFormDataAPI: 'Api/UpdateRegistration/AddUpdateAnswers',
-  UpdateRegistrationSchoolAPI: 'Api/Registration/CreateOrUpdateFromGoogle',
+  UpdateRegistrationSchoolAPI: 'Api/UpdateRegistration/CreateOrUpdateFromGoogle',
+  UpdateRegistrationWithESignature: 'Api/UpdateRegistration/UpdateRegistrationWithESignature',
 
   //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',

@@ -1,11 +1,12 @@
 import { useSnackbar } from 'notistack';
-import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Box, Button, Link, Typography, Icon } from '@material-ui/core';
 
 import utils from 'utils';
 import apiRoutes from 'routes';
 import useStyles from './styles';
+import { Loader } from 'components';
 import { useThankYou } from 'redux/hooks';
 import ShareButton from 'components/ShareButton';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
@@ -16,9 +17,10 @@ function ThankYouSection({ volunteerRegistration = false }) {
   const { accountUrl } = apiRoutes;
   const { registrationId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
-
   const {
+    loading,
     data: {
       isParent,
       ActivityUrl,
@@ -33,6 +35,8 @@ function ThankYouSection({ volunteerRegistration = false }) {
   useEffect(() => {
     loadThankYouScreenData(registrationId, volunteerRegistration);
   }, []);
+
+  if (loading) return <Loader />;
 
   const copyToClipBoard = async copyMe => {
     try {
@@ -69,13 +73,22 @@ function ThankYouSection({ volunteerRegistration = false }) {
       />
     ));
 
+  const Msg = () =>
+    searchParams.get('update') ? (
+      <Typography variant="body1">
+        Your updated response for <b>{ActivityName}</b> has been saved.
+      </Typography>
+    ) : (
+      <Typography variant="body1">
+        <b>{RegistrantFirstName}</b> has been registered for <b>{ActivityName}</b>
+      </Typography>
+    );
+
   return (
     <Box className={classes.wrapper}>
       <Box className={classes.thankYouWrapper}>
         <Typography variant="h4">Thank You!</Typography>
-        <Typography variant="body1">
-          <b>{RegistrantFirstName}</b> has been registered for <b>{ActivityName}</b>
-        </Typography>
+        <Msg />
         <Box>
           {volunteerRegistration ? (
             <Button

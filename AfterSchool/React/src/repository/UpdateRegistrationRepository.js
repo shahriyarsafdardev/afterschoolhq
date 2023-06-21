@@ -7,5 +7,5 @@ export default {
   getFormData: regUid => axios.get(ApiRoutes.getRegistrationFormDataAPI(regUid)).then(res => res),
   submitSchoolData: params => axios.post(ApiRoutes.UpdateRegistrationSchoolAPI, params),
   exit: uid => axios.get(ApiRoutes.exitRegistrationAPI(uid)),
-  register: params => axios.post(ApiRoutes.RegisterAPI, params)
+  eSignature: params => axios.post(ApiRoutes.UpdateRegistrationWithESignature, params)
 };

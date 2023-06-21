@@ -5,6 +5,7 @@ import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import { responseMapper } from './helper';
+import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import UpdateRegistrationRepository from 'repository/UpdateRegistrationRepository';
 
 const UpdateRegistrationSlice = createSlice({
@@ -39,6 +40,7 @@ const UpdateRegistrationSlice = createSlice({
         IsGenderRestricted
       } = activityDto;
 
+      const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
         RegistrantType,
@@ -47,8 +49,8 @@ const UpdateRegistrationSlice = createSlice({
         IsGenderRestricted
       );
 
-      state.questions = [...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated];
+      state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
+      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -112,9 +114,17 @@ export const useUpdateRegistrationActions = () => {
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
-    await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-      dispatch(setMsgs(msgs))
-    );
+    if (lastSection) {
+      const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
+      formData.append('eSignature', eSignature);
+      dispatch(loadingFormData());
+      UpdateRegistrationRepository.eSignature(formData).then(({ data: { msgs } }) => {
+        dispatch(setMsgs(msgs));
+      });
+    } else
+      await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
+        dispatch(setMsgs(msgs))
+      );
 
     dispatch(submitFormSection(answers));
   };
