@@ -53,6 +53,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
+                
+                if (currentRegistrant.IsAdult)
+                    questionGroups = questionGroups.Where(group =>
+                        group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
+                    ).ToList();
 
                 var formQuestionDtoList = questions.Select(question => new FormQuestionDto()
                     {
