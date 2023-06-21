@@ -45,7 +45,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
                     throw new Exception("You are not authorized to access this page");
                 
-                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentUserRegistrant = currentMasterRegistrant.IsVolunteer ? currentUser.GetMasterVolunteerRegistrant(msgs) : 
+                    currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
                 if(participationObject.IsEmpty())
                     throw new Exception("Invalid Object");
