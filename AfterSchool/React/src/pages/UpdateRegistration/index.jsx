@@ -1,4 +1,4 @@
-import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
@@ -10,18 +10,15 @@ import apiRoutes from 'routes';
 import utils from 'utils';
 
 export default function UpdateRegistration() {
-  const navigate = useNavigate();
-  const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouUrl } = apiRoutes;
+  const { accountUrl } = apiRoutes;
+  const { scrollToTop, navigateTo } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    exit,
     msgs,
     school,
     loading,
     questions,
     loadFormData,
-    registrationId,
     questionsGroups,
     answeredQuestions,
     setSchoolFieldValue,
@@ -37,17 +34,16 @@ export default function UpdateRegistration() {
       MaxGrade,
       MinGrade,
       IsGenderRestricted,
-      EnforcedGender,
-      ActivityUrl
+      EnforcedGender
     }
   } = useUpdateRegistration();
 
+  const { regUid } = useParams();
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { accountName, activityName, regUid } = useParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
   const registrationService = new RegistrationService(
@@ -82,15 +78,6 @@ export default function UpdateRegistration() {
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
-
-  useEffect(() => {
-    if (registrationId) handleRedirection();
-  }, [registrationId]);
-
-  const handleRedirection = () => {
-    if (IsFree) navigate(thankyouUrl(registrationId));
-    else redirect(paymentScreenPath(registrationId));
-  };
 
   const gradeRestrictions = {
     minGrade: MinGrade,
@@ -136,7 +123,10 @@ export default function UpdateRegistration() {
       if (!lastSection && !msgs.length) {
         handleSection('next');
         resetForm();
-      } else setSaveDisabled(false);
+      } else {
+        lastSection && !msgs.length && navigateTo(accountUrl);
+        setSaveDisabled(false);
+      }
     }
   });
   const { handleSubmit, dirty, values } = formik;
@@ -177,10 +167,6 @@ export default function UpdateRegistration() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
-  const exitHandler = () => {
-    exit(regUid, ActivityUrl);
-  };
-
   return (
     <RegistrationForm
       loading={loading}
@@ -198,8 +184,8 @@ export default function UpdateRegistration() {
       registrantType={RegistrantType}
       isFree={IsFree}
       firstSection={activeGroup === 0}
-      exitHandler={exitHandler}
       isUpdatingRegistration={true}
+      showExit={false}
     ></RegistrationForm>
   );
 }

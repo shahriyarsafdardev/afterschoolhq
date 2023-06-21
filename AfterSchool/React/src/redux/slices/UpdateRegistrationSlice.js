@@ -4,8 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
-import { responseMapper, handleRedirection } from './helper';
-import ConfirmRegistrationSection from 'constants/eSignatureSection';
+import { responseMapper } from './helper';
 import UpdateRegistrationRepository from 'repository/UpdateRegistrationRepository';
 
 const UpdateRegistrationSlice = createSlice({
@@ -33,19 +32,13 @@ const UpdateRegistrationSlice = createSlice({
     },
     setFormData: (state, { payload: { FormDto, activityDto } }) => {
       const {
-        CanAccess,
         RegistrantType,
         SchoolLocation,
         IsAgeRestricted,
         IsGradeRestricted,
-        IsGenderRestricted,
-        RegistrationIsCompleted
+        IsGenderRestricted
       } = activityDto;
 
-      const isProhibited = RegistrationIsCompleted || !CanAccess;
-      //   if (isProhibited) return handleRedirection(activityDto);
-
-      const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
         RegistrantType,
@@ -54,8 +47,8 @@ const UpdateRegistrationSlice = createSlice({
         IsGenderRestricted
       );
 
-      state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questions = [...formQuestionUpdated, schoolField(RegistrantType)];
+      state.questionsGroups = [...formQuestionGroupUpdated];
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -119,10 +112,6 @@ export const useUpdateRegistrationActions = () => {
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
-    if (lastSection) {
-      const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
-      formData.append('eSignature', eSignature);
-    }
     await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
       dispatch(setMsgs(msgs))
     );
