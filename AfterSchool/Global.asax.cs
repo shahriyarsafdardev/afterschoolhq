@@ -70,6 +70,8 @@ namespace AfterSchool
                     SessionVariables.MaintenanceMessage = maintenanceBarMessage;
                 }
             }
+            else
+                SessionVariables.MaintenanceMessage = null;
         }
     }
 }
