@@ -22,7 +22,7 @@ namespace AfterSchool.Areas.Api.Models
             };
         }
 
-        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> questionSettingsList, int questionId = 0, FormType currFormType = FormType.NotSet)
+        public static List<FormQuestionSettingDto> MapToDtoList(List<FormQuestionSettings> questionSettingsList, FormQuestion question, FormType currFormType = FormType.NotSet)
         {
             var audienceTypes = currFormType.Equals(FormType.VolunteerForm) ? new List<AudienceType>(){AudienceType.Volunteer} :
                 new List<AudienceType>(){ AudienceType.Parents, AudienceType.Students, AudienceType.Adults };
@@ -36,8 +36,8 @@ namespace AfterSchool.Areas.Api.Models
                                         questionSettingsList.Add(new FormQuestionSettings()
                                         {
                                             Audience = audienceType,
-                                            Show = true,
-                                            Required = true,
+                                            Show = question.IsActive,
+                                            Required = question.IsRequired,
                                         });
                                     }
                                 });
