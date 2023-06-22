@@ -74,7 +74,7 @@ namespace AfterSchool.Models
             return user;
         }
 
-        public static string GetMaintenanceBarMessage(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static string GetMaintenanceBarMessage(SystemMessages msgs = null)
         {
             var message = (string) HttpContext.Current.Session["MaintenanceBarMessage"];
             return message;
