@@ -79,6 +79,7 @@
                                     billingPeriodTypeId = originalPlan.BillingPeriodTypeId;
                                 }
 
+                                // need to revisit this logic before moving to next steps.
                                 if (!plan.DateCancelled.HasValue)
                                 {
                                     if (payments?.Count < (plan.TotalPeriods ?? 0))

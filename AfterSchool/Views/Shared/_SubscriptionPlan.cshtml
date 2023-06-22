@@ -5,6 +5,8 @@
     var subscriptionPlan = (SubscriptionPlan) ViewBag.SubscriptionPlan;
     var paymentdisabled = (string) ViewBag.paymentdisabled;
 
+    var activitySchedule = Model.GetSchedule();
+
     var accountPackage = (AccountPackage) ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
@@ -219,13 +221,14 @@
             <div class="">
                 <label class="col-sm-3 control-label">End Date <span class="text-danger">*</span></label>
                 <div class="col-sm-9">
-                    @{
+                    @{  
                         Html.RenderPartial(
                             "~/Views/Shared/Components/_Date.cshtml",
                             new FormInputViewModel
                             {
                                 Id = "subscriptionEndDate",
                                 Name = "subscriptionEndDate",
+                                Value = subscriptionPlan?.EndDate.ToShortDateString(),
                                 Placeholder = "End Date",
                             }
                             );

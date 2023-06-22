@@ -1361,13 +1361,39 @@ namespace AfterSchoolLibrary.Services
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
+                DateTime validEndDate;
+                switch (plan.BillingPeriodTypeId)
+                {
+                    case BillingPeriodType.Month:
+                        validEndDate = DateTime.UtcNow.AddMonths(1);
+                        break;
+                    case BillingPeriodType.Year:
+                        validEndDate = DateTime.UtcNow.AddYears(1);
+                        break;
+                    case BillingPeriodType.Week:
+                        validEndDate = DateTime.UtcNow.AddDays(7);
+                        break;
+                    case BillingPeriodType.Day:
+                        validEndDate = DateTime.UtcNow.AddDays(1);
+                        break;
+                    case BillingPeriodType.TwoWeeks:
+                        validEndDate = DateTime.UtcNow.AddDays(14);
+                        break;
+                    default:
+                        validEndDate = DateTime.UtcNow;
+                        break;
+                }
+                if (subscriptionEndDate < validEndDate)
+                {
+                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                }
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                   plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
-                                   plan.PaymentStartTypeId != paymentStartType ||
-                                   (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
-                                   (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
-                                   plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
+                                plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
+                                plan.PaymentStartTypeId != paymentStartType ||
+                                (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
+                                (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
+                                plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
