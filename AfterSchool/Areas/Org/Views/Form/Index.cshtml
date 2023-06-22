@@ -4,8 +4,8 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
-    var currentFormCount = ViewBag.CurrentFormCount;
-    var showFormFields = !(currentFormCount >= maxFormCount);
+    var accountTotalForms = ViewBag.AccountTotalForms; 
+    var showFormFields = !(accountTotalForms >= maxFormCount);
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var archived = (bool)ViewBag.Archived;
     var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);       
@@ -51,7 +51,7 @@
                 <p class="pull-right text-bold formCount">
                     @if (!archived)
                     { 
-                        @:<span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
+                        @:<span id="currentFormNumber">@accountTotalForms</span> of @maxFormCount Forms
                     }
                     else 
                     {
