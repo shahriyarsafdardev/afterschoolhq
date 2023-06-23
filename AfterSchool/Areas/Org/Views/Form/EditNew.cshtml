@@ -2,8 +2,8 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var currentAccount = SessionVariables.CurrentAccount;
-    string bundlePath = Server.MapPath("~/React/dist/bundle.js");
-    DateTime lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
+    var bundlePath = Server.MapPath("~/React/dist/bundle.js");
+    var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
     var version = lastModifiedDate.ToString("yyyyMMddHHmmss");
 }
 
