@@ -218,23 +218,26 @@
 
             </div>
 
-            <div class="">
-                <label class="col-sm-3 control-label">End Date <span class="text-danger">*</span></label>
-                <div class="col-sm-9">
-                    @{  
-                        Html.RenderPartial(
-                            "~/Views/Shared/Components/_Date.cshtml",
-                            new FormInputViewModel
-                            {
-                                Id = "subscriptionEndDate",
-                                Name = "subscriptionEndDate",
-                                Value = subscriptionPlan?.EndDate.ToShortDateString(),
-                                Placeholder = "End Date",
-                            }
-                            );
-                    }
+            @if (activitySchedule.IsNotEmpty() && !activitySchedule.IsOngoing)
+            {
+                <div class="">
+                    <label class="col-sm-3 control-label">End Date <span class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/Components/_Date.cshtml",
+                                new FormInputViewModel
+                                {
+                                    Id = "subscriptionEndDate",
+                                    Name = "subscriptionEndDate",
+                                    Value = subscriptionPlan?.EndDate != null ? subscriptionPlan.EndDate.Value.ToShortDateString() : activitySchedule.EndDate.Value.ToShortDateString(),
+                                    Placeholder = "End Date",
+                                }
+                                );
+                        }
+                    </div>
                 </div>
-            </div>
+             }
         </div>
     </div>
 </div>
