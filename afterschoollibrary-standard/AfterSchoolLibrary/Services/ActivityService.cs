@@ -1362,7 +1362,7 @@ namespace AfterSchoolLibrary.Services
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
-                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId);
+                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime)activitySchedule.StartDate, (BillingPeriodType)plan.BillingPeriodTypeId);
                 
                 if (subscriptionEndDate < validEndDate)
                     msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
@@ -1390,7 +1390,15 @@ namespace AfterSchoolLibrary.Services
 
             // if the subscription plan option(UI) is activated
             if (hassubscriptionplan.ToBoolean() && hasStripeChanges && msgs.HasNoErrors())
-                SubscriptionPlanService.CreateNewSubscriptionPlan(
+            {
+                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+                if (subscriptionEndDate < validEndDate)
+                {
+                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                }
+                else
+                    SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
                     participationObjectId: activity.ID.Value,
@@ -1407,7 +1415,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
-
+            }
             return msgs;
         }
 
