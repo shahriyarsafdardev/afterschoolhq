@@ -1431,26 +1431,35 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             HandleTempMessages(msgs);
 
-            var currentAccount = SessionVariables.CurrentAccount;
-            var currentAccountPackage = SessionVariables.AccountPackage;
-            var newPackage = Package.LoadByUid(newplan, msgs);
+            try
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+                var currentAccountPackage = SessionVariables.AccountPackage;
+                var newPackage = Package.LoadByUid(newplan, msgs);
 
-            var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
-                currentAccount.StripeCustomerId,
-                newPackage.GetStripePriceId(period),
-                $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
-                $"?newplan={newplan}&period={(int)period}&returnurl={Url.Action("SelectPlanDone", "Account", new {Area = "org"})}",
-                $"{Utilities.BaseUrl()}/{Url.Action("SelectPlan", "Account", new {Area = "org"})}",
-                currentAccount.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
-                msgs);
+                var session = StripeHelper.GetStripeHelperSubscriberAccount().GetCheckoutSession(
+                    currentAccount.StripeCustomerId,
+                    newPackage.GetStripePriceId(period),
+                    $"{Utilities.BaseUrl()}{Url.Action("AfterStripeUpdate", "Account", new {Area = "org"})}" +
+                    $"?newplan={newplan}&period={(int)period}&returnurl={Url.Action("SelectPlanDone", "Account", new {Area = "org"})}",
+                    $"{Utilities.BaseUrl()}/{Url.Action("SelectPlan", "Account", new {Area = "org"})}",
+                    currentAccount.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null,
+                    msgs);
 
-            // have to cancel the existing subscription in stripe or else it will auto charge on the existing trial
-            var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
-            if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
-                StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(currentAccountPackage.StripeSubscriptionId, false, msgs);
-            
-            if (msgs.HasNoErrors() && session.IsNotEmpty())
-                return new RedirectResult(session.Url);
+                // have to cancel the existing subscription in stripe or else it will auto charge on the existing trial
+                var stripeSubscription = currentAccountPackage.GetStripeSubscription(msgs);
+                if (stripeSubscription.IsNotEmpty() && !stripeSubscription.CanceledAt.HasValue)
+                    StripeHelper.GetStripeHelperSubscriberAccount().CancelSubscription(currentAccountPackage.StripeSubscriptionId, false, msgs);
+                
+                if (msgs.HasNoErrors() && session.IsNotEmpty())
+                    return new RedirectResult(session.Url);
+            }
+            catch(Exception ex)
+            {
+                msgs.Add("An Error has occurred. Please reach out to our support team (support@afterschoolhq.com) if you continue to experience this issue.", MessageType.UserError);
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
+
+            }
 
             SetTempMessages(msgs);
             return RedirectToAction("SelectPlan");
