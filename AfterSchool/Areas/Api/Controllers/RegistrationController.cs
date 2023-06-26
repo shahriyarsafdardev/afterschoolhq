@@ -140,7 +140,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        AllowToPayLater = participationObject.AllowToPayLater,
                     }
                 };
                 
@@ -392,7 +393,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        AllowToPayLater = participationObject.AllowToPayLater,
                     }
                 };
                 
