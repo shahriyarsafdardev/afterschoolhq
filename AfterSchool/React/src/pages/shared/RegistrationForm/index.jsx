@@ -117,7 +117,13 @@ export default function RegistrationForm(props) {
                           {'Loading . . .'} <CircularProgress size={'20px'} />
                         </>
                       ) : (
-                        saveButtonText(lastSection, registrantType, isFree, skipAble)
+                        saveButtonText(
+                          lastSection,
+                          registrantType,
+                          isFree,
+                          skipAble,
+                          isUpdatingRegistration
+                        )
                       )}
                     </Button>
                   </Box>
