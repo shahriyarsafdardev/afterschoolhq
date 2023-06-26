@@ -542,11 +542,12 @@
             </div>
             <div class="modal-body form fixed-height-modal-options">
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
-                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
+                <p class="minMaxValidation text-danger hide">Min rating value should be less than max value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="0" max="9" required id="question-rating-min" name="question-rating-min" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
                     <div class="col">
@@ -556,22 +557,13 @@
                     </div>
 
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="1" max="10" required id="question-rating-max" name="question-rating-max" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
-                    <div class="col">
-                        <label class="rating-label">
-                            by increments of
-                        </label>
-                    </div>
-
-                    <div class="col">
-                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>5</option>
-                            <option>10</option>
-                            <option>25</option>
+                    <div class="col hide">
+                        <select class="form-control input-sm rating" id="question-rating-increment">
+                            <option value="1" selected="selected">1</option>
                         </select>
                     </div>
                 </div>
@@ -593,11 +585,11 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-
+                <p id="ratingError" class="text-danger hide">Max rating value should not be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateRating()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" id="btnRating" onclick="updateRating()">Done</button>
             </div>
         </div>
     </form>
@@ -1327,27 +1319,37 @@
         $('#question-rating-increment').val($('#question-rating-increment').val());
     }
 
-    function setOptionalLabelAndIncrement() {
-
-        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
-        var ratingMinValue = $('#question-rating-min').val().replace(/[^\d.-]/g, '');
-
-        if ($.isNumeric($('#question-rating-min').val())) {
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append($('#question-rating-min').val());
+    function setOptionalLabelAndIncrement(isNan, input) {  
+        if (isNan) {
+            $(input).val('');
         }
-
-        if ($.isNumeric($('#question-rating-max').val())) {
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append($('#question-rating-max').val());
-        }
-
-        $('#question-rating-increment').empty();
-
-        for (var i = ratingMinValue; i < ratingMaxValue; i++) {
-            if (ratingMaxValue % i == 0) {
-                var newOption = $('<option value="' + i + '">' + i + '</option>');
-                $('#question-rating-increment').append(newOption);
+        else {
+            let maxValue = 10;
+            let minRatingValue = parseInt($('#question-rating-min').val());
+            let maxRatingValue = parseInt($('#question-rating-max').val()); 
+            let minRatingError = $('.minMaxValidation');
+            let maxRatingError = $('#ratingError');
+            
+            $('#rating-min-label').html(minRatingValue);
+            $('#rating-max-label').html(maxRatingValue);
+            
+            if (maxRatingValue > maxValue || minRatingValue >= maxRatingValue) {
+                $('#btnRating').prop('disabled', true);
+            }    
+            else {
+                $('#btnRating').prop('disabled', false);
+            }
+            if (maxRatingValue > maxValue) {
+                $(maxRatingError).removeClass('hide');
+            } 
+            else {
+                $(maxRatingError).addClass(' hide');
+            }    
+            if (minRatingValue >= maxRatingValue) {
+                $(minRatingError).removeClass('hide');
+            }
+            else {
+                $(minRatingError).addClass(' hide');
             }
         }
     }
