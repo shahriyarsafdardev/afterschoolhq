@@ -4,6 +4,7 @@ import { Form, FormikProvider } from 'formik';
 import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 
 import { Loader, ProgressBar, ShowQuestion } from 'components';
+import { eSignMsg } from 'constants';
 import useStyles from './styles';
 
 export default function RegistrationForm(props) {
@@ -25,6 +26,7 @@ export default function RegistrationForm(props) {
     handleSection,
     registrantType,
     saveButtonText,
+    allowToPayLater,
     showExit = true,
     isSurvey = false,
     currentQuestions,
@@ -36,6 +38,14 @@ export default function RegistrationForm(props) {
     isUpdating || isSurvey
       ? classes.outerWrapper
       : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
+
+  function eSignInfoText() {
+    return (
+      <Box className={classes.infoText}>
+        <Typography>{eSignMsg(allowToPayLater)}</Typography>
+      </Box>
+    );
+  }
   return (
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
@@ -92,6 +102,7 @@ export default function RegistrationForm(props) {
                   </Grid>
                 </Grid>
                 <Box className={classes.buttonOuterWrapper}>
+                  {lastSection && !isFree && eSignInfoText()}
                   <Box className={classes.buttonWrapper}>
                     <Button
                       color="primary"

@@ -46,23 +46,39 @@ export default makeStyles(theme => ({
     color: 'red'
   },
   buttonOuterWrapper: {
+    maxWidth: 380,
+    margin: '60px 0px',
     [theme.breakpoints.down('sm')]: {
       width: '100%',
       display: 'flex',
+      flexDirection: 'column',
       justifyContent: 'center'
     }
   },
   buttonWrapper: {
-    margin: '60px 0px',
+    marginTop: '15px',
+    margin: 'auto',
     minWidth: '235px',
     justifyContent: 'space-between',
     display: 'flex',
+    width: 'fit-content',
     [theme.breakpoints.down('sm')]: {
       justifyContent: 'space-between',
       minHeight: '80px',
       flexDirection: 'column',
       width: '90%',
       maxWidth: 540
+    }
+  },
+  infoText: {
+    '& .MuiTypography-root': {
+      color: '#979797'
+    },
+    maxWidth: '100%',
+    textAlign: 'justify',
+    alignSelf: 'center',
+    [theme.breakpoints.down('sm')]: {
+      maxWidth: '90%'
     }
   },
   saveButton: {
