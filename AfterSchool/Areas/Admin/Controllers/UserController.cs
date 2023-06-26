@@ -60,7 +60,6 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("This is Success error", MessageType.Success);
 
                 AfterSchoolLibrary.Helpers.Utilities.SystemAbcLog(msgs);
-                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             }
             ViewBag.Messages = msgs;
 
