@@ -106,7 +106,12 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
             if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form.FormTypeId != FormType.Survey)
+            {
+                var bundlePath = Server.MapPath("~/React/dist/bundle.js");
+                var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
+                ViewBag.Version = lastModifiedDate.ToString("yyyyMMddHHmmss");
                 return View("EditNew", form);
+            }
             return View(form);
         }
 
@@ -334,7 +339,12 @@ namespace AfterSchool.Areas.Org.Controllers
             if (id.ToInteger() == 0)
                 return RedirectToAction("Edit", new { id = form.ID });
             if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form?.FormTypeId != FormType.Survey)
+            {
+                var bundlePath = Server.MapPath("~/React/dist/bundle.js");
+                var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
+                ViewBag.Version = lastModifiedDate.ToString("yyyyMMddHHmmss");
                 return View("EditNew", form);
+            }
             return View(form);
         }
 

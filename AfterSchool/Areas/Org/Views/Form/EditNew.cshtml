@@ -2,9 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var currentAccount = SessionVariables.CurrentAccount;
-    var bundlePath = Server.MapPath("~/React/dist/bundle.js");
-    var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
-    var version = lastModifiedDate.ToString("yyyyMMddHHmmss");
+    var version = (String)ViewBag.Version;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
