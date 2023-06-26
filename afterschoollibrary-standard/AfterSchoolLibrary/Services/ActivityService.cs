@@ -1358,8 +1358,11 @@ namespace AfterSchoolLibrary.Services
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule(msgs, dc);
 
+            if(subscriptionEndDate < DateTime.UtcNow)
+                msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
+
             // first: desactivate the current plan if there are any changes
-            if (activity.HasSubscriptionPlan(msgs, dc))
+            if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
                 DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime)activitySchedule.StartDate, (BillingPeriodType)plan.BillingPeriodTypeId);
