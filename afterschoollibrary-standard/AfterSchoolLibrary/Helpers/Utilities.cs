@@ -127,7 +127,6 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SystemErrorLog(SystemMessages msgs)
         {
-            msgs.Add("For testing SystemErrorLog function", MessageType.Error);
             RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
                 {Environment = GetRollbarEnvironment()});
             RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
@@ -135,6 +134,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SystemAbcLog(SystemMessages msgs)
         {
+            msgs.Add("For testing SystemAbcLog function", MessageType.Error);
             RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
             { Environment = GetRollbarEnvironment() });
             var desiredMessageTypes = new List<MessageType>
