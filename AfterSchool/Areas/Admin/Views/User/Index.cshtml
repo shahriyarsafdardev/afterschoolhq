@@ -41,8 +41,6 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", (SystemMessages)ViewBag.Messages); }
-
 <script>
     function doSearch() {
         location.href = `@Url.Action("index", "user")?search=${$('#search').val()}`;
