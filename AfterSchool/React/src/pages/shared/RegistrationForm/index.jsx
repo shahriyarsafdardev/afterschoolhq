@@ -102,7 +102,7 @@ export default function RegistrationForm(props) {
                   </Grid>
                 </Grid>
                 <Box className={classes.buttonOuterWrapper}>
-                  {lastSection && !isFree && eSignInfoText()}
+                  {lastSection && !isUpdatingRegistration && !isFree && eSignInfoText()}
                   <Box className={classes.buttonWrapper}>
                     <Button
                       color="primary"
