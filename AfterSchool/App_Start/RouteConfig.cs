@@ -124,6 +124,11 @@ namespace AfterSchool
                new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
+                "RegUpdate",
+                "reg/{action}/{regUid}",
+                new {controller = "r", action = "update", regUid = UrlParameter.Optional});
+            
+            routes.MapRoute(
                 "LeagueHome1",
                 "{accountname}/league/{leaguename}",
                 new

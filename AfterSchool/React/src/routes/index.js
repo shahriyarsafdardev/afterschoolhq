@@ -12,6 +12,12 @@ export default {
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+  // Update Registration APIs
+  getRegistrationFormDataAPI: regUid =>
+    `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
+  submitRegistrationFormDataAPI: 'Api/UpdateRegistration/AddUpdateAnswers',
+  UpdateRegistrationSchoolAPI: 'Api/UpdateRegistration/CreateOrUpdateFromGoogle',
+  UpdateRegistrationWithESignature: 'Api/UpdateRegistration/UpdateRegistrationWithESignature',
 
   //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',

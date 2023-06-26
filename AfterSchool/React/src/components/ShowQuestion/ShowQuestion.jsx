@@ -22,7 +22,14 @@ import {
   ApiTextField
 } from 'components';
 
-function ShowQuestion({ index, formik, isUpdating, currentQuestion, currentQuestions }) {
+function ShowQuestion({
+  index,
+  formik,
+  isUpdating,
+  currentQuestion,
+  currentQuestions,
+  isUpdatingRegistration
+}) {
   const { QuestionTypeId } = currentQuestion;
 
   switch (QuestionTypeId) {
@@ -33,6 +40,7 @@ function ShowQuestion({ index, formik, isUpdating, currentQuestion, currentQuest
           formik={formik}
           isUpdating={isUpdating}
           key={index}
+          isUpdatingRegistration={isUpdatingRegistration}
         />
       ) : 'Street Address' === currentQuestion.Text ? (
         <ApiTextField

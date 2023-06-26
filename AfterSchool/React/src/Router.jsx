@@ -28,6 +28,10 @@ function Router() {
           element: <Registration newChild={true} />
         },
         {
+          path: 'reactapp/reg/update/:regUid',
+          element: <UpdateRegistration />
+        },
+        {
           path: 'reactapp/registration/thankyou/:registrationId',
           element: <ThankYouSection />
         },
@@ -88,6 +92,7 @@ const RedirectToExternal = () => {
 const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
+const UpdateRegistration = Loadable(lazy(() => import('pages/UpdateRegistration')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));

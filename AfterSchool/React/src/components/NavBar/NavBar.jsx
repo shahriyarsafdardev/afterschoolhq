@@ -8,7 +8,7 @@ import MenuPopover from 'components/MenuPopover/MenuPopover';
 import I18n from 'components/i18n/I18n';
 import useStyles from './styles';
 
-import { useRegistration, useVolunteerRegistration, useThankYou } from 'redux/hooks';
+import { useRegistration, useVolunteerRegistration, useThankYou, useHeader } from 'redux/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -36,11 +36,21 @@ export default function NavBar() {
     loading: isLoading
   } = useThankYou();
 
+  const { headerData } = useHeader();
+
+  const isloaded = !loading || !isLoading || !volunteerLoading || !headerData.loading;
+  const activityName = activity.Name || ActivityName || volunteerActivity.Name || headerData?.Name;
+  const organizationName =
+    activity.Organization ||
+    Organization ||
+    volunteerActivity.Organization ||
+    headerData?.Organization;
+
   return (
     <>
       <HeaderStyle className={classes.headerWrapper}>
         <Button size="large" variant="text" target="_blank">
-          {activity.Organization || Organization || volunteerActivity.Organization}
+          {organizationName}
         </Button>
         <Box className={classes.outerOption}>
           <I18n />
@@ -89,14 +99,10 @@ export default function NavBar() {
         </Box>
       </HeaderStyle>
 
-      {(!loading || !isLoading || !volunteerLoading) && (
+      {isloaded && (
         <Box className={classes.navImage}>
-          <Typography className={classes.activityName}>
-            {activity.Name || ActivityName || volunteerActivity.Name}
-          </Typography>
-          <Typography className={classes.organizationName}>
-            {activity.Organization || Organization || volunteerActivity.Organization}
-          </Typography>
+          <Typography className={classes.activityName}>{activityName}</Typography>
+          <Typography className={classes.organizationName}>{organizationName}</Typography>
         </Box>
       )}
     </>
