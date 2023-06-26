@@ -1,3 +1,9 @@
+using AfterSchoolLibrary.Models;
+using Amazon;
+using BasicLibrary;
+using Newtonsoft.Json;
+using Rollbar;
+using SendGrid.Helpers.Mail;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -6,12 +12,6 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using System.Web;
-using AfterSchoolLibrary.Models;
-using Amazon;
-using BasicLibrary;
-using Newtonsoft.Json;
-using Rollbar;
-using SendGrid.Helpers.Mail;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -132,9 +132,8 @@ namespace AfterSchoolLibrary.Helpers
             RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
         }
 
-        public static void SystemAbcLog(SystemMessages msgs)
+        public static void FilteredErrorLog(SystemMessages msgs)
         {
-            msgs.Add("For testing SystemAbcLog function", MessageType.Error);
             RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
             { Environment = GetRollbarEnvironment() });
             var desiredMessageTypes = new List<MessageType>
@@ -144,15 +143,14 @@ namespace AfterSchoolLibrary.Helpers
                 MessageType.ApiUsageError,
                 MessageType.ApiError
             };
-            var filteredMessages = new SystemMessages();
-            foreach (var message in msgs)
-            {
-                var systemMessage = message as SystemMessage;
-                if (systemMessage != null && desiredMessageTypes.Contains(systemMessage.MessageType))
-                {
-                    filteredMessages.Add(systemMessage);
-                }
-            }
+
+            SystemMessages filteredMessages = new SystemMessages();
+            var systemMessages = msgs.OfType<SystemMessage>()
+                .Where(systemMessage => desiredMessageTypes.Contains(systemMessage.MessageType))
+                .ToList();
+
+            filteredMessages.AddRange(ref systemMessages);
+
             RollbarLocator.RollbarInstance.Error(filteredMessages.RenderMessageList(MessageOutputType.Text));
         }
 
