@@ -9,6 +9,7 @@ using AfterSchoolLibrary;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary.DataAccess;
+using System.Windows.Interop;
 
 namespace AfterSchool.Areas.Admin.Controllers
 {
@@ -59,7 +60,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 msgs.Add("This is Warning error", MessageType.Warning);
                 msgs.Add("This is Success error", MessageType.Success);
 
-                AfterSchoolLibrary.Helpers.Utilities.SystemAbcLog(msgs); 
+                AfterSchoolLibrary.Helpers.Utilities.SystemAbcLog(msgs);
+                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(msgs);
             }
             ViewBag.Messages = msgs;
 

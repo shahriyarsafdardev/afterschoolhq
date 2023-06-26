@@ -127,6 +127,7 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SystemErrorLog(SystemMessages msgs)
         {
+            msgs.Add("For testing SystemErrorLog function", MessageType.Error);
             RollbarLocator.RollbarInstance.Configure(new RollbarConfig(RollbarAccessToken)
                 {Environment = GetRollbarEnvironment()});
             RollbarLocator.RollbarInstance.Error(msgs.RenderMessageList(MessageOutputType.Text));
