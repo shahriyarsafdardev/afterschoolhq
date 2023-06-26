@@ -81,6 +81,34 @@ namespace AfterSchoolLibrary.Models
             return BaseLoad(criteria, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<Maintenance> LoadFutureSchedulesByDate(DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var currentDateTime = date.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            var sql = $@"
+					SELECT *  
+					FROM Maintenance
+					WHERE '{currentDateTime}' <= EndTime";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<Maintenance> LoadOnGoingSchedulesByDate(DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var currentDateTime = date.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            var sql = $@"
+					SELECT *  
+					FROM Maintenance
+					WHERE '{currentDateTime}' >= StartTime AND '{currentDateTime}' <= EndTime";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static SystemMessages Create(DatabaseConnection dc = null)
         {
             return _Create(DatabaseQuery, dc, ObjectMap);

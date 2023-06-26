@@ -10,15 +10,15 @@ namespace AfterSchool.Helpers
     {
         public static void RedirectToMaintenance()
         {
-            var maintenanceSchedule = Maintenance.Load().FirstOrDefault();
+            var maintenanceSchedule = Maintenance.LoadOnGoingSchedulesByDate(DateTime.UtcNow);
 
-            if (maintenanceSchedule != null && DateTime.UtcNow >= maintenanceSchedule.StartTime && DateTime.UtcNow <= maintenanceSchedule.EndTime)
+            if (maintenanceSchedule.Count > 0)
                 HttpContext.Current.Response.Redirect("~/scheduled-maintenance.html");
         }
 
         public static void DisplayMaintenanceSchedule()
         {
-            var maintenanceSchedules = Maintenance.Load().Where(schedule => DateTime.UtcNow <= schedule.EndTime).ToList();
+            var maintenanceSchedules = Maintenance.LoadFutureSchedulesByDate(DateTime.UtcNow);
 
             if (maintenanceSchedules.Count > 0)
             {
