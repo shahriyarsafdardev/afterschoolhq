@@ -2,7 +2,7 @@
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var currentAccount = SessionVariables.CurrentAccount;
-    var version = (String)ViewBag.Version;
+    var bundleVersion = (String)ViewBag.BundleVersion;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -40,7 +40,7 @@
 
 </div>
 
-<script src="/React/dist/bundle.js?v=@version"></script>
+<script src="/React/dist/bundle.js?v=@bundleVersion"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>

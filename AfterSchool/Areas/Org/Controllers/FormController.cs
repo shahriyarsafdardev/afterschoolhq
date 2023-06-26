@@ -109,7 +109,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var bundlePath = Server.MapPath("~/React/dist/bundle.js");
                 var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
-                ViewBag.Version = lastModifiedDate.ToString("yyyyMMddHHmmss");
+                ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
                 return View("EditNew", form);
             }
             return View(form);
@@ -342,7 +342,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var bundlePath = Server.MapPath("~/React/dist/bundle.js");
                 var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
-                ViewBag.Version = lastModifiedDate.ToString("yyyyMMddHHmmss");
+                ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
                 return View("EditNew", form);
             }
             return View(form);
