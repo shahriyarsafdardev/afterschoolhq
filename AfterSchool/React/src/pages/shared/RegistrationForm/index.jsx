@@ -49,7 +49,7 @@ export default function RegistrationForm(props) {
   function eSignInfoText() {
     return (
       <Box className={classes.infoText}>
-        <Typography>{eSignMsg(allowToPayLater)}</Typography>
+        <Typography data-testid="eSignInfoText">{eSignMsg(allowToPayLater)}</Typography>
       </Box>
     );
   }
@@ -135,13 +135,7 @@ export default function RegistrationForm(props) {
                           {'Loading . . .'} <CircularProgress size={'20px'} />
                         </>
                       ) : (
-                        saveButtonText(
-                          lastSection,
-                          registrantType,
-                          isFree,
-                          skipAble,
-                          isUpdatingRegistration
-                        )
+                        saveButtonText(lastSection, registrantType, isFree, skipAble)
                       )}
                     </Button>
                   </Box>
