@@ -379,7 +379,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Name = activity.Name,
                         Organization = activity.AccountName,
                         IsFree = participationObject.IsFree,
-                        RegistrantType = RegistrantPersonType.Parent,
+                        RegistrantType = RegistrantPersonType.Parent.ToString(),
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),

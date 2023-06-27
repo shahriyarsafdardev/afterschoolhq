@@ -39,6 +39,13 @@ export default function RegistrationForm(props) {
       ? classes.outerWrapper
       : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
 
+  const showMsg =
+    lastSection &&
+    !isUpdatingRegistration &&
+    !isFree &&
+    registrantType &&
+    registrantType !== 'Volunteer';
+
   function eSignInfoText() {
     return (
       <Box className={classes.infoText}>
@@ -102,7 +109,7 @@ export default function RegistrationForm(props) {
                   </Grid>
                 </Grid>
                 <Box className={classes.buttonOuterWrapper}>
-                  {lastSection && !isUpdatingRegistration && !isFree && eSignInfoText()}
+                  {showMsg && eSignInfoText()}
                   <Box className={classes.buttonWrapper}>
                     <Button
                       color="primary"

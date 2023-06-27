@@ -124,19 +124,19 @@ export default class RegistrationService {
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId }, formData };
   };
 
-  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble, isUpdatingRegistration) => {
+  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) => {
     let buttonText = '';
     if (skipAble) {
       buttonText = 'Skip';
     } else if (lastSection) {
-      if (RegistrantType === 'Parent') {
+      if (['Parent', 'Student', 'Adult'].includes(RegistrantType)) {
         if (IsFree) {
           buttonText = 'Confirm Registration';
         } else {
-          buttonText = isUpdatingRegistration ? 'E-Sign' : 'E-Sign and Continue to Payment';
+          buttonText = 'E-Sign and Continue to Payment';
         }
       } else if (RegistrantType === 'Volunteer') {
-        buttonText = 'Complete Registration';
+        buttonText = 'Confirm Registration';
       } else {
         buttonText = 'Confirm';
       }
