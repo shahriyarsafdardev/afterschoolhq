@@ -16,5 +16,6 @@ namespace AfterSchoolLibrary.Models
         AdverseAction = 11,
         Dispute = 12,
         Archive = 13,
+        ExpiredInvite = 14 
     }
 }
