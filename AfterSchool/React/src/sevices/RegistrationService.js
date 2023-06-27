@@ -124,7 +124,7 @@ export default class RegistrationService {
     return { answers, answerQuery: { answerQuery, groupId: activeGroupId }, formData };
   };
 
-  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble) => {
+  saveButtonText = (lastSection, RegistrantType, IsFree, skipAble, isUpdatingRegistration) => {
     let buttonText = '';
     if (skipAble) {
       buttonText = 'Skip';
@@ -133,7 +133,7 @@ export default class RegistrationService {
         if (IsFree) {
           buttonText = 'Confirm Registration';
         } else {
-          buttonText = 'E-Sign and Continue to Payment';
+          buttonText = isUpdatingRegistration ? 'E-Sign' : 'E-Sign and Continue to Payment';
         }
       } else if (RegistrantType === 'Volunteer') {
         buttonText = 'Complete Registration';
