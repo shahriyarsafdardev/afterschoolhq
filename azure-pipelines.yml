@@ -39,6 +39,15 @@ jobs:
           command: 'custom'
           workingDir: 'AfterSchool/React'
           customCommand: 'run build'
+      - task: PowerShell@2
+        displayName: Update index.html
+        inputs:
+          targetType: 'inline'
+          script: |
+            $commitSHA = git rev-parse HEAD
+            $indexFile = Get-Content -Path AfterSchool\reactapp\index.html
+            $updatedIndexFile = $indexFile -replace '{{COMMIT_SHA}}', $commitSHA
+            $updatedIndexFile | Set-Content -Path AfterSchool\reactapp\index.html
       - task: NuGetToolInstaller@1
         displayName: Use NuGet
         inputs:
