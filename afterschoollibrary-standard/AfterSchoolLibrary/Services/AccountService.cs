@@ -1668,6 +1668,7 @@ namespace AfterSchoolLibrary.Services
             {
                 account.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
                 account.HasDefaultPaymentMethod = true;
+                account.IsPayingCustomer = true;
 
                 // if a customer has paid via another method than going through the app
                 // then make sure when the user logs in they can proceed
@@ -1675,6 +1676,7 @@ namespace AfterSchoolLibrary.Services
                     account.UpdateOnboardingStep(OnboardingStepType.AccountType, msgs, dc);
 
                 msgs.AddRange(account.Save(dc));
+
             }
         }
 
