@@ -118,6 +118,15 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(account.Save(dc));
         }
 
+        public static void SetIsPayingCustomer(this Account account, bool IsPayingCustomer, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            account.IsPayingCustomer = IsPayingCustomer;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
         public static void SetIsClaimed(this Account account, bool isClaimed, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {

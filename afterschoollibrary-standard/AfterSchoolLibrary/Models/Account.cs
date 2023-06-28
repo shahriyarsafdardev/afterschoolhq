@@ -271,6 +271,12 @@ namespace AfterSchoolLibrary.Models
             get => (int?) MDV["FiscalAccountId"].Value;
             set => MDV["FiscalAccountId"].Value = value;
         }
+        
+        public bool IsPayingCustomer
+        {
+            get => (bool) MDV["IsPayingCustomer"].Value;
+            set => MDV["IsPayingCustomer"].Value = value;
+        }
 
 
         public Account()
@@ -294,6 +300,7 @@ namespace AfterSchoolLibrary.Models
             HasDefaultPaymentMethod = false;
             SignUpTypeId = SignUpType.NotSet;
             ReferralCode = Guid.NewGuid();
+            IsPayingCustomer = false;
         }
 
         public static DatabaseParameters ObjectMap
@@ -342,6 +349,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "ReferralCode", SqlDbType.UniqueIdentifier);
                 _dp.Add(className, "ReferrerAccountId", SqlDbType.Int);
                 _dp.Add(className, "FiscalAccountId", SqlDbType.Int);
+                _dp.Add(className, "IsPayingCustomer", SqlDbType.Bit);
                 return _dp;
             }
         }
@@ -573,6 +581,10 @@ namespace AfterSchoolLibrary.Models
             
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["FiscalAccountId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsPayingCustomer"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
 

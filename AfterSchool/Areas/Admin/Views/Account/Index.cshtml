@@ -94,8 +94,12 @@
                                         @($"{(account.IsActive ? "Deactivate" : "Activate" )}")
                                     </a>
 
-                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn @($"{(account.IsClaimed ? "btn-default" : "btn-info" )}") btn-xs">
-                                        @($"{(!account.IsClaimed ? "Mark as Claimed" : "Mark as UnClaimed")}")
+                                    <a href="@Url.Action("updateaccountclaims", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="hide btn @($"{(account.IsClaimed ? "btn-default" : "btn-info" )}") btn-xs">
+                                        @($"{(!account.IsClaimed ? "Mark Claimed" : "Mark UnClaimed")}")
+                                    </a>
+
+                                    <a href="@Url.Action("updatepayingcustomer", "account", new { id = account.Uid, pn = paging.PageNumber, rpp = paging.RecordsPerPage, search = Request["search"], type = Request["type"] })" class="btn @($"{(account.IsPayingCustomer ? "btn-default" : "btn-info" )}") btn-xs">
+                                        @($"{(!account.IsPayingCustomer ? "Mark as Paying" : "Mark as Not Paying")}")
                                     </a>
                                     
                                     <a href="#" class="btn btn-danger btn-xs md-trigger" data-modal="modal-confirm-account-deletion-@account.Uid">
