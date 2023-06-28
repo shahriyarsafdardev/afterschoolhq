@@ -5,7 +5,7 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var accountTotalForms = ViewBag.AccountTotalForms; 
-    var showFormFields = !(accountTotalForms >= maxFormCount);
+    var showFormFields = true;
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var archived = (bool)ViewBag.Archived;
     var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);       

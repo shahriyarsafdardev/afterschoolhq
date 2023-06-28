@@ -60,7 +60,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             ViewBag.FromSurvey = fromSurvey;
             ViewBag.Archived = archived;
-            ViewBag.AccountTotalForms = currentAccount.GetFormCount(null, formType, q, msgs);
+            ViewBag.AccountTotalForms = currentAccount.GetFormCount( archived, FormType.NotSet, null , msgs);
             return View(forms);
         }
 
