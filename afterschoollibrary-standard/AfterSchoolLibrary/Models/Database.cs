@@ -1316,7 +1316,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230525_UpdateLocationDistanceFromOrigin.Do(amsgs,adc); 
             Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc); 
             Migration_20230525_UpdateLocationLongitude.Do(amsgs,adc);
-            Migration_20230525_UpdateLocationName.Do(amsgs, adc);
+            // Migration_20230525_UpdateLocationName.Do(amsgs, adc);
             Migration_20230620_AddFormQuestionAnswerRidQdtidIndex.Do(amsgs,adc);
             Migration_20230628_SetAccountIsPayingCustomer.Do(amsgs, adc);
         }
