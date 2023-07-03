@@ -980,12 +980,12 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                RegistrationCommon.ResetRegistrationSession();
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
-                var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
                 var registrant = registration.GetRegistrant(msgs);
-                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
+                RegistrationCommon.ResetRegistrationSession();
 
                 dynamic response = new
                 {
@@ -1000,7 +1000,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
                         AmountPaid = registrantActivity?.GetAmountPaid(msgs),
                         ProviderEmail = participationObject.OwnerAccount.Email,
-                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
+                        RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
+                        ApplyMode = participationObject.RegistrationMode.ToString(),
                     }
                 };
 
