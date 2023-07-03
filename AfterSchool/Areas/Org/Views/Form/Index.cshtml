@@ -148,11 +148,21 @@
                                     <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
                                     <td>@isDefaultForm.ToYesNo()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
-                                    <td> 
-                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
-                                            <i class="icon icon-left s7-copy-file"></i> Copy
-                                        </button>
+                                    <td>
+                                        @if (showFormFields)
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
 
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
+                                        
                                         @if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                         {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
