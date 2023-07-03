@@ -77,6 +77,7 @@ namespace AfterSchool.Areas.Api.Models
                 FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
                 QuestionSettings = FormQuestionSettingDto.MapToDtoList(FormQuestionSettings.LoadByQuestionIds(question.ID), question,formType),
                 IsLocked = question.IsLocked,
+                Link = question.Link,
             };
         }
 
