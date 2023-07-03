@@ -14,8 +14,14 @@ function CheckBox({ formik, question }) {
   };
 
   const LinkAndIcon = () => (
-    <a className={classes.linkIcon} href={Link} target="_blank" rel="noreferrer">
-      {'(Click here to view)'}
+    <a
+      data-testid={`${title}-${QuestionDataTypeId}-link`}
+      className={classes.linkIcon}
+      href={Link}
+      target="_blank"
+      rel="noreferrer"
+    >
+      (Click here to view)
       <LinkIcon />
     </a>
   );
