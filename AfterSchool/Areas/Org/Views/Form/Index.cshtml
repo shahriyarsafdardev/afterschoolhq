@@ -5,7 +5,7 @@
     var currentAccount = SessionVariables.CurrentAccount;
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
     var accountTotalForms = ViewBag.AccountTotalForms; 
-    var showFormFields = true;
+    var showFormFields = !(accountTotalForms >= maxFormCount);
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var archived = (bool)ViewBag.Archived;
     var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);       
@@ -148,8 +148,12 @@
                                     <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
                                     <td>@isDefaultForm.ToYesNo()</td>
                                     <td>@form.CreateDate.Value.ToLongDateString()</td>
-                                    <td>
-                                        @if (showFormFields)
+                                    <td> 
+                                        <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
+                                            <i class="icon icon-left s7-copy-file"></i> Copy
+                                        </button>
+
+                                        @if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                         {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
                                             {
@@ -193,9 +197,7 @@
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
-                                                <i class="icon icon-left s7-copy-file"></i> Copy
-                                            </button>
+                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button>
                                         }
                                     </td>
                                 </tr>
