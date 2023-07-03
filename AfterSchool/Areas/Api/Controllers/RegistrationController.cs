@@ -123,7 +123,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         Name = participationObject.Name,
                         Organization = participationObject.OwnerAccount.Name,
-                        IsFree = participationObject.IsFree,
+                        IsFree = !participationObject.ShouldParentPay(),
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
@@ -379,7 +379,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         Name = activity.Name,
                         Organization = activity.AccountName,
-                        IsFree = participationObject.IsFree,
+                        IsFree = !participationObject.ShouldParentPay(),
                         RegistrantType = RegistrantPersonType.Parent.ToString(),
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
@@ -850,7 +850,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     parent2Registrant?.SetProfileAsCompleted(currentUser, msgs);
                 }
 
-                if(participationObject.IsFree)
+                if(!participationObject.ShouldParentPay())
                 {
                     var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
                     var datesToRemove = new List<DateTime>();
@@ -980,9 +980,10 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
+                RegistrationCommon.ResetRegistrationSession();
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
-                var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+                var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
                 var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
                 RegistrationCommon.ResetRegistrationSession();
