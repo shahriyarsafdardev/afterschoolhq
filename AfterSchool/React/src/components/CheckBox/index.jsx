@@ -1,16 +1,24 @@
 import React from 'react';
+import { Link as LinkIcon, Check as CheckIcon } from '@material-ui/icons';
 import { FormControlLabel, Checkbox, Box, FormHelperText } from '@material-ui/core';
-import CheckIcon from '@material-ui/icons/Check';
+
 import useStyles from './styles';
 
 function CheckBox({ formik, question }) {
   const classes = useStyles();
-  const { ID, Text: title, QuestionDataTypeId } = question;
   const { values, setFieldValue, errors, touched } = formik;
+  const { ID, Text: title, QuestionDataTypeId, Link } = question;
 
   const handleCheck = ({ target: { checked } }) => {
     setFieldValue(ID, checked ? 1 : 0);
   };
+
+  const LinkAndIcon = () => (
+    <a className={classes.linkIcon} href={Link} target="_blank" rel="noreferrer">
+      {'(Click here to view)'}
+      <LinkIcon />
+    </a>
+  );
 
   return (
     <Box className={classes.outerWrapper}>
@@ -36,6 +44,8 @@ function CheckBox({ formik, question }) {
             }}
             onChange={handleCheck}
           />
+          &nbsp;
+          {Link && <LinkAndIcon />}
         </div>
         {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
