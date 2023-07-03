@@ -29,6 +29,7 @@ export default function Registration({ newChild = false }) {
     clearMessages,
     activity: {
       IsFree,
+      AllowToPayLater,
       RegistrantType,
       IsAgeRestricted,
       MaxAge,
@@ -186,6 +187,7 @@ export default function Registration({ newChild = false }) {
 
   return (
     <RegistrationForm
+      allowToPayLater={AllowToPayLater}
       loading={loading}
       totalGroups={totalGroups}
       activeGroup={activeGroup}

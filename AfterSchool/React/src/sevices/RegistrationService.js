@@ -129,14 +129,14 @@ export default class RegistrationService {
     if (skipAble) {
       buttonText = 'Skip';
     } else if (lastSection) {
-      if (RegistrantType === 'Parent') {
+      if (['Parent', 'Student', 'Adult'].includes(RegistrantType)) {
         if (IsFree) {
           buttonText = 'Confirm Registration';
         } else {
           buttonText = 'E-Sign and Continue to Payment';
         }
       } else if (RegistrantType === 'Volunteer') {
-        buttonText = 'Complete Registration';
+        buttonText = 'Confirm Registration';
       } else {
         buttonText = 'Confirm';
       }

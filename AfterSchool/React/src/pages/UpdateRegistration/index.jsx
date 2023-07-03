@@ -173,6 +173,8 @@ export default function UpdateRegistration() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  const updatedSaveButton = () => 'E-Sign';
+
   return (
     <RegistrationForm
       loading={loading}
@@ -181,7 +183,7 @@ export default function UpdateRegistration() {
       saveDisabled={saveDisabled}
       currentQuestions={currentQuestions}
       Name={Name}
-      saveButtonText={saveButtonText}
+      saveButtonText={lastSection ? updatedSaveButton : saveButtonText}
       handleSection={handleSection}
       lastSection={lastSection}
       formik={formik}
