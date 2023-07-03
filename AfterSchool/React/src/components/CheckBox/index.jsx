@@ -20,6 +20,12 @@ function CheckBox({ formik, question }) {
     </a>
   );
 
+  const Label = () => (
+    <Box className={classes.label}>
+      {title} &nbsp; {Link && <LinkAndIcon />}
+    </Box>
+  );
+
   return (
     <Box className={classes.outerWrapper}>
       <Box className={classes.innerWrapper}>
@@ -38,14 +44,12 @@ function CheckBox({ formik, question }) {
                 iconstyle={{ fill: 'black' }}
               />
             }
-            label={title}
+            label={<Label />}
             classes={{
               root: classes.formControlLabelRoot
             }}
             onChange={handleCheck}
           />
-          &nbsp;
-          {Link && <LinkAndIcon />}
         </div>
         {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
