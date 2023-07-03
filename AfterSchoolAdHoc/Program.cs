@@ -48,7 +48,8 @@ internal class Program
         // doCSVReportGenerator(dc);
 
         // JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
-
-        FormDataFix.Run(msgs, dc);
+        
+        //FormDataFix.Run(msgs, dc);
+        StudentImportCSV.Run(msgs, dc);
     }
 }
