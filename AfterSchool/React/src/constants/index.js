@@ -28,3 +28,4 @@ export const eSignMsg = allowToPayLater =>
   allowToPayLater
     ? 'Your registration is not finalized until you have selected a payment option.'
     : ' Your registration is not finalized until you complete payment.';
+export const applyModes = { Apply: 'Apply', Register: 'Register' };
