@@ -27,6 +27,11 @@ const useStyles = makeStyles(theme => ({
       }
     }
   },
+  linkIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    color: theme.palette.primary.main
+  },
   checked: {
     padding: 0,
     borderRadius: 3,
