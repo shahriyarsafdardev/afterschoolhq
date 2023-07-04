@@ -1,5 +1,6 @@
 import utils from 'utils';
 import Routes from 'routes';
+import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
@@ -70,6 +71,7 @@ export const useVolunteerRegistrationActions = () => {
     submitFormSection,
     setRegistrationId
   } = VolunteerRegistrationSlice.actions;
+  const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
 
   const loaded = () => dispatch(formDataLoaded());
@@ -81,9 +83,19 @@ export const useVolunteerRegistrationActions = () => {
         if (obj) dispatch(setFormData(obj));
 
         dispatch(setMsgs(msgs));
-        const { RegistrationIsCompleted, CanAccess } = obj?.activityDto;
+        const {
+          Name,
+          CanAccess,
+          Organization,
+          HeaderImageURL,
+          RegistrationIsCompleted
+        } = obj?.activityDto;
 
-        if (CanAccess && !RegistrationIsCompleted && !msgs.length) dispatch(formDataLoaded());
+        if (CanAccess && !RegistrationIsCompleted && !msgs.length) {
+          dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
+          dispatch(headerLoadingCompleted());
+          dispatch(formDataLoaded());
+        }
       }
     );
   };
