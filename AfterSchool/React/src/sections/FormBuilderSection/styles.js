@@ -341,6 +341,15 @@ export default makeStyles(theme => ({
       color: theme.palette.gray.primary
     }
   },
+  optionsComponent: {
+    width: '100%',
+    maxWidth: '100%',
+    opacity: 0,
+    transition: 'all 1s ease-out'
+  },
+  showOptionsComponent: {
+    opacity: 1
+  },
   dialogTitle: {
     background: theme.palette.primary.main,
     color: '#FFFFFF',
