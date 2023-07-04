@@ -78,11 +78,10 @@ export const useUpdateRegistrationActions = () => {
     setFormData,
     formDataLoaded,
     loadingFormData,
-    submitFormSection,
-    setRegistrationId
+    submitFormSection
   } = UpdateRegistrationSlice.actions;
 
-  const { setHeaderData } = HeaderSlice.actions;
+  const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
 
   const loaded = () => dispatch(formDataLoaded());
@@ -93,8 +92,9 @@ export const useUpdateRegistrationActions = () => {
       if (obj) dispatch(setFormData(obj));
 
       if (obj?.activityDto) {
-        const { Name, Organization } = obj?.activityDto;
-        dispatch(setHeaderData({ Name, Organization }));
+        const { HeaderImageURL, Name, Organization } = obj?.activityDto;
+        dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
+        dispatch(headerLoadingCompleted());
       }
       dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());

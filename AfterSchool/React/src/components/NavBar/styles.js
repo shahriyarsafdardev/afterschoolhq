@@ -36,11 +36,13 @@ const useStyles = makeStyles(theme => ({
     marginTop: '30px',
     height: '165px',
     padding: '0px 40px 15px 40px',
-    backgroundImage: `url(${header})`,
+    backgroundImage: props => `url(${props.headerUrl || header})`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
     backgroundSize: 'cover',
     gap: '8px',
     [theme.breakpoints.down('sm')]: {
-      backgroundImage: `url(${headerMobile})`
+      backgroundImage: props => `url(${props.headerUrl || headerMobile})`
     },
     display: 'flex',
     flexDirection: 'column',
