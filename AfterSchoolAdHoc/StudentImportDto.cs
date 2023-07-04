@@ -1,4 +1,5 @@
 ﻿using BasicLibrary;
+using System.Globalization;
 
 namespace AfterSchoolAdHoc;
 
@@ -27,5 +28,10 @@ public class StudentImportDto
             default:
                 return GenderType.NotSet;
         }
+    }
+    public static string GetDate(string date)
+    {
+        var formattedDate = DateTime.Parse(date).ToString("M/d/yyyy", CultureInfo.InvariantCulture);
+        return formattedDate;
     }
 }
