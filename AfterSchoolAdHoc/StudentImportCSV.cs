@@ -10,7 +10,7 @@ internal class StudentImportCSV
 {
     public static void Run(SystemMessages msgs, DatabaseConnection dc)
     {
-        const string sql =
+        string sql =
             @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street, s.Student_zip, r.ID as RegistrantId from Registrant as r 
               inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name";
 
@@ -34,7 +34,10 @@ internal class StudentImportCSV
 
         studentList.ForEach(student =>
             {
-                if (student.RegistrantId.IsNotEmpty())
+                sql = $"select * from StudentRegistrant where RegistrantId = {student.RegistrantId} and StudentId = {student.ID}";
+                var dt = dq.ExecuteSelect(sql, msgs);
+                
+                if (student.RegistrantId.IsNotEmpty() && dt.Rows.Count < 1)
                 {
                     var matchedColumns = $"FirstName: {student.FirstName}, LastName: {student.LastName}";
 
@@ -98,7 +101,7 @@ internal class StudentImportCSV
 
                     var sqlInsert = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns) " +
                                     $"values('{student.RegistrantId}','{student.ID}','{matchedColumns}')";
-                    
+
                     if(answerByDob.IsNotEmpty())
                         msgs.AddRange(dq.ExecuteSql(sqlInsert));
                 }
