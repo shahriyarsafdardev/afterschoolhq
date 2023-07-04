@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -126,6 +126,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
+                        HeaderImageURL = GetHeaderImageURL(participationObject),
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
@@ -393,6 +394,12 @@ namespace AfterSchool.Areas.Api.Controllers
                 RegistrantPersonType.Volunteer => AudienceType.Volunteer,
                 _ => AudienceType.NotSet,
             };
+        }
+        private static string GetHeaderImageURL(ParticipationObject participationObject)
+        {
+            var msgs = new SystemMessages();
+            var accountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            return accountProfile.GetHeaderImageUrl(msgs);
         }
     }
 }
