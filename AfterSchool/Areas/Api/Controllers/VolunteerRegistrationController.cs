@@ -107,7 +107,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsGenderRestricted = participationObject.IsGenderEnforced,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        HeaderImageURL = GetHeaderImageURL(participationObject),
                     }
                 };
                 
@@ -352,7 +353,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         ProviderEmail = participationObject.OwnerAccount.Email,
-                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
+                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString(),
+                        HeaderImageURL = GetHeaderImageURL(participationObject),
                     }
                 };
                 return Json(
@@ -589,5 +591,11 @@ namespace AfterSchool.Areas.Api.Controllers
             return formQuestionDtoList;
         }
         
+        private static string GetHeaderImageURL(ParticipationObject participationObject)
+        {
+            var msgs = new SystemMessages();
+            var accountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            return accountProfile.GetHeaderImageUrl(msgs);
+        }
     }
 }

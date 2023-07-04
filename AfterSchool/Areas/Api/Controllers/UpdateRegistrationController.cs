@@ -126,6 +126,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
+                        HeaderImageURL = GetHeaderImageURL(participationObject),
                     },
                 };
                 
@@ -389,6 +390,12 @@ namespace AfterSchool.Areas.Api.Controllers
                 RegistrantPersonType.Volunteer => AudienceType.Volunteer,
                 _ => AudienceType.NotSet,
             };
+        }
+        private static string GetHeaderImageURL(ParticipationObject participationObject)
+        {
+            var msgs = new SystemMessages();
+            var accountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            return accountProfile.GetHeaderImageUrl(msgs);
         }
     }
 }
