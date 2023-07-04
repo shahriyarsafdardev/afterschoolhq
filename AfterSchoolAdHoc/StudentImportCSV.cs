@@ -99,6 +99,8 @@ internal class StudentImportCSV
                     if (answerByAddress.IsNotEmpty())
                         matchedColumns = string.Concat(matchedColumns, $", Address: {student.Address}");
 
+                    matchedColumns = matchedColumns.Replace("'","''"); // for avoiding single quotes in matchedColumns during insertion
+                    
                     var sqlInsert = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns) " +
                                     $"values('{student.RegistrantId}','{student.ID}','{matchedColumns}')";
 
