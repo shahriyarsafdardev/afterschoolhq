@@ -50,6 +50,10 @@ function Router() {
         {
           path: 'reactapp/reg/setup/:registrationUid',
           element: <PostRegistrationSetup />
+        },
+        {
+          path: 'reactapp/select-registrant',
+          element: <SelectRegistrant />
         }
       ]
     },
@@ -125,11 +129,12 @@ const RedirectToExternal = () => {
 const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
-const PostRegistrationSetup = Loadable(lazy(() => import('pages/PostRegistrationSetup')));
+const SelectRegistrant = Loadable(lazy(() => import('pages/SelectRegistrant')));
 const UpdateRegistration = Loadable(lazy(() => import('pages/UpdateRegistration')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
+const PostRegistrationSetup = Loadable(lazy(() => import('pages/PostRegistrationSetup')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ManageCheckInOutAccess = Loadable(lazy(() => import('sections/ManageCheckInOutAccess')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
