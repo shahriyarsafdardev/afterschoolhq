@@ -3,6 +3,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Collections;
 using System.Data;
+using AfterSchoolLibrary.Services;
 
 namespace AfterSchoolAdHoc;
 
@@ -10,14 +11,8 @@ internal class StudentImportCSV
 {
     public static void Run(SystemMessages msgs, DatabaseConnection dc)
     {
-        string sql =
-            @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street, s.Student_zip, r.ID as RegistrantId from Registrant as r 
-              inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name";
-
-        var dq = new DatabaseQuery();
-        dq.Connection = dc;
-        var dt = dq.ExecuteSelect(sql, msgs);
-
+        var dt = RegistrantService.GetAllStudents(msgs,dc);
+        
         var studentList = (from DataRow row in dt.Rows
             select new StudentImportDto
             {
@@ -34,10 +29,8 @@ internal class StudentImportCSV
 
         studentList.ForEach(student =>
             {
-                sql = $"select * from StudentRegistrant where RegistrantId = {student.RegistrantId} and StudentId = {student.ID}";
-                var dt = dq.ExecuteSelect(sql, msgs);
-                
-                if (student.RegistrantId.IsNotEmpty() && dt.Rows.Count < 1)
+                var recordExist = RegistrantService.CheckStudentRegistrant(student.RegistrantId, student.ID, msgs, dc);
+                if (student.RegistrantId.IsNotEmpty() && !recordExist)
                 {
                     var matchedColumns = $"FirstName: {student.FirstName}, LastName: {student.LastName}";
 
@@ -100,12 +93,9 @@ internal class StudentImportCSV
                         matchedColumns = string.Concat(matchedColumns, $", Address: {student.Address}");
 
                     matchedColumns = matchedColumns.Replace("'","''"); // for avoiding single quotes in matchedColumns during insertion
-                    
-                    var sqlInsert = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns) " +
-                                    $"values('{student.RegistrantId}','{student.ID}','{matchedColumns}')";
 
                     if(answerByDob.IsNotEmpty())
-                        msgs.AddRange(dq.ExecuteSql(sqlInsert));
+                        RegistrantService.SaveMatchedStudentRegistrant(student.RegistrantId, student.ID, matchedColumns, msgs, dc);
                 }
             }
         );

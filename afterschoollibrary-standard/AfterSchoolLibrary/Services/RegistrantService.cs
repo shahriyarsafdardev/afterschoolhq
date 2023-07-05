@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -1935,6 +1936,33 @@ namespace AfterSchoolLibrary.Services
                 registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
                 msgs.AddRange(registrant.Save(dc));
             }
+        }
+        
+        public static DataTable GetAllStudents(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            string sql =
+                @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street, s.Student_zip, r.ID as RegistrantId from Registrant as r 
+              inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name and r.AccountId in 
+              (select ac.Id from Account ac inner join AccountRelationship ar on ac.Id = ar.VisitorAccountId where ar.HostAccountId = 84)";
+            var dq = new DatabaseQuery();
+            dq.Connection = dc;
+            return dq.ExecuteSelect(sql, msgs);
+        }
+        public static bool CheckStudentRegistrant(int registrantId, int studentId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            string sql = $"select * from StudentRegistrant where RegistrantId = {registrantId} and StudentId = {studentId}";
+            var dq = new DatabaseQuery();
+            dq.Connection = dc;
+            var dt = dq.ExecuteSelect(sql, msgs);
+            return dt.Rows.Count > 1;
+        }
+        public static void SaveMatchedStudentRegistrant(int registrantId, int studentId, string matchedColumns, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var sql = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns) " +
+                            $"values('{registrantId}','{studentId}','{matchedColumns}')";
+            var dq = new DatabaseQuery();
+            dq.Connection = dc;
+            msgs.AddRange(dq.ExecuteSql(sql));
         }
     }
 }
