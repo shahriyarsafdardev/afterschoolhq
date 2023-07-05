@@ -16,10 +16,9 @@ jobs:
     steps:
       - checkout: self
         clean: true
-      - task: NodeTool@0
+      - task: UseNode@1
         inputs:
-          versionSource: 'spec'
-          versionSpec: '16.0'
+          version: '16.0.0'
       - script: |
           cd AfterSchool/React
           echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
@@ -65,9 +64,9 @@ jobs:
         inputs:
           testAssemblyVer2: >-
             **\*.Tests.dll
-            
+
             !**\*TestAdapter.dll
-            
+
             !**\obj\**
           codeCoverageEnabled: false
           publishRunAttachments: false
@@ -76,4 +75,3 @@ jobs:
         inputs:
           path: $(Pipeline.Workspace)\publish
           artifactName: AfterSchoolHQ-Pipeline-Artifact
-      
