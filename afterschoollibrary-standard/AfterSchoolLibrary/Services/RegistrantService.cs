@@ -1954,7 +1954,7 @@ namespace AfterSchoolLibrary.Services
             var dq = new DatabaseQuery();
             dq.Connection = dc;
             var dt = dq.ExecuteSelect(sql, msgs);
-            return dt.Rows.Count > 1;
+            return dt.Rows.Count > 0;
         }
         public static void SaveMatchedStudentRegistrant(int registrantId, int studentId, string matchedColumns, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
