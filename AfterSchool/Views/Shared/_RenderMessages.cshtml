@@ -8,7 +8,7 @@
     {
         Model.Add("An error has occurred", MessageType.UserError);
         // Logging errors to Rollbar
-        AfterSchoolLibrary.Helpers.Utilities.FilteredErrorLog(Model);
+        AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(Model);
     }
 
     foreach (SystemMessage msg in Model.GetByMessageType(MessageType.UserError))
