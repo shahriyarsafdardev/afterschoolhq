@@ -1,7 +1,6 @@
 variables:
-  - name: BuildParameters.solution
-    value: AfterSchoolHQ - Darye.sln
-  npm_config_cache: $(Pipeline.Workspace)/.npm
+  BuildParameters.solution: 'AfterSchoolHQ - Darye.sln'
+  npm_config_cache: '$(Pipeline.Workspace)/.npm'
 trigger: none
 pr: none # Disable triggering a build on every pull request.
 resources:
