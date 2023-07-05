@@ -1,6 +1,6 @@
 variables:
-  - name: BuildParameters.solution
-    value: AfterSchoolHQ - Darye.sln
+  BuildParameters.solution: 'AfterSchoolHQ - Darye.sln'
+  npm_config_cache: '$(Pipeline.Workspace)/.npm'
 trigger:
   branches:
     include:
@@ -19,10 +19,9 @@ jobs:
     steps:
       - checkout: self
         clean: true
-      - task: NodeTool@0
+      - task: UseNode@1
         inputs:
-          versionSource: 'spec'
-          versionSpec: '16.0'
+          version: '16.0.0'
       - script: |
           cd AfterSchool/React
           echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
@@ -30,10 +29,17 @@ jobs:
           echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
           echo GTM_ID=$(GTM_ID) >> .env
         displayName: "Set environment variables"
-      - task: Npm@1
+      - task: Cache@2
         inputs:
-          command: 'install'
-          workingDir: 'AfterSchool/React'
+          key: 'npm | "$(Agent.OS)" | AfterSchool/React/package-lock.json'
+          restoreKeys: |
+            npm | "$(Agent.OS)"
+          path: $(npm_config_cache)
+        displayName: Cache npm
+      - script: |
+          cd AfterSchool/React
+          npm ci
+        displayName: 'NPM Install Packages'
       - task: Npm@1
         inputs:
           command: 'custom'
@@ -68,9 +74,9 @@ jobs:
         inputs:
           testAssemblyVer2: >-
             **\*.Tests.dll
-            
+
             !**\*TestAdapter.dll
-            
+
             !**\obj\**
           codeCoverageEnabled: false
           publishRunAttachments: false
