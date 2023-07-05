@@ -1,6 +1,7 @@
 variables:
   - name: BuildParameters.solution
     value: AfterSchoolHQ - Darye.sln
+  npm_config_cache: $(Pipeline.Workspace)/.npm
 trigger: none
 pr: none # Disable triggering a build on every pull request.
 resources:
@@ -26,10 +27,17 @@ jobs:
           echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
           echo GTM_ID=$(GTM_ID) >> .env
         displayName: 'Set environment variables'
-      - task: Npm@1
+      - task: Cache@2
         inputs:
-          command: 'install'
-          workingDir: 'AfterSchool/React'
+          key: 'npm | "$(Agent.OS)" | AfterSchool/React/package-lock.json'
+          restoreKeys: |
+            npm | "$(Agent.OS)"
+          path: $(npm_config_cache)
+        displayName: Cache npm
+      - script: |
+          cd AfterSchool/React
+          npm ci
+        displayName: 'NPM Install Packages'
       - task: Npm@1
         inputs:
           command: 'custom'
