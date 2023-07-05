@@ -7,6 +7,8 @@ function CheckBoxLink({
   ID,
   Link,
   index,
+  errors,
+  touched,
   question,
   IsLocked,
   setQuestion,
@@ -23,13 +25,15 @@ function CheckBoxLink({
           size="small"
           fullWidth
           key={`linkOfQuestion-${ID}-${index}-${QuestionDataTypeId}`}
-          placeholder="Link (Optional)"
+          placeholder="Add Link (Optional)"
           value={Link || ''}
           onChange={event => {
             setQuestion({ ...question, Link: event.target.value });
           }}
           disabled={!customQuestion || IsLocked}
           data-testid={`linkOfQuestion-${ID}-${index}`}
+          helperText={touched?.Link && errors?.Link ? errors?.Link.substr(2) : ''}
+          error={touched?.Link && errors?.Link}
         />
       </Grid>
     </Grid>

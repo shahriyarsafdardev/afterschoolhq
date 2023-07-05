@@ -11,6 +11,7 @@ const formValidationSchema = values => {
       acc[key] = Yup.object().shape({
         QuestionTypeId: Yup.number(),
         DisplayOrder: Yup.number(),
+        Link: Yup.string().url(),
         Text: Yup.string().when(['QuestionTypeId'], {
           is: val => val !== textBlock,
           then: () =>
