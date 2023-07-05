@@ -18,6 +18,7 @@
 
 @{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
 
+@{ Html.RenderPartial("~/Views/Shared/Registration/_RegistrationHeader.cshtml", new RegistrationHeaderViewModel(account, (AccountProfile) ViewBag.AccountProfile)); }
 <div>
     <div class="col-md-6 col-md-offset-3 text-center">
         <div class="panel">
