@@ -768,7 +768,7 @@ namespace AfterSchoolLibrary.Models
                         if (searchTextWhere.IsNotBlank())
                             searchTextWhere += " or ";
 
-                        searchTextWhere += $"[Text] like '%{item.Replace("\'", "\\\'")}%'";
+                        searchTextWhere += $"[Text] like '%{item.Replace("\'", "\'\'")}%'";
                     }
                 });
 
