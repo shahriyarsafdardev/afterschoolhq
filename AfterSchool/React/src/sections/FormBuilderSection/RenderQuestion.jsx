@@ -99,6 +99,10 @@ const RenderQuestion = ({
     return questionHasOptions(key) ? { Options: options } : { Options: undefined };
   };
 
+  const getLink = (qTypeId = QuestionTypeId) => {
+    return { Link: qTypeId !== checkBox ? null : Link };
+  };
+
   const handleDeleteSection = async () => {
     await handleDelete(deleteSectionId);
     handleCloseDialog();
@@ -160,7 +164,12 @@ const RenderQuestion = ({
             <DropDown
               question={{ ...question, ...{ options: questionTypesOptions } }}
               setFieldValue={key =>
-                setQuestion({ ...question, QuestionTypeId: key, ...getOptions(key) })
+                setQuestion({
+                  ...question,
+                  QuestionTypeId: key,
+                  ...getOptions(key),
+                  ...getLink()
+                })
               }
               disabled={!customQuestion || IsLocked}
               dataTestId={`questionTypeDropDown-${ID}-${index}`}
@@ -243,6 +252,8 @@ const RenderQuestion = ({
             ID={ID}
             Link={Link}
             index={index}
+            errors={errors}
+            touched={touched}
             question={question}
             IsLocked={IsLocked}
             setQuestion={setQuestion}
