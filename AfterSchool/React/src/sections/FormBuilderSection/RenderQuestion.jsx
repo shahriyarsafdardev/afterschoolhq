@@ -66,7 +66,8 @@ const RenderQuestion = ({
   const maxLimit = getMaxLimit(QuestionTypeId);
   const questionHasOptions = (qTypeId = QuestionTypeId) =>
     [dropdown, radioList, checkBoxList].includes(qTypeId);
-  const showOptions = questionHasOptions() && showOptionsList;
+  const showOptions =
+    (questionHasOptions() && showOptionsList) || Boolean(touched?.Options && errors?.Options);
   const [options, setOptions] = useState(cloneDeep(Options) || []);
   const customQuestion = QuestionDataTypeId === 0;
 
