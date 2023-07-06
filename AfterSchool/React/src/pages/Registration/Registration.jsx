@@ -8,6 +8,7 @@ import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
+import { applyModes } from 'constants';
 
 export default function Registration({ newChild = false }) {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function Registration({ newChild = false }) {
       IsAgeRestricted,
       MaxAge,
       MinAge,
+      ApplyMode,
       IsGradeRestricted,
       MaxGrade,
       MinGrade,
@@ -90,7 +92,11 @@ export default function Registration({ newChild = false }) {
 
   const handleRedirection = () => {
     if (IsFree) navigate(thankyouUrl(registrationId));
-    else redirect(paymentScreenPath(registrationId));
+    else {
+      ApplyMode === applyModes.Apply
+        ? navigate(thankyouUrl(registrationId))
+        : redirect(paymentScreenPath(registrationId));
+    }
   };
 
   const gradeRestrictions = {

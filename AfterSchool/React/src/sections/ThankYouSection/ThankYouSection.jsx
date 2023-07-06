@@ -10,6 +10,7 @@ import { Loader } from 'components';
 import { useThankYou } from 'redux/hooks';
 import ShareButton from 'components/ShareButton';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
+import { applyModes } from 'constants';
 
 function ThankYouSection({ volunteerRegistration = false }) {
   const classes = useStyles();
@@ -19,6 +20,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const [copySuccess, setCopySuccess] = useState('Copy URL');
+  const { Register, Apply } = applyModes;
   const {
     loading,
     data: {
@@ -27,7 +29,8 @@ function ThankYouSection({ volunteerRegistration = false }) {
       ActivityName,
       RegistrantFirstName,
       FindAnotherActivityUrl,
-      RegisterForNewChildUrl
+      RegisterForNewChildUrl,
+      ApplyMode = 'Register'
     },
     loadThankYouScreenData
   } = useThankYou();
@@ -80,7 +83,8 @@ function ThankYouSection({ volunteerRegistration = false }) {
       </Typography>
     ) : (
       <Typography variant="body1">
-        <b>{RegistrantFirstName}</b> has been registered for <b>{ActivityName}</b>
+        <b>{RegistrantFirstName}</b> has {ApplyMode === Apply ? 'Applied' : 'been registered'} for{' '}
+        <b>{ActivityName}</b>
       </Typography>
     );
 
@@ -133,7 +137,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
             variant="body1"
             data-testid={'Register for New Child'}
           >
-            Register for New Child
+            {ApplyMode === Apply ? Apply : Register} for New Child
           </Link>
         )}
       </Box>
