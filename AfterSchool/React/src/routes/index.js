@@ -48,6 +48,7 @@ export default {
   //Paths & URLs
   paymentScreenPath: uId => `/account/payment/${uId}`,
   thankyouScreenPath: uId => `/account/thankyou/${uId}`,
+  makePaymentScreenPath: uId => `/account/makepayment/${uId}`,
 
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,

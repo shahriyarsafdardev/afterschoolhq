@@ -9,10 +9,10 @@ import { Loader } from 'components';
 import { useThankYou } from 'redux/hooks';
 
 function AlreadyPaidSection() {
+  const { redirect } = utils;
   const classes = useStyles();
-  const { navigateTo } = utils;
-  const { paymentScreenPath, accountUrl } = apiRoutes;
   const { registrationId } = useParams();
+  const { makePaymentScreenPath, accountUrl } = apiRoutes;
 
   const {
     loading,
@@ -26,13 +26,16 @@ function AlreadyPaidSection() {
 
   if (loading) return <Loader />;
 
+  const redirectToPayment = () => redirect(makePaymentScreenPath(registrationId));
+
   return (
     <Box className={classes.wrapper}>
       <Box className={classes.paymentWrapper}>
         <Typography variant="h4">Payment Already Submitted</Typography>
         <Typography variant="h6" className={classes.fontWeight500}>
           You have already paid <b>${AmountPaid}</b> to <b>{Organization}</b> for{' '}
-          <b>{ActivityName}</b> and have a current status of <b>{RegistrationStatus}</b>.
+          <b>{ActivityName}</b> and have a current status of <b>{RegistrationStatus}</b>. Are you
+          sure you want to continue to payment?
         </Typography>
         <Typography variant="h6" className={classes.fontWeight500}>
           If you have any questions or believe this is an error, please contact the provider.
@@ -53,12 +56,20 @@ function AlreadyPaidSection() {
             className={classes.viewAccountButton}
             variant="contained"
             type="submit"
-            onClick={() => navigateTo(accountUrl)}
-            data-testid={'Return to Account'}
+            onClick={redirectToPayment}
+            data-testid={'Continue to Payment'}
           >
-            Return to Account
+            Continue to Payment
           </Button>
         </Box>
+        <Link
+          href={accountUrl}
+          className={classes.link}
+          variant="body1"
+          data-testid={'Return to Account'}
+        >
+          Return to Account
+        </Link>
       </Box>
     </Box>
   );
