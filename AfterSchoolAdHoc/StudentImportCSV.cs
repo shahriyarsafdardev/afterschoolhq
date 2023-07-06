@@ -79,10 +79,6 @@ internal class StudentImportCSV
                         dc: dc
                     ).FirstOrDefault();
 
-                    if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() && 
-                        student.DOB == registrantByDateOfBirth.Text.ToDateTime())
-                        matchedColumns = string.Concat(matchedColumns, $", Date of Birth: {student.DOB}");
-
                     if (registrantByGender.IsNotEmpty())
                         matchedColumns = string.Concat(matchedColumns, $", Gender: {(GenderType) student.Gender}");
 
@@ -94,9 +90,12 @@ internal class StudentImportCSV
 
                     matchedColumns = matchedColumns.Replace("'","''"); // for avoiding single quotes in matchedColumns during insertion
 
-                    if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() && 
+                    if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() &&
                         student.DOB == registrantByDateOfBirth.Text.ToDateTime())
+                    {
+                        matchedColumns = string.Concat(matchedColumns, $", Date of Birth: {student.DOB}");
                         RegistrantService.SaveMatchedStudentRegistrant(student.RegistrantId, student.ID, matchedColumns, msgs, dc);
+                    }
                 }
             }
         );

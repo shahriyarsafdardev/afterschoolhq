@@ -1942,8 +1942,8 @@ namespace AfterSchoolLibrary.Services
         {
             string sql =
                 @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street, s.Student_zip, r.ID as RegistrantId from Registrant as r 
-              inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name and r.AccountId in 
-              (select ac.Id from Account ac inner join AccountRelationship ar on ac.Id = ar.VisitorAccountId where ar.HostAccountId = 84)";
+                  inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name and r.AccountId in 
+                  (select VisitorAccountId from AccountRelationship where hostaccountid = 84)";
             var dq = new DatabaseQuery();
             dq.Connection = dc;
             return dq.ExecuteSelect(sql, msgs);
