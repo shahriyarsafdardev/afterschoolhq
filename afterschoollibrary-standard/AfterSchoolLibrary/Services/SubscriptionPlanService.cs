@@ -600,21 +600,15 @@ namespace AfterSchoolLibrary.Services
         public static DateTime? CalculateEndDateFromNumberOfPeriods(this SubscriptionPlan plan, DateTime chargeDate, int numberOfPeriods)
         {
             // end the subscription exactly x periods after activity start date (if it needs to end)
-            switch (plan.BillingPeriodTypeId)
+            return plan.BillingPeriodTypeId switch
             {
-                case BillingPeriodType.Month:
-                    return chargeDate.AddMonths(numberOfPeriods);
-                case BillingPeriodType.Week:
-                    return chargeDate.AddWeeks(numberOfPeriods);
-                case BillingPeriodType.TwoWeeks:
-                    return chargeDate.AddBiWeeks(numberOfPeriods);
-                case BillingPeriodType.Day:
-                    return chargeDate.AddDays(numberOfPeriods);
-                case BillingPeriodType.Year:
-                    return chargeDate.AddYears(numberOfPeriods);
-            }
-
-            return null;
+                BillingPeriodType.Month => chargeDate.AddMonths(numberOfPeriods),
+                BillingPeriodType.Week => chargeDate.AddWeeks(numberOfPeriods),
+                BillingPeriodType.TwoWeeks => chargeDate.AddBiWeeks(numberOfPeriods),
+                BillingPeriodType.Day => chargeDate.AddDays(numberOfPeriods),
+                BillingPeriodType.Year => chargeDate.AddYears(numberOfPeriods),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
         }
 
         public static DateTime? GetPlanEndDateForRegistrantSubscriptionUtc(this SubscriptionPlan plan, DateTime startDateTime,

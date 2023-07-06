@@ -126,9 +126,8 @@ namespace AfterSchoolLibrary.Helpers
                 nextChargeDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));               
                 var lengthOfSubscriptionFromToday = plan.NumberOfPeriodsForSubscription(checkoutDateProviderTimeZone, lastActivityDateProviderTimeZone);
 
-                if (nextChargeDate.HasValue)
-                    if (plan.EndDate.HasValue)
-                        EndDate = plan.EndDate ?? plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday);
+                EndDate = billingAccount.ConvertFromAccountTimeZone((DateTime) (plan.EndDate ?? plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday)));
+                        
 
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date
