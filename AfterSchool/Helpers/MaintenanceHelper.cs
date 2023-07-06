@@ -35,7 +35,7 @@ namespace AfterSchool.Helpers
                         hours = $"{duration.Hours} hour";
                 }
                 else
-                    hours = $"{duration.TotalMinutes} minutes";
+                    hours = $"{duration.Minutes} minutes";
 
                 if (DateTime.UtcNow <= upcomingMaintenance.StartTime)
                 {
