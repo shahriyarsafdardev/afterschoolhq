@@ -31,7 +31,7 @@ public class StudentImportDto
     }
     public static string GetDate(string date)
     {
-        var formattedDate = DateTime.Parse(date).ToString("M/d/yyyy", CultureInfo.InvariantCulture);
+        var formattedDate = DateTime.Parse(date).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
         return formattedDate;
     }
 }
