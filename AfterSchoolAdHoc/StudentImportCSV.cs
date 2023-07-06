@@ -20,7 +20,7 @@ internal class StudentImportCSV
                 FirstName = row["first_name"].ToString(),
                 LastName = row["last_name"].ToString(),
                 Email = row["email"].ToString(),
-                DOB = StudentImportDto.GetDate(row["DOB"].ToString()),
+                DOB = row["DOB"].ToString().ToDateTime(),
                 Gender = (int) StudentImportDto.GetGenderType(row["Gender"].ToString().ToLower()),
                 Address = row["Student_street"].ToString(),
                 ZipCode = row["Student_zip"].ToString(),
@@ -34,13 +34,12 @@ internal class StudentImportCSV
                 {
                     var matchedColumns = $"FirstName: {student.FirstName}, LastName: {student.LastName}";
 
-                    var answerByDob = FormQuestionAnswer.Load(
+                    var registrantByDateOfBirth = FormQuestionAnswer.Load(
                         new Hashtable()
                         {
                             {"RegistrantId", student.RegistrantId},
                             {"QuestionText", "Date of Birth"},
                             {"QuestionDataTypeId", (int) QuestionDataType.RegistrantDateOfBirth},
-                            {"Text", student.DOB},
                         },
                         msgs: msgs,
                         dc: dc
@@ -56,7 +55,7 @@ internal class StudentImportCSV
                         dc: dc
                     ).FirstOrDefault();
 
-                    var answerByPostalCode = FormQuestionAnswer.Load(
+                    var registrantByPostalCode = FormQuestionAnswer.Load(
                         new Hashtable()
                         {
                             {"RegistrantId", student.RegistrantId},
@@ -68,7 +67,7 @@ internal class StudentImportCSV
                         dc: dc
                     ).FirstOrDefault();
 
-                    var answerByAddress = FormQuestionAnswer.Load(
+                    var registrantByAddress = FormQuestionAnswer.Load(
                         new Hashtable()
                         {
                             {"RegistrantId", student.RegistrantId},
@@ -80,21 +79,23 @@ internal class StudentImportCSV
                         dc: dc
                     ).FirstOrDefault();
 
-                    if (answerByDob.IsNotEmpty())
+                    if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() && 
+                        student.DOB == registrantByDateOfBirth.Text.ToDateTime())
                         matchedColumns = string.Concat(matchedColumns, $", Date of Birth: {student.DOB}");
 
                     if (registrantByGender.IsNotEmpty())
                         matchedColumns = string.Concat(matchedColumns, $", Gender: {(GenderType) student.Gender}");
 
-                    if (answerByPostalCode.IsNotEmpty())
+                    if (registrantByPostalCode.IsNotEmpty())
                         matchedColumns = string.Concat(matchedColumns, $", ZipCode: {student.ZipCode}");
 
-                    if (answerByAddress.IsNotEmpty())
+                    if (registrantByAddress.IsNotEmpty())
                         matchedColumns = string.Concat(matchedColumns, $", Address: {student.Address}");
 
                     matchedColumns = matchedColumns.Replace("'","''"); // for avoiding single quotes in matchedColumns during insertion
 
-                    if(answerByDob.IsNotEmpty())
+                    if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() && 
+                        student.DOB == registrantByDateOfBirth.Text.ToDateTime())
                         RegistrantService.SaveMatchedStudentRegistrant(student.RegistrantId, student.ID, matchedColumns, msgs, dc);
                 }
             }

@@ -9,7 +9,7 @@ public class StudentImportDto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
-    public string DOB { get; set; }
+    public DateTime DOB { get; set; }
     public int Gender { get; set; }
     public string Address{ get; set; }
     public string ZipCode{ get; set; }
@@ -28,10 +28,5 @@ public class StudentImportDto
             default:
                 return GenderType.NotSet;
         }
-    }
-    public static string GetDate(string date)
-    {
-        var formattedDate = DateTime.Parse(date).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
-        return formattedDate;
     }
 }
