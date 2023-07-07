@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Controllers;
+using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
@@ -143,6 +144,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                     }
                 };
 
@@ -397,6 +399,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                     }
                 };
 
@@ -986,7 +989,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
                 var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
-                RegistrationCommon.ResetRegistrationSession();
 
                 dynamic response = new
                 {
@@ -1003,6 +1005,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         ProviderEmail = participationObject.OwnerAccount.Email,
                         RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                     }
                 };
 
