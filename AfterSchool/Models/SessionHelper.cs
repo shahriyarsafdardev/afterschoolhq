@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -72,6 +72,12 @@ namespace AfterSchool.Models
             SessionVariables.CurrentUser = user;
 
             return user;
+        }
+
+        public static string GetMaintenanceBarMessage(SystemMessages msgs = null)
+        {
+            var message = (string) HttpContext.Current.Session["MaintenanceBarMessage"];
+            return message;
         }
 
         public static WebUser GetOriginalLoggedInUser(SystemMessages msgs = null, DatabaseConnection dc = null)

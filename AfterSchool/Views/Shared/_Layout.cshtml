@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -26,20 +26,21 @@
 
 </head>
 <body class="am-box-layout">
-@{ Html.RenderPartial("~/Views/Shared/_GoogleTagManagerNoScript.cshtml"); }
-<div class="am-wrapper am-nosidebar-left am-box-layout">
-    <!-- top navbar-->
-    @Html.Partial("_TopNavbar")
-    <!-- Main section-->
-    <div class="am-content">
-        @RenderBody()
-    </div>
-    @*
-            @Html.Partial("_RightSideBar")
+    @{ Html.RenderPartial("~/Views/Shared/_GoogleTagManagerNoScript.cshtml"); }
+    <div class="am-wrapper am-nosidebar-left am-box-layout">
+        @Html.Partial("_Scheduled_Downtime")
+        <!-- top navbar-->
+        @Html.Partial("_TopNavbar")
+        <!-- Main section-->
+        <div class="am-content">
+            @RenderBody()
+        </div>
+        @*
+        @Html.Partial("_RightSideBar")
         *@
-</div>
+    </div>
 
-@{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
-@RenderSection("scripts", false)
+    @{ Html.RenderPartial("~/Views/Shared/_JavascriptIncludes.cshtml"); }
+    @RenderSection("scripts", false)
 </body>
 </html>

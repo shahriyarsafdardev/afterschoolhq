@@ -1,9 +1,14 @@
-﻿using AfterSchool.Models;
+using AfterSchool.Models;
+using AfterSchoolLibrary.Models;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using Newtonsoft.Json;
+using System.Web;
+using System;
+using System.Linq;
+using AfterSchool.Helpers;
 
 namespace AfterSchool
 {
@@ -29,6 +34,16 @@ namespace AfterSchool
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             
+        }
+
+        protected void Application_BeginRequest()
+        {
+            MaintenanceHelper.RedirectToMaintenance();
+        }
+
+        protected void Application_PostAcquireRequestState()
+        {
+            MaintenanceHelper.DisplayMaintenanceSchedule();
         }
     }
 }

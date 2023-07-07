@@ -1,4 +1,4 @@
-﻿using System.Web;
+using System.Web;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 
@@ -33,6 +33,21 @@ namespace AfterSchool.Models
                     SessionHelper.AddToSession("LoggedInUser", value.ID.Value.ToString());
                 else
                     SessionHelper.RemoveFromSession("LoggedInUser");
+            }
+        }
+
+        public static string MaintenanceMessage
+        {
+            get
+            {
+                return SessionHelper.GetMaintenanceBarMessage();
+            }
+            set
+            {
+                if (value.IsNotEmpty())
+                    SessionHelper.AddToSession("MaintenanceBarMessage", value.ToString());
+                else
+                    SessionHelper.RemoveFromSession("MaintenanceBarMessage");
             }
         }
 

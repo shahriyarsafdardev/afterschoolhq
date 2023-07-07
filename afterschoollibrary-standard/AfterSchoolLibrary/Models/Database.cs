@@ -103,8 +103,8 @@ namespace AfterSchoolLibrary.Models
             VolunteerApproval.Create(dc);
             VolunteerTask.Create(dc);
             MultipartAuth.Create(dc);
+            Maintenance.Create(dc);
             FormQuestionSettings.Create(dc);
-
 
             return msgs;
         }
@@ -200,6 +200,7 @@ namespace AfterSchoolLibrary.Models
             VolunteerApproval.Alter(dc);
             VolunteerTask.Alter(dc);
             MultipartAuth.Alter(dc);
+            Maintenance.Alter(dc);
             FormQuestionSettings.Alter(dc);
 
             return msgs;
