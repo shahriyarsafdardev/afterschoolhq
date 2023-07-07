@@ -213,6 +213,13 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
                 stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
+                
+                // Temporary Addition
+                stripeMetaData.Add("End Long Date Time String", proratingCalculation.GetEndDate().ToLongDateTimeString());
+                stripeMetaData.Add("UTC Time Now", DateTime.UtcNow.ToLongDateTimeString());
+                stripeMetaData.Add("Local Time Now", DateTime.Now.ToLongDateTimeString());
+
+
 
                 startDateTime = proratingCalculation.GetStartDate();
                 endDateTime = proratingCalculation.GetEndDate();
