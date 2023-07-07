@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var forms = (List<Form>)ViewBag.Forms;
@@ -37,7 +37,7 @@
                 <div style="clear:both"></div>
                 <div class="row margin-t-30">
                     <div class="col-md-6">
-                        <select name="formId" id="formId" class="form-control newDropDown newInput" required>
+                        <select name="formId" id="formId" class="form-control formtype-select" required>
                             @if (forms.Count(a => a.FormTypeId == FormType.Survey) == 0)
                             {
                                 <option value=""  disabled selected>--No Survey Form, Create one----</option>
@@ -60,19 +60,19 @@
 
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6  ">
-                        <input type="text" class="form-control newInput name" name="name" placeholder="Add Title" required />
+                        <input type="text" class="form-control name" name="name" placeholder="Add Title" required />
                     </div>
                 </div>
                 <div class="row margin-t-10">
                     <div class="col-lg-6 col-md-6 ">
-                        <input type="text" class="form-control newInput" id="dueDate" name="dueDate" value="" placeholder="Due Date (Optional)" autocomplete="off" />
+                        <input type="text" class="form-control" id="dueDate" name="dueDate" value="" placeholder="Due Date (Optional)" autocomplete="off" />
                     </div>
                 </div>
                 <div style="clear:both"></div>
 
-                <div class="row margin-t-30">
+                <div class="row margin-t-30 hide">
                     <div class="col-lg-6">
-                        <input id="isAllowMultiple" name="isAllowMultiple" type="checkbox" class="newCheckbox" value="true" />
+                        <input id="isAllowMultiple" name="isAllowMultiple" type="checkbox" class="newCheckbox" value="false" />
                         <input type="hidden" value="false" name="isAllowMultiple" />
                         <label for="isAllowMultiple" class="margin-h-10 mobile-padding">Allow multiple submissions per person?</label>
                     </div>
@@ -112,14 +112,9 @@
                     </div>
                 </div>
                 <div style="clear:both"></div>
-                <div class="row margin-t-30">
-                    <div class="col-lg-8 col-md-8">
-                        <textarea id="optional" name="optionalText" class="newInput" style="height:150px;width:100%;padding:10px" placeholder="Add special intructions (optional)"></textarea>
-                    </div>
-                </div>
 
                 <div class=" margin-t-30 text-center">
-                    <input type="submit" class="btn btnNewColorSurvey" value="Send & Notify" id="send" />
+                    <input type="submit" class="btn btnNewColorSurvey" value="Begin Accepting Surveys" id="send" />
                 </div>
             }
         </div>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -119,6 +120,11 @@ namespace AfterSchoolLibrary.Services
 
             return row;
         }
+        public static string BuildShortHomePageUrlForm(Guid surveyReqUid)
+        {
+            return
+                $"{Helpers.Utilities.ShortBaseUrl()}/sr/{surveyReqUid}";
+        }
 
         private static List<string> AddQuestionAnswerRow(DateTime? createDate, DateTime? lastModifiedDate,
             string firstName, string lastName, List<FormQuestionAnswer> formQuestionAnswers)
@@ -137,8 +143,17 @@ namespace AfterSchoolLibrary.Services
                     {
                         if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.TextArea)
                         {
-                            dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
-                            row.Add(Convert.ToString(json.blocks[0].text));
+                            var checkJson = AfterSchoolLibrary.Helpers.Utilities.IsAlreadyJsonString(formQuestionAnswer.Text);
+
+                            if (checkJson)
+                            {
+                                dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
+                                row.Add(Convert.ToString(json.blocks[0].text));   
+                            }
+                            else
+                            {
+                                row.Add(Convert.ToString(formQuestionAnswer.Text));  
+                            }
                         }
                         else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.Checkbox)
                         {
@@ -156,6 +171,12 @@ namespace AfterSchoolLibrary.Services
                         else if (formQuestionAnswer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
                         {
                             var str = "";
+                            
+                            if (formQuestionAnswer.Text.StartsWith("[["))
+                            {
+                                formQuestionAnswer.Text = formQuestionAnswer.Text.Substring(1, formQuestionAnswer.Text.Length - 2);
+                            }
+                            
                             dynamic json = JsonConvert.DeserializeObject(formQuestionAnswer.Text);
                             foreach (var item in json)
                                 if (str.IsNotEmpty())

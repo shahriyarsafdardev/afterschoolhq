@@ -1,4 +1,4 @@
-﻿@model List<Transaction>
+@model List<Transaction>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
@@ -87,6 +87,7 @@
                             foreach (var transaction in Model)
                             {
                                 var registrant = transaction.GetPurchase()?.GetRegistrant();
+                                var showPartialRefundIcon = transaction.CouponId.HasValue && transaction.HasRefundableAmount(false, msgs);
                                 var billerAccount = transaction.GetBillerAccount();
 
                                 <tr id="@transaction.Uid">
@@ -140,11 +141,19 @@
                                             {
                                                 @:Refunded
                                             }
+                                            else if (transaction.CouponId.HasValue && !transaction.HasRefundableAmount(false, msgs))
+                                            {
+                                                @:100% Coupon Applied
+                                            }
                                             else
                                             {
                                                 @:Paid
+                                                if (showPartialRefundIcon)
+                                                {
+                                                    <img src="~/Assets/img/coupon-discount.svg" style="height: 15px; width: 15px;" data-toggle="popover" data-trigger="hover" data-html="true"
+                                                         data-placement="top" data-content="Discount: @transaction.CouponValue.ToCurrency()" />
+                                                }
                                             }
-
                                         }
                                         else if (transaction.IsRefund())
                                         {
@@ -237,6 +246,9 @@
         });
         $('#refund-reason').blur(function () {
             canProcessRequest();
+        });
+        $("#refund-request-amount").on('change', function(e){
+           this.value = Math.min(this.value, $("#refund-request-amount").attr('max'));
         });
     });
 

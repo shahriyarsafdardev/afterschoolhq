@@ -26,37 +26,43 @@ function RadioQuestion({ question, formik }) {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <div className={classes.radioGroupWrapper}>
-        <div className={classes.radio}>
-          <RadioGroup
-            name="radio-question"
-            onChange={handleRadioChange}
-            value={value}
-            classes={{
-              root: classes.radioGroupRoot
-            }}
-            data-testid={`${title}-${QuestionDataTypeId}`}
-          >
-            {options.length &&
-              options.map(option => (
-                <RadioButton
-                  key={option.key}
-                  label={option.value}
-                  value={option.value}
-                  selectedValue={value}
-                  dataTestId={`${title}-${QuestionDataTypeId}-${option.value}`}
-                />
-              ))}
-          </RadioGroup>
+      <Box className={classes.outerWrapper}>
+        <div className={classes.radioGroupWrapper}>
+          <div className={classes.radio}>
+            <RadioGroup
+              name="radio-question"
+              onChange={handleRadioChange}
+              value={value}
+              classes={{
+                root: classes.radioGroupRoot
+              }}
+              data-testid={`${title}-${QuestionDataTypeId}`}
+            >
+              {options.length &&
+                options.map(option => (
+                  <RadioButton
+                    key={option.key}
+                    label={option.value}
+                    value={option.value}
+                    selectedValue={value}
+                    dataTestId={`${title}-${QuestionDataTypeId}-${option.value}`}
+                  />
+                ))}
+            </RadioGroup>
+          </div>
         </div>
-      </div>
-      {touched[ID] && errors[ID] && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.maxWidth} error>
-            {errors[ID]}
-          </FormHelperText>
-        </Box>
-      )}
+        {touched[ID] && errors[ID] && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText
+              data-testid={`${title}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
+              {errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
+      </Box>
     </FieldWrapper>
   );
 }

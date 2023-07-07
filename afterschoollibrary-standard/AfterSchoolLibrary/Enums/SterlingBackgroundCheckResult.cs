@@ -14,6 +14,7 @@ namespace AfterSchoolLibrary.Enums
         Level3,
         EmailSentToVolunteer,
         BackgroundCheckRequested,
-        Consider
+        Consider,
+        ExpiredInvite,
     }
 }

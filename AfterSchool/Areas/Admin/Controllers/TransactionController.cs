@@ -11,7 +11,8 @@ namespace AfterSchool.Areas.Admin.Controllers
 {
     public class TransactionController : BaseLoggedInController
     {
-        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool })
+        public TransactionController() : base(new List<AccountType> { AccountType.AfterSchool, AccountType.School, AccountType.Teacher, 
+            AccountType.ActivityProvider, AccountType.Business, AccountType.CommunityCenter, AccountType.Church})
         {
 
         }
@@ -203,10 +204,10 @@ namespace AfterSchool.Areas.Admin.Controllers
         public ActionResult Refund(string id, string request, string refundcc, string refundcf, PaymentSourceType? paymentsource)
         {
             var msgs = new SystemMessages();
-
             if (id.IsGuid())
             {
                 var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+                paymentsource = transaction.PaymentSourceTypeId;
                 Transaction refund = new Transaction();
                 
                 if (request.IsNotEmpty())
@@ -222,6 +223,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                                 true, 
                                 refundCreditFees, 
                                 refundConvenienceFees,
+                                null,
                                 paymentsource.Value,
                                 SessionVariables.CurrentUser, 
                                 msgs);
@@ -232,7 +234,7 @@ namespace AfterSchool.Areas.Admin.Controllers
                 else
                 {
                     if (transaction.IsNotEmpty() && !transaction.HasRefunds())
-                        refund = transaction.RefundPayerFullAmount(SessionVariables.CurrentUser, msgs);
+                        refund = transaction.RefundPayer(null, SessionVariables.CurrentUser, msgs);
                     else
                         msgs.Add("Invalid Request", MessageType.UserError);
                 }

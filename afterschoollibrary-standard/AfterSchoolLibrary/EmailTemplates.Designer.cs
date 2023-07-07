@@ -333,6 +333,26 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] ReEnroll_Free_Parent_Processed {
+            get {
+                object obj = ResourceManager.GetObject("ReEnroll_Free_Parent_Processed", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ReEnroll_Parent_Processed {
+            get {
+                object obj = ResourceManager.GetObject("ReEnroll_Parent_Processed", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Refund_Denied {
             get {
                 object obj = ResourceManager.GetObject("Refund_Denied", resourceCulture);
@@ -343,9 +363,19 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] Refund_Processed {
+        internal static byte[] Refund_Parent_Processed {
             get {
-                object obj = ResourceManager.GetObject("Refund_Processed", resourceCulture);
+                object obj = ResourceManager.GetObject("Refund_Parent_Processed", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Refund_Provider_Processed {
+            get {
+                object obj = ResourceManager.GetObject("Refund_Provider_Processed", resourceCulture);
                 return ((byte[])(obj));
             }
         }

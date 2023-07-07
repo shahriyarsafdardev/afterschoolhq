@@ -1,5 +1,10 @@
 export { default as FileUpload } from './FileUpload';
 export { default as DateQuestion } from './DateQuestion';
+export { default as MoodQuestion } from './MoodQuestion';
 export { default as RadioQuestion } from './RadioQuestion';
+export { default as VideoQuestion } from './VideoQuestion';
+export { default as AudioQuestion } from './AudioQuestion';
+export { default as PhotoQuestion } from './PhotoQuestion';
+export { default as RatingQuestion } from './RatingQuestion';
 export { default as DropdownQuestion } from './DropdownQuestion';
 export { default as TextAreaQuestion } from './TextAreaQuestion';

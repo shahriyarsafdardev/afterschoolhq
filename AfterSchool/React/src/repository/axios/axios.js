@@ -15,6 +15,7 @@ axios.interceptors.response.use(
     if (msgs?.length && msgs[0].IsError)
       if (msgs.find(msg => ['No Registrant', 'Unauthorized'].includes(msg.Text)))
         navigateTo('/login');
+      else if (msgs.find(msg => ['Invalid Form.'].includes(msg.Text))) navigateTo('/404.html');
 
     return response;
   },

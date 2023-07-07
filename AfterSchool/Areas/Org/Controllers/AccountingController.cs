@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -368,7 +368,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
                 else
                     msgs.Add("Registrant not found", MessageType.UserError);
-                
+
             }
 
             ViewBag.Messages = msgs;
@@ -419,7 +419,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
-
+            else
+            {
+                msgs.Add("Amount is not a valid number", MessageType.UserError);
+            }
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
         }
 
@@ -443,7 +446,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     SessionVariables.WebSession.LogRefundRequestUpdate(currentAccount, SessionVariables.CurrentUser, WebSessionActionType.Requested,
                         refundRequest.Amount.ToCurrency(), refundRequest, msgs);
-                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+                    return new JsonResult {Data = new {status = "ok", uid = refundRequest.Uid}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
                 }
             }
 
@@ -471,28 +474,41 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
             }
 
-            return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            return new JsonResult { Data = new { status = "error", messages = msgs }, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
         [HttpGet]
-        public ActionResult ApproveManualRefundRequest(string uid)
+        public ActionResult ApproveManualRefundRequest(string transactionUid, string requestUid, string amount)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            
+            if (!transactionUid.IsGuid())
+                msgs.Add("Invalid Transaction ID", MessageType.UserError);
+            
+            if (!requestUid.IsGuid())
+                msgs.Add("Invalid Request ID",MessageType.UserError);
+            
+            if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
+                msgs.Add("Invalid Amount", MessageType.UserError);
 
-            if (uid.IsGuid())
+            if (!transactionUid.IsGuid() || !requestUid.IsGuid() || !amount.IsNumber())
+                return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            
+            var transaction = currentAccount.GetBillerTransaction(transactionUid.ToGuid(), msgs);
+            var refundRequest = currentAccount.GetRefundRequest(requestUid.ToGuid(), msgs);
+                
+            if (transaction.IsNotEmpty())
+                transaction.ManualRefund(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+
+            if (refundRequest.IsNotEmpty())
+                refundRequest.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
+
+            if (msgs.HasNoErrors())
             {
-                var request = currentAccount.GetRefundRequest(uid.ToGuid(), msgs);
-
-                if (request.IsNotEmpty())
-                    request.UpdateStatus(RefundRequestStatus.ApprovedManualRefund, SessionVariables.CurrentUser, msgs);
-
-                if (msgs.HasNoErrors())
-                {
-                    SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
-                        WebSessionActionType.Approved, request.Amount.ToCurrency(), request, msgs);
-                    return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
-                }
+                SessionVariables.WebSession.LogRefundRequestUpdate(SessionVariables.CurrentAccount, SessionVariables.CurrentUser,
+                    WebSessionActionType.Approved, refundRequest.Amount.ToCurrency(), refundRequest, msgs);
+                return new JsonResult {Data = new {status = "ok"}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
             }
 
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
@@ -520,6 +536,59 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return new JsonResult {Data = new {status = "error", messages = msgs}, JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+        }
+        
+        [HttpGet]
+        public ActionResult Refund(string id, string amount, string request)
+        {
+            var msgs = new SystemMessages();
+            if (id.IsEmpty())
+                msgs.Add("Invalid ID", MessageType.UserError);
+            
+            if (amount.IsEmpty() || !amount.IsNumber() || amount.ToDecimal() <= 0)
+                msgs.Add("Invalid Amount", MessageType.UserError);
+
+            if (msgs.HasErrors())
+                return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
+                    JsonRequestBehavior.AllowGet);
+            
+            var transaction = Transaction.LoadByUid(id.ToGuid(), msgs);
+            var paymentSource = transaction.PaymentSourceTypeId;
+            var refund = new Transaction();
+                
+            if (request.IsNotEmpty())
+            {
+                if (request.IsGuid())
+                {
+                    var refundRequest = RefundRequest.LoadByUid(request.ToGuid(), msgs);
+                        
+                    if (refundRequest.IsNotEmpty() && refundRequest.CanRefundAmountRequested(msgs))
+                        refund = refundRequest.ApproveAndProcessRequest(
+                            true, 
+                            false, 
+                            false,
+                            amount.ToDecimal(),
+                            paymentSource,
+                            SessionVariables.CurrentUser, 
+                            msgs);
+                }
+                else
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
+            else
+            {
+                if (transaction.IsNotEmpty() && !transaction.HasRefunds())
+                    refund = transaction.RefundPayer(amount.ToDecimal(), SessionVariables.CurrentUser, msgs);
+                else
+                    msgs.Add("Invalid Request", MessageType.UserError);
+            }
+
+            if (msgs.HasErrors()) return Json(new {status = "error", messages = msgs.ToList().Select(msg => new {msg.Text})}, 
+                JsonRequestBehavior.AllowGet);
+            
+            SessionVariables.WebSession.LogRefundCompleted(SessionVariables.CurrentAccount, SessionVariables.CurrentUser, WebSessionActionType.Refunded, 
+                refund.Amount.ToCurrency(), transaction, msgs);
+            return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -654,6 +723,10 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (applyType.IsBlank() || Enum.IsDefined(typeof(CouponApplyType), applyType))
                 msgs.Add("Coupon Must have a Fee Type Set", MessageType.UserError);
+
+            if (amount.ToDecimal() > 100 && amountType.ToInteger() == (int) CouponAmountType.Percentage)
+                msgs.Add("Amount in percentage cannot be greater than 100", MessageType.UserError);
+
 
             if (msgs.HasNoErrors())
             {

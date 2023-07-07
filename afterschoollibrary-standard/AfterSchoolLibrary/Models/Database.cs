@@ -104,6 +104,7 @@ namespace AfterSchoolLibrary.Models
             VolunteerTask.Create(dc);
             MultipartAuth.Create(dc);
             Maintenance.Create(dc);
+            FormQuestionSettings.Create(dc);
 
             return msgs;
         }
@@ -200,6 +201,7 @@ namespace AfterSchoolLibrary.Models
             VolunteerTask.Alter(dc);
             MultipartAuth.Alter(dc);
             Maintenance.Alter(dc);
+            FormQuestionSettings.Alter(dc);
 
             return msgs;
         }
@@ -1198,6 +1200,9 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(
                 dq.ExecuteSql(
                     "CREATE INDEX IX_SurveyResponse_RegistrantId_Uid ON [SurveyResponse] (Uid,RegistrantId)"));
+            msgs.AddRange(
+                dq.ExecuteSql(
+                    "CREATE INDEX IX_SurveyResponse_SurveyRequestId_Pin ON [SurveyResponse] (Pin,SurveyRequestId)"));
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_RegistrantInviteCode_RegistrantId ON [RegistrantInviteCode] (RegistrantId)"));
             msgs.AddRange(dq.ExecuteSql(
@@ -1312,7 +1317,9 @@ namespace AfterSchoolLibrary.Models
             Migration_20230525_UpdateLocationDistanceFromOrigin.Do(amsgs,adc); 
             Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc); 
             Migration_20230525_UpdateLocationLongitude.Do(amsgs,adc);
-            Migration_20230525_UpdateLocationName.Do(amsgs, adc);
+            // Migration_20230525_UpdateLocationName.Do(amsgs, adc);
+            Migration_20230620_AddFormQuestionAnswerRidQdtidIndex.Do(amsgs,adc);
+            Migration_20230628_SetAccountIsPayingCustomer.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()

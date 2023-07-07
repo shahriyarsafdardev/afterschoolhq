@@ -6,26 +6,28 @@ const useStyles = makeStyles(() => ({
     flexDirection: 'column',
     alignItems: 'center',
     width: '100%',
-    maxWidth: 540
+    maxWidth: 675
   },
   radio: {
     width: '100%',
-    display: 'flex',
-    padding: '8px 12px'
+    display: 'flex'
   },
   radioGroupRoot: {
     flexDirection: 'row',
     justifyContent: 'start',
-    maxWidth: 540,
+    maxWidth: 675,
     width: '100%'
   },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 25
+    paddingLeft: 14
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 500
+    maxWidth: 675
+  },
+  outerWrapper: {
+    marginBottom: '5px'
   }
 }));
 

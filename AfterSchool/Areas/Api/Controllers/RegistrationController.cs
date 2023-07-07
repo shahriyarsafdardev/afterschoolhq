@@ -46,7 +46,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpGet]
         public ActionResult GetForm(string accountName, string activityName, string registrantUid)
         {
@@ -59,14 +59,14 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
-                
+
                 Registrant parentRegistrant = null;
                 Registration registration = null;
                 RegistrantActivity registrantActivity = null;
@@ -74,45 +74,20 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentRegistrant.IsStudent)
                     parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
-                                
+
                 var participationObject = activity.GetParticipationObject(msgs);
                 var form = participationObject.Form;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
-                
+
                 if (currentRegistrant.IsAdult)
-                {
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
                     ).ToList();
-                }
-                
-                var formQuestionDtoList = new List<FormQuestionDto>();
+
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -125,8 +100,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                     );
                 }
-                
-                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value))
+
+                foreach (var questionAnswer in FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs))
                 {
                     formQuestionAnswerDtoList.Add(
                         new FormQuestionAnswerDto()
@@ -148,7 +123,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         Name = participationObject.Name,
                         Organization = participationObject.OwnerAccount.Name,
-                        IsFree = participationObject.IsFree,
+                        IsFree = !participationObject.ShouldParentPay(),
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
@@ -165,10 +140,12 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        AllowToPayLater = participationObject.AllowToPayLater,
+                        ApplyMode = participationObject.RegistrationMode.ToString(),
                     }
                 };
-                
+
                 return Json(
                     new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
@@ -187,12 +164,14 @@ namespace AfterSchool.Areas.Api.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+
             try
             {
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 var registrant = Registrant.LoadByUid(id.ToGuid(), msgs);
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
@@ -202,17 +181,17 @@ namespace AfterSchool.Areas.Api.Controllers
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
                     ).ToList();
-                    
+
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
-                }                
+                }
                 else if (registrant.PersonTypeId == RegistrantPersonType.Adult)
                 {
                     questionGroups = questionGroups.Where(group =>
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
                     ).ToList();
-                    
+
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
-                }                
+                }
                 else if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                 {
                     questionGroups = questionGroups.Where(group =>
@@ -223,33 +202,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())
                     ).ToList();
                 }
-                
-                var formQuestionDtoList = new List<FormQuestionDto>();
+
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
-
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -261,7 +217,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
                         }
                     );
-                }                                
+                }
 
                 foreach (var questionAnswer in registrant.GetAnswers(msgs))
                 {
@@ -284,7 +240,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
                     registrantType,SchoolLocation,
                 };
-                
+
                 return Json(
                     new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
@@ -313,7 +269,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
                 var participationObject = activity.GetParticipationObject(msgs);
                 Registrant studentReg = null;
-                
+
                 Database.ExecuteTransaction
                     (
                         (amsgs, adc) =>
@@ -330,12 +286,14 @@ namespace AfterSchool.Areas.Api.Controllers
                                 loggedInUser: currentUser,
                                 msgs: amsgs,
                                 dc : adc);
-                            
-                            if(parentRegistrant.IsNotEmpty())
-                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
-                    
+
+                            var formQuestions = participationObject.Form.GetAllQuestions(amsgs, adc);
+
+                            if (parentRegistrant.IsNotEmpty())
+                                RegistrationCommon.MapParent1AnswersToStudent(parentRegistrant, studentReg, formQuestions, currentUser, amsgs, adc);
+
                             if(parent2Registrant.IsNotEmpty())
-                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, participationObject.Form.GetAllQuestions(msgs), currentUser, amsgs, adc);
+                                RegistrationCommon.MapParent2AnswersToStudent(parent2Registrant, studentReg, formQuestions, currentUser, amsgs, adc);
                         },
                         smsgs =>
                         {
@@ -345,7 +303,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         fmsgs => msgs.AddRange(fmsgs),
                         emsgs => throw new Exception(emsgs.ToString())
                     );
-                
+
                 return Redirect($"~/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}");
             }
             catch (Exception ex)
@@ -353,9 +311,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 Utilities.SystemErrorLog(ex);
                 throw;
             }
-            
+
         }
-        
+
         [HttpGet]
         public ActionResult GetNewChildForm(string accountName, string activityName, string registrantUid)
         {
@@ -364,48 +322,27 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentRegistrant = Registrant.LoadByUid(registrantUid.ToGuid(), msgs);
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
-                
+
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-                
+
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
-                
+
                 Registration registration = null;
 
-                var formQuestionDtoList = new List<FormQuestionDto>();
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
-                foreach (var question in questions)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                             ID = question.ID.Value,
-                             FormQuestionGroupId = question.FormQuestionGroupId,
-                             Text = question.Text,
-                             Description = question.Description,
-                             GroupTitle = question.FormQuestionGroupName,
-                             Options = question.Options,
-                             IsRequired = question.IsRequired,
-                             DisplayOrder = question.DisplayOrder,
-                             IsActive = question.IsActive,
-                             IsDeleted = question.IsDeleted,
-                             QuestionTypeId = question.QuestionTypeId,
-                             QuestionDataTypeId = question.QuestionDataTypeId,
-                             FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
-                        }
-                    );
-                }
-                
                 foreach (var questionGroup in questionGroups)
                 {
                     formQuestionGroupDtoList.Add(
@@ -418,7 +355,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                     );
                 }
-                
+
                 foreach (var questionAnswer in currentRegistrant?.GetAnswers(msgs))
                 {
                     formQuestionAnswerDtoList.Add(
@@ -431,7 +368,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                     );
                 }
-                
+
                 if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                     registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
 
@@ -442,8 +379,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         Name = activity.Name,
                         Organization = activity.AccountName,
-                        IsFree = participationObject.IsFree,
-                        RegistrantType = RegistrantPersonType.Parent,
+                        IsFree = !participationObject.ShouldParentPay(),
+                        RegistrantType = RegistrantPersonType.Parent.ToString(),
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
                         SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
@@ -457,10 +394,12 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        AllowToPayLater = participationObject.AllowToPayLater,
+                        ApplyMode = participationObject.RegistrationMode.ToString(),
                     }
                 };
-                
+
                 return Json(
                     new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
@@ -473,7 +412,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult UpdateProfile(QuestionAnswerResponse json)
         {
@@ -486,13 +425,13 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-                
+
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-                
+
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())
-                    ).ToList();  
+                    ).ToList();
 
                 else if (registrant.PersonTypeId == RegistrantPersonType.Adult)
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInStudentPanel())).ToList();
@@ -500,7 +439,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 else if (registrant.PersonTypeId == RegistrantPersonType.Parent)
                     questions = questions.Where(x => x.FormQuestionGroupQuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInParentPanel()) &&
                     x.QuestionDataTypeId.NotIn(FormConstants.QuestionsToNotIncludeInParentPanel())).ToList();
-                
+
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
@@ -549,6 +488,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 qvms.ForEach(qvm =>
                                 {
+
                                     registrant.AddOrUpdateAnswer(
                                         answerText: qvm.Value.IfEmpty("").Trim(),
                                         question: qvm.Question,
@@ -568,7 +508,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         {QuestionDataType.RegistrantMobilePhone, QuestionDataType.Parent1MobilePhone},
                                         {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent1WorkPhone},
                                     };
-                                    
+
                                     var parent2Map = new Dictionary<QuestionDataType, QuestionDataType>()
                                     {
                                         {QuestionDataType.RegistrantFirstName, QuestionDataType.Parent2FirstName},
@@ -579,7 +519,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         {QuestionDataType.RegistrantWorkPhone, QuestionDataType.Parent2WorkPhone},
                                     };
 
-                                    var children = currentAccount.GetStudentRegistrants(msgs, adc);
+                                    var children = currentAccount.GetStudentRegistrants(amsgs, adc);
 
                                     children.ForEach(child =>
                                     {
@@ -605,7 +545,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                                     adc);
                                     });
                                 }
-                                
+
                             },
                             onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                             onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -624,7 +564,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult AddUpdateAnswers(QuestionAnswerResponse json)
         {
@@ -644,6 +584,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
+                var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 //var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
@@ -651,7 +592,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-                
+
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
                     // if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
@@ -695,7 +636,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             break;
                     }
                 });
-                
+
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName)?.Value;
@@ -714,7 +655,24 @@ namespace AfterSchool.Areas.Api.Controllers
                 Database.ExecuteTransaction
                 (
                     action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {                
+                    {
+
+                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
+                        {
+                            studentRegistrants.ForEach(stdRegistrant =>
+                            {
+                                if (stdRegistrant.ID != currentRegistrant.ID && stdRegistrant.IsMaster &&
+                                    stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
+                                {
+                                        var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
+                                            currentUser.ID.Value, msgs, adc);
+                                        msgs.AddRange(stdRegistrant.Delete(adc));
+                                        if (registrantWebUser.IsNotEmpty())
+                                            msgs.AddRange(registrantWebUser.Delete(adc));
+                                }
+                            });
+                        }
+
                         if (currentUserPersonType != RegistrantPersonType.Adult && json.newChild != 1)
                         {
                             if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
@@ -740,7 +698,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                 amsgs.AddRange(parent1Reg.Save(adc));
                             }
-                    
+
                             if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent2Information && parent2Registrant.IsEmpty())
                             {
                                 var parent2Reg = currentAccount.CreateParentOrStudentRegistrant(
@@ -765,25 +723,22 @@ namespace AfterSchool.Areas.Api.Controllers
                                 amsgs.AddRange(parent2Reg.Save(adc));
                             }
                         }
-                        
+
                         if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
-                        {
                             currentRegistrant.UpdateProfileStatus(RegistrantProfileStatus.Started, currentUser, amsgs, adc);
-                        }
-                        
+
                         qvms.ForEach(qvm =>
                         {
+
                             if (qvm.Question.QuestionDataTypeId != QuestionDataType.NotSet)
-                            {
                                 currentRegistrant.AddOrUpdateAnswer(
                                     qvm.Value.IfEmpty("").Trim(),
                                     qvm.Question,
                                     currentUser,
                                     amsgs,
                                     adc);
-                            }
                         });
-                        
+
                         RegistrationCommon.AddCustomQuestions(
                             qvms,
                             currentRegistrant,
@@ -797,19 +752,19 @@ namespace AfterSchool.Areas.Api.Controllers
                             if (json.newChild != -1)
                             {
                                 if(currentUserPersonType == RegistrantPersonType.Parent)
-                                {                        
+                                {
                                     if(parentRegistrant.IsNotEmpty())
                                         RegistrationCommon.MapStudentAnswersToParent1(currentRegistrant, parentRegistrant, questions, currentUser, amsgs, adc);
 
                                     if (parent2Registrant.IsNotEmpty())
                                         RegistrationCommon.MapStudentAnswersToParent2(currentRegistrant, parent2Registrant, questions, currentUser, amsgs, adc);
-                                }                  
+                                }
                             }
                         }
                     },
                     onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
 
                 return Json(
@@ -835,7 +790,7 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentRegistrant = Registrant.LoadByUid(uid.ToGuid(), msgs);
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
@@ -845,7 +800,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     msgs.AddRange(currentRegistrant.Delete());
                     msgs.AddRange(registrantWebUser.Delete());
                 }
-                
+
                 return Json(
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
@@ -857,7 +812,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs,null),
                     JsonRequestBehavior.AllowGet);
             }
-            
+
         }
 
         [HttpPost]
@@ -871,15 +826,15 @@ namespace AfterSchool.Areas.Api.Controllers
                 var account = Account.LoadByUniqueName(json.accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
                 var currentRegistrant = Registrant.LoadByUid(json.registrantUid.ToGuid(), msgs);
-                
+
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
 
                 if (json.esignature.IsEmpty())
-                    msgs.Add("E-signature is required", MessageType.UserError);                
+                    msgs.Add("E-signature is required", MessageType.UserError);
 
                 var participationObject = activity.GetParticipationObject(msgs);
                 var questions = participationObject.Form.GetAllQuestions(msgs);
@@ -894,8 +849,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     parentRegistrant?.SetProfileAsCompleted(currentUser, msgs);
                     parent2Registrant?.SetProfileAsCompleted(currentUser, msgs);
                 }
-                
-                if(participationObject.IsFree)
+
+                if(!participationObject.ShouldParentPay())
                 {
                     var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
                     var datesToRemove = new List<DateTime>();
@@ -925,7 +880,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             SessionVariables.CurrentUser,
                             msgs);
                 }
-                
+
                 return Json(
                     new ApiResponse(msgs,registration.Uid),
                     JsonRequestBehavior.AllowGet);
@@ -939,18 +894,18 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         public ActionResult CreateOrUpdateFromGoogle(LocationDto json)
         {
             var msgs = new SystemMessages();
-            
+
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized");
-                
+
                 var location = Location.LoadByGooglePlaceId(json.googlePlaceId, msgs);
 
                 if (location.IsEmpty())
@@ -998,10 +953,10 @@ namespace AfterSchool.Areas.Api.Controllers
                         if (distance.IsNotEmpty())
                             location.DistanceFromOrigin = Convert.ToDecimal(distance);
                     }
-                
+
                     msgs.AddRange(location.Save());
                 }
-                
+
                 return Json(
                     new ApiResponse(msgs,location.ID),
                     JsonRequestBehavior.AllowGet);
@@ -1014,14 +969,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         public ActionResult ThankYou(string id)
         {
             var currentUser = SessionVariables.CurrentUser;
-                
+
             if (currentUser.IsEmpty())
                 throw new Exception("Unauthorized");
-            
+
             var msgs = new SystemMessages();
             try
             {
@@ -1030,8 +985,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
                 var registrant = registration.GetRegistrant(msgs);
-                var registrantActivity = registration?.GetRegistrantActivity(participationObject);
-                
+                var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
+                RegistrationCommon.ResetRegistrationSession();
+
                 dynamic response = new
                 {
                     activityDto = new
@@ -1045,10 +1001,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
                         AmountPaid = registrantActivity?.GetAmountPaid(msgs),
                         ProviderEmail = participationObject.OwnerAccount.Email,
-                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
+                        RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
+                        ApplyMode = participationObject.RegistrationMode.ToString(),
                     }
                 };
-                
+
                 return Json(
                     new ApiResponse(msgs,response),
                     JsonRequestBehavior.AllowGet);
@@ -1061,5 +1018,51 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
+
+        private static AudienceType GetAudienceType(RegistrantPersonType type)
+        {
+            return type switch
+            {
+                RegistrantPersonType.Parent => AudienceType.Parents,
+                RegistrantPersonType.Student => AudienceType.Students,
+                RegistrantPersonType.Adult => AudienceType.Adults,
+                RegistrantPersonType.Volunteer => AudienceType.Volunteer,
+                _ => AudienceType.NotSet,
+            };
+        }
+
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
+        {
+            var msgs = new SystemMessages();
+            var formQuestionDtoList = new List<FormQuestionDto>();
+            var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
+            foreach (var question in questions)
+            {
+                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
+                if (audienceSettings?.Show ?? question.IsActive)
+                {
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                            ID = question.ID.Value,
+                            FormQuestionGroupId = question.FormQuestionGroupId,
+                            Text = question.Text,
+                            Description = question.Description,
+                            GroupTitle = question.FormQuestionGroupName,
+                            Options = question.Options,
+                            IsRequired = audienceSettings?.Required ?? question.IsRequired,
+                            DisplayOrder = question.DisplayOrder,
+                            IsActive = question.IsActive,
+                            IsDeleted = question.IsDeleted,
+                            QuestionTypeId = question.QuestionTypeId,
+                            QuestionDataTypeId = question.QuestionDataTypeId,
+                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                        }
+                    );
+                }
+            }
+            return formQuestionDtoList;
+        }
+
     }
 }

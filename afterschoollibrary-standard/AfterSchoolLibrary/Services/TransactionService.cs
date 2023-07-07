@@ -547,7 +547,12 @@ namespace AfterSchoolLibrary.Services
             if (!transaction.IsCharge())
                 return "Processed";
 
-            if (!transaction.HasRefundableAmount(false, msgs, dc))
+            var hasRefundableAmount = transaction.HasRefundableAmount(false, msgs, dc);
+
+            if (transaction.CouponId.HasValue && !hasRefundableAmount)
+                return "100% Coupon Applied";
+            
+            if (!hasRefundableAmount)
                 return "Refunded";
 
             var currentPayout = GetPayout(transaction, msgs, dc);
@@ -566,7 +571,7 @@ namespace AfterSchoolLibrary.Services
             if (DateTime.UtcNow.IsBefore(transaction.CreateDate.Value.AddDays(transaction.GetWaitPeriodInDays())))
                 return "Incoming";
 
-            if (transaction.HasRefundsAHQ(msgs, dc) && transaction.HasRefundableAmount(false, msgs, dc))
+            if (transaction.HasRefundsAHQ(msgs, dc))
                 return "Partially Refunded / Ready for Payout";
 
             if (transaction.HasRefundsManual(msgs, dc))
@@ -676,7 +681,7 @@ namespace AfterSchoolLibrary.Services
             return request;
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
+        public static Transaction Refund(this Transaction transaction, decimal? refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
             decimal? paymentTypeFeeAmount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return transaction.Refund(
@@ -690,12 +695,15 @@ namespace AfterSchoolLibrary.Services
                 dc);
         }
 
-        public static Transaction Refund(this Transaction transaction, decimal refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
+        public static Transaction Refund(this Transaction transaction, decimal? refundAmount, bool allowFullAmountRefund, decimal? convenienceFeeAmount,
             decimal? paymentTypeFeeAmount, PaymentSourceType paymentSourceType, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             Transaction refund = null;
 
-            if (!transaction.IsAmountRefundable(refundAmount, allowFullAmountRefund, msgs))
+            if (!refundAmount.HasValue)
+                msgs.Add("Refund Amount is invalid. Amount provided : " + refundAmount, MessageType.UserError);
+            
+            if (msgs.HasNoErrors() && !transaction.IsAmountRefundable(refundAmount.Value, allowFullAmountRefund, msgs))
                 msgs.Add("Amount is not refundable", MessageType.UserError);
 
             if (msgs.HasNoErrors())
@@ -712,7 +720,7 @@ namespace AfterSchoolLibrary.Services
                     var stripeHelper = StripeHelper.GetStripeHelperConnectAccount();
                     var stripeRefund = stripeHelper.CreateRefund(
                         chargeId: transaction.StripeChargeOrRefundId,
-                        totalAmount: refundAmount,
+                        totalAmount: refundAmount.Value,
                         reason: StripeRefundReason.RequestedByCustomer.ToString().SplitByUpperCase().Replace(" ", "_").ToLower(),
                         reverseTransfer: false,
                         msgs: msgs);
@@ -730,7 +738,7 @@ namespace AfterSchoolLibrary.Services
                         // create transfer reversal
                         // calculate amount to reverse
                         var billerPayout = transaction.GetBillerPayout(msgs, dc);
-                        var amountToReverse = Math.Min(billerPayout, refundAmount);
+                        var amountToReverse = Math.Min(billerPayout, refundAmount.Value);
 
                         if (stripeTransferId.IsNotEmpty() && amountToReverse > 0)
                             stripeHelper.CreateTransferReversal(stripeTransferId, amountToReverse, msgs);
@@ -753,7 +761,7 @@ namespace AfterSchoolLibrary.Services
 
                 if (msgs.HasNoErrors())
                     refund = transaction.CreateNewRefund(
-                        fullAmount: refundAmount,
+                        fullAmount: refundAmount.Value,
                         convenienceFeeAmount: convenienceFeeAmount,
                         paymentTypeFeeAmount: paymentTypeFeeAmount,
                         refundId: stripeRefundId,
@@ -776,16 +784,16 @@ namespace AfterSchoolLibrary.Services
             return transaction.Refund(refundAmount, false, null, null, loggedInUser, msgs, dc);
         }
 
-        public static Transaction ManualRefund(this Transaction transaction, decimal refundAmount, WebUser loggedInUser, SystemMessages msgs,
+        public static Transaction ManualRefund(this Transaction transaction, decimal? refundAmount, WebUser loggedInUser, SystemMessages msgs,
             DatabaseConnection dc = null)
         {
             return transaction.Refund(refundAmount, false, null, null, PaymentSourceType.ManualProvider, loggedInUser, msgs, dc);
         }
 
-        public static Transaction RefundPayerFullAmount(this Transaction transaction, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static Transaction RefundPayer(this Transaction transaction, decimal? amount, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             return transaction.Refund(
-                transaction.GetPayerAmount(),
+                amount,
                 true,
                 transaction.GetConvenienceFeesChargedToPayer(),
                 transaction.GetPaymentTypeFeesChargedToPayer(),

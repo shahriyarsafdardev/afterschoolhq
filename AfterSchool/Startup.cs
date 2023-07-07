@@ -16,6 +16,7 @@ using Microsoft.Owin;
 using Owin;
 using AccountService = AfterSchoolLibrary.Services.AccountService;
 using SMTPMailTrapHelper = AfterSchoolLibrary.Helpers.SMTPMailTrapHelper;
+using ServiceCollection = Microsoft.Extensions.DependencyInjection.ServiceCollection;
 
 [assembly: OwinStartup(typeof(Startup))]
 

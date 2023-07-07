@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -113,6 +113,15 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             account.IsDeleted = true;
+            account.LastModifiedDate = DateTime.UtcNow;
+            account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(account.Save(dc));
+        }
+
+        public static void SetIsPayingCustomer(this Account account, bool IsPayingCustomer, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            account.IsPayingCustomer = IsPayingCustomer;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
@@ -1658,9 +1667,16 @@ namespace AfterSchoolLibrary.Services
                 (paymentMethod.IsNotEmpty() || account.GetAllStripePaymentMethods(StripeAccountType.SubscriberAccount, msgs).Any()))
             {
                 account.SetStripeDefaultPaymentMethod(StripeAccountType.SubscriberAccount, msgs);
-
                 account.HasDefaultPaymentMethod = true;
+                account.IsPayingCustomer = true;
+
+                // if a customer has paid via another method than going through the app
+                // then make sure when the user logs in they can proceed
+                if (account.OnboardingStepDone == OnboardingStepType.NotSet)
+                    account.UpdateOnboardingStep(OnboardingStepType.AccountType, msgs, dc);
+
                 msgs.AddRange(account.Save(dc));
+
             }
         }
 
@@ -4681,8 +4697,7 @@ namespace AfterSchoolLibrary.Services
             if (coupon.IsNotEmpty() && coupon.DoesApplyToRegistrationFee())
             {
                 var discountValue = coupon.Amount;
-                if (coupon.AmountTypeId ==
-                    CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
+                if (coupon.AmountTypeId == CouponAmountType.FlatAmount) // calculate the new discount amount for the coupon
                     discountValue = (checkoutObject.ParticipationObject.Cost - coupon.Amount) /
                                     checkoutObject.PaymentPlan.TotalPeriods;
 
@@ -4798,9 +4813,7 @@ namespace AfterSchoolLibrary.Services
                     var hasPaymentPlan = checkoutObject.PaymentPlan.IsNotEmpty();
                     var hasSubscription = checkoutObject.SubscriptionPlan.IsNotEmpty();
                     var hasPostPayPlan = checkoutObject.PostPayPlan.IsNotEmpty();
-                    var alreadyPaidRegFee = submittedRecord.GetAmountPaid(msgs, dc) > 0;
-
-                    if (!isRegFree && !hasPaymentPlan && !alreadyPaidRegFee && !hasPostPayPlan)
+                    if (!isRegFree && !hasPaymentPlan && !hasPostPayPlan) 
                         ProcessRegistrationFee(checkoutObject, loggedInUser, amsgs, adc);
 
                     if (hasSubscription)
@@ -4817,8 +4830,14 @@ namespace AfterSchoolLibrary.Services
                     msgs.AddRange(smsgs);
 
                     // invalidate coupon
-                    if (checkoutObject.Coupon.IsNotEmpty() && checkoutObject.Coupon.ID.IsNotEmpty())
-                        checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon);
+                    // saving coupon in Registration here.
+                    // This needs refactoring (finding a better place to save coupon in registration)
+                    if ((bool) checkoutObject.Coupon?.ID.HasValue)
+                    {
+                        checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon, msgs,dc);
+                        checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
+                        msgs.AddRange(checkoutObject.Registration.Save(dc));
+                    }
 
                     checkoutObject.Registration.SendConfirmation(checkoutObject, null, loggedInUser, true, msgs, dc);
                 },

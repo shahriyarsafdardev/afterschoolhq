@@ -28,6 +28,10 @@ function Router() {
           element: <Registration newChild={true} />
         },
         {
+          path: 'reactapp/reg/update/:regUid',
+          element: <UpdateRegistration />
+        },
+        {
           path: 'reactapp/registration/thankyou/:registrationId',
           element: <ThankYouSection />
         },
@@ -54,22 +58,47 @@ function Router() {
       element: <UpdateVolunteerProfile />
     },
     {
+      path: '/Org/form/edit/:formId',
+      element: <FormBuilderSection />
+    },
+    {
       path: '*',
       element: <RedirectToExternal />
+    },
+    {
+      path: 'reactapp/survey/:formUid/thankyou',
+      element: <SurveyThankYouSection />
+    },
+    {
+      path: 'reactapp/sr/:srUid/thankyou',
+      element: <PinSurveyThankYouSection />
+    },
+    {
+      path: 'reactapp/survey/:formUid',
+      element: <Survey />
+    },
+    {
+      path: 'reactapp/sr/:srUid',
+      element: <SurveyPinModal />
     }
   ]);
 }
-
 const RedirectToExternal = () => {
   const { pathWithOrigin, redirect } = utils;
 
   redirect(pathWithOrigin('/User/home'));
   return null;
 };
+const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
+const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
+const UpdateRegistration = Loadable(lazy(() => import('pages/UpdateRegistration')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
+const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
+const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
+const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

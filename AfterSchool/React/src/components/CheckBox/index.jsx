@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControlLabel, Checkbox, Grid, Box, FormHelperText } from '@material-ui/core';
+import { FormControlLabel, Checkbox, Box, FormHelperText } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import useStyles from './styles';
 
@@ -13,9 +13,8 @@ function CheckBox({ formik, question }) {
   };
 
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
-      <Grid xs={12} md={4} item className={classes.titleGrid} />
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.innerWrapper}>
         <div className={classes.checkboxWrapper}>
           <FormControlLabel
             data-testid={`${title}-${QuestionDataTypeId}-form`}
@@ -27,15 +26,8 @@ function CheckBox({ formik, question }) {
                   checked: classes.checked,
                   root: classes.root
                 }}
-                checkedIcon={
-                  <CheckIcon
-                    style={{
-                      height: '18px',
-                      width: '18px'
-                    }}
-                  />
-                }
-                IconStyle={{ fill: 'black' }}
+                checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
+                iconstyle={{ fill: 'black' }}
               />
             }
             label={title}
@@ -47,13 +39,17 @@ function CheckBox({ formik, question }) {
         </div>
         {touched[ID] && errors[ID] && (
           <Box className={classes.flexCenter}>
-            <FormHelperText className={classes.maxWidth} error>
+            <FormHelperText
+              data-testid={`${title}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
               {errors[ID]}
             </FormHelperText>
           </Box>
         )}
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
 

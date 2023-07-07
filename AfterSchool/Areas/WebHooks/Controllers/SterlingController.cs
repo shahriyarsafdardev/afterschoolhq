@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
@@ -19,18 +19,21 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
+            if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                return ReturnOK(msgs);
+
             try
             {
                 var parsedObject = JObject.Parse(json.ToString());
                 var payload = parsedObject["payload"].ToString();
                 var responseBody = JsonConvert.DeserializeObject<Payload>(payload);
-                
+
                 List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
                 var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
-                
+
                 if (responseBody.result != "")
                 {
-                    
+
                     if (backgroundChecks.IsNotEmpty())
                     {
                         foreach (var backgroundCheck in backgroundChecks)
@@ -41,8 +44,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                     }
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
-            
-                    if(responseBody.result == "Clear")
+
+                    if (responseBody.result == "Clear")
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -52,26 +55,32 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             DateTime.UtcNow,
                             msgs
                         );
-                    
-                    if(responseBody.result == "Consider")
-                        VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId, 
-                            TaskStatus.ReviewBackground, 
-                            ApplicationStatus.FailedBackgroundCheck, 
+
+                    if (responseBody.result == "Consider")
+                        VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
+                            TaskStatus.ReviewBackground,
+                            ApplicationStatus.FailedBackgroundCheck,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             null,
                             msgs);
-                    
-                    latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-                    latestBackgroundCheck.BackgroundCheckResultId = (SterlingBackgroundCheckResult)Enum.Parse(typeof(SterlingBackgroundCheckResult), responseBody.result);
+
+                    latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus) Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+
+                    latestBackgroundCheck.BackgroundCheckResultId = (SterlingBackgroundCheckResult) Enum.Parse(typeof(SterlingBackgroundCheckResult), responseBody.result);
                     latestBackgroundCheck.IsActive = true;
-                    
+
                     msgs.AddRange(latestBackgroundCheck.Save());
                 }
                 else
                 {
-                    latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus)Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+
+                    if (responseBody.status != "Expired Invite")
+                        latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus) Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
+                    else
+                        latestBackgroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.ExpiredInvite;
+
                     latestBackgroundCheck.BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending;
-                    
+
                     msgs.AddRange(latestBackgroundCheck.Save());
                 }
 
@@ -83,20 +92,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
             }
-            
+
         }
-        
+
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
             return Ok(msgs.ToJSON());
         }
-        
+
         private IHttpActionResult Return500(SystemMessages msgs)
         {
             SendLogEmail(msgs);
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
         }
-        
+
         private void SendLogEmail(SystemMessages msgs)
         {
             string toEmail = "dev@afterschoolhq.com";
@@ -106,19 +115,19 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
         }
     }
-    
+
     public class Payload
     {
-        [JsonProperty(PropertyName = "id")] 
+        [JsonProperty(PropertyName = "id")]
         public string id { get; set; }
-        
-        [JsonProperty(PropertyName = "candidateId")] 
+
+        [JsonProperty(PropertyName = "candidateId")]
         public string candidateId { get; set; }
-        
-        [JsonProperty(PropertyName = "status")] 
+
+        [JsonProperty(PropertyName = "status")]
         public string status { get; set; }
-        
-        [JsonProperty(PropertyName = "result")] 
+
+        [JsonProperty(PropertyName = "result")]
         public string result { get; set; }
     }
 }

@@ -43,11 +43,7 @@ namespace AfterSchoolLibrary.Integrations
             };
             request.Body = jsonSerializer.Serialize(sterlingRequest);
             
-            Helpers.Utilities.SystemLog(request.ToString());
-
             var response = await httpClient.ExecuteAsync(request);
-            
-            Helpers.Utilities.SystemLog(response.ToString());
             
             if (response.StatusCode != 201)
                 throw new Exception($"Sterling screening request failed with status code {response.StatusCode}; body: {response.Body}");

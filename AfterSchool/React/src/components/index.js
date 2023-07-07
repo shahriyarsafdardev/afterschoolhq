@@ -1,7 +1,10 @@
 export { default as CheckBox } from './CheckBox';
+export { default as Modal } from './common/Modal';
 export { default as Loader } from './Loader/Loader';
 export { default as NavBar } from './NavBar/NavBar';
+export { default as PinModal } from './common/PinModal';
 export { default as CheckBoxList } from './CheckBoxList';
+export { default as ErrorBand } from './common/ErrorBand';
 export { default as TextField } from './TextField/TextField';
 export { default as TextBlock } from './TextBlock/TextBlock';
 export { default as ProgressBar } from './ProgressBar/ProgressBar';

@@ -285,6 +285,26 @@ namespace AfterSchool.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        public ActionResult UpdatePayingCustomer(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
+
+            if (account.IsEmpty())
+                msgs.Add("Invalid Account.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                account.SetIsPayingCustomer(!account.IsPayingCustomer, currentUser, msgs);
+                msgs.Add("Is Paying Customer changed successfully.", MessageType.Success);
+            }
+
+            SetTempMessages(msgs);
+            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
+        }
+
+        [HttpGet]
         public ActionResult DeleteAccount(string id, string pn, string rpp, string search, AccountType type = AccountType.NotSet)
         {
             var msgs = new SystemMessages();

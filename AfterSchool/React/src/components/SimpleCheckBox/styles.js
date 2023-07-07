@@ -4,17 +4,28 @@ const useStyles = makeStyles(theme => ({
   checkboxWrapper: {
     borderRadius: 12,
     display: 'flex',
-    maxWidth: 515,
+    maxWidth: 675,
     overflowWrap: 'anywhere',
-    marginLeft: '14px',
     width: '100%',
-    marginBottom: 15
+    marginBottom: 5,
+    [theme.breakpoints.up('sm')]: {
+      marginLeft: '-34px',
+      maxWidth: 'unset',
+      width: 'unset'
+    },
+    [theme.breakpoints.between('sm', 'md')]: {
+      marginLeft: '-24px'
+    }
   },
   formControlLabelRoot: {
     margin: '10px 0px',
     alignItems: 'flex-start',
     '& .MuiTypography-root': {
-      marginLeft: 18
+      marginLeft: 18,
+      textAlign: 'left',
+      [theme.breakpoints.down('md')]: {
+        marginLeft: 8
+      }
     }
   },
   checked: {
@@ -36,24 +47,17 @@ const useStyles = makeStyles(theme => ({
       width: '18px'
     }
   },
-  textFieldGrid: {
-    maxWidth: 540,
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
+  outerWrapper: {
+    maxWidth: '675px',
+    margin: 'auto'
   },
-  titleGrid: {
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  textFieldBox: {
+  innerWrapper: {
     display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      justifyContent: 'flex-start'
-    }
+    margin: 'auto'
+  },
+  checkBoxIcon: {
+    height: '18px',
+    width: '18px'
   }
 }));
 

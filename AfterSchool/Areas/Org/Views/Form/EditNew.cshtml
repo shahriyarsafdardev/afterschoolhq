@@ -1,0 +1,47 @@
+@model Form
+@{
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var currentAccount = SessionVariables.CurrentAccount;
+    var bundleVersion = (String)ViewBag.BundleVersion;
+}
+
+@{Html.RenderPartial("OrgAccountHeader");}
+<style>
+    @@media(max-width: 600px){
+        .panel-body{
+            padding-left:0;
+            padding-right:0;
+        }
+    }
+</style>
+
+<div class="main-content">
+
+    @{Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);}
+
+    <div class="panel panel-default">
+        <div class="panel-heading row">
+            <div class="col-xl-10 col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                <i class="s7-note2"></i> Form - @Model.Name
+            </div>
+            <div id="right-section" class="pull-right">
+                @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
+                {
+                    <a href="@Url.Action("report", "form", new {form = Model.ID})" class="btn btn-default" target="_blank">View Submissions</a>
+                }
+                <a href="@Url.Action("index", "form")" class="btn btn-default">&laquo; All Forms</a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="root" style="height: 100%"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/React/dist/bundle.js?v=@bundleVersion"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+

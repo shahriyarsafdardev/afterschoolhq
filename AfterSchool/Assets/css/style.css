@@ -23106,3 +23106,10 @@ a.text-limit span {
         position: static !important;
     }
 }
+
+@media(max-width: 992px) {
+    #right-section{
+        float: left !important;
+        padding-left: 15px;
+    }
+}

@@ -30,7 +30,14 @@ const FileUpload = ({ formik, question }) => {
   };
 
   const parseFileName = () => {
-    if (typeof values[ID] === 'string') return values[ID].split('/').at(-1);
+    if (typeof values[ID] === 'string')
+      try {
+        return values[ID].split('?')[0]
+          .split('/')
+          .at(-1);
+      } catch {
+        return '';
+      }
   };
   const getFileName = () => values[ID]?.name || parseFileName() || '';
 
@@ -44,38 +51,44 @@ const FileUpload = ({ formik, question }) => {
 
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
-      <div className={classes.photoWrapper}>
-        <div>Supported file types are .pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3</div>
-        <Box className={classes.uploadButtonWrapper}>
-          <Button
-            data-testid={`${title}-${QuestionDataTypeId}-button`}
-            className={classes.uploadButton}
-            onClick={handleClick}
-          >
-            {fileName ? 'Discard & Upload New File' : 'Upload File'}
-          </Button>
-          {fileName && (
-            <Typography data-testid={`${title}-${QuestionDataTypeId}-filename`}>
-              {fileName}
-            </Typography>
-          )}
-        </Box>
-        <input
-          type="file"
-          accept=".pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3"
-          ref={uploadInputRef}
-          className={classes.inputFile}
-          onChange={handleUploadChange}
-          data-testid={`${title}-${QuestionDataTypeId}-input`}
-        />
-      </div>
-      {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText className={classes.maxWidth} error>
-            {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
-          </FormHelperText>
-        </Box>
-      )}
+      <Box className={classes.outerWrapper}>
+        <div className={classes.photoWrapper}>
+          <div>Supported file types are .pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3</div>
+          <Box className={classes.uploadButtonWrapper}>
+            <Button
+              data-testid={`${title}-${QuestionDataTypeId}-button`}
+              className={classes.uploadButton}
+              onClick={handleClick}
+            >
+              {fileName ? 'Discard & Upload New File' : 'Upload File'}
+            </Button>
+            {fileName && (
+              <Typography data-testid={`${title}-${QuestionDataTypeId}-filename`}>
+                {fileName}
+              </Typography>
+            )}
+          </Box>
+          <input
+            type="file"
+            accept=".pdf,.txt,.docx,.png,.jpg,.jpeg,.mp4,.mp3"
+            ref={uploadInputRef}
+            className={classes.inputFile}
+            onChange={handleUploadChange}
+            data-testid={`${title}-${QuestionDataTypeId}-input`}
+          />
+        </div>
+        {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
+          <Box className={classes.flexCenter}>
+            <FormHelperText
+              data-testid={`${title}-${QuestionDataTypeId}-error`}
+              className={classes.maxWidth}
+              error
+            >
+              {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
+            </FormHelperText>
+          </Box>
+        )}
+      </Box>
     </FieldWrapper>
   );
 };

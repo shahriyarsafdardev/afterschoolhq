@@ -10,13 +10,19 @@
     var typesWithRating = new List<QuestionType> { QuestionType.Rating };
     var typesWithOptions = new List<QuestionType> { QuestionType.CheckboxList, QuestionType.DropDownList, QuestionType.RadioList, QuestionType.RadioMatrix, QuestionType.Emoji };
     var typesUserCannotAdd = Model.GetTypesUserCannotAdd();
-
+    var formUrl = ViewBag.FormUrl;
     if (questionGroup.IsNotEmpty())
     {
         qgId = questionGroup.ID;
         questions = questionGroup.GetAllQuestions().Where(a => a.Text.IsNotEmpty() || a.QuestionTypeId == QuestionType.TextBlock).ToList();
     }
     var count = 1;
+
+    var publishClass = "btn-success";
+    if (Model.IsPublished ?? false)
+    {
+        publishClass = "btn-danger";
+    }
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -26,15 +32,17 @@
     @{Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs);}
 
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="pull-right">
+        <div class="panel-heading row">
+            <div class="col-xl-10 col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                <i class="s7-note2"></i> Form - @Model.Name
+            </div>
+            <div id="right-section" class="pull-right">
                 @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
                 {
-                    <a href="@Url.Action("report", "form", new { form = Model.ID })" class="btn btn-default" target="_blank">View Submissions</a>
+                    <a href="@Url.Action("report", "form", new {form = Model.ID})" class="btn btn-default" target="_blank">View Submissions</a>
                 }
                 <a href="@Url.Action("index", "form")" class="btn btn-default">&laquo; All Forms</a>
             </div>
-            <i class="s7-note2"></i> Form - @Model.Name
         </div>
         <div class="panel-body">
 
@@ -51,6 +59,10 @@
                                     {
                                         <button type="submit" class="btn btn-default btn-space" onclick="navigateForm('@Url.Action("edit", "form", new { id = Model.ID, qg = qgId, cmd = "prev" })')">&laquo;</button>
                                     }
+                                    @if (Model.FormTypeId == FormType.Survey)
+                                    {
+                                        <a href="@Url.Action("publish", "form", new { id = Model.ID })" class="btn @publishClass"><i class="s7-link"></i> @(Model.IsPublished == true ? "Unpublish":"Publish...")</a>  
+                                    }
                                     <button type="submit" class="btn btn-default btn-space"><i class="s7-diskette"></i> Save</button>
                                     @if (questionGroups.Count() > 0 ? questionGroups.Last().ID != qgId : false)
                                     {
@@ -62,6 +74,24 @@
                                 Settings
                             </div>
                             <div class="panel-body">
+                                <div class="form-group">
+                                    @if (Model.FormTypeId == FormType.Survey && (Model.IsPublished ?? false))
+                                    {
+                                        <label class="col-sm-3 control-label">Published Url</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="formUrl" name="formUrl" value="@formUrl" onfocus="this.select()" required />
+                                        </div>
+                                        <div class="col-sm-1 pt-1" style="margin-top:5px">
+                                            @* IN- LINE STYLING --- NEEDS REFACTORING ^ *@
+                                            <span onclick="WebPage.copySelection('@formUrl', 'URL has been copied')" title="Copy Url">
+                                                <i class="s7-copy-file icon-large text-success pointer"></i>
+                                            </span>
+                                            <a href="@formUrl" target="_blank" title="View Page">
+                                                <i class="s7-link icon-large"></i>
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">Form Name</label>
                                     <div class="col-sm-9">
@@ -512,11 +542,12 @@
             </div>
             <div class="modal-body form fixed-height-modal-options">
                 <p id="valueRequired" class="text-danger hide">Value is required.</p>
-                <p class="minMaxValidation text-danger hide">Max value should be greater than min value.</p>
+                <p class="minMaxValidation text-danger hide">Min rating value should be less than max value.</p>
                 <p id="invalidBarChar" class="text-danger hide">| sign is not allowed.</p>
                 <div class="form-group row d-flex">
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-min" name="question-rating-min" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="0" max="9" required id="question-rating-min" name="question-rating-min" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
                     <div class="col">
@@ -526,22 +557,13 @@
                     </div>
 
                     <div class="col">
-                        <input class="form-control input-sm rating" required id="question-rating-max" name="question-rating-max" oninput="setOptionalLabelAndIncrement();" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                        <input class="form-control input-sm rating" type="number" min="1" max="10" required id="question-rating-max" name="question-rating-max" 
+                               oninput="setOptionalLabelAndIncrement(isNaN(parseFloat(this.value)), this);" />
                     </div>
 
-                    <div class="col">
-                        <label class="rating-label">
-                            by increments of
-                        </label>
-                    </div>
-
-                    <div class="col">
-                        <select class="form-control input-sm rating" id="question-rating-increment" onchange="setRatingIncrement()">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>5</option>
-                            <option>10</option>
-                            <option>25</option>
+                    <div class="col hide">
+                        <select class="form-control input-sm rating" id="question-rating-increment">
+                            <option value="1" selected="selected">1</option>
                         </select>
                     </div>
                 </div>
@@ -563,11 +585,11 @@
                         <input class="form-control input-sm" id="question-rating-label-max" required placeholder="Label (Optional)" />
                     </div>
                 </div>
-
+                <p id="ratingError" class="text-danger hide">Max rating value should not be greater than 10.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-                <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="updateRating()">Done</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" id="btnRating" onclick="updateRating()">Done</button>
             </div>
         </div>
     </form>
@@ -1297,27 +1319,37 @@
         $('#question-rating-increment').val($('#question-rating-increment').val());
     }
 
-    function setOptionalLabelAndIncrement() {
-
-        var ratingMaxValue = $('#question-rating-max').val().replace(/[^\d.-]/g, '');
-        var ratingMinValue = $('#question-rating-min').val().replace(/[^\d.-]/g, '');
-
-        if ($.isNumeric($('#question-rating-min').val())) {
-            $('#rating-min-label').empty();
-            $('#rating-min-label').append($('#question-rating-min').val());
+    function setOptionalLabelAndIncrement(isNan, input) {  
+        if (isNan) {
+            $(input).val('');
         }
-
-        if ($.isNumeric($('#question-rating-max').val())) {
-            $('#rating-max-label').empty();
-            $('#rating-max-label').append($('#question-rating-max').val());
-        }
-
-        $('#question-rating-increment').empty();
-
-        for (var i = ratingMinValue; i < ratingMaxValue; i++) {
-            if (ratingMaxValue % i == 0) {
-                var newOption = $('<option value="' + i + '">' + i + '</option>');
-                $('#question-rating-increment').append(newOption);
+        else {
+            let maxValue = 10;
+            let minRatingValue = parseInt($('#question-rating-min').val());
+            let maxRatingValue = parseInt($('#question-rating-max').val()); 
+            let minRatingError = $('.minMaxValidation');
+            let maxRatingError = $('#ratingError');
+            
+            $('#rating-min-label').html(minRatingValue);
+            $('#rating-max-label').html(maxRatingValue);
+            
+            if (maxRatingValue > maxValue || minRatingValue >= maxRatingValue) {
+                $('#btnRating').prop('disabled', true);
+            }    
+            else {
+                $('#btnRating').prop('disabled', false);
+            }
+            if (maxRatingValue > maxValue) {
+                $(maxRatingError).removeClass('hide');
+            } 
+            else {
+                $(maxRatingError).addClass(' hide');
+            }    
+            if (minRatingValue >= maxRatingValue) {
+                $(minRatingError).removeClass('hide');
+            }
+            else {
+                $(minRatingError).addClass(' hide');
             }
         }
     }

@@ -1188,14 +1188,14 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, Stream file, string filename, FormQuestion question, int? registrationId,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (question.IsNotEmpty())
             {
                 var amazonFilePath = registrant.UploadFile(file, filename, question, msgs, dc);
 
                 if (msgs.HasNoErrors())
-                    return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc);
+                    return registrant.AddOrUpdateAnswer(amazonFilePath, question, registrationId, loggedInUser, msgs, dc, description);
             }
 
             return null;
@@ -1211,7 +1211,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, FormQuestion question, int? registrationId,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (question.IsNotEmpty())
             {
@@ -1226,14 +1226,31 @@ namespace AfterSchoolLibrary.Services
                     registrationId,
                     loggedInUser,
                     msgs,
-                    dc);
+                    dc,
+                    description);
             }
 
             return null;
         }
+        
+        public static void UpdateDescription(this Registrant registrant, string description, FormQuestion question, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (msgs.IsEmpty()) msgs = new SystemMessages();
+            FormQuestionAnswer answer = null;
+
+            answer = FormQuestionAnswer.LoadByFormQuestionIdByRegistrantId(question.ID.Value, registrant.ID.Value, msgs, dc);
+
+            if (answer.IsNotEmpty())
+            {
+                answer.Description = description;
+                answer.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(answer.Save(dc));
+            }
+
+        }
 
         public static FormQuestionAnswer AddOrUpdateAnswer(this Registrant registrant, string answerText, int? questionId, QuestionDataType questionDataType,
-            string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            string questionText, int? registrationId, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null, string description="")
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1275,7 +1292,8 @@ namespace AfterSchoolLibrary.Services
                     CreateDate = DateTime.UtcNow,
                     CreatedBy = loggedInUser?.ID,
                 };
-
+            if (description != "")
+                answer.Description = description;
             answer.RegistrationId = registrationId;
             answer.Text = answerText;
             answer.LastModifiedDate = DateTime.UtcNow;
@@ -1445,6 +1463,98 @@ namespace AfterSchoolLibrary.Services
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
                 dc: dc
             );
+        }
+
+        public static string GetReEnrollmentModalHtmlContent(ParticipationObject participationObject, Activity activity,Registrant registrant, decimal amountPaid)
+        {
+            decimal costToDisplay = 0;
+            var registrationSubscriptionText = "";
+            var isRegFree = participationObject.IsRegistrationFree;
+            var regSubPlanCount = registrant.GetRegistrantSubscriptionPlans(null).Count;
+            var htmlString = "";
+            if (!isRegFree)
+            {
+                var totalFee = activity.HasPaymentPlan() ? 0 : participationObject.GetCreditCardFee();
+                amountPaid += totalFee + (activity.HasSubscriptionPlan() ? participationObject.Cost ?? 0 : 0);
+                costToDisplay = participationObject.Cost + totalFee ?? 0;
+                registrationSubscriptionText = $"a registration fee of <strong>{costToDisplay.ToCurrency()}</strong>";
+            }
+            if (activity.HasSubscriptionPlan())
+            {
+                var subscriptionPlan = activity.GetSubscriptionPlan();
+                var account = subscriptionPlan.GetAccount();
+                var totalFee = subscriptionPlan.GetCreditCardFee(account);
+                costToDisplay += subscriptionPlan.CostPerPeriod + totalFee ?? 0;
+                registrationSubscriptionText += 
+                    $"{(!isRegFree ? " plus a" : "a")} {subscriptionPlan.BillingPeriodTypeId.ToString().ToLower()}ly " +
+                    $"subscription charge of <strong class=\"proratedCost\">{(subscriptionPlan.CostPerPeriod + totalFee).ToCurrency()}</strong>";
+            }
+            if (activity.HasPaymentPlan() && regSubPlanCount > 0)
+            {
+                var paymentPlan = activity.GetPaymentPlan();
+                var totalPeriods = paymentPlan.TotalPeriods ?? 0;
+                htmlString = $"<span class=\"registrantName\">Taco Turner</span><span> has previously paid {regSubPlanCount} of {totalPeriods} payments towards the" +
+                             $" <strong>{participationObject.Cost.ToCurrency()}</strong> registration fee (totaling <strong class=\"proratedCost\" id=\"paidCost\">" +
+                             $"{amountPaid.ToCurrency()}</strong>) for <strong>{participationObject.Name}</strong>. Do you want to send a payment link for" +
+                             "<span id=\"costToPay\"> the full registration amount</span>?</span>";
+            }
+            else
+            {
+                htmlString = "<span class=\"registrantName\">Taco Turner</span><span> has previously paid <strong class=\"proratedCost\" id=\"paidCost\">" +
+                             $"{amountPaid.ToCurrency()}</strong> for <strong>{participationObject.Name}</strong>. Do you want to send a payment link for" +
+                             $" {registrationSubscriptionText}<span id=\"costToPay\" class=\"hide\">{costToDisplay.ToCurrency()}</span>?</span>";
+            }
+            return htmlString;
+        }
+        public static (string,string) ReEnrollCurrentRegistrant(this Registrant registrant, int participationObjectId, ParticipationObjectType participationObjectType,
+            WebUser loggedInUser, Account account, bool requirePayment, string paidCost, string costToPay, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs, dc);
+            var ras = registrant.GetRegistrantActivities(msgs, dc);
+            var ra = ras.Find(item => item.ParticipationObjectId == participationObjectId && 
+                                      item.ParticipationObjectTypeId == participationObjectType);
+            var newRegistrationAssignment = RegistrationAssignmentType.ReservedPendingPayment;
+            if (ra.IsEmpty())
+            {
+                msgs.Add("Registration not found", MessageType.Error);
+                return ("","");
+            }
+
+            var activity = ra.GetActivity(msgs, dc);
+            var hasAccessToActivity = activity.IsNotEmpty()
+                ? ActivityWebUser.LoadByActivityIdByWebUserId(activity.ID.Value, loggedInUser.ID.Value, msgs, dc).IsNotEmpty()
+                : false;
+
+            if (!loggedInUser.IsTechSupportOwnerOrAdmin(account, msgs, dc)
+                && !loggedInUser.HasAccessToRegistrant(masterRegistrant, msgs, dc)
+                && !hasAccessToActivity)
+            {
+                msgs.Add("You don't have permission to modify this registration", MessageType.Error);
+                return ("","");
+            }
+
+            if (!requirePayment || activity.IsFree)
+                newRegistrationAssignment = RegistrationAssignmentType.Reserved;
+            
+            Database.ExecuteTransaction
+            (
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    ra.ChangeSeatAssignment(newRegistrationAssignment, loggedInUser, amsgs, adc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+
+                    // Notify Parent
+                    var participationObject = ra.GetParticipationObject(msgs, dc);
+                    EmailHelper.SendReEnrollConfirmation(masterRegistrant, ra, participationObject, requirePayment, paidCost, costToPay);
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs),
+                dc: dc
+            );
+            return (activity.Name, ra.AssignmentTypeId.ToString());
         }
 
         public static Registration AddRegistration(this Registrant registrant, int ownerAccountId, int? activityGroupId, int? accountActivityGroupId,

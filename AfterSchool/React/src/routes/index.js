@@ -1,4 +1,5 @@
 export default {
+  //Registration
   RegisterAPI: 'Api/Registration/Register',
   currentUserAPI: 'Api/Registration/GetCurrentUser',
   submitFormDataAPI: 'Api/Registration/AddUpdateAnswers',
@@ -11,7 +12,14 @@ export default {
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+  // Update Registration APIs
+  getRegistrationFormDataAPI: regUid =>
+    `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
+  submitRegistrationFormDataAPI: 'Api/UpdateRegistration/AddUpdateAnswers',
+  UpdateRegistrationSchoolAPI: 'Api/UpdateRegistration/CreateOrUpdateFromGoogle',
+  UpdateRegistrationWithESignature: 'Api/UpdateRegistration/UpdateRegistrationWithESignature',
 
+  //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
   submitVolunteerFormDataAPI: 'Api/VolunteerRegistration/AddUpdateAnswers',
   updateVolunteerProfileFormDataAPI: 'Api/VolunteerRegistration/UpdateProfile',
@@ -23,13 +31,33 @@ export default {
   getVolunteerFormDataAPI: (accountName, activityName, regUid) =>
     `Api/VolunteerRegistration/GetForm?accountName=${accountName}&activityName=${activityName}&registrantUid=${regUid}`,
 
+  //FormBuilder API
+  getFormBuilderDataAPI: formId => `Api/Form/GetFormData/?FormId=${formId}`,
+  getFormBuilderSectionDataAPI: (formId, sectionId) =>
+    `Api/Form/GetFormQuestions/?FormId=${formId}&SectionId=${sectionId}`,
+  submitFormBuilderDataAPI: 'Api/Form/SaveFormData',
+  saveNewSectionDataAPI: 'Api/Form/SaveNewSection',
+
+  // Survey Form APIs
+  getSurveyFormDataAPI: (formUid, surveyResponseUid) =>
+    `Api/SurveyForm/GetForm?formUid=${formUid}&surveyResponseUid=${surveyResponseUid}`,
+  submitSurveyFormDataAPI: 'Api/SurveyForm/AddUpdateAnswers',
+  getSurveyFormDataWithPinAPI: (uid, pin) => `Api/SurveyRequest/GetForm?uid=${uid}&pin=${pin}`,
+  submitSurveyFormDataWithPinAPI: 'Api/SurveyRequest/AddUpdateAnswers',
+
+  //Paths & URLs
   paymentScreenPath: uId => `/account/payment/${uId}`,
   thankyouScreenPath: uId => `/account/thankyou/${uId}`,
 
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
+  formSettingsPath: formId => `/Org/form/edit/${formId}`,
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
+  surveyUrl: formUid => `/reactapp/survey/${formUid}`,
+  pinSurveyThankyouUrl: srUid => `/reactapp/sr/${srUid}/thankyou`,
+  pinSurveyUrl: (srUid, pin) => `/reactapp/sr/${srUid}?pin=${pin}`,
+  surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,
   facebookShareUrl: (activityUrl, textToShare = '') =>

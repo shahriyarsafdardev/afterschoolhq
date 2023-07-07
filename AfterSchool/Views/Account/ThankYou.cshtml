@@ -11,6 +11,7 @@
     var assignmentType = Model.AssignmentType;
     var participationObject = Model.ParticipationObject;
     var currentUser = Model.CurrentUser;
+    var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
 }
 
 @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
@@ -85,7 +86,7 @@
                     {
                         <hr/>
 
-                        if (true)
+                        if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
                         {
                             Html.RenderPartial(
                                 "~/Views/Shared/Registration/_RegisterButton.cshtml",

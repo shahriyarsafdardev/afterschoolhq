@@ -4,6 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Text.RegularExpressions;
 using System.Web;
 using AfterSchoolLibrary.Models;
 using Amazon;
@@ -29,6 +30,7 @@ namespace AfterSchoolLibrary.Helpers
         };
 
         public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
+        public const int MaxFileSize = 5242880;
 
         public static string SurveyBaseUrl => Environment switch
         {
@@ -251,10 +253,8 @@ namespace AfterSchoolLibrary.Helpers
             // for data formatted like this '[[1,2,3,4]]"
             if (stringInput.StartsWith("[["))
             {
-                // get rid of the surrounding brac
-                stringInput = stringInput.Substring(2); 
-                if (stringInput.EndsWith("]]"))
-                    stringInput = stringInput.Substring(0, stringInput.Length - 2);
+                // get rid of the surrounding bracs and only keep one
+                stringInput = Regex.Replace(stringInput, @"^\[+(.*?)\]+$", "[$1]");
 
                 s = stringInput;
             }

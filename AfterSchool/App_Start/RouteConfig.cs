@@ -1,4 +1,4 @@
-﻿using System.Web.Mvc;
+using System.Web.Mvc;
 using System.Web.Routing;
 
 namespace AfterSchool
@@ -111,6 +111,23 @@ namespace AfterSchool
                 new {controller = "VolunteerRegistration", action = "GetStarted", id = UrlParameter.Optional},
                 new[] {"AfterSchool.Controllers"});
 
+            routes.MapRoute(
+                "SurveyRequest",
+                "sr/{id}",
+                new { controller = "survey", action = "sr", id = UrlParameter.Optional },
+                new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
+               "Survey",
+               "survey/{id}",
+               new { controller = "survey", action = "index", id = UrlParameter.Optional },
+               new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
+                "RegUpdate",
+                "reg/{action}/{regUid}",
+                new {controller = "r", action = "update", regUid = UrlParameter.Optional});
+            
             routes.MapRoute(
                 "LeagueHome1",
                 "{accountname}/league/{leaguename}",

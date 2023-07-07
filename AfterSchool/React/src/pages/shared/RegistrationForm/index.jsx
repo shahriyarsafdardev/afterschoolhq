@@ -4,6 +4,7 @@ import { Form, FormikProvider } from 'formik';
 import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
 
 import { Loader, ProgressBar, ShowQuestion } from 'components';
+import { eSignMsg } from 'constants';
 import useStyles from './styles';
 
 export default function RegistrationForm(props) {
@@ -25,13 +26,33 @@ export default function RegistrationForm(props) {
     handleSection,
     registrantType,
     saveButtonText,
+    allowToPayLater,
+    showExit = true,
+    isSurvey = false,
     currentQuestions,
     handleRedirection,
-    isUpdating = false
+    isUpdating = false,
+    isUpdatingRegistration = false
   } = props;
-  const outerWrapperClass = isUpdating
-    ? classes.outerWrapper
-    : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
+  const outerWrapperClass =
+    isUpdating || isSurvey
+      ? classes.outerWrapper
+      : cs(classes.outerWrapper, classes.outerWrapperMarginTop);
+
+  const showMsg =
+    lastSection &&
+    !isUpdatingRegistration &&
+    !isFree &&
+    registrantType &&
+    registrantType !== 'Volunteer';
+
+  function eSignInfoText() {
+    return (
+      <Box className={classes.infoText}>
+        <Typography data-testid="eSignInfoText">{eSignMsg(allowToPayLater)}</Typography>
+      </Box>
+    );
+  }
   return (
     <FormikProvider value={formik}>
       <Form autoComplete="off" noValidate onSubmit={handleSubmit} className={classes.form}>
@@ -39,51 +60,48 @@ export default function RegistrationForm(props) {
           <Loader />
         ) : (
           <Box className={outerWrapperClass}>
-            {isUpdating ? (
-              <Box className={classes.exitButtonWrapper}>
-                <Button
-                  color="primary"
-                  variant="outlined"
-                  className={classes.backButton}
-                  onClick={() => handleRedirection()}
-                  data-testid={`Exit-${Name}`}
-                >
-                  Exit
-                </Button>
-              </Box>
-            ) : (
-              firstSection && (
+            {showExit &&
+              (isUpdating ? (
                 <Box className={classes.exitButtonWrapper}>
                   <Button
                     color="primary"
                     variant="outlined"
                     className={classes.backButton}
-                    onClick={exitHandler}
+                    onClick={() => handleRedirection()}
                     data-testid={`Exit-${Name}`}
                   >
                     Exit
                   </Button>
                 </Box>
-              )
-            )}
+              ) : (
+                firstSection && (
+                  <Box className={classes.exitButtonWrapper}>
+                    <Button
+                      color="primary"
+                      variant="outlined"
+                      className={classes.backButton}
+                      onClick={exitHandler}
+                      data-testid={`Exit-${Name}`}
+                    >
+                      Exit
+                    </Button>
+                  </Box>
+                )
+              ))}
             <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>
-                <Typography
-                  style={{
-                    padding: '30px 0px'
-                  }}
-                  variant="h6"
-                  color="primary"
-                >
+                <Typography className={classes.sectionName} variant="h6" color="primary">
                   {Name}
                 </Typography>
                 <Grid container className={cs(classes.justifyContentCenter, classes.leftPadding)}>
                   <Grid className={classes.innerContainer} item xs={12} md={12} lg={12}>
-                    {currentQuestions?.map(question =>
+                    {currentQuestions?.map((question, index) =>
                       ShowQuestion({
+                        index,
+                        formik,
                         isUpdating,
-                        formik: formik,
+                        isUpdatingRegistration,
                         currentQuestion: question,
                         currentQuestions: currentQuestions
                       })
@@ -91,6 +109,7 @@ export default function RegistrationForm(props) {
                   </Grid>
                 </Grid>
                 <Box className={classes.buttonOuterWrapper}>
+                  {showMsg && eSignInfoText()}
                   <Box className={classes.buttonWrapper}>
                     <Button
                       color="primary"
