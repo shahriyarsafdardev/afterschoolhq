@@ -110,7 +110,10 @@ function SchoolField({
     }
   };
 
-  const changeHandler = event => setSchoolValue(event.target.value);
+  const changeHandler = event => {
+    setSchoolValue(event.target.value);
+    setFieldValue(ID, '');
+  };
 
   useEffect(() => {
     setSchoolValue(school?.locationName || school?.Name || '');

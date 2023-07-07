@@ -131,6 +131,8 @@ export default function Registration({ newChild = false }) {
             errors = msgs;
           });
           if (errors.length) return setSaveDisabled(false);
+        } else {
+          schoolLocationID = school?.ID;
         }
 
         await submitFormSectionData(
