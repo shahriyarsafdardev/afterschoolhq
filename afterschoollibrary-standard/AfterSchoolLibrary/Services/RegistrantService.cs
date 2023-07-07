@@ -214,18 +214,18 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
                 
-                // Temporary Addition
-                stripeMetaData.Add("End Long Date Time String", proratingCalculation.GetEndDate().ToLongDateTimeString());
-                stripeMetaData.Add("UTC Time Now", DateTime.UtcNow.ToLongDateTimeString());
-                stripeMetaData.Add("Local Time Now", DateTime.Now.ToLongDateTimeString());
-
-
-
                 startDateTime = proratingCalculation.GetStartDate();
                 endDateTime = proratingCalculation.GetEndDate();
                 anchorDate = proratingCalculation.GetAnchorDate();               
             }
 
+            
+            // Temporary Addition
+            stripeMetaData.Add("End Long Date Time String", proratingCalculation.GetEndDate().ToLongDateTimeString());
+            stripeMetaData.Add("UTC Time Now", DateTime.UtcNow.ToLongDateTimeString());
+            stripeMetaData.Add("Local Time Now", DateTime.Now.ToLongDateTimeString());
+            
+            
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
