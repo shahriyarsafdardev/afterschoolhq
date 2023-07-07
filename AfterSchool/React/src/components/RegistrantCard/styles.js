@@ -5,12 +5,11 @@ const useStyles = makeStyles(theme => ({
     borderColor: '#00AE85',
     borderRadius: '10px',
     boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
-    // width: '400px',
     minWidth: '385px',
-    minHeight: '215px'
-    // [theme.breakpoints.only('xs')]: {
-    //   minWidth: '300px'
-    // }
+    minHeight: '215px',
+    [theme.breakpoints.only('xs')]: {
+      minWidth: '300px'
+    }
   },
   enrollButton: {
     background: theme.palette.primary.main,
@@ -37,20 +36,29 @@ const useStyles = makeStyles(theme => ({
     textAlign: 'center',
     color: theme.palette.text.hint
   },
-  subHeading2: {
+  enrollMsg: {
     fontFamily: 'Montserrat',
     fontWeight: '300',
     fontSize: '14px',
     textAlign: 'center',
-    color: theme.palette.text.hint
+    color: theme.palette.text.hint,
+    [theme.breakpoints.only('xs')]: {
+      width: '260px'
+    }
   },
   actions: {
     flexDirection: 'column',
     padding: '8px 16px 16px 16px',
-    gap: '10px'
+    gap: '10px',
+    [theme.breakpoints.only('xs')]: {
+      minHeight: '144px'
+    }
   },
   arrowIcon: {
     fontSize: '8px'
+  },
+  cardContent: {
+    minHeight: '84px'
   }
 }));
 
