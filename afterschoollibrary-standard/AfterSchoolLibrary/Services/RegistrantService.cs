@@ -225,7 +225,6 @@ namespace AfterSchoolLibrary.Services
             stripeMetaData.Add("UTC Time Now", DateTime.UtcNow.ToLongDateTimeString());
             stripeMetaData.Add("Local Time Now", DateTime.Now.ToLongDateTimeString());
             
-            
             // create the subscription on the stripe account (could be added to main account or connected account)
             var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
                 customerId: customer.Id,
