@@ -835,7 +835,8 @@ namespace AfterSchoolLibrary.Models
                 from 
                     FormQuestionAnswer inner join 
                     FormQuestion on FormQuestionAnswer.FormQuestionId = FormQuestion.ID inner join 
-                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID left outer join
+                    Registrant on FormQuestionAnswer.RegistrantId = Registrant.ID inner join
+                    Registration on Registrant.ID = Registration.RegistrantID left outer join
                     Location on Registrant.SchoolLocationId = Location.ID";
 
             if (activityIds.IsNotEmpty() && activityIds.Any())
@@ -845,7 +846,8 @@ namespace AfterSchoolLibrary.Models
 
             sql += @$"
                 where 
-                    Registrant.AccountId = {accountId}";
+                    Registrant.AccountId = {accountId} and
+                    Registration.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed} ";
             
             if (formId.HasValue) 
                 sql += $" and FormQuestion.FormId = {formId.Value}";
