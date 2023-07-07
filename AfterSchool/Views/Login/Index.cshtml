@@ -122,7 +122,7 @@
                 @Html.Raw(UI.RenderMessagesToHtml(msgs))
                 <div class="clearfix"></div>
 
-                <form action="@Url.Action("index", "login", new {returnurl = ViewData["ReturnUrl"], invite = ViewData["invite"]})" method="post" class="form-horizontal" id="form-login">
+                <form action="@Url.Action("index", "login", new {returnurl = Request["ReturnUrl"], invite = ViewData["invite"]})" method="post" class="form-horizontal" id="form-login">
 
                     <div class="form-group">
                         <label class="short-description" for="username"> Email </label>
