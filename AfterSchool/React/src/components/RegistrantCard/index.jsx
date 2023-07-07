@@ -15,7 +15,7 @@ function RegistrantCard({ name, showMsg }) {
 
   return (
     <Card className={classes.root} variant="outlined">
-      <CardContent style={{ minHeight: '84px' }}>
+      <CardContent className={classes.cardContent}>
         <Typography className={classes.heading}>{name ? name : 'New Participant'}</Typography>
         {name && (
           <Typography className={classes.subHeading}>
@@ -33,7 +33,7 @@ function RegistrantCard({ name, showMsg }) {
           {buttonText} &nbsp; <DoubleArrowIcon className={classes.arrowIcon} />
         </Button>
         {showMsg && (
-          <Typography className={classes.subHeading2}>
+          <Typography className={classes.enrollMsg}>
             This activity is for students who are 16-18 years old.
           </Typography>
         )}
