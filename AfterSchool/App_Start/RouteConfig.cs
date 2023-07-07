@@ -118,6 +118,12 @@ namespace AfterSchool
                 new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
+                "SubscriptionCreationStripe",
+                "SubscriptionCreationStripe/{action}/{enddate}",
+                new { controller = "SubscriptionCreationStripe", action = "Index", enddate = UrlParameter.Optional },
+                new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
                "Survey",
                "survey/{id}",
                new { controller = "survey", action = "index", id = UrlParameter.Optional },

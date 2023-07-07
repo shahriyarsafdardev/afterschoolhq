@@ -679,6 +679,7 @@
     <Compile Include="Assemblers\VolunteerProfileQuestionsAssembler.cs" />
     <Compile Include="Assemblers\VolunteerRegisterAssembler.cs" />
     <Compile Include="Controllers\RegistrationCommon.cs" />
+    <Compile Include="Controllers\SubscriptionCreationStripeController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
@@ -2611,6 +2612,7 @@
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />
+    <Folder Include="Views\SubscriptionCreationStripe\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
