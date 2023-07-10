@@ -58,11 +58,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact1FirstName,
                     QuestionDataType.EmergencyContact1LastName,QuestionDataType.EmergencyContact1Phone, FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
                 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
-                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact2FirstName,
+                    QuestionDataType.EmergencyContact2LastName,QuestionDataType.EmergencyContact2Phone, FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
                 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
-                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact3FirstName,
+                    QuestionDataType.EmergencyContact3LastName,QuestionDataType.EmergencyContact3Phone, FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
                 
                 dynamic response = new
                 {
