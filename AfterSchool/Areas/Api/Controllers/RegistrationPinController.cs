@@ -8,6 +8,7 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -85,7 +86,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         RegistrationUid = registration?.Uid,
                         IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
                         MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
-                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
+                        MaxGrade = participationObject.GetMaxGradeLevel(msgs).Abbreviation,
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
@@ -103,6 +104,98 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 return Json(
                     new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult AddOrUpdateRegistrantWebUser(string registrationUid, string phone, string pinCode, List<PickUpDto> peopleList)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                if (!registrationUid.IsGuid())
+                    throw new Exception("Invalid Id");
+
+                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+
+                if (registration.IsEmpty())
+                    throw new Exception("No Registration");
+
+                var currentRegistrant = registration.GetRegistrant(msgs);
+
+                if (currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
+
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if (currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
+                
+                Database.ExecuteTransaction
+                (
+                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
+                        {
+                            if (currentUser.Phone.IsEmpty())
+                                currentUser.Phone = phone;
+
+                            if (currentUser.PinCode.IsEmpty())
+                                currentUser.PinCode = pinCode;
+                            
+                            amsgs.AddRange(currentUser.Save(adc));
+                        }
+
+                        if (amsgs.HasNoErrors())
+                        {
+                            if (peopleList.Count > 0)
+                            {
+                                peopleList.ForEach(currentPickUp =>
+                                {
+                                    var user = new WebUser
+                                    {
+                                        FirstName = currentPickUp.FirstName,
+                                        LastName = currentPickUp.LastName,
+                                        Phone = currentPickUp.Phone,
+                                        CreateDate = DateTime.UtcNow,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                    };
+                                    amsgs.AddRange(user.Save(adc));
+                                    
+                                    if (amsgs.HasNoErrors())
+                                    {
+                                        var registrantWebUser = new RegistrantWebUser
+                                        {
+                                            CreateDate = DateTime.UtcNow,
+                                            RegistrantId = currentMasterRegistrant.ID,
+                                            WebUserId = user.ID,
+                                            IsDeleted = false,
+                                        };
+                                        amsgs.AddRange(registrantWebUser.Save(adc));
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                );
+
+                return Json(
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
