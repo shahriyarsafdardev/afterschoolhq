@@ -139,12 +139,11 @@ namespace AfterSchoolLibrary.Helpers
             var desiredMessageTypes = new List<MessageType>
             {
                 MessageType.Error,
-                MessageType.Warning,
                 MessageType.ApiUsageError,
                 MessageType.ApiError
             };
 
-            SystemMessages filteredMessages = new SystemMessages();
+            var filteredMessages = new SystemMessages();
             var systemMessages = msgs.OfType<SystemMessage>()
                 .Where(systemMessage => desiredMessageTypes.Contains(systemMessage.MessageType))
                 .ToList();
