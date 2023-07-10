@@ -134,6 +134,28 @@
 
                 </div>
             </div>
+            
+            if (Model.ActivityTypeId == ActivityType.Activity)
+            {
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">
+                        Require Check In/Out?
+                    </label>
+                    <div class="col-sm-9">
+                        @{
+                            Html.RenderPartial(
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                Model.IsRequireCheckInCheckOut,
+                                new ViewDataDictionary
+                                {
+                                    {"checkboxname", "isRequireCheckInCheckOutEnabled"},
+                                    {"checkboxid", "isRequireCheckInCheckOutEnabled"},
+                                    {"disabled", false},
+                                });
+                        }
+                    </div>
+                </div>
+            }
 
             <div class="form-group hide" id="cutoffhours-container">
                 <label class="col-sm-3 control-label">Registration Cut-Off Time</label>

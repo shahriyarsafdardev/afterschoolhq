@@ -88,6 +88,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
+                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
                     },
                     setupDto = new
                     {
