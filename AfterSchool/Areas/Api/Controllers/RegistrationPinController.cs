@@ -135,7 +135,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
                     throw new Exception("Phone is already in use");
 
-                if (peopleList.Count > 0)
+                if (peopleList.IsNotEmpty() && peopleList.Count > 0)
                     peopleList.ForEach(currentPickUp =>
                     {
                         if (currentPickUp.Phone.IsNotEmpty() && WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
@@ -169,7 +169,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             amsgs.AddRange(currentUser.Save(adc));
                         }
 
-                        if (amsgs.HasNoErrors() && peopleList.Count > 0)
+                        if (amsgs.HasNoErrors() && peopleList.IsNotEmpty() && peopleList.Count > 0)
                             peopleList.ForEach(currentPickUp =>
                             {
                                 var user = new WebUser
