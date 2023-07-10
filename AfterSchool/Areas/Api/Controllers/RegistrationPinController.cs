@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
@@ -9,7 +10,7 @@ using BasicLibrary;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
-    public class RegistrationProcessController : BaseController
+    public class RegistrationPinController : BaseController
     {
         [HttpGet]
         public ActionResult GetRegistrationSettings(string registrationUid)
@@ -18,32 +19,50 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
-                if(!registrationUid.IsGuid())
+
+                if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
-                
+
                 var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
-                
-                if(registration.IsEmpty())
+
+                if (registration.IsEmpty())
                     throw new Exception("No Registration");
-                
+
                 var currentRegistrant = registration.GetRegistrant(msgs);
-                
-                if(currentRegistrant.IsEmpty())
+
+                if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-                
+
                 var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
-                if(currentMasterRegistrant.IsEmpty())
+                if (currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Master Registrant");
 
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
-                
-                if(participationObject.IsEmpty())
+
+                if (participationObject.IsEmpty())
                     throw new Exception("Invalid Object");
+                
+                var answers = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs);
+                var additionalContactInfo = new List<PickUpDto>();
+                
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
+                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.Parent1InfoToIncludeInStudentPanel()));
+                
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent2FirstName,
+                    QuestionDataType.Parent2LastName,QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
+                
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact1FirstName,
+                    QuestionDataType.EmergencyContact1LastName,QuestionDataType.EmergencyContact1Phone, FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
+                
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
+                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
+                
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
+                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
                 
                 dynamic response = new
                 {
@@ -70,25 +89,44 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
                     },
-                    setupDto = new 
+                    setupDto = new
                     {
                         IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                         IsPinSetup = currentUser.PinCode.IsNotEmpty(),
                         UserAuthorizationType = currentUser.AuthorizationTypeId.ToString(),
                     },
+                    additionalContactDto = additionalContactInfo,
                 };
-                
+
                 return Json(
-                    new ApiResponse(msgs,response),
+                    new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
                 return Json(
-                    new ApiResponse(msgs,null),
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
+        }
+
+        private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName, 
+            QuestionDataType phone, List<QuestionDataType> questionDataTypes)
+        {
+            var pickUpContactList = new List<PickUpDto>();
+            var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes)).ToList();
+            
+            if(contactInfo.Count > 0)
+            {
+                pickUpContactList.Add(new PickUpDto()
+                {
+                    FirstName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == firstName)?.Text,
+                    LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
+                    Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
+                });
+            };
+            return pickUpContactList;
         }
     }
 }

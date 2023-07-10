@@ -207,5 +207,55 @@ namespace AfterSchoolLibrary.Services
                 ActivityMessageReason.UrgentUpdate
             };
         }
+        
+        public static List<QuestionDataType> Parent1InfoToIncludeInStudentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.Parent1FirstName,
+                QuestionDataType.Parent1LastName,
+                QuestionDataType.Parent1MobilePhone,
+            };
+        }
+        
+        public static List<QuestionDataType> Parent2InfoToIncludeInStudentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.Parent2FirstName,
+                QuestionDataType.Parent2LastName,
+                QuestionDataType.Parent2MobilePhone,
+            };
+        }
+        
+        public static List<QuestionDataType> EmergencyContact1InfoToIncludeInStudentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.EmergencyContact1FirstName,
+                QuestionDataType.EmergencyContact1LastName,
+                QuestionDataType.EmergencyContact1Phone,
+            };
+        }
+        
+        public static List<QuestionDataType> EmergencyContact2InfoToIncludeInStudentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.EmergencyContact2FirstName,
+                QuestionDataType.EmergencyContact2LastName,
+                QuestionDataType.EmergencyContact2Phone,
+            };
+        }
+        
+        public static List<QuestionDataType> EmergencyContact3InfoToIncludeInStudentPanel()
+        {
+            return new List<QuestionDataType>
+            {
+                QuestionDataType.EmergencyContact3FirstName,
+                QuestionDataType.EmergencyContact3LastName,
+                QuestionDataType.EmergencyContact3Phone,
+            };
+        }
     }
 }
