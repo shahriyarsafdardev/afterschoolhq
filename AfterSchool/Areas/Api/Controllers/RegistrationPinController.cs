@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
+using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
@@ -88,6 +89,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                         IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
                     },
                     setupDto = new

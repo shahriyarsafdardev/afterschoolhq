@@ -689,6 +689,7 @@
     <Compile Include="Controllers\RegistrationCommon.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
     <Compile Include="Controllers\VolunteerRegistrationController.cs" />
+    <Compile Include="Helpers\AccountProfileHelper.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Helpers\MaintenanceHelper.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />
