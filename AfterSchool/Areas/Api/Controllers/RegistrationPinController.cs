@@ -47,25 +47,28 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (participationObject.IsEmpty())
                     throw new Exception("Invalid Object");
-                
+
                 var answers = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs);
                 var additionalContactInfo = new List<PickUpDto>();
-                
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent1FirstName,
-                    QuestionDataType.Parent1LastName,QuestionDataType.Parent1MobilePhone, FormConstants.Parent1InfoToIncludeInStudentPanel()));
-                
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.Parent2FirstName,
-                    QuestionDataType.Parent2LastName,QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
-                
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact1FirstName,
-                    QuestionDataType.EmergencyContact1LastName,QuestionDataType.EmergencyContact1Phone, FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
-                
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact2FirstName,
-                    QuestionDataType.EmergencyContact2LastName,QuestionDataType.EmergencyContact2Phone, FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
-                
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers,QuestionDataType.EmergencyContact3FirstName,
-                    QuestionDataType.EmergencyContact3LastName,QuestionDataType.EmergencyContact3Phone, FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
-                
+
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent1FirstName,
+                    QuestionDataType.Parent1LastName, QuestionDataType.Parent1MobilePhone, FormConstants.Parent1InfoToIncludeInStudentPanel()));
+
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent2FirstName,
+                    QuestionDataType.Parent2LastName, QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
+
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact1FirstName,
+                    QuestionDataType.EmergencyContact1LastName, QuestionDataType.EmergencyContact1Phone,
+                    FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
+
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact2FirstName,
+                    QuestionDataType.EmergencyContact2LastName, QuestionDataType.EmergencyContact2Phone,
+                    FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
+
+                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact3FirstName,
+                    QuestionDataType.EmergencyContact3LastName, QuestionDataType.EmergencyContact3Phone,
+                    FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
+
                 dynamic response = new
                 {
                     activityDto = new
@@ -91,7 +94,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
                         HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
-                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
+                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     },
                     setupDto = new
                     {
@@ -114,7 +118,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult AddOrUpdateRegistrantWebUser(string registrationUid, string phone, string pinCode, List<PickUpDto> peopleList)
         {
@@ -122,30 +126,37 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
 
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
-                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
+                    throw new Exception("Phone is already in use");
 
+                if (peopleList.Count > 0)
+                    peopleList.ForEach(currentPickUp =>
+                    {
+                        if (currentPickUp.Phone.IsNotEmpty() && WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
+                            throw new Exception("Phone is already in use");
+                    });
+                
+                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
                 if (registration.IsEmpty())
                     throw new Exception("No Registration");
 
                 var currentRegistrant = registration.GetRegistrant(msgs);
-
                 if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
                 var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
                 if (currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Master Registrant");
-                
+
                 Database.ExecuteTransaction
                 (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                    (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
                         if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
                         {
@@ -154,44 +165,36 @@ namespace AfterSchool.Areas.Api.Controllers
 
                             if (currentUser.PinCode.IsEmpty())
                                 currentUser.PinCode = pinCode;
-                            
+
                             amsgs.AddRange(currentUser.Save(adc));
                         }
 
-                        if (amsgs.HasNoErrors())
-                        {
-                            if (peopleList.Count > 0)
+                        if (amsgs.HasNoErrors() && peopleList.Count > 0)
+                            peopleList.ForEach(currentPickUp =>
                             {
-                                peopleList.ForEach(currentPickUp =>
+                                var user = new WebUser
                                 {
-                                    var user = new WebUser
-                                    {
-                                        FirstName = currentPickUp.FirstName,
-                                        LastName = currentPickUp.LastName,
-                                        Phone = currentPickUp.Phone,
-                                        CreateDate = DateTime.UtcNow,
-                                        LastModifiedDate = DateTime.UtcNow,
-                                    };
-                                    amsgs.AddRange(user.Save(adc));
-                                    
-                                    if (amsgs.HasNoErrors())
-                                    {
-                                        var registrantWebUser = new RegistrantWebUser
-                                        {
-                                            CreateDate = DateTime.UtcNow,
-                                            RegistrantId = currentMasterRegistrant.ID,
-                                            WebUserId = user.ID,
-                                            IsDeleted = false,
-                                        };
-                                        amsgs.AddRange(registrantWebUser.Save(adc));
-                                    }
-                                });
-                            }
-                        }
+                                    FirstName = currentPickUp.FirstName,
+                                    LastName = currentPickUp.LastName,
+                                    Phone = currentPickUp.Phone,
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                };
+                                amsgs.AddRange(user.Save(adc));
+
+                                var registrantWebUser = new RegistrantWebUser
+                                {
+                                    CreateDate = DateTime.UtcNow,
+                                    RegistrantId = currentMasterRegistrant.ID,
+                                    WebUserId = user.ID,
+                                    IsDeleted = false,
+                                };
+                                amsgs.AddRange(registrantWebUser.Save(adc));
+                            });
                     },
-                    onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
                 );
 
                 return Json(
@@ -207,21 +210,20 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
 
-        private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName, 
+        private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName,
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {
             var pickUpContactList = new List<PickUpDto>();
             var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes)).ToList();
-            
-            if(contactInfo.Count > 0)
-            {
+
+            if (contactInfo.Count > 0)
                 pickUpContactList.Add(new PickUpDto()
                 {
                     FirstName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == firstName)?.Text,
                     LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
                     Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
                 });
-            };
+            ;
             return pickUpContactList;
         }
     }
