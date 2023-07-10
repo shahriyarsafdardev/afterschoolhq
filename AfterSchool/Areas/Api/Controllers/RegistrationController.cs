@@ -143,6 +143,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -397,6 +398,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -1005,6 +1007,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         ProviderEmail = participationObject.OwnerAccount.Email,
                         RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 

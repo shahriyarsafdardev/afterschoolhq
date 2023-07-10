@@ -1305,7 +1305,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode,
             string group, string cmd, string type, string inviteonly, string minseatsrequired,
             string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours,
-            string isContinuousEnrollmentEnabled)
+            string isContinuousEnrollmentEnabled, string isRequireCheckInCheckOutEnabled)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1377,6 +1377,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"costfrequencytype", costfrequencytype},
                 {"cutoffhours", cutoffhours},
                 {"isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()},
+                {"isRequireCheckInCheckOutEnabled", isRequireCheckInCheckOutEnabled.IsNotEmpty() && isRequireCheckInCheckOutEnabled.ToBoolean()},
                 {"activitylocationtype", activityLocationTypeId},
                 {"isparentpricecost", true},
             };

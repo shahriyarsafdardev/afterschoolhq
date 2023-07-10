@@ -795,6 +795,7 @@ namespace AfterSchoolLibrary.Services
             var costFrequencyType = values.GetValueOrDefault("costfrequencytype");
             var cutoffHours = values.GetValueOrDefault("cutoffhours");
             var isContinuousEnrollmentEnabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
+            var isRequireCheckInCheckOutEnabled = values.GetValueOrDefault("isRequireCheckInCheckOutEnabled");
             var strictgenderrestrictions = values.GetValueOrDefault("strictgenderrestrictions");
 
             var activityType = ActivityType.NotSet;
@@ -898,6 +899,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isContinuousEnrollmentEnabled.IsNotEmpty())
                 activity.IsContinuousEnrollment = isContinuousEnrollmentEnabled.ToString().ToBoolean();
+
+            if (isRequireCheckInCheckOutEnabled.IsNotEmpty())
+                activity.IsRequireCheckInCheckOut = isRequireCheckInCheckOutEnabled.ToString().ToBoolean();
 
             if (ageEnd.IsNumber())
             {

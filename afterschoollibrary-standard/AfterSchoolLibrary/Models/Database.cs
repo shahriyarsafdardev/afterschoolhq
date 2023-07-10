@@ -235,6 +235,8 @@ namespace AfterSchoolLibrary.Models
                 Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsContinuousEnrollment", false}},
                 new Hashtable {{"IsContinuousEnrollment", DBNull.Value}}, Activity.ObjectMap, dc);
+            BaseObject.Update(new Hashtable {{"IsRequireCheckInCheckOut", false}},
+                new Hashtable {{"IsRequireCheckInCheckOut", DBNull.Value}}, Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"ActivityTypeId", 0}}, new Hashtable {{"ActivityTypeId", DBNull.Value}},
                 Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"LeaderTypeId", 0}}, new Hashtable {{"LeaderTypeId", DBNull.Value}},
