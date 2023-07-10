@@ -223,7 +223,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
                     Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
                 });
-            ;
             return pickUpContactList;
         }
     }
