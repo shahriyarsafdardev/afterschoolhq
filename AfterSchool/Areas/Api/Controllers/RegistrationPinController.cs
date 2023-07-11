@@ -96,6 +96,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                         IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
+                        StudentFirstName = currentRegistrant.FirstName,
+                        StudentLastName = currentRegistrant.LastName,
                     },
                     setupDto = new
                     {
