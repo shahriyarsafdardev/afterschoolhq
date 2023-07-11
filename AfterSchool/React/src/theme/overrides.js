@@ -25,7 +25,11 @@ export default {
   },
   MuiButton: {
     root: {
-      borderRadius: '6px'
+      borderRadius: '6px',
+      '&.Mui-disabled': {
+        color: '#FFFFFF !important',
+        backgroundColor: '#b2b2b4 !important'
+      }
     },
     containedPrimary: {
       color: '#ffffff'
