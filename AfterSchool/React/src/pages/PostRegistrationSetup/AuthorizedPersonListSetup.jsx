@@ -2,16 +2,17 @@ import { Grid, Button, Container, Typography, CircularProgress } from '@material
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { isEmpty } from 'lodash';
 
 import { phoneValidationRegex } from 'constants/regex';
 import { usePostRegistration } from 'redux/hooks';
-import PeopleListRow from './PeopleListRow';
-import AddUserForm from './AddUserForm';
+import AuthorizedPersonListRow from './AuthorizedPersonListRow';
+import AddAuthorizedUserForm from './AddAuthorizedUserForm';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+import useStyles from './styles';
 
-function PeopleListSetup({ listOfPeople, setActiveStep }) {
+function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
+  const classes = useStyles();
   const { registrationUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [initialValues, setInitialValue] = useState({});
@@ -36,35 +37,38 @@ function PeopleListSetup({ listOfPeople, setActiveStep }) {
   }, [msgs]);
 
   useEffect(() => {
-    const authorizedPersons = listOfPeople.filter(({ FirstName }) => FirstName !== null);
+    const filteredAuthorizedPersons = authorizedPersons.filter(
+      ({ FirstName }) => FirstName !== null
+    );
     const initialState = {};
-    authorizedPersons.forEach(
+    filteredAuthorizedPersons.forEach(
       (person, index) => (initialState[index] = { ...person, default: true, checked: false })
     );
-    initialState[authorizedPersons.length] = newUser;
+    initialState[filteredAuthorizedPersons.length] = newUser;
     setInitialValue(initialState);
-  }, [listOfPeople]);
+  }, [authorizedPersons]);
 
   const formValidationSchema = values =>
     Yup.object().shape(
       Object.keys(values).reduce((acc, key) => {
         acc[key] = Yup.object().shape({
-          phoneNumber: Yup.string().when('checked', {
-            is: true,
-            then: Yup.string()
-              .matches(phoneValidationRegex, 'Phone number is not valid')
-              .required('Phone Number is required'),
-            otherwise: Yup.string().notRequired()
+          Phone: Yup.string().when(['checked'], {
+            is: val => val,
+            then: () =>
+              Yup.string()
+                .matches(phoneValidationRegex, 'Phone number is not valid')
+                .required('Phone Number is required'),
+            otherwise: () => Yup.string().nullable()
           }),
-          firstName: Yup.string().when('checked', {
-            is: true,
-            then: Yup.string().required('First Name is required'),
-            otherwise: Yup.string().notRequired()
+          FirstName: Yup.string().when(['checked'], {
+            is: val => val,
+            then: () => Yup.string().required('First Name is required'),
+            otherwise: () => Yup.string()
           }),
-          lastName: Yup.string().when('checked', {
-            is: true,
-            then: Yup.string().required('Last Name is required'),
-            otherwise: Yup.string().notRequired()
+          LastName: Yup.string().when(['checked'], {
+            is: val => val,
+            then: () => Yup.string().required('Last Name is required'),
+            otherwise: () => Yup.string()
           })
         });
 
@@ -72,17 +76,13 @@ function PeopleListSetup({ listOfPeople, setActiveStep }) {
       }, {})
     );
 
-  useEffect(() => {
-    !isEmpty(values) && setValidationSchema(formValidationSchema(values));
-  }, [values]);
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues,
     // validationSchema,
     onSubmit: async values => {
       setSaveDisabled(true);
-      const authorizedPersons = [];
+      const filteredAuthorizedPersons = [];
       Object.keys(values).forEach(key => {
         if (values[key].checked) {
           const user = {
@@ -90,14 +90,14 @@ function PeopleListSetup({ listOfPeople, setActiveStep }) {
             LastName: values[key].LastName,
             Phone: values[key].Phone
           };
-          authorizedPersons.push(user);
+          filteredAuthorizedPersons.push(user);
         }
       });
       await updateData({
         registrationUid,
         phone: '',
         pinCode: '',
-        peopleList: authorizedPersons
+        peopleList: filteredAuthorizedPersons
       }).then(apiErrors => {
         setSaveDisabled(false);
         if (apiErrors.length > 0) return;
@@ -108,58 +108,56 @@ function PeopleListSetup({ listOfPeople, setActiveStep }) {
   });
 
   const { setFieldValue, values, handleSubmit, errors, touched } = formik;
-
-  const handleInputChange = (event, id) => {
-    const { name, value } = event.target;
-    setFieldValue(id, { ...values[id], [name]: name === 'checked' ? !values[id].checked : value });
-  };
+  // useEffect(() => {
+  //   setValidationSchema(formValidationSchema(values));
+  // }, [values]);
 
   const addNewUserHandler = () => {
-    const newValues = { ...values };
-    const key = Number(Object.keys(values)[-1]) + 1;
-    newValues[key] = newUser;
-    setInitialValue(newValues);
+    const key = Number(Object.keys(values).at(-1)) + 1;
+    setFieldValue(key, newUser);
   };
 
   return (
     <Container maxWidth="md">
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2} style={{ textAlign: 'left' }}>
+        <Grid container spacing={2} className={classes.alignLeft}>
           {Object.keys(values).map(key =>
             values[key].default ? (
-              <PeopleListRow
+              <AuthorizedPersonListRow
                 person={values[key]}
                 key={key}
                 handleChange={() =>
                   setFieldValue(key, { ...values[key], checked: !values[key].checked })
                 }
-                handlePhoneInputChange={e =>
-                  setFieldValue(key, { ...values[key], Phone: e.target.value })
+                handlePhoneInputChange={value =>
+                  setFieldValue(key, { ...values[key], Phone: value })
                 }
-                touched={touched}
-                errors={errors}
+                touched={touched[key]}
+                errors={errors[key]}
               />
             ) : (
-              <AddUserForm
-                values={values[key]}
-                handleInputChange={e => handleInputChange(e, key)}
-                key={key}
-                touched={touched}
-                errors={errors}
-              />
+              <>
+                <AddAuthorizedUserForm
+                  values={values[key]}
+                  setFieldValue={value => {
+                    setFieldValue(key, value);
+                    addNewUserHandler();
+                  }}
+                  id={key}
+                  touched={touched[key]}
+                  errors={errors[key]}
+                />
+              </>
             )
           )}
 
           <Grid item xs={12}>
-            <Typography
-              style={{ textDecoration: 'underline', cursor: 'pointer' }}
-              onClick={addNewUserHandler}
-            >
+            <Typography className={classes.addPersonButton} onClick={addNewUserHandler}>
               Add another authorized person
             </Typography>
           </Grid>
 
-          <Grid item xs={12} style={{ display: 'flex', gap: '8px' }}>
+          <Grid item xs={12} className={classes.listButtonWrapper}>
             <Button type="submit" variant="outlined" color="primary" fullWidth>
               Cancel
             </Button>
@@ -185,4 +183,4 @@ function PeopleListSetup({ listOfPeople, setActiveStep }) {
   );
 }
 
-export default PeopleListSetup;
+export default AuthorizedPersonListSetup;
