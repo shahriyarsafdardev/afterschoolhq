@@ -478,7 +478,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     }
                 });
 
-                registrant.SchoolLocationId = json.schoolLocationID;
+                if (json.groupid == "2")
+                    registrant.SchoolLocationId = json.schoolLocationID;
 
                 if (msgs.HasNoErrors())
                     Database.ExecuteTransaction
@@ -648,7 +649,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var parent2Phone = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2MobilePhone).Value;
                 var parent2Email = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent2Email).Value;
 
-                currentRegistrant.SchoolLocationId = json.schoolLocationID;
+                if (json.groupid == "2")
+                    currentRegistrant.SchoolLocationId = json.schoolLocationID;
 
                 Database.ExecuteTransaction
                 (

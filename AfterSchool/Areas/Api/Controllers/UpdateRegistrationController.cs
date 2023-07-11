@@ -212,7 +212,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     }
                 });
 
-                currentRegistrant.SchoolLocationId = json.schoolLocationID;
+                if (json.groupid == "2")
+                    currentRegistrant.SchoolLocationId = json.schoolLocationID;
 
                 Database.ExecuteTransaction
                 (
