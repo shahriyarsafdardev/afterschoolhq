@@ -135,13 +135,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
                     throw new Exception("Phone is already in use");
 
-                if (peopleList.IsNotEmpty() && peopleList.Count > 0)
-                    peopleList.ForEach(currentPickUp =>
-                    {
-                        if (currentPickUp.Phone.IsNotEmpty() && WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
-                            throw new Exception("Phone is already in use");
-                    });
-                
                 var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
                 if (registration.IsEmpty())
                     throw new Exception("No Registration");
@@ -150,9 +143,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
-                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
-                if (currentMasterRegistrant.IsEmpty())
-                    throw new Exception("No Master Registrant");
+                var currentParentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                if (currentParentRegistrant.IsEmpty())
+                    throw new Exception("No Parent Registrant");
 
                 Database.ExecuteTransaction
                 (
@@ -172,24 +165,27 @@ namespace AfterSchool.Areas.Api.Controllers
                         if (amsgs.HasNoErrors() && peopleList.IsNotEmpty() && peopleList.Count > 0)
                             peopleList.ForEach(currentPickUp =>
                             {
-                                var user = new WebUser
+                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
                                 {
-                                    FirstName = currentPickUp.FirstName,
-                                    LastName = currentPickUp.LastName,
-                                    Phone = currentPickUp.Phone,
-                                    CreateDate = DateTime.UtcNow,
-                                    LastModifiedDate = DateTime.UtcNow,
-                                };
-                                amsgs.AddRange(user.Save(adc));
+                                    var user = new WebUser
+                                    {
+                                        FirstName = currentPickUp.FirstName,
+                                        LastName = currentPickUp.LastName,
+                                        Phone = currentPickUp.Phone,
+                                        CreateDate = DateTime.UtcNow,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                    };
+                                    amsgs.AddRange(user.Save(adc));
 
-                                var registrantWebUser = new RegistrantWebUser
-                                {
-                                    CreateDate = DateTime.UtcNow,
-                                    RegistrantId = currentMasterRegistrant.ID,
-                                    WebUserId = user.ID,
-                                    IsDeleted = false,
-                                };
-                                amsgs.AddRange(registrantWebUser.Save(adc));
+                                    var registrantWebUser = new RegistrantWebUser
+                                    {
+                                        CreateDate = DateTime.UtcNow,
+                                        RegistrantId = currentParentRegistrant.ID,
+                                        WebUserId = user.ID,
+                                        IsDeleted = false,
+                                    };
+                                    amsgs.AddRange(registrantWebUser.Save(adc));
+                                }
                             });
                     },
                     (SystemMessages smsgs) => msgs.AddRange(smsgs),
