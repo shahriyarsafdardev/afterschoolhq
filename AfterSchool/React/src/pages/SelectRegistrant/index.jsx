@@ -13,11 +13,11 @@ function SelectRegistrant() {
       <Box className={classes.outerWrapper}>
         <Box className={classes.innerWrapper}>
           {keys.map(item => (
-            <RegistrantCard key={item} name={'Ahsan Ellahi'} showMsg={true} />
+            <RegistrantCard key={item} name={'Natalie Smith'} showMsg={true} />
           ))}
-          <RegistrantCard name={'Ahsan Ellahi'} showMsg={true} />
-          <RegistrantCard name={'Ahsan Ellahi'} showMsg={false} />
-          <RegistrantCard name={null} showMsg={false} />
+          <RegistrantCard name={'Natalie Smith'} showMsg={true} />
+          <RegistrantCard name={'Marlow Smith'} showMsg={false} eligible={false} />
+          <RegistrantCard showMsg={false} />
         </Box>
       </Box>
     </Box>

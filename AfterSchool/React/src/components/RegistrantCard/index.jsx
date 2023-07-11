@@ -3,12 +3,14 @@ import DoubleArrowIcon from '@material-ui/icons/DoubleArrow';
 import { Button, Link, Typography, CardContent, CardActions, Card } from '@material-ui/core';
 import useStyles from './styles';
 
-function RegistrantCard({ name, showMsg }) {
-  const classes = useStyles();
+function RegistrantCard({ name, showMsg, eligible = true }) {
+  const classes = useStyles({ eligible });
   const handleClick = () => {};
   let buttonText = '';
-  if (name) {
+  if (name && eligible) {
     buttonText = 'Enroll';
+  } else if (!eligible) {
+    buttonText = 'Ineligible';
   } else {
     buttonText = 'Add New Participant';
   }
@@ -29,8 +31,10 @@ function RegistrantCard({ name, showMsg }) {
           className={classes.enrollButton}
           variant="contained"
           onClick={handleClick}
+          disabled={!eligible}
         >
-          {buttonText} &nbsp; <DoubleArrowIcon className={classes.arrowIcon} />
+          {buttonText} &nbsp;
+          {eligible && <DoubleArrowIcon className={classes.arrowIcon} />}
         </Button>
         {showMsg && (
           <Typography className={classes.enrollMsg}>
