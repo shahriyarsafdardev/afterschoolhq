@@ -1,6 +1,5 @@
-﻿function googleTranslateElementInit() {
+function googleTranslateElementInit() {
     new google.translate.TranslateElement({
-        pageLanguage: 'en',
         includedLanguages: 'en,es,fr,ht,sw',
         layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
     }, 'google_translate_element');
@@ -69,30 +68,14 @@ $(document).ready(function () {
     }
 
     function updateLanguage(languageCode) {
+        var values = [];
+        $(".goog-te-combo option").each(function () {
+            values.push($(this).val());
+        });
         var selectIndex = 0;
         var a = document.querySelector("#google_translate_element select");
-        switch (languageCode) {
-            case "en":
-                selectIndex = 0;
-                break;
-            case "es":
-                selectIndex = 3;
-                break;
-            case "fr":
-                selectIndex = 1;
-                break;
-            case "ht":
-                selectIndex = 2;
-                break;
-            case "sw":
-                selectIndex = 4;
-                break;
-        }
+        selectIndex = values.indexOf(languageCode);
         a.selectedIndex = selectIndex;
         a.dispatchEvent(new Event('change'));
-        if (languageCode === "en") {
-            localStorage.removeItem('languageSelected');
-            window.location.reload();
-        }
     }
 })
