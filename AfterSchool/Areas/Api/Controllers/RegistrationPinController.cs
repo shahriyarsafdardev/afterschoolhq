@@ -5,6 +5,7 @@ using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -170,6 +171,11 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
                                 {
+                                    var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
+                                    var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
+                                                  "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
+                                                  $"check out your child through this link: {url}";
+                                    
                                     var user = new WebUser
                                     {
                                         FirstName = currentPickUp.FirstName,
@@ -188,6 +194,14 @@ namespace AfterSchool.Areas.Api.Controllers
                                         IsDeleted = false,
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
+                                    
+                                    if (amsgs.HasNoErrors())
+                                        TwilioHelper.SendSMS(
+                                            currentPickUp.Phone,
+                                            msgBody,
+                                            null,
+                                            null,
+                                            amsgs);
                                 }
                             });
                     },
