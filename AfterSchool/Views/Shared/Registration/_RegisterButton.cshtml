@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Enums
+@using AfterSchoolLibrary.Enums
 @model ParticipationObject
 
 @{
@@ -277,27 +277,31 @@ else
     }
     else if (Model.RegistrationPeriod.WillOpen(Model.OwnerAccount))
     {
-        <button type="button" class="btn btn-register btn-block">
-            @if (condensed)
-            {
-                @:Will open soon
-            }
-            else
-            {
-                var ts = Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount);
+<button type="button" class="btn btn-register btn-block">
+    @if (condensed)
+    {
+        @:Will open soon
+    }
+    else
+    {
+        var ts = Model.RegistrationPeriod.WillOpenIn(Model.OwnerAccount);
 
-                @:Registration will open in
+        @:Registration will open in
 
-                if (ts.Days > 0)
-                {
-                    @: @ts.Days days @ts.Hours hrs
-                }
-                else
-                {
-                    @: @ts.Hours hrs @ts.Minutes mins
-                }
-            }
-        </button>
+        if (ts.Days > 0)
+        {
+            @: @ts.Days days @ts.Hours hrs
+        }
+        else if (ts.Hours > 0)
+        {
+            @: @ts.Hours hrs @ts.Minutes mins
+        }
+        else
+        {
+            @: @ts.Minutes mins
+        }
+    }
+</button>
     }
     else if (Model.RegistrationPeriod.IsClosed(Model.OwnerAccount))
     {

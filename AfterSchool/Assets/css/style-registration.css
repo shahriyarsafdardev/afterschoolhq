@@ -1,4 +1,4 @@
-﻿/* Registration Browse*/
+/* Registration Browse*/
 
 body.registration {
     background-color: #f7f7f7;
@@ -243,6 +243,13 @@ body.registration {
     border: none;
 }
 
+@media screen and (max-width: 443px)
+{
+    .btn-register
+    {
+        font-size:2.5vw;
+    }
+}
 .btn-register:hover, .btn-register-default:hover {
     background-color: #444;
     color: #fff;
