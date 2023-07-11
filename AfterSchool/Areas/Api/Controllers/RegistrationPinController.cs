@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -192,7 +193,129 @@ namespace AfterSchool.Areas.Api.Controllers
                     },
                     (SystemMessages smsgs) => msgs.AddRange(smsgs),
                     (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                );
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult CreateNewPin(string registrationUid, string phone)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (!registrationUid.IsGuid())
+                    throw new Exception("Invalid Id");
+
+                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+                if (registration.IsEmpty())
+                    throw new Exception("No Registration");
+
+                if (phone.IsEmpty())
+                    throw new Exception("Invalid Phone");
+
+                var currentRegistrant = registration.GetRegistrant(msgs);
+                if (currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
+
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if (currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
+
+                var currentUser = WebUser.LoadByPhone(phone, msgs);
+                if (currentUser.IsEmpty())
+                    throw new Exception("Invalid User");
+
+                if (!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
+                    throw new Exception("You are not authorized to access this page");
+
+                var currentParentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                if (currentParentRegistrant.IsEmpty())
+                    throw new Exception("No Parent Registrant");
+
+                dynamic response = new
+                {
+                    currentUserInfo = new
+                    {
+                        IsPinSetup = currentUser.PinCode.IsNotEmpty(),
+                        StudentFirstName = currentRegistrant.FirstName,
+                        StudentLastName = currentRegistrant.LastName,
+                        ParentFirstName = currentParentRegistrant.FirstName,
+                        ParentLastName = currentParentRegistrant.LastName,
+                    },
+                };
+
+                return Json(
+                    new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CreateNewPin(string registrationUid, string phone, string pinCode)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (!registrationUid.IsGuid())
+                    throw new Exception("Invalid Id");
+
+                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+                if (registration.IsEmpty())
+                    throw new Exception("No Registration");
+
+                if (phone.IsEmpty())
+                    throw new Exception("Invalid Phone");
+
+                if (pinCode.IsEmpty())
+                    throw new Exception("Invalid Pin");
+
+                var currentRegistrant = registration.GetRegistrant(msgs);
+                if (currentRegistrant.IsEmpty())
+                    throw new Exception("No Registrant");
+
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if (currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
+
+                var currentUser = WebUser.LoadByPhone(phone, msgs);
+                if (currentUser.IsEmpty())
+                    throw new Exception("Invalid User");
+
+                if (!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
+                    throw new Exception("You are not authorized to access this page");
+
+                Database.ExecuteTransaction
+                (
+                    (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (currentUser.PinCode.IsEmpty())
+                        {
+                            currentUser.PinCode = pinCode;
+                            amsgs.AddRange(currentUser.Save(adc));
+                        }
+                    },
+                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                 );
 
                 return Json(
