@@ -34,6 +34,9 @@ function RenderOptions(props) {
   const customQuestion = QuestionDataTypeId === 0;
   const radioListIcon = radioList === QuestionTypeId;
   const checkboxListIcon = checkBoxList === QuestionTypeId;
+  const optionsWrapperClass = `${classes.optionsComponent} ${
+    showOptions ? classes.showOptionsComponent : ''
+  }`;
 
   useEffect(() => {
     if (initialized && options.length > 0) handleSubmit();
@@ -151,61 +154,63 @@ function RenderOptions(props) {
   };
 
   return (
-    showOptions && (
-      <Grid item lg={12} md={12} sm={12} xs={12} container>
-        <Grid lg={1}></Grid>
-        <Grid lg={11} md={12} sm={12} xs={12}>
-          <Box
-            className={cs(classes.flexDirectionCol)}
-            style={{ display: 'flex', padding: '8px 12px' }}
-          >
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable key="list" droppableId="droppable-options-container" type="column">
-                {provided => (
-                  <div ref={provided.innerRef} {...provided.droppableProps}>
-                    {options.map(({ key, value }, index) => (
-                      <Draggable
-                        draggableId={`question-${ID}-option-${index}`}
-                        isDragDisabled={!customQuestion}
-                        index={Number(index)}
-                        key={index}
-                      >
-                        {provided => (
-                          <Box ref={provided.innerRef} {...provided.draggableProps}>
-                            {renderOption({
-                              index,
-                              option: { key, value },
-                              dragHandleProps: { ...provided.dragHandleProps },
-                              errors: errors?.Options && errors?.Options[index],
-                              touched: touched?.Options && touched?.Options[index]
-                            })}
-                          </Box>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-            {touched?.Options && errors?.Options && typeof errors?.Options === 'string' && (
-              <FormHelperText
-                data-testid={`${ID}-${QuestionDataTypeId}-error`}
-                className={classes.maxWidth}
-                error
-              >
-                {errors?.Options}
-              </FormHelperText>
-            )}
-            {!(!customQuestion || IsLocked) && (
-              <Typography className={classes.adddNewOption} onClick={handleAddNewOption}>
-                Add new option
-              </Typography>
-            )}
-          </Box>
+    <Box className={optionsWrapperClass}>
+      {showOptions && (
+        <Grid item lg={12} md={12} sm={12} xs={12} container>
+          <Grid lg={1}></Grid>
+          <Grid lg={11} md={12} sm={12} xs={12}>
+            <Box
+              className={cs(classes.flexDirectionCol)}
+              style={{ display: 'flex', padding: '8px 12px' }}
+            >
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable key="list" droppableId="droppable-options-container" type="column">
+                  {provided => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      {options.map(({ key, value }, index) => (
+                        <Draggable
+                          draggableId={`question-${ID}-option-${index}`}
+                          isDragDisabled={!customQuestion}
+                          index={Number(index)}
+                          key={index}
+                        >
+                          {provided => (
+                            <Box ref={provided.innerRef} {...provided.draggableProps}>
+                              {renderOption({
+                                index,
+                                option: { key, value },
+                                dragHandleProps: { ...provided.dragHandleProps },
+                                errors: errors?.Options && errors?.Options[index],
+                                touched: touched?.Options && touched?.Options[index]
+                              })}
+                            </Box>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
+              {touched?.Options && errors?.Options && typeof errors?.Options === 'string' && (
+                <FormHelperText
+                  data-testid={`${ID}-${QuestionDataTypeId}-error`}
+                  className={classes.maxWidth}
+                  error
+                >
+                  {errors?.Options}
+                </FormHelperText>
+              )}
+              {!(!customQuestion || IsLocked) && (
+                <Typography className={classes.adddNewOption} onClick={handleAddNewOption}>
+                  Add new option
+                </Typography>
+              )}
+            </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    )
+      )}
+    </Box>
   );
 }
 
