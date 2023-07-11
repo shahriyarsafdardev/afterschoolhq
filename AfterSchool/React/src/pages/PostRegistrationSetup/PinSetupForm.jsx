@@ -70,27 +70,21 @@ function PinSetupForm(props) {
 
   const handleInputChange = (event, field) => {
     const inputValue = event.target.value;
-    const formattedValue = inputValue.slice(0, 4); // Limit to 4 digits
+    const formattedValue = inputValue.slice(0, 4);
     formik.setFieldValue(field, formattedValue);
   };
 
   const { errors, touched, handleSubmit, getFieldProps, values } = formik;
 
   return (
-    <Box
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
-      }}
-    >
+    <Box className={classes.pinSetupWrapper}>
       {!IsPhoneSetup && (
         <TextField
           id="phone"
           customLabel="Cell Phone Number"
           variant="outlined"
           autofill="false"
-          style={{ width: '100%' }}
+          className={classes.widthFull}
           {...getFieldProps('phone')}
           error={!!(touched['phone'] && errors['phone'])}
           helperText={touched['phone'] && errors['phone']}
@@ -101,7 +95,7 @@ function PinSetupForm(props) {
         id="pinCode"
         customLabel="PIN Code"
         variant="outlined"
-        style={{ width: '100%' }}
+        className={classes.widthFull}
         onChange={e => handleInputChange(e, 'pin')}
         value={values.pin}
         error={!!(touched['pin'] && errors['pin'])}
@@ -113,7 +107,7 @@ function PinSetupForm(props) {
         id="confirmPinCode"
         customLabel="Confirm PIN Code"
         variant="outlined"
-        style={{ width: '100%' }}
+        className={classes.widthFull}
         onChange={e => handleInputChange(e, 'confirmPin')}
         value={values.confirmPin}
         error={!!(touched['confirmPin'] && errors['confirmPin'])}
@@ -121,7 +115,7 @@ function PinSetupForm(props) {
         required={true}
         type="number"
       />
-      <Box style={{ maxWidth: '600px', margin: 'auto', textAlign: 'center', paddingTop: '40px' }}>
+      <Box className={classes.pinSetupButtonsWrapper}>
         <Button
           color="primary"
           className={classes.saveButton}
