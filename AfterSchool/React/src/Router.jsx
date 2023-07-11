@@ -46,6 +46,10 @@ function Router() {
         {
           path: 'reactapp/registration/payment/:registrationId',
           element: <AlreadyPaidSection />
+        },
+        {
+          path: 'reactapp/reg/setup/:registrationUid',
+          element: <PostRegistrationSetup />
         }
       ]
     },
@@ -92,6 +96,7 @@ const RedirectToExternal = () => {
 const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
+const PostRegistrationSetup = Loadable(lazy(() => import('pages/PostRegistrationSetup')));
 const UpdateRegistration = Loadable(lazy(() => import('pages/UpdateRegistration')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));

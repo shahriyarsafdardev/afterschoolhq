@@ -6,6 +6,7 @@ import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
+import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
 import { useVolunteerProfileActions } from 'redux/slices/VolunteerProfileSlice';
 import { useUpdateRegistrationActions } from 'redux/slices/UpdateRegistrationSlice';
 import { useVolunteerRegistrationActions } from 'redux/slices/VolunteerRegistrationSlice';
@@ -58,4 +59,9 @@ export const useProfile = () => ({
 export const useThankYou = () => ({
   ...useSelector(state => state.thankYouSlice),
   ...useThankYouActions()
+});
+
+export const usePostRegistration = () => ({
+  ...useSelector(state => state.postRegistrationSetupSlice),
+  ...usePostRegistrationActions()
 });
