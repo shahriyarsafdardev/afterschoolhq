@@ -9,6 +9,7 @@ import FormBuilderSlice from './slices/FormBuilderSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
 import UpdateRegistrationSlice from './slices/UpdateRegistrationSlice';
+import PostRegistrationSetupSlice from './slices/PostRegistrationSetupSlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
 const { getEnv } = utils;
 
@@ -23,6 +24,7 @@ export default configureStore({
     [RegistrationSlice.name]: RegistrationSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [UpdateRegistrationSlice.name]: UpdateRegistrationSlice.reducer,
+    [PostRegistrationSetupSlice.name]: PostRegistrationSetupSlice.reducer,
     [VolunteerRegistrationSlice.name]: VolunteerRegistrationSlice.reducer
   },
   devTools: getEnv() === 'Local'

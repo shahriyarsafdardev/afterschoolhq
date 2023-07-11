@@ -13,7 +13,7 @@ import { applyModes } from 'constants';
 export default function Registration({ newChild = false }) {
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouUrl } = apiRoutes;
+  const { paymentScreenPath, thankyouUrl, postRegistrationUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     exit,
@@ -41,7 +41,8 @@ export default function Registration({ newChild = false }) {
       MinGrade,
       IsGenderRestricted,
       EnforcedGender,
-      ActivityUrl
+      ActivityUrl,
+      IsRequireCheckInCheckOut
     }
   } = useRegistration();
 
@@ -91,11 +92,15 @@ export default function Registration({ newChild = false }) {
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsFree) navigate(thankyouUrl(registrationId));
-    else {
-      ApplyMode === applyModes.Apply
-        ? navigate(thankyouUrl(registrationId))
-        : redirect(paymentScreenPath(registrationId));
+    if (IsRequireCheckInCheckOut) {
+      navigate(postRegistrationUrl(registrationId));
+    } else {
+      if (IsFree) navigate(thankyouUrl(registrationId));
+      else {
+        ApplyMode === applyModes.Apply
+          ? navigate(thankyouUrl(registrationId))
+          : redirect(paymentScreenPath(registrationId));
+      }
     }
   };
 
