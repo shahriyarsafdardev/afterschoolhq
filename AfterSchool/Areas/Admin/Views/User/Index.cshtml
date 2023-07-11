@@ -1,6 +1,6 @@
 @model List<WebUser>
 @{
-    ViewBag.Title = "Users";   
+    ViewBag.Title = "Users";
 }
 
 <div class="page-head">
@@ -28,19 +28,18 @@
             </div>
 
             @{ Html.RenderPartial(
-               "~/Views/Shared/_Users.cshtml",
-               Model,
-               new ViewDataDictionary()
-               {
+                "~/Views/Shared/_Users.cshtml",
+                Model,
+                new ViewDataDictionary()
+                {
                     { "AccountId", ViewBag.AccountId },
                     { "ReturnUrl", ViewBag.ReturnUrl } ,
                     { "PagingModel", ViewBag.PagingModel }
-         });
+      });
             }
         </div>
     </div>
 </div>
-
 
 <script>
     function doSearch() {

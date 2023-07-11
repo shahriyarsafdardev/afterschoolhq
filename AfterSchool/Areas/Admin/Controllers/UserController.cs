@@ -49,6 +49,8 @@ namespace AfterSchool.Areas.Admin.Controllers
                 TotalPages = totalPages
             };
 
+            ViewBag.Messages = msgs;
+
             return View(users);
         }
 
