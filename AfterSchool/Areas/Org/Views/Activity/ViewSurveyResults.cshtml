@@ -240,17 +240,6 @@
                     $('.playbtn').addClass('glyphicon-play');
                 });
             }
-
-
-            if ($('.emoji').length) {
-                function convert() {
-                    var input = $(".emoji").html();
-                    var output = emojione.shortnameToImage(input);
-                    $(".emoji").html(output);
-                    $(".emojione").attr('style', "height: 30px;");
-                }
-                convert();
-            }
         })
     </script>
 }
