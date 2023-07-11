@@ -220,7 +220,7 @@ namespace AfterSchool.Models
 
             var account = activity.GetAccount(msgs, dc);
      
-            if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc,activity.ActivityTypeId))
+            if (activity.CostPerRegistrant <= 0 && !account.CanPublishFreeActivity(msgs, dc,activity.ActivityTypeId) && !activity.IsPublished)
             {
                 var freeActivityLimitPackage =
                     PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit, SessionVariables.AccountPackage);
