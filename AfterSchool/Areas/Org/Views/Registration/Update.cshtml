@@ -6,7 +6,7 @@
     var registrant = (Registrant)ViewBag.Registrant;
     var registrations = (List<Registration>)ViewBag.Registrations;
     var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
-    var account = (Account)ViewBag.Account;    
+    var account = (Account)ViewBag.Account;
 }
 
 @{Html.RenderPartial("OrgAccountHeader");}
@@ -59,7 +59,7 @@
                             <a href="@Url.Action("edit", "registration", new { id = Model.Uid, returnUrl = ViewBag.ReturnURl })" class="text-muted">&laquo; Back</a>
                         </div>
                         <div class="btn-group pull-right">
-                            <button type="submit" class="btn btn-primary btn-lg">Update @UILabel.RegistrantLabel() &raquo;</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Update @(registrant.IsVolunteer ? @UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity) : @UILabel.RegistrantLabel()) &raquo;</button>
                         </div>
                     </div>
                 </div>
