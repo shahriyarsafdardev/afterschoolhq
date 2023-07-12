@@ -212,7 +212,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     }
                 });
 
-                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation)
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation && currentRegistrant.PersonTypeId != RegistrantPersonType.Adult
+                    && currentRegistrant.PersonTypeId != RegistrantPersonType.Volunteer)
                     currentRegistrant.SchoolLocationId = json.schoolLocationID;
 
                 Database.ExecuteTransaction
