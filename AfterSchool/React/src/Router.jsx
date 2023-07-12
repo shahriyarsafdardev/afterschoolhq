@@ -84,6 +84,10 @@ function Router() {
     {
       path: 'reactapp/sr/:srUid',
       element: <SurveyPinModal />
+    },
+    {
+      path: 'reactapp/pin-setup/:registrationUid',
+      element: <PinSetup />
     }
   ]);
 }
@@ -104,6 +108,7 @@ const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProf
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
+const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );
