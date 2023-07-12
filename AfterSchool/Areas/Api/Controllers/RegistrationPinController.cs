@@ -147,9 +147,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
-                var currentParentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
-                if (currentParentRegistrant.IsEmpty())
-                    throw new Exception("No Parent Registrant");
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if (currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
 
                 Database.ExecuteTransaction
                 (
@@ -189,19 +189,19 @@ namespace AfterSchool.Areas.Api.Controllers
                                     var registrantWebUser = new RegistrantWebUser
                                     {
                                         CreateDate = DateTime.UtcNow,
-                                        RegistrantId = currentParentRegistrant.ID,
+                                        RegistrantId = currentMasterRegistrant.ID,
                                         WebUserId = user.ID,
                                         IsDeleted = false,
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
                                     
-                                    if (amsgs.HasNoErrors())
-                                        TwilioHelper.SendSMS(
-                                            currentPickUp.Phone,
-                                            msgBody,
-                                            null,
-                                            null,
-                                            amsgs);
+                                    // if (amsgs.HasNoErrors())
+                                    //     TwilioHelper.SendSMS(
+                                    //         currentPickUp.Phone,
+                                    //         msgBody,
+                                    //         null,
+                                    //         null,
+                                    //         amsgs);
                                 }
                             });
                     },
@@ -254,7 +254,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
                     throw new Exception("You are not authorized to access this page");
 
-                var currentParentRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentParentRegistrant = currentMasterRegistrant.GetParentOrGuardian(msgs);
                 if (currentParentRegistrant.IsEmpty())
                     throw new Exception("No Parent Registrant");
 
