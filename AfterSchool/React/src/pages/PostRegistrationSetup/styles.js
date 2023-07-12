@@ -55,7 +55,8 @@ export default makeStyles(theme => ({
   },
   addPersonButton: {
     textDecoration: 'underline',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    color: theme.palette.primary.main
   },
   listButtonWrapper: {
     display: 'flex',
@@ -83,5 +84,29 @@ export default makeStyles(theme => ({
   },
   checkboxPadding: {
     paddingLeft: '0px'
+  },
+  checked: {
+    padding: 0,
+    borderRadius: 3,
+    color: '#494949 !important',
+    background: 'transparent !important'
+  },
+  root: {
+    padding: 0,
+    marginRight: 5,
+    background: '#ffffff',
+    color: '#ffffff',
+    border: '1px solid #c4c4c4',
+    borderRadius: 3,
+    height: '18px',
+    width: '18px',
+    '& .MuiSvgIcon-root': {
+      height: '18px',
+      width: '18px'
+    }
+  },
+  checkBoxIcon: {
+    height: '18px',
+    width: '18px'
   }
 }));
