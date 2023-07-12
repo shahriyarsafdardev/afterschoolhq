@@ -92,15 +92,18 @@ export default function Registration({ newChild = false }) {
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsRequireCheckInCheckOut) {
+    if (IsRequireCheckInCheckOut && ApplyMode === applyModes.Register && IsFree) {
       navigate(postRegistrationUrl(registrationId));
+      return;
+    }
+    if (IsFree) {
+      navigate(thankyouUrl(registrationId));
+      return;
+    }
+    if (ApplyMode === applyModes.Apply) {
+      navigate(thankyouUrl(registrationId));
     } else {
-      if (IsFree) navigate(thankyouUrl(registrationId));
-      else {
-        ApplyMode === applyModes.Apply
-          ? navigate(thankyouUrl(registrationId))
-          : redirect(paymentScreenPath(registrationId));
-      }
+      redirect(paymentScreenPath(registrationId));
     }
   };
 

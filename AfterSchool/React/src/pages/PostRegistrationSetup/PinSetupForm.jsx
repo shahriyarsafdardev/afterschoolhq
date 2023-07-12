@@ -11,7 +11,7 @@ import { useSnackbar } from 'notistack';
 
 function PinSetupForm(props) {
   const classes = useStyles();
-  const { setActiveStep } = props;
+  const { setActiveStep, RegistrantType } = props;
   const { registrationUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [saveDisabled, setSaveDisabled] = useState(false);
@@ -61,8 +61,9 @@ function PinSetupForm(props) {
       }).then(apiErrors => {
         setSaveDisabled(false);
         if (apiErrors.length) return;
-
-        setActiveStep(1);
+        if (RegistrantType === 'Parent') {
+          setActiveStep(1);
+        } else setActiveStep(2);
         enqueueSnackbar('Submitted.', { variant: 'success' });
       });
     }
