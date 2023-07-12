@@ -178,7 +178,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         if (amsgs.HasNoErrors() && peopleList.IsNotEmpty() && peopleList.Count > 0)
                             peopleList.ForEach(currentPickUp =>
                             {
-                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), msgs))
+                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs))
                                 {
                                     var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
                                     var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
