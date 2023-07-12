@@ -17,6 +17,10 @@ export default {
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
+  //RegistrationPin APIs
+  getPinSetupData: (registrationUid, phone) =>
+    `Api/RegistrationPin/CreateNewPin?registrationUid=${registrationUid}&phone=${phone}`,
+  updatePinSetupData: 'Api/RegistrationPin/CreateNewPin',
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>
     `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,

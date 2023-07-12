@@ -4,6 +4,7 @@ import { useSurveyActions } from 'redux/slices/SurveySlice';
 import { useHeaderActions } from 'redux/slices/HeaderSlice';
 import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
+import { usePinSetupActions } from 'redux/slices/PinSetupSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
 import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
@@ -64,4 +65,9 @@ export const useThankYou = () => ({
 export const usePostRegistration = () => ({
   ...useSelector(state => state.postRegistrationSetupSlice),
   ...usePostRegistrationActions()
+});
+
+export const usePinSetup = () => ({
+  ...useSelector(state => state.pinSetupSlice),
+  ...usePinSetupActions()
 });

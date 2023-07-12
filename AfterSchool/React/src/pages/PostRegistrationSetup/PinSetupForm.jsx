@@ -84,7 +84,7 @@ function PinSetupForm(props) {
           customLabel="Cell Phone Number"
           variant="outlined"
           autofill="false"
-          className={classes.widthFull}
+          fullWidth
           {...getFieldProps('phone')}
           error={!!(touched['phone'] && errors['phone'])}
           helperText={touched['phone'] && errors['phone']}
@@ -95,7 +95,7 @@ function PinSetupForm(props) {
         id="pinCode"
         customLabel="PIN Code"
         variant="outlined"
-        className={classes.widthFull}
+        fullWidth
         onChange={e => handleInputChange(e, 'pin')}
         value={values.pin}
         error={!!(touched['pin'] && errors['pin'])}
@@ -107,7 +107,7 @@ function PinSetupForm(props) {
         id="confirmPinCode"
         customLabel="Confirm PIN Code"
         variant="outlined"
-        className={classes.widthFull}
+        fullWidth
         onChange={e => handleInputChange(e, 'confirmPin')}
         value={values.confirmPin}
         error={!!(touched['confirmPin'] && errors['confirmPin'])}
