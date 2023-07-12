@@ -1,14 +1,14 @@
-import * as Yup from 'yup';
-import { Box, Button, CircularProgress } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import * as Yup from 'yup';
+import { Box } from '@material-ui/core';
 import useStyles from './styles';
 import TextField from 'components/Overrides/TextField';
+import LoadingButton from 'components/Overrides/LoadingButton';
 import { useFormik } from 'formik';
 import { phoneValidationRegex } from 'constants/regex';
 import { usePostRegistration } from 'redux/hooks';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-
 function PinSetupForm(props) {
   const classes = useStyles();
   const { setActiveStep, RegistrantType } = props;
@@ -117,23 +117,16 @@ function PinSetupForm(props) {
         type="number"
       />
       <Box className={classes.pinSetupButtonsWrapper}>
-        <Button
+        <LoadingButton
           color="primary"
           className={classes.saveButton}
           variant="contained"
           type="submit"
           data-testid={'Save & continue'}
           onClick={() => handleSubmit()}
-          disabled={saveDisabled}
-        >
-          {saveDisabled ? (
-            <>
-              {'Loading . . .'} <CircularProgress size={'20px'} />
-            </>
-          ) : (
-            'Save & Continue'
-          )}
-        </Button>
+          text="Save & Continue"
+          loading={saveDisabled}
+        />
       </Box>
     </Box>
   );

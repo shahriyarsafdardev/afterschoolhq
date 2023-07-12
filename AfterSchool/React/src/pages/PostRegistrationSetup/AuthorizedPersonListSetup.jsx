@@ -1,4 +1,4 @@
-import { Grid, Button, Container, Typography, CircularProgress } from '@material-ui/core';
+import { Grid, Button, Container, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -10,6 +10,7 @@ import AddAuthorizedUserForm from './AddAuthorizedUserForm';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import useStyles from './styles';
+import LoadingButton from 'components/Overrides/LoadingButton';
 
 function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   const classes = useStyles();
@@ -157,21 +158,14 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
             >
               Cancel
             </Button>
-            <Button
+            <LoadingButton
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
-              disabled={saveDisabled}
-            >
-              {saveDisabled ? (
-                <>
-                  {'Loading . . .'} <CircularProgress size={'20px'} />
-                </>
-              ) : (
-                'Save & Notify'
-              )}
-            </Button>
+              text="Save & Notify"
+              loading={saveDisabled}
+            />
           </Grid>
         </Grid>
       </form>
