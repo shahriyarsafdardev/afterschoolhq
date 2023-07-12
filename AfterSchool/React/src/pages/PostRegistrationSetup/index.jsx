@@ -21,7 +21,7 @@ export default function PostRegistrationSetup() {
     data: { additionalContactDto = [], setupDto, activityDto }
   } = usePostRegistration();
 
-  const { RegistrantType, IsFree, StudentFirstName } = activityDto || {};
+  const { RegistrantType, StudentFirstName } = activityDto || {};
   const { IsPhoneSetup, IsPinSetup } = setupDto || {};
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function PostRegistrationSetup() {
         />
       );
     else {
-      if (IsFree) navigate(thankyouUrl(registrationUid));
+      navigate(thankyouUrl(registrationUid));
       return null;
     }
   };
