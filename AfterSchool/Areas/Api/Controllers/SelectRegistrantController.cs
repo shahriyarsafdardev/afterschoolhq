@@ -28,9 +28,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
             try
             {
-
                 var currentAccount = SessionVariables.CurrentAccount;
                 var currentUser = SessionVariables.CurrentUser;
+
                 if (currentAccount.IsEmpty() || currentUser.IsEmpty())
                     throw new Exception("Unauthorized Account");
 
@@ -68,61 +68,141 @@ namespace AfterSchool.Areas.Api.Controllers
                     ParticipationActivityGroupType = poActivityGroupType
                 };
 
+
+
                 //Get things for Students
                 foreach (var student in students)
                 {
-                    var isGradeRestricted = participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student);
-                    var isAgeRestricted = !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student);
-                    var isGenderRestricted = participationObject.IsGenderEnforced
-                                           && !participationObject.AcceptsGenderType(student.GenderId);
+                    var registered = "Enrolled";
+                    var register = "Enroll";
+
+                    if (participationObject.RegistrationMode == RegistrationMode.Apply)
+                    {
+                        register = "Apply";
+                        registered = "Applied";
+                    }
+
+                    if (participationObject.SeatsRemaining == 0)
+                    {
+                        register = "Join Waiting List";
+                    }
+
+                    var disabledText = "";
+                    var btnText = "";
+                    var registerUrl = "/account/setstudent"+student.Uid;
+                    var btnUrl = $"{student.Uid}/{registerUrl}";
+
+                    var registrantGrade = student.GetAnswer(QuestionDataType.RegistrantGrade);
+                    var registrantGradeText = registrantGrade?.Text;
                     var canStillRegister = false;
+
+
+                    var ineligibleText = "";
+
+                    var isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student);
+                    var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student);
+                    var isGenderRestricted = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
+                                           && !participationObject.AcceptsGenderType(student.GenderId);
+
+
                     if (participationObject.CanRegisterPerClass)
                     {
-                        canStillRegister = !student.IsReservedForAllDates(participationObject, selectedDates, null, msgs);
+                        canStillRegister = !student.IsReservedForAllDates(participationObject, selectedDates, null);
                     }
-                    var hasSubmittedForActivity = student.HasSubmittedFor(participationObject, null, msgs);
-                    var hasWithDrawnFromActivity = student.HasWithdrawn(participationObject, msgs);
-                    var hasCancelledSubscription = student.HasCancelledSubscription(participationObject, msgs);
-                    var hasConsentFor = student.HasConsentFor(participationObject, msgs);
-                    var isOnWaitingListFor = student.OnWaitingListFor(participationObject, msgs);
-                    var isReservedAndPaidFor = student.IsReservedAndPaidFor(participationObject, null, msgs);
-                    var isAppliedFor = student.IsAppliedFor(participationObject, null, msgs);
-                    var masterRegistrantHasPlan = student.MasterRegistrantHasPlan(participationObject, msgs);
-                    var makePaymentAcc = student.GetRegistrationWithParticipationObject(participationObject, msgs)?.Uid;
-                    var isProfileCompleted = student.IsProfileCompleted;
-                    var ineligibleText = ParticipationObjectUI.PrintIneligibilityMessageString(participationObject,
-                    isGenderRestricted, isAgeRestricted, isGradeRestricted);
-                    var registrantGradeText = student.GetAnswer(QuestionDataType.RegistrantGrade, msgs)?.Text;
-                    var grade = UILabel.GetGradeDescription(registrantGradeText);
-                    var enrollURL = "/account/setstudent/" + student.Uid;
-                    var paymentURL = makePaymentAcc.IsNotEmpty()?"/account/makepayment/" + makePaymentAcc: "";
+
+
+                    if (student.HasSubmittedFor(participationObject, null) && !canStillRegister)
+                    {
+                        if (student.HasWithdrawn(participationObject))
+                        {
+                            if (participationObject.SubscriptionPlans.Any() && student.HasCancelledSubscription(participationObject))
+                            {
+                                btnText = "Re-Enroll &raquo";
+                            }
+                            else
+                            {
+                                btnText = "Withdrawn";
+                                disabledText = " disabled=\"disabled\" ";
+                                btnUrl = "#";
+                            }
+                        }
+                        else if (!student.HasConsentFor(participationObject))
+                        {
+                            btnText = "Give Consent";
+                        }
+                        else if (student.OnWaitingListFor(participationObject))
+                        {
+                            btnText = "On Waiting List";
+                            disabledText = " disabled=\"disabled\" ";
+                            btnUrl = "#";
+                        }
+                        else if (!student.IsReservedAndPaidFor(participationObject, null) && !student.IsAppliedFor(participationObject, null) && !student.MasterRegistrantHasPlan(participationObject))
+                        {
+                            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
+
+                            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
+                            {
+                                btnText = "Awaiting Finalization";
+                                disabledText = " disabled=\"disabled\" ";
+                                btnUrl = "#";
+                            }
+                            else
+                            {
+                                btnText = "Pay Now &raquo";
+                                btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject).Uid });
+                            }
+                        }
+                        else if (participationObject.IsSession())
+                        {
+                            btnText = "Add To Existing Registration &raquo";
+                        }
+                        else
+                        {
+                            btnText = $"Already {registered}";
+                            disabledText = " disabled=\"disabled\" ";
+                            btnUrl = "#";
+                        }
+                    }
+                    else
+                    {
+
+                        if (!student.IsProfileCompleted)
+                        {
+                            btnText = "Update Profile &amp; Enroll &raquo";
+                            btnUrl = registerUrl;
+                        }
+                        else
+                        {
+                            if (participationObject.ActivityGroupType != ActivityGroupType.Session && (isGenderRestricted || isGradeRestricted || isAgeRestricted))
+                            {
+                                btnText = "Ineligible";
+                                disabledText = " disabled=\"disabled\" ";
+                                ineligibleText = ParticipationObjectUI.PrintIneligibilityMessageString(participationObject,
+                                    isGenderRestricted, isAgeRestricted, isGradeRestricted);
+                            }
+                            else
+                            {
+                                btnText = register + " &raquo";
+                            }
+
+                        }
+                    }
+                    var updateProfileLink = $"/reactapp/updateprofile/{student.Uid}";
                     var newStudent = new SelectRegistrantsDto
                     {
                         ID = student.ID,
                         FirstName = student.FirstName,
                         LastName = student.LastName,
-                        IsParentOrGuardian = student.IsParentOrGuardian,
-                        IsAdult = student.IsAdult,
-                        Uid = student.Uid,
-                        IsGradeRestricted = isGradeRestricted,
-                        IsAgeRestricted = isAgeRestricted,
-                        IsGenderRestricted = isGenderRestricted,
+                        Registered = registered,
+                        Register = register,
+                        DisabledText = disabledText,
+                        BtnText = btnText,
+                        RegisterUrl = registerUrl,
+                        UpdateProfileLink = updateProfileLink,
+                        BtnUrl = btnUrl,
+                        RegistrantGradeText = UILabel.GetGradeDescription(registrantGradeText),
                         CanStillRegister = canStillRegister,
-                        HasSubmittedForActivity = hasSubmittedForActivity,
-                        HasWithDrawnFromActivity = hasWithDrawnFromActivity,
-                        HasCancelledSubscription = hasCancelledSubscription,
-                        HasConsentFor = hasConsentFor,
-                        IsOnWaitingListFor = isOnWaitingListFor,
-                        IsReservedAndPaidFor = isReservedAndPaidFor,
-                        IsAppliedFor = isAppliedFor,
-                        MasterRegistrantHasPlan = masterRegistrantHasPlan,
-                        MakePaymentAcc = makePaymentAcc,
-                        IsProfileCompleted = isProfileCompleted,
-                        IneligibleText = ineligibleText,
-                        Grade = grade,
-                        EnrollURL = enrollURL,
-                        PaymentURL = paymentURL
-
+                        IneligibleText = ineligibleText
                     };
                     registrantsDtos.Add(newStudent);
                 }
