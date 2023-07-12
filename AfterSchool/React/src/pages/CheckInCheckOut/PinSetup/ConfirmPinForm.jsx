@@ -1,8 +1,7 @@
 import { Box, Button, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import useStyles from './styles';
-import PinInput from 'react-pin-input';
-import { ErrorBand } from 'components';
+import PinInputField from './PinInputField';
 
 export default function ConfirmPinForm({ userPin, handleSubmitPinCode }) {
   const classes = useStyles();
@@ -27,20 +26,7 @@ export default function ConfirmPinForm({ userPin, handleSubmitPinCode }) {
   return (
     <Box className={classes.pinSetupForm}>
       <Typography className={classes.headerText}>Please enter your PIN code again.</Typography>
-      <Box className={classes.marginAuto}>
-        <PinInput
-          length={4}
-          onChange={value => {
-            handleChange(value);
-          }}
-          type="numeric"
-          inputMode="number"
-          style={{ padding: '10px' }}
-          inputStyle={{ border: '3px solid #E4E4E4', borderRadius: '6px' }}
-          regexCriteria={/^[ A-Za-z0-9_@./#&+-]*$/}
-        />
-        {errorMessage && <ErrorBand error={errorMessage} />}
-      </Box>
+      <PinInputField handleChange={handleChange} errorMessage={errorMessage} />
       <Button
         onClick={handleSubmit}
         className={classes.buttonNext}
