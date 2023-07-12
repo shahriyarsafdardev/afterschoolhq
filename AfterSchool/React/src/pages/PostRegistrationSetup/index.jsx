@@ -6,16 +6,13 @@ import AuthorizedPersonListSetup from './AuthorizedPersonListSetup';
 import { usePostRegistration } from 'redux/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Loader } from 'components';
-import utils from 'utils';
 import apiRoutes from 'routes';
-import { applyModes } from 'constants';
 
 export default function PostRegistrationSetup() {
   const classes = useStyles();
   const navigate = useNavigate();
   const { registrationUid } = useParams();
-  const { redirect } = utils;
-  const { paymentScreenPath, thankyouUrl } = apiRoutes;
+  const { thankyouUrl } = apiRoutes;
   const [activeStep, setActiveStep] = useState(0);
 
   const {
@@ -24,7 +21,7 @@ export default function PostRegistrationSetup() {
     data: { additionalContactDto = [], setupDto, activityDto }
   } = usePostRegistration();
 
-  const { RegistrantType, IsFree, ApplyMode, StudentFirstName } = activityDto || {};
+  const { RegistrantType, IsFree, StudentFirstName } = activityDto || {};
   const { IsPhoneSetup, IsPinSetup } = setupDto || {};
 
   useEffect(() => {
@@ -42,7 +39,14 @@ export default function PostRegistrationSetup() {
   }, [IsPhoneSetup, IsPinSetup]);
 
   const renderActiveStep = () => {
-    if (activeStep === 0) return <PinSetupForm setActiveStep={setActiveStep} setupDto={setupDto} />;
+    if (activeStep === 0)
+      return (
+        <PinSetupForm
+          setActiveStep={setActiveStep}
+          setupDto={setupDto}
+          RegistrantType={RegistrantType}
+        />
+      );
     else if (activeStep === 1)
       return (
         <AuthorizedPersonListSetup
@@ -52,11 +56,6 @@ export default function PostRegistrationSetup() {
       );
     else {
       if (IsFree) navigate(thankyouUrl(registrationUid));
-      else {
-        ApplyMode === applyModes.Apply
-          ? navigate(thankyouUrl(registrationUid))
-          : redirect(paymentScreenPath(registrationUid));
-      }
       return null;
     }
   };
