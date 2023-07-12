@@ -62,7 +62,7 @@ export default makeStyles(theme => ({
     textAlign: 'center',
     fontWeight: 400
   },
-  pinInputField: {
+  marginAuto: {
     margin: 'auto'
   }
 }));

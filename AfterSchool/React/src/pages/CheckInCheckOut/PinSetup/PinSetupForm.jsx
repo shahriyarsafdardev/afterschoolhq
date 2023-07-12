@@ -22,7 +22,7 @@ function PinSetupForm({ setUserPin, currentUserInfo }) {
       <Typography className={classes.subHeaderText}>
         Please select four numbers to use for your PIN code during check in and check out.
       </Typography>
-      <Box className={classes.pinInputField}>
+      <Box className={classes.marginAuto}>
         <PinInput
           length={4}
           onChange={value => {

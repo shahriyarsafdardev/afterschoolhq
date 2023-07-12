@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import useStyles from './styles';
 import { useSnackbar } from 'notistack';
-import { Box, Card, Grid } from '@material-ui/core';
+import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import PhoneNumberForm from './PhoneNumberForm';
 import PinSetupForm from './PinSetupForm';
 import ConfirmPinForm from './ConfirmPinForm';
 import ThankyouScreen from './ThankyouScreen';
 import { usePinSetup } from 'redux/hooks';
-import { Loader } from 'components';
+import { isEmpty } from 'lodash';
 
 function index() {
   const classes = useStyles();
@@ -48,13 +48,15 @@ function index() {
   }, [phone]);
 
   const innerSection = () => {
-    if (loading) return <Loader />;
+    if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (isSetupCompleted || IsPinSetup) return <ThankyouScreen />;
-    if (!phone) {
-      return <PhoneNumberForm setSearchParams={setSearchParams} />;
-    } else if (!userPin)
+    if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
+    if (!userPin && !isEmpty(currentUserInfo))
       return <PinSetupForm setUserPin={setUserPin} currentUserInfo={currentUserInfo} />;
-    else return <ConfirmPinForm userPin={userPin} handleSubmitPinCode={handleSubmitPinCode} />;
+    if (!isEmpty(currentUserInfo))
+      return <ConfirmPinForm userPin={userPin} handleSubmitPinCode={handleSubmitPinCode} />;
+
+    return <CircularProgress className={classes.marginAuto} />;
   };
 
   return (
