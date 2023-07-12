@@ -25,13 +25,18 @@ export default function PostRegistrationSetup() {
   const { IsPhoneSetup, IsPinSetup } = setupDto || {};
 
   useEffect(() => {
-    postRegistration(registrationUid);
+    getRegistrationData();
   }, []);
+
+  const getRegistrationData = () => {
+    postRegistration(registrationUid);
+  };
 
   useEffect(() => {
     if (!IsPhoneSetup || !IsPinSetup) {
       setActiveStep(0);
     } else if (RegistrantType === 'Parent') {
+      getRegistrationData();
       setActiveStep(1);
     } else {
       setActiveStep(2);
