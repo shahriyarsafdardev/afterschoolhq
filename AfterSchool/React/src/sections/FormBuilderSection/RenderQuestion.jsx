@@ -18,16 +18,16 @@ import {
   Box
 } from '@material-ui/core';
 
-import useStyles from './styles';
-import DropDown from './DropDown';
-import LockIcon from 'assets/lock.svg';
-import { StyledImage } from './helper';
-import { getMaxLimit } from './helper';
+import QuestionControlActions from './QuestionControlActions';
 import { audienceTypes, questionType } from 'constants';
 import RenderAudienceList from './RenderAudienceList';
+import { StyledImage, getMaxLimit } from './helper';
 import LabeledCheckBox from './LabeledCheckBox';
 import RenderOptions from './RenderOptions';
-import QuestionControlActions from './QuestionControlActions';
+import CheckBoxLink from './CheckBoxLink';
+import LockIcon from 'assets/lock.svg';
+import DropDown from './DropDown';
+import useStyles from './styles';
 
 const RenderQuestion = ({
   index,
@@ -50,11 +50,12 @@ const RenderQuestion = ({
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const [showOptionsList, setShowOptionsList] = useState(false);
-  const { dropdown, radioList, checkBoxList } = questionType;
+  const { dropdown, radioList, checkBoxList, checkBox } = questionType;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
     ID,
     Text,
+    Link,
     Options,
     IsLocked,
     QuestionTypeId,
@@ -99,6 +100,10 @@ const RenderQuestion = ({
   const getOptions = key => {
     !questionHasOptions(key) && setOptions([]);
     return questionHasOptions(key) ? { Options: options } : { Options: undefined };
+  };
+
+  const getLink = (qTypeId = QuestionTypeId) => {
+    return { Link: qTypeId !== checkBox ? null : Link };
   };
 
   const handleDeleteSection = async () => {
@@ -163,7 +168,12 @@ const RenderQuestion = ({
               <DropDown
                 question={{ ...question, ...{ options: questionTypesOptions } }}
                 setFieldValue={key =>
-                  setQuestion({ ...question, QuestionTypeId: key, ...getOptions(key) })
+                  setQuestion({
+                    ...question,
+                    QuestionTypeId: key,
+                    ...getOptions(key),
+                    ...getLink()
+                  })
                 }
                 disabled={!customQuestion || IsLocked}
                 dataTestId={`questionTypeDropDown-${ID}-${index}`}
@@ -241,6 +251,20 @@ const RenderQuestion = ({
               )}
             </>
           </Grid>
+          {QuestionTypeId === checkBox && (
+            <CheckBoxLink
+              ID={ID}
+              Link={Link}
+              index={index}
+              errors={errors}
+              touched={touched}
+              question={question}
+              IsLocked={IsLocked}
+              setQuestion={setQuestion}
+              customQuestion={customQuestion}
+              QuestionDataTypeId={QuestionDataTypeId}
+            />
+          )}
           <RenderOptions
             showOptions={showOptions}
             initialized={initialized}

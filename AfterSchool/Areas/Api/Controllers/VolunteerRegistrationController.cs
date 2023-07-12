@@ -580,7 +580,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             IsDeleted = question.IsDeleted,
                             QuestionTypeId = question.QuestionTypeId,
                             QuestionDataTypeId = question.QuestionDataTypeId,
-                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId
+                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                            Link = question.Link,
                         }
                     );
                 }

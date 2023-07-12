@@ -60,6 +60,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         QuestionTypeId = question.QuestionTypeId,
                         QuestionDataTypeId = question.QuestionDataTypeId,
                         FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                        Link = question.Link,
                     })
                     .ToList();
 
