@@ -27,7 +27,7 @@ export default function ConfirmPinForm({ userPin, handleSubmitPinCode }) {
   return (
     <Box className={classes.pinSetupForm}>
       <Typography className={classes.headerText}>Please enter your PIN code again.</Typography>
-      <Box className={classes.pinInputField}>
+      <Box className={classes.marginAuto}>
         <PinInput
           length={4}
           onChange={value => {
