@@ -164,6 +164,15 @@ namespace AfterSchool.Areas.Api.Controllers
                                 currentUser.PinCode = pinCode;
 
                             amsgs.AddRange(currentUser.Save(adc));
+
+                            var parentPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
+                                QuestionDataType.Parent1MobilePhone,amsgs);
+                            
+                            if (parentPhoneInfo.IsNotEmpty())
+                            {
+                                parentPhoneInfo.Text = currentUser.Phone;
+                                amsgs.AddRange(parentPhoneInfo.Save(adc));
+                            }
                         }
 
                         if (amsgs.HasNoErrors() && peopleList.IsNotEmpty() && peopleList.Count > 0)
@@ -194,6 +203,18 @@ namespace AfterSchool.Areas.Api.Controllers
                                         IsDeleted = false,
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
+
+                                    if (currentPickUp.PersonPhoneDataType != QuestionDataType.NotSet)
+                                    {
+                                        var currentPickUpPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
+                                            currentPickUp.PersonPhoneDataType,amsgs);
+                            
+                                        if (currentPickUpPhoneInfo.IsNotEmpty())
+                                        {
+                                            currentPickUpPhoneInfo.Text = currentPickUp.Phone;
+                                            amsgs.AddRange(currentPickUpPhoneInfo.Save(adc));
+                                        }
+                                    }
                                     
                                     // if (amsgs.HasNoErrors())
                                     //     TwilioHelper.SendSMS(
@@ -357,6 +378,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     FirstName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == firstName)?.Text,
                     LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
                     Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
+                    PersonPhoneDataType = phone,
                 });
             return pickUpContactList;
         }
