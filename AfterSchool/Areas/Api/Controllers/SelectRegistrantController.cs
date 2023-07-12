@@ -94,7 +94,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     isGenderRestricted, isAgeRestricted, isGradeRestricted);
                     var registrantGradeText = student.GetAnswer(QuestionDataType.RegistrantGrade, msgs)?.Text;
                     var grade = UILabel.GetGradeDescription(registrantGradeText);
-
+                    var enrollURL = "/account/setstudent/" + student.Uid;
+                    var paymentURL = makePaymentAcc.IsNotEmpty()?"/account/makepayment/" + makePaymentAcc: "";
                     var newStudent = new SelectRegistrantsDto
                     {
                         ID = student.ID,
@@ -118,7 +119,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         MakePaymentAcc = makePaymentAcc,
                         IsProfileCompleted = isProfileCompleted,
                         IneligibleText = ineligibleText,
-                        Grade = grade
+                        Grade = grade,
+                        EnrollURL = enrollURL,
+                        PaymentURL = paymentURL
 
                     };
                     registrantsDtos.Add(newStudent);

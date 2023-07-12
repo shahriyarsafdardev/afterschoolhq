@@ -47,6 +47,9 @@ namespace AfterSchool.Areas.Api.Models
         public string? IneligibleText { get; set; }
 
         public string? Grade { get; set; }
+        
+        public string? EnrollURL { get; set; }
+        public string? PaymentURL { get; set; }
 
         public static SelectRegistrantsDto MapToDto(SelectRegistrantsDto registrant)
         {
@@ -74,6 +77,9 @@ namespace AfterSchool.Areas.Api.Models
                 IsProfileCompleted = registrant.IsProfileCompleted,
                 IneligibleText = registrant.IneligibleText,
                 Grade = registrant.Grade,
+                EnrollURL = registrant.EnrollURL,
+                PaymentURL = registrant.PaymentURL
+
             };
         }
 
