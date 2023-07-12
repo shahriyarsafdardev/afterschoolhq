@@ -349,7 +349,7 @@ namespace AfterSchool.Areas.Api.Controllers
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {
             var pickUpContactList = new List<PickUpDto>();
-            var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes)).ToList();
+            var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes) && x.Text.IsNotEmpty()).ToList();
 
             if (contactInfo.Count > 0)
                 pickUpContactList.Add(new PickUpDto()
