@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -213,7 +213,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     }
                 });
 
-                if (json.schoolLocationID.IsNotEmpty() && currentRegistrant.IsStudent)
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation && currentRegistrant.PersonTypeId != RegistrantPersonType.Adult
+                    && currentRegistrant.PersonTypeId != RegistrantPersonType.Volunteer)
                     currentRegistrant.SchoolLocationId = json.schoolLocationID;
 
                 Database.ExecuteTransaction
