@@ -148,7 +148,13 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
           </Grid>
 
           <Grid item xs={12} className={classes.listButtonWrapper}>
-            <Button type="submit" variant="outlined" color="primary" fullWidth>
+            <Button
+              type="submit"
+              variant="outlined"
+              color="primary"
+              fullWidth
+              onClick={() => setActiveStep(3)}
+            >
               Cancel
             </Button>
             <Button
