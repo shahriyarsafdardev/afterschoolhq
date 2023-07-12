@@ -603,12 +603,15 @@
     <Compile Include="Areas\Api\Models\CheckInCheckOutStudentInfoDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInOutAttendanceDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInOutStudentsDto.cs" />
+    <Compile Include="Areas\Api\Controllers\SelectRegistrantController.cs" />
     <Compile Include="Areas\Api\Models\FormQuestionSettingDto.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
     <Compile Include="Areas\Api\Controllers\UpdateRegistrationController.cs" />
     <Compile Include="Areas\Api\Models\ManageCheckInOutAccessDto.cs" />
     <Compile Include="Areas\Api\Models\PickUpDto.cs" />
+    <Compile Include="Areas\Api\Models\SelectRegistrantsDto.cs" />
+    <Compile Include="Areas\Api\Models\SRParticipationObjectDTO.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\SurveyRequestQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\UpdateQuestionAnswerResponse.cs" />
