@@ -23,7 +23,8 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     LastName: '',
     Phone: '',
     checked: false,
-    default: false
+    default: false,
+    PersonPhoneDataType: 'NotSet'
   };
 
   const { msgs, updateData } = usePostRegistration();
@@ -80,7 +81,8 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
           const user = {
             FirstName: values[key].FirstName,
             LastName: values[key].LastName,
-            Phone: values[key].Phone
+            Phone: values[key].Phone,
+            PersonPhoneDataType: values[key].PersonPhoneDataType
           };
           filteredAuthorizedPersons.push(user);
         }
