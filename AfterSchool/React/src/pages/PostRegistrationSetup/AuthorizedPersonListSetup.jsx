@@ -26,29 +26,21 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     default: false
   };
 
-  const {
-    msgs,
-    updateData,
-    data: { activityDto }
-  } = usePostRegistration();
+  const { msgs, updateData } = usePostRegistration();
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
   useEffect(() => {
-    const filteredAuthorizedPersons = authorizedPersons.filter(
-      ({ FirstName }) => FirstName !== null
-    );
     const initialState = {};
-    filteredAuthorizedPersons.forEach(
+    authorizedPersons.forEach(
       (person, index) => (initialState[index] = { ...person, default: true, checked: false })
     );
-    initialState[filteredAuthorizedPersons.length] = newUser;
     setInitialValue(initialState);
   }, [authorizedPersons]);
 
-  const formValidationSchema = values =>
+  const formValidationSchema = () =>
     Yup.object().shape(
       Object.keys(values).reduce((acc, key) => {
         acc[key] = Yup.object().shape({
@@ -58,7 +50,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
               Yup.string()
                 .matches(phoneValidationRegex, 'Phone number is not valid')
                 .required('Phone Number is required'),
-            otherwise: () => Yup.string().nullable()
+            otherwise: () => Yup.string().notRequired()
           }),
           FirstName: Yup.string().when(['checked'], {
             is: val => val,
@@ -79,7 +71,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues,
-    // validationSchema,
+    validationSchema,
     onSubmit: async values => {
       setSaveDisabled(true);
       const filteredAuthorizedPersons = [];
@@ -108,9 +100,10 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   });
 
   const { setFieldValue, values, handleSubmit, errors, touched } = formik;
-  // useEffect(() => {
-  //   setValidationSchema(formValidationSchema(values));
-  // }, [values]);
+
+  useEffect(() => {
+    setValidationSchema(formValidationSchema());
+  }, [values]);
 
   const addNewUserHandler = () => {
     const key = Number(Object.keys(values).at(-1)) + 1;
@@ -129,23 +122,18 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
                 handleChange={() =>
                   setFieldValue(key, { ...values[key], checked: !values[key].checked })
                 }
-                handlePhoneInputChange={value =>
-                  setFieldValue(key, { ...values[key], Phone: value })
-                }
+                handleEdit={() => setFieldValue(key, { ...values[key], default: false })}
                 touched={touched[key]}
                 errors={errors[key]}
               />
             ) : (
               <>
                 <AddAuthorizedUserForm
-                  values={values[key]}
+                  person={values[key]}
                   setFieldValue={value => {
                     setFieldValue(key, value);
-                    addNewUserHandler();
                   }}
                   id={key}
-                  touched={touched[key]}
-                  errors={errors[key]}
                 />
               </>
             )
