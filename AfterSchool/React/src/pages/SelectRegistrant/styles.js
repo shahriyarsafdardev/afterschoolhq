@@ -6,22 +6,21 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center'
   },
   innerWrapper: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    display: 'grid',
+    gridTemplateColumns: 'auto auto auto',
     gap: '20px',
     [theme.breakpoints.up('xl')]: {
-      justifyContent: 'space-between',
       maxWidth: '80%'
     },
     [theme.breakpoints.down('md')]: {
-      justifyContent: 'center'
+      gridTemplateColumns: 'auto'
     },
     [theme.breakpoints.only('lg')]: {
-      justifyContent: 'center',
-      maxWidth: '80%'
+      gridTemplateColumns: 'auto auto',
+      maxWidth: '90%'
     },
     [theme.breakpoints.only('xs')]: {
-      // padding: '15px'
+      gridTemplateColumns: 'auto'
     }
   },
   heading: {

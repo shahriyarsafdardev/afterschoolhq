@@ -1,49 +1,47 @@
 import React from 'react';
-import DoubleArrowIcon from '@material-ui/icons/DoubleArrow';
 import { Button, Link, Typography, CardContent, CardActions, Card } from '@material-ui/core';
+
 import useStyles from './styles';
 
-function RegistrantCard({ name, showMsg, eligible = true }) {
-  const classes = useStyles({ eligible });
-  const handleClick = () => {};
-  let buttonText = '';
-  if (name && eligible) {
-    buttonText = 'Enroll';
-  } else if (!eligible) {
-    buttonText = 'Ineligible';
-  } else {
-    buttonText = 'Add New Participant';
-  }
+function RegistrantCard({ student, handleClick }) {
+  const {
+    FirstName,
+    LastName,
+    IneligibleText,
+    RegistrantGradeText,
+    BtnText: buttonText,
+    Disabled: disabled,
+    NewParticipant = false,
+    UpdateProfileLink: updateProfileUrl
+  } = student;
+  const name = `${FirstName} ${LastName}`;
+  const classes = useStyles({ disabled: disabled || NewParticipant });
 
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent className={classes.cardContent}>
-        <Typography className={classes.heading}>{name ? name : 'New Participant'}</Typography>
-        {name && (
-          <Typography className={classes.subHeading}>
-            Parent/Guardian Participant (Adult)
-          </Typography>
-        )}
+        <Typography className={classes.heading}>{name}</Typography>
+        <Typography className={classes.subHeading}>{RegistrantGradeText}</Typography>
       </CardContent>
       <CardActions className={classes.actions}>
         <Button
-          color="primary"
           className={classes.enrollButton}
-          variant="contained"
           onClick={handleClick}
-          disabled={!eligible}
+          disabled={disabled}
+          variant="contained"
+          color="primary"
         >
           {buttonText} &nbsp;
-          {eligible && <DoubleArrowIcon className={classes.arrowIcon} />}
         </Button>
-        {showMsg && (
-          <Typography className={classes.enrollMsg}>
-            This activity is for students who are 16-18 years old.
-          </Typography>
-        )}
-
-        {name && (
-          <Link href="#" className={classes.link} variant="body1" data-testid={'Update Profile'}>
+        <Typography className={classes.enrollMsg}>{IneligibleText}</Typography>
+        {updateProfileUrl && (
+          <Link
+            data-testid={'Update Profile'}
+            className={classes.link}
+            href={updateProfileUrl}
+            target="_blank"
+            variant="body1"
+          >
             Update Profile
           </Link>
         )}

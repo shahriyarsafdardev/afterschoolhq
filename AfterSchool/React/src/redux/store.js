@@ -12,6 +12,7 @@ import RegistrationSlice from './slices/RegistrationSlice';
 import ErrorMessagesSlice from './slices/ErrorMessagesSlice';
 import RegistrantNotesSlice from './slices/RegistrantNotesSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
+import SelectRegistrantSlice from './slices/SelectRegistrantSlice';
 import UpdateRegistrationSlice from './slices/UpdateRegistrationSlice';
 import PostRegistrationSetupSlice from './slices/PostRegistrationSetupSlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
@@ -30,6 +31,7 @@ export default configureStore({
     [RegistrationSlice.name]: RegistrationSlice.reducer,
     [ErrorMessagesSlice.name]: ErrorMessagesSlice.reducer,
     [RegistrantNotesSlice.name]: RegistrantNotesSlice.reducer,
+    [SelectRegistrantSlice.name]: SelectRegistrantSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [UpdateRegistrationSlice.name]: UpdateRegistrationSlice.reducer,
     [PostRegistrationSetupSlice.name]: PostRegistrationSetupSlice.reducer,
