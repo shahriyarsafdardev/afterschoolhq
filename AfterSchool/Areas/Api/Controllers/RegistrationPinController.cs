@@ -390,8 +390,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 StudentName = registrantActivity.RegistrantName,
                                 ActivityName = activity?.Name,
-                                ActivityStartTime = activitySchedule?.DailyStartTime,
-                                ActivityEndTime = activitySchedule?.DailyEndTime,
+                                ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
+                                ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
                             });
                         });
                     });
