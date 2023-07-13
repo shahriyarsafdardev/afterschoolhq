@@ -30,6 +30,7 @@ export default function Registration({ newChild = false }) {
     clearMessages,
     activity: {
       IsFree,
+      IsPaid,
       AllowToPayLater,
       RegistrantType,
       IsAgeRestricted,
@@ -92,18 +93,19 @@ export default function Registration({ newChild = false }) {
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsRequireCheckInCheckOut && ApplyMode === applyModes.Register && IsFree) {
+    if (IsPaid && !IsFree) {
+      redirect(paymentScreenPath(registrationId));
+      return;
+    }
+
+    if (!IsPaid && IsFree && IsRequireCheckInCheckOut) {
       navigate(postRegistrationUrl(registrationId));
       return;
     }
+
     if (IsFree) {
       navigate(thankyouUrl(registrationId));
       return;
-    }
-    if (ApplyMode === applyModes.Apply) {
-      navigate(thankyouUrl(registrationId));
-    } else {
-      redirect(paymentScreenPath(registrationId));
     }
   };
 
