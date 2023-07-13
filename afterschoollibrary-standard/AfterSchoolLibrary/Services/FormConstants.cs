@@ -207,17 +207,7 @@ namespace AfterSchoolLibrary.Services
                 ActivityMessageReason.UrgentUpdate
             };
         }
-        
-        public static List<QuestionDataType> Parent1InfoToIncludeInStudentPanel()
-        {
-            return new List<QuestionDataType>
-            {
-                QuestionDataType.Parent1FirstName,
-                QuestionDataType.Parent1LastName,
-                QuestionDataType.Parent1MobilePhone,
-            };
-        }
-        
+
         public static List<QuestionDataType> Parent2InfoToIncludeInStudentPanel()
         {
             return new List<QuestionDataType>
