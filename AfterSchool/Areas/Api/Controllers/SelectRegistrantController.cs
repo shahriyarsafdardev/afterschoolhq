@@ -2,6 +2,7 @@ using AfterSchool.Areas.Api.Models;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -31,6 +32,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentAccount = SessionVariables.CurrentAccount;
                 var currentUser = SessionVariables.CurrentUser;
 
+
                 if (currentAccount.IsEmpty() || currentUser.IsEmpty())
                     throw new Exception("Unauthorized Account");
 
@@ -57,7 +59,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 var poSubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
                 var poParticipationObject = participationObject.IsSession();
                 var poActivityGroupType = participationObject.ActivityGroupType;
-
+                var activityName = participationObject.Name;
+                var orgName = participationObject.OwnerAccount.Name;
+                var profile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+                var HeaderImageUrl = profile.GetHeaderImageUrl(msgs);
                 var resParticipationObject = new SRParticipationObjectDTO
                 {
                     ParticipationRegistrationMode = poRegistrationMode,
@@ -65,7 +70,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     AnySubscriptionPlans = poSubscriptionPlans,
                     FirstSubscriptionPlan = poSubscriptionPlan,
                     ParticipationObjectIsSession = poParticipationObject,
-                    ParticipationActivityGroupType = poActivityGroupType
+                    ParticipationActivityGroupType = poActivityGroupType,
+                    ActivityName = activityName,
+                    OrganizationName = orgName,
+                    HeaderImageUrl = HeaderImageUrl
                 };
 
 
@@ -75,7 +83,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     var registered = "Enrolled";
                     var register = "Enroll";
-
                     if (participationObject.RegistrationMode == RegistrationMode.Apply)
                     {
                         register = "Apply";
@@ -91,8 +98,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     var btnText = ""; 
                     var registerUrl = "/account/setstudent/"+student.Uid;
                     var btnUrl = registerUrl;
-                    var activityName = participationObject.Name;
-                    var orgName = currentAccount.Name;
+                    
                     //
 
                     var registrantGrade = student.GetAnswer(QuestionDataType.RegistrantGrade);
@@ -171,7 +177,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         if (!student.IsProfileCompleted)
                         {
-                            btnText = "Update Profile &amp; Enroll »";
+                            btnText = "Update Profile &; Enroll »";
                             btnUrl = registerUrl;
                         }
                         else
@@ -206,8 +212,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         RegistrantGradeText = UILabel.GetGradeDescription(registrantGradeText),
                         CanStillRegister = canStillRegister,
                         IneligibleText = ineligibleText,
-                        ActivityName = activityName,
-                        OrganizationName = orgName
+                        isAdult = student.IsAdult,
+                        isStudent = student.IsStudent,
+                        isParentOrGuardien = student.IsParentOrGuardian
                     };
                     registrantsDtos.Add(newStudent);
                 }
