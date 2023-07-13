@@ -8,7 +8,7 @@
     var showFormFields = !(currentFormCount >= maxFormCount);
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var archived = (bool)ViewBag.Archived;
-    var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);
+    var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);       
 }
 <input type="hidden" id="isSurveyForm" name="isSurveyForm" value="@ViewBag.FromSurvey" />
 
@@ -123,11 +123,18 @@
                                     <td>
                                         @if (maxFormCount > 0)
                                         {
-                                            <a href="@Url.Action("edit", "form", new { id = form.ID })" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                            if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
+                                            {
+                                                <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("edit", "form", new { id = form.ID })" class="btn btn-default btn-sm"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                            }
                                         }
                                         else
                                         {
-                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                        <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
                                         }
 
                                         @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
@@ -135,7 +142,7 @@
                                             <a href="@Url.Action("report", "form", new { form = form.ID })" class="btn btn-default btn-sm" target="_blank">Submissions</a>
                                         }
 
-                                     </td>
+                                    </td>
                                     <td><a href="@Url.Action("edit", "form", new { id = form.ID })">@form.Name</a></td>
                                     <td>@totalSubmissions</td>
                                     <td>@form.FormTypeId.ToString().SplitByUpperCase()</td>
@@ -144,10 +151,18 @@
                                     <td>
                                         @if (showFormFields)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
-                                                <i class="icon icon-left s7-copy-file"></i> Copy
-                                            </button>
-
+                                            if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
+                                            {
+                                                <button class="btn btn-default btn-sm" data-modal="modal-newform" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                    <i class="icon icon-left s7-copy-file"></i> Copy
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
+                                                    <i class="icon icon-left s7-copy-file"></i> Copy
+                                                </button>
+                                            }
                                             if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                             {
                                                 var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
@@ -157,8 +172,8 @@
                                                     formType = UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true).ToLower();
                                                 }
 
-                                                <button class="btn btn-default btn-sm md-trigger" 
-                                                        data-modal="modal-setdefault" 
+                                                <button class="btn btn-default btn-sm md-trigger"
+                                                        data-modal="modal-setdefault"
                                                         onclick="setFormAsDefault('@UI.JavascriptSafeString(form.Name)', '@formType', '@Url.Action("setasdefault", "form", new { id = form.ID.ToString() })')">
                                                     Set as Default
                                                 </button>
@@ -173,7 +188,7 @@
                                             }
                                             else
                                             {
-                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button> 
                                             }
                                         }
                                         else
@@ -242,7 +257,7 @@
                         <label>Form Type</label>
                         <select class="form-control formtype-select" id="formtype" name="formtype" required>
                             <option value="" selected>-- Select Form Type --</option>
-                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => !a.Equals(FormType.NotSet) && hasSurveyFeature ? true : !a.Equals(FormType.Survey)))
+                            @foreach (var type in Enum.GetValues(typeof(FormType)).Cast<FormType>().Where(a => hasSurveyFeature && !a.Equals(FormType.NotSet) ? true : !a.Equals(FormType.NotSet) && !a.Equals(FormType.Survey)))
                             {
                                 <option value="@((int)type)">
                                     @type.ToString().SplitByUpperCase()
