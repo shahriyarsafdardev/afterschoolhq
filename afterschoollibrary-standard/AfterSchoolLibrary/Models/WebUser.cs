@@ -353,6 +353,15 @@ namespace AfterSchoolLibrary.Models
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
+        
+        public static WebUser LoadByPhoneByPinCode(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Phone"], phone);
+            dq.Criterias.Add(ObjectMap["PinCode"], pinCode);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
         public static WebUser LoadByUsername(string username, SystemMessages msgs, DatabaseConnection dc = null)
         {
