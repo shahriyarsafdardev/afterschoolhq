@@ -177,7 +177,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         if (!student.IsProfileCompleted)
                         {
-                            btnText = "Update Profile &; Enroll »";
+                            btnText = "Update Profile & Enroll »";
                             btnUrl = registerUrl;
                         }
                         else
