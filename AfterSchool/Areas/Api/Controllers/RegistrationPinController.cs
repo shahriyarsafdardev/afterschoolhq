@@ -254,8 +254,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("You are not authorized to access this page");
 
                 var currentParentRegistrant = currentMasterRegistrant.GetParentOrGuardian(msgs);
-                if (currentParentRegistrant.IsEmpty())
-                    throw new Exception("No Parent Registrant");
 
                 dynamic response = new
                 {
@@ -264,8 +262,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsPinSetup = currentUser.PinCode.IsNotEmpty(),
                         StudentFirstName = currentRegistrant.FirstName,
                         StudentLastName = currentRegistrant.LastName,
-                        ParentFirstName = currentParentRegistrant.FirstName,
-                        ParentLastName = currentParentRegistrant.LastName,
+                        ParentFirstName = currentParentRegistrant?.FirstName,
+                        ParentLastName = currentParentRegistrant?.LastName,
                     },
                 };
 
