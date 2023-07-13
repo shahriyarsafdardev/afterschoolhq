@@ -348,6 +348,74 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult GetAllStudentsInfo(string accountName, string phone, string pinCode)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if(accountName.IsEmpty())
+                    throw new Exception("Invalid Account");                    
+
+                if (phone.IsEmpty())
+                    throw new Exception("Invalid Phone");
+
+                if (pinCode.IsEmpty())
+                    throw new Exception("Invalid Pin");
+
+                var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
+                if (currentUser.IsEmpty())
+                    throw new Exception("You are not authorized to access this page");
+                
+                var account = Account.LoadByUniqueName(accountName, msgs);
+                if(account.IsEmpty())
+                    throw new Exception("Invalid Account");
+
+                var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
+                var studentsInfoList = new List<CheckInCheckOutStudentInfoDto>();
+                
+                masterRegistrants.ForEach(masterRegistrant =>
+                {
+                    var registrants = Registrant.LoadByParentRegistrantIdByAccountId(masterRegistrant.ID.Value,
+                        account.ID.Value,msgs);
+                    
+                    registrants.ForEach(registrant =>
+                    {
+                        var registrantActivities = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs);
+                        registrantActivities.ForEach(registrantActivity =>
+                        {
+                            var activity = registrantActivity.GetActivity(msgs);
+                            var activitySchedule = activity.GetSchedule(msgs);
+                            studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
+                            {
+                                StudentName = registrantActivity.RegistrantName,
+                                ActivityName = activity?.Name,
+                                ActivityStartTime = activitySchedule?.DailyStartTime,
+                                ActivityEndTime = activitySchedule?.DailyEndTime,
+                            });
+                        });
+                    });
+                });
+                
+                dynamic response = new
+                {
+                    AccountName = account.Name,
+                    StudentsInfo = studentsInfoList,
+                };
+
+                return Json(
+                    new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
         private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName,
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {

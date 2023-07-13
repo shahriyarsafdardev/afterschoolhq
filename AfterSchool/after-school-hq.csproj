@@ -598,6 +598,7 @@
     <Compile Include="Areas\Api\Controllers\AuthController.cs" />
     <Compile Include="Areas\Api\Controllers\FormController.cs" />
     <Compile Include="Areas\Api\Controllers\RegistrationPinController.cs" />
+    <Compile Include="Areas\Api\Models\CheckInCheckOutStudentInfoDto.cs" />
     <Compile Include="Areas\Api\Models\FormQuestionSettingDto.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
