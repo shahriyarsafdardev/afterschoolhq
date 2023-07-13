@@ -15,7 +15,7 @@ namespace AfterSchool.Areas.Api.Models
         public string LastName { get; set; }
         public string Registered { get; set; }    
         public string Register { get; set; }
-        public string DisabledText { get; set; }    
+        public bool Disabled { get; set; }    
         
         public string BtnText { get; set; }
 
@@ -30,6 +30,8 @@ namespace AfterSchool.Areas.Api.Models
         
         public string UpdateProfileLink { get; set; }
 
+        public string ActivityName { get; set; }
 
+        public string OrganizationName { get; set; }
     }
 }
