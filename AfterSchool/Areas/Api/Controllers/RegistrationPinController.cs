@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
                         HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
-                        IsRequireCheckInCheckOut = currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
                         StudentFirstName = currentRegistrant.FirstName,
