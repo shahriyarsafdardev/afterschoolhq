@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@material-ui/core';
-import useStyles from './styles';
+import useStyles from '../Common/styles';
 
 export default function ThankyouScreen() {
   const classes = useStyles();

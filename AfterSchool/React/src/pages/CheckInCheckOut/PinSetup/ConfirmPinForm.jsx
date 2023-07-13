@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
-import useStyles from './styles';
+import useStyles from '../Common/styles';
 import PinInputField from './PinInputField';
 
 export default function ConfirmPinForm({ userPin, handleSubmitPinCode }) {

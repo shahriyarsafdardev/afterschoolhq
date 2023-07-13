@@ -88,6 +88,10 @@ function Router() {
     {
       path: 'reactapp/pin-setup/:registrationUid',
       element: <PinSetup />
+    },
+    {
+      path: 'reactapp/check-in-out/:accountName',
+      element: <CheckInOut />
     }
   ]);
 }
@@ -109,6 +113,7 @@ const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYo
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
 const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
+const CheckInOut = Loadable(lazy(() => import('pages/CheckInCheckOut/CheckInOut')));
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import useStyles from './styles';
+import useStyles from '../Common/styles';
 import { useSnackbar } from 'notistack';
 import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import PhoneNumberForm from './PhoneNumberForm';
+import PhoneNumberForm from '../Common/PhoneNumberForm';
 import PinSetupForm from './PinSetupForm';
 import ConfirmPinForm from './ConfirmPinForm';
 import ThankyouScreen from './ThankyouScreen';
-import { usePinSetup } from 'redux/hooks';
+import { useCheckInOut } from 'redux/hooks';
 import { isEmpty } from 'lodash';
 
 function index() {
@@ -26,7 +26,7 @@ function index() {
     updatePinData,
     pinSetupData: { currentUserInfo = {} },
     loading
-  } = usePinSetup();
+  } = useCheckInOut();
 
   const { IsPinSetup } = currentUserInfo;
 
