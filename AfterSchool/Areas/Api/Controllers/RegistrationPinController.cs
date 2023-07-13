@@ -23,9 +23,12 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
+                
+                var currentAccount = SessionVariables.CurrentAccount;
+                if (currentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
 
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
@@ -93,7 +96,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
                         HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
-                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                        IsRequireCheckInCheckOut = currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
                         StudentFirstName = currentRegistrant.FirstName,
                         StudentLastName = currentRegistrant.LastName,
@@ -385,7 +389,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         registrantActivities.ForEach(registrantActivity =>
                         {
                             var activity = registrantActivity.GetActivity(msgs);
-                            var activitySchedule = activity.GetSchedule(msgs);
+                            var activitySchedule = activity?.GetSchedule(msgs);
                             studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
                             {
                                 StudentName = registrantActivity.RegistrantName,
