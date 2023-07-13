@@ -214,7 +214,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         IneligibleText = ineligibleText,
                         isAdult = student.IsAdult,
                         isStudent = student.IsStudent,
-                        isParentOrGuardien = student.IsParentOrGuardian
+                        isParentOrGuardian = student.IsParentOrGuardian
                     };
                     registrantsDtos.Add(newStudent);
                 }

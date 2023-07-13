@@ -32,6 +32,6 @@ namespace AfterSchool.Areas.Api.Models
 
         public bool isAdult { get; set; }
         public bool isStudent { get; set; }
-        public bool isParentOrGuardien { get; set; }
+        public bool isParentOrGuardian { get; set; }
     }
 }
