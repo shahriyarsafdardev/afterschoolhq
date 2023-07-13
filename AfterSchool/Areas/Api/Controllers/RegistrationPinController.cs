@@ -156,6 +156,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     if (currentUser.PinCode.IsEmpty())
                         currentUser.PinCode = pinCode;
 
+                    currentUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
                     msgs.AddRange(currentUser.Save());
                 }
                 
@@ -180,6 +181,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                             Phone = currentPickUp.Phone,
                                             CreateDate = DateTime.UtcNow,
                                             LastModifiedDate = DateTime.UtcNow,
+                                            AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                         };
                                         amsgs.AddRange(user.Save(adc));
 
