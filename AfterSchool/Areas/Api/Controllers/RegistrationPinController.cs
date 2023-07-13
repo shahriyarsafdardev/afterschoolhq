@@ -150,86 +150,86 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
                 if (currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Master Registrant");
+                
+                if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
+                {
+                    if (currentUser.Phone.IsEmpty())
+                        currentUser.Phone = phone;
 
-                Database.ExecuteTransaction
-                (
-                    (SystemMessages amsgs, DatabaseConnection adc) =>
+                    if (currentUser.PinCode.IsEmpty())
+                        currentUser.PinCode = pinCode;
+
+                    msgs.AddRange(currentUser.Save());
+
+                    var parentPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
+                        QuestionDataType.Parent1MobilePhone,msgs);
+                            
+                    if (parentPhoneInfo.IsNotEmpty())
                     {
-                        if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
+                        parentPhoneInfo.Text = currentUser.Phone;
+                        msgs.AddRange(parentPhoneInfo.Save());
+                    }
+                }
+                
+                if(peopleList.IsNotEmpty())
+                    Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            if (currentUser.Phone.IsEmpty())
-                                currentUser.Phone = phone;
-
-                            if (currentUser.PinCode.IsEmpty())
-                                currentUser.PinCode = pinCode;
-
-                            amsgs.AddRange(currentUser.Save(adc));
-
-                            var parentPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
-                                QuestionDataType.Parent1MobilePhone,amsgs);
-                            
-                            if (parentPhoneInfo.IsNotEmpty())
-                            {
-                                parentPhoneInfo.Text = currentUser.Phone;
-                                amsgs.AddRange(parentPhoneInfo.Save(adc));
-                            }
-                        }
-
-                        if (amsgs.HasNoErrors() && peopleList.IsNotEmpty() && peopleList.Count > 0)
                             peopleList.ForEach(currentPickUp =>
-                            {
-                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs))
                                 {
-                                    var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
-                                    var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
-                                                  "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
-                                                  $"check out your child through this link: {url}";
-                                    
-                                    var user = new WebUser
+                                    if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
                                     {
-                                        FirstName = currentPickUp.FirstName,
-                                        LastName = currentPickUp.LastName,
-                                        Phone = currentPickUp.Phone,
-                                        CreateDate = DateTime.UtcNow,
-                                        LastModifiedDate = DateTime.UtcNow,
-                                    };
-                                    amsgs.AddRange(user.Save(adc));
-
-                                    var registrantWebUser = new RegistrantWebUser
-                                    {
-                                        CreateDate = DateTime.UtcNow,
-                                        RegistrantId = currentMasterRegistrant.ID,
-                                        WebUserId = user.ID,
-                                        IsDeleted = false,
-                                    };
-                                    amsgs.AddRange(registrantWebUser.Save(adc));
-
-                                    if (currentPickUp.PersonPhoneDataType != QuestionDataType.NotSet)
-                                    {
-                                        var currentPickUpPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
-                                            currentPickUp.PersonPhoneDataType,amsgs);
-                            
-                                        if (currentPickUpPhoneInfo.IsNotEmpty())
+                                        var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
+                                        var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
+                                                      "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
+                                                      $"check out your child through this link: {url}";
+                                        
+                                        var user = new WebUser
                                         {
-                                            currentPickUpPhoneInfo.Text = currentPickUp.Phone;
-                                            amsgs.AddRange(currentPickUpPhoneInfo.Save(adc));
+                                            FirstName = currentPickUp.FirstName,
+                                            LastName = currentPickUp.LastName,
+                                            Phone = currentPickUp.Phone,
+                                            CreateDate = DateTime.UtcNow,
+                                            LastModifiedDate = DateTime.UtcNow,
+                                        };
+                                        amsgs.AddRange(user.Save(adc));
+
+                                        var registrantWebUser = new RegistrantWebUser
+                                        {
+                                            CreateDate = DateTime.UtcNow,
+                                            RegistrantId = currentMasterRegistrant.ID,
+                                            WebUserId = user.ID,
+                                            IsDeleted = false,
+                                        };
+                                        amsgs.AddRange(registrantWebUser.Save(adc));
+
+                                        if (currentPickUp.PersonPhoneDataType != QuestionDataType.NotSet)
+                                        {
+                                            var currentPickUpPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
+                                                currentPickUp.PersonPhoneDataType,amsgs,adc);
+                                
+                                            if (currentPickUpPhoneInfo.IsNotEmpty())
+                                            {
+                                                currentPickUpPhoneInfo.Text = currentPickUp.Phone;
+                                                amsgs.AddRange(currentPickUpPhoneInfo.Save(adc));
+                                            }
                                         }
+                                        
+                                        // if (amsgs.HasNoErrors())
+                                        //     TwilioHelper.SendSMS(
+                                        //         currentPickUp.Phone,
+                                        //         msgBody,
+                                        //         null,
+                                        //         null,
+                                        //         amsgs);
                                     }
-                                    
-                                    // if (amsgs.HasNoErrors())
-                                    //     TwilioHelper.SendSMS(
-                                    //         currentPickUp.Phone,
-                                    //         msgBody,
-                                    //         null,
-                                    //         null,
-                                    //         amsgs);
-                                }
-                            });
-                    },
-                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
-                );
+                                });
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
 
                 return Json(
                     new ApiResponse(msgs, null),
