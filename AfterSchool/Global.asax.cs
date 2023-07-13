@@ -41,9 +41,9 @@ namespace AfterSchool
             MaintenanceHelper.RedirectToMaintenance();
         }
 
-        protected void Application_PostAcquireRequestState()
-        {
-            MaintenanceHelper.DisplayMaintenanceSchedule();
-        }
+        //protected void Application_PostAcquireRequestState()
+        //{
+        //    MaintenanceHelper.DisplayMaintenanceSchedule();
+        //}
     }
 }
