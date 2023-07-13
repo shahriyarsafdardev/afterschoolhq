@@ -86,11 +86,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         register = "Join Waiting List";
                     }
-
-                    var disabledText = "";
-                    var btnText = "";
-                    var registerUrl = "/account/setstudent"+student.Uid;
-                    var btnUrl = $"{student.Uid}/{registerUrl}";
+                    //changed
+                    var disabled = false;
+                    var btnText = ""; 
+                    var registerUrl = "/account/setstudent/"+student.Uid;
+                    var btnUrl = registerUrl;
+                    var activityName = participationObject.Name;
+                    var orgName = currentAccount.Name;
+                    //
 
                     var registrantGrade = student.GetAnswer(QuestionDataType.RegistrantGrade);
                     var registrantGradeText = registrantGrade?.Text;
@@ -117,12 +120,12 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             if (participationObject.SubscriptionPlans.Any() && student.HasCancelledSubscription(participationObject))
                             {
-                                btnText = "Re-Enroll &raquo";
+                                btnText = "Re-Enroll »";
                             }
                             else
                             {
                                 btnText = "Withdrawn";
-                                disabledText = " disabled=\"disabled\" ";
+                                disabled = true;
                                 btnUrl = "#";
                             }
                         }
@@ -133,7 +136,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         else if (student.OnWaitingListFor(participationObject))
                         {
                             btnText = "On Waiting List";
-                            disabledText = " disabled=\"disabled\" ";
+                            disabled = true;
                             btnUrl = "#";
                         }
                         else if (!student.IsReservedAndPaidFor(participationObject, null) && !student.IsAppliedFor(participationObject, null) && !student.MasterRegistrantHasPlan(participationObject))
@@ -143,23 +146,23 @@ namespace AfterSchool.Areas.Api.Controllers
                             if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
                             {
                                 btnText = "Awaiting Finalization";
-                                disabledText = " disabled=\"disabled\" ";
+                                disabled = true;
                                 btnUrl = "#";
                             }
                             else
                             {
-                                btnText = "Pay Now &raquo";
+                                btnText = "Pay Now »";
                                 btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject).Uid });
                             }
                         }
                         else if (participationObject.IsSession())
                         {
-                            btnText = "Add To Existing Registration &raquo";
+                            btnText = "Add To Existing Registration »";
                         }
                         else
                         {
                             btnText = $"Already {registered}";
-                            disabledText = " disabled=\"disabled\" ";
+                            disabled = true;
                             btnUrl = "#";
                         }
                     }
@@ -168,7 +171,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         if (!student.IsProfileCompleted)
                         {
-                            btnText = "Update Profile &amp; Enroll &raquo";
+                            btnText = "Update Profile &amp; Enroll »";
                             btnUrl = registerUrl;
                         }
                         else
@@ -176,13 +179,13 @@ namespace AfterSchool.Areas.Api.Controllers
                             if (participationObject.ActivityGroupType != ActivityGroupType.Session && (isGenderRestricted || isGradeRestricted || isAgeRestricted))
                             {
                                 btnText = "Ineligible";
-                                disabledText = " disabled=\"disabled\" ";
+                                disabled = true;
                                 ineligibleText = ParticipationObjectUI.PrintIneligibilityMessageString(participationObject,
                                     isGenderRestricted, isAgeRestricted, isGradeRestricted);
                             }
                             else
                             {
-                                btnText = register + " &raquo";
+                                btnText = register + " »";
                             }
 
                         }
@@ -195,14 +198,16 @@ namespace AfterSchool.Areas.Api.Controllers
                         LastName = student.LastName,
                         Registered = registered,
                         Register = register,
-                        DisabledText = disabledText,
+                        Disabled = disabled,
                         BtnText = btnText,
                         RegisterUrl = registerUrl,
                         UpdateProfileLink = updateProfileLink,
                         BtnUrl = btnUrl,
                         RegistrantGradeText = UILabel.GetGradeDescription(registrantGradeText),
                         CanStillRegister = canStillRegister,
-                        IneligibleText = ineligibleText
+                        IneligibleText = ineligibleText,
+                        ActivityName = activityName,
+                        OrganizationName = orgName
                     };
                     registrantsDtos.Add(newStudent);
                 }
@@ -230,6 +235,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
 
         }
+        
+
+       
 
         [HttpGet]
 
