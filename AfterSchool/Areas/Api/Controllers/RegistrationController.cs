@@ -144,7 +144,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
-                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
+                        IsRequireCheckInCheckOut = currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                                              participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                                              participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -400,7 +402,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
-                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
+                        IsRequireCheckInCheckOut = currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -977,9 +981,12 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult ThankYou(string id)
         {
             var currentUser = SessionVariables.CurrentUser;
-
             if (currentUser.IsEmpty())
-                throw new Exception("Unauthorized");
+                throw new Exception("Unauthorized User");
+                
+            var currentAccount = SessionVariables.CurrentAccount;
+            if (currentAccount.IsEmpty())
+                throw new Exception("Unauthorized Account");
 
             var msgs = new SystemMessages();
             try
@@ -1007,7 +1014,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         ProviderEmail = participationObject.OwnerAccount.Email,
                         RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
                         ApplyMode = participationObject.RegistrationMode.ToString(),
-                        IsRequireCheckInCheckOut = participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled,
+                        IsRequireCheckInCheckOut = currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
