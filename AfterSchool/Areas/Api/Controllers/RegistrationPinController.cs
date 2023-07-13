@@ -166,43 +166,49 @@ namespace AfterSchool.Areas.Api.Controllers
                         (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
                             peopleList.ForEach(currentPickUp =>
+                            {
+                                WebUser user = null;
+                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
                                 {
-                                    if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
+                                    var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
+                                    var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
+                                                  "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
+                                                  $"check out your child through this link: {url}";
+
+                                    user = new WebUser
                                     {
-                                        var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
-                                        var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
-                                                      "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
-                                                      $"check out your child through this link: {url}";
-                                        
-                                        var user = new WebUser
-                                        {
-                                            FirstName = currentPickUp.FirstName,
-                                            LastName = currentPickUp.LastName,
-                                            Phone = currentPickUp.Phone,
-                                            CreateDate = DateTime.UtcNow,
-                                            LastModifiedDate = DateTime.UtcNow,
-                                            AuthorizationTypeId = WebUserAuthorizationType.Pickup,
-                                        };
-                                        amsgs.AddRange(user.Save(adc));
-
-                                        var registrantWebUser = new RegistrantWebUser
-                                        {
-                                            CreateDate = DateTime.UtcNow,
-                                            RegistrantId = currentMasterRegistrant.ID,
-                                            WebUserId = user.ID,
-                                            IsDeleted = false,
-                                        };
-                                        amsgs.AddRange(registrantWebUser.Save(adc));
-
-                                        // if (amsgs.HasNoErrors())
-                                        //     TwilioHelper.SendSMS(
-                                        //         currentPickUp.Phone,
-                                        //         msgBody,
-                                        //         null,
-                                        //         null,
-                                        //         amsgs);
-                                    }
-                                });
+                                        FirstName = currentPickUp.FirstName,
+                                        LastName = currentPickUp.LastName,
+                                        Phone = currentPickUp.Phone,
+                                        CreateDate = DateTime.UtcNow,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                        AuthorizationTypeId = WebUserAuthorizationType.Pickup,
+                                    };
+                                    amsgs.AddRange(user.Save(adc));
+                                }
+                                else if (currentPickUp.Phone.IsNotEmpty())
+                                {
+                                    user = WebUser.LoadByPhone(currentPickUp.Phone, amsgs, adc);
+                                }
+                                if (user.IsNotEmpty())
+                                {
+                                    var registrantWebUser = new RegistrantWebUser
+                                    {
+                                        CreateDate = DateTime.UtcNow,
+                                        RegistrantId = currentMasterRegistrant.ID,
+                                        WebUserId = user.ID,
+                                        IsDeleted = false,
+                                    };
+                                    amsgs.AddRange(registrantWebUser.Save(adc));
+                                    
+                                    //     TwilioHelper.SendSMS(
+                                    //         currentPickUp.Phone,
+                                    //         msgBody,
+                                    //         null,
+                                    //         null,
+                                    //         amsgs);
+                                }
+                            });
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
