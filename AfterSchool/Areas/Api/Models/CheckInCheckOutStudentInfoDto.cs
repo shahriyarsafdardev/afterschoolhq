@@ -6,7 +6,7 @@ namespace AfterSchool.Areas.Api.Models
     {
         public string StudentName { get; set; }
         public string ActivityName { get; set; }
-        public DateTime? ActivityStartTime { get; set; }
-        public DateTime? ActivityEndTime { get; set; }
+        public string ActivityStartTime { get; set; }
+        public string ActivityEndTime { get; set; }
     }
 }
