@@ -18,6 +18,11 @@ namespace AfterSchool.Areas.Api.Models
         public bool ParticipationObjectIsSession { get; set; }
 
         public ActivityGroupType? ParticipationActivityGroupType { get; set;}
+        public string ActivityName { get; set; }
+
+        public string OrganizationName { get; set; }
+
+        public string HeaderImageUrl { get; set; }
 
 
     }

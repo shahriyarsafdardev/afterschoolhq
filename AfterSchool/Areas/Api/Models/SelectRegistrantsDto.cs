@@ -30,8 +30,8 @@ namespace AfterSchool.Areas.Api.Models
         
         public string UpdateProfileLink { get; set; }
 
-        public string ActivityName { get; set; }
-
-        public string OrganizationName { get; set; }
+        public bool isAdult { get; set; }
+        public bool isStudent { get; set; }
+        public bool isParentOrGuardien { get; set; }
     }
 }
