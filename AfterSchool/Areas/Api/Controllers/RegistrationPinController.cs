@@ -53,9 +53,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 var answers = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs);
                 var additionalContactInfo = new List<PickUpDto>();
 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent1FirstName,
-                    QuestionDataType.Parent1LastName, QuestionDataType.Parent1MobilePhone, FormConstants.Parent1InfoToIncludeInStudentPanel()));
-
                 additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent2FirstName,
                     QuestionDataType.Parent2LastName, QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
 
@@ -160,15 +157,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         currentUser.PinCode = pinCode;
 
                     msgs.AddRange(currentUser.Save());
-
-                    var parentPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
-                        QuestionDataType.Parent1MobilePhone,msgs);
-                            
-                    if (parentPhoneInfo.IsNotEmpty())
-                    {
-                        parentPhoneInfo.Text = currentUser.Phone;
-                        msgs.AddRange(parentPhoneInfo.Save());
-                    }
                 }
                 
                 if(peopleList.IsNotEmpty())
@@ -204,18 +192,6 @@ namespace AfterSchool.Areas.Api.Controllers
                                         };
                                         amsgs.AddRange(registrantWebUser.Save(adc));
 
-                                        if (currentPickUp.PersonPhoneDataType != QuestionDataType.NotSet)
-                                        {
-                                            var currentPickUpPhoneInfo = FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value,
-                                                currentPickUp.PersonPhoneDataType,amsgs,adc);
-                                
-                                            if (currentPickUpPhoneInfo.IsNotEmpty())
-                                            {
-                                                currentPickUpPhoneInfo.Text = currentPickUp.Phone;
-                                                amsgs.AddRange(currentPickUpPhoneInfo.Save(adc));
-                                            }
-                                        }
-                                        
                                         // if (amsgs.HasNoErrors())
                                         //     TwilioHelper.SendSMS(
                                         //         currentPickUp.Phone,
