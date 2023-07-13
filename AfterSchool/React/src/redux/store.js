@@ -5,7 +5,7 @@ import SurveySlice from './slices/SurveySlice';
 import ProfileSlice from './slices/ProfileSlice';
 import { configureStore } from '@reduxjs/toolkit';
 import ThankYouSlice from './slices/ThankYouSlice';
-import PinSetupSlice from './slices/PinSetupSlice';
+import CheckInOutSlice from './slices/CheckInOutSlice';
 import FormBuilderSlice from './slices/FormBuilderSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
@@ -20,7 +20,7 @@ export default configureStore({
     [HeaderSlice.name]: HeaderSlice.reducer,
     [SurveySlice.name]: SurveySlice.reducer,
     [ProfileSlice.name]: ProfileSlice.reducer,
-    [PinSetupSlice.name]: PinSetupSlice.reducer,
+    [CheckInOutSlice.name]: CheckInOutSlice.reducer,
     [ThankYouSlice.name]: ThankYouSlice.reducer,
     [FormBuilderSlice.name]: FormBuilderSlice.reducer,
     [RegistrationSlice.name]: RegistrationSlice.reducer,

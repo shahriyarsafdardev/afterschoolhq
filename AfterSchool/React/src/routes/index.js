@@ -21,6 +21,8 @@ export default {
   getPinSetupData: (registrationUid, phone) =>
     `Api/RegistrationPin/CreateNewPin?registrationUid=${registrationUid}&phone=${phone}`,
   updatePinSetupData: 'Api/RegistrationPin/CreateNewPin',
+  getChildListData: (accountName, phone, pinCode) =>
+    `Api/RegistrationPin/GetAllStudentsInfo?accountName=${accountName}&phone=${phone}&pinCode=${pinCode}`,
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>
     `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,

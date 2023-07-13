@@ -47,6 +47,17 @@ export default makeStyles(theme => ({
       width: '100%'
     }
   },
+  childListForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    gap: 16,
+    margin: 'auto',
+    width: '60%',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
+    }
+  },
   buttonNext: {
     width: '150px',
     margin: '10px auto',
@@ -64,5 +75,21 @@ export default makeStyles(theme => ({
   },
   marginAuto: {
     margin: 'auto'
+  },
+  listButtonWrapper: {
+    display: 'flex',
+    gap: '8px'
+  },
+  fontBold: {
+    fontSize: '16px',
+    fontWeight: 'bold'
+  },
+  fontLight: {
+    fontSize: '16px',
+    fontWeight: 400
+  },
+  childListHeader: {
+    fontSize: '20px',
+    textAlign: 'center'
   }
 }));

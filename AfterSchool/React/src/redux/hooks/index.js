@@ -4,7 +4,7 @@ import { useSurveyActions } from 'redux/slices/SurveySlice';
 import { useHeaderActions } from 'redux/slices/HeaderSlice';
 import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
-import { usePinSetupActions } from 'redux/slices/PinSetupSlice';
+import { useCheckInOutActions } from 'redux/slices/CheckInOutSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
 import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
@@ -67,7 +67,7 @@ export const usePostRegistration = () => ({
   ...usePostRegistrationActions()
 });
 
-export const usePinSetup = () => ({
-  ...useSelector(state => state.pinSetupSlice),
-  ...usePinSetupActions()
+export const useCheckInOut = () => ({
+  ...useSelector(state => state.checkInOutSlice),
+  ...useCheckInOutActions()
 });

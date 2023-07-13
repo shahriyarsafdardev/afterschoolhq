@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography } from '@material-ui/core';
-import useStyles from './styles';
+import useStyles from '../Common/styles';
 import TextField from 'components/Overrides/TextField';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
