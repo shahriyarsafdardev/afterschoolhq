@@ -17,7 +17,7 @@
     var hasVisitorAccountsToApprove = (bool) ViewBag.HasVisitorAccountsToApprove;
     var hasOutstandingLeagueInvites = (bool) ViewBag.HasOutstandingLeagueInvites;
     var externalLeagueCount = (int) ViewBag.ExternalLeagueCount;
-    var accountUniqueName = SessionVariables.CurrentAccount.UniqueName;
+    var currentAccount = SessionVariables.CurrentAccount;
 
     var attendanceRate = totalPresent > 0 ? (totalPresent.ToDouble() / (totalPresent + totalAbsent) * 100).Round(1).ToString("###.#") : "0";
 
@@ -192,18 +192,20 @@
                         }
 
                     </div>
-
-                    <div class="col-lg-4 col-md-12">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div id="qr-code" class="m-auto"></div>
-                            </div>
-                            <div class="margin-h-20">
-                                <a class="btn btn-default">Full Screen</a>
-                                <a id="download-btn" class="btn btn-default">Download</a>
+                    @if (currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut))
+                    {
+                        <div class="col-lg-4 col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <div id="qr-code" class="m-auto"></div>
+                                </div>
+                                <div class="margin-h-20">
+                                    <a class="btn btn-default">Full Screen</a>
+                                    <a id="download-btn" class="btn btn-default">Download</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
                 </div>
             }
 
@@ -216,19 +218,6 @@
         referrerpolicy="no-referrer">
 </script>
 <script>
-    const downloadBtn = document.querySelector("#download-btn");
-    downloadBtn.addEventListener("click", downloadQR);
-
-    function downloadQR() {
-        const qrCanvas = document.querySelector("#qr-code canvas");
-        const qrDataURL = qrCanvas.toDataURL("image/png");
-
-        const link = document.createElement("a");
-        link.href = qrDataURL;
-        link.download = "qr-code.png";
-        link.click();
-    }
-
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         new Morris.Bar({
             // ID of the element in which to draw the chart.
@@ -253,16 +242,31 @@
         });
     });
 
+    const downloadBtn = document.querySelector("#download-btn");
     const qrCode = document.querySelector("#qr-code");
+
+    function downloadQR() {
+        const qrCanvas = document.querySelector("#qr-code canvas");
+        const qrDataURL = qrCanvas.toDataURL("image/png");
+
+        const link = document.createElement("a");
+        link.href = qrDataURL;
+        link.download = "qr-code.png";
+        link.click();
+    }
+
     function generateQrCode() {
-        const url = "@Utilities.BaseUrl()/reactapp/check-in-out/@accountUniqueName";
+        const url = "@Utilities.BaseUrl()/reactapp/check-in-out/@currentAccount.UniqueName";
         console.log(url);
             const qr = new QRCode(document.getElementById("qr-code"), {
                 text: url,
                 width: 200,
                 height: 200,
             });
-        }
+    }
 
-    generateQrCode();
+    if ('@currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut)'.toLowerCase() === 'true') {
+        generateQrCode();
+        downloadBtn.addEventListener("click", downloadQR);
+    }
 </script>
