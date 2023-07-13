@@ -91,5 +91,11 @@ export default makeStyles(theme => ({
   childListHeader: {
     fontSize: '20px',
     textAlign: 'center'
+  },
+  esignPage: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 }));
