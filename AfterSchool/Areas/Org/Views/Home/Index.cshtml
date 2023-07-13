@@ -1,5 +1,5 @@
 @model Account
-
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     var msgs = (SystemMessages) ViewBag.Messages;
     var registrations = (List<Registration>) ViewBag.CurrentRegistrations;
@@ -17,6 +17,7 @@
     var hasVisitorAccountsToApprove = (bool) ViewBag.HasVisitorAccountsToApprove;
     var hasOutstandingLeagueInvites = (bool) ViewBag.HasOutstandingLeagueInvites;
     var externalLeagueCount = (int) ViewBag.ExternalLeagueCount;
+    var accountUniqueName = SessionVariables.CurrentAccount.UniqueName;
 
     var attendanceRate = totalPresent > 0 ? (totalPresent.ToDouble() / (totalPresent + totalAbsent) * 100).Round(1).ToString("###.#") : "0";
 
@@ -120,90 +121,90 @@
             }
             else
             {
-        <div class="row">
-            <div class="col-lg-8 col-md-12">
-                <div class="col-md-6">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
-                            <div class="desc desc-mobile-width">Total Registrations (30 days)</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
-                        </div>
-                    </div>
-                </div>
-
-                @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
-                {
-                    <div class="col-md-6">
-                        <div class="widget widget-tile widget-bordered">
-                            <div class="data-info">
-                                <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
-                                <div class="desc">Total Earned</div>
-                            </div>
-                            <div class="icon">
-                                <span class="s7-cash"></span>
+                <div class="row">
+                    <div class="col-lg-8 col-md-12">
+                        <div class="col-md-6">
+                            <div class="widget widget-tile widget-bordered">
+                                <div class="data-info">
+                                    <div data-end="@registrationCount" data-decimals="0" data-suffix="" class="value">@registrationCount</div>
+                                    <div class="desc desc-mobile-width">Total Registrations (30 days)</div>
+                                </div>
+                                <div class="icon">
+                                    <span class="s7-users"></span>
+                                </div>
                             </div>
                         </div>
+
+                        @if (Permissions.HasPermission(SessionVariables.AccountUserType, PermissionType.AccountingView))
+                        {
+                            <div class="col-md-6">
+                                <div class="widget widget-tile widget-bordered">
+                                    <div class="data-info">
+                                        <div data-end="@totalPaid" data-decimals="2" data-suffix="" class="value">@totalPaid.ToCurrency()</div>
+                                        <div class="desc">Total Earned</div>
+                                    </div>
+                                    <div class="icon">
+                                        <span class="s7-cash"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <div class="widget widget-tile widget-bordered">
+                                <div class="data-info">
+                                    <div data-toggle="counter" data-end="@classesCount" data-decimals="0" data-suffix="" class="value">@classesCount</div>
+                                    <div class="desc">@UILabel.ActivityLabel() Meetings</div>
+                                </div>
+                                <div class="icon">
+                                    <span class="s7-users"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+
+                            <div class="widget widget-tile widget-bordered">
+                                <div class="data-info">
+                                    <div data-end="@attendanceRate.IfBlank("0")" data-decimals="0" data-suffix="" class="value">@attendanceRate.IfBlank("0")%</div>
+                                    <div class="desc">Attendance Rate</div>
+                                </div>
+                                <div class="icon">
+                                    <span class="s7-check-circle"></span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @if (registrationCount > 0)
+                        {
+                            <div class="col-md-12">
+
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        Registrations By Date (last 30 days)
+                                    </div>
+                                    <div class="panel-body">
+                                        <div id="registrantsbydate" style="height: 350px;"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+
                     </div>
-                }
 
-                <div class="col-md-6">
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-toggle="counter" data-end="@classesCount" data-decimals="0" data-suffix="" class="value">@classesCount</div>
-                            <div class="desc">@UILabel.ActivityLabel() Meetings</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-users"></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-
-                    <div class="widget widget-tile widget-bordered">
-                        <div class="data-info">
-                            <div data-end="@attendanceRate.IfBlank("0")" data-decimals="0" data-suffix="" class="value">@attendanceRate.IfBlank("0")%</div>
-                            <div class="desc">Attendance Rate</div>
-                        </div>
-                        <div class="icon">
-                            <span class="s7-check-circle"></span>
-                        </div>
-                    </div>
-
-                </div>
-
-                @if (registrationCount > 0)
-                {
-                    <div class="col-md-12">
-
+                    <div class="col-lg-4 col-md-12">
                         <div class="panel panel-default">
-                            <div class="panel-heading">
-                                Registrations By Date (last 30 days)
-                            </div>
                             <div class="panel-body">
-                                <div id="registrantsbydate" style="height: 350px;"></div>
+                                <div id="qr-code" class="m-auto"></div>
+                            </div>
+                            <div class="margin-h-20">
+                                <a class="btn btn-default">Full Screen</a>
+                                <a id="download-btn" class="btn btn-default">Download</a>
                             </div>
                         </div>
-
-                    </div>
-                }
-
-            </div>
-
-            <div class="col-lg-4 col-md-12">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="qr-code" class="m-auto"></div>
-                    </div>
-                    <div class="margin-h-20">
-                        <a class="btn btn-default">Full Screen</a>
-                        <a id="download-btn" class="btn btn-default">Download</a>
                     </div>
                 </div>
-            </div>
-        </div>
             }
 
         </div>
@@ -211,8 +212,8 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer">
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
 </script>
 <script>
     const downloadBtn = document.querySelector("#download-btn");
@@ -254,7 +255,7 @@
 
     const qrCode = document.querySelector("#qr-code");
     function generateQrCode() {
-        const url = "https://www.google.com";
+        const url = "@Utilities.BaseUrl()/reactapp/check-in-out/@accountUniqueName";
         console.log(url);
             const qr = new QRCode(document.getElementById("qr-code"), {
                 text: url,
