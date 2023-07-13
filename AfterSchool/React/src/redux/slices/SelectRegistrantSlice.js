@@ -1,6 +1,7 @@
+import SelectRegistrantRepository from 'repository/SelectRegistrantRepository';
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import SelectRegistrantRepository from 'repository/SelectRegistrantRepository';
+import HeaderSlice from './HeaderSlice';
 import utils from 'utils';
 
 const SelectRegistrantSlice = createSlice({
@@ -43,6 +44,7 @@ const SelectRegistrantSlice = createSlice({
 
 export const useSelectRegistrantActions = () => {
   const dispatch = useDispatch();
+  const { setHeaderData } = HeaderSlice.actions;
   const { setMsgs, setData, loadingStart, loadingCompleted } = SelectRegistrantSlice.actions;
   const loadData = async () => {
     dispatch(loadingStart());
@@ -50,6 +52,17 @@ export const useSelectRegistrantActions = () => {
       dispatch(setMsgs(msgs));
 
       if (msgs.length > 0) return;
+
+      if (obj?.ParticipationObject) {
+        const {
+          HeaderImageUrl,
+          ActivityName: Name,
+          OrganizationName: Organization
+        } = obj?.ParticipationObject;
+
+        dispatch(setHeaderData({ Name, Organization, HeaderImageUrl }));
+      }
+
       dispatch(setData(obj));
       dispatch(loadingCompleted());
     });
