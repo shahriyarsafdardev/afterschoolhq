@@ -2,8 +2,8 @@ import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   root: {
-    borderColor: ({ eligible }) =>
-      eligible ? theme.palette.primary.main : theme.palette.text.disabled,
+    borderColor: ({ disabled }) =>
+      disabled ? theme.palette.text.disabled : theme.palette.primary.main,
     borderRadius: '10px',
     boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1)',
     minWidth: '385px',

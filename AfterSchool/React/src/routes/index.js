@@ -66,6 +66,10 @@ export default {
   getSurveyFormDataWithPinAPI: (uid, pin) => `Api/SurveyRequest/GetForm?uid=${uid}&pin=${pin}`,
   submitSurveyFormDataWithPinAPI: 'Api/SurveyRequest/AddUpdateAnswers',
 
+  //Select Registrant APIs
+  addNewRegistrantAPI: 'Api/SelectRegistrant/AddNewRegistrant',
+  getRegistrantAPI: 'Api/SelectRegistrant/GetRegistrantsForParent',
+
   //Paths & URLs
   paymentScreenPath: uId => `/account/payment/${uId}`,
   thankyouScreenPath: uId => `/account/thankyou/${uId}`,

@@ -10,6 +10,7 @@ import CheckInOutSlice from './slices/CheckInOutSlice';
 import FormBuilderSlice from './slices/FormBuilderSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
+import SelectRegistrantSlice from './slices/SelectRegistrantSlice';
 import UpdateRegistrationSlice from './slices/UpdateRegistrationSlice';
 import PostRegistrationSetupSlice from './slices/PostRegistrationSetupSlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
@@ -26,6 +27,7 @@ export default configureStore({
     [ThankYouSlice.name]: ThankYouSlice.reducer,
     [FormBuilderSlice.name]: FormBuilderSlice.reducer,
     [RegistrationSlice.name]: RegistrationSlice.reducer,
+    [SelectRegistrantSlice.name]: SelectRegistrantSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [UpdateRegistrationSlice.name]: UpdateRegistrationSlice.reducer,
     [PostRegistrationSetupSlice.name]: PostRegistrationSetupSlice.reducer,
