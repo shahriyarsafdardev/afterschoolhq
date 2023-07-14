@@ -3,29 +3,30 @@ import useStyles from '../Common/styles';
 import { Box, Button, Grid, Typography } from '@material-ui/core';
 import LoadingButton from 'components/Overrides/LoadingButton';
 import ChildListRow from './ChildListRow';
+import { useCheckInOut } from 'redux/hooks';
 
-export default function ChildList({ setSelectedChilds, StudentsInfo, AccountName }) {
+export default function ChildList({ setSelectedChilds, setActiveStep }) {
   const classes = useStyles();
-  const testData = [
-    { name: 'Ahsan', activity: 'Oxford activity' },
-    { name: 'Ellahi', activity: 'Martial Arts' },
-    { name: 'Ahsan Ellahi', activity: 'Social work' }
-  ];
+  const {
+    childData: { AccountName, StudentsInfo = [] }
+  } = useCheckInOut();
 
   return (
     <Box className={classes.childListForm}>
       <Typography className={classes.childListHeader}>{AccountName}</Typography>
       <Typography className={classes.subHeaderText}>Select all that apply.</Typography>
-      {StudentsInfo.map((student, index) => (
-        <ChildListRow student={student} key={index} />
-      ))}
+      <Box className={classes.childListWrapper}>
+        {StudentsInfo.map((student, index) => (
+          <ChildListRow student={student} key={index} />
+        ))}
+      </Box>
       <Grid item xs={12} className={classes.listButtonWrapper}>
         <Button type="submit" variant="outlined" color="primary" fullWidth>
           Cancel
         </Button>
         <LoadingButton
           type="submit"
-          onClick={() => setSelectedChilds(testData[0])}
+          onClick={() => setActiveStep(2)}
           variant="contained"
           color="primary"
           fullWidth

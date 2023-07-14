@@ -9,6 +9,7 @@ export default makeStyles(theme => ({
     height: '70%',
     width: '70%',
     margin: 'auto',
+    background: 'white',
     border: `8px solid ${theme.palette.primary.main}`,
     [theme.breakpoints.down('sm')]: {
       height: '95%',
@@ -96,6 +97,40 @@ export default makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    gap: 16,
+    margin: 'auto',
+    width: '60%',
+    [theme.breakpoints.down('md')]: {
+      width: '90%'
+    },
+    '.sigCanvas': {
+      width: '100%'
+    }
+  },
+  activityRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center'
+  },
+  childListWrapper: {
+    height: '100%'
+  },
+  formControlLabelRoot: {
+    color: theme.palette.primary.main,
+    '& .MuiTypography-root': {
+      color: theme.palette.primary.main,
+      fontSize: '12px'
+    }
+  },
+  checked: {
+    color: theme.palette.primary.main
+  },
+  root: {
+    color: `${theme.palette.primary.main} !important`,
+    '& .MuiSvgIcon-root': {
+      height: '18px',
+      width: '18px'
+    }
   }
 }));

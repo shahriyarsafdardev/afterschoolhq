@@ -21,7 +21,7 @@ export default function PostRegistrationSetup() {
     data: { additionalContactDto = [], setupDto, activityDto }
   } = usePostRegistration();
 
-  const { RegistrantType, StudentFirstName } = activityDto || {};
+  const { RegistrantType, StudentFirstName, Name } = activityDto || {};
   const { IsPhoneSetup, IsPinSetup } = setupDto || {};
 
   useEffect(() => {
@@ -69,8 +69,8 @@ export default function PostRegistrationSetup() {
     if (activeStep === 0) {
       return [
         'Pin Setup',
-        'You have registered for an activity that will require you to check in and check out your child each day.',
-        'Please select four numbers to use for your PIN code during check in and check out.'
+        `${Name} requires in-person check in and check out.`,
+        'Please select four numbers to use as your PIN code when arriving to and departing from your activity.'
       ];
     }
     return [

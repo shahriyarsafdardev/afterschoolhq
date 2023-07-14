@@ -40,7 +40,8 @@ export default makeStyles(theme => ({
     paddingTop: '40px'
   },
   marginWrapper: {
-    marginTop: '25px'
+    marginTop: '25px',
+    background: 'white'
   },
   innerWrapper: {
     maxWidth: '600px',
