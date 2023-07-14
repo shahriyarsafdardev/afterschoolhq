@@ -38,6 +38,8 @@ const MoodQuestion = ({ question, formik }) => {
       : classes.moodIconButton;
   };
 
+  const emojiContent = key => (key === ':slight_frown:' ? ':slightly_frowning:' : key);
+
   return (
     <FieldWrapper label={title} isRequired={isRequired}>
       <Box className={classes.outerWrapper}>
@@ -51,7 +53,7 @@ const MoodQuestion = ({ question, formik }) => {
                     onClick={handleMoodChange(mood)}
                     className={getClassName(mood.value)}
                   >
-                    <Emoji>{mood.key}</Emoji>
+                    <Emoji>{emojiContent(mood.key)}</Emoji>
                   </IconButton>
                   {currentMood.value === mood.value && (
                     <Box className={classes.moodName}>{currentMood.value}</Box>

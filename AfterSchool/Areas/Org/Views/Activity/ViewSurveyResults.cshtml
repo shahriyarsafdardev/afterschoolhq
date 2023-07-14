@@ -88,7 +88,7 @@
                                         }
                                         else if (question.FormQuestionQuestionTypeId == QuestionType.Emoji)
                                         {
-                                            <div class="viewSurveyAnswer emoji">@Html.Raw(json[0].key)</div>
+                                            <div class="viewSurveyAnswer emoji">@Html.Raw(json[0].value)</div>
                                         }
                                         else
                                         {
@@ -239,17 +239,6 @@
                     $('.playbtn').removeClass('glyphicon-pause');
                     $('.playbtn').addClass('glyphicon-play');
                 });
-            }
-
-
-            if ($('.emoji').length) {
-                function convert() {
-                    var input = $(".emoji").html();
-                    var output = emojione.shortnameToImage(input);
-                    $(".emoji").html(output);
-                    $(".emojione").attr('style', "height: 30px;");
-                }
-                convert();
             }
         })
     </script>
