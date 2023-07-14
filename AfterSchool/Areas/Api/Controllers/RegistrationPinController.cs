@@ -382,42 +382,32 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     var registrants = Registrant.LoadByParentRegistrantIdByAccountId(masterRegistrant.ID.Value,
                         account.ID.Value,msgs);
+                    var activityInfo = new List<ActivityDto>();
                     
                     registrants.ForEach(registrant =>
                     {
-                        var registrantActivities = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs);
-                        registrantActivities.ForEach(registrantActivity =>
-                        {
-                            var activity = registrantActivity.GetActivity(msgs);
-                            var activitySchedule = activity?.GetSchedule(msgs);
-                            var activityInfo = new List<ActivityDto>
+                        var registrantActivity = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
+                            .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
+                        var activity = registrantActivity?.GetActivity(msgs);
+                        var activitySchedule = activity?.GetSchedule(msgs);
+                        
+                        if(activity.IsNotEmpty())
+                            activityInfo.Add(new ActivityDto
                             {
-                                new ActivityDto
-                                {
-                                    ActivityUid = activity?.Uid.ToString(),
-                                    ActivityName = activity?.Name,
-                                    ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
-                                    ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
-                                },
-                            };
-                            var studentNames = studentsInfoList.Select(s => s.StudentName).ToList();
-                            if (studentNames.Contains(registrant.Name))
-                            {
-                                var currentRegistrant = studentNames.IndexOf(registrant.Name);
-                                var currentStudentInfo = studentsInfoList[currentRegistrant];
-                                currentStudentInfo.Activities.AddRange(activityInfo);
-                            }
-                            else
-                            {
-                                studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
-                                {
-                                    StudentUid = masterRegistrant.Uid.ToString(),
-                                    StudentName = registrant.Name,
-                                    Activities = activityInfo,
-                                });    
-                            }
-                        });
+                                ActivityUid = activity.Uid.ToString(),
+                                ActivityName = activity.Name,
+                                ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
+                                ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
+                            });
                     });
+                    
+                    if(activityInfo.Count > 0)
+                        studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
+                        {
+                            StudentUid = masterRegistrant.Uid.ToString(),
+                            StudentName = masterRegistrant.Name,
+                            Activities = activityInfo,
+                        });    
                 });
                 
                 dynamic response = new
