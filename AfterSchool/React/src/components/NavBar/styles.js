@@ -2,6 +2,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import header from 'assets/header.png';
 import headerMobile from 'assets/header-mob.png';
 
+const backgroundImage = src =>
+  `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${src})`;
+
 const useStyles = makeStyles(theme => ({
   headerWrapper: {
     background: '#454E51',
@@ -36,13 +39,13 @@ const useStyles = makeStyles(theme => ({
     marginTop: '30px',
     height: '165px',
     padding: '0px 40px 15px 40px',
-    backgroundImage: props => `url(${props.headerUrl || header})`,
+    backgroundImage: ({ headerUrl }) => backgroundImage(headerUrl || header),
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center',
     backgroundSize: 'cover',
     gap: '8px',
     [theme.breakpoints.down('sm')]: {
-      backgroundImage: props => `url(${props.headerUrl || headerMobile})`
+      backgroundImage: ({ headerUrl }) => backgroundImage(headerUrl || headerMobile)
     },
     display: 'flex',
     flexDirection: 'column',
