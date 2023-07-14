@@ -390,13 +390,32 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             var activity = registrantActivity.GetActivity(msgs);
                             var activitySchedule = activity?.GetSchedule(msgs);
-                            studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
+                            var activityInfo = new List<ActivityDto>
                             {
-                                StudentName = registrantActivity.RegistrantName,
-                                ActivityName = activity?.Name,
-                                ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
-                                ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
-                            });
+                                new ActivityDto
+                                {
+                                    ActivityUid = activity?.Uid.ToString(),
+                                    ActivityName = activity?.Name,
+                                    ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
+                                    ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
+                                },
+                            };
+                            var studentNames = studentsInfoList.Select(s => s.StudentName).ToList();
+                            if (studentNames.Contains(registrant.Name))
+                            {
+                                var currentRegistrant = studentNames.IndexOf(registrant.Name);
+                                var currentStudentInfo = studentsInfoList[currentRegistrant];
+                                currentStudentInfo.Activities.AddRange(activityInfo);
+                            }
+                            else
+                            {
+                                studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
+                                {
+                                    StudentUid = masterRegistrant.Uid.ToString(),
+                                    StudentName = registrant.Name,
+                                    Activities = activityInfo,
+                                });    
+                            }
                         });
                     });
                 });

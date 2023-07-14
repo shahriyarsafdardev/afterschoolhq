@@ -1,12 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace AfterSchool.Areas.Api.Models
 {
     public class CheckInCheckOutStudentInfoDto
     {
+        public string StudentUid { get; set; }
         public string StudentName { get; set; }
-        public string ActivityName { get; set; }
-        public string ActivityStartTime { get; set; }
-        public string ActivityEndTime { get; set; }
+        public List<ActivityDto> Activities { get; set; }
     }
 }
