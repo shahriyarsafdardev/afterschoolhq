@@ -19,16 +19,22 @@ function index() {
   const phone = searchParams.get('phone') || '';
   const userPin = searchParams.get('pin') || '';
   const [selectedChilds, setSelectedChilds] = useState({});
+  const [userSignature, setUserSignature] = useState('');
+  const [activeStep, setActiveStep] = useState(0);
 
   const {
     msgs,
     loadChildListData,
-    childData: { AccountName, StudentsInfo = [] },
+    childData: { StudentsInfo = [] },
     loading
   } = useCheckInOut();
 
   const handlePinInput = pin => {
     setSearchParams(`phone=${phone}&pin=${pin}`);
+  };
+
+  const setSignature = sign => {
+    setUserSignature(sign);
   };
 
   useEffect(() => {
@@ -39,6 +45,7 @@ function index() {
     if (phone && userPin) {
       await loadChildListData(accountName, phone, userPin).then(msgs => {
         if (msgs.length > 0) navigate(`/reactapp/check-in-out/${accountName}`);
+        setActiveStep(1);
       });
     }
   }, [phone, userPin]);
@@ -47,24 +54,19 @@ function index() {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
     if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
-    if (phone && userPin && !isEmpty(StudentsInfo) && isEmpty(selectedChilds))
-      return (
-        <ChildList
-          setSelectedChilds={setSelectedChilds}
-          StudentsInfo={StudentsInfo}
-          AccountName={AccountName}
-        />
-      );
-    if (!isEmpty(selectedChilds)) return <EsignPage />;
+    if (activeStep === 1)
+      return <ChildList setSelectedChilds={setSelectedChilds} setActiveStep={setActiveStep} />;
+    if (activeStep === 2)
+      return <EsignPage setSignature={setSignature} setActiveStep={setActiveStep} />;
 
     return <CircularProgress className={classes.marginAuto} />;
   };
 
   return (
     <Grid container className={classes.wrapper}>
-      <Card className={classes.innerContainer}>
+      <Box className={classes.innerContainer}>
         <Box className={classes.content}>{innerSection()}</Box>
-      </Card>
+      </Box>
     </Grid>
   );
 }
