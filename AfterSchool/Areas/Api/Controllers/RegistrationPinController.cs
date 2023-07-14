@@ -391,7 +391,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
                         
-                        if(activity.IsNotEmpty())
+                        if(activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
                             {
                                 ActivityUid = activity.Uid.ToString(),
