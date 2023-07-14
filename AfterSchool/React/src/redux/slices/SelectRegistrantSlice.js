@@ -44,14 +44,23 @@ const SelectRegistrantSlice = createSlice({
 
 export const useSelectRegistrantActions = () => {
   const dispatch = useDispatch();
-  const { setHeaderData } = HeaderSlice.actions;
+  const {
+    setHeaderData,
+    loadingStart: headerLoadingStart,
+    loadingCompleted: headerLoadingCompleted
+  } = HeaderSlice.actions;
   const { setMsgs, setData, loadingStart, loadingCompleted } = SelectRegistrantSlice.actions;
+
   const loadData = async () => {
+    const { navigateTo } = utils;
+
     dispatch(loadingStart());
+    dispatch(headerLoadingStart());
+
     await SelectRegistrantRepository.getData().then(({ obj, msgs }) => {
       dispatch(setMsgs(msgs));
 
-      if (msgs.length > 0) return;
+      if (msgs.length > 0) return navigateTo('/login');
 
       if (obj?.ParticipationObject) {
         const {
@@ -64,6 +73,7 @@ export const useSelectRegistrantActions = () => {
       }
 
       dispatch(setData(obj));
+      dispatch(headerLoadingCompleted());
       dispatch(loadingCompleted());
     });
   };
