@@ -600,6 +600,8 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebUser_FacebookId ON [WebUser] (FacebookId)"));
             msgs.AddRange(
                 dq.ExecuteSql("CREATE INDEX IX_WebUser_CleverUserId_IsActive ON [WebUser] (CleverUserId,IsActive)"));
+            msgs.AddRange(
+                dq.ExecuteSql("CREATE INDEX IX_WebUser_Phone_PinCode ON [WebUser] (PinCode,Phone)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId ON [Activity] (AccountId)"));
             msgs.AddRange(
                 dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_IsPublished ON [Activity] (AccountId,IsPublished)"));
