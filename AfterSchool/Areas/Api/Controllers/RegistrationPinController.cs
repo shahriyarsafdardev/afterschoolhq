@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
-using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -163,8 +164,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     currentUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
                     msgs.AddRange(currentUser.Save());
                 }
-                
-                if(peopleList.IsNotEmpty())
+
+                if (peopleList.IsNotEmpty())
                     Database.ExecuteTransaction
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -204,7 +205,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         IsDeleted = false,
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
-                                    
+
                                     //     TwilioHelper.SendSMS(
                                     //         currentPickUp.Phone,
                                     //         msgBody,
@@ -358,8 +359,8 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                if(accountName.IsEmpty())
-                    throw new Exception("Invalid Account");                    
+                if (accountName.IsEmpty())
+                    throw new Exception("Invalid Account");
 
                 if (phone.IsEmpty())
                     throw new Exception("Invalid Phone");
@@ -370,52 +371,50 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("You are not authorized to access this page");
-                
+
                 var account = Account.LoadByUniqueName(accountName, msgs);
-                if(account.IsEmpty())
+                if (account.IsEmpty())
                     throw new Exception("Invalid Account");
 
                 var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var studentsInfoList = new List<CheckInCheckOutStudentInfoDto>();
-                
+
                 masterRegistrants.ForEach(masterRegistrant =>
                 {
                     var registrants = Registrant.LoadByParentRegistrantIdByAccountId(masterRegistrant.ID.Value,
-                        account.ID.Value,msgs);
+                        account.ID.Value, msgs);
                     var activityInfo = new List<ActivityDto>();
-                    
+
                     registrants.ForEach(registrant =>
                     {
                         var registrantActivity = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
                             .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
-                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow.Date,msgs).FirstOrDefault();
+                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
                         CheckInOut checkInOutInfo = null;
                         WebUser webUser = null;
-                        
+
                         if (attendance.IsNotEmpty())
                         {
                             var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
-                                registrant.ID.Value,msgs).FirstOrDefault();
-                            
+                                registrant.ID.Value, msgs).FirstOrDefault();
+
                             if (attendanceRegistrant.IsNotEmpty())
-                            {
-                                checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
-                            }
+                                checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
-                        if(checkInOutInfo.IsNotEmpty())
+                        if (checkInOutInfo.IsNotEmpty())
                             webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
-                        
+
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
                             CheckIn = checkInOutInfo.IsNotEmpty(),
                             CheckInTime = checkInOutInfo?.Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
-                        
-                        if(activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+
+                        if (activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
                             {
                                 StudentUid = registrant.Uid.ToString(),
@@ -426,15 +425,15 @@ namespace AfterSchool.Areas.Api.Controllers
                                 CheckSetupDto = checkSetupInfo,
                             });
                     });
-                    
-                    if(activityInfo.Count > 0)
+
+                    if (activityInfo.Count > 0)
                         studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
                         {
                             StudentName = masterRegistrant.Name,
                             Activities = activityInfo,
-                        });    
+                        });
                 });
-                
+
                 dynamic response = new
                 {
                     AccountName = account.Name,
@@ -453,9 +452,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
-        public ActionResult AddOrUpdateStudentCheckInOutInfo(string phone, string pinCode,List<CheckInOutStudentsDto> studentList)
+        public ActionResult AddOrUpdateStudentCheckInOutInfo(string phone, string pinCode, string signature, List<CheckInOutStudentsDto> studentList)
         {
             var msgs = new SystemMessages();
             try
@@ -469,44 +468,44 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("You are not authorized to access this page");
-                
+
                 studentList.ForEach(student =>
                 {
-                    if(student.ActivityUid.IsEmpty() || !student.ActivityUid.IsGuid())
+                    if (student.ActivityUid.IsEmpty() || !student.ActivityUid.IsGuid())
                         throw new Exception("Invalid Activity Id");
-                    if(student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
+                    if (student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
                         throw new Exception("Invalid Registrant Id");
-                    
-                    var activity = Activity.LoadByUid(student.ActivityUid.ToGuid(),msgs);
-                    if(activity.IsEmpty())
+
+                    var activity = Activity.LoadByUid(student.ActivityUid.ToGuid(), msgs);
+                    if (activity.IsEmpty())
                         throw new Exception("No Activity");
-                    
+
                     var registrant = Registrant.LoadByUid(student.StudentUid.ToGuid(), msgs);
-                    if(registrant.IsEmpty())
+                    if (registrant.IsEmpty())
                         throw new Exception("No Registrant");
-                    
-                    
+
+
                     Database.ExecuteTransaction
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow.Date,amsgs,adc).FirstOrDefault();
+                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, amsgs, adc).FirstOrDefault();
                             if (attendance.IsEmpty())
                             {
                                 attendance = new Attendance
                                 {
-                                  CreateDate = DateTime.UtcNow,
-                                  LastModifiedDate = DateTime.UtcNow,
-                                  ActivityId = activity.ID,
-                                  Date = DateTime.UtcNow.Date,
-                                  IsCompleted = false,
-                                  IsCharged = false,
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    ActivityId = activity.ID,
+                                    Date = DateTime.UtcNow.Date,
+                                    IsCompleted = false,
+                                    IsCharged = false,
                                 };
                                 amsgs.AddRange(attendance.Save(adc));
                             }
-                            
+
                             var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
-                                    registrant.ID.Value,amsgs, adc).FirstOrDefault();
+                                registrant.ID.Value, amsgs, adc).FirstOrDefault();
 
                             if (attendanceRegistrant.IsEmpty())
                             {
@@ -524,12 +523,21 @@ namespace AfterSchool.Areas.Api.Controllers
                                 };
                                 amsgs.AddRange(attendanceRegistrant.Save(adc));
                             }
-                            
+
+                            if (signature.IsEmpty())
+                                if (Request.Files[0].ContentLength > 0)
+                                {
+                                    var file = Request.Files[0].InputStream;
+                                    var fileName = Request.Files[0].FileName;
+                                    signature = GetUploadedFilePath(registrant, file, fileName, amsgs, adc);
+                                }
+
                             var checkInOutInfo = new CheckInOut
                             {
                                 CreateDate = DateTime.UtcNow,
                                 LastModifiedDate = DateTime.UtcNow,
                                 Date = DateTime.UtcNow,
+                                Signature = signature,
                                 Browser = Request.UserAgent,
                                 IPAddress = Request.GetUserHostAddress(),
                                 WebUserId = currentUser.ID.Value,
@@ -572,6 +580,26 @@ namespace AfterSchool.Areas.Api.Controllers
                     PersonPhoneDataType = phone,
                 });
             return pickUpContactList;
+        }
+
+        private static string GetUploadedFilePath(Registrant registrant, Stream file, string filename, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            var ah = Utilities.GetNewAmazonHelper();
+
+            var regEx = new Regex(
+                BasicLibrary.Utilities.UrlFriendlyRegEx,
+                RegexOptions.IgnoreCase | RegexOptions.Singleline
+            );
+
+            var account = registrant.GetAccount(msgs, dc);
+            var accountFolder = $"{account.UniqueName}-{account.ID}";
+            var registrantFolder = $"{registrant.Name.Replace(regEx, "")}-{registrant.ID}";
+            var amazonFilePath = $"{accountFolder}/{registrantFolder}/{filename}".ToLower();
+
+            msgs.AddRange(ah.AddFile(file, amazonFilePath));
+
+            return amazonFilePath;
         }
     }
 }
