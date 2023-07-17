@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import useStyles from '../Common/styles';
 import { useSnackbar } from 'notistack';
-import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
+import { Box, CircularProgress, Grid } from '@material-ui/core';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useCheckInOut } from 'redux/hooks';
-import { isEmpty } from 'lodash';
 import PhoneNumberForm from '../Common/PhoneNumberForm';
 import PinInputForm from './PinInputForm';
 import ChildList from './ChildList';
@@ -18,7 +17,6 @@ function index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const phone = searchParams.get('phone') || '';
   const userPin = searchParams.get('pin') || '';
-  const [selectedChilds, setSelectedChilds] = useState({});
   const [userSignature, setUserSignature] = useState('');
   const [activeStep, setActiveStep] = useState(0);
 
@@ -26,15 +24,21 @@ function index() {
     msgs,
     loadChildListData,
     childData: { StudentsInfo = [] },
-    loading
+    loading,
+    selectedStudents,
+    updateStudentCheckInOutInfo
   } = useCheckInOut();
 
   const handlePinInput = pin => {
     setSearchParams(`phone=${phone}&pin=${pin}`);
   };
 
-  const setSignature = sign => {
+  const setSignature = async sign => {
     setUserSignature(sign);
+
+    await updateStudentCheckInOutInfo(selectedStudents, phone, userPin).then(res => {
+      setActiveStep(2);
+    });
   };
 
   useEffect(() => {
@@ -54,8 +58,7 @@ function index() {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
     if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
-    if (activeStep === 1)
-      return <ChildList setSelectedChilds={setSelectedChilds} setActiveStep={setActiveStep} />;
+    if (activeStep === 1) return <ChildList setActiveStep={setActiveStep} />;
     if (activeStep === 2)
       return <EsignPage setSignature={setSignature} setActiveStep={setActiveStep} />;
 

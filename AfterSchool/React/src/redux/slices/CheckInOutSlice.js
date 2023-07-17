@@ -8,9 +8,13 @@ const CheckInOutSlice = createSlice({
     pinSetupData: {},
     childData: {},
     loading: false,
+    selectedStudents: [],
     msgs: []
   },
   reducers: {
+    setSelectedStudentsData: (state, { payload }) => {
+      state.selectedStudents = payload;
+    },
     setPinData: (state, { payload }) => {
       state.pinSetupData = payload || {};
     },
@@ -34,6 +38,7 @@ export const useCheckInOutActions = () => {
   const {
     setMsgs,
     setPinData,
+    setSelectedStudentsData,
     setChildListData,
     loadingStart,
     loadingCompleted
@@ -71,7 +76,26 @@ export const useCheckInOutActions = () => {
     });
   };
 
-  return { loadPinData, updatePinData, loadChildListData };
+  const updateStudentCheckInOutInfo = async (studentList, phone, pinCode) => {
+    const params = { studentList, phone, pinCode };
+    dispatch(loadingStart());
+    return await CheckInOutRepository.updateStudentCheckInOutInfo(params).then(
+      ({ data: { msgs } }) => {
+        dispatch(loadingCompleted());
+        return msgs;
+      }
+    );
+  };
+
+  const updateSelectedStudentsData = data => dispatch(setSelectedStudentsData(data));
+
+  return {
+    loadPinData,
+    updatePinData,
+    loadChildListData,
+    updateSelectedStudentsData,
+    updateStudentCheckInOutInfo
+  };
 };
 
 export default CheckInOutSlice;
