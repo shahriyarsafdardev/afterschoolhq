@@ -390,6 +390,37 @@ namespace AfterSchool.Areas.Api.Controllers
                             .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
+                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow,msgs).FirstOrDefault();
+                        CheckInOut checkInOutInfo = null;
+                        AttendanceRegistrant attendanceRegistrant = null;
+                        CheckInCheckOutSetupDto checkSetupInfo = null;
+                        if (attendance.IsNotEmpty())
+                        {
+                            attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
+                                registrant.ID.Value,msgs).FirstOrDefault();
+                            if (attendanceRegistrant.IsNotEmpty())
+                            {
+                                checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
+                                if (checkInOutInfo.IsNotEmpty())
+                                {
+                                    var webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
+                                    checkSetupInfo = new CheckInCheckOutSetupDto
+                                    {
+                                       CheckIn = true,
+                                       CheckInTime = checkInOutInfo.Date,
+                                       CheckInBy = $"{webUser?.FirstName} {webUser?.LastName}",
+                                    };
+                                }
+                            }
+                        }
+                        else
+                        {
+                            checkSetupInfo = new CheckInCheckOutSetupDto
+                            {
+                                CheckIn = false,
+                                CheckInTime = null,
+                            };
+                        }
                         
                         if(activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
@@ -398,6 +429,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 ActivityName = activity.Name,
                                 ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
                                 ActivityEndTime = activitySchedule?.DailyEndTime.ToShortTimeString(),
+                                CheckSetupDto = checkSetupInfo,
                             });
                     });
                     
