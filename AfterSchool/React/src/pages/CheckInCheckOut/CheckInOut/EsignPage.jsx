@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import useStyles from '../Common/styles';
 import LoadingButton from 'components/Overrides/LoadingButton';
 import EsignComponent from './EsignComponent';
+import Confirmation from './Confirmation';
 
 export default function EsignPage({ setSignature, setActiveStep }) {
   const theme = useTheme();
@@ -13,6 +14,7 @@ export default function EsignPage({ setSignature, setActiveStep }) {
   return (
     <Box className={classes.esignPage}>
       <Typography className={classes.headerText}>Please sign below.</Typography>
+      <Confirmation />
       {isMobile ? (
         <EsignComponent handleSubmit={setEsign} type="pad" />
       ) : (

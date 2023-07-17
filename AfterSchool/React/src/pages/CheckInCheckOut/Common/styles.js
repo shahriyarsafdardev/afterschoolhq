@@ -114,10 +114,15 @@ export default makeStyles(theme => ({
     alignItems: 'center'
   },
   childListWrapper: {
-    height: '100%'
+    height: '300px',
+    overflow: 'hidden scroll',
+    [theme.breakpoints.down('md')]: {
+      height: '80vh'
+    }
   },
   formControlLabelRoot: {
     color: theme.palette.primary.main,
+    width: '100px',
     '& .MuiTypography-root': {
       color: theme.palette.primary.main,
       fontSize: '12px'
@@ -132,5 +137,9 @@ export default makeStyles(theme => ({
       height: '18px',
       width: '18px'
     }
+  },
+  checkedInMsg: {
+    color: theme.palette.text.hint,
+    fontStyle: 'italic'
   }
 }));
