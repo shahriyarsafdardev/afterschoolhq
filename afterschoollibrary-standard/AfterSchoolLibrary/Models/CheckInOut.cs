@@ -142,5 +142,12 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["CheckType"] }));
             return msgs;
         }
+        
+        public SystemMessages Save(DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(CheckInOut)));
+            return msgs;
+        }
     }
 }

@@ -601,6 +601,7 @@
     <Compile Include="Areas\Api\Models\ActivityDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInCheckOutSetupDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInCheckOutStudentInfoDto.cs" />
+    <Compile Include="Areas\Api\Models\CheckInOutStudentsDto.cs" />
     <Compile Include="Areas\Api\Models\FormQuestionSettingDto.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyFormController.cs" />
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />

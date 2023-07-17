@@ -390,7 +390,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
-                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow,msgs).FirstOrDefault();
+                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow.Date,msgs).FirstOrDefault();
                         CheckInCheckOutSetupDto checkSetupInfo = null;
                         if (attendance.IsNotEmpty())
                         {
@@ -448,6 +448,107 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 return Json(
                     new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult AddOrUpdateStudentCheckInOutInfo(string phone, string pinCode,List<CheckInOutStudentsDto> studentList)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (phone.IsEmpty())
+                    throw new Exception("Invalid Phone");
+
+                if (pinCode.IsEmpty())
+                    throw new Exception("Invalid Pin");
+
+                var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
+                if (currentUser.IsEmpty())
+                    throw new Exception("You are not authorized to access this page");
+                
+                studentList.ForEach(student =>
+                {
+                    if(student.ActivityUid.IsEmpty() || !student.ActivityUid.IsGuid())
+                        throw new Exception("Invalid Activity Id");
+                    if(student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
+                        throw new Exception("Invalid Registrant Id");
+                    
+                    var activity = Activity.LoadByUid(student.ActivityUid.ToGuid(),msgs);
+                    if(activity.IsEmpty())
+                        throw new Exception("No Activity");
+                    
+                    var registrant = Registrant.LoadByUid(student.StudentUid.ToGuid(), msgs);
+                    if(registrant.IsEmpty())
+                        throw new Exception("No Registrant");
+                    
+                    
+                    Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.Today.Date,amsgs,adc).FirstOrDefault();
+                            if (attendance.IsEmpty())
+                            {
+                                attendance = new Attendance
+                                {
+                                  CreateDate = DateTime.UtcNow,
+                                  LastModifiedDate = DateTime.UtcNow,
+                                  ActivityId = activity.ID,
+                                  Date = DateTime.UtcNow.Date,
+                                  IsCompleted = false,
+                                  IsCharged = false,
+                                };
+                                amsgs.AddRange(attendance.Save(adc));
+                            }
+                            
+                            var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
+                                    registrant.ID.Value,amsgs, adc).FirstOrDefault();
+
+                            if (attendanceRegistrant.IsEmpty())
+                            {
+                                attendanceRegistrant = new AttendanceRegistrant
+                                {
+                                    CreateDate = DateTime.UtcNow,
+                                    LastModifiedDate = DateTime.UtcNow,
+                                    RegistrantId = registrant.ID,
+                                    AttendanceId = attendance.ID,
+                                    IsPresent = false,
+                                    IsLate = false,
+                                    NumberPresent = 0,
+                                    NumberLate = 0,
+                                    NumberPossible = 1,
+                                };
+                                amsgs.AddRange(attendanceRegistrant.Save(adc));
+                            }
+                            
+                            var checkInOutInfo = new CheckInOut
+                            {
+                                CreateDate = DateTime.UtcNow,
+                                LastModifiedDate = DateTime.UtcNow,
+                                Date = DateTime.UtcNow,
+                                WebUserId = currentUser.ID.Value,
+                                AttendanceRegistrantId = attendanceRegistrant.ID.Value,
+                                CheckType = student.CheckInOut ? CheckType.CheckIn : CheckType.CheckOut,
+                            };
+                            amsgs.AddRange(checkInOutInfo.Save(adc));
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                });
+
+                return Json(
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
