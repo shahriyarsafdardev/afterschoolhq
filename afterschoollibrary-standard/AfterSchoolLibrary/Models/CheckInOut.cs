@@ -67,7 +67,7 @@ namespace AfterSchoolLibrary.Models
                 var dp = get_BaseObjectMap(className);
                 dp.Add(className, "Date", SqlDbType.DateTime);
                 dp.Add(className, "Signature", SqlDbType.NVarChar,"1000");
-                dp.Add(className, "Browser", SqlDbType.NVarChar,"100");
+                dp.Add(className, "Browser", SqlDbType.NVarChar,"400");
                 dp.Add(className, "IPAddress", SqlDbType.NVarChar,"100");
                 dp.Add(className, "WebUserId", SqlDbType.Int);
                 dp.Add(className, "AttendanceRegistrantId", SqlDbType.Int);
