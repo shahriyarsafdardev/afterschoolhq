@@ -76,10 +76,22 @@ export const useCheckInOutActions = () => {
     });
   };
 
-  const updateStudentCheckInOutInfo = async (studentList, phone, pinCode) => {
-    const params = { studentList, phone, pinCode };
+  const updateStudentCheckInOutInfo = async (studentList, phone, pinCode, userSignature) => {
+    const formData = new FormData();
+    formData.append('phone', phone);
+    formData.append('pinCode', pinCode);
+    if (userSignature && typeof userSignature === 'string')
+      formData.append('signature', userSignature);
+    else formData.append('digitalSignature', userSignature);
+    studentList.forEach((obj, index) => {
+      // Append each object as a separate field in the form data
+      formData.append(`studentList[${index}].StudentUid`, obj.StudentUid);
+      formData.append(`studentList[${index}].ActivityUid`, obj.ActivityUid);
+      formData.append(`studentList[${index}].CheckInOut`, obj.CheckInOut);
+    });
+
     dispatch(loadingStart());
-    return await CheckInOutRepository.updateStudentCheckInOutInfo(params).then(
+    return await CheckInOutRepository.updateStudentCheckInOutInfo(formData).then(
       ({ data: { msgs } }) => {
         dispatch(loadingCompleted());
         return msgs;
