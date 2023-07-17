@@ -453,7 +453,7 @@ else
         new ViewDataDictionary
         {
             {"id", id},
-            {"querystring", $"archive={newArchiveValue}&type={(int) activityType}"},
+            {"querystring", $"archive={newArchiveValue}&type={(int) activityType}&q={Request["q"]}"},
             {"action", pagingAction},
             {"controller", pagingController},
         }
