@@ -8,6 +8,7 @@ import PhoneNumberForm from '../Common/PhoneNumberForm';
 import PinInputForm from './PinInputForm';
 import ChildList from './ChildList';
 import EsignPage from './EsignPage';
+import ThankyouPage from './ThankyouPage';
 
 function index() {
   const classes = useStyles();
@@ -19,6 +20,7 @@ function index() {
   const userPin = searchParams.get('pin') || '';
   const [userSignature, setUserSignature] = useState('');
   const [activeStep, setActiveStep] = useState(0);
+  const [checkedStudents, setCheckedStudents] = useState({});
 
   const {
     msgs,
@@ -33,11 +35,15 @@ function index() {
     setSearchParams(`phone=${phone}&pin=${pin}`);
   };
 
-  const setSignature = async sign => {
+  const setSignature = async (sign, checkedInStudents, checkedOutStudents) => {
     setUserSignature(sign);
+    setCheckedStudents({
+      checkedInStudents: checkedInStudents,
+      checkedOutStudents: checkedOutStudents
+    });
 
-    await updateStudentCheckInOutInfo(selectedStudents, phone, userPin).then(res => {
-      setActiveStep(2);
+    await updateStudentCheckInOutInfo(selectedStudents, phone, userPin, sign).then(res => {
+      setActiveStep(3);
     });
   };
 
@@ -61,6 +67,7 @@ function index() {
     if (activeStep === 1) return <ChildList setActiveStep={setActiveStep} />;
     if (activeStep === 2)
       return <EsignPage setSignature={setSignature} setActiveStep={setActiveStep} />;
+    if (activeStep === 3) return <ThankyouPage checkedStudents={checkedStudents} />;
 
     return <CircularProgress className={classes.marginAuto} />;
   };

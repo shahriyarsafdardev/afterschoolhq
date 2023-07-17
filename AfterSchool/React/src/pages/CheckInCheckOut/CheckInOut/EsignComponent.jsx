@@ -10,7 +10,7 @@ export default function EsignComponent({ handleSubmit, type = 'pad', value = '' 
     const imageFile = await fetch(URL)
       .then(res => res.blob())
       .then(blobFile => new File([blobFile], `signPhoto.jpg`, { type: 'image/png' }));
-    handleSubmit(URL);
+    handleSubmit(imageFile);
   };
 
   const handleChange = e => {
