@@ -391,34 +391,29 @@ namespace AfterSchool.Areas.Api.Controllers
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
                         var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow.Date,msgs).FirstOrDefault();
-                        CheckInCheckOutSetupDto checkSetupInfo = null;
+                        CheckInOut checkInOutInfo = null;
+                        WebUser webUser = null;
+                        
                         if (attendance.IsNotEmpty())
                         {
                             var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
                                 registrant.ID.Value,msgs).FirstOrDefault();
+                            
                             if (attendanceRegistrant.IsNotEmpty())
                             {
-                                var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
-                                if (checkInOutInfo.IsNotEmpty())
-                                {
-                                    var webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
-                                    checkSetupInfo = new CheckInCheckOutSetupDto
-                                    {
-                                       CheckIn = true,
-                                       CheckInTime = checkInOutInfo.Date,
-                                       CheckInBy = $"{webUser?.FirstName} {webUser?.LastName}",
-                                    };
-                                }
+                                checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
                             }
                         }
-                        else
+
+                        if(checkInOutInfo.IsNotEmpty())
+                            webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
+                        
+                        var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
-                            checkSetupInfo = new CheckInCheckOutSetupDto
-                            {
-                                CheckIn = false,
-                                CheckInTime = null,
-                            };
-                        }
+                            CheckIn = checkInOutInfo.IsNotEmpty(),
+                            CheckInTime = checkInOutInfo?.Date.ToShortTimeString(),
+                            CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
+                        };
                         
                         if(activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
@@ -535,6 +530,8 @@ namespace AfterSchool.Areas.Api.Controllers
                                 CreateDate = DateTime.UtcNow,
                                 LastModifiedDate = DateTime.UtcNow,
                                 Date = DateTime.UtcNow,
+                                Browser = Request.UserAgent,
+                                IPAddress = Request.GetUserHostAddress(),
                                 WebUserId = currentUser.ID.Value,
                                 AttendanceRegistrantId = attendanceRegistrant.ID.Value,
                                 CheckType = student.CheckInOut ? CheckType.CheckIn : CheckType.CheckOut,
