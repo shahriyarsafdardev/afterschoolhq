@@ -490,7 +490,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.Today.Date,amsgs,adc).FirstOrDefault();
+                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow.Date,amsgs,adc).FirstOrDefault();
                             if (attendance.IsEmpty())
                             {
                                 attendance = new Attendance
