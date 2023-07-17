@@ -1,9 +1,10 @@
-﻿@model Activity
+@model Activity
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
+    var forms = currentAccount.GetSurveyForms(false, msgs).OrderBy(x => x.Name).ToList();
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -54,6 +55,7 @@
                         <tr>
                             <th></th>
                             <th>Survey Name</th>
+                            <th>Form Used</th>
                             <th>Sent By</th>
                             <th>Date Sent</th>
                         </tr>
@@ -67,6 +69,9 @@
                                 </td>
                                 <td>
                                     @survey.Name
+                                </td>
+                                <td>
+                                    @forms.Where(form => survey.FormId == form.ID).Select(form => form.Name).FirstOrDefault()
                                 </td>
                                 <td>
                                     @SurveyRequestService.GetCreatedBy(survey).DisplayName
