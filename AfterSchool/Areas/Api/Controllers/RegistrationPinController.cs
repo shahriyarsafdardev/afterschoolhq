@@ -391,16 +391,14 @@ namespace AfterSchool.Areas.Api.Controllers
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
                         var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value,DateTime.UtcNow,msgs).FirstOrDefault();
-                        CheckInOut checkInOutInfo = null;
-                        AttendanceRegistrant attendanceRegistrant = null;
                         CheckInCheckOutSetupDto checkSetupInfo = null;
                         if (attendance.IsNotEmpty())
                         {
-                            attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
+                            var attendanceRegistrant = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value,
                                 registrant.ID.Value,msgs).FirstOrDefault();
                             if (attendanceRegistrant.IsNotEmpty())
                             {
-                                checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
+                                var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
                                 if (checkInOutInfo.IsNotEmpty())
                                 {
                                     var webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
@@ -425,6 +423,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         if(activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
                             {
+                                StudentUid = registrant.Uid.ToString(),
                                 ActivityUid = activity.Uid.ToString(),
                                 ActivityName = activity.Name,
                                 ActivityStartTime = activitySchedule?.DailyStartTime.ToShortTimeString(),
@@ -436,7 +435,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     if(activityInfo.Count > 0)
                         studentsInfoList.Add(new CheckInCheckOutStudentInfoDto
                         {
-                            StudentUid = masterRegistrant.Uid.ToString(),
                             StudentName = masterRegistrant.Name,
                             Activities = activityInfo,
                         });    
