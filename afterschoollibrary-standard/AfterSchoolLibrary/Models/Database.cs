@@ -105,6 +105,7 @@ namespace AfterSchoolLibrary.Models
             MultipartAuth.Create(dc);
             Maintenance.Create(dc);
             FormQuestionSettings.Create(dc);
+            CheckInOut.Create(dc);
 
             return msgs;
         }
@@ -202,7 +203,8 @@ namespace AfterSchoolLibrary.Models
             MultipartAuth.Alter(dc);
             Maintenance.Alter(dc);
             FormQuestionSettings.Alter(dc);
-
+            CheckInOut.Alter(dc);
+            
             return msgs;
         }
 

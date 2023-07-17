@@ -1,4 +1,6 @@
-﻿namespace AfterSchool.Areas.Api.Models
+﻿using System;
+
+namespace AfterSchool.Areas.Api.Models
 {
     public class ActivityDto
     {
@@ -6,5 +8,6 @@
         public string ActivityName { get; set; }
         public string ActivityStartTime { get; set; }
         public string ActivityEndTime { get; set; }
+        public CheckInCheckOutSetupDto  CheckSetupDto{ get; set; }
     }
 }
