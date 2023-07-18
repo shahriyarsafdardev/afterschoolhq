@@ -404,17 +404,12 @@ namespace AfterSchool.Areas.Api.Controllers
                                 checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
-                        var checkOut = checkInOutInfo?.Where(x=> x.CheckType == CheckType.CheckOut).FirstOrDefault();
-
-                        if (checkOut.IsNotEmpty())
-                            return;
-
                         if (checkInOutInfo.IsNotEmpty())
                             webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
-                            CheckIn = checkInOutInfo.IsNotEmpty(),
+                            CheckIn = (checkInOutInfo?.LastOrDefault().CheckType) != CheckType.CheckOut,
                             CheckInTime = checkInOutInfo?.First().Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
