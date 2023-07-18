@@ -21,10 +21,11 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [validationSchema, setValidationSchema] = useState({});
   const newUser = {
+    ID: -1,
     FirstName: '',
     LastName: '',
     Phone: '',
-    checked: false,
+    HasAccess: false,
     default: false,
     newObject: true,
     PersonPhoneDataType: 'NotSet'
@@ -40,7 +41,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     const initialState = {};
     authorizedPersons.forEach(
       (person, index) =>
-        (initialState[index] = { ...person, default: true, checked: false, newObject: false })
+        (initialState[index] = { HasAccess: false, ...person, default: true, newObject: false })
     );
     setInitialValue(initialState);
   }, [authorizedPersons]);
@@ -49,7 +50,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     Yup.object().shape(
       Object.keys(values).reduce((acc, key) => {
         acc[key] = Yup.object().shape({
-          Phone: Yup.string().when(['checked'], {
+          Phone: Yup.string().when(['HasAccess'], {
             is: val => val,
             then: () =>
               Yup.string()
@@ -57,12 +58,12 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
                 .required('Phone Number is required'),
             otherwise: () => Yup.string().notRequired()
           }),
-          FirstName: Yup.string().when(['checked'], {
+          FirstName: Yup.string().when(['HasAccess'], {
             is: val => val,
             then: () => Yup.string().required('First Name is required'),
             otherwise: () => Yup.string()
           }),
-          LastName: Yup.string().when(['checked'], {
+          LastName: Yup.string().when(['HasAccess'], {
             is: val => val,
             then: () => Yup.string().required('Last Name is required'),
             otherwise: () => Yup.string()
@@ -81,13 +82,9 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
       setSaveDisabled(true);
       const filteredAuthorizedPersons = [];
       Object.keys(values).forEach(key => {
-        if (values[key].checked) {
-          const user = {
-            FirstName: values[key].FirstName,
-            LastName: values[key].LastName,
-            Phone: values[key].Phone,
-            PersonPhoneDataType: values[key].PersonPhoneDataType
-          };
+        const { ID, FirstName, LastName, Phone, HasAccess, PersonPhoneDataType } = values[key];
+        if (ID !== -1 || (ID == -1 && HasAccess)) {
+          const user = { ID, FirstName, LastName, Phone, HasAccess, PersonPhoneDataType };
           filteredAuthorizedPersons.push(user);
         }
       });
@@ -124,7 +121,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   };
 
   const saveButtonText =
-    !isEmpty(values) && Object.keys(values).some(key => values[key].checked)
+    !isEmpty(values) && Object.keys(values).some(key => values[key].HasAccess)
       ? 'Save & Notify'
       : 'Save';
   return (
@@ -137,7 +134,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
                 person={values[key]}
                 key={key}
                 handleChange={() =>
-                  setFieldValue(key, { ...values[key], checked: !values[key].checked })
+                  setFieldValue(key, { ...values[key], HasAccess: !values[key].HasAccess })
                 }
                 handleEdit={() => setFieldValue(key, { ...values[key], default: false })}
                 touched={touched[key]}

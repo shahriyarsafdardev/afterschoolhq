@@ -57,33 +57,40 @@ namespace AfterSchool.Areas.Api.Controllers
                 var answers = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs);
                 var additionalContactInfo = new List<PickUpDto>();
 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent2FirstName,
+                var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantIdBy(Convert.ToInt32(currentMasterRegistrant.ID), msgs);
+
+                if(pickUpRegistrantWebUsers.Count() == 1)
+                {
+                    additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent2FirstName,
                     QuestionDataType.Parent2LastName, QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact1FirstName,
-                    QuestionDataType.EmergencyContact1LastName, QuestionDataType.EmergencyContact1Phone,
-                    FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
+                    additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact1FirstName,
+                        QuestionDataType.EmergencyContact1LastName, QuestionDataType.EmergencyContact1Phone,
+                        FormConstants.EmergencyContact1InfoToIncludeInStudentPanel()));
 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact2FirstName,
-                    QuestionDataType.EmergencyContact2LastName, QuestionDataType.EmergencyContact2Phone,
-                    FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
+                    additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact2FirstName,
+                        QuestionDataType.EmergencyContact2LastName, QuestionDataType.EmergencyContact2Phone,
+                        FormConstants.EmergencyContact2InfoToIncludeInStudentPanel()));
 
-                additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact3FirstName,
-                    QuestionDataType.EmergencyContact3LastName, QuestionDataType.EmergencyContact3Phone,
-                    FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
+                    additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.EmergencyContact3FirstName,
+                        QuestionDataType.EmergencyContact3LastName, QuestionDataType.EmergencyContact3Phone,
+                        FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
+                }
 
-                var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(Convert.ToInt32(currentMasterRegistrant.ID), false, msgs);
+                
                 foreach (var pickUpRegistrantWebUser in pickUpRegistrantWebUsers)
                 {
-                    var registeredPickUser = WebUser.Load(pickUpRegistrantWebUser.ID.Value, msgs);
-                    additionalContactInfo.Add(new PickUpDto()
-                    {
-                        ID = registeredPickUser.ID.Value,
-                        FirstName = registeredPickUser.FirstName,
-                        LastName = registeredPickUser.LastName,
-                        Phone = registeredPickUser.Phone,
-                        HasAccess = true
-                    });
+                    var registeredPickUser = WebUser.Load(pickUpRegistrantWebUser.WebUserId.Value, msgs);
+                    
+                    if(registeredPickUser.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+                        additionalContactInfo.Add(new PickUpDto()
+                        {
+                            ID = registeredPickUser.ID.Value,
+                            FirstName = registeredPickUser.FirstName,
+                            LastName = registeredPickUser.LastName,
+                            Phone = registeredPickUser.Phone,
+                            HasAccess = !pickUpRegistrantWebUser.IsDeleted
+                        });
                 }
 
                 dynamic response = new
@@ -188,10 +195,10 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 WebUser user = null;
 
-                                if(currentPickUp.ID != -1 && !currentPickUp.HasAccess)
+                                if(currentPickUp.ID != -1)
                                 {
-                                    var existedRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserIdIsDeleted(currentPickUp.ID, currentMasterRegistrant.ID.Value, false, amsgs, adc);
-                                    existedRegistrantWebUser.IsDeleted = true;
+                                    var existedRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value, currentPickUp.ID, amsgs, adc);
+                                    existedRegistrantWebUser.IsDeleted = !currentPickUp.HasAccess;
 
                                     amsgs.AddRange(existedRegistrantWebUser.Save(adc));
 
@@ -443,8 +450,8 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
-                            CheckIn = (checkInOutInfo.LastOrDefault()?.CheckType) != CheckType.CheckOut,
-                            CheckInTime = checkInOutInfo.FirstOrDefault()?.Date.ToShortTimeString(),
+                            CheckIn = checkInOutInfo.IsEmpty() || checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut ? false : true,
+                            CheckInTime = checkInOutInfo?.First().Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 

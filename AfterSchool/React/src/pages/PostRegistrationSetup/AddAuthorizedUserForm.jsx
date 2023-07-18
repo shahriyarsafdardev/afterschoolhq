@@ -13,8 +13,8 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
   const classes = useStyles();
 
   const handleChange = () => {
-    setFieldValue({ ...user, checked: !user.checked });
-    setValue('checked', !user.checked);
+    setFieldValue({ ...user, HasAccess: !user.HasAccess });
+    setValue('HasAccess', !user.HasAccess);
   };
 
   const ValidationSchema = Yup.object().shape({
@@ -65,7 +65,7 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
           }}
           checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
           iconstyle={{ fill: 'black' }}
-          checked={values.checked}
+          checked={values.HasAccess}
           onChange={handleChange}
           name="checked"
         />

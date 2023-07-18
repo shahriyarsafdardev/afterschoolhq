@@ -6,7 +6,9 @@ import { ErrorBand } from 'components';
 
 function AuthorizedPersonListRow({ handleChange, touched, person, errors, handleEdit }) {
   const classes = useStyles();
-  const { FirstName, LastName, Phone, checked } = person;
+  const { ID, FirstName, LastName, Phone, HasAccess } = person;
+
+  const canEdit = ID === -1;
   return (
     <>
       <Box className={classes.listWrapper}>
@@ -15,7 +17,7 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={checked}
+                  checked={HasAccess}
                   onChange={handleChange}
                   name={`${FirstName}_${LastName}`}
                   classes={{
@@ -35,9 +37,11 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
 
           <Box className={classes.phoneField}>
             <Typography>{Phone}</Typography>
-            <Typography onClick={handleEdit} className={classes.editButton}>
-              Edit
-            </Typography>
+            {canEdit && (
+              <Typography onClick={handleEdit} className={classes.editButton}>
+                Edit
+              </Typography>
+            )}
           </Box>
         </Box>
       </Box>
