@@ -28,7 +28,7 @@ export default function ChildListRow({ student }) {
   };
 
   return (
-    <Box>
+    <Box className={classes.widthFull}>
       <Typography className={classes.fontBold}>{student?.StudentName}</Typography>
       {Activities &&
         Activities.map((activity, index) => {

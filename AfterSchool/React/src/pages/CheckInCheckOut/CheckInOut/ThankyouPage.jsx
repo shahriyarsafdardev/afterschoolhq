@@ -1,21 +1,24 @@
 import { Box, Button, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import useStyles from '../Common/styles';
 
 export default function ThankyouPage({ checkedStudents }) {
   const classes = useStyles();
-  const { checkedInStudents, checkedOutStudents } = checkedStudents;
+  const {
+    checkedInStudents = localStorage.getItem('checkedInStudents'),
+    checkedOutStudents = localStorage.getItem('checkedOutStudents')
+  } = checkedStudents;
 
   return (
-    <Box className={classes.esignPage}>
-      <Typography className={classes.headerText}>Thank you!</Typography>
+    <Box className={classes.thankyouPageWrapper}>
+      <Typography className={classes.font18Bold}>Thank you!</Typography>
       {checkedInStudents && (
-        <Typography className={classes.subHeaderText}>
+        <Typography className={classes.font18Light}>
           {checkedInStudents} have successfully been checked in.
         </Typography>
       )}
       {checkedOutStudents && (
-        <Typography className={classes.subHeaderText}>
+        <Typography className={classes.font18Light}>
           {checkedOutStudents} have successfully been checked out.
         </Typography>
       )}

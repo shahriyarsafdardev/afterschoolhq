@@ -26,6 +26,9 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
                   iconstyle={{ fill: 'black' }}
                 />
               }
+              classes={{
+                root: classes.formControlLabelRoot
+              }}
               label={`${FirstName} ${LastName}`}
             />
           </Box>

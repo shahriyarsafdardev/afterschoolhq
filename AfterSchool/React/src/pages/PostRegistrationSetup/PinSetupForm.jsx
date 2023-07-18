@@ -41,7 +41,7 @@ function PinSetupForm(props) {
       .required('Pin is required'),
     confirmPin: Yup.string()
       .required('Please confirm your pin.')
-      .oneOf([Yup.ref('pin')], 'Your pin do not match.')
+      .oneOf([Yup.ref('pin')], 'Your pins do not match.')
   });
 
   const formik = useFormik({

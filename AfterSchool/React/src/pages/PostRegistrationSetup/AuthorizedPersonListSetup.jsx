@@ -25,6 +25,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     Phone: '',
     checked: false,
     default: false,
+    newObject: true,
     PersonPhoneDataType: 'NotSet'
   };
 
@@ -37,7 +38,8 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   useEffect(() => {
     const initialState = {};
     authorizedPersons.forEach(
-      (person, index) => (initialState[index] = { ...person, default: true, checked: false })
+      (person, index) =>
+        (initialState[index] = { ...person, default: true, checked: false, newObject: false })
     );
     setInitialValue(initialState);
   }, [authorizedPersons]);
@@ -113,6 +115,13 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     setFieldValue(key, newUser);
   };
 
+  const handleDeleteField = fieldName => {
+    const { [fieldName]: deletedField, ...newValues } = formik.values;
+    formik.setValues(newValues);
+    formik.setFieldTouched(fieldName, false);
+    formik.setFieldError(fieldName, '');
+  };
+
   return (
     <Container maxWidth="md">
       <form onSubmit={handleSubmit}>
@@ -136,6 +145,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
                   setFieldValue={value => {
                     setFieldValue(key, value);
                   }}
+                  handleDeleteField={() => handleDeleteField(key)}
                   id={key}
                 />
               </>

@@ -36,7 +36,7 @@ function PhoneNumberForm({ setSearchParams }) {
       <Typography className={classes.headerText}>Please enter your phone number.</Typography>
       <TextField
         value={values.phone}
-        type="number"
+        type="text"
         {...getFieldProps('phone')}
         error={!!(touched['phone'] && errors['phone'])}
         helperText={touched['phone'] && errors['phone']}

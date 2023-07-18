@@ -5,6 +5,9 @@ export default makeStyles(theme => ({
     backgroundColor: '#00517C',
     height: '100vh'
   },
+  widthFull: {
+    width: '100%'
+  },
   innerContainer: {
     height: '70%',
     width: '70%',
@@ -45,7 +48,9 @@ export default makeStyles(theme => ({
     margin: 'auto',
     width: '80%',
     [theme.breakpoints.down('sm')]: {
-      width: '100%'
+      width: '100%',
+      // height: '45%',
+      marginTop: '30%'
     }
   },
   childListForm: {
@@ -53,7 +58,7 @@ export default makeStyles(theme => ({
     flexDirection: 'column',
     justifyContent: 'center',
     gap: 16,
-    margin: 'auto',
+    padding: '20px 0px',
     width: '60%',
     [theme.breakpoints.down('sm')]: {
       width: '100%'
@@ -79,7 +84,12 @@ export default makeStyles(theme => ({
   },
   listButtonWrapper: {
     display: 'flex',
-    gap: '8px'
+    gap: '8px',
+    flexBasis: 'unset',
+    [theme.breakpoints.down('sm')]: {
+      height: '100px',
+      flexDirection: 'column-reverse'
+    }
   },
   fontBold: {
     fontSize: '16px',
@@ -111,14 +121,19 @@ export default makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start'
+    }
   },
   childListWrapper: {
-    height: '300px',
     overflow: 'hidden scroll',
-    [theme.breakpoints.down('md')]: {
-      height: '80vh'
-    }
+    flexBasis: '100%',
+    gap: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   formControlLabelRoot: {
     color: theme.palette.primary.main,
@@ -141,5 +156,21 @@ export default makeStyles(theme => ({
   checkedInMsg: {
     color: theme.palette.text.hint,
     fontStyle: 'italic'
+  },
+  thankyouPageWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    padding: '50px 0px',
+    margin: 'auto'
+  },
+  font18Bold: {
+    fontSize: '18px',
+    fontWeight: 600,
+    textAlign: 'center'
+  },
+  font18Light: {
+    fontSize: '18px',
+    textAlign: 'center'
   }
 }));

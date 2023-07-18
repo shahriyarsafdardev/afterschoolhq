@@ -64,7 +64,7 @@ export default function EsignPage({ setSignature, setActiveStep }) {
           variant="contained"
           color="primary"
           fullWidth
-          text="Next"
+          text="Complete"
           loading={false}
           disabled={!eSign}
         />
