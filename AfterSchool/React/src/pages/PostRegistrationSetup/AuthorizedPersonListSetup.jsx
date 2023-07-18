@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import useStyles from './styles';
 import LoadingButton from 'components/Overrides/LoadingButton';
+import { isEmpty } from 'lodash';
 
 function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   const classes = useStyles();
@@ -122,6 +123,10 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     formik.setFieldError(fieldName, '');
   };
 
+  const saveButtonText =
+    !isEmpty(values) && Object.keys(values).some(key => values[key].checked)
+      ? 'Save & Notify'
+      : 'Save';
   return (
     <Container maxWidth="md">
       <form onSubmit={handleSubmit}>
@@ -173,7 +178,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
               variant="contained"
               color="primary"
               fullWidth
-              text="Save & Notify"
+              text={saveButtonText}
               loading={saveDisabled}
             />
           </Grid>
