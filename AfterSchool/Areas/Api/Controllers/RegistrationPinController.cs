@@ -415,7 +415,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
                             CheckIn = checkInOutInfo.IsNotEmpty(),
-                            CheckInTime = checkInOutInfo.First()?.Date.ToShortTimeString(),
+                            CheckInTime = checkInOutInfo?.First().Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
