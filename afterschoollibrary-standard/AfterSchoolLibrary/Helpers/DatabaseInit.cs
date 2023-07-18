@@ -49,7 +49,11 @@ namespace AfterSchoolLibrary.Helpers
                     Database.RunMigrations(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                    Utilities.SystemErrorLog(fmsgs);
+                }
             );
 
             return msgs;
