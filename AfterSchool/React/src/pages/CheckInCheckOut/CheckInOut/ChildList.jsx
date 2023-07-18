@@ -5,7 +5,7 @@ import LoadingButton from 'components/Overrides/LoadingButton';
 import ChildListRow from './ChildListRow';
 import { useCheckInOut } from 'redux/hooks';
 
-export default function ChildList({ setActiveStep }) {
+export default function ChildList({ setActiveStep, navigateToRoot }) {
   const classes = useStyles();
   const {
     childData: { AccountName, StudentsInfo = [] },
@@ -24,7 +24,13 @@ export default function ChildList({ setActiveStep }) {
         ))}
       </Box>
       <Grid item xs={12} className={classes.listButtonWrapper}>
-        <Button type="submit" variant="outlined" color="primary" fullWidth>
+        <Button
+          type="submit"
+          variant="outlined"
+          color="primary"
+          onClick={() => navigateToRoot()}
+          fullWidth
+        >
           Cancel
         </Button>
         <LoadingButton

@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import useStyles from '../Common/styles';
+import { useCheckInOut } from 'redux/hooks';
 
 export default function ThankyouPage({ checkedStudents }) {
   const classes = useStyles();
@@ -8,6 +9,14 @@ export default function ThankyouPage({ checkedStudents }) {
     checkedInStudents = localStorage.getItem('checkedInStudents'),
     checkedOutStudents = localStorage.getItem('checkedOutStudents')
   } = checkedStudents;
+
+  const { clearSelectedStudents } = useCheckInOut();
+
+  useEffect(() => {
+    return () => {
+      clearSelectedStudents();
+    };
+  }, []);
 
   return (
     <Box className={classes.thankyouPageWrapper}>

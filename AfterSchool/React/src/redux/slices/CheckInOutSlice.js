@@ -29,6 +29,9 @@ const CheckInOutSlice = createSlice({
     },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
+    },
+    clearStudents: (state, { payload }) => {
+      state.selectedStudents = [];
     }
   }
 });
@@ -41,7 +44,8 @@ export const useCheckInOutActions = () => {
     setSelectedStudentsData,
     setChildListData,
     loadingStart,
-    loadingCompleted
+    loadingCompleted,
+    clearStudents
   } = CheckInOutSlice.actions;
   const loadPinData = async (registrationUid, phone) => {
     dispatch(loadingStart());
@@ -65,6 +69,11 @@ export const useCheckInOutActions = () => {
         return msgs;
       }
     );
+  };
+
+  const clearSelectedStudents = () => {
+    dispatch(clearStudents());
+    return;
   };
 
   const updatePinData = async (registrationUid, phone, pinCode) => {
@@ -106,7 +115,8 @@ export const useCheckInOutActions = () => {
     updatePinData,
     loadChildListData,
     updateSelectedStudentsData,
-    updateStudentCheckInOutInfo
+    updateStudentCheckInOutInfo,
+    clearSelectedStudents
   };
 };
 

@@ -55,10 +55,12 @@ function index() {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
+  const navigateToRoot = () => navigate(`/reactapp/check-in-out/${accountName}`);
+
   useEffect(async () => {
     if (phone && userPin) {
       await loadChildListData(accountName, phone, userPin).then(msgs => {
-        if (msgs.length > 0) navigate(`/reactapp/check-in-out/${accountName}`);
+        if (msgs.length > 0) navigateToRoot();
         setActiveStep(1);
       });
     }
@@ -69,7 +71,8 @@ function index() {
     if (success) return <ThankyouPage checkedStudents={checkedStudents} />;
     if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
     if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
-    if (activeStep === 1) return <ChildList setActiveStep={setActiveStep} />;
+    if (activeStep === 1)
+      return <ChildList setActiveStep={setActiveStep} navigateToRoot={navigateToRoot} />;
     if (activeStep === 2)
       return <EsignPage setSignature={setSignature} setActiveStep={setActiveStep} />;
 
