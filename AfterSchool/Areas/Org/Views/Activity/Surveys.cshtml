@@ -4,7 +4,7 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var forms = currentAccount.GetSurveyForms(false, msgs).OrderBy(x => x.Name).ToList();
+    var forms = currentAccount.GetSurveyForms(null, msgs).OrderBy(x => x.Name).ToList();
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 
@@ -71,7 +71,7 @@
                                     @survey.Name
                                 </td>
                                 <td>
-                                    @forms.Where(form => survey.FormId == form.ID).Select(form => form.Name).FirstOrDefault()
+                                    @forms.Where(form => form.ID == survey.FormId).Select(form => form.Name + (form.IsArchived ? " (Archived)" : "")).FirstOrDefault()
                                 </td>
                                 <td>
                                     @SurveyRequestService.GetCreatedBy(survey).DisplayName
