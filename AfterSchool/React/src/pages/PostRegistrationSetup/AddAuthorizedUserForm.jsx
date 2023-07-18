@@ -9,7 +9,7 @@ import { phoneValidationRegex } from 'constants/regex';
 import Controls from './Controls';
 import useStyles from './styles';
 
-function AddAuthorizedUserForm({ setFieldValue, person: user }) {
+function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user }) {
   const classes = useStyles();
 
   const handleChange = () => {
@@ -29,25 +29,30 @@ function AddAuthorizedUserForm({ setFieldValue, person: user }) {
     initialValues: user,
     validationSchema: ValidationSchema,
     onSubmit: () => {
-      setFieldValue({ ...values, default: true });
+      setFieldValue({ ...values, default: true, newObject: false });
     }
   });
 
   const { values, getFieldProps, touched, errors, handleSubmit, setFieldValue: setValue } = formik;
+  const onClear = () => {
+    setFieldValue({ ...user, default: true });
+    const { FirstName, LastName, Phone, newObject } = user;
+    if (!(FirstName || LastName || Phone) && newObject) handleDeleteField();
+  };
 
   const formField = ({ name, label, value }) => (
-    <>
+    <Box fullWidth>
       <TextField
         name={name}
         value={value}
         fullWidth
         {...getFieldProps(name)}
-        type={name === 'Phone' ? 'number' : 'text'}
+        type="text"
         error={!!(touched && touched[name] && errors[name])}
         helperText={touched && touched[name] && errors[name]}
       />
       <Typography>{label}</Typography>
-    </>
+    </Box>
   );
 
   return (
@@ -66,22 +71,17 @@ function AddAuthorizedUserForm({ setFieldValue, person: user }) {
         />
       </Box>
       <Grid container spacing={2} className={classes.alignLeft}>
-        <Grid item xs={3}>
+        <Grid item sm={10} xs={12} md={3}>
           {formField({ name: 'FirstName', label: 'First Name', value: values.FirstName })}
         </Grid>
-        <Grid item xs={3}>
+        <Grid item sm={10} xs={12} md={3}>
           {formField({ name: 'LastName', label: 'Last Name', value: values.LastName })}
         </Grid>
-        <Grid item xs={4}>
+        <Grid item sm={10} xs={12} md={4}>
           {formField({ name: 'Phone', label: 'Phone Number', value: values.Phone })}
         </Grid>
-        <Grid item xs={2} style={{ margin: 'auto' }}>
-          <Controls
-            onClear={() => {
-              setFieldValue({ ...user, default: true });
-            }}
-            onSave={handleSubmit}
-          />
+        <Grid item sm={10} xs={12} md={2} style={{ margin: 'auto' }}>
+          <Controls onClear={onClear} onSave={handleSubmit} />
         </Grid>
       </Grid>
     </Box>

@@ -18,16 +18,16 @@ function index() {
   const [searchParams, setSearchParams] = useSearchParams();
   const phone = searchParams.get('phone') || '';
   const userPin = searchParams.get('pin') || '';
+  const success = searchParams.get('success') || false;
   const [userSignature, setUserSignature] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [checkedStudents, setCheckedStudents] = useState({});
 
   const {
     msgs,
-    loadChildListData,
-    childData: { StudentsInfo = [] },
     loading,
     selectedStudents,
+    loadChildListData,
     updateStudentCheckInOutInfo
   } = useCheckInOut();
 
@@ -42,8 +42,12 @@ function index() {
       checkedOutStudents: checkedOutStudents
     });
 
+    localStorage.setItem('checkedInStudents', checkedInStudents);
+    localStorage.setItem('checkedOutStudents', checkedOutStudents);
+
     await updateStudentCheckInOutInfo(selectedStudents, phone, userPin, sign).then(res => {
       setActiveStep(3);
+      setSearchParams('success=true');
     });
   };
 
@@ -62,12 +66,12 @@ function index() {
 
   const innerSection = () => {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
+    if (success) return <ThankyouPage checkedStudents={checkedStudents} />;
     if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
     if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
     if (activeStep === 1) return <ChildList setActiveStep={setActiveStep} />;
     if (activeStep === 2)
       return <EsignPage setSignature={setSignature} setActiveStep={setActiveStep} />;
-    if (activeStep === 3) return <ThankyouPage checkedStudents={checkedStudents} />;
 
     return <CircularProgress className={classes.marginAuto} />;
   };

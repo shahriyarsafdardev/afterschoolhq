@@ -20,7 +20,10 @@ export default makeStyles(theme => ({
   controls: {
     margin: 'auto 0px auto auto',
     display: 'flex',
-    justifyContent: 'end'
+    justifyContent: 'end',
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'center'
+    }
   },
   cursorPointer: {
     cursor: 'pointer'
@@ -55,6 +58,7 @@ export default makeStyles(theme => ({
     textAlign: 'left'
   },
   addPersonButton: {
+    width: 'fit-content',
     textDecoration: 'underline',
     cursor: 'pointer',
     color: theme.palette.primary.main
@@ -77,11 +81,19 @@ export default makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '50px'
+    marginLeft: 0,
+    height: '50px',
+    [theme.breakpoints.down('sm')]: {
+      marginLeft: 8
+    }
   },
   fieldWrapper: {
     display: 'flex',
-    alignItems: 'baseline'
+    alignItems: 'baseline',
+    marginLeft: 0,
+    [theme.breakpoints.down('sm')]: {
+      marginLeft: 8
+    }
   },
   checkboxPadding: {
     paddingLeft: '0px'
@@ -91,6 +103,11 @@ export default makeStyles(theme => ({
     borderRadius: 3,
     color: '#494949 !important',
     background: 'transparent !important'
+  },
+  formControlLabelRoot: {
+    '& .MuiTypography-root': {
+      wordBreak: 'break-all'
+    }
   },
   root: {
     padding: 0,
