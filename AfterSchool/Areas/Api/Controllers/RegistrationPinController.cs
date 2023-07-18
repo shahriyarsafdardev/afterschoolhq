@@ -72,6 +72,20 @@ namespace AfterSchool.Areas.Api.Controllers
                     QuestionDataType.EmergencyContact3LastName, QuestionDataType.EmergencyContact3Phone,
                     FormConstants.EmergencyContact3InfoToIncludeInStudentPanel()));
 
+                var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(Convert.ToInt32(currentMasterRegistrant.ID), false, msgs);
+                foreach (var pickUpRegistrantWebUser in pickUpRegistrantWebUsers)
+                {
+                    var registeredPickUser = WebUser.Load(pickUpRegistrantWebUser.ID.Value, msgs);
+                    additionalContactInfo.Add(new PickUpDto()
+                    {
+                        ID = registeredPickUser.ID.Value,
+                        FirstName = registeredPickUser.FirstName,
+                        LastName = registeredPickUser.LastName,
+                        Phone = registeredPickUser.Phone,
+                        HasAccess = true
+                    });
+                }
+
                 dynamic response = new
                 {
                     activityDto = new
@@ -578,10 +592,12 @@ namespace AfterSchool.Areas.Api.Controllers
             if (contactInfo.Count > 0)
                 pickUpContactList.Add(new PickUpDto()
                 {
+                    ID = -1,
                     FirstName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == firstName)?.Text,
                     LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
                     Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
                     PersonPhoneDataType = phone,
+                    HasAccess = false
                 });
             return pickUpContactList;
         }
