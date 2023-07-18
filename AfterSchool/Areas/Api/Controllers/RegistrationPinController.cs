@@ -534,7 +534,11 @@ namespace AfterSchool.Areas.Api.Controllers
                                 {
                                     var file = Request.Files[0].InputStream;
                                     var fileName = Request.Files[0].FileName;
-                                    signature = GetUploadedFilePath(registrant, file, fileName, amsgs, adc);
+                                    DateTime currentUtcDateTime = DateTime.UtcNow;
+                                    string uniqueDate = currentUtcDateTime.ToString("yyyyMMdd_HHmmss");
+                                    string fileExtension = Path.GetExtension(fileName);
+                                    string newFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_{uniqueDate}{fileExtension}";
+                                    signature = GetUploadedFilePath(registrant, file, newFileName, amsgs, adc);
                                 }
 
                             var checkInOutInfo = new CheckInOut
