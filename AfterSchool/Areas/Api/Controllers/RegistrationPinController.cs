@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -392,7 +392,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
                         var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
-                        CheckInOut checkInOutInfo = null;
+                        List<CheckInOut> checkInOutInfo = null;
                         WebUser webUser = null;
 
                         if (attendance.IsNotEmpty())
@@ -404,13 +404,18 @@ namespace AfterSchool.Areas.Api.Controllers
                                 checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
+                        var checkOut = checkInOutInfo?.Where(x=> x.CheckType == CheckType.CheckOut).FirstOrDefault();
+
+                        if (checkOut.IsNotEmpty())
+                            return;
+
                         if (checkInOutInfo.IsNotEmpty())
-                            webUser = WebUser.Load(checkInOutInfo.WebUserId, msgs);
+                            webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
                             CheckIn = checkInOutInfo.IsNotEmpty(),
-                            CheckInTime = checkInOutInfo?.Date.ToShortTimeString(),
+                            CheckInTime = checkInOutInfo.First()?.Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 

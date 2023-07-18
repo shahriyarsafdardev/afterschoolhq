@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -100,12 +100,12 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
-        public static CheckInOut LoadByAttendanceRegistrantId(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<CheckInOut> LoadByAttendanceRegistrantId(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AttendanceRegistrantId"], id);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
         public SystemMessages Delete(DatabaseConnection dc = null)
