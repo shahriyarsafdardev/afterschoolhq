@@ -24,15 +24,12 @@ import paths from 'routes';
 
 function FormSectionList() {
   const theme = useTheme();
-  const classes = useStyles();
   const ref = useRef(null);
   const { formId } = useParams();
   const navigate = useNavigate();
   const { formSettingsPath } = paths;
-  const { enqueueSnackbar } = useSnackbar();
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const [open, setOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
   const [isUnsaved, setIsUnsaved] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
@@ -40,10 +37,12 @@ function FormSectionList() {
   const [newSectionError, setNewSectionError] = useState('');
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const [showNewSectionField, setShowNewSectionField] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const questionGroup = searchParams.get('qg');
+  const classes = useStyles({ questionGroup });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
-  const questionGroup = searchParams.get('qg');
   const { unsavedChanges } = useUnsavedChanges();
   const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 

@@ -30,7 +30,7 @@ export default makeStyles(theme => ({
   sectionListWrapper: {
     paddingLeft: '10px',
     [theme.breakpoints.up('sm')]: {
-      marginTop: '104px'
+      marginTop: props => (props.questionGroup ? '104px' : '0px')
     },
     [theme.breakpoints.down('sm')]: {
       backgroundColor: '#F9F9F9',
