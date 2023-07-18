@@ -187,6 +187,18 @@ namespace AfterSchool.Areas.Api.Controllers
                             peopleList.ForEach(currentPickUp =>
                             {
                                 WebUser user = null;
+
+                                if(currentPickUp.ID != -1 && !currentPickUp.HasAccess)
+                                {
+                                    var existedRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserIdIsDeleted(currentPickUp.ID, currentMasterRegistrant.ID.Value, false, amsgs, adc);
+                                    existedRegistrantWebUser.IsDeleted = true;
+
+                                    amsgs.AddRange(existedRegistrantWebUser.Save(adc));
+
+                                    return;
+                                }
+
+
                                 if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
                                 {
                                     var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
