@@ -394,9 +394,17 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (pinCode.IsEmpty())
                     throw new Exception("Invalid Pin");
 
+                var phoneCheck = phone;
+                phoneCheck = phone.Contains("-") ? phoneCheck.Replace("-", "") : phoneCheck.Insert(3, "-").Insert(7, "-");
                 var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
-                    throw new Exception("You are not authorized to access this page");
+                {
+                    var currentUserNewPhone = WebUser.LoadByPhoneByPinCode(phoneCheck, pinCode, msgs);
+                    if (currentUserNewPhone.IsEmpty())
+                        throw new Exception("You are not authorized to access this page");
+                    else
+                        currentUser = currentUserNewPhone;
+                }
 
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 if (account.IsEmpty())
@@ -430,13 +438,13 @@ namespace AfterSchool.Areas.Api.Controllers
                                 checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
-                        if (checkInOutInfo.IsNotEmpty())
+                        if (checkInOutInfo.Count()!=0)
                             webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
-                            CheckIn = (checkInOutInfo?.LastOrDefault().CheckType) != CheckType.CheckOut,
-                            CheckInTime = checkInOutInfo?.First().Date.ToShortTimeString(),
+                            CheckIn = (checkInOutInfo.LastOrDefault()?.CheckType) != CheckType.CheckOut,
+                            CheckInTime = checkInOutInfo.FirstOrDefault()?.Date.ToShortTimeString(),
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
