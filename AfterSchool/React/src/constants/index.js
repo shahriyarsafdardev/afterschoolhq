@@ -21,8 +21,21 @@ export const gradeIds = {
 export const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 export const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
 
+export const isFileTypeValid = (file, validExtensions) => {
+  const fileExtension = file.type.split('/')[1];
+  return validExtensions.includes(fileExtension);
+};
+
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 export const validFileSize = file => file && file.size <= MAX_FILE_SIZE;
+
+export const isValidFile = (file, validExtensions) => {
+  const validFile = isFileTypeValid(file, validExtensions);
+  const validSize = validFileSize(file);
+  if (!validFile) return 'File Type is not valid';
+  if (!validSize) return 'File size cannot be greater than 5MB';
+  return;
+};
 
 export const eSignMsg = allowToPayLater =>
   allowToPayLater
