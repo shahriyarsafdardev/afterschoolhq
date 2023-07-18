@@ -445,7 +445,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
-                        if (checkInOutInfo.Count()!=0)
+                        if (checkInOutInfo.IsNotEmpty())
                             webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
