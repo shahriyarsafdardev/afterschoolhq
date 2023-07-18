@@ -15,11 +15,11 @@ export default function EsignPage({ setSignature, setActiveStep }) {
   const { selectedStudents } = useCheckInOut();
 
   const checkedInStudents = selectedStudents
-    .filter(std => std.checkInOut)
+    .filter(std => std.CheckInOut)
     .map(std => std.StudentName);
 
   const checkedOutStudents = selectedStudents
-    .filter(std => !std.checkInOut)
+    .filter(std => !std.CheckInOut)
     .map(std => std.StudentName);
 
   function formatNames(names) {

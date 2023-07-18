@@ -172,5 +172,6 @@ export default makeStyles(theme => ({
   font18Light: {
     fontSize: '18px',
     textAlign: 'center'
-  }
+  },
+  displayContents: { display: 'contents' }
 }));
