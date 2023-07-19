@@ -9,17 +9,18 @@ import { useCheckInOut } from 'redux/hooks';
 
 function index() {
   const classes = useStyles();
-  const { loading, resetPin } = useCheckInOut();
+  const { msgs, loading, resetPin } = useCheckInOut();
   const [activeStep, setActiveStep] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const phone = searchParams.get('phone') || '';
+  const phone = decodeURI(searchParams.get('phone')) || '';
   const accountName = searchParams.get('accountName') || '';
 
   const handleSubmit = phoneNumber => {
     resetPin(phoneNumber, accountName).then(msgs => {
       if (msgs.length > 0) return;
 
-      let query = `phone=${phoneNumber}`;
+      let query = `phone=${encodeURIComponent(phoneNumber)}`;
       if (accountName) query += `&accountName=${accountName}`;
 
       setSearchParams(query);
@@ -29,11 +30,15 @@ function index() {
   };
 
   useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
+
+  useEffect(() => {
     if (phone) setActiveStep(1);
   }, [phone]);
 
   const innerSection = () => {
-    if (!phone)
+    if (!phone || phone === 'null')
       return (
         <PhoneNumberForm
           handleSubmit={handleSubmit}
@@ -42,7 +47,7 @@ function index() {
           submitting={loading}
         />
       );
-    if (activeStep == 1) return <ResendLink resendHandler={handleSubmit} />;
+    if (activeStep == 1) return <ResendLink resendHandler={() => handleSubmit(phone)} />;
 
     return <CircularProgress className={classes.marginAuto} />;
   };

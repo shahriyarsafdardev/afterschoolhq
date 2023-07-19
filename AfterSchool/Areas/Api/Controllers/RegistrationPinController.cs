@@ -685,10 +685,10 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 if (!PasswordResetToken.ExistsAndIsValidByUid(token.ToGuid()))
-                    msgs.Add("Invalid reset token", MessageType.UserError);
+                    throw new Exception("Invalid Token");
 
                 if (code.IsEmpty())
-                    msgs.Add("Code not provided", MessageType.UserError);
+                    throw new Exception("Code is not valid");
 
                 var passwordResetToken = PasswordResetToken.LoadValidByUid(token.ToGuid());
                 var webUser = WebUser.Load(passwordResetToken.WebUserId.Value, msgs);

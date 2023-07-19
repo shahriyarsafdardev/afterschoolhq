@@ -25,6 +25,7 @@ export default {
     `Api/RegistrationPin/GetAllStudentsInfo?accountName=${accountName}&phone=${phone}&pinCode=${pinCode}`,
   updateStudentCheckInOutInfoAPI: 'Api/RegistrationPin/AddOrUpdateStudentCheckInOutInfo',
   resetPinAPI: 'Api/RegistrationPin/SendResetUrl',
+  submitResetPinAPI: 'Api/RegistrationPin/ResetPin',
 
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>

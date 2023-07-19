@@ -81,6 +81,7 @@ export const useCheckInOutActions = () => {
     dispatch(loadingStart());
     return await CheckInOutRepository.updatePinSetupData(params).then(({ data: { msgs } }) => {
       dispatch(loadingCompleted());
+      dispatch(setMsgs(msgs));
       return msgs;
     });
   };
@@ -89,6 +90,17 @@ export const useCheckInOutActions = () => {
     const params = { phone, account };
     dispatch(loadingStart());
     return await CheckInOutRepository.resetPin(params).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      dispatch(loadingCompleted());
+      return msgs;
+    });
+  };
+
+  const submitResetPin = async (token, code) => {
+    const params = { token, code };
+    dispatch(loadingStart());
+    return await CheckInOutRepository.submitResetPin(params).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
       return msgs;
     });
@@ -111,6 +123,7 @@ export const useCheckInOutActions = () => {
     dispatch(loadingStart());
     return await CheckInOutRepository.updateStudentCheckInOutInfo(formData).then(
       ({ data: { msgs } }) => {
+        dispatch(setMsgs(msgs));
         dispatch(loadingCompleted());
         return msgs;
       }
@@ -123,10 +136,11 @@ export const useCheckInOutActions = () => {
     resetPin,
     loadPinData,
     updatePinData,
+    submitResetPin,
     loadChildListData,
+    clearSelectedStudents,
     updateSelectedStudentsData,
-    updateStudentCheckInOutInfo,
-    clearSelectedStudents
+    updateStudentCheckInOutInfo
   };
 };
 

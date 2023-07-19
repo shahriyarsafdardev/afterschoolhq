@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import useStyles from '../Common/styles';
-import { useSnackbar } from 'notistack';
-import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { isEmpty } from 'lodash';
+
 import PhoneNumberForm from '../Common/PhoneNumberForm';
-import PinSetupForm from './PinSetupForm';
-import ConfirmPinForm from './ConfirmPinForm';
+import ConfirmPinForm from '../Common/ConfirmPinForm';
 import ThankyouScreen from './ThankyouScreen';
 import { useCheckInOut } from 'redux/hooks';
-import { isEmpty } from 'lodash';
+import PinSetupForm from './PinSetupForm';
+import useStyles from '../Common/styles';
 
 function index() {
   const classes = useStyles();

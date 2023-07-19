@@ -1,40 +1,59 @@
+import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import useStyles from '../Common/styles';
+import { useSearchParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { Box, Card, CircularProgress, Typography, Grid, Button } from '@material-ui/core';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import PinInputField from '../Common/PinInputField';
+
+import ConfirmPinForm from '../Common/ConfirmPinForm';
+import { useCheckInOut } from 'redux/hooks';
+import PinSetupForm from './PinSetupForm';
+import useStyles from '../Common/styles';
+import Thankyou from './Thankyou';
 
 function index() {
   const classes = useStyles();
-  const [pin, setPin] = useState('');
   const [userPin, setUserPin] = useState();
+  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const phone = searchParams.get('phone') || '';
-  const handleSubmit = () => {
-    setUserPin(pin);
+  const token = searchParams.get('token') || '';
+  const success = searchParams.get('success') || '';
+  const accountName = searchParams.get('accountName') || '';
+
+  const [activeStep, setActiveStep] = useState(1);
+
+  const { msgs, loading, submitResetPin } = useCheckInOut();
+
+  useEffect(() => {
+    if (userPin) setActiveStep(2);
+  }, [userPin]);
+
+  useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
+
+  const handleSubmit = async pin => {
+    await submitResetPin(token, pin).then(msgs => {
+      if (!msgs.length > 0) {
+        setActiveStep(3);
+        setSearchParams('success=true');
+        localStorage.setItem('accountName', accountName);
+      }
+    });
   };
+
+  const innerSection = () => {
+    if (loading) return <CircularProgress className={classes.marginAuto} />;
+    if (success) return <Thankyou />;
+    if (activeStep === 1) return <PinSetupForm setUserPin={setUserPin} />;
+    if (activeStep === 2)
+      return <ConfirmPinForm userPin={userPin} handleSubmitPinCode={handleSubmit} />;
+
+    return <CircularProgress className={classes.marginAuto} />;
+  };
+
   return (
     <Grid container className={classes.wrapper}>
       <Card className={classes.innerContainer}>
-        <Box className={classes.content}>
-          <Box className={classes.pinSetupForm}>
-            <Typography className={classes.headerText}>Reset your PIN code.</Typography>
-            <Typography className={classes.subHeaderText}>
-              Please select four numbers to use for your PIN code during check in and check out.
-            </Typography>
-            <PinInputField handleChange={setPin} errorMessage={''} />
-            <Button
-              onClick={handleSubmit}
-              className={classes.buttonNext}
-              variant="contained"
-              color="primary"
-              disabled={pin.length !== 4}
-            >
-              Next
-            </Button>
-          </Box>
-        </Box>
+        <Box className={classes.content}>{innerSection()}</Box>
       </Card>
     </Grid>
   );
