@@ -13,7 +13,24 @@ namespace AfterSchool.Helpers
             var maintenanceSchedule = Maintenance.LoadOnGoingSchedulesByDate(DateTime.UtcNow);
 
             if (maintenanceSchedule.Count > 0)
-                HttpContext.Current.Response.Redirect("~/scheduled-maintenance.html");
+            {
+                if (IsStripeWebhookRequest())
+                {
+                    HttpContext.Current.Response.StatusCode = 503;
+                    HttpContext.Current.Response.End();
+                }
+                else
+                    HttpContext.Current.Response.Redirect("~/scheduled-maintenance.html");
+            }
+        }
+
+        private static bool IsStripeWebhookRequest()
+        {
+            var webhookUrlSegment = "/webhooks/stripe";
+            if (HttpContext.Current.Request.Url.AbsolutePath.Contains(webhookUrlSegment))
+                return true;
+
+            return false;
         }
 
         public static void DisplayMaintenanceSchedule()
