@@ -1,5 +1,5 @@
 import React from 'react';
-import useStyles from '../Common/styles';
+import useStyles from './styles';
 import { Box } from '@material-ui/core';
 import PinInput from 'react-pin-input';
 import { ErrorBand } from 'components';

@@ -1,7 +1,7 @@
 import { Box, Button, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import useStyles from '../Common/styles';
-import PinInputField from '../PinSetup/PinInputField';
+import PinInputField from '../Common/PinInputField';
 
 export default function PinInputForm({ setUserPin }) {
   const classes = useStyles();

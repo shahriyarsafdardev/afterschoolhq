@@ -8,5 +8,6 @@ export default {
   getChildListData: (accountName, phone, pinCode) =>
     axios.get(ApiRoutes.getChildListData(accountName, phone, pinCode)).then(res => res),
   updateStudentCheckInOutInfo: data =>
-    axios.post(ApiRoutes.updateStudentCheckInOutInfoAPI, data).then(res => res)
+    axios.post(ApiRoutes.updateStudentCheckInOutInfoAPI, data).then(res => res),
+  resetPin: data => axios.post(ApiRoutes.resetPinAPI, data).then(res => res)
 };
