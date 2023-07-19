@@ -8,6 +8,8 @@ using AfterSchoolLibrary.Helpers;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Exceptions;
+using Twilio.Types;
+using Twilio.Rest.Lookups.V1;
 
 namespace AfterSchoolLibrary
 {
@@ -53,6 +55,22 @@ namespace AfterSchoolLibrary
             }
 
             return resource;
+        }
+
+        public static bool IsValidPhoneNumber(string phoneNumber)
+        {
+            try
+            {
+                InitializeTwilioClientService();
+
+                var lookupPhoneNumber = PhoneNumberResource.Fetch(new PhoneNumber(phoneNumber));
+                return true;
+            }
+            catch (Twilio.Exceptions.ApiException)
+            {
+                return false;
+            }
+
         }
     }
 }

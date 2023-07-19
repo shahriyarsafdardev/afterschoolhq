@@ -630,6 +630,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(webUser.IsEmpty())
                     throw new Exception("Phone not registered");
 
+                if (!TwilioHelper.IsValidPhoneNumber(phone))
+                    throw new Exception("Invalid Phone Number");
+
                 if (!PasswordResetToken.ExistsAndIsValidByWebUserId(webUser.ID.Value))
                 {
                     token = new PasswordResetToken
