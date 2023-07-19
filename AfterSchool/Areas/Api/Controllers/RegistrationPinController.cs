@@ -1,16 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
+using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Microsoft.IdentityModel.Tokens;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -600,6 +605,60 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult SendResetUrl(string phone, string account)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (phone.IsEmpty())
+                    throw new Exception("Invalid Phone");
+
+                var webUser = WebUser.LoadByPhone(phone, msgs);
+
+                if(webUser.IsEmpty())
+                    throw new Exception("Phone not registered");
+
+                var token = new PasswordResetToken
+                {
+                    ExpireDate = DateTime.UtcNow.AddMinutes(10),
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = webUser.ID,
+                    WebUserId = webUser.ID
+                };
+
+                token.LastModifiedDate = DateTime.UtcNow;
+                token.LastModifiedBy = webUser.ID.Value;
+                msgs.AddRange(token.Save());
+
+                string msgBody = $"Click the link below to reset your AfterSchool HQ PIN code. " +
+                    $"If you need more help or did not request a PIN reset, feel free to contact us at support@afterschoolhq.com." +
+                    $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/react-app/check-in-out/react-pin/?token={token.Uid}";
+
+                if (account.IsNotEmpty())
+                    msgBody = msgBody + $"&account={account}";
+
+                TwilioHelper.SendSMS(
+                    webUser.Phone,
+                    msgBody,
+                    null,
+                    null,
+                    msgs);
+
+                return Json(
+                new ApiResponse(msgs,
+                    new WebUserDto(null)),
+                JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
