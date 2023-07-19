@@ -215,35 +215,14 @@
     </div>
 </div>
 
-<div class="modal fade modal-fullscreen" id="modal-fullscreen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            </div>
-            <div class="modal-body col-lg-4 col-lg-offset-4">
-                @if (logoUrl.IsNotBlank())
-                {
-                    <div class="col-lg-4 col-md-12">
-                        <div class="logo-wrapper">
-                            <img src="@logoUrl" class="pointer qr-logo" alt="Account logo" />
-                        </div>
-                    </div>
-                }
-                <div class="col-lg-8 padding-20">
-                    <div class="qr-code-head">
-                        @currentAccount.Name
-                    </div>
-                    <div class="qr-code-secondary">Check In/Out</div>
-                </div>
-                <div class="col-lg-12" id="qr-codes"></div>
-            <div class="col-lg-12 text-center">
-                <a  class="reset-login-pass pointer" data-dismiss="modal">Exit Full Screen</a>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
+@{
+    Html.RenderPartial("_ModalQR", new ModalQRModel()
+    {
+        LogoUrl = logoUrl,
+        AccountName = currentAccount.Name,
+        ID = "modal-fullscreen",
+    });
+}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
         crossorigin="anonymous"
@@ -289,19 +268,17 @@
 
     function generateQrCode() {
         const url = "@Utilities.BaseUrl()/reactapp/check-in-out/@currentAccount.UniqueName";
-            const qr = new QRCode(document.getElementById("qr-code"), {
+
+        new QRCode(document.getElementById("qr-code"), {
                 text: url,
-                width: 200,
                 height: 200,
+                width: 200
             });
-        const qr1 = new QRCode(document.getElementById("qr-codes"), {
+        new QRCode(document.getElementById("modal-qr-code"), {
             text: url,
-            width: 300,
-            height: 300,
+            height: 350,
+            width: 350
         });
-        const qrCodeImg = qrCode.querySelector("img");
-        qrCodeImg.classList.add("margin-h-auto");  
-        qrCodeImg.classList.add("margin-v-60");                
     }
 
     if ('@currentAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut)'.toLowerCase() === 'true') {
