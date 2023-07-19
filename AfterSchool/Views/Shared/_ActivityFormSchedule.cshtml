@@ -14,7 +14,7 @@
     var isContinuousEnrollmentEnabled = ViewData["isContinuousEnrollmentEnabled"] != null && Equals(ViewData["isContinuousEnrollmentEnabled"], true);
     var isDisabled = ViewData["isDisabled"]?.ToString().AsBool() ?? false;
     var paymentType = ViewData["PaymentStartType"] ?? PlanPaymentStartType.WhenActivityStarts;
-    var activityCostFrequency = (ActivityCostFrequencyType)ViewData["activityCostFrequency"];
+    var activityCostFrequency = ViewData["activityCostFrequency"].IsNotEmpty() ? (ActivityCostFrequencyType) ViewData["activityCostFrequency"] : ActivityCostFrequencyType.NotSet;
     var hidden = activityCostFrequency == ActivityCostFrequencyType.PerClass ? true : false;
 
     if (isContinuousEnrollmentEnabled)
