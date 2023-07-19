@@ -643,7 +643,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 string msgBody = $"Click the link below to reset your AfterSchool HQ PIN code. " +
                     $"If you need more help or did not request a PIN reset, feel free to contact us at support@afterschoolhq.com." +
-                    $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/react-app/check-in-out/react-pin/?token={token.Uid}";
+                    $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/reactapp/check-in-out/reset-pin/?token={token.Uid}";
 
                 if (account.IsNotEmpty())
                     msgBody = msgBody + $"&account={account}";
