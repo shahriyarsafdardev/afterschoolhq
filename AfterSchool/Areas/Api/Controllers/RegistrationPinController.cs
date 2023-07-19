@@ -678,6 +678,39 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult ResetPin(string token, string code)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (!PasswordResetToken.ExistsAndIsValidByUid(token.ToGuid()))
+                    msgs.Add("Invalid reset token", MessageType.UserError);
+
+                if (code.IsEmpty())
+                    msgs.Add("Code not provided", MessageType.UserError);
+
+                var passwordResetToken = PasswordResetToken.LoadValidByUid(token.ToGuid());
+                var webUser = WebUser.Load(passwordResetToken.WebUserId.Value, msgs);
+
+                webUser.PinCode = code;
+
+                msgs.AddRange(webUser.Save());
+
+                return Json(
+                new ApiResponse(msgs,
+                    null),
+                JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
         private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName,
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {
