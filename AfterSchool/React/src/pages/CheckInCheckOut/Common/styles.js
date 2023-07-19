@@ -176,7 +176,8 @@ export default makeStyles(theme => ({
   link: {
     textAlign: 'center',
     color: theme.palette.gray.secondary,
-    textDecoration: 'underline'
+    textDecoration: 'underline',
+    cursor: 'pointer'
   },
   displayContents: {
     display: 'contents'

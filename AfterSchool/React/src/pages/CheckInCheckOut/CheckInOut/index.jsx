@@ -74,7 +74,13 @@ function index() {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (success) return <ThankyouPage checkedStudents={checkedStudents} />;
     if (!phone) return <PhoneNumberForm handleSubmit={handleSubmit} />;
-    if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
+    if (!userPin)
+      return (
+        <PinInputForm
+          setUserPin={handlePinInput}
+          resetPinLink={`/reactapp/check-in-out/request-pin-reset/?accountName=${accountName}`}
+        />
+      );
     if (activeStep === 1)
       return <ChildList setActiveStep={setActiveStep} navigateToRoot={navigateToRoot} />;
     if (activeStep === 2)

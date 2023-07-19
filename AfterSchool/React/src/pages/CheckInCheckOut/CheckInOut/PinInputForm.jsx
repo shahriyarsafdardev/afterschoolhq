@@ -2,10 +2,12 @@ import { Box, Button, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import useStyles from '../Common/styles';
 import PinInputField from '../Common/PinInputField';
+import { useNavigate } from 'react-router-dom';
 
-export default function PinInputForm({ setUserPin }) {
+export default function PinInputForm({ setUserPin, resetPinLink }) {
   const classes = useStyles();
   const [pin, setPin] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     setUserPin(pin);
@@ -28,6 +30,9 @@ export default function PinInputForm({ setUserPin }) {
       >
         Next
       </Button>
+      <Typography onClick={() => navigate(resetPinLink)} className={classes.link} variant="body1">
+        Forgot My PIN
+      </Typography>
     </Box>
   );
 }
