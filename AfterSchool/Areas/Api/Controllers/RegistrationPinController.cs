@@ -657,7 +657,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 return Json(
                 new ApiResponse(msgs,
-                    new WebUserDto(null)),
+                    null),
                 JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
