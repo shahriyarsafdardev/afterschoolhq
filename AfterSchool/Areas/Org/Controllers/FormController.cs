@@ -602,7 +602,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     Text = answer.GetAnswerText().IfEmpty(""),
                                     QuestionId = answer.FormQuestionId.Value,
                                     QuestionDataTypeId = (int) answer.QuestionDataTypeId,
-                                    RegistrantId = answer.RegistrantId.Value,
+                                    RegistrantId = answer.RegistrantId,
                                     FirstRegistrantId = answer.RegistrantFirstRegistrantId,
                                     answer.SurveyResponseId,
                                 }),

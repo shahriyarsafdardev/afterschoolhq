@@ -134,6 +134,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+                var surveyFeedbackStatusType = isLastSection ? SurveyFeedbackStatus.Completed : SurveyFeedbackStatus.InProgress;
                 Database.ExecuteTransaction
                 (
                     (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -147,7 +148,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 SurveyRequestId = form.ID,
                                 IsDeleted = false,
                                 Uid = Guid.NewGuid(),
-                                SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.InProgress,
+                                SurveyFeedbackStatusTypeId = surveyFeedbackStatusType,
                             };
                             amsgs.AddRange(surveyResponse.Save(adc));
                         }
