@@ -1,17 +1,20 @@
 import React from 'react';
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Typography } from '@material-ui/core';
 import useStyles from '../Common/styles';
 import TextField from 'components/Overrides/TextField';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import LoadingButton from 'components/Overrides/LoadingButton';
+
 import { phoneValidationRegex } from 'constants/regex';
 
-function PhoneNumberForm({ setSearchParams }) {
+function PhoneNumberForm({
+  handleSubmit: submitHandler,
+  headerText = 'Please enter your phone number.',
+  subHeaderText = '',
+  submitting = false
+}) {
   const classes = useStyles();
-
-  const handleSubmit = () => {
-    setSearchParams(`phone=${values.phone}`);
-  };
 
   const ValidationSchema = Yup.object().shape({
     phone: Yup.string()
@@ -24,16 +27,17 @@ function PhoneNumberForm({ setSearchParams }) {
       phone: ''
     },
     validationSchema: ValidationSchema,
-    onSubmit: () => {
-      handleSubmit();
+    onSubmit: values => {
+      submitHandler(values.phone);
     }
   });
 
-  const { values, getFieldProps, touched, errors, isValid } = formik;
+  const { values, getFieldProps, touched, errors, isValid, handleSubmit } = formik;
 
   return (
     <Box className={classes.phoneForm}>
-      <Typography className={classes.headerText}>Please enter your phone number.</Typography>
+      <Typography className={classes.headerText}>{headerText}</Typography>
+      {subHeaderText && <Typography className={classes.subHeaderText}>{subHeaderText}</Typography>}
       <TextField
         value={values.phone}
         type="text"
@@ -42,15 +46,16 @@ function PhoneNumberForm({ setSearchParams }) {
         helperText={touched['phone'] && errors['phone']}
         fullWidth
       />
-      <Button
+      <LoadingButton
+        type="submit"
         onClick={handleSubmit}
-        className={classes.buttonNext}
         variant="contained"
         color="primary"
+        text="Next"
         disabled={!isValid}
-      >
-        Next
-      </Button>
+        loading={submitting}
+        className={classes.buttonNext}
+      />
     </Box>
   );
 }

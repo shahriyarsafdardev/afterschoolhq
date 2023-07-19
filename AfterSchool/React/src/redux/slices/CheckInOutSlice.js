@@ -85,6 +85,15 @@ export const useCheckInOutActions = () => {
     });
   };
 
+  const resetPin = async (phone, account) => {
+    const params = { phone, account };
+    dispatch(loadingStart());
+    return await CheckInOutRepository.resetPin(params).then(({ data: { msgs } }) => {
+      dispatch(loadingCompleted());
+      return msgs;
+    });
+  };
+
   const updateStudentCheckInOutInfo = async (studentList, phone, pinCode, userSignature) => {
     const formData = new FormData();
     formData.append('phone', phone);
@@ -111,6 +120,7 @@ export const useCheckInOutActions = () => {
   const updateSelectedStudentsData = data => dispatch(setSelectedStudentsData(data));
 
   return {
+    resetPin,
     loadPinData,
     updatePinData,
     loadChildListData,

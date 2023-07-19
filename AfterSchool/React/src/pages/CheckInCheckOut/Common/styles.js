@@ -173,5 +173,12 @@ export default makeStyles(theme => ({
     fontSize: '18px',
     textAlign: 'center'
   },
-  displayContents: { display: 'contents' }
+  link: {
+    textAlign: 'center',
+    color: theme.palette.gray.secondary,
+    textDecoration: 'underline'
+  },
+  displayContents: {
+    display: 'contents'
+  }
 }));

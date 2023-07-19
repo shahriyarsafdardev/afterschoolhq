@@ -90,8 +90,21 @@ function Router() {
       element: <PinSetup />
     },
     {
-      path: 'reactapp/check-in-out/:accountName',
-      element: <CheckInOut />
+      path: 'reactapp/check-in-out/',
+      children: [
+        {
+          path: ':accountName',
+          element: <CheckInOut />
+        },
+        {
+          path: 'request-pin-reset',
+          element: <RequestPinReset />
+        },
+        {
+          path: 'reset-pin',
+          element: <ResetPin />
+        }
+      ]
     }
   ]);
 }
@@ -114,6 +127,9 @@ const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/Tha
 const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
 const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
 const CheckInOut = Loadable(lazy(() => import('pages/CheckInCheckOut/CheckInOut')));
+const RequestPinReset = Loadable(lazy(() => import('pages/CheckInCheckOut/RequestPinReset')));
+const ResetPin = Loadable(lazy(() => import('pages/CheckInCheckOut/ResetPin')));
+
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

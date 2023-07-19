@@ -47,10 +47,14 @@ function index() {
     }
   }, [phone]);
 
+  const handleSubmit = phoneNumber => {
+    setSearchParams(`phone=${phoneNumber}`);
+  };
+
   const innerSection = () => {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (isSetupCompleted || IsPinSetup) return <ThankyouScreen />;
-    if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
+    if (!phone) return <PhoneNumberForm handleSubmit={handleSubmit} />;
     if (!userPin && !isEmpty(currentUserInfo))
       return <PinSetupForm setUserPin={setUserPin} currentUserInfo={currentUserInfo} />;
     if (!isEmpty(currentUserInfo))

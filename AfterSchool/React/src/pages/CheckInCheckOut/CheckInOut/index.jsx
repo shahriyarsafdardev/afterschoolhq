@@ -66,10 +66,14 @@ function index() {
     }
   }, [phone, userPin]);
 
+  const handleSubmit = phoneNumber => {
+    setSearchParams(`phone=${phoneNumber}`);
+  };
+
   const innerSection = () => {
     if (loading) return <CircularProgress className={classes.marginAuto} />;
     if (success) return <ThankyouPage checkedStudents={checkedStudents} />;
-    if (!phone) return <PhoneNumberForm setSearchParams={setSearchParams} />;
+    if (!phone) return <PhoneNumberForm handleSubmit={handleSubmit} />;
     if (!userPin) return <PinInputForm setUserPin={handlePinInput} />;
     if (activeStep === 1)
       return <ChildList setActiveStep={setActiveStep} navigateToRoot={navigateToRoot} />;
