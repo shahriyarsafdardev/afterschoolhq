@@ -619,6 +619,7 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult SendResetUrl(string phone, string account)
         {
             var msgs = new SystemMessages();
+            var token = new PasswordResetToken();
             try
             {
                 if (phone.IsEmpty())
@@ -629,13 +630,21 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(webUser.IsEmpty())
                     throw new Exception("Phone not registered");
 
-                var token = new PasswordResetToken
+                if (!PasswordResetToken.ExistsAndIsValidByWebUserId(webUser.ID.Value))
                 {
-                    ExpireDate = DateTime.UtcNow.AddMinutes(10),
-                    CreateDate = DateTime.UtcNow,
-                    CreatedBy = webUser.ID,
-                    WebUserId = webUser.ID
-                };
+                    token = new PasswordResetToken
+                    {
+                        ExpireDate = DateTime.UtcNow.AddMinutes(15),
+                        CreateDate = DateTime.UtcNow,
+                        CreatedBy = webUser.ID,
+                        WebUserId = webUser.ID
+                    };
+                }
+                else
+                {
+                    token = PasswordResetToken.LoadValidByWebUserId(webUser.ID.Value);
+                    token.ExpireDate = DateTime.UtcNow.AddMinutes(15);
+                }
 
                 token.LastModifiedDate = DateTime.UtcNow;
                 token.LastModifiedBy = webUser.ID.Value;
