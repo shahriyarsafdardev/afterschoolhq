@@ -1,5 +1,6 @@
 @model Activity
 @{
+    var msgs = new SystemMessages();
     var grades = GradeLevel.Load();
     var showAllowStudentRegistration = SessionVariables.AccountPackage.HasFeature(FeatureType.AllowStudentRegistration) && Model.ActivityTypeId.In(new[]
     {
@@ -10,6 +11,59 @@
     });
     var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
     var requiresParentConsent= Model.RequiresParentalConsent;
+    var activeForm = Model.GetActiveActivityForm(msgs).GetForm(msgs);
+    var questions = activeForm.GetActiveQuestions();
+    var gardeQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).FirstOrDefault();
+    var gradeQuestionSettings = FormQuestionSettings.LoadByQuestionIds(gardeQuestion.ID);
+    var genderQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGender).FirstOrDefault();
+    var genderQuestionSettings = FormQuestionSettings.LoadByQuestionIds(genderQuestion.ID);
+    var ageQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).FirstOrDefault();
+    var ageQuestionSettings = FormQuestionSettings.LoadByQuestionIds(ageQuestion.ID);
+    var isFormAgeRestricted = false;
+    var isFormGenderRestricted = false;
+    var isFormGradeRestricted = false;
+
+    if(gradeQuestionSettings.Count == 0)
+    {
+        isFormGradeRestricted = gardeQuestion.IsRequired;
+    }
+    else
+    {
+        var notRequiredCount = gradeQuestionSettings.Where(question => question.Required == false).Count();
+        var notShowCount = gradeQuestionSettings.Where(question => question.Show == false).Count();
+        if(notRequiredCount == 0 && notShowCount==0)
+        {
+            isFormGradeRestricted = true;
+        }
+    }
+
+    if (ageQuestionSettings.Count == 0)
+    {
+        isFormAgeRestricted = ageQuestion.IsRequired;
+    }
+    else
+    {
+        var notRequiredCount = ageQuestionSettings.Where(question => question.Required == false).Count();
+        var notShowCount = ageQuestionSettings.Where(question => question.Show == false).Count();
+        if (notRequiredCount == 0 && notShowCount == 0)
+        {
+            isFormAgeRestricted = true;
+        }
+    }
+
+    if (genderQuestionSettings.Count == 0)
+    {
+        isFormGenderRestricted = genderQuestion.IsRequired;
+    }
+    else
+    {
+        var notRequiredCount = genderQuestionSettings.Where(question => question.Required == false).Count();
+        var notShowCount = genderQuestionSettings.Where(question => question.Show == false).Count();
+        if (notRequiredCount == 0 && notShowCount == 0)
+        {
+            isFormGenderRestricted = true;
+        }
+    }
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
@@ -26,6 +80,7 @@
                     @foreach (GenderRestrictionType item in Enum.GetValues(typeof(GenderRestrictionType)))
                     {
                         <input type="radio"
+                               data-modal="modal-gender-restriction-error"
                                name="genderrestrictions"
                                id="genderrestrictions-@((int) item)"
                                @(Model.GenderRestriction == item ? " checked=\"checked\" " : "")
@@ -37,6 +92,18 @@
                 </div>
             </div>
         </div>
+        @{
+            Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+            {
+                Title = "Gender Restriction Error",
+                HtmlBody = "<p>You have turned on gender restrictions for this activity but your default form doesn't ask for gender. To enforce this restriction, we will ask registrants for their gender during registration.</ p > ",
+                ActionButtonHtml = "Remove Restriction",
+                ActionButtonId = $"btn-gender-restriction-error",
+                ID = $"modal-gender-restriction-error",
+                OkButtonHtml = "Okay",
+                OkButtonId = "modal-gender-restriction-ok",
+            }); ;
+        }
 
         <div class="form-group" id="strictGenderRestrictions">
             <label class="col-md-3 control-label">
@@ -73,6 +140,8 @@
                     {"ageStart", Model.AgeStart},
                     {"ageEnd", Model.AgeEnd},
                     {"restrictbygrade", Model.RestrictByGrade()},
+                    {"isFormAgeRestricted", isFormAgeRestricted},
+                    {"isFormGradeRestricted", isFormGradeRestricted},
                 }
                 );
         }
@@ -95,7 +164,7 @@
                                 {"onclick", "showParentConsent();"},
                                 {"required", false},
 
-                    });
+});
                     }
                     <i id="parentConsentWarning" class="s7-attention icon-large text-warning margin-l-10 position-relative" data-toggle="popover" data-trigger="hover" data-content="If you allow minors to register, they can actually register without parental knowledge." data-placement="top"></i>
                 </div>
@@ -115,7 +184,7 @@
                                 {"checkboxid", "requiresparentalconsent"},
                                 {"onclick", "showConsentWarning();"},
                                 {"disabled", false}
-    });
+});
                     }
                 </div>
             </div>
@@ -129,6 +198,15 @@
 </div>
 
 <script>
+    PageEvent.add(
+        PageEvent.AFTER_INIT,
+        function () {
+            $("#btn-gender-restriction-error").click(function () {
+                $("input[name='genderrestrictions']:checked").attr("checked", false);
+                $('#strictGenderRestrictions').addClass("hidden");
+                $("#genderrestrictions-0").prop("checked", true);
+            });
+        });
     function showConsentWarning() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
         var isParentConsent = $("#requiresparentalconsent").is(":checked");
@@ -164,14 +242,14 @@
     }
 
     function handleCheck(obj) {
-            if (obj.getAttribute("value") != 0)
-                {
-                    $('#strictGenderRestrictions').removeClass("hidden");
-                }
-            else
-            {
-                $('#strictGenderRestrictions').addClass("hidden");
-            }
+        if (obj.getAttribute("value") != 0)
+        {
+            $('#strictGenderRestrictions').removeClass("hidden");
+        }
+        else
+        {
+            $('#strictGenderRestrictions').addClass("hidden");
+        }
     }
     function validateAgeChanged() {
         if (parseInt($('#agestart').val()) >= 18) {
@@ -199,4 +277,18 @@
         $("#requiresparentalconsent").prop('checked', @(requiresParentConsent.IsEmpty() ? "false" : (requiresParentConsent ? "true" : "false")));
         showConsentWarning();
     });
+
+    function addClassToRadioInputs() {
+        var radioInputs = document.querySelectorAll('input[name="genderrestrictions"]');
+        for (var i = 0; i < radioInputs.length; i++) {
+            var input = radioInputs[i];
+            if (input.value !== "0" && "@isFormGenderRestricted" == "False") {
+                input.classList.add("md-trigger");
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        addClassToRadioInputs();
+    });
+
 </script>
