@@ -6,7 +6,7 @@ import React from 'react';
 export default function Thankyou() {
   const classes = useStyles();
   const { navigateTo } = utils;
-  const accountName = localStorage.getItem('accountName');
+  const accountName = sessionStorage.getItem('accountName');
 
   return (
     <Box className={classes.thankyouPageWrapper}>

@@ -31,6 +31,15 @@ function index() {
     updateStudentCheckInOutInfo
   } = useCheckInOut();
 
+  useEffect(() => {
+    const sessionCompleted = sessionStorage.getItem('isSessionCompleted');
+    if (!success && !phone && !userPin) {
+      sessionStorage.removeItem('isSessionCompleted');
+    } else if (sessionCompleted) {
+      setSearchParams('success=true');
+    }
+  }, [phone, userPin]);
+
   const handlePinInput = pin => {
     setSearchParams(`phone=${phone}&pin=${pin}`);
   };
@@ -45,9 +54,11 @@ function index() {
     localStorage.setItem('checkedInStudents', checkedInStudents);
     localStorage.setItem('checkedOutStudents', checkedOutStudents);
 
-    await updateStudentCheckInOutInfo(selectedStudents, phone, userPin, sign).then(res => {
+    await updateStudentCheckInOutInfo(selectedStudents, phone, userPin, sign).then(messages => {
+      if (messages.length > 0) return;
       setActiveStep(3);
       setSearchParams('success=true');
+      sessionStorage.setItem('isSessionCompleted', true);
     });
   };
 
