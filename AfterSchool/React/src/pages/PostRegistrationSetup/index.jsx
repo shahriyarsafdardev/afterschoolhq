@@ -15,12 +15,9 @@ export default function PostRegistrationSetup() {
   const { thankyouUrl } = apiRoutes;
   const [activeStep, setActiveStep] = useState(0);
 
-  const {
-    loading,
-    postRegistration,
-    data: { additionalContactDto = [], setupDto, activityDto }
-  } = usePostRegistration();
+  const { data, loading, postRegistration } = usePostRegistration();
 
+  const { additionalContactDto = [], setupDto = {}, activityDto = {} } = data || {};
   const { RegistrantType, StudentFirstName, Name } = activityDto || {};
   const { IsPhoneSetup, IsPinSetup } = setupDto || {};
 

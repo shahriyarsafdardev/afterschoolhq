@@ -12,7 +12,7 @@ const PostRegistrationSetupSlice = createSlice({
   },
   reducers: {
     setData: (state, { payload }) => {
-      state.data = payload;
+      state.data = payload || {};
     },
     loadingStart: state => {
       state.loading = true;
