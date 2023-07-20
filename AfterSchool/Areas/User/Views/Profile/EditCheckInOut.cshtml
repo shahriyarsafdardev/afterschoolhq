@@ -1,0 +1,37 @@
+﻿@{
+    var bundleVersion = (string)ViewBag.BundleVersion;
+}
+
+<style>
+    @@media(max-width: 600px){
+        .panel-body{
+            padding-left:0;
+            padding-right:0;
+        }
+    }
+</style>
+
+<div class="main-content">
+    <div class="btn-toolbar">
+        <div class="btn-group hidden-xs">
+            <a href="@Url.Action("Edit", "profile")" class="btn btn-alt6-active">Profile</a>
+            <a href="@Url.Action("EditCheckInOut", "profile")" class="btn btn-alt6">Check In/Out</a>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading row">
+            <div class="col-xl-10 col-lg-7 col-md-7 col-sm-12 col-xs-12">
+                <i class="s7-user"></i> Manage Check In/Out Access
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="root" style="height: 100%"></div>
+        </div>
+    </div>
+</div>
+
+<script src="/React/dist/bundle.js?v=@bundleVersion"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+
