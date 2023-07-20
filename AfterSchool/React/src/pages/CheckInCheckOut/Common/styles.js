@@ -173,6 +173,10 @@ export default makeStyles(theme => ({
     fontSize: '18px',
     textAlign: 'center'
   },
+  font16Light: {
+    fontSize: '16px',
+    textAlign: 'center'
+  },
   link: {
     textAlign: 'center',
     color: theme.palette.gray.secondary,
