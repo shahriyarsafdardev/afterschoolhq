@@ -64,7 +64,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantIdBy(Convert.ToInt32(currentMasterRegistrant.ID), msgs);
 
-                if(pickUpRegistrantWebUsers.Count() == 1)
+                if(pickUpRegistrantWebUsers.Count == 1)
                 {
                     additionalContactInfo.AddRange(GetAdditionalContactInfo(answers, QuestionDataType.Parent2FirstName,
                     QuestionDataType.Parent2LastName, QuestionDataType.Parent2MobilePhone, FormConstants.Parent2InfoToIncludeInStudentPanel()));
@@ -94,7 +94,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             FirstName = registeredPickUser.FirstName,
                             LastName = registeredPickUser.LastName,
                             Phone = registeredPickUser.Phone,
-                            HasAccess = !pickUpRegistrantWebUser.IsDeleted
+                            HasAccess = !pickUpRegistrantWebUser.IsDeleted,
                         });
                 }
 
@@ -300,6 +300,15 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid User");
 
                 if (!currentUser.HasAccessToRegistrant(currentMasterRegistrant, msgs))
+                    throw new Exception("You are not authorized to access this page");
+                
+                var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value,
+                    currentUser.ID.Value, msgs);
+                
+                if(registrantWebUser.IsEmpty())
+                    throw new Exception("Invalid Registrant WebUser");
+                
+                if(registrantWebUser.IsDeleted)
                     throw new Exception("You are not authorized to access this page");
 
                 var currentParentRegistrant = currentMasterRegistrant.GetParentOrGuardian(msgs);
@@ -718,7 +727,8 @@ namespace AfterSchool.Areas.Api.Controllers
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {
             var pickUpContactList = new List<PickUpDto>();
-            var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes) && x.Text.IsNotEmpty()).ToList();
+            var contactInfo = answers.Where(x => x.QuestionDataTypeId.In(questionDataTypes) && x.Text.IsNotEmpty() && 
+                                                 !x.Text.Contains("null")).ToList();
 
             if (contactInfo.Count > 0)
                 pickUpContactList.Add(new PickUpDto()
@@ -728,7 +738,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     LastName = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == lastName)?.Text,
                     Phone = contactInfo.FirstOrDefault(x => x.QuestionDataTypeId == phone)?.Text,
                     PersonPhoneDataType = phone,
-                    HasAccess = false
+                    HasAccess = false,
                 });
             return pickUpContactList;
         }
@@ -750,7 +760,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
             msgs.AddRange(ah.AddFile(file, amazonFilePath));
 
-            return amazonFilePath;
+            return ah.GetFileLink(amazonFilePath);
         }
     }
 }
