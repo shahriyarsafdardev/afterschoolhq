@@ -759,6 +759,7 @@
     <Compile Include="Models\WebSessionUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceProviderExtensions.cs" />
+    <Compile Include="Models\RestrictionModelViewModel.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -2120,6 +2121,7 @@
     <Content Include="Scripts\umd\popper.min.js" />
     <Content Include="Views\R\BrowseVolunteerOpportunities.cshtml" />
     <Content Include="Views\Shared\JavascriptIncludes\_Beamer.cshtml" />
+    <Content Include="Views\Shared\_RestrictionModal.cshtml" />
     <Content Include="Views\Shared\Layouts\_PrintScreen.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseAllActivities.cshtml" />
     <Content Include="Views\Shared\Registration\_BrowseVolunteerOpportunitiesFilterBar.cshtml" />
