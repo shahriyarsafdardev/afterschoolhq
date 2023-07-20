@@ -21,16 +21,19 @@ export default function ThankyouPage({ checkedStudents }) {
   return (
     <Box className={classes.thankyouPageWrapper}>
       <Typography className={classes.font18Bold}>Thank you!</Typography>
-      {checkedInStudents && (
-        <Typography className={classes.font18Light}>
-          {checkedInStudents} have successfully been checked in.
-        </Typography>
-      )}
-      {checkedOutStudents && (
-        <Typography className={classes.font18Light}>
-          {checkedOutStudents} have successfully been checked out.
-        </Typography>
-      )}
+      <Box>
+        {checkedInStudents && (
+          <Typography className={classes.font16Light}>
+            {checkedInStudents} have successfully been checked in.
+          </Typography>
+        )}
+        {checkedOutStudents && (
+          <Typography className={classes.font16Light}>
+            {checkedOutStudents} have successfully been checked out.
+          </Typography>
+        )}
+      </Box>
+
       <Button
         variant="outlined"
         color="primary"

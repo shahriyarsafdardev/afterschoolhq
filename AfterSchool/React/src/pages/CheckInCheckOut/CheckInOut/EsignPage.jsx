@@ -38,7 +38,7 @@ export default function EsignPage({ setSignature, setActiveStep }) {
 
   return (
     <Box className={classes.esignPage}>
-      <Typography className={classes.headerText}>Please sign below.</Typography>
+      <Typography className={classes.font18Bold}>Please sign below.</Typography>
       <Confirmation
         checkedInStudents={formattedCheckedIn}
         checkedOutStudents={formattedCheckedOut}
