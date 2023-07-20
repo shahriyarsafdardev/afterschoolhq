@@ -62,7 +62,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var answers = FormQuestionAnswer.LoadByRegistrantId(currentRegistrant.ID.Value, msgs);
                 var additionalContactInfo = new List<PickUpDto>();
 
-                var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantIdBy(Convert.ToInt32(currentMasterRegistrant.ID), msgs);
+                var pickUpRegistrantWebUsers = RegistrantWebUser.LoadByRegistrantId(Convert.ToInt32(currentMasterRegistrant.ID), msgs);
 
                 if(pickUpRegistrantWebUsers.Count == 1)
                 {
@@ -667,7 +667,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/reactapp/check-in-out/reset-pin/?token={token.Uid}";
 
                 if (account.IsNotEmpty())
-                    msgBody = msgBody + $"&account={account}";
+                    msgBody = msgBody + $"&accountName={account}";
 
                 TwilioHelper.SendSMS(
                     webUser.Phone,
@@ -713,6 +713,64 @@ namespace AfterSchool.Areas.Api.Controllers
                 new ApiResponse(msgs,
                     null),
                 JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult GetAuthorizedPersonsList()
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
+                var studentsAuthorizedPersons = new List<ManageCheckInOutAccessDto>();
+
+                masterRegistrants.ForEach(masterRegistrant =>
+                {
+                    var registrantWebUsers = RegistrantWebUser.LoadByRegistrantId(masterRegistrant.ID.Value, msgs);
+                    var authorizedPersons = new List<PickUpDto>();
+                    
+                    registrantWebUsers.ForEach(registrantWebUser =>
+                    {
+                        var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
+                        authorizedPersons.Add(new PickUpDto
+                        {
+                            ID = authorizedPerson.ID.Value,
+                            FirstName = authorizedPerson.FirstName,
+                            LastName = authorizedPerson.LastName,
+                            HasAccess = !registrantWebUser.IsDeleted,
+                            Phone = authorizedPerson.Phone,
+                            IsPinSetup = authorizedPerson.PinCode.IsNotEmpty(),
+                        });
+                    });
+
+                    studentsAuthorizedPersons.Add(new ManageCheckInOutAccessDto
+                    {
+                        StudentName = masterRegistrant.Name,
+                        StudentUid = masterRegistrant.Uid.ToString(),
+                        AuthorizedPersons = authorizedPersons,
+                    });
+                });
+
+                dynamic response = new
+                {
+                    AuthorizedPersons = studentsAuthorizedPersons,
+                };
+
+                return Json(
+                    new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
