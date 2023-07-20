@@ -27,15 +27,23 @@ function index() {
   }, [userPin]);
 
   useEffect(() => {
+    const sessionCompleted = sessionStorage.getItem('isSessionCompleted');
+    if (sessionCompleted) {
+      setSearchParams('success=true');
+    }
+  }, [success]);
+
+  useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
   const handleSubmit = async pin => {
     await submitResetPin(token, pin).then(msgs => {
       if (!msgs.length > 0) {
+        sessionStorage.setItem('accountName', accountName);
+        sessionStorage.setItem('isSessionCompleted', true);
         setActiveStep(3);
         setSearchParams('success=true');
-        localStorage.setItem('accountName', accountName);
       }
     });
   };

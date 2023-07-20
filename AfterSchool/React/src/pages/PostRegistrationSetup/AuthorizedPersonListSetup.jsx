@@ -38,6 +38,13 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
   }, [msgs]);
 
   useEffect(() => {
+    const sessionCompleted = sessionStorage.getItem('isSessionCompleted');
+    if (sessionCompleted) {
+      setActiveStep(3);
+    }
+  }, []);
+
+  useEffect(() => {
     const initialState = {};
     authorizedPersons.forEach(
       (person, index) =>
@@ -97,6 +104,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
         setSaveDisabled(false);
         if (apiErrors.length > 0) return;
         enqueueSnackbar('Submitted.', { variant: 'success' });
+        sessionStorage.setItem('isSessionCompleted', true);
         setActiveStep(3);
       });
     }
