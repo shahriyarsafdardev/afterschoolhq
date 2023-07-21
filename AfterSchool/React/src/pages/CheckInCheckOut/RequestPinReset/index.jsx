@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import PhoneNumberForm from '../Common/PhoneNumberForm';
 import ResendLink from './ResendLink';
 import { useCheckInOut } from 'redux/hooks';
+import { getPhoneFromParams } from '../Common';
 
 function index() {
   const classes = useStyles();
@@ -13,7 +14,7 @@ function index() {
   const [activeStep, setActiveStep] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const phone = decodeURI(searchParams.get('phone')) || '';
+  const phone = getPhoneFromParams(searchParams);
   const accountName = searchParams.get('accountName') || '';
 
   const handleSubmit = phoneNumber => {

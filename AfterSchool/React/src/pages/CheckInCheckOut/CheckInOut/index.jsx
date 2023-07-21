@@ -9,6 +9,7 @@ import PinInputForm from './PinInputForm';
 import ChildList from './ChildList';
 import EsignPage from './EsignPage';
 import ThankyouPage from './ThankyouPage';
+import { getPhoneFromParams, setPhoneNumber } from '../Common';
 
 function index() {
   const classes = useStyles();
@@ -16,7 +17,7 @@ function index() {
   const { accountName } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const phone = searchParams.get('phone') || '';
+  const phone = getPhoneFromParams(searchParams);
   const userPin = searchParams.get('pin') || '';
   const success = searchParams.get('success') || false;
   const [userSignature, setUserSignature] = useState('');
@@ -78,7 +79,8 @@ function index() {
   }, [phone, userPin]);
 
   const handleSubmit = phoneNumber => {
-    setSearchParams(`phone=${phoneNumber}`);
+    setPhoneNumber(phoneNumber, setSearchParams);
+    // setSearchParams(`phone=${phoneNumber}`);
   };
 
   const innerSection = () => {
