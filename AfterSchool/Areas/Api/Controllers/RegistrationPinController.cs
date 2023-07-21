@@ -734,7 +734,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Unauthorized User");
 
                 var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
-                var studentsAuthorizedPersons = new List<ManageCheckInOutAccessDto>();
+                var studentsList = new List<ManageCheckInOutAccessDto>();
 
                 masterRegistrants.ForEach(masterRegistrant =>
                 {
@@ -755,7 +755,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         });
                     });
 
-                    studentsAuthorizedPersons.Add(new ManageCheckInOutAccessDto
+                    studentsList.Add(new ManageCheckInOutAccessDto
                     {
                         StudentName = masterRegistrant.Name,
                         StudentUid = masterRegistrant.Uid.ToString(),
@@ -765,11 +765,102 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 dynamic response = new
                 {
-                    AuthorizedPersons = studentsAuthorizedPersons,
+                    Students = studentsList,
                 };
 
                 return Json(
                     new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult AddOrUpdateAuthorizedPersons(List<ManageCheckInOutAccessDto> studentsList)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                studentsList.ForEach(student =>
+                {
+                    if(student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
+                        throw new Exception("Invalid Registrant Id");
+                    
+                    if(student.StudentName.IsEmpty())
+                        throw new Exception("Invalid Registrant Name");
+
+                    var masterRegistrant = Registrant.LoadByUid(student.StudentUid.ToGuid(), msgs);
+
+                    Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            student.AuthorizedPersons.ForEach(authorizedPerson =>
+                            {
+                                WebUser user;
+                                RegistrantWebUser registrantWebUser;
+                                if (authorizedPerson.ID == -1)
+                                {
+                                    user = new WebUser
+                                    {
+                                        FirstName = authorizedPerson.FirstName,
+                                        LastName = authorizedPerson.LastName,
+                                        Phone = authorizedPerson.Phone,
+                                        CreateDate = DateTime.UtcNow,
+                                        LastModifiedDate = DateTime.UtcNow,
+                                        AuthorizationTypeId = WebUserAuthorizationType.Pickup,
+                                    };
+                                    amsgs.AddRange(user.Save(adc));
+                                    
+                                    registrantWebUser = new RegistrantWebUser
+                                    {
+                                        CreateDate = DateTime.UtcNow,
+                                        RegistrantId = masterRegistrant.ID,
+                                        WebUserId = user.ID,
+                                        IsDeleted = false,
+                                    };
+                                    amsgs.AddRange(registrantWebUser.Save(adc));
+                                }
+                                else
+                                {
+                                    user = WebUser.Load(authorizedPerson.ID, amsgs,adc);
+                                    
+                                    if (user.IsNotEmpty())
+                                    {
+                                        user.FirstName = authorizedPerson.FirstName;
+                                        user.LastName = authorizedPerson.LastName;
+                                        user.Phone = authorizedPerson.Phone;
+                                        
+                                        amsgs.AddRange(user.Save(adc));
+                                    }
+                                    
+                                    if (!authorizedPerson.HasAccess)
+                                    {
+                                        registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
+                                            user.ID.Value, amsgs, adc);
+                                    
+                                        registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
+                                        amsgs.AddRange(registrantWebUser.Save(adc));
+                                    }
+                                }
+
+
+                            });
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                });
+
+                return Json(
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
