@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Services;
@@ -30,7 +30,6 @@ namespace AfterSchoolLibrary.Migrations
                 msgs: msgs,
                 dc: dc
             );
-            msgs.Add("Testing error of migration on rolllbar", MessageType.Error);
         }
     }
 }
