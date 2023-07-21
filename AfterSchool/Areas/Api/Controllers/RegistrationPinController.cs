@@ -744,15 +744,17 @@ namespace AfterSchool.Areas.Api.Controllers
                     registrantWebUsers.ForEach(registrantWebUser =>
                     {
                         var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
-                        authorizedPersons.Add(new PickUpDto
-                        {
-                            ID = authorizedPerson.ID.Value,
-                            FirstName = authorizedPerson.FirstName,
-                            LastName = authorizedPerson.LastName,
-                            HasAccess = !registrantWebUser.IsDeleted,
-                            Phone = authorizedPerson.Phone,
-                            IsPinSetup = authorizedPerson.PinCode.IsNotEmpty(),
-                        });
+                        
+                        if(authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+                            authorizedPersons.Add(new PickUpDto
+                            {
+                                ID = authorizedPerson.ID.Value,
+                                FirstName = authorizedPerson.FirstName,
+                                LastName = authorizedPerson.LastName,
+                                HasAccess = !registrantWebUser.IsDeleted,
+                                Phone = authorizedPerson.Phone,
+                                IsPinSetup = authorizedPerson.PinCode.IsNotEmpty(),
+                            });
                     });
 
                     studentsList.Add(new ManageCheckInOutAccessDto
