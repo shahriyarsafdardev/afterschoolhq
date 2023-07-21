@@ -840,16 +840,18 @@ namespace AfterSchool.Areas.Api.Controllers
                                         user.Phone = authorizedPerson.Phone;
                                         
                                         amsgs.AddRange(user.Save(adc));
+                                        
+                                        if (!authorizedPerson.HasAccess)
+                                        {
+                                            registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
+                                                user.ID.Value, amsgs, adc);
+                                    
+                                            registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
+                                            amsgs.AddRange(registrantWebUser.Save(adc));
+                                        }
                                     }
                                     
-                                    if (!authorizedPerson.HasAccess)
-                                    {
-                                        registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
-                                            user.ID.Value, amsgs, adc);
-                                    
-                                        registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
-                                        amsgs.AddRange(registrantWebUser.Save(adc));
-                                    }
+
                                 }
                             });
                         },
