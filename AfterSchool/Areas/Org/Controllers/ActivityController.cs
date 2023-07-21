@@ -2680,6 +2680,123 @@ namespace AfterSchool.Areas.Org.Controllers
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult getFormInfo(int formID)
+        {
+            var msgs = new SystemMessages();
+            var forms = SessionVariables.CurrentAccount.GetForms(null, msgs);
+            var currentForm = forms.Where(form => form.ID == formID).FirstOrDefault();
+            var questions = currentForm.GetActiveQuestions();
+            var gardeQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).FirstOrDefault();
+            var gradeQuestionSettings = FormQuestionSettings.LoadByQuestionIds(gardeQuestion.ID);
+            var genderQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGender).FirstOrDefault();
+            var genderQuestionSettings = FormQuestionSettings.LoadByQuestionIds(genderQuestion.ID);
+            var ageQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).FirstOrDefault();
+            var ageQuestionSettings = FormQuestionSettings.LoadByQuestionIds(ageQuestion.ID);
+            var isFormAgeRestricted = false;
+            var isFormGenderRestricted = false;
+            var isFormGradeRestricted = false;
+            if (gradeQuestionSettings.Count == 0)
+            {
+                isFormGradeRestricted = gardeQuestion.IsRequired;
+            }
+            else
+            {
+                var notRequiredCount = gradeQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = gradeQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                {
+                    isFormGradeRestricted = true;
+                }
+            }
+
+            if (ageQuestionSettings.Count == 0)
+            {
+                isFormAgeRestricted = ageQuestion.IsRequired;
+            }
+            else
+            {
+                var notRequiredCount = ageQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = ageQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                {
+                    isFormAgeRestricted = true;
+                }
+            }
+
+            if (genderQuestionSettings.Count == 0)
+            {
+                isFormGenderRestricted = genderQuestion.IsRequired;
+            }
+            else
+            {
+                var notRequiredCount = genderQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = genderQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                {
+                    isFormGenderRestricted = true;
+                }
+            }
+            return Json(new
+            {
+                status = "ok",
+                isFormGenderRes = isFormGenderRestricted,
+                isFormAgeRes = isFormAgeRestricted,
+                isFormGradeRes = isFormGradeRestricted
+            }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public JsonResult SaveEditedRestrictions(Guid ActivityID, string type)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(ActivityID, msgs);
+            if (!activity.IsEmpty())
+            {
+                Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            if (type == "grade")
+                            {
+                                activity.AgeStart = 0;
+                                activity.AgeEnd = 18;
+                                activity.GradeLevelStart = null;
+                                activity.GradeLevelEnd = null;
+                            }
+                            else if (type == "age")
+                            {
+                                var grades = GradeLevel.Load(msgs: amsgs, dc: adc);
+                                activity.GradeLevelStart = grades.First().ID;
+                                activity.GradeLevelEnd = grades.Last().ID;
+                                activity.AgeStart = null;
+                                activity.AgeEnd = null;
+                            }
+                            else if (type == "gender")
+                            {
+                                activity.GenderRestriction = GenderRestrictionType.None;
+                            }
+                            activity.Save(adc);
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                return Json(new
+                {
+                    status = "ok",
+                    messages = msgs,
+                }, JsonRequestBehavior.AllowGet);
+            }
+            msgs.Add("Activity id not found",MessageType.ApiError);
+            return Json(new
+            {
+                status = "error",
+                messages = msgs,
+            }, JsonRequestBehavior.AllowGet);
+        }
+            
+
+
         #endregion
 
         #region Attendance

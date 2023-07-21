@@ -205,7 +205,11 @@
                 $("input[name='genderrestrictions']:checked").attr("checked", false);
                 $('#strictGenderRestrictions').addClass("hidden");
                 $("#genderrestrictions-0").prop("checked", true);
+                $("#modal-gender-restriction-error").removeClass("md-show");
             });
+            $("#modal-gender-restriction-ok").click(function () {
+                $("#modal-gender-restriction-error").removeClass("md-show");
+            })
         });
     function showConsentWarning() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");

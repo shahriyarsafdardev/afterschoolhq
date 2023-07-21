@@ -48,11 +48,11 @@
     </label>
     <div class="col-lg-9 margin-left-sm">
         <div class="am-radio inline">
-            <input type="radio" id="restrictby-grade" name="restrictbygrade" data-modal="modal-grade-restriction-error" class="form-control @(isFormGradeRestricted? "" : "md-trigger")" value="1" @(isFormGradeRestricted ? "checked=\"checked\"" : "") />
+            <input type="radio" id="restrictby-grade" name="restrictbygrade" data-modal="modal-grade-restriction-error" class="form-control " value="1" @(restrictbygrade ? "checked=\"checked\"" : "") />
             <label for="restrictby-grade">Grade</label>
         </div>
         <div class="am-radio inline">
-            <input type="radio" id="restrictby-age" name="restrictbygrade" data-modal="modal-age-restriction-error" class="form-control @(isFormAgeRestricted? "" : "md-trigger")" value="0" @(isFormAgeRestricted ? "checked=\"checked\"" : "") />
+            <input type="radio" id="restrictby-age" name="restrictbygrade" data-modal="modal-age-restriction-error" class="form-control " value="0" @(!restrictbygrade ? "checked=\"checked\"" : "") />
             <label for="restrictby-age">Age</label>
         </div>
     </div>
@@ -90,12 +90,18 @@
         PageEvent.AFTER_INIT,
         function () {
             $('#restrictby-grade').click(function () {
+                if ("@isFormGradeRestricted" == "False") {
+                    $("#modal-grade-restriction-error").addClass("md-show");
+                }
                 gradeOrAgeCheck();
                 if (@allAgeRegistrationEnabled.ToString().ToLower()) {
                     showRestrictionsCheck();
                 }
             });
             $('#restrictby-age').click(function () {
+                if ("@isFormAgeRestricted" == "False") {
+                    $("#modal-age-restriction-error").addClass("md-show");
+                }
                 gradeOrAgeCheck();
                 if (@allAgeRegistrationEnabled.ToString().ToLower()) {
                     validateByAge();
@@ -104,10 +110,26 @@
             $("#btn-age-restriction-error").click(function () {
                 $("#restrictby-age").attr("checked", false);
                 $("#restrictby-grade").prop("checked", true);
+                gradeOrAgeCheck();
+                $("#modal-age-restriction-error").removeClass("md-show");
+                if ("@isFormGradeRestricted" == "False") {
+                    $("#modal-grade-restriction-error").addClass("md-show");
+                }
             });
             $("#btn-grade-restriction-error").click(function () {
                 $("#restrictby-grade").attr("checked", false);
                 $("#restrictby-age").prop("checked", true);
+                gradeOrAgeCheck();
+                $("#modal-grade-restriction-error").removeClass("md-show");
+                if ("@isFormAgeRestricted" == "False") {
+                    $("#modal-age-restriction-error").addClass("md-show");
+                }
+            });
+            $("#modal-age-restriction-ok").click(function () {
+                $("#modal-age-restriction-error").removeClass("md-show");
+            });
+            $("#modal-grade-restriction-ok").click(function () {
+                $("#modal-grade-restriction-error").removeClass("md-show");
             });
 
             gradeOrAgeCheck();
@@ -142,5 +164,5 @@
             showRestrictionsCheck();
         }
     }
-    
+
 </script>
