@@ -640,7 +640,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         ExpireDate = DateTime.UtcNow.AddMinutes(15),
                         CreateDate = DateTime.UtcNow,
                         CreatedBy = webUser.ID,
-                        WebUserId = webUser.ID
+                        WebUserId = webUser.ID,
                     };
                 }
                 else
@@ -655,7 +655,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 string msgBody = $"Click the link below to reset your AfterSchool HQ PIN code. " +
                     $"If you need more help or did not request a PIN reset, feel free to contact us at support@afterschoolhq.com." +
-                    $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/reactapp/check-in-out/reset-pin/?token={token.Uid}";
+                    $"\r\nReset PIN: {Utilities.ShortBaseUrl()}/reactapp/check-in-out/reset-pin?token={token.Uid}";
 
                 if (account.IsNotEmpty())
                     msgBody = msgBody + $"&accountName={account}";
@@ -697,9 +697,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 var webUser = WebUser.Load(passwordResetToken.WebUserId.Value, msgs);
 
                 webUser.PinCode = code;
-
+                passwordResetToken.ExpireDate = DateTime.UtcNow;
+                
                 msgs.AddRange(webUser.Save());
-
+                msgs.AddRange(passwordResetToken.Save());
+                
                 return Json(
                 new ApiResponse(msgs,
                     null),
