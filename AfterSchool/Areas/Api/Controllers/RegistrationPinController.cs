@@ -213,11 +213,6 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                 if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
                                 {
-                                    var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{registration.Uid}?phone={currentPickUp.Phone}";
-                                    var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
-                                                  "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
-                                                  $"check out your child through this link: {url}";
-
                                     user = new WebUser
                                     {
                                         FirstName = currentPickUp.FirstName,
@@ -244,12 +239,8 @@ namespace AfterSchool.Areas.Api.Controllers
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
 
-                                    //     TwilioHelper.SendSMS(
-                                    //         currentPickUp.Phone,
-                                    //         msgBody,
-                                    //         null,
-                                    //         null,
-                                    //         amsgs);
+                                    if (TwilioHelper.IsValidPhoneNumber(currentPickUp.Phone))
+                                        SendTwilioSms(registration.Uid.ToString(),currentPickUp.Phone);
                                 }
                             });
                         },
@@ -740,12 +731,12 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     var registrantWebUsers = RegistrantWebUser.LoadByRegistrantId(masterRegistrant.ID.Value, msgs);
                     var authorizedPersons = new List<PickUpDto>();
-                    
+
                     registrantWebUsers.ForEach(registrantWebUser =>
                     {
                         var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
-                        
-                        if(authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+
+                        if (authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
                             authorizedPersons.Add(new PickUpDto
                             {
                                 ID = authorizedPerson.ID.Value,
@@ -782,7 +773,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult AddOrUpdateAuthorizedPersons(List<ManageCheckInOutAccessDto> studentsList)
         {
@@ -791,10 +782,10 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 studentsList.ForEach(student =>
                 {
-                    if(student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
+                    if (student.StudentUid.IsEmpty() || !student.StudentUid.IsGuid())
                         throw new Exception("Invalid Registrant Id");
-                    
-                    if(student.StudentName.IsEmpty())
+
+                    if (student.StudentName.IsEmpty())
                         throw new Exception("Invalid Registrant Name");
 
                     var masterRegistrant = Registrant.LoadByUid(student.StudentUid.ToGuid(), msgs);
@@ -819,7 +810,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                     };
                                     amsgs.AddRange(user.Save(adc));
-                                    
+
                                     registrantWebUser = new RegistrantWebUser
                                     {
                                         CreateDate = DateTime.UtcNow,
@@ -831,27 +822,34 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
                                 else
                                 {
-                                    user = WebUser.Load(authorizedPerson.ID, amsgs,adc);
-                                    
+                                    user = WebUser.Load(authorizedPerson.ID, amsgs, adc);
+
                                     if (user.IsNotEmpty())
                                     {
                                         user.FirstName = authorizedPerson.FirstName;
                                         user.LastName = authorizedPerson.LastName;
                                         user.Phone = authorizedPerson.Phone;
-                                        
+
                                         amsgs.AddRange(user.Save(adc));
-                                        
+
                                         if (!authorizedPerson.HasAccess)
                                         {
                                             registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
                                                 user.ID.Value, amsgs, adc);
-                                    
+
                                             registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
                                             amsgs.AddRange(registrantWebUser.Save(adc));
                                         }
-                                    }
-                                    
 
+                                        if (authorizedPerson.ResendInvite ?? false)
+                                        {
+                                            var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, amsgs, adc).LastOrDefault();
+                                            var registration = Registration.LoadByRegistrantId(registrant.ID.Value, amsgs, adc).LastOrDefault();
+
+                                            if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(authorizedPerson.Phone))
+                                                SendTwilioSms(registration.Uid.ToString(), authorizedPerson.Phone);
+                                        }
+                                    }
                                 }
                             });
                         },
@@ -912,6 +910,22 @@ namespace AfterSchool.Areas.Api.Controllers
             msgs.AddRange(ah.AddFile(file, amazonFilePath));
 
             return ah.GetFileLink(amazonFilePath);
+        }
+
+        private static void SendTwilioSms(string regUid, string phone)
+        {
+            var msgs = new SystemMessages();
+            var url = $"{Utilities.BaseUrl()}/reactapp/pin-setup/{regUid}?phone={phone}";
+            var msgBody = $"Welcome to {Utilities.AppName()}! You've been invited for an activity that will require you to check in " +
+                          "and check out your child each day. \nPlease setup your PIN Number that you will use to check in and " +
+                          $"check out your child through this link: {url}";
+
+            TwilioHelper.SendSMS(
+                phone,
+                msgBody,
+                null,
+                null,
+                msgs);
         }
     }
 }
