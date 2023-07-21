@@ -1,10 +1,15 @@
 import { Box, Button, Typography } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+
 import React, { useEffect } from 'react';
 import useStyles from '../Common/styles';
 import { useCheckInOut } from 'redux/hooks';
+import utils from 'utils';
 
 export default function ThankyouPage({ checkedStudents }) {
   const classes = useStyles();
+  const { redirect } = utils;
+  const { accountName } = useParams();
   const {
     checkedInStudents = localStorage.getItem('checkedInStudents'),
     checkedOutStudents = localStorage.getItem('checkedOutStudents')
@@ -39,7 +44,7 @@ export default function ThankyouPage({ checkedStudents }) {
         color="primary"
         fullWidth
         onClick={() => {
-          window.close();
+          redirect(`/${accountName}`);
         }}
       >
         Close

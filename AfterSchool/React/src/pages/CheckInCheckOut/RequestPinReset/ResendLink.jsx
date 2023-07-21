@@ -62,7 +62,13 @@ function ResendLink({
         </Typography>
       )}
 
-      <Link href="#" className={classes.link} variant="body1" data-testid={''}>
+      <Link
+        href="https://afterschoolhq.zendesk.com/hc/en-us/requests/new"
+        target="_blank"
+        className={classes.link}
+        variant="body1"
+        data-testid={''}
+      >
         Contact Support
       </Link>
     </Box>

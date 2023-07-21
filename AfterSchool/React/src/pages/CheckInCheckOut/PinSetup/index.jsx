@@ -10,6 +10,7 @@ import ThankyouScreen from './ThankyouScreen';
 import { useCheckInOut } from 'redux/hooks';
 import PinSetupForm from './PinSetupForm';
 import useStyles from '../Common/styles';
+import { getPhoneFromParams, setPhoneNumber } from '../Common';
 
 function index() {
   const classes = useStyles();
@@ -19,7 +20,7 @@ function index() {
   const { registrationUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const phone = searchParams.get('phone') || '';
+  const phone = getPhoneFromParams(searchParams);
 
   const {
     msgs,
@@ -49,7 +50,9 @@ function index() {
   }, [phone]);
 
   const handleSubmit = phoneNumber => {
-    setSearchParams(`phone=${phoneNumber}`);
+    setPhoneNumber(phoneNumber, setSearchParams);
+
+    // setSearchParams(`phone=${phoneNumber}`);
   };
 
   const innerSection = () => {
