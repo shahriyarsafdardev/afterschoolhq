@@ -849,8 +849,6 @@ namespace AfterSchool.Areas.Api.Controllers
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
                                 }
-
-
                             });
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
