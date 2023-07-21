@@ -7,9 +7,6 @@
     var activityType = (ActivityType)ViewBag.ActivityType;
     var accountPackage = SessionVariables.AccountPackage;
     var managePermissionSlips = accountPackage.HasFeature(FeatureType.ManagePermissionSlips);
-    var maxPermissionSlipCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManagePermissionSlips).Max.Value : 0;
-    var showPermissionSlipFields = ViewBag.PagingModel?.TotalCount < maxPermissionSlipCount;
-    var permissionSlipsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManagePermissionSlips, accountPackage);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", currentAccount.ID.ToString());}
@@ -23,16 +20,9 @@
             <div class="pull-right">
                 @if (activityType == ActivityType.PermissionSlip)
                 {
-                    if (managePermissionSlips && showPermissionSlipFields)
+                    if (managePermissionSlips)
                     {
                         <a href="@Url.Action("editsetup", "activity", new { isnew = 1, type = (int)activityType })" class="btn btn-primary">
-                            <i class="icon icon-left s7-plus"></i>
-                            Add @UILabel.ActivityLabel(activityType)
-                        </a>
-                    }
-                    else
-                    {
-                        <a href="#" class="btn btn-primary" onclick="return showUpgradeMyPlan('@(permissionSlipsPackage?.Name)', @(permissionSlipsPackage?.ID))">
                             <i class="icon icon-left s7-plus"></i>
                             Add @UILabel.ActivityLabel(activityType)
                         </a>
@@ -43,7 +33,7 @@
 
                     if (activityType == ActivityType.Activity)
                     {
-                        <a href="@Url.Action("attendancesummary", "activity")" 
+                        <a href="@Url.Action("attendancesummary", "activity")"
                            class="btn btn-default"
                            target="_blank">
                             <i class="icon icon-left s7-file"></i>
