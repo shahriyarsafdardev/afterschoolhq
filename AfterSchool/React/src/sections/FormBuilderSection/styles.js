@@ -120,12 +120,16 @@ export default makeStyles(theme => ({
   applyAllRow: {
     fontWeight: 'bold'
   },
+  questionWrapper: {
+    display: 'flex',
+    margin: '30px 0px'
+  },
   question: {
+    width: '-webkit-fill-available',
     justifyContent: 'space-evenly',
     border: '1px solid #E4E4E4',
     flexDirection: 'row',
     borderRadius: '3px',
-    margin: '30px 0px',
     display: 'flex',
     [theme.breakpoints.down('sm')]: {
       flexDirection: 'column'
@@ -216,6 +220,9 @@ export default makeStyles(theme => ({
     height: '40px',
     border: '1px solid #E4E4E4',
     margin: '8px 12px'
+  },
+  setAudienceButton: {
+    width: 180
   },
   formSettingsButton: {
     width: 120,
@@ -397,5 +404,45 @@ export default makeStyles(theme => ({
     textDecoration: 'underline',
     padding: '12px 0px',
     width: 'fit-content'
+  },
+  applyAllHeading: {
+    marginTop: '17px'
+  },
+  applyAllBox: {
+    display: 'flex',
+    flexWrap: 'wrap'
+  },
+  applyallButton: {
+    color: '#494949',
+    margin: '8px 12px',
+    width: '100px',
+    fontSize: '14px',
+    border: '1px solid #E4E4E4',
+    '& .MuiCircularProgress-colorPrimary': {
+      color: '#494949'
+    }
+  },
+  questionCheckbox: {
+    right: '10px',
+    marginTop: '26px',
+    [theme.breakpoints.down('sm')]: {
+      right: '5px'
+    }
+  },
+  audienceDisplay: {
+    marginTop: '-8px',
+    marginLeft: '12px',
+    [theme.breakpoints.down('sm')]: {
+      minWidth: '250px'
+    }
+  },
+  questionsBoxWrapper: {
+    marginLeft: '-17px',
+    [theme.breakpoints.down('sm')]: {
+      marginLeft: '5px'
+    }
+  },
+  setAudienceWrapper: {
+    position: 'relative'
   }
 }));

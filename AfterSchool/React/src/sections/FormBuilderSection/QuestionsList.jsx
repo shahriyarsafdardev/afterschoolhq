@@ -1,10 +1,11 @@
 import React from 'react';
+import cs from 'classnames';
+import { cloneDeep } from 'lodash';
 import { Box } from '@material-ui/core';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
 import useStyles from './styles';
 import RenderQuestion from './RenderQuestion';
-import { cloneDeep } from 'lodash';
+import RenderCheckbox from './RenderCheckbox';
 
 function QuestionsList(props) {
   const classes = useStyles();
@@ -81,8 +82,16 @@ function QuestionsList(props) {
     setReRender(!reRender);
   };
 
+  const selectQuestion = (event, key) => {
+    const updatedValue = {
+      ...values[key],
+      checked: event.target.checked
+    };
+    setFieldValue(key, updatedValue);
+  };
+
   return (
-    <Box>
+    <Box className={classes.questionsBoxWrapper}>
       {values && (
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable key="list-2" droppableId="dropable-questions-container" type="column">
@@ -101,10 +110,18 @@ function QuestionsList(props) {
                           <Box
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={
+                            className={cs(
+                              classes.questionWrapper,
                               snapshot.isDragging ? classes.whiteBorder : classes.transparentBorder
-                            }
+                            )}
                           >
+                            <RenderCheckbox
+                              key={key}
+                              styleClass={classes.questionCheckbox}
+                              checked={values[key].checked}
+                              handleCheck={event => selectQuestion(event, key)}
+                              dataTestId={`selectQuestion-${key}`}
+                            />
                             <RenderQuestion
                               index={key}
                               key={`${key}-${values[key]?.ID}${reRender}`}
