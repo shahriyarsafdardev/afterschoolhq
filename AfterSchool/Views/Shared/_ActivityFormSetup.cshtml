@@ -1,12 +1,12 @@
 @model Activity
 
 @{
-    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
-    var forms = (List<Form>) ViewData["Forms"];
-    var group = (ActivityGroup) ViewData["Group"];
-    var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
-    var activeForm = (ActivityForm) ViewData["ActiveForm"];
-    var showSeats = Model.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip});
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var forms = (List<Form>)ViewData["Forms"];
+    var group = (ActivityGroup)ViewData["Group"];
+    var activePeriod = (RegistrationPeriod)ViewData["ActivePeriod"];
+    var activeForm = (ActivityForm)ViewData["ActiveForm"];
+    var showSeats = Model.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
     var showCheckInOut = accountPackage.HasFeature(FeatureType.ManageCheckInCheckOut);
     var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
@@ -14,10 +14,10 @@
     var allowApplicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
     var isActivityGenderRestricted = Model.GenderRestriction;
     var isActivityGradeRestricted = Model.RestrictByGrade();
-    
+
 }
 
-<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
 <div class="panel panel-default margin-bottom-zero">
     <div class="panel-heading activity-heading">
         Settings
@@ -106,7 +106,7 @@
                                 {"checkboxname", "isContinuousEnrollmentEnabled"},
                                 {"checkboxid", "isContinuousEnrollmentEnabled"},
                                 {"disabled", false},
-                            });
+                    });
                     }
                 </div>
             </div>
@@ -397,21 +397,29 @@
             $("#modal-grade-restriction-error").removeClass("md-show");
             $.post(
                 '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "grade"}))',
-                function () {}
+                function (data) {
+                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                i}
             )
         });
         $("#btn-age-restriction-error").click(function () {
             $("#modal-age-restriction-error").removeClass("md-show");
             $.post(
                 '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "age"}))',
-                function () {}
+                function (data) {
+                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                }
+
             )
         });
         $("#btn-gender-restriction-error").click(function () {
             $("#modal-gender-restriction-error").removeClass("md-show");
             $.post(
                 '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "gender"}))',
-                function () {}
+                function (data) {
+                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                }
+
             )
         });
         $("#modal-age-restriction-ok").click(function () {
@@ -426,12 +434,14 @@
     });
     function CheckFormRestrictions(formID)
     {
-        if (@Model.IsNotEmpty())
+        if ("@Model.ID.IsNotEmpty()" == "True")
         {
+            showLoader();
             $.get(
                 `/org/activity/getFormInfo?formID=${formID}`,
                 function (data)
                 {
+                    hideLoader();
                     if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
                         $("#modal-age-restriction-error").addClass("md-show");
                     }
