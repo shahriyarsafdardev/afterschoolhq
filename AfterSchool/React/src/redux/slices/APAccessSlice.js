@@ -48,7 +48,15 @@ export const useAPAccessActions = () => {
     );
   };
 
-  return { loadAuthorizedPersonsList, updateAuthorizedPersons };
+  const resendInvite = async (studentUid, webUserId) => {
+    const params = { studentUid, webUserId };
+    return await ManageAPAccessRepository.resendInvite(params).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      return msgs;
+    });
+  };
+
+  return { loadAuthorizedPersonsList, updateAuthorizedPersons, resendInvite };
 };
 
 export default APAccessSlice;

@@ -4,10 +4,18 @@ import { Box, Typography } from '@material-ui/core';
 import useStyles from './styles';
 import { ErrorBand } from 'components';
 import { useSnackbar } from 'notistack';
+import { useManageAPAccess } from 'redux/hooks';
 
 const RESEND_LIMIT = 86400;
 
-function AuthorizedPersonListRow({ touched, person, errors, handleEdit, handleAddRemoveAccess }) {
+function AuthorizedPersonListRow({
+  touched,
+  person,
+  errors,
+  handleEdit,
+  studentUid,
+  handleAddRemoveAccess
+}) {
   const classes = useStyles();
   const { ID, FirstName, LastName, Phone, HasAccess, IsPinSetup } = person;
   const inviteLinkSendAt = localStorage.getItem(`invited${ID}`);
@@ -15,11 +23,16 @@ function AuthorizedPersonListRow({ touched, person, errors, handleEdit, handleAd
   const { enqueueSnackbar } = useSnackbar();
   const cantInvite = timeDifference > 0;
 
-  const sendInvite = () => {
+  const { resendInvite } = useManageAPAccess();
+
+  const sendInvite = async () => {
     if (cantInvite) return;
-    localStorage.setItem(`invited${ID}`, new Date().toISOString());
-    setTimeDifference(RESEND_LIMIT);
-    enqueueSnackbar('Invite Sent', { variant: 'success' });
+    await resendInvite(studentUid, ID).then(msgs => {
+      if (msgs.length) return;
+      localStorage.setItem(`invited${ID}`, new Date().toISOString());
+      setTimeDifference(RESEND_LIMIT);
+      enqueueSnackbar('Invite Sent', { variant: 'success' });
+    });
   };
 
   useEffect(() => {

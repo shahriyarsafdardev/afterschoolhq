@@ -85,6 +85,7 @@ export default function index() {
           <AuthorizedPersonListSetup
             key={key}
             studentName={Students[key]?.StudentName}
+            studentUid={Students[key]?.StudentUid}
             authorizedPersons={values[key]}
             setValue={value => setFieldValue(key, value)}
           />

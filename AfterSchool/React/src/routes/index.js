@@ -27,8 +27,8 @@ export default {
   resetPinAPI: 'Api/RegistrationPin/SendResetUrl',
   submitResetPinAPI: 'Api/RegistrationPin/ResetPin',
   getAuthorizedPersonsAPI: 'Api/RegistrationPin/GetAuthorizedPersonsList',
-  AddOrUpdateAuthorizedPersonsAPI: 'Api/RegistrationPin/AddOrUpdateAuthorizedPersons',
-
+  addOrUpdateAuthorizedPersonsAPI: 'Api/RegistrationPin/AddOrUpdateAuthorizedPersons',
+  resendInviteAPI: 'Api/RegistrationPin/ResendInvite',
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>
     `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
