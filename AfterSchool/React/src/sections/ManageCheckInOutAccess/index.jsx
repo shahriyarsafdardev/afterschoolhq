@@ -52,13 +52,14 @@ export default function index() {
         };
         students.push(student);
       });
-      updateAuthorizedPersons(students).then(() =>
-        enqueueSnackbar('Submitted.', { variant: 'success' })
-      );
+      updateAuthorizedPersons(students).then(() => {
+        enqueueSnackbar('Submitted.', { variant: 'success' });
+        resetForm();
+      });
     }
   });
 
-  const { setFieldValue, values, handleSubmit, resetForm } = formik;
+  const { setFieldValue, values, handleSubmit, resetForm, dirty } = formik;
 
   const handleOnCancel = () => {
     resetForm();
@@ -106,6 +107,7 @@ export default function index() {
           color="primary"
           className={classes.saveButton}
           text={'Save'}
+          disabled={!dirty}
           loading={false}
         />
       </Box>

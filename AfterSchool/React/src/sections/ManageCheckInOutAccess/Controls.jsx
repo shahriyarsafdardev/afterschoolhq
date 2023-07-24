@@ -12,12 +12,14 @@ function Controls({ onSave, onClear }) {
         data-testid="saveChanges"
         className={classes.cursorPointer}
         onClick={onSave}
+        fontSize="large"
       />
       <CloseOutlined
         color="error"
         data-testid="closeField"
         onClick={onClear}
         className={classes.cursorPointer}
+        fontSize="large"
       />
     </Box>
   );
