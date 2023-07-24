@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
+using System.Windows.Interop;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
@@ -15,6 +16,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Clever.Models;
 using Microsoft.IdentityModel.Tokens;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
@@ -866,6 +868,42 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult ResendInvite(string studentUid, int webUserId)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                if (studentUid.IsEmpty() || !studentUid.IsGuid())
+                    throw new Exception("Invalid Registrant Id");
+
+                if(webUserId.IsEmpty())
+                    throw new Exception("Invalid WebUserId Id");
+
+                var masterRegistrant = Registrant.LoadByUid(studentUid.ToGuid(), msgs);
+
+                var user = WebUser.Load(webUserId, msgs);
+
+                var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs).LastOrDefault();
+
+                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).LastOrDefault();
+
+                if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(user.Phone))
+                    SendTwilioSms(registration.Uid.ToString(), user.Phone);
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch(Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
                 return Json(
