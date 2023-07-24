@@ -52,7 +52,7 @@ namespace AfterSchoolLibrary.Helpers
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
-                    msgs.Insert(0, "Migration(s) Failed", MessageType.Error);
+                    fmsgs.Insert(0, "Migration(s) Failed", MessageType.Error);
                     Utilities.SystemErrorLog(fmsgs);
                 }
             );
