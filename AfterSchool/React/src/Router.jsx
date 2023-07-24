@@ -66,6 +66,10 @@ function Router() {
       element: <FormBuilderSection />
     },
     {
+      path: '/User/profile/EditCheckInOut',
+      element: <ManageCheckInOutAccess />
+    },
+    {
       path: '*',
       element: <RedirectToExternal />
     },
@@ -123,6 +127,7 @@ const Registration = Loadable(lazy(() => import('pages/Registration/Registration
 const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
+const ManageCheckInOutAccess = Loadable(lazy(() => import('sections/ManageCheckInOutAccess')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
 const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
