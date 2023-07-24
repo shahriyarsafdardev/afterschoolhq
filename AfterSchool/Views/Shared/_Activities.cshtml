@@ -380,7 +380,7 @@ else
                     {
                         if (activityType == ActivityType.PermissionSlip)
                         {
-                            if (managePermissionSlips && showPermissionSlipFields)
+                            if (managePermissionSlips)
                             {
                                 <button class="md-trigger btn btn-default btn-sm" data-modal="modal-copy-activity"
                                         onclick="ActivitySetup.setCopyActivity('@UI.JavascriptSafeString(activity.Name)', '@Url.Action("copy", "activity", new {id = activity.Uid.ToString(), isnew = 1})')" @(needToUpgrade ? "disabled=\"disabled\"" : "")>
@@ -389,7 +389,7 @@ else
                             }
                             else
                             {
-                                <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return HandleNotification('@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.Name : "")',@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.ID : 0))">
+                                <button class="md-trigger btn btn-default btn-sm showNotification" onclick="return showUpgradeMyPlan('@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.Name : "")',@(managePermissionSlipsPackage != null ? managePermissionSlipsPackage.ID : 0))">
                                     <i class="s7-copy-file"></i> Copy
                                 </button>
                             }
