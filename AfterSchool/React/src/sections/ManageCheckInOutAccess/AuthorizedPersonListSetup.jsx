@@ -18,7 +18,7 @@ const newUser = {
   PersonPhoneDataType: 'NotSet'
 };
 
-function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue }) {
+function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, studentUid }) {
   const classes = useStyles();
   const [initialValues, setInitialValue] = useState({});
 
@@ -72,6 +72,7 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue })
           person={values[key]}
           errors={errors[key]}
           touched={touched[key]}
+          studentUid={studentUid}
           handleEdit={() => setFieldValue(key, { ...values[key], default: false })}
           handleAddRemoveAccess={val => setFieldValue(key, { ...values[key], HasAccess: val })}
         />
