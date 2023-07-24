@@ -11,59 +11,7 @@
     });
     var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
     var requiresParentConsent= Model.RequiresParentalConsent;
-    var activeForm = Model.GetActiveActivityForm(msgs).GetForm(msgs);
-    var questions = activeForm.GetActiveQuestions();
-    var gardeQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).FirstOrDefault();
-    var gradeQuestionSettings = FormQuestionSettings.LoadByQuestionIds(gardeQuestion.ID);
-    var genderQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantGender).FirstOrDefault();
-    var genderQuestionSettings = FormQuestionSettings.LoadByQuestionIds(genderQuestion.ID);
-    var ageQuestion = questions.Where(question => question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).FirstOrDefault();
-    var ageQuestionSettings = FormQuestionSettings.LoadByQuestionIds(ageQuestion.ID);
-    var isFormAgeRestricted = false;
-    var isFormGenderRestricted = false;
-    var isFormGradeRestricted = false;
-
-    if(gradeQuestionSettings.Count == 0)
-    {
-        isFormGradeRestricted = gardeQuestion.IsRequired;
-    }
-    else
-    {
-        var notRequiredCount = gradeQuestionSettings.Where(question => question.Required == false).Count();
-        var notShowCount = gradeQuestionSettings.Where(question => question.Show == false).Count();
-        if(notRequiredCount == 0 && notShowCount==0)
-        {
-            isFormGradeRestricted = true;
-        }
-    }
-
-    if (ageQuestionSettings.Count == 0)
-    {
-        isFormAgeRestricted = ageQuestion.IsRequired;
-    }
-    else
-    {
-        var notRequiredCount = ageQuestionSettings.Where(question => question.Required == false).Count();
-        var notShowCount = ageQuestionSettings.Where(question => question.Show == false).Count();
-        if (notRequiredCount == 0 && notShowCount == 0)
-        {
-            isFormAgeRestricted = true;
-        }
-    }
-
-    if (genderQuestionSettings.Count == 0)
-    {
-        isFormGenderRestricted = genderQuestion.IsRequired;
-    }
-    else
-    {
-        var notRequiredCount = genderQuestionSettings.Where(question => question.Required == false).Count();
-        var notShowCount = genderQuestionSettings.Where(question => question.Show == false).Count();
-        if (notRequiredCount == 0 && notShowCount == 0)
-        {
-            isFormGenderRestricted = true;
-        }
-    }
+    var activeForm = Model.GetActiveForm(msgs);
 }
 <div class="panel panel-default panel-small-padding">
     <div class="panel-heading activity-heading">
@@ -139,9 +87,7 @@
                     {"grades", grades},
                     {"ageStart", Model.AgeStart},
                     {"ageEnd", Model.AgeEnd},
-                    {"restrictbygrade", Model.RestrictByGrade()},
-                    {"isFormAgeRestricted", isFormAgeRestricted},
-                    {"isFormGradeRestricted", isFormGradeRestricted},
+                    {"restrictbygrade", Model.RestrictByGrade()}
                 }
                 );
         }
@@ -201,6 +147,50 @@
     PageEvent.add(
         PageEvent.AFTER_INIT,
         function () {
+            $.get(
+                `/org/activity/getFormInfo?formID=${@activeForm.ID}`,
+                function (data)
+                {
+                    $('#restrictby-grade').click(function () {
+                        if (!data.isFormGradeRes) {
+                            $("#modal-grade-restriction-error").addClass("md-show");
+                        }
+                    });
+                    $('#restrictby-age').click(function () {
+                        if (!data.isFormAgeRes) {
+                            $("#modal-age-restriction-error").addClass("md-show");
+                        }
+                    });
+                    $("#btn-age-restriction-error").click(function () {
+                        $("#restrictby-age").attr("checked", false);
+                        $("#restrictby-grade").prop("checked", true);
+                        gradeOrAgeCheck();
+                        $("#modal-age-restriction-error").removeClass("md-show");
+                            if (!data.isFormGradeRes) {
+                                $("#modal-grade-restriction-error").addClass("md-show");
+                            }
+                    });
+                    $("#btn-grade-restriction-error").click(function () {
+                        $("#restrictby-grade").attr("checked", false);
+                        $("#restrictby-age").prop("checked", true);
+                        gradeOrAgeCheck();
+                        $("#modal-grade-restriction-error").removeClass("md-show");
+                            if (!data.isFormAgeRes) {
+                                $("#modal-age-restriction-error").addClass("md-show");
+                            }
+                    });
+                    $("#genderrestrictions-1").click(function () {
+                        if (!data.isFormGenderRes) {
+                            $("#modal-gender-restriction-error").addClass("md-show")
+                        }
+                    });
+                    $("#genderrestrictions-2").click(function () {
+                        if (!data.isFormGenderRes) {
+                            $("#modal-gender-restriction-error").addClass("md-show")
+                        }
+                    });
+                }
+            );
             $("#btn-gender-restriction-error").click(function () {
                 $("input[name='genderrestrictions']:checked").attr("checked", false);
                 $('#strictGenderRestrictions').addClass("hidden");
@@ -210,6 +200,12 @@
             $("#modal-gender-restriction-ok").click(function () {
                 $("#modal-gender-restriction-error").removeClass("md-show");
             })
+            $("#modal-age-restriction-ok").click(function () {
+                $("#modal-age-restriction-error").removeClass("md-show");
+            });
+            $("#modal-grade-restriction-ok").click(function () {
+                $("#modal-grade-restriction-error").removeClass("md-show");
+            });
         });
     function showConsentWarning() {
         var isStudentAllowed = $("#isStudentAllowed").is(":checked");
@@ -282,7 +278,7 @@
         showConsentWarning();
     });
 
-    function addClassToRadioInputs() {
+    @*function addClassToRadioInputs() {
         var radioInputs = document.querySelectorAll('input[name="genderrestrictions"]');
         for (var i = 0; i < radioInputs.length; i++) {
             var input = radioInputs[i];
@@ -293,6 +289,6 @@
     }
     document.addEventListener('DOMContentLoaded', function () {
         addClassToRadioInputs();
-    });
+    });*@
 
 </script>

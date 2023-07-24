@@ -6,8 +6,6 @@
 
     var agestart = (int?)ViewData["agestart"];
     var ageend = (int?)ViewData["ageend"];
-    var isFormGradeRestricted = (bool)ViewData["isFormGradeRestricted"];
-    var isFormAgeRestricted = (bool)ViewData["isFormAgeRestricted"];
 
     if (!minGradeLevelId.HasValue && !minGradeLevelId.HasValue && !agestart.HasValue && !ageend.HasValue)
     {
@@ -90,48 +88,17 @@
         PageEvent.AFTER_INIT,
         function () {
             $('#restrictby-grade').click(function () {
-                if ("@isFormGradeRestricted" == "False") {
-                    $("#modal-grade-restriction-error").addClass("md-show");
-                }
                 gradeOrAgeCheck();
                 if (@allAgeRegistrationEnabled.ToString().ToLower()) {
                     showRestrictionsCheck();
                 }
             });
             $('#restrictby-age').click(function () {
-                if ("@isFormAgeRestricted" == "False") {
-                    $("#modal-age-restriction-error").addClass("md-show");
-                }
                 gradeOrAgeCheck();
                 if (@allAgeRegistrationEnabled.ToString().ToLower()) {
                     validateByAge();
                 }
             });
-            $("#btn-age-restriction-error").click(function () {
-                $("#restrictby-age").attr("checked", false);
-                $("#restrictby-grade").prop("checked", true);
-                gradeOrAgeCheck();
-                $("#modal-age-restriction-error").removeClass("md-show");
-                if ("@isFormGradeRestricted" == "False") {
-                    $("#modal-grade-restriction-error").addClass("md-show");
-                }
-            });
-            $("#btn-grade-restriction-error").click(function () {
-                $("#restrictby-grade").attr("checked", false);
-                $("#restrictby-age").prop("checked", true);
-                gradeOrAgeCheck();
-                $("#modal-grade-restriction-error").removeClass("md-show");
-                if ("@isFormAgeRestricted" == "False") {
-                    $("#modal-age-restriction-error").addClass("md-show");
-                }
-            });
-            $("#modal-age-restriction-ok").click(function () {
-                $("#modal-age-restriction-error").removeClass("md-show");
-            });
-            $("#modal-grade-restriction-ok").click(function () {
-                $("#modal-grade-restriction-error").removeClass("md-show");
-            });
-
             gradeOrAgeCheck();
         }
     );
