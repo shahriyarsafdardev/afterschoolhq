@@ -1,0 +1,123 @@
+@model Attendance
+@{
+    var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
+    var account = SessionVariables.CurrentAccount;
+    var schedule = (ActivitySchedule)ViewData["schedule"];
+    var controller = (string)ViewData["controller"];
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    const int FUTURE_INSTANCES_TO_SHOW = 8;
+    var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
+    var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a => a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
+}
+<style media="all and (max-width: 479px)">
+    .attendance-table {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding: 0 !important;
+    }
+</style>
+<form method="post" action="@Url.Action("trackattendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href="@Url.Action("attendance", controller, new { id = Model.ActivityUid })" class="btn btn-default btn-space">&laquo; Back to List</a>
+                <button type="submit" class="btn btn-primary btn-space" @(isAttendanceDisabled)><i class="icon icon-left s7-diskette"></i> Save Attendance</button>
+            </div>
+            <i class="s7-check"></i> Take Attendance
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-md-2 control-label">
+                        Attendance Date
+                    </div>
+                    <div class="col-md-10">
+                        <select name="activityinstance" id="activityinstance" class="form-control">
+                            <option value="">Select...</option>
+                            @{
+                                foreach (var instance in schedule.GetInSessionInstances().DistinctBy(instance => instance.ID))
+                                {
+                                    if (instance.StartDateTime.HasValue)
+                                    {
+                                        <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                            @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                        </option>
+
+                                        @*
+                                            if (DateTime.UtcNow >= account.ConvertFromAccountTimeZone(instance.StartDateTime.Value).AddDays(-FUTURE_INSTANCES_TO_SHOW))
+                                            {
+                                                <option value="@instance.ID" @(Model.ActivityInstanceId == instance.ID ? " selected=\"selected\" " : "")>
+                                                    @instance.StartDateTime.ToShortTimeString(), @instance.StartDateTime.Value.ToLongDateString()
+                                                </option>
+                                            }
+                                        *@
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-10 col-md-offset-2 attendance-table">
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Name</th>
+                            <th>Check In Time</th>
+                            <th>Check Out Time</th>
+                        </tr>
+
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.OrderBy(x => x.RegistrantName))
+                        {
+                            if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId && registrantActivity.IsReservedRegistrationAssignmentType()))
+                            {
+                                <tr>
+                                    <td>@(isTechSupport ? $"{attendanceRegistrant.RegistrantName.MaskString(3, 3)}" : attendanceRegistrant.RegistrantName)</td>
+                                    <td>
+                                      
+                                    </td>
+                                    <td>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"></label>
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block pull-right" @(isAttendanceDisabled)><i class="s7-diskette"></i> Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<script>
+
+    function checkAll() {
+        $('input[id^="present-"]').prop('checked', true);
+    }
+    function uncheckAll() {
+        $('input[id^="present-"]').prop('checked', false);
+    }
+</script>
+
+
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('#activityinstance').change(function () {
+            location.href = '@Url.Action("trackattendance", "activity")?actinst=' + $(this).val();
+        });
+    });
+</script>
+
+
