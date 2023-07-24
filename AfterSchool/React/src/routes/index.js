@@ -26,6 +26,8 @@ export default {
   updateStudentCheckInOutInfoAPI: 'Api/RegistrationPin/AddOrUpdateStudentCheckInOutInfo',
   resetPinAPI: 'Api/RegistrationPin/SendResetUrl',
   submitResetPinAPI: 'Api/RegistrationPin/ResetPin',
+  getAuthorizedPersonsAPI: 'Api/RegistrationPin/GetAuthorizedPersonsList',
+  AddOrUpdateAuthorizedPersonsAPI: 'Api/RegistrationPin/AddOrUpdateAuthorizedPersons',
 
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>

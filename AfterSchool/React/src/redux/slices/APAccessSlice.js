@@ -1,0 +1,54 @@
+import { useDispatch } from 'react-redux';
+import { createSlice } from '@reduxjs/toolkit';
+import ManageAPAccessRepository from 'repository/ManageAPAccessRepository';
+
+const APAccessSlice = createSlice({
+  name: 'APAccessSlice',
+  initialState: {
+    data: {},
+    msgs: [],
+    loading: true
+  },
+  reducers: {
+    setData: (state, { payload: { obj } }) => {
+      state.data = obj;
+    },
+    loadingStart: state => {
+      state.loading = true;
+    },
+    loadingCompleted: state => {
+      state.loading = false;
+    },
+    setMsgs: (state, { payload }) => {
+      state.msgs = payload;
+    }
+  }
+});
+
+export const useAPAccessActions = () => {
+  const dispatch = useDispatch();
+  const { setMsgs, setData, loadingStart, loadingCompleted } = APAccessSlice.actions;
+  const loadAuthorizedPersonsList = async () => {
+    dispatch(loadingStart());
+    const data = await ManageAPAccessRepository.getAuthorizedPersons();
+    dispatch(setData(data));
+    dispatch(setMsgs(data.msgs));
+    dispatch(loadingCompleted());
+  };
+
+  const updateAuthorizedPersons = async studentsList => {
+    const params = { studentsList };
+    dispatch(loadingStart());
+    return await ManageAPAccessRepository.addOrUpdateAuthorizedPersons(params).then(
+      ({ data: { msgs } }) => {
+        dispatch(loadingCompleted());
+        dispatch(setMsgs(msgs));
+        return msgs;
+      }
+    );
+  };
+
+  return { loadAuthorizedPersonsList, updateAuthorizedPersons };
+};
+
+export default APAccessSlice;

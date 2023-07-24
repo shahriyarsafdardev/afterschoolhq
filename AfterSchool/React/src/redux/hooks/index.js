@@ -4,6 +4,7 @@ import { useSurveyActions } from 'redux/slices/SurveySlice';
 import { useHeaderActions } from 'redux/slices/HeaderSlice';
 import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
+import { useAPAccessActions } from 'redux/slices/APAccessSlice';
 import { useCheckInOutActions } from 'redux/slices/CheckInOutSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
@@ -70,4 +71,9 @@ export const usePostRegistration = () => ({
 export const useCheckInOut = () => ({
   ...useSelector(state => state.checkInOutSlice),
   ...useCheckInOutActions()
+});
+
+export const useManageAPAccess = () => ({
+  ...useSelector(state => state.APAccessSlice),
+  ...useAPAccessActions()
 });
