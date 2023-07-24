@@ -156,5 +156,11 @@ export default makeStyles(theme => ({
   },
   phoneNumber: {
     color: theme.palette.primary
+  },
+  fontGreen: {
+    fontStyle: 'italic',
+    textDecoration: 'none',
+    color: theme.palette.primary.main,
+    cursor: 'unset'
   }
 }));

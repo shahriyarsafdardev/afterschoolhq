@@ -1,14 +1,41 @@
 import cs from 'classnames';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@material-ui/core';
 import useStyles from './styles';
 import { ErrorBand } from 'components';
+import { useSnackbar } from 'notistack';
+
+const RESEND_LIMIT = 86400;
 
 function AuthorizedPersonListRow({ touched, person, errors, handleEdit, handleAddRemoveAccess }) {
   const classes = useStyles();
   const { ID, FirstName, LastName, Phone, HasAccess, IsPinSetup } = person;
+  const inviteLinkSendAt = localStorage.getItem(`invited${ID}`);
+  const [timeDifference, setTimeDifference] = useState(0);
+  const { enqueueSnackbar } = useSnackbar();
+  const cantInvite = timeDifference > 0;
 
-  const sendInvite = () => {};
+  const sendInvite = () => {
+    if (cantInvite) return;
+    localStorage.setItem(`invited${ID}`, new Date().toISOString());
+    setTimeDifference(RESEND_LIMIT);
+    enqueueSnackbar('Invite Sent', { variant: 'success' });
+  };
+
+  useEffect(() => {
+    const savedDateTime = localStorage.getItem(`invited${ID}`);
+    const savedTime = new Date(savedDateTime);
+
+    const updateTimeDifference = () => {
+      const currentTime = new Date();
+      const newTimeDifference = Math.round((currentTime - savedTime) / 1000);
+      const timeLeft = RESEND_LIMIT - newTimeDifference;
+
+      if (timeLeft >= 0) setTimeDifference(timeLeft);
+    };
+
+    updateTimeDifference();
+  }, [inviteLinkSendAt]);
 
   const controlSections = () => {
     let sections = [];
@@ -22,11 +49,12 @@ function AuthorizedPersonListRow({ touched, person, errors, handleEdit, handleAd
             <>
               <Typography
                 onClick={sendInvite}
-                className={classes.editButton}
+                className={cs(classes.editButton, cantInvite && classes.fontGreen)}
                 key="resend-invite-button"
               >
-                Resend Invite
+                {cantInvite ? 'Invite Sent!' : 'Resend Invite'}
               </Typography>
+
               <Typography
                 onClick={() => handleAddRemoveAccess(false)}
                 className={classes.editButton}
@@ -59,7 +87,7 @@ function AuthorizedPersonListRow({ touched, person, errors, handleEdit, handleAd
 
   return (
     <>
-      <Box className={classes.listWrapper}>
+      <Box className={classes.listWrapper} key={`${ID}-${HasAccess}`}>
         <Box className={classes.listInnerWrapper}>
           <Typography
             variant="body1"

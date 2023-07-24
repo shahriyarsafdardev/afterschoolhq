@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import * as Yup from 'yup';
 import { Grid, Box, Container, Typography, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
 import { useFormik } from 'formik';
 import { isEmpty, isEqual, toArray } from 'lodash';
-import { phoneValidationRegex } from 'constants/regex';
 import AuthorizedPersonListRow from './AuthorizedPersonListRow';
 import AddAuthorizedUserForm from './AddAuthorizedUserForm';
 
@@ -23,7 +21,6 @@ const newUser = {
 function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue }) {
   const classes = useStyles();
   const [initialValues, setInitialValue] = useState({});
-  const [validationSchema, setValidationSchema] = useState({});
 
   useEffect(() => {
     const initialState = {};
@@ -34,45 +31,14 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue })
     setInitialValue(initialState);
   }, [authorizedPersons]);
 
-  const formValidationSchema = () =>
-    Yup.object().shape(
-      Object.keys(values).reduce((acc, key) => {
-        acc[key] = Yup.object().shape({
-          Phone: Yup.string().when(['HasAccess'], {
-            is: val => val,
-            then: () =>
-              Yup.string()
-                .matches(phoneValidationRegex, 'Phone number is not valid')
-                .required('Phone Number is required'),
-            otherwise: () => Yup.string().notRequired()
-          }),
-          FirstName: Yup.string().when(['HasAccess'], {
-            is: val => val,
-            then: () => Yup.string().required('First Name is required'),
-            otherwise: () => Yup.string()
-          }),
-          LastName: Yup.string().when(['HasAccess'], {
-            is: val => val,
-            then: () => Yup.string().required('Last Name is required'),
-            otherwise: () => Yup.string()
-          })
-        });
-
-        return acc;
-      }, {})
-    );
-
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues,
-    validationSchema
+    initialValues
   });
 
   const { setFieldValue, values, errors, touched } = formik;
 
   useEffect(() => {
-    setValidationSchema(formValidationSchema());
-
     const updatedValues = [];
     let shouldUpdate = true;
     Object.keys(values).forEach(key => {
