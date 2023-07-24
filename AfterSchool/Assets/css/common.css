@@ -380,10 +380,12 @@
 }
 
 .qr-logo {
-    max-width: 100%;
-    height: auto;
+    width: 150px;
+    height: 150px;
     display: inline-block;
     vertical-align: middle;
+    object-fit: contain;
+    max-width: 100%;
 }
 
 .account-info {
@@ -410,11 +412,11 @@
     margin-bottom: 20px;
 }
 
-    .qr-container img {
-        height: auto;
-        width: auto;
-        max-height: 100%;
-    }
+.qr-container img {
+    height: auto;
+    width: auto;
+    max-height: 100%;
+}
 
 .exit-text {
     position: fixed;
@@ -423,9 +425,9 @@
     bottom: 30px;
 }
 
-    .exit-text a {
-        color: #B2B2B4;
-    }
+.exit-text a {
+    color: #B2B2B4;
+}
 
 .text-only {
     display: flex;
