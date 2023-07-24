@@ -5,7 +5,18 @@ import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import { isValidFile } from 'constants';
 import useStyles from './styles';
 
-const VALID_EXTENSIONS = ['png', 'jpeg', 'jpg', 'pdf', 'txt', 'docx', 'mp4', 'mp3'];
+const VALID_EXTENSIONS = [
+  'png',
+  'jpeg',
+  'jpg',
+  'pdf',
+  'txt',
+  'docx',
+  'mp4',
+  'mp3',
+  'mpeg',
+  'plain'
+];
 
 const FileUpload = ({ formik, question }) => {
   const classes = useStyles();

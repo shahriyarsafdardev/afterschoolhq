@@ -12,7 +12,7 @@ import pauseButton from 'assets/pauseWhite.svg';
 import { isValidFile } from 'constants';
 import useStyles from './styles';
 
-const VALID_EXTENSIONS = ['mp4', 'webm', 'ogg', 'avi', 'mkv', 'flv'];
+const VALID_EXTENSIONS = ['mp4', 'webm', 'video/ogg'];
 
 const VideoQuestion = ({ question, formik }) => {
   const classes = useStyles();
