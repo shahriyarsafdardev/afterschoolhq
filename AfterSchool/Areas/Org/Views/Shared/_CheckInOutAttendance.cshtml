@@ -240,7 +240,7 @@
                    },
                    function (data) {
                        if (data && data.status == 'ok') {
-                           location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid})';
+                           location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, actinst = Model.ActivityInstanceId})';
                            Notifications.showBar({
                              title: 'Success',
                              success: true,
