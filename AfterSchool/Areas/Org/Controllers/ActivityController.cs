@@ -2853,10 +2853,11 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult TrackCheckInOutAttendance(List<CheckInOutAttendanceDto> checkInOutInfo)
+        public ActionResult TrackCheckInOutAttendance(int attendanceId, List<CheckInOutAttendanceDto> checkInOutInfo)
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(attendanceId, msgs);
 
             checkInOutInfo.ForEach(checkInOut =>
             {
@@ -2875,6 +2876,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
                 msgs.AddRange(checkInOutObj.Save());
             });
+            
+            attendance.IsCompleted = true;
+            msgs.AddRange(attendance.Save());
 
             if (msgs.HasNoErrors())
                 return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
