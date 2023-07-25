@@ -51,8 +51,6 @@ function index() {
 
   const handleSubmit = phoneNumber => {
     setPhoneNumber(phoneNumber, setSearchParams);
-
-    // setSearchParams(`phone=${phoneNumber}`);
   };
 
   const innerSection = () => {

@@ -96,7 +96,7 @@ export default function index() {
           color="primary"
           variant="outlined"
           className={classes.cancelButton}
-          data-testid={`CancelButton`}
+          data-testid="cancel-button"
           onClick={handleOnCancel}
         >
           Cancel

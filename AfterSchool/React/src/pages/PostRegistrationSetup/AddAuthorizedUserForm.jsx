@@ -47,6 +47,7 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
         value={value}
         fullWidth
         {...getFieldProps(name)}
+        data-testid={`${name}-add-user-field`}
         type="text"
         error={!!(touched && touched[name] && errors[name])}
         helperText={touched && touched[name] && errors[name]}
@@ -63,11 +64,12 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
             checked: classes.checked,
             root: classes.root
           }}
-          checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
-          iconstyle={{ fill: 'black' }}
-          checked={values.HasAccess}
-          onChange={handleChange}
           name="checked"
+          onChange={handleChange}
+          checked={values.HasAccess}
+          iconstyle={{ fill: 'black' }}
+          data-testid={`${values.FirstName}-checked`}
+          checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
         />
       </Box>
       <Grid container spacing={2} className={classes.alignLeft}>

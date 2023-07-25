@@ -102,7 +102,11 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, s
             return innerContent(values[key].default, key);
           })}
           <Grid item xs={12}>
-            <Typography className={classes.addPersonButton} onClick={addNewUserHandler}>
+            <Typography
+              className={classes.addPersonButton}
+              onClick={addNewUserHandler}
+              data-testid={`${studentName}-add-authorized-person-button`}
+            >
               Add another authorized person
             </Typography>
           </Grid>

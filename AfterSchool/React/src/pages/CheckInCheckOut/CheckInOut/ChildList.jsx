@@ -30,6 +30,7 @@ export default function ChildList({ setActiveStep, navigateToRoot }) {
           color="primary"
           onClick={() => navigateToRoot()}
           fullWidth
+          data-testid="cancel-button"
         >
           Cancel
         </Button>

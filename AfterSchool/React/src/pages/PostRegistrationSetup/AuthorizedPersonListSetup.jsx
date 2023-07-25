@@ -163,7 +163,11 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
           )}
 
           <Grid item xs={12}>
-            <Typography className={classes.addPersonButton} onClick={addNewUserHandler}>
+            <Typography
+              className={classes.addPersonButton}
+              onClick={addNewUserHandler}
+              data-testid="add-authorized-person-button"
+            >
               Add another authorized person
             </Typography>
           </Grid>
@@ -175,6 +179,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
               color="primary"
               fullWidth
               onClick={() => setActiveStep(3)}
+              data-testid="cancel-button"
             >
               Cancel
             </Button>

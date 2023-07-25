@@ -28,6 +28,7 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
   });
 
   const { values, getFieldProps, touched, errors, handleSubmit } = formik;
+
   const onClear = () => {
     setFieldValue({ ...user, default: true });
     const { FirstName, LastName, Phone, newObject } = user;
@@ -41,6 +42,7 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
         value={value}
         fullWidth
         {...getFieldProps(name)}
+        data-testid={`${name}-add-user-field`}
         type="text"
         error={!!(touched && touched[name] && errors[name])}
         helperText={touched && touched[name] && errors[name]}
