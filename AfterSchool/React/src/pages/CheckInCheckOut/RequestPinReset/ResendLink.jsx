@@ -52,6 +52,7 @@ function ResendLink({
         variant="contained"
         color="primary"
         disabled={!canResend}
+        data-testid="resend-text-button"
       >
         Resend Text
       </Button>
@@ -67,7 +68,7 @@ function ResendLink({
         target="_blank"
         className={classes.link}
         variant="body1"
-        data-testid={''}
+        data-testid="contact-support-button"
       >
         Contact Support
       </Link>

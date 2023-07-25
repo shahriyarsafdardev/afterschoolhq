@@ -51,6 +51,7 @@ export default function ActivityRow({ activity, onSelect, checked }) {
                 icon={<CircleUnchecked />}
                 checkedIcon={<CircleChecked />}
                 label="Check"
+                data-testid={`${StudentUid}-checkbox`}
                 checked={isChecked}
                 classes={{
                   checked: classes.checked,

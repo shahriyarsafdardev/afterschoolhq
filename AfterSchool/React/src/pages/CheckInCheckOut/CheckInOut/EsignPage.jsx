@@ -56,6 +56,7 @@ export default function EsignPage({ setSignature, setActiveStep }) {
           onClick={() => {
             setActiveStep(1);
           }}
+          data-testid="back-button"
         >
           Back
         </Button>

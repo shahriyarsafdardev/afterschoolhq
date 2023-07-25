@@ -82,6 +82,7 @@ function PinSetupForm(props) {
       {!IsPhoneSetup && (
         <TextField
           id="phone"
+          data-testid="phone-field"
           customLabel="Cell Phone Number"
           variant="outlined"
           autofill="false"
@@ -96,6 +97,7 @@ function PinSetupForm(props) {
         id="pinCode"
         customLabel="PIN Code"
         variant="outlined"
+        data-testid="pin-field"
         fullWidth
         onChange={e => handleInputChange(e, 'pin')}
         value={values.pin}
@@ -107,6 +109,7 @@ function PinSetupForm(props) {
       <TextField
         id="confirmPinCode"
         customLabel="Confirm PIN Code"
+        data-testid="confirm-pin-field"
         variant="outlined"
         fullWidth
         onChange={e => handleInputChange(e, 'confirmPin')}
@@ -122,7 +125,7 @@ function PinSetupForm(props) {
           className={classes.saveButton}
           variant="contained"
           type="submit"
-          data-testid={'Save & continue'}
+          data-testid="save-continue"
           onClick={() => handleSubmit()}
           text="Save & Continue"
           loading={saveDisabled}

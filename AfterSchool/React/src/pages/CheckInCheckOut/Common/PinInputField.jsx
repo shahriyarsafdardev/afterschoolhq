@@ -17,9 +17,10 @@ export default function PinInputField(props) {
         }}
         type="numeric"
         inputMode="number"
-        style={{ padding: '10px' }}
-        inputStyle={{ border: '3px solid #E4E4E4', borderRadius: '6px' }}
+        data-testid="pin-field"
+        className={classes.pinField}
         regexCriteria={/^[ A-Za-z0-9_@./#&+-]*$/}
+        inputStyle={{ border: '3px solid #E4E4E4', borderRadius: '6px' }}
       />
       {errorMessage && <ErrorBand error={errorMessage} />}
     </Box>

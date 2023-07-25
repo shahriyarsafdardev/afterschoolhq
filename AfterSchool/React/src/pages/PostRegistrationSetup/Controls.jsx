@@ -9,13 +9,13 @@ function Controls({ onSave, onClear }) {
     <Box className={classes.controls}>
       <Done
         color="primary"
-        data-testid="saveChanges"
+        data-testid="save-changes"
         className={classes.cursorPointer}
         onClick={onSave}
       />
       <CloseOutlined
         color="error"
-        data-testid="closeField"
+        data-testid="close-field"
         onClick={onClear}
         className={classes.cursorPointer}
       />

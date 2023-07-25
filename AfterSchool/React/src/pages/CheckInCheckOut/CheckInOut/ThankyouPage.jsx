@@ -46,6 +46,7 @@ export default function ThankyouPage({ checkedStudents }) {
         onClick={() => {
           redirect(`/${accountName}`);
         }}
+        data-testid="close-button"
       >
         Close
       </Button>

@@ -20,7 +20,13 @@ export default function EsignComponent({ handleSubmit, type = 'pad', value = '' 
   return (
     <>
       {type === 'text' ? (
-        <TextField value={value} onChange={handleChange} type="text" fullWidth />
+        <TextField
+          value={value}
+          data-testid="text-field"
+          onChange={handleChange}
+          type="text"
+          fullWidth
+        />
       ) : (
         <SignatureCanvas
           penColor="black"

@@ -26,6 +26,7 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
                   }}
                   checkedIcon={<CheckIcon className={classes.checkBoxIcon} />}
                   iconstyle={{ fill: 'black' }}
+                  data-testid={`${FirstName}-${LastName}-checked`}
                 />
               }
               classes={{
@@ -38,7 +39,11 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
           <Box className={classes.phoneField}>
             <Typography>{Phone}</Typography>
             {canEdit && (
-              <Typography onClick={handleEdit} className={classes.editButton}>
+              <Typography
+                onClick={handleEdit}
+                className={classes.editButton}
+                data-testid="edit-button"
+              >
                 Edit
               </Typography>
             )}

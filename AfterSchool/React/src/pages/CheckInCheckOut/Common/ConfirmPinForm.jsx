@@ -34,6 +34,7 @@ export default function ConfirmPinForm({ userPin, handleSubmitPinCode }) {
         variant="contained"
         color="primary"
         disabled={errorMessage}
+        data-testid="next-button"
       >
         Next
       </Button>

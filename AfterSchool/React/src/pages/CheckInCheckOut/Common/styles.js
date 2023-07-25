@@ -49,7 +49,6 @@ export default makeStyles(theme => ({
     width: '80%',
     [theme.breakpoints.down('sm')]: {
       width: '100%',
-      // height: '45%',
       marginTop: '30%'
     }
   },
@@ -185,5 +184,8 @@ export default makeStyles(theme => ({
   },
   displayContents: {
     display: 'contents'
+  },
+  pinField: {
+    padding: '10px'
   }
 }));

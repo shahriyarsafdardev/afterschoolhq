@@ -27,10 +27,16 @@ export default function PinInputForm({ setUserPin, resetPinLink }) {
         variant="contained"
         color="primary"
         disabled={pin.length !== 4}
+        data-testid="next-button"
       >
         Next
       </Button>
-      <Typography onClick={() => navigate(resetPinLink)} className={classes.link} variant="body1">
+      <Typography
+        onClick={() => navigate(resetPinLink)}
+        className={classes.link}
+        variant="body1"
+        data-testid="forgot-pin-button"
+      >
         Forgot My PIN
       </Typography>
     </Box>

@@ -55,7 +55,7 @@ function AuthorizedPersonListRow({
     if (HasAccess && !IsPinSetup)
       sections.push(
         <>
-          <Typography onClick={handleEdit} className={classes.editButton}>
+          <Typography onClick={handleEdit} className={classes.editButton} data-testid="edit-button">
             Edit
           </Typography>
           {ID !== -1 && (
@@ -64,6 +64,7 @@ function AuthorizedPersonListRow({
                 onClick={sendInvite}
                 className={cs(classes.editButton, cantInvite && classes.fontGreen)}
                 key="resend-invite-button"
+                data-testid="resend-invite-button"
               >
                 {cantInvite ? 'Invite Sent!' : 'Resend Invite'}
               </Typography>
@@ -72,6 +73,7 @@ function AuthorizedPersonListRow({
                 onClick={() => handleAddRemoveAccess(false)}
                 className={classes.editButton}
                 key="cancel-invite-button"
+                data-testid="cancel-invite-button"
               >
                 Cancel Invite
               </Typography>
@@ -85,13 +87,18 @@ function AuthorizedPersonListRow({
           onClick={() => handleAddRemoveAccess(false)}
           className={classes.editButton}
           key="remove-access-button"
+          data-testid="remove-invite-button"
         >
           Remove Access
         </Typography>
       );
     if (!HasAccess)
       sections.push(
-        <Typography onClick={() => handleAddRemoveAccess(true)} className={classes.editButton}>
+        <Typography
+          onClick={() => handleAddRemoveAccess(true)}
+          className={classes.editButton}
+          data-testid="restore-invite-button"
+        >
           Restore Access
         </Typography>
       );

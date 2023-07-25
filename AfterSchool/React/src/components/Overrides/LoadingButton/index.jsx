@@ -5,7 +5,7 @@ export default function index(props) {
   const { loading = false, text, disabled, ...restProps } = props;
 
   return (
-    <Button disabled={loading || disabled} {...restProps}>
+    <Button disabled={loading || disabled} {...restProps} data-testid={`${text}-button`}>
       {loading ? (
         <>
           {'Loading . . .'} <CircularProgress size={'20px'} />

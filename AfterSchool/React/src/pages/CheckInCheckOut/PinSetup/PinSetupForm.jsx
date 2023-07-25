@@ -29,6 +29,7 @@ function PinSetupForm({ setUserPin, currentUserInfo }) {
         variant="contained"
         color="primary"
         disabled={pin.length !== 4}
+        data-testid="next-button"
       >
         Next
       </Button>
