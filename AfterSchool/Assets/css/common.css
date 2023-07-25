@@ -136,7 +136,7 @@
         flex-direction: row;
     }
 
-    .logo-wrapper {
+    .qr-logo-wrapper {
         width: 33.33%;
         text-align: right;
     }
@@ -165,7 +165,7 @@
         font-size: 16px;
     }
 
-    .logo-wrapper {
+    .qr-logo-wrapper {
         width: 66.66%;
         text-align: center;
         padding-bottom: 20px;
