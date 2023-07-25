@@ -85,7 +85,7 @@
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
                                                        checkMessage="checking in" class="checkInOutBox newCheckbox checkIn" data-forerror="true"/>
-                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label">Check In</label>
+                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check In</label>
                                             }
                                             else
                                             {
@@ -99,7 +99,7 @@
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
                                                        checkMessage="checking out" class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
-                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label">Check Out</label>
+                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check Out</label>
                                             }
                                         </td>
                                     </tr>
@@ -212,14 +212,14 @@
            {
                html += "<br/>You are manually checking in:<br/>";
                checkInStudentsName.forEach(function (stdName){
-                   html += "<span class='checkin-label'>"+stdName+"</span>"+"<br/>";
+                   html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
                });
            }
            if (checkOutStudentsName.length > 0)
            {
                html += "<br/>You are manually checking out:<br/>";
                checkOutStudentsName.forEach(function (stdName){
-                   html += "<span class='checkin-label'>"+stdName+"</span>"+"<br/>";
+                   html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
                });   
            }
            $("#attendanceList").empty();
