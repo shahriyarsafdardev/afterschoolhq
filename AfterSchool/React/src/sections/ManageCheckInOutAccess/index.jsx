@@ -53,24 +53,28 @@ export default function index() {
         };
         students.push(student);
       });
-      await updateAuthorizedPersons(students).then(() => {
-        enqueueSnackbar('Submitted.', { variant: 'success' });
-        setSubmitting(false);
+      await updateAuthorizedPersons(students).then(msgs => {
+        if (!msgs.length) {
+          enqueueSnackbar('Submitted.', { variant: 'success' });
+        }
       });
+      setSubmitting(false);
     }
   });
 
   const { setFieldValue, values, handleSubmit, resetForm, dirty, isSubmitting } = formik;
 
-  const handleOnCancel = () => {
+  const handleOnCancel = event => {
+    event.preventDefault();
     resetForm();
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = event => {
+    event.preventDefault();
     handleSubmit();
   };
 
-  if (loading) return <Loader />;
+  if (loading || isSubmitting) return <Loader />;
 
   return (
     <Box>

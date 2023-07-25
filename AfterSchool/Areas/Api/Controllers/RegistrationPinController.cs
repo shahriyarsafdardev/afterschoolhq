@@ -729,7 +729,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Unauthorized User");
 
                 var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
-                var studentsList = GetAuthorizedPerson(masterRegistrants);
+                var studentsList = GetAuthorizedPerson(masterRegistrants, msgs);
 
                 dynamic response = new
                 {
@@ -779,40 +779,55 @@ namespace AfterSchool.Areas.Api.Controllers
                                 WebUser user;
                                 RegistrantWebUser registrantWebUser;
 
-                                if (authorizedPerson.ID == -1)
+                                if (authorizedPerson.ID == -1 && amsgs.HasNoErrors())
                                 {
-                                    user = new WebUser
-                                    {
+                                    if (WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs))
+                                        user = WebUser.LoadByPhone(authorizedPerson.Phone, amsgs, adc);
+                                    else
+                                    {  
+                                        user = new WebUser
+                                        {
                                         FirstName = authorizedPerson.FirstName,
                                         LastName = authorizedPerson.LastName,
                                         Phone = authorizedPerson.Phone,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
                                         AuthorizationTypeId = WebUserAuthorizationType.Pickup,
-                                    };
+                                        };
                                     amsgs.AddRange(user.Save(adc));
+                                    }
+                                    var existingRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value, user.ID.Value, amsgs, adc);
 
-                                    registrantWebUser = new RegistrantWebUser
+                                    if(existingRegistrantWebUser.IsEmpty())
                                     {
-                                        CreateDate = DateTime.UtcNow,
-                                        RegistrantId = masterRegistrant.ID,
-                                        WebUserId = user.ID,
-                                        IsDeleted = false,
-                                    };
-                                    amsgs.AddRange(registrantWebUser.Save(adc));
+                                        registrantWebUser = new RegistrantWebUser
+                                        {
+                                            CreateDate = DateTime.UtcNow,
+                                            RegistrantId = masterRegistrant.ID,
+                                            WebUserId = user.ID,
+                                            IsDeleted = false,
+                                        };
+                                        amsgs.AddRange(registrantWebUser.Save(adc));
+                                    }
+                                    
                                 }
                                 else
                                 {
-                                    if (WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs, adc))
-                                        throw new Exception($"Phone number {authorizedPerson.Phone} already exist");
-
                                     user = WebUser.Load(authorizedPerson.ID, amsgs, adc);
 
-                                    if (user.IsNotEmpty())
+                                    if(!user.Phone.Equals(authorizedPerson.Phone))
+                                        if(!WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs))
+                                            user.Phone = authorizedPerson.Phone;
+                                        else
+                                        {
+                                            amsgs.Add($"Phone already exist {authorizedPerson.Phone}", MessageType.UserError);
+                                            return;
+                                        }
+
+                                    if (user.IsNotEmpty() && amsgs.HasNoErrors())
                                     {
                                         user.FirstName = authorizedPerson.FirstName;
                                         user.LastName = authorizedPerson.LastName;
-                                        user.Phone = authorizedPerson.Phone;
 
                                         amsgs.AddRange(user.Save(adc));
 
@@ -841,7 +856,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 dynamic response = new
                 {
-                    Students = GetAuthorizedPerson(masterRegistrants),
+                    Students = GetAuthorizedPerson(masterRegistrants, msgs),
                 };
 
                 return Json(
@@ -957,7 +972,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 msgs);
         }
 
-        public static List<ManageCheckInOutAccessDto> GetAuthorizedPerson(List<Registrant> masterRegistrants)
+        public static List<ManageCheckInOutAccessDto> GetAuthorizedPerson(List<Registrant> masterRegistrants , SystemMessages msgs)
         {
             var studentsList = new List<ManageCheckInOutAccessDto>();
 
