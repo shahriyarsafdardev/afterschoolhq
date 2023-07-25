@@ -2816,7 +2816,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpPost]
         public ActionResult AddNewAttendanceDate(int scheduleId, DateTime date)
         {
-            var msgs =  new SystemMessages();
+            var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
             var activitySchedule = ActivitySchedule.Load(scheduleId, msgs);
             var activityInstance = activitySchedule.GetInstances().FirstOrDefault();
@@ -2824,7 +2824,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var endDateTime = date.Date + activityInstance?.EndDateTime.Value.TimeOfDay;
             var dateAlreadyExist = ActivityInstance.LoadByActivityScheduleIdByDateRange(scheduleId, startDateTime.Value,
                 endDateTime.Value, msgs).Count > 0;
-            
+
             if (!dateAlreadyExist)
             {
                 var instance = new ActivityInstance
@@ -2840,29 +2840,32 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
                 instance.Day = Extensions.ToDayOfWeekASL(instance.StartDateTime.Value.DayOfWeek);
                 msgs.AddRange(instance.Save());
-            
+
                 if (msgs.HasNoErrors())
-                    return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);    
+                    return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
             }
             else
             {
                 msgs.Add("Date already exists.", MessageType.UserError);
             }
+
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpPost]
         public ActionResult TrackCheckInOutAttendance(List<CheckInOutAttendanceDto> checkInOutInfo)
         {
-            var msgs =  new SystemMessages();
+            var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
-            
+
             checkInOutInfo.ForEach(checkInOut =>
             {
                 var checkInOutObj = new CheckInOut
                 {
                     CreateDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
                     LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = currentUser.ID,
                     Date = DateTime.UtcNow,
                     Browser = Request.UserAgent,
                     IPAddress = Request.GetUserHostAddress(),
@@ -2870,12 +2873,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     AttendanceRegistrantId = checkInOut.Id,
                     CheckType = checkInOut.CheckType,
                 };
-                msgs.AddRange(checkInOutObj.Save());    
+                msgs.AddRange(checkInOutObj.Save());
             });
-            
+
             if (msgs.HasNoErrors())
                 return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
-            
+
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
