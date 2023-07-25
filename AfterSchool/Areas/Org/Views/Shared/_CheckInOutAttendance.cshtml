@@ -235,6 +235,7 @@
             $.post(
                '@Url.Action("TrackCheckInOutAttendance", controller)',
                    {
+                       attendanceId: @Model.ID,
                        checkInOutInfo: checkInOutInfo
                    },
                    function (data) {
