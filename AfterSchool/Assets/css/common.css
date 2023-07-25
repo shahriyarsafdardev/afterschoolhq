@@ -1939,3 +1939,6 @@
     color: #00C5A3;
     cursor:pointer;
 }
+.checkin-date {
+    margin-bottom: auto;
+}
