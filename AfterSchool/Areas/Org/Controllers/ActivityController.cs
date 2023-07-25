@@ -2878,6 +2878,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
             
             attendance.IsCompleted = true;
+            attendance.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(attendance.Save());
 
             if (msgs.HasNoErrors())
