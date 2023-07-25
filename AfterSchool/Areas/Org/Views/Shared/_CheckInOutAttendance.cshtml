@@ -150,6 +150,10 @@
 </div>
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
+        let checkInOutInfo = [];
+        let checkInStudentsName = [];
+        let checkOutStudentsName = [];
+        updateButtonState();
         $('#activityinstance').change(function () {
             location.href = '@Url.Action("TrackAttendance", "activity")?actinst=' + $(this).val();
         });
@@ -177,9 +181,6 @@
                   );
             }
         });
-        let checkInOutInfo = [];
-        let checkInStudentsName = [];
-        let checkOutStudentsName = [];
         $(".checkInOutBox").on('click',function () {
             checkInOutInfo = [];
             checkInStudentsName = [];
@@ -206,24 +207,29 @@
                }
             }); 
         });
-        $("#submitAttendanceBtn").on('click',function (){
+        $("#submitAttendanceBtn").on('click',function (e){
            let html = "";
-           if (checkInStudentsName.length > 0)
-           {
-               html += "<br/>You are manually checking in:<br/>";
-               checkInStudentsName.forEach(function (stdName){
-                   html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
-               });
+           if (checkInOutInfo.length === 0) {
+               e.preventDefault();
+           } 
+           else {
+               if (checkInStudentsName.length > 0)
+               {
+                   html += "<br/>You are manually checking in:<br/>";
+                   checkInStudentsName.forEach(function (stdName){
+                       html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
+                   });
+               }
+               if (checkOutStudentsName.length > 0)
+               {
+                   html += "<br/>You are manually checking out:<br/>";
+                   checkOutStudentsName.forEach(function (stdName){
+                       html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
+                   });   
+               }
+               $("#attendanceList").empty();
+               $("#attendanceList").append(html);
            }
-           if (checkOutStudentsName.length > 0)
-           {
-               html += "<br/>You are manually checking out:<br/>";
-               checkOutStudentsName.forEach(function (stdName){
-                   html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
-               });   
-           }
-           $("#attendanceList").empty();
-           $("#attendanceList").append(html);
         });
         $('#save-check-in-out').click(function () {
             $.post(
@@ -247,6 +253,17 @@
                    }
                );
         });
+        $(".checkInOutBox").on("change", function () {
+            updateButtonState();
+        });
+        function updateButtonState() {
+            let submitAttendanceBtn = $("#submitAttendanceBtn");
+            if (checkInOutInfo.length > 0) {
+                submitAttendanceBtn.removeClass("disabled");
+            } else {
+                submitAttendanceBtn.addClass("disabled");
+            }
+        }
     });
 </script>
 
