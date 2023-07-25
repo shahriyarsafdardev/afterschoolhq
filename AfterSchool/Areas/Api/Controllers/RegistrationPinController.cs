@@ -729,36 +729,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Unauthorized User");
 
                 var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
-                var studentsList = new List<ManageCheckInOutAccessDto>();
-
-                masterRegistrants.ForEach(masterRegistrant =>
-                {
-                    var registrantWebUsers = RegistrantWebUser.LoadByRegistrantId(masterRegistrant.ID.Value, msgs);
-                    var authorizedPersons = new List<PickUpDto>();
-
-                    registrantWebUsers.ForEach(registrantWebUser =>
-                    {
-                        var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
-
-                        if (authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
-                            authorizedPersons.Add(new PickUpDto
-                            {
-                                ID = authorizedPerson.ID.Value,
-                                FirstName = authorizedPerson.FirstName,
-                                LastName = authorizedPerson.LastName,
-                                HasAccess = !registrantWebUser.IsDeleted,
-                                Phone = authorizedPerson.Phone,
-                                IsPinSetup = authorizedPerson.PinCode.IsNotEmpty(),
-                            });
-                    });
-
-                    studentsList.Add(new ManageCheckInOutAccessDto
-                    {
-                        StudentName = masterRegistrant.Name,
-                        StudentUid = masterRegistrant.Uid.ToString(),
-                        AuthorizedPersons = authorizedPersons,
-                    });
-                });
+                var studentsList = GetAuthorizedPerson(masterRegistrants);
 
                 dynamic response = new
                 {
@@ -782,6 +753,11 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult AddOrUpdateAuthorizedPersons(List<ManageCheckInOutAccessDto> studentsList)
         {
             var msgs = new SystemMessages();
+
+            var currentUser = SessionVariables.CurrentUser;
+            if (currentUser.IsEmpty())
+                throw new Exception("Unauthorized User");
+
             try
             {
                 studentsList.ForEach(student =>
@@ -802,6 +778,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             {
                                 WebUser user;
                                 RegistrantWebUser registrantWebUser;
+
                                 if (authorizedPerson.ID == -1)
                                 {
                                     user = new WebUser
@@ -826,6 +803,9 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
                                 else
                                 {
+                                    if (WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs, adc))
+                                        throw new Exception($"Phone number {authorizedPerson.Phone} already exist");
+
                                     user = WebUser.Load(authorizedPerson.ID, amsgs, adc);
 
                                     if (user.IsNotEmpty())
@@ -857,8 +837,15 @@ namespace AfterSchool.Areas.Api.Controllers
                     );
                 });
 
+                var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
+
+                dynamic response = new
+                {
+                    Students = GetAuthorizedPerson(masterRegistrants),
+                };
+
                 return Json(
-                    new ApiResponse(msgs, null),
+                    new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -968,6 +955,42 @@ namespace AfterSchool.Areas.Api.Controllers
                 null,
                 null,
                 msgs);
+        }
+
+        public static List<ManageCheckInOutAccessDto> GetAuthorizedPerson(List<Registrant> masterRegistrants)
+        {
+            var studentsList = new List<ManageCheckInOutAccessDto>();
+
+            masterRegistrants.ForEach(masterRegistrant =>
+            {
+                var registrantWebUsers = RegistrantWebUser.LoadByRegistrantId(masterRegistrant.ID.Value, msgs);
+                var authorizedPersons = new List<PickUpDto>();
+
+                registrantWebUsers.ForEach(registrantWebUser =>
+                {
+                    var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
+
+                    if (authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+                        authorizedPersons.Add(new PickUpDto
+                        {
+                            ID = authorizedPerson.ID.Value,
+                            FirstName = authorizedPerson.FirstName,
+                            LastName = authorizedPerson.LastName,
+                            HasAccess = !registrantWebUser.IsDeleted,
+                            Phone = authorizedPerson.Phone,
+                            IsPinSetup = authorizedPerson.PinCode.IsNotEmpty(),
+                        });
+                });
+
+                studentsList.Add(new ManageCheckInOutAccessDto
+                {
+                    StudentName = masterRegistrant.Name,
+                    StudentUid = masterRegistrant.Uid.ToString(),
+                    AuthorizedPersons = authorizedPersons,
+                });
+            });
+
+            return studentsList;
         }
     }
 }
