@@ -16,13 +16,18 @@
         padding: 0 !important;
     }
 </style>
+<style>
+    .modal-body-attendance {
+        text-align: center;
+    }
+</style>
 <form method="post" action="@Url.Action("TrackCheckInOutAttendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
 
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="pull-right">
                 <a href="@Url.Action("attendance", controller, new { id = Model.ActivityUid })" class="btn btn-default btn-space">&laquo; Back to List</a>
-                <button type="submit" class="btn btn-primary btn-space" @(isAttendanceDisabled)><i class="icon icon-left s7-diskette"></i> Save Attendance</button>
+                <a data-modal="save-checkin" id="submitAttendanceBtn" class="btn btn-primary btn-space md-trigger" @(isAttendanceDisabled)><i class="icon icon-left s7-diskette"></i> Save Attendance</a>
             </div>
             <i class="s7-check"></i> Take Attendance
         </div>
@@ -79,7 +84,7 @@
                                             @if (checkInOutInfo.Count == 0)
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
-                                                       checkType="CheckIn" checkMessage="checking in" class="checkInOutBox newCheckbox checkIn" data-forerror="true"/>
+                                                       checkMessage="checking in" class="checkInOutBox newCheckbox checkIn" data-forerror="true"/>
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label">Check In</label>
                                             }
                                             else
@@ -93,8 +98,8 @@
                                             @if (checkInOutInfo.Count > 0 && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckIn)
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
-                                                       checkType="CheckOut" checkMessage="checking out" class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
-                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label">Check Out</label>
+                                                       checkMessage="checking out" class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
+                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkout-label">Check Out</label>
                                             }
                                         </td>
                                     </tr>
@@ -104,17 +109,24 @@
                     </table>
                 </div>
             </div>
-
-            <div class="form-group">
-                <label class="col-sm-2 control-label"></label>
-                <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block pull-right" @(isAttendanceDisabled)><i class="s7-diskette"></i> Save</button>
-                </div>
-            </div>
-
         </div>
     </div>
 </form>
+@{
+    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
+    {
+        ActionButtonHtml = "Save Attendance",
+        ActionButtonId = "save-check-in-out",
+        HtmlBody =
+        "<div class=\"modal-body-attendance\"><p>WARNING: The selected students have not been checked in/out by an approved person. <b>Please ensure the students are accounted for before you save.</b></p>" +
+        "<div id=\"attendanceListContainer\">" +
+        "<div id=\"attendanceList\"></div>" +
+        "</div>" +
+        "</div>",
+        ID = "save-checkin",
+        Title = "Save Attendance",
+    });
+}
 <div id="modal-add-attendance-date" class="md-modal colored-header custom-width md-effect-9">
     <div class="md-content">
         <div class="modal-header">
@@ -130,7 +142,7 @@
             <input type="hidden" id="schedule" name="scheduleId" value="@schedule.ID"/>
             <div id="dateError" class="text-danger hide">Date is required.</div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer textCenterImportant">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
             <a id="btnAddDate" class="btn btn-primary" >Add Date</a>
         </div>
@@ -139,7 +151,7 @@
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#activityinstance').change(function () {
-            location.href = '@Url.Action("TrackCheckInOutAttendance", "activity")?actinst=' + $(this).val();
+            location.href = '@Url.Action("TrackAttendance", "activity")?actinst=' + $(this).val();
         });
         $("#btnAddDate").on('click',function (){
            let date = $("#txtNewDate").val(); 
@@ -165,24 +177,53 @@
                   );
             }
         });
-        let checkInOutInfo = {};
-        $(".checkInOutBox").on('click',function (){
-            $("#checkIn").each(function (){
+        let checkInOutInfo = [];
+        let checkInStudentsName = [];
+        let checkOutStudentsName = [];
+        $(".checkInOutBox").on('click',function () {
+            checkInOutInfo = [];
+            checkInStudentsName = [];
+            checkOutStudentsName = [];
+            $(".checkIn").each(function (){
                if ($(this).is(':checked'))
                {
-                   checkInOutInfo.Id = $(this).attr('id');
-                   checkInOutInfo.Name = $(this).attr('name');
-                   checkInOutInfo.CheckType = $(this).attr('checkType');
+                   checkInOutInfo.push({
+                       Id : $(this).attr('id'),
+                       CheckType : 'CheckIn'
+                   });
+                   checkInStudentsName.push($(this).attr('name'));
                }
             }); 
-            $("#checkOut").each(function (){
+            
+            $(".checkOut").each(function (){
                if ($(this).is(':checked'))
                {
-                   checkInOutInfo.Id = $(this).attr('id');
-                   checkInOutInfo.Name = $(this).attr('name');
-                   checkInOutInfo.CheckType = $(this).attr('checkType');
+                   checkInOutInfo.push({
+                       Id : $(this).attr('id'),
+                       CheckType : 'CheckOut'
+                   });
+                   checkOutStudentsName.push($(this).attr('name'));
                }
             }); 
+        });
+        $("#submitAttendanceBtn").on('click',function (){
+           let html = "";
+           if (checkInStudentsName.length > 0)
+           {
+               html += "<br/>You are manually checking in:<br/>";
+               checkInStudentsName.forEach(function (d){
+                   html += "<span class='checkin-label'>"+d+"</span>"+"<br/>";
+               });
+           }
+           if (checkOutStudentsName.length > 0)
+           {
+               html += "<br/>You are manually checking out:<br/>";
+               checkOutStudentsName.forEach(function (d){
+                   html += "<span class='checkin-label'>"+d+"</span>"+"<br/>";
+               });   
+           }
+           $("#attendanceList").empty();
+           $("#attendanceList").append(html);
         });
     });
 </script>
