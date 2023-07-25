@@ -2876,14 +2876,18 @@ namespace AfterSchool.Areas.Org.Controllers
                 };
                 msgs.AddRange(checkInOutObj.Save());
 
-                var attendanceRegistrant = AttendanceRegistrant.Load(checkInOut.Id, msgs);
-                if (attendanceRegistrant.IsNotEmpty())
+                if (checkInOut.CheckType == CheckType.CheckIn)
                 {
-                    attendanceRegistrant.NumberPresent = 1;
-                    attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
-                    attendanceRegistrant.LastModifiedBy = currentUser.ID;
-                    msgs.AddRange(attendanceRegistrant.Save());
+                    var attendanceRegistrant = AttendanceRegistrant.Load(checkInOut.Id, msgs);
+                    if (attendanceRegistrant.IsNotEmpty())
+                    {
+                        attendanceRegistrant.NumberPresent = 1;
+                        attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
+                        attendanceRegistrant.LastModifiedBy = currentUser.ID;
+                        msgs.AddRange(attendanceRegistrant.Save());
+                    }
                 }
+
             });
             
             attendance.IsCompleted = true;
