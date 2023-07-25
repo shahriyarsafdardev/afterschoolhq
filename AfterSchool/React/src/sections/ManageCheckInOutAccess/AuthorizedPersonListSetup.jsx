@@ -68,7 +68,7 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, s
     if (val) {
       return (
         <AuthorizedPersonListRow
-          key={key}
+          key={`${key}-${studentUid}`}
           person={values[key]}
           errors={errors[key]}
           touched={touched[key]}

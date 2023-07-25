@@ -39,8 +39,11 @@ export const useAPAccessActions = () => {
   const updateAuthorizedPersons = async studentsList => {
     const params = { studentsList };
     return await ManageAPAccessRepository.addOrUpdateAuthorizedPersons(params).then(
-      ({ data: { msgs } }) => {
+      ({ data: { msgs, obj } }) => {
         dispatch(setMsgs(msgs));
+        if (!msgs.length) {
+          dispatch(setData({ obj }));
+        }
         return msgs;
       }
     );

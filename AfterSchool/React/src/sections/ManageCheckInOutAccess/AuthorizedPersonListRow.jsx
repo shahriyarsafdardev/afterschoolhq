@@ -2,20 +2,12 @@ import cs from 'classnames';
 import React, { useEffect, useState } from 'react';
 import { Box, Typography } from '@material-ui/core';
 import useStyles from './styles';
-import { ErrorBand } from 'components';
 import { useSnackbar } from 'notistack';
 import { useManageAPAccess } from 'redux/hooks';
 
 const RESEND_LIMIT = 86400;
 
-function AuthorizedPersonListRow({
-  touched,
-  person,
-  errors,
-  handleEdit,
-  studentUid,
-  handleAddRemoveAccess
-}) {
+function AuthorizedPersonListRow({ person, handleEdit, studentUid, handleAddRemoveAccess }) {
   const classes = useStyles();
   const { ID, FirstName, LastName, Phone, HasAccess, IsPinSetup } = person;
   const inviteLinkSendAt = localStorage.getItem(`invited${ID}`);
@@ -48,6 +40,10 @@ function AuthorizedPersonListRow({
     };
 
     updateTimeDifference();
+
+    return () => {
+      console.log('unmounted');
+    };
   }, [inviteLinkSendAt]);
 
   const controlSections = () => {
@@ -106,31 +102,27 @@ function AuthorizedPersonListRow({
   };
 
   return (
-    <>
-      <Box className={classes.listWrapper} key={`${ID}-${HasAccess}`}>
-        <Box className={classes.listInnerWrapper}>
+    <Box className={classes.listWrapper} key={`${studentUid}-${ID}-${HasAccess}`}>
+      <Box className={classes.listInnerWrapper}>
+        <Box className={classes.personInfo}>
           <Typography
             variant="body1"
             className={cs(classes.formControlLabelRoot, !HasAccess && classes.hintColor)}
           >
-            {`${FirstName} ${LastName}`}{' '}
+            {FirstName} {LastName}
             {!HasAccess && (
               <Typography component="span" variant="body1" className={classes.accessRevokedInfo}>
                 (Access Revoked)
               </Typography>
             )}
           </Typography>
-
-          <Box className={classes.phoneField}>
-            <Typography className={cs(classes.phoneNumber, !HasAccess && classes.hintColor)}>
-              {Phone}
-            </Typography>
-            {controlSections()}
-          </Box>
+          <Typography className={cs(classes.phoneNumber, !HasAccess && classes.hintColor)}>
+            {Phone}
+          </Typography>
         </Box>
+        <Box className={classes.phoneField}>{controlSections()}</Box>
       </Box>
-      {touched && errors?.Phone && <ErrorBand error={errors?.Phone} />}
-    </>
+    </Box>
   );
 }
 

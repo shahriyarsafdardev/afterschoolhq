@@ -7,7 +7,7 @@ export default makeStyles(theme => ({
     color: '#FFFFFF',
     marginLeft: 15,
     minWidth: 95,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       width: '100%',
       marginLeft: 0
     }
@@ -15,7 +15,8 @@ export default makeStyles(theme => ({
   editButton: {
     cursor: 'pointer',
     textDecoration: 'underline',
-    color: theme.palette.text.secondary
+    color: theme.palette.text.secondary,
+    textAlign: 'center'
   },
   controls: {
     margin: 'auto 0px auto auto',
@@ -37,9 +38,10 @@ export default makeStyles(theme => ({
     textAlign: 'left'
   },
   addPersonButton: {
+    marginTop: 10,
+    cursor: 'pointer',
     width: 'fit-content',
     textDecoration: 'underline',
-    cursor: 'pointer',
     color: theme.palette.primary.main
   },
   listButtonWrapper: {
@@ -48,8 +50,15 @@ export default makeStyles(theme => ({
   },
   phoneField: {
     display: 'flex',
-    width: '412px',
-    justifyContent: 'space-between'
+    width: '45%',
+    gap: '20px',
+    justifyContent: 'space-between',
+    [theme.breakpoints.only('md')]: {
+      width: '80%'
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
+    }
   },
   listWrapper: {
     display: 'flex',
@@ -61,17 +70,22 @@ export default makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginLeft: 0,
-    width: '75%',
     height: '50px',
+    gap: '20px',
+    [theme.breakpoints.only('md')]: {
+      gap: '30px'
+    },
     [theme.breakpoints.down('sm')]: {
-      marginLeft: 8
+      marginBottom: 20,
+      gap: 'unset',
+      flexDirection: 'column',
+      alignItems: 'flex-start'
     }
   },
   fieldWrapper: {
     display: 'flex',
     alignItems: 'baseline',
     marginLeft: 0,
-    width: '75%',
     [theme.breakpoints.down('sm')]: {
       marginLeft: 8
     }
@@ -133,7 +147,14 @@ export default makeStyles(theme => ({
   },
   listingWrapper: {
     paddingLeft: '27px',
-    width: '80%'
+    width: '80%',
+    [theme.breakpoints.only('md')]: {
+      width: '90%'
+    },
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 0,
+      width: '100%'
+    }
   },
   italicFont: {
     fontStyle: 'italic'
@@ -146,13 +167,17 @@ export default makeStyles(theme => ({
     fontSize: 14,
     minWidth: 90,
     color: theme.palette.primary.main,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       width: '100%'
     }
   },
   buttons: {
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column',
+      gap: '10px'
+    }
   },
   phoneNumber: {
     color: theme.palette.primary
@@ -162,5 +187,17 @@ export default makeStyles(theme => ({
     textDecoration: 'none',
     color: theme.palette.primary.main,
     cursor: 'unset'
+  },
+  personInfo: {
+    gap: '10px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '40%',
+    [theme.breakpoints.only('md')]: {
+      width: '80%'
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
+    }
   }
 }));
