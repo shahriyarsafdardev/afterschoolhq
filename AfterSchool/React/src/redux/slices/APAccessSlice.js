@@ -38,10 +38,8 @@ export const useAPAccessActions = () => {
 
   const updateAuthorizedPersons = async studentsList => {
     const params = { studentsList };
-    dispatch(loadingStart());
     return await ManageAPAccessRepository.addOrUpdateAuthorizedPersons(params).then(
       ({ data: { msgs } }) => {
-        dispatch(loadingCompleted());
         dispatch(setMsgs(msgs));
         return msgs;
       }
@@ -56,7 +54,11 @@ export const useAPAccessActions = () => {
     });
   };
 
-  return { loadAuthorizedPersonsList, updateAuthorizedPersons, resendInvite };
+  return {
+    loadAuthorizedPersonsList,
+    updateAuthorizedPersons,
+    resendInvite
+  };
 };
 
 export default APAccessSlice;

@@ -42,7 +42,8 @@ export default function index() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues,
-    onSubmit: async values => {
+    onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
       const students = [];
       Object.keys(values).map(key => {
         const student = {
@@ -52,14 +53,14 @@ export default function index() {
         };
         students.push(student);
       });
-      updateAuthorizedPersons(students).then(() => {
+      await updateAuthorizedPersons(students).then(() => {
         enqueueSnackbar('Submitted.', { variant: 'success' });
-        resetForm();
+        setSubmitting(false);
       });
     }
   });
 
-  const { setFieldValue, values, handleSubmit, resetForm, dirty } = formik;
+  const { setFieldValue, values, handleSubmit, resetForm, dirty, isSubmitting } = formik;
 
   const handleOnCancel = () => {
     resetForm();
@@ -109,7 +110,7 @@ export default function index() {
           className={classes.saveButton}
           text={'Save'}
           disabled={!dirty}
-          loading={false}
+          loading={isSubmitting}
         />
       </Box>
     </Box>

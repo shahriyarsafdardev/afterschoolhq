@@ -6,7 +6,7 @@ export default makeStyles(theme => ({
     fontSize: 14,
     color: '#FFFFFF',
     marginLeft: 15,
-    width: 95,
+    minWidth: 95,
     [theme.breakpoints.down('sm')]: {
       width: '100%',
       marginLeft: 0
@@ -144,7 +144,7 @@ export default makeStyles(theme => ({
   },
   cancelButton: {
     fontSize: 14,
-    width: 90,
+    minWidth: 90,
     color: theme.palette.primary.main,
     [theme.breakpoints.down('sm')]: {
       width: '100%'
