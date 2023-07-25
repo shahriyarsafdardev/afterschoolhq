@@ -1923,3 +1923,20 @@
 .margin-right-10px {
     margin-right: 10px;
 }
+
+.checkInOutBox {
+    border-radius: 50%;
+    outline: none !important;
+}
+.checkInOutBox::before {
+    left: 5px;
+    border-color: #00C5A3;
+}
+.checkInOutBox:checked {
+    background: #fff;
+}
+.checkin-label {
+    color: #00C5A3;
+    font-weight:700;
+    cursor:pointer;
+}
