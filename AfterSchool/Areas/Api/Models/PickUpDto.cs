@@ -8,8 +8,6 @@ namespace AfterSchool.Areas.Api.Models
         public string Phone { get; set; }
         public QuestionDataType? PersonPhoneDataType { get; set; }
         public bool HasAccess { get; set; }
-        public bool? IsPinSetup { get; set; }
-        public bool? ResendInvite { get; set; }
-        
+        public bool? IsPinSetup { get; set; }        
     }
 }
