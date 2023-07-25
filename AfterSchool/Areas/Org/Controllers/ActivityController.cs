@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using AfterSchool.Areas.Api.Models;
 using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
@@ -2851,37 +2852,32 @@ namespace AfterSchool.Areas.Org.Controllers
         }
         
         [HttpPost]
-        /*public ActionResult TrackCheckInOutAttendance(string id, string att)
+        public ActionResult TrackCheckInOutAttendance(List<CheckInOutAttendanceDto> checkInOutInfo)
         {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var presentStudents = new List<int>();
-            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
-            var activitySchedule = activity.GetSchedule(msgs);
-            
-            attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant =>
-            {
-                var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
-                if (checkInOutInfo.Count == 0)
-                {
-                    
-                }
-            });
-
-            if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents,
-                    SessionVariables.CurrentUser, msgs);
-
-            ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
-            ViewBag.Schedule = activitySchedule;
+            var msgs =  new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
-            ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
-                currentUser.IsActivityLeader(activity, msgs));
-            ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
-            ViewBag.Messages = msgs;
-            return View(attendance);
-        }*/
+            
+            checkInOutInfo.ForEach(checkInOut =>
+            {
+                var checkInOutObj = new CheckInOut
+                {
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    Date = DateTime.UtcNow,
+                    Browser = Request.UserAgent,
+                    IPAddress = Request.GetUserHostAddress(),
+                    WebUserId = currentUser.ID.Value,
+                    AttendanceRegistrantId = checkInOut.Id,
+                    CheckType = checkInOut.CheckType,
+                };
+                msgs.AddRange(checkInOutObj.Save());    
+            });
+            
+            if (msgs.HasNoErrors())
+                return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
+            
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+        }
 
         // This returns all unbilled selected Attendances by Registrant
         private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(
