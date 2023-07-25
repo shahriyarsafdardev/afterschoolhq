@@ -112,7 +112,7 @@ namespace AfterSchool.Models
             return "";
         }
 
-        public static SystemMessages GetItemsRequiredToPublish(this Activity activity, SystemMessages msg = null,
+        public static SystemMessages GetItemsRequiredToPublish(this Activity activity, SystemMessages msg = null, bool isNotificationBar = false,
             DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -122,6 +122,7 @@ namespace AfterSchool.Models
             var paymentMsgs = new SystemMessages();
             var confirmationMsgs = new SystemMessages();
             var archiveMsgs = new SystemMessages();
+            var classes = isNotificationBar ? "error-bullet" : "";
 
             if (activity.Name.IsEmpty())
                 setupMsgs.Add("Activity Name", MessageType.UserError);
@@ -225,11 +226,11 @@ namespace AfterSchool.Models
                 var freeActivityLimitPackage =
                     PackageService.GetPackageWithFeatureLowestPrice(FeatureType.FreeActivityLimit, SessionVariables.AccountPackage);
                 var editCostLink =
-                    $"<a href=\"/org/activity/editcost/{activity.Uid}\">update pricing and payment for this activity</a>";
+                    $"<a href=\"/org/activity/editcost/{activity.Uid}\" class=\"{classes}\">update pricing and payment for this activity</a>";
                 var billingReturnUrl =
                     $"{AfterSchoolLibrary.Helpers.Utilities.BaseUrl()}/org/account/afterstripeupdate?returnurl=/org/activity/publishdetail/{activity.Uid}";
                 var upgradePackageLink =
-                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}', {(int)BillingPortalConfigurationType.SubscriptionUpdate})\">upgrade your account to the {freeActivityLimitPackage?.Name} Plan for more free activities</a>";
+                    $"<a href=\"javascript:AccountSetup.getStripeBillingLink('{billingReturnUrl}', {(int)BillingPortalConfigurationType.SubscriptionUpdate})\" class=\"{classes}\">upgrade your account to the {freeActivityLimitPackage?.Name} Plan for more free activities</a>";
 
                 msgs.Add(
                     $"<p class=\"no-bullet\">You've reached your limit on free activities, please take one of the following actions:</p><ul>" +
