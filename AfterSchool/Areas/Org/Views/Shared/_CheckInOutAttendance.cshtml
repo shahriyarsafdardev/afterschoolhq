@@ -84,7 +84,7 @@
                                             @if (checkInOutInfo.Count == 0)
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
-                                                       checkMessage="checking in" class="checkInOutBox newCheckbox checkIn" data-forerror="true"/>
+                                                       class="checkInOutBox newCheckbox checkIn" data-forerror="true"/>
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check In</label>
                                             }
                                             else
@@ -98,7 +98,7 @@
                                             @if (checkInOutInfo.Count > 0 && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckIn)
                                             {
                                                 <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
-                                                       checkMessage="checking out" class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
+                                                       class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check Out</label>
                                             }
                                         </td>
