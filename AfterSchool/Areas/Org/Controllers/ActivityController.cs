@@ -2875,6 +2875,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     CheckType = checkInOut.CheckType,
                 };
                 msgs.AddRange(checkInOutObj.Save());
+
+                var attendanceRegistrant = AttendanceRegistrant.Load(checkInOut.Id, msgs);
+                if (attendanceRegistrant.IsNotEmpty())
+                {
+                    attendanceRegistrant.NumberPresent = 1;
+                    attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
+                    attendanceRegistrant.LastModifiedBy = currentUser.ID;
+                    msgs.AddRange(attendanceRegistrant.Save());
+                }
             });
             
             attendance.IsCompleted = true;
