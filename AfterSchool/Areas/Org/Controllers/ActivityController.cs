@@ -20,6 +20,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Hangfire;
 using Email = AfterSchoolLibrary.Helpers.Email;
+using Extensions = AfterSchoolLibrary.Extensions;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -2810,6 +2811,77 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View(attendance);
         }
+
+        [HttpPost]
+        public ActionResult AddNewAttendanceDate(int scheduleId, DateTime date)
+        {
+            var msgs =  new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var activitySchedule = ActivitySchedule.Load(scheduleId, msgs);
+            var activityInstance = activitySchedule.GetInstances().FirstOrDefault();
+            var startDateTime = date.Date + activityInstance?.StartDateTime.Value.TimeOfDay;
+            var endDateTime = date.Date + activityInstance?.EndDateTime.Value.TimeOfDay;
+            var dateAlreadyExist = ActivityInstance.LoadByActivityScheduleIdByDateRange(scheduleId, startDateTime.Value,
+                endDateTime.Value, msgs).Count > 0;
+            
+            if (!dateAlreadyExist)
+            {
+                var instance = new ActivityInstance
+                {
+                    ActivityScheduleId = scheduleId,
+                    StartDateTime = startDateTime,
+                    EndDateTime = endDateTime,
+                    InstanceTypeId = InstanceType.InSession,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
+                    LastModifiedBy = currentUser.ID,
+                };
+                instance.Day = Extensions.ToDayOfWeekASL(instance.StartDateTime.Value.DayOfWeek);
+                msgs.AddRange(instance.Save());
+            
+                if (msgs.HasNoErrors())
+                    return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);    
+            }
+            else
+            {
+                msgs.Add("Date already exists.", MessageType.UserError);
+            }
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+        }
+        
+        [HttpPost]
+        /*public ActionResult TrackCheckInOutAttendance(string id, string att)
+        {
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var presentStudents = new List<int>();
+            var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(), msgs);
+            var activitySchedule = activity.GetSchedule(msgs);
+            
+            attendance.GetAttendanceRegistrants(msgs).ForEach(attendanceRegistrant =>
+            {
+                var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value,msgs);
+                if (checkInOutInfo.Count == 0)
+                {
+                    
+                }
+            });
+
+            if (msgs.HasNoErrors())
+                attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents,
+                    SessionVariables.CurrentUser, msgs);
+
+            ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+            ViewBag.Schedule = activitySchedule;
+            var currentUser = SessionVariables.CurrentUser;
+            ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
+                currentUser.IsActivityLeader(activity, msgs));
+            ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
+            ViewBag.Messages = msgs;
+            return View(attendance);
+        }*/
 
         // This returns all unbilled selected Attendances by Registrant
         private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(

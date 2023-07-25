@@ -37,34 +37,34 @@
                 
                 @{
                     if(AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value,FeatureType.ManageCheckInCheckOut) && 
-                        activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                       activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                     {
                         Html.RenderPartial(
-                     "_CheckInOutAttendance",
-                     Model,
-                     new ViewDataDictionary
-                     {
-                          { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
-                          { "Schedule", ViewBag.Schedule },
-                          { "RegistrantActivities", ViewBag.RegistrantActivities },
-                          { "Controller", "activity" },
-                     });
+                            "_CheckInOutAttendance",
+                            Model,
+                            new ViewDataDictionary
+                            {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "Schedule", ViewBag.Schedule },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                            });
                     }
                     else
-            {
-                    Html.RenderPartial(
-                              "~/Views/Shared/_RegistrantAttendance.cshtml",
-                              Model,
-                              new ViewDataDictionary
-                              {
-                          { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
-                          { "Schedule", ViewBag.Schedule },
-                          { "RegistrantActivities", ViewBag.RegistrantActivities },
-                          { "Controller", "activity" },
-                              });
-                }
+                    {
+                        Html.RenderPartial(
+                            "~/Views/Shared/_RegistrantAttendance.cshtml",
+                            Model,
+                            new ViewDataDictionary
+                            {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "Schedule", ViewBag.Schedule },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                            });
+                    }
 
-            }
+                }
             </div>
         </div>
     </div>
