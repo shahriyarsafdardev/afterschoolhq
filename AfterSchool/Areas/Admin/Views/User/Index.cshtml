@@ -43,7 +43,8 @@
 
 <script>
     function doSearch() {
-        location.href = `@Url.Action("index", "user")?search=${$('#search').val()}`;
+        var encodedSearchValue = encodeURIComponent($('#search').val());
+        location.href = `@Url.Action("index", "user")?search=${encodedSearchValue}`;
     }
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
