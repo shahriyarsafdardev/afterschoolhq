@@ -1361,10 +1361,13 @@ namespace AfterSchoolLibrary.Services
             if(subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < DateTime.UtcNow.Date)
                 msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
 
-            var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+            if(activitySchedule != null && activitySchedule.StartDate.HasValue)
+            {
+                var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
 
-            if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
-                msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
+                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+            }
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())

@@ -99,7 +99,7 @@ namespace AfterSchoolLibrary.Helpers
             var isSubscription = subscriptionPlanType == SubscriptionPlanType.Subscription;
             var isOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
 
-            if (isSubscription && !isOnCheckout)
+            if (isSubscription && !isOnCheckout && !(!participationObject.GetActivity().HasSchedule && plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart))
             {
                 //loading variables
                 // understand when first charge happens
