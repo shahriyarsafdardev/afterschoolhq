@@ -836,23 +836,17 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                         amsgs.AddRange(user.Save(adc));
 
-                                        if (!authorizedPerson.HasAccess)
-                                        {
-                                            registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
+                                        registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
                                                 user.ID.Value, amsgs, adc);
 
-                                            registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
-                                            amsgs.AddRange(registrantWebUser.Save(adc));
-                                        }
+                                        registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
+                                        amsgs.AddRange(registrantWebUser.Save(adc));
 
-                                        if (authorizedPerson.ResendInvite ?? false)
-                                        {
-                                            var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, amsgs, adc).LastOrDefault();
-                                            var registration = Registration.LoadByRegistrantId(registrant.ID.Value, amsgs, adc).LastOrDefault();
+                                        var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, amsgs, adc).LastOrDefault();
+                                        var registration = Registration.LoadByRegistrantId(registrant.ID.Value, amsgs, adc).LastOrDefault();
 
-                                            if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(authorizedPerson.Phone))
-                                                SendTwilioSms(registration.Uid.ToString(), authorizedPerson.Phone);
-                                        }
+                                        if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(authorizedPerson.Phone))
+                                            SendTwilioSms(registration.Uid.ToString(), authorizedPerson.Phone);
                                     }
                                 }
                             });
@@ -882,6 +876,11 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+                
                 if (studentUid.IsEmpty() || !studentUid.IsGuid())
                     throw new Exception("Invalid Registrant Id");
 
@@ -889,6 +888,9 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid WebUserId Id");
 
                 var masterRegistrant = Registrant.LoadByUid(studentUid.ToGuid(), msgs);
+
+                if (!currentUser.HasAccessToRegistrant(masterRegistrant, msgs))
+                    throw new Exception("Do not hav access");
 
                 var user = WebUser.Load(webUserId, msgs);
 
