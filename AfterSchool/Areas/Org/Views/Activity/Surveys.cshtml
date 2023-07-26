@@ -4,7 +4,7 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
-    var forms = currentAccount.GetSurveyForms(null, msgs).OrderBy(x => x.Name).ToList();
+    var forms = (List<Form>)ViewBag.forms;
 }
 @{Html.RenderPartial("OrgAccountHeader");}
 

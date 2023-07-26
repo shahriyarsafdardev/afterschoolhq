@@ -3256,7 +3256,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
-
+            var forms = currentAccount.GetSurveyForms(null, msgs);
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
@@ -3265,6 +3265,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs)
                 .OrderByDescending(a => a.CreateDate).ToList();
             ViewBag.Messages = msgs;
+            ViewBag.forms = forms;
             return View(activity);
         }
 
