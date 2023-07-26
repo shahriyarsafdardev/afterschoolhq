@@ -2008,7 +2008,7 @@ namespace AfterSchoolLibrary.Services
             return closestPastActivity.IsNotEmpty() ? closestPastActivity : closestInstancesToNow.First();
         }
 
-        public static ActivityInstance GetClosestActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc)
+        public static ActivityInstance GetClosestActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var instances = activity
                 .GetSchedule(msgs: msgs, dc: dc)
