@@ -189,89 +189,79 @@
                         </div>
                     </div>
                 </div>
-                                <div class="@(Model.ActivityTypeId.Equals(ActivityType.PermissionSlip)?"hide":"")">
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            @UILabel.EnrollmentPeriodLabel()
-                                            <div class="row fontSize12">
-                                                <div class="col-sm-12">
-                                                    <p class="text-muted margin-bottom-zero">Select the date range participants are allowed to register for this activity.</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                
 
-                                    <div class="registrationperiod-container">
+                <div class="registrationperiod-container">
 
-                                        <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
+                    <input type="hidden" name="registrationperiod" id="registrationperiod" value="@activePeriod.ID" />
 
-                                        <div class="form-group reg-period">
-                                            <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Open <span class="text-danger">*</span></label>
-                                            <div class="col-sm-5">
-                                                @{
-                                                    Html.RenderPartial(
-                                                        "~/Views/Shared/Components/_Date.cshtml",
-                                                        new FormInputViewModel
-                                                        {
-                                                            Id = "registrationopendate",
-                                                            Name = "registrationopendate",
-                                                            Value = activePeriod.StartDateTime.ToShortDateString(),
-                                                        });
-                                                }
-                                            </div>
-                                            <div class="col-sm-4">
+                    <div class="form-group reg-period">
+                        <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Open <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel
+                                    {
+                                        Id = "registrationopendate",
+                                        Name = "registrationopendate",
+                                        Value = activePeriod.StartDateTime.ToShortDateString(),
+                                    });
+                            }
+                        </div>
+                        <div class="col-sm-4">
 
-                                                @{
-                                                    Html.RenderPartial(
-                                                        "~/Views/Shared/_TimeSelect.cshtml",
-                                                        activePeriod.StartDateTime.Value,
-                                                        new ViewDataDictionary
-                                                        {
-                                        {"name", "registrationopentime"},
-                                        {"id", "registrationopentime"},
-                                        {"required", true},
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    activePeriod.StartDateTime.Value,
+                                    new ViewDataDictionary
+                                    {
+                    {"name", "registrationopentime"},
+                    {"id", "registrationopentime"},
+                    {"required", true},
 }
-                                                        );
-                                                }
+                                    );
+                            }
 
-                                            </div>
-                                        </div>
+                        </div>
+                    </div>
 
-                                        <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
-                                            <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Close <span class="text-danger">*</span></label>
-                                            <div class="col-sm-5">
-                                                @{
-                                                    Html.RenderPartial(
-                                                        "~/Views/Shared/Components/_Date.cshtml",
-                                                        new FormInputViewModel
-                                                        {
-                                                            Id = "registrationclosedate",
-                                                            Name = "registrationclosedate",
-                                                            Value = activePeriod.EndDateTime.ToShortDateString(),
-                                                        }
-                                                        );
-                                                }
-                                            </div>
-                                            <div class="col-sm-4">
+                    <div class="form-group reg-period" id="signUpCloseDate" style="@(Model.IsContinuousEnrollment ? "display:none" : "")">
+                        <label class="col-sm-3 control-label">@UILabel.EnrollmentPeriodLabel() Close <span class="text-danger">*</span></label>
+                        <div class="col-sm-5">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/Components/_Date.cshtml",
+                                    new FormInputViewModel
+                                    {
+                                        Id = "registrationclosedate",
+                                        Name = "registrationclosedate",
+                                        Value = activePeriod.EndDateTime.ToShortDateString(),
+                                    }
+                                    );
+                            }
+                        </div>
+                        <div class="col-sm-4">
 
-                                                @{
-                                                    Html.RenderPartial(
-                                                        "~/Views/Shared/_TimeSelect.cshtml",
-                                                        activePeriod.EndDateTime.Value,
-                                                        new ViewDataDictionary
-                                                        {
-                                        {"name", "registrationclosetime"},
-                                        {"id", "registrationclosetime"},
-                                        {"required", true},
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_TimeSelect.cshtml",
+                                    activePeriod.EndDateTime.Value,
+                                    new ViewDataDictionary
+                                    {
+                    {"name", "registrationclosetime"},
+                    {"id", "registrationclosetime"},
+                    {"required", true},
 }
-                                                        );
-                                                }
+                                    );
+                            }
 
-                                            </div>
-                                        </div>
+                        </div>
+                    </div>
 
-                                    </div>
-                                </div>
+                </div>
+            </div>
 
                                 <div class="col-md-offset-3 col-md-9 padding-v-20">
                                     <span>
