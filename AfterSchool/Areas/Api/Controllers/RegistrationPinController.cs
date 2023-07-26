@@ -439,7 +439,15 @@ namespace AfterSchool.Areas.Api.Controllers
                             .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
-                        var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
+
+                        //var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
+                        var attendance = new Attendance();
+                        var activityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(msgs) : null;
+
+                        if (activity.HasSchedule)
+                            attendance = Attendance.LoadByActivityInstanceId(activityInstance.ID.Value, msgs).FirstOrDefault();
+                        else
+                            attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
                         List<CheckInOut> checkInOutInfo = null;
                         WebUser webUser = null;
 
@@ -537,7 +545,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
                         {
-                            var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, amsgs, adc).FirstOrDefault();
+                            var attendance = new Attendance();
+                            var activityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(amsgs, adc) : null;
+
+                            if (activity.HasSchedule)
+                                attendance = Attendance.LoadByActivityInstanceId(activityInstance.ID.Value, amsgs, adc).FirstOrDefault();
+                            else
+                                attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, amsgs, adc).FirstOrDefault();
+
                             if (attendance.IsEmpty())
                             {
                                 attendance = new Attendance
@@ -546,8 +561,9 @@ namespace AfterSchool.Areas.Api.Controllers
                                     LastModifiedDate = DateTime.UtcNow,
                                     ActivityId = activity.ID,
                                     Date = DateTime.UtcNow.Date,
-                                    IsCompleted = false,
+                                    IsCompleted = true,
                                     IsCharged = false,
+                                    ActivityInstanceId = activityInstance?.ID
                                 };
                                 amsgs.AddRange(attendance.Save(adc));
                             }
@@ -565,7 +581,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     AttendanceId = attendance.ID,
                                     IsPresent = false,
                                     IsLate = false,
-                                    NumberPresent = 0,
+                                    NumberPresent = 1,
                                     NumberLate = 0,
                                     NumberPossible = 1,
                                 };
