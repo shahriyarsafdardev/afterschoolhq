@@ -40,10 +40,6 @@ function AuthorizedPersonListRow({ person, handleEdit, studentUid, handleAddRemo
     };
 
     updateTimeDifference();
-
-    return () => {
-      console.log('unmounted');
-    };
   }, [inviteLinkSendAt]);
 
   const controlSections = () => {

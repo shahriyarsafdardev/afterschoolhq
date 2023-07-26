@@ -34,7 +34,6 @@ export default function index() {
   useEffect(() => {
     if (isEmpty(Students)) return;
     const initialState = {};
-
     Students.forEach((student, index) => (initialState[index] = student.AuthorizedPersons));
     setInitialValue(initialState);
   }, [Students]);
@@ -42,7 +41,7 @@ export default function index() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
       setSubmitting(true);
       const students = [];
       Object.keys(values).map(key => {
@@ -56,6 +55,7 @@ export default function index() {
       await updateAuthorizedPersons(students).then(msgs => {
         if (!msgs.length) {
           enqueueSnackbar('Submitted.', { variant: 'success' });
+          resetForm();
         }
       });
       setSubmitting(false);
@@ -74,7 +74,7 @@ export default function index() {
     handleSubmit();
   };
 
-  if (loading || isSubmitting) return <Loader />;
+  if (loading) return <Loader />;
 
   return (
     <Box>
@@ -107,6 +107,8 @@ export default function index() {
           Cancel
         </Button>
         <LoadingButton
+          key="CICO-Save-Button"
+          id="CICO-Save-Button"
           type="submit"
           onClick={handleSubmitForm}
           variant="contained"
