@@ -52,6 +52,7 @@ namespace AfterSchoolLibrary.Helpers
                 onFailure: (SystemMessages fmsgs) =>
                 {
                     msgs.AddRange(fmsgs);
+                    //To add title for the error message in Rollbar
                     fmsgs.Insert(0, "Migration(s) Failed", MessageType.Error);
                     Utilities.SystemErrorLog(fmsgs);
                 }
