@@ -447,7 +447,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             attendance = Attendance.LoadByActivityInstanceId(activityInstance.ID.Value, msgs).FirstOrDefault();
                         else
                             attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
-                        List<CheckInOut> checkInOutInfo = null;
+                        List<CheckInOut> checkInOutInfo = new List<CheckInOut>();
                         WebUser webUser = null;
 
                         if (attendance.IsNotEmpty())
