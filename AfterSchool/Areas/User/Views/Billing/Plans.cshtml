@@ -84,29 +84,8 @@
                                 {
                                     if (payments?.Count < (plan.TotalPeriods ?? 0) || !activity.HasSchedule)
                                     {
-                                        DateTime startDate;
-
-                                        if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
-                                        {
-                                            startDate = plan.StartDate ?? DateTime.UtcNow;
-                                        }
-                                        else if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
-                                        {
-                                            startDate = participationObject.StartDate ?? DateTime.UtcNow;
-                                        }
-                                        else if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
-                                        {
-                                            startDate = originalPlan.StartDate ?? DateTime.UtcNow;
-                                        }
-                                        else
-                                        {
-                                            startDate = DateTime.UtcNow;
-                                        }
-
-                                        nextPaymentDate = new SubscriptionPlan
-                                        {
-                                            BillingPeriodTypeId = (BillingPeriodType)billingPeriodTypeId
-                                        }.CalculateEndDateFromNumberOfPeriods(startDate, payments.Count).ToShortDateString();
+                                        nextPaymentDate = RegistrantSubscriptionPlanService.GetNextPaymentDate(originalPlan, participationObject, plan,
+                                            billingPeriodTypeId, payments.Count);
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
