@@ -459,13 +459,13 @@ namespace AfterSchool.Areas.Api.Controllers
                                 checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value, msgs);
                         }
 
-                        if (checkInOutInfo.IsNotEmpty())
+                        if (checkInOutInfo.Count > 0)
                             webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
-                            CheckIn = checkInOutInfo.IsEmpty() || checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut ? false : true,
-                            CheckInTime = checkInOutInfo?.First().Date.ToShortTimeString(),
+                            CheckIn = checkInOutInfo.Count == 0 || checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut ? false : true,
+                            CheckInTime = checkInOutInfo.Count > 0 ? checkInOutInfo.First().Date.ToShortTimeString() : null,
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
