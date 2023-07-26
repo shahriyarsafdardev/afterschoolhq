@@ -8,12 +8,20 @@ import { phoneValidationRegex } from 'constants/regex';
 import Controls from './Controls';
 import useStyles from './styles';
 
-function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user }) {
+function AddAuthorizedUserForm({
+  setFieldValue,
+  handleDeleteField,
+  person: user,
+  authorizedPersonsPhoneList
+}) {
   const classes = useStyles();
 
   const ValidationSchema = Yup.object().shape({
     Phone: Yup.string()
       .matches(phoneValidationRegex, 'Phone is not valid')
+      .test('unique-phone', 'Phone already exists', function(value) {
+        return !authorizedPersonsPhoneList.includes(value) || user.Phone === value;
+      })
       .required('Phone is required'),
     FirstName: Yup.string().required('First Name is required'),
     LastName: Yup.string().required('Last Name is required')

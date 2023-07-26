@@ -21,14 +21,18 @@ const newUser = {
 function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, studentUid }) {
   const classes = useStyles();
   const [initialValues, setInitialValue] = useState({});
+  const [authorizedPersonsPhone, setAuthorizedPersonsPhone] = useState([]);
 
   useEffect(() => {
     const initialState = {};
-    authorizedPersons.forEach(
-      (person, index) =>
-        (initialState[index] = { HasAccess: false, ...person, default: true, newObject: false })
-    );
+    const authorizedPersonsPhoneList = [];
+    authorizedPersons.forEach((person, index) => {
+      authorizedPersonsPhoneList.push(person.Phone);
+      initialState[index] = { HasAccess: false, ...person, default: true, newObject: false };
+    });
     setInitialValue(initialState);
+
+    setAuthorizedPersonsPhone(authorizedPersonsPhoneList);
   }, [authorizedPersons]);
 
   const formik = useFormik({
@@ -86,6 +90,7 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, s
           setFieldValue(key, value);
         }}
         handleDeleteField={() => handleDeleteField(key)}
+        authorizedPersonsPhoneList={authorizedPersonsPhone}
       />
     );
   };
