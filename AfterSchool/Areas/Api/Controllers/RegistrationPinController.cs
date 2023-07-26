@@ -449,6 +449,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         var registrantActivity = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
                             .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
+
+                        if (registrantActivity.IsEmpty() && registrantActivity.AssignmentTypeId != RegistrationAssignmentType.Reserved)
+                            return;
+
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
 
