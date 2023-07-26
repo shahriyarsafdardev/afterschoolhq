@@ -148,7 +148,7 @@
         PageEvent.AFTER_INIT,
         function () {
             $.get(
-                `/org/activity/getFormInfo?formID=${@activeForm.ID}`,
+                `/org/activity/GetFormInfo?formID=${@activeForm.ID}`,
                 function (data)
                 {
                     $('#restrictby-grade').click(function () {
@@ -277,18 +277,4 @@
         $("#requiresparentalconsent").prop('checked', @(requiresParentConsent.IsEmpty() ? "false" : (requiresParentConsent ? "true" : "false")));
         showConsentWarning();
     });
-
-    @*function addClassToRadioInputs() {
-        var radioInputs = document.querySelectorAll('input[name="genderrestrictions"]');
-        for (var i = 0; i < radioInputs.length; i++) {
-            var input = radioInputs[i];
-            if (input.value !== "0" && "@isFormGenderRestricted" == "False") {
-                input.classList.add("md-trigger");
-            }
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        addClassToRadioInputs();
-    });*@
-
 </script>
