@@ -75,8 +75,6 @@
                                                                                registrantActivity.IsReservedRegistrationAssignmentType()))
                             {
                                 var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value);
-                                if (checkInOutInfo.Count < 2)
-                                {
                                     <tr>
                                         <td>@(isTechSupport ? $"{attendanceRegistrant.RegistrantName.MaskString(3, 3)}"
                                                 : attendanceRegistrant.RegistrantName)</td>
@@ -90,20 +88,28 @@
                                             else
                                             {
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
-                                                    @checkInOutInfo.LastOrDefault().Date.ToShortTimeString()
+                                                    @checkInOutInfo.FirstOrDefault().Date.ToShortTimeString()
                                                 </label>
                                             }
                                         </td>
                                         <td>
                                             @if (checkInOutInfo.Count > 0 && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckIn)
                                             {
-                                                <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox" 
-                                                       class="checkInOutBox newCheckbox checkOut" data-forerror="true"/>
+                                                <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox"
+                                                       class="checkInOutBox newCheckbox checkOut" data-forerror="true" />
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check Out</label>
                                             }
-                                        </td>
+                                            else
+                                            {
+                                                if (checkInOutInfo.Count >=2  && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut)
+                                                {
+                                                    <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
+                                                        @checkInOutInfo.LastOrDefault().Date.ToShortTimeString()
+                                                    </label>
+                                                }
+                                            }
+                                            </td>
                                     </tr>
-                                }
                             }
                         }
                     </table>
