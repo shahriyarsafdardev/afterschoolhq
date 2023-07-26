@@ -440,7 +440,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         var activity = registrantActivity?.GetActivity(msgs);
                         var activitySchedule = activity?.GetSchedule(msgs);
 
-                        //var attendance = Attendance.LoadByActivityIdByDate(activity.ID.Value, DateTime.UtcNow.Date, msgs).FirstOrDefault();
                         var attendance = new Attendance();
                         var activityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(msgs) : null;
 
