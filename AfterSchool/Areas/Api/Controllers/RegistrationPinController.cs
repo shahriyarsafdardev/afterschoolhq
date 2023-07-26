@@ -12,6 +12,7 @@ using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -224,14 +225,25 @@ namespace AfterSchool.Areas.Api.Controllers
                                         LastModifiedDate = DateTime.UtcNow,
                                         AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                     };
-                                    amsgs.AddRange(user.Save(adc));
                                 }
                                 else if (currentPickUp.Phone.IsNotEmpty())
                                 {
                                     user = WebUser.LoadByPhone(currentPickUp.Phone, amsgs, adc);
+                                    
+                                    if (user.IsNotEmpty())
+                                    {
+                                        var personType = user.GetMasterParentOrStudentOrAdultRegistrant(amsgs, adc);
+                                    
+                                        user.AuthorizationTypeId = personType.IsNotEmpty() && personType.PersonTypeId == RegistrantPersonType.Parent ? 
+                                            WebUserAuthorizationType.FullyAuthorized : WebUserAuthorizationType.Pickup;
+                                    
+                                        user.LastModifiedDate = DateTime.UtcNow;
+                                    }
                                 }
                                 if (user.IsNotEmpty())
                                 {
+                                    amsgs.AddRange(user.Save(adc));
+                                    
                                     var registrantWebUser = new RegistrantWebUser
                                     {
                                         CreateDate = DateTime.UtcNow,
