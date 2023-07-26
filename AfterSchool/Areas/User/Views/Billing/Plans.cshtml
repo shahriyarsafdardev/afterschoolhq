@@ -38,6 +38,7 @@
                             {
                                 var originalPlan = plan.GetSubscriptionPlan();
                                 var participationObject = originalPlan.GetParticipationObject();
+                                var activity = participationObject.GetActivity();
                                 var registrant = plan.GetRegistrant();
                                 var masterRegistrant = registrant.GetMasterRegistrant();
                                 var regStatus = RegistrationStatus.Current;
@@ -81,12 +82,31 @@
 
                                 if (!plan.DateCancelled.HasValue)
                                 {
-                                    if (payments?.Count < (plan.TotalPeriods ?? 0))
+                                    if (payments?.Count < (plan.TotalPeriods ?? 0) || !activity.HasSchedule)
                                     {
+                                        DateTime startDate;
+
+                                        if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout)
+                                        {
+                                            startDate = plan.StartDate ?? DateTime.UtcNow;
+                                        }
+                                        else if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.WhenActivityStarts)
+                                        {
+                                            startDate = participationObject.StartDate ?? DateTime.UtcNow;
+                                        }
+                                        else if (originalPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
+                                        {
+                                            startDate = originalPlan.StartDate ?? DateTime.UtcNow;
+                                        }
+                                        else
+                                        {
+                                            startDate = DateTime.UtcNow;
+                                        }
+
                                         nextPaymentDate = new SubscriptionPlan
                                         {
                                             BillingPeriodTypeId = (BillingPeriodType)billingPeriodTypeId
-                                        }.CalculateEndDateFromNumberOfPeriods(plan.StartDate ?? DateTime.UtcNow, payments.Count).ToShortDateString();
+                                        }.CalculateEndDateFromNumberOfPeriods(startDate, payments.Count).ToShortDateString();
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
