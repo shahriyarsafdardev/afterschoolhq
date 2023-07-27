@@ -18,9 +18,14 @@
                          && (studentAccountViewingActivity || volunteerAccountViewingOpportunity);
 
     var plan = Model.GetSubscriptionPlan();
-    var onePeriodStartDate = (bool)plan?.EndDate.HasValue ? 
-        SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId) : DateTime.UtcNow;
- 
+
+    var onePeriodStartDate = new DateTime();
+
+    if(Model.ActivityType == ActivityType.Activity)
+    {
+        onePeriodStartDate = (bool)plan?.EndDate.HasValue ?
+            SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId) : DateTime.UtcNow;
+    }
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
