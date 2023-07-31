@@ -2865,6 +2865,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
             var dateAlreadyExist = AfterSchoolLibrary.Models.Attendance.LoadByActivityIdByDate(activityId, date.Date,msgs).Count > 0;
+            var activity = Activity.Load(activityId, msgs);
 
             if (!dateAlreadyExist)
             {
@@ -2880,6 +2881,15 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 };
                 msgs.AddRange(attendance.Save());
+                
+                var registrantActivities = activity.GetRegistrantActivities(msgs);
+
+                registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
+                    .ToList()
+                    .ForEach(registrantActivity =>
+                    {
+                        AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, currentUser, msgs);
+                    });
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
