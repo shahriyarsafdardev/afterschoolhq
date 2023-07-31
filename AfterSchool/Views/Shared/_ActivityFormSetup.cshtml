@@ -412,7 +412,6 @@
             $.post(
                 '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "age"}))',
                 function (data) {
-                    debugger
                     if (data && data.status == 'ok') {
                         Notifications.showMessage('Success', 'Your settings have been saved', true);
                     }
