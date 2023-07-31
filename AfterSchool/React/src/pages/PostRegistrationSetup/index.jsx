@@ -33,7 +33,6 @@ export default function PostRegistrationSetup() {
     if (!IsPhoneSetup || !IsPinSetup) {
       setActiveStep(0);
     } else if (RegistrantType === 'Parent') {
-      getRegistrationData();
       setActiveStep(1);
     } else {
       setActiveStep(2);

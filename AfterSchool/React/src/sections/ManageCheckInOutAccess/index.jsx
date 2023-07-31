@@ -18,10 +18,12 @@ export default function index() {
   const {
     msgs,
     loading,
-    data: { Students = [] },
+    data,
     updateAuthorizedPersons,
     loadAuthorizedPersonsList
   } = useManageAPAccess();
+
+  const { Students = [] } = data || {};
 
   useEffect(() => {
     loadAuthorizedPersonsList();
