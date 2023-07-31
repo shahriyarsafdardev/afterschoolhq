@@ -90,12 +90,6 @@ namespace AfterSchoolLibrary.Models
             get => (string)MDV["PinCode"].Value;
             set => MDV["PinCode"].Value = value; 
         }
-        
-        public WebUserAuthorizationType AuthorizationTypeId
-        {
-            get => (WebUserAuthorizationType)MDV["AuthorizationTypeId"].Value;
-            set => MDV["AuthorizationTypeId"].Value = value; 
-        }
 
 
         public WebUser()
@@ -107,7 +101,6 @@ namespace AfterSchoolLibrary.Models
             VerifiedAccount = false;
             IsRegistered = false;
             AllowTextMessages = false;
-            AuthorizationTypeId = WebUserAuthorizationType.NotSet;
         }
 
         public static DatabaseParameters ObjectMap
@@ -129,7 +122,6 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "CleverUserName", SqlDbType.NVarChar, "100");
                 _dp.Add(className, "HowHearAboutUs", SqlDbType.NVarChar, "500");
                 _dp.Add(className, "PinCode",  SqlDbType.NVarChar, "100");
-                _dp.Add(className, "AuthorizationTypeId",  SqlDbType.Int);
 
                 return _dp;
             }
@@ -252,10 +244,6 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["PinCode"]);
-            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
-            
-            dps = new DatabaseParameters();
-            dps.Add(ObjectMap["AuthorizationTypeId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;

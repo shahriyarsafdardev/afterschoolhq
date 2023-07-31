@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
-using System.Windows.Interop;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Helpers;
 using AfterSchool.Models;
@@ -17,8 +13,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Clever.Models;
-using Microsoft.IdentityModel.Tokens;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -90,7 +84,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     var registeredPickUser = WebUser.Load(pickUpRegistrantWebUser.WebUserId.Value, msgs);
                     
-                    if(registeredPickUser.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+                    if(pickUpRegistrantWebUser.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
                         additionalContactInfo.Add(new PickUpDto()
                         {
                             ID = registeredPickUser.ID.Value,
@@ -136,7 +130,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                         IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                         IsPinSetup = currentUser.PinCode.IsNotEmpty(),
-                        UserAuthorizationType = currentUser.AuthorizationTypeId.ToString(),
                     },
                     additionalContactDto = additionalContactInfo,
                 };
@@ -190,8 +183,17 @@ namespace AfterSchool.Areas.Api.Controllers
                     if (currentUser.PinCode.IsEmpty())
                         currentUser.PinCode = pinCode;
 
-                    currentUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
                     msgs.AddRange(currentUser.Save());
+                    
+                    var currentRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value, 
+                        currentUser.ID.Value, msgs);
+
+                    if (currentRegistrantWebUser.IsNotEmpty())
+                    {
+                        currentRegistrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
+                        msgs.AddRange(currentRegistrantWebUser.Save());
+                    }
+                        
                 }
 
                 if (peopleList.IsNotEmpty())
@@ -205,7 +207,8 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                 if(currentPickUp.ID != -1)
                                 {
-                                    var existedRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value, currentPickUp.ID, amsgs, adc);
+                                    var existedRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value,
+                                        currentPickUp.ID, amsgs, adc);
                                     existedRegistrantWebUser.IsDeleted = !currentPickUp.HasAccess;
 
                                     amsgs.AddRange(existedRegistrantWebUser.Save(adc));
@@ -215,7 +218,6 @@ namespace AfterSchool.Areas.Api.Controllers
 
 
                                 if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
-                                {
                                     user = new WebUser
                                     {
                                         FirstName = currentPickUp.FirstName,
@@ -223,23 +225,10 @@ namespace AfterSchool.Areas.Api.Controllers
                                         Phone = currentPickUp.Phone,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
-                                        AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                     };
-                                }
                                 else if (currentPickUp.Phone.IsNotEmpty())
-                                {
                                     user = WebUser.LoadByPhone(currentPickUp.Phone, amsgs, adc);
-                                    
-                                    if (user.IsNotEmpty())
-                                    {
-                                        var personType = user.GetMasterParentOrStudentOrAdultRegistrant(amsgs, adc);
-                                    
-                                        user.AuthorizationTypeId = personType.IsNotEmpty() && personType.PersonTypeId == RegistrantPersonType.Parent ? 
-                                            WebUserAuthorizationType.FullyAuthorized : WebUserAuthorizationType.Pickup;
-                                    
-                                        user.LastModifiedDate = DateTime.UtcNow;
-                                    }
-                                }
+                                
                                 if (user.IsNotEmpty())
                                 {
                                     amsgs.AddRange(user.Save(adc));
@@ -250,6 +239,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         RegistrantId = currentMasterRegistrant.ID,
                                         WebUserId = user.ID,
                                         IsDeleted = false,
+                                        AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                     };
                                     amsgs.AddRange(registrantWebUser.Save(adc));
 
@@ -823,11 +813,11 @@ namespace AfterSchool.Areas.Api.Controllers
                                         Phone = authorizedPerson.Phone,
                                         CreateDate = DateTime.UtcNow,
                                         LastModifiedDate = DateTime.UtcNow,
-                                        AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                         };
                                     amsgs.AddRange(user.Save(adc));
                                     }
-                                    var existingRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value, user.ID.Value, amsgs, adc);
+                                    var existingRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
+                                        user.ID.Value, amsgs, adc);
 
                                     if(existingRegistrantWebUser.IsEmpty())
                                     {
@@ -837,6 +827,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                             RegistrantId = masterRegistrant.ID,
                                             WebUserId = user.ID,
                                             IsDeleted = false,
+                                            AuthorizationTypeId = WebUserAuthorizationType.Pickup,
                                         };
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
@@ -1016,7 +1007,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     var authorizedPerson = WebUser.Load(registrantWebUser.WebUserId.Value);
 
-                    if (authorizedPerson.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
+                    if (registrantWebUser.AuthorizationTypeId == WebUserAuthorizationType.Pickup)
                         authorizedPersons.Add(new PickUpDto
                         {
                             ID = authorizedPerson.ID.Value,
