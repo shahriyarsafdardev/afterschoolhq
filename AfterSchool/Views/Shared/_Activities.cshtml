@@ -143,10 +143,10 @@ else
     }
 
     <div class="table-responsive">
-    @if (activityType == ActivityType.Activity)
+     @if (activityType == ActivityType.Activity || activityType == ActivityType.VolunteerOpportunity)
     {
         <div class="pull-right">
-            <input type="text" id="search" class="form-control searchFormInput" placeholder="Search for activity" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]"/>
+            <input type="text" id="search" class="form-control searchFormInput" placeholder = "@(activityType == ActivityType.Activity ? "Search for activity" : "Search for volunteer opportunity")" style="float: left;width: 300px;height: 38px;margin-right: 10px;" value="@Request["q"]"/>
             <button class="btn btn-primary searchActivitiesBtn" id="searchBtn" onclick="doSearch()">
                 Search
             </button>
