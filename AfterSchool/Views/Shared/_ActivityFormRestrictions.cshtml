@@ -151,44 +151,49 @@
                 `/org/activity/GetFormInfo?formID=${@activeForm.ID}`,
                 function (data)
                 {
-                    $('#restrictby-grade').click(function () {
-                        if (!data.isFormGradeRes) {
-                            $("#modal-grade-restriction-error").addClass("md-show");
-                        }
-                    });
-                    $('#restrictby-age').click(function () {
-                        if (!data.isFormAgeRes) {
-                            $("#modal-age-restriction-error").addClass("md-show");
-                        }
-                    });
-                    $("#btn-age-restriction-error").click(function () {
-                        $("#restrictby-age").attr("checked", false);
-                        $("#restrictby-grade").prop("checked", true);
-                        gradeOrAgeCheck();
-                        $("#modal-age-restriction-error").removeClass("md-show");
+                    if (data && data.status == 'ok') {
+                        $('#restrictby-grade').click(function () {
                             if (!data.isFormGradeRes) {
                                 $("#modal-grade-restriction-error").addClass("md-show");
                             }
-                    });
-                    $("#btn-grade-restriction-error").click(function () {
-                        $("#restrictby-grade").attr("checked", false);
-                        $("#restrictby-age").prop("checked", true);
-                        gradeOrAgeCheck();
-                        $("#modal-grade-restriction-error").removeClass("md-show");
+                        });
+                        $('#restrictby-age').click(function () {
                             if (!data.isFormAgeRes) {
                                 $("#modal-age-restriction-error").addClass("md-show");
                             }
-                    });
-                    $("#genderrestrictions-1").click(function () {
-                        if (!data.isFormGenderRes) {
-                            $("#modal-gender-restriction-error").addClass("md-show")
-                        }
-                    });
-                    $("#genderrestrictions-2").click(function () {
-                        if (!data.isFormGenderRes) {
-                            $("#modal-gender-restriction-error").addClass("md-show")
-                        }
-                    });
+                        });
+                        $("#btn-age-restriction-error").click(function () {
+                            $("#restrictby-age").attr("checked", false);
+                            $("#restrictby-grade").prop("checked", true);
+                            gradeOrAgeCheck();
+                            $("#modal-age-restriction-error").removeClass("md-show");
+                            if (!data.isFormGradeRes) {
+                                $("#modal-grade-restriction-error").addClass("md-show");
+                            }
+                        });
+                        $("#btn-grade-restriction-error").click(function () {
+                            $("#restrictby-grade").attr("checked", false);
+                            $("#restrictby-age").prop("checked", true);
+                            gradeOrAgeCheck();
+                            $("#modal-grade-restriction-error").removeClass("md-show");
+                            if (!data.isFormAgeRes) {
+                                $("#modal-age-restriction-error").addClass("md-show");
+                            }
+                        });
+                        $("#genderrestrictions-1").click(function () {
+                            if (!data.isFormGenderRes) {
+                                $("#modal-gender-restriction-error").addClass("md-show")
+                            }
+                        });
+                        $("#genderrestrictions-2").click(function () {
+                            if (!data.isFormGenderRes) {
+                                $("#modal-gender-restriction-error").addClass("md-show")
+                            }
+                        });
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }                
                 }
             );
             $("#btn-gender-restriction-error").click(function () {

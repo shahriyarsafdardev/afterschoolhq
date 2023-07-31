@@ -396,30 +396,44 @@
         $("#btn-grade-restriction-error").click(function () {
             $("#modal-grade-restriction-error").removeClass("md-show");
             $.post(
-                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "grade"}))',
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "grade"}))',
                 function (data) {
-                    Notifications.showMessage('Success', 'Your settings have been saved', true);
-                i}
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
             )
         });
         $("#btn-age-restriction-error").click(function () {
             $("#modal-age-restriction-error").removeClass("md-show");
             $.post(
-                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "age"}))',
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "age"}))',
                 function (data) {
-                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    debugger
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
                 }
-
             )
         });
         $("#btn-gender-restriction-error").click(function () {
             $("#modal-gender-restriction-error").removeClass("md-show");
             $.post(
-                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { ActivityID = @Model.Uid, type = "gender"}))',
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "gender"}))',
                 function (data) {
-                    Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
                 }
-
             )
         });
         $("#modal-age-restriction-ok").click(function () {
@@ -442,14 +456,19 @@
                 function (data)
                 {
                     hideLoader();
-                    if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
-                        $("#modal-age-restriction-error").addClass("md-show");
+                    if (data && data.status == 'ok') {  
+                        if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
+                            $("#modal-age-restriction-error").addClass("md-show");
+                        }
+                        if (!data.isFormGradeRes && "@isActivityGradeRestricted" == "True") {
+                            $("#modal-grade-restriction-error").addClass("md-show");
+                        }
+                        if (!data.isFormGenderRes && "@isActivityGenderRestricted" !== "None") {
+                            $("#modal-gender-restriction-error").addClass("md-show");
+                        }
                     }
-                    if (!data.isFormGradeRes && "@isActivityGradeRestricted" == "True") {
-                        $("#modal-grade-restriction-error").addClass("md-show");
-                    }
-                    if (!data.isFormGenderRes && "@isActivityGenderRestricted" !== "None") {
-                        $("#modal-gender-restriction-error").addClass("md-show");
+                    else {
+                        Notifications.showErrors(data.messages);
                     }
                 }
             );

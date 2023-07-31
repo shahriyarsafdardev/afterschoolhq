@@ -2735,11 +2735,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
         }
         [HttpPost]
-        public JsonResult SaveEditedRestrictions(Guid ActivityID, string type)
+        public JsonResult SaveEditedRestrictions(Guid activityId, string type)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            var activity = currentAccount.GetActivity(ActivityID, msgs);
+            var activity = currentAccount.GetActivity(activityId, msgs);
             if (!activity.IsEmpty())
             {
                 Database.ExecuteTransaction
@@ -2771,11 +2771,12 @@ namespace AfterSchool.Areas.Org.Controllers
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                         (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
-                return Json(new
-                {
-                    status = "ok",
-                    messages = msgs,
-                }, JsonRequestBehavior.AllowGet);
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        messages = msgs,
+                    }, JsonRequestBehavior.AllowGet);
             }
             msgs.Add("Activity not found",MessageType.ApiError);
             return Json(new
