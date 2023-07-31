@@ -137,13 +137,19 @@
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
-                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
-                            @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>                           
+                        @{
+                            var weeklyDate = DateTime.UtcNow;
+                            var endDate = weeklyDate.AddDays(30);
+                            for (var d = 0; weeklyDate <= endDate; d++)
                             {
-                                <option value="@item.ToString()">
-                                    @item.ToString()
+                                <option class="@(d == 30 ? "btn-primary text-white" : "")" value="@weeklyDate.ToShortDateString()" 
+                                        id="@((subscriptionPlan != null && subscriptionPlan.StartDate.HasValue && weeklyDate.Date == subscriptionPlan.StartDate) || d == 30 ? "selected" : "")">
+                                    @(weeklyDate.ToString("MMMM dd"))
                                 </option>
+                                weeklyDate = weeklyDate.AddDays(1);
                             }
+                        }
                         </select>
                     </div>
 
@@ -259,8 +265,7 @@
                 $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("#selected").val());
             }
         } else if (billingTypeId === "3") { //weekly
-            let weekDay = '@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.DayOfWeek : DayOfWeek.Sunday)'
-            $('#subscriptionperiodstartweekday').val(weekDay)
+            $('#subscriptionperiodstartweekday').val($('#subscriptionperiodstartweekday').find("#selected").val());
         }
     }
 
@@ -305,9 +310,8 @@
         }
         else
         {
-            let currentWeekDay = $("#subscriptionperiodstartweekday").val();
-            let currentDate = getWeeklyCurrentDate(dayNames, currentWeekDay);
-            $('.periodstartdate').html(getFormattedDateString(currentDate, dayNames));
+            let dateObj = new Date($("#subscriptionperiodstartweekday").val());
+            $('.periodstartdate').html(getFormattedDateString(dateObj, dayNames));
         }
         showPeriodStartContent();
     }

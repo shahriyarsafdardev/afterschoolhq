@@ -2849,7 +2849,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(
-            this Activity activity, BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth,
+            this Activity activity, BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (!activity.HasSchedule)
@@ -2862,23 +2862,21 @@ namespace AfterSchoolLibrary.Services
         }
 
         internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
-            BillingPeriodType billingPeriodType, DayOfWeek dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
             DateTime utcNow)
         {
             if (!activityHasSchedule)
                 return (null, null);
 
             var startDate = dayOfMonth; // schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
+            var startDateWeekly = dayOfWeek;
             var paymentEnd = schedule.EndDate.Value;
 
             switch (billingPeriodType)
             {
                 case BillingPeriodType.Week:
                 {
-                    var shouldPickDateInFuture = startDate.AddDays(-1).IsOnOrBefore(utcNow);
-                    var daysToAdd = ((int) dayOfWeek - (int) startDate.DayOfWeek + (shouldPickDateInFuture ? 7 : -7)) % 7;
-                    var paymentStart = startDate.AddDays(daysToAdd);
-
+                    var paymentStart = new DateTime(startDateWeekly.Year, startDateWeekly.Month, startDateWeekly.Day); //startingDay.IsAfter(utcNow) ? startingDay : utcNow;
                     return (paymentStart, paymentEnd);
                 }
                 case BillingPeriodType.Month:
