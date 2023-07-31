@@ -184,16 +184,15 @@ namespace AfterSchool.Areas.Api.Controllers
                         currentUser.PinCode = pinCode;
 
                     msgs.AddRange(currentUser.Save());
-                    
-                    var currentRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value, 
-                        currentUser.ID.Value, msgs);
+                }
+                
+                var currentRegistrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(currentMasterRegistrant.ID.Value, 
+                    currentUser.ID.Value, msgs);
 
-                    if (currentRegistrantWebUser.IsNotEmpty())
-                    {
-                        currentRegistrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
-                        msgs.AddRange(currentRegistrantWebUser.Save());
-                    }
-                        
+                if (currentRegistrantWebUser.IsNotEmpty())
+                {
+                    currentRegistrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
+                    msgs.AddRange(currentRegistrantWebUser.Save());
                 }
 
                 if (peopleList.IsNotEmpty())
