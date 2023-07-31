@@ -52,7 +52,7 @@
 
 @{
 
-    if (Model.HasSchedule)
+    if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
     {
         <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
     }
@@ -125,7 +125,10 @@
                         }
 
                         <td>
-                            <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                            @if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
+                            {
+                                <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                            }
                         </td>
 
                         <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
@@ -159,15 +162,15 @@
             { "querystring", "" },
             { "action", "attendance" },
             { "controller", "activity" }
-                                                       }
+                                                               }
    );
 
     Html.RenderPartial("_ModalQR", new ModalQRModel()
-        {
-            LogoUrl = logoUrl,
-            AccountName = account.Name,
-            ID = "modal-fullscreen",
-        });
+    {
+        LogoUrl = logoUrl,
+        AccountName = account.Name,
+        ID = "modal-fullscreen",
+    });
 }
 
 

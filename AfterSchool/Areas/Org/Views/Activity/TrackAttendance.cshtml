@@ -36,19 +36,34 @@
             <div class="col-md-10 col-md-offset-1">
                 
                 @{
-                    if(AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value,FeatureType.ManageCheckInCheckOut) && 
+                    if(AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value,FeatureType.ManageCheckInCheckOut) &&
                        activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                     {
-                        Html.RenderPartial(
-                            "_CheckInOutAttendance",
-                            Model,
-                            new ViewDataDictionary
-                            {
+                        if(activity.HasSchedule)
+                        {
+                            Html.RenderPartial(
+                           "_CheckInOutAttendance",
+                           Model,
+                           new ViewDataDictionary
+                           {
                                 { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
                                 { "Schedule", ViewBag.Schedule },
                                 { "RegistrantActivities", ViewBag.RegistrantActivities },
                                 { "Controller", "activity" },
-                            });
+                           });
+                        }
+                        else {
+                            Html.RenderPartial(
+                                "_CICOAttendanceNoSchedule",
+                                Model,
+                                new ViewDataDictionary
+                                {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                                {"AttendanceDate",ViewBag.AttendanceDate },
+                                });
+                        }
                     }
                     else
                     {

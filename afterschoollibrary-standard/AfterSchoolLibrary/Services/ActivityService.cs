@@ -1911,7 +1911,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId,
-            int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+              int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // get attendance by activityInstanceId if it exists
             if (activityInstanceId.HasValue)
@@ -1929,7 +1929,7 @@ namespace AfterSchoolLibrary.Services
             var closestActivityInstance = activity.GetClosestPastActivityInstance(msgs, dc);
             if (closestActivityInstance.IsEmpty())
                 return null;
-
+            
             var closestActivityInstanceAttendance = Attendance
                 .LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
 
@@ -1961,6 +1961,18 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static Attendance GetOrCreateNewAttendance(this Activity activity,
+             WebUser loggedInUser, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+                var newAttendance = date.IsNotEmpty() ? activity.GetAttendanceByDate(date, msgs).FirstOrDefault() : null;
+                if (newAttendance.IsEmpty())
+                    return activity.CreateNewAttendance(
+                        null, loggedInUser,
+                        msgs, dc);
+
+                return Attendance.Load(newAttendance.ID.Value, msgs, dc);
         }
 
         public static List<AttendanceRegistrant> CreateNewAttendanceRegistrantByRegistrantActivities(

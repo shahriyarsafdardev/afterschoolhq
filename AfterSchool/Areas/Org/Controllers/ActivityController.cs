@@ -2741,10 +2741,16 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+            var nonScheduleDate = DateTime.UtcNow.Date;
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+            var attendance = new Attendance();
+            if(activity.HasSchedule)
+                attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+            else
+                attendance = activity.GetOrCreateNewAttendance(currentUser, nonScheduleDate, msgs);
+
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
@@ -2752,6 +2758,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
+            ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
@@ -2850,6 +2857,39 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AddNewAttendanceDateWithoutSchedule(int activityId, DateTime date)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var dateAlreadyExist = AfterSchoolLibrary.Models.Attendance.LoadByActivityIdByDate(activityId, date.Date,msgs).Count > 0;
+
+            if (!dateAlreadyExist)
+            {
+                var attendance = new Attendance
+                {
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
+                    LastModifiedBy = currentUser.ID,
+                    ActivityId = activityId,
+                    Date = date.Date,
+                    IsCompleted = true,
+
+                };
+                msgs.AddRange(attendance.Save());
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                msgs.Add("Date already exists.", MessageType.UserError);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
