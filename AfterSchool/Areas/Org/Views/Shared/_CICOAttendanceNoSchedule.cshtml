@@ -163,7 +163,7 @@
         let checkOutStudentsName = [];
         updateButtonState();
         $('#activityinstance').change(function () {
-            location.href = '@Url.Action("TrackAttendance", "activity")?actinst=' + $(this).val();
+            location.href = '@Url.Action("TrackAttendance", "activity")?att=' + $(this).val();
         });
         $("#btnAddDate").on('click',function (){
             let date = $("#txtNewDate").val();

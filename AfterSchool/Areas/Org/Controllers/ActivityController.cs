@@ -2741,7 +2741,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var nonScheduleDate = DateTime.UtcNow.Date;
+            var nonScheduleDate = att.IsNotEmpty() ? AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(),msgs).Date : DateTime.UtcNow.Date;
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -2749,7 +2749,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if(activity.HasSchedule)
                 attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
             else
-                attendance = activity.GetOrCreateNewAttendance(currentUser, nonScheduleDate, msgs);
+                attendance = activity.GetOrCreateNewAttendance(currentUser, nonScheduleDate.Value, msgs);
 
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
