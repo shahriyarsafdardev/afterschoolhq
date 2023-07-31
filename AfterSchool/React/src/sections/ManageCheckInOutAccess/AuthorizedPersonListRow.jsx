@@ -10,7 +10,7 @@ const RESEND_LIMIT = 86400;
 function AuthorizedPersonListRow({ person, handleEdit, studentUid, handleAddRemoveAccess }) {
   const classes = useStyles();
   const { ID, FirstName, LastName, Phone, HasAccess, IsPinSetup } = person;
-  const inviteLinkSendAt = localStorage.getItem(`invited${ID}`);
+  const inviteLinkSendAt = localStorage.getItem(`invited${ID}-${studentUid}`);
   const [timeDifference, setTimeDifference] = useState(0);
   const { enqueueSnackbar } = useSnackbar();
   const cantInvite = timeDifference > 0;
@@ -21,14 +21,14 @@ function AuthorizedPersonListRow({ person, handleEdit, studentUid, handleAddRemo
     if (cantInvite) return;
     await resendInvite(studentUid, ID).then(msgs => {
       if (msgs.length) return;
-      localStorage.setItem(`invited${ID}`, new Date().toISOString());
+      localStorage.setItem(`invited${ID}-${studentUid}`, new Date().toISOString());
       setTimeDifference(RESEND_LIMIT);
       enqueueSnackbar('Invite Sent', { variant: 'success' });
     });
   };
 
   useEffect(() => {
-    const savedDateTime = localStorage.getItem(`invited${ID}`);
+    const savedDateTime = localStorage.getItem(`invited${ID}-${studentUid}`);
     const savedTime = new Date(savedDateTime);
 
     const updateTimeDifference = () => {
