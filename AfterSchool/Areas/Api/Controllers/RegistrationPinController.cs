@@ -831,6 +831,15 @@ namespace AfterSchool.Areas.Api.Controllers
                                         };
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
+
+                                    if (amsgs.HasNoErrors())
+                                    {
+                                        var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, amsgs, adc).LastOrDefault();
+                                        var registration = Registration.LoadByRegistrantId(registrant.ID.Value, amsgs, adc).LastOrDefault();
+
+                                        if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(authorizedPerson.Phone))
+                                            SendTwilioSms(registration.Uid.ToString(), authorizedPerson.Phone);
+                                    }
                                     
                                 }
                                 else
@@ -858,12 +867,6 @@ namespace AfterSchool.Areas.Api.Controllers
 
                                         registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
                                         amsgs.AddRange(registrantWebUser.Save(adc));
-
-                                        var registrant = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, amsgs, adc).LastOrDefault();
-                                        var registration = Registration.LoadByRegistrantId(registrant.ID.Value, amsgs, adc).LastOrDefault();
-
-                                        if (registration.IsNotEmpty() && TwilioHelper.IsValidPhoneNumber(authorizedPerson.Phone))
-                                            SendTwilioSms(registration.Uid.ToString(), authorizedPerson.Phone);
                                     }
                                 }
                             });
