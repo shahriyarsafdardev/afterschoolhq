@@ -7,7 +7,7 @@
     var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a =>
         a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent ||
         a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
-    var attendanceDates = (List<Attendance>)ViewData["AttendanceDate"];
+    var attendanceDates = (List<Attendance>)ViewData["AttendanceList"];
 }
 <style media="all and (max-width: 479px)">
     .attendance-table {
