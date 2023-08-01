@@ -88,7 +88,7 @@
                                             else
                                             {
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
-                                                    @checkInOutInfo.FirstOrDefault().Date.ToShortTimeString()
+                                                    @checkInOutInfo.Where(check => check.CheckType == CheckType.CheckIn).LastOrDefault().Date.ToShortTimeString()
                                                 </label>
                                             }
                                         </td>
