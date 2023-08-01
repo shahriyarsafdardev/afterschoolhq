@@ -47,7 +47,7 @@
                                         if (attendance.Date.HasValue)
                                         {
                                             <option value="@attendance.ID" @(Model.ID == attendance.ID ? " selected=\"selected\" " : "")>
-                                                @attendance.Date.ToShortTimeString(), @attendance.Date.Value.ToLongDateString()
+                                                @attendance.Date.Value.ToLongDateString()
                                             </option>
                                         }
                                     }
@@ -184,7 +184,7 @@
                                  success: true,
                                  message: 'Attendance Date Added.'
                                });
-                               location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid})';
+                               location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, att = Model.ID })';
                                hideModal('modal-add-attendance-date');
                            } else {
                                hideModal('modal-add-attendance-date');
@@ -253,7 +253,7 @@
                    },
                    function (data) {
                        if (data && data.status == 'ok') {
-                           location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, actinst = Model.ActivityInstanceId})';
+                           location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, att = Model.ID})';
                            Notifications.showBar({
                              title: 'Success',
                              success: true,

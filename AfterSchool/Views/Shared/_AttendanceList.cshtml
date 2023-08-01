@@ -127,11 +127,11 @@
                         <td>
                             @if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
                             {
-                                <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                                <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID, actinst = attendance.ActivityInstanceId })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
                             }
                         </td>
 
-                        <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
+                        <td>@(Model.HasSchedule ? account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString() : attendance.Date.Value.ToLongDateString() )</td>
 
                         <td>@seatsPossible</td>
 
