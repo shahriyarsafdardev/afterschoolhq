@@ -177,6 +177,11 @@
                        params,
                        function (data) {
                            if (data && data.status == 'ok') {
+                               Notifications.showBar({
+                                 title: 'Success',
+                                 success: true,
+                                 message: 'Attendance Date Added.'
+                               });
                                location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid})';
                                hideModal('modal-add-attendance-date');
                            } else {
