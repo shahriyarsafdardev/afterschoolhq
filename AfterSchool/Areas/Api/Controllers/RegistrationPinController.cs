@@ -470,7 +470,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
                             CheckIn = checkInOutInfo.Count == 0 || checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut ? false : true,
-                            CheckInTime = checkInOutInfo.Count > 0 ? checkInOutInfo.First().Date.ToShortTimeString() : null,
+                            CheckInTime = checkInOutInfo.Count > 0 ? checkInOutInfo.Last().Date.ToShortTimeString() : null,
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
