@@ -8,12 +8,11 @@ import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
-import { applyModes } from 'constants';
 
 export default function Registration({ newChild = false }) {
   const navigate = useNavigate();
   const { scrollToTop, redirect } = utils;
-  const { paymentScreenPath, thankyouUrl } = apiRoutes;
+  const { paymentScreenPath, thankyouUrl, postRegistrationUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     exit,
@@ -30,18 +29,19 @@ export default function Registration({ newChild = false }) {
     clearMessages,
     activity: {
       IsFree,
+      IsPaid,
       AllowToPayLater,
       RegistrantType,
       IsAgeRestricted,
       MaxAge,
       MinAge,
-      ApplyMode,
       IsGradeRestricted,
       MaxGrade,
       MinGrade,
       IsGenderRestricted,
       EnforcedGender,
-      ActivityUrl
+      ActivityUrl,
+      IsRequireCheckInCheckOut
     }
   } = useRegistration();
 
@@ -87,15 +87,24 @@ export default function Registration({ newChild = false }) {
   }, [msgs]);
 
   useEffect(() => {
+    sessionStorage.removeItem('isSessionCompleted');
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
   const handleRedirection = () => {
-    if (IsFree) navigate(thankyouUrl(registrationId));
-    else {
-      ApplyMode === applyModes.Apply
-        ? navigate(thankyouUrl(registrationId))
-        : redirect(paymentScreenPath(registrationId));
+    if (IsPaid && !IsFree) {
+      redirect(paymentScreenPath(registrationId));
+      return;
+    }
+
+    if (!IsPaid && IsFree && IsRequireCheckInCheckOut) {
+      navigate(postRegistrationUrl(registrationId));
+      return;
+    }
+
+    if (IsFree) {
+      navigate(thankyouUrl(registrationId));
+      return;
     }
   };
 

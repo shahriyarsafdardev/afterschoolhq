@@ -1,4 +1,5 @@
 @model Activity
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     var list = (List<Attendance>)ViewData["attendances"];
     var totalPresent = Model.GetAttendancePresentCount();
@@ -8,6 +9,8 @@
     var account = SessionVariables.CurrentAccount;
     var controller = (string)ViewData["controller"];
     var postPayPlan = Model.HasPostPayPlan();
+    var logoUrl = SessionVariables.CurrentAccount.GetAccountProfile().GetLogoUrl();
+    logoUrl = logoUrl.IsNotEmpty() ? logoUrl : "";
 
     if (totalPresent > 0)
     {
@@ -49,7 +52,7 @@
 
 @{
 
-    if (Model.HasSchedule)
+    if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
     {
         <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
     }
@@ -67,6 +70,11 @@
     <a href="@Url.Action("attendancereport", "activity", new {id = Model.Uid})" class="btn btn-default btn-space" target="_blank">
         View Attendance Report
     </a>
+
+    if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut))
+    {
+        <a data-toggle="modal" data-target="#modal-fullscreen" class="btn btn-default btn-space">Display QR Code</a>
+    }
 }
 
 
@@ -117,10 +125,13 @@
                         }
 
                         <td>
-                            <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                            @if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
+                            {
+                                <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID, actinst = attendance.ActivityInstanceId })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
+                            }
                         </td>
 
-                        <td>@account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString()</td>
+                        <td>@(Model.HasSchedule ? account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString() : attendance.Date.Value.ToLongDateString() )</td>
 
                         <td>@seatsPossible</td>
 
@@ -151,8 +162,15 @@
             { "querystring", "" },
             { "action", "attendance" },
             { "controller", "activity" }
-               }
+                                                               }
    );
+
+    Html.RenderPartial("_ModalQR", new ModalQRModel()
+    {
+        LogoUrl = logoUrl,
+        AccountName = account.Name,
+        ID = "modal-fullscreen",
+    });
 }
 
 
@@ -162,7 +180,10 @@
     @Html.Hidden("AttendanceIds")
     @Html.HiddenFor(m => m.Uid)
 </form>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
+</script>
 <script>
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
@@ -207,6 +228,20 @@
                     this.click();
             }
         })
+    }
+
+     function generateQrCode() {
+        const url = "@Utilities.BaseUrl()/reactapp/check-in-out/@account.UniqueName";
+
+        new QRCode(document.getElementById("modal-qr-code"), {
+            text: url,
+            height: 350,
+            width: 350
+        });
+    }
+
+    if ('@account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut)'.toLowerCase() === 'true') {
+        generateQrCode();
     }
 
 </script>

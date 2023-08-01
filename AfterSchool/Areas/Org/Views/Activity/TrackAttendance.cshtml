@@ -1,4 +1,4 @@
-﻿@model Attendance
+@model Attendance
 @{
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -36,18 +36,50 @@
             <div class="col-md-10 col-md-offset-1">
                 
                 @{
-                    Html.RenderPartial(
-                      "~/Views/Shared/_RegistrantAttendance.cshtml",
-                      Model,
-                      new ViewDataDictionary
-                      {
-                          { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
-                          { "Schedule", ViewBag.Schedule },
-                          { "RegistrantActivities", ViewBag.RegistrantActivities },
-                          { "Controller", "activity" },
-                      });
-                }
+                    if(AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value,FeatureType.ManageCheckInCheckOut) &&
+                       activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                    {
+                        if(activity.HasSchedule)
+                        {
+                            Html.RenderPartial(
+                           "_CheckInOutAttendance",
+                           Model,
+                           new ViewDataDictionary
+                           {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "Schedule", ViewBag.Schedule },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                           });
+                        }
+                        else {
+                            Html.RenderPartial(
+                                "_CICOAttendanceNoSchedule",
+                                Model,
+                                new ViewDataDictionary
+                                {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                                {"AttendanceList",ViewBag.AttendanceList },
+                                });
+                        }
+                    }
+                    else
+                    {
+                        Html.RenderPartial(
+                            "~/Views/Shared/_RegistrantAttendance.cshtml",
+                            Model,
+                            new ViewDataDictionary
+                            {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "Schedule", ViewBag.Schedule },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                            });
+                    }
 
+                }
             </div>
         </div>
     </div>

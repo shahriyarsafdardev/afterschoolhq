@@ -1,0 +1,284 @@
+@model Attendance
+@{
+    var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
+    var controller = (string)ViewData["controller"];
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
+    var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a =>
+        a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent ||
+        a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
+    var attendanceDates = (List<Attendance>)ViewData["AttendanceList"];
+}
+<style media="all and (max-width: 479px)">
+    .attendance-table {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding: 0 !important;
+    }
+</style>
+<style>
+    .modal-body-attendance {
+        text-align: center;
+    }
+</style>
+<form method="post" action="@Url.Action("TrackCheckInOutAttendance", controller, new { id = Model.ActivityUid, att = Model.ID })" class="form-horizontal">
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="pull-right">
+                <a href="@Url.Action("attendance", controller, new { id = Model.ActivityUid })" class="btn btn-default btn-space">&laquo; Back to List</a>
+                <a data-modal="save-checkin" id="submitAttendanceBtn" class="btn btn-primary btn-space md-trigger" @(isAttendanceDisabled)><i class="icon icon-left s7-diskette"></i> Save Attendance</a>
+            </div>
+            <i class="s7-check"></i> Take Attendance
+        </div>
+        <div class="panel-body">
+
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-md-2 control-label">
+                        Attendance Date
+                    </div>
+                    <div class="col-md-8">
+                        <select name="activityinstance" id="activityinstance" class="form-control">
+                            <option value="">Select...</option>
+                            @{
+                                    foreach (var attendance in attendanceDates)
+                                    {
+                                        if (attendance.Date.HasValue)
+                                        {
+                                            <option value="@attendance.ID" @(Model.ID == attendance.ID ? " selected=\"selected\" " : "")>
+                                                @attendance.Date.Value.ToLongDateString()
+                                            </option>
+                                        }
+                                    }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 p-l-0">
+                        <a data-modal="modal-add-attendance-date" class="btn btn-default btn-space padding-10 md-trigger">Add New Date</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-10 col-md-offset-2 attendance-table">
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Name</th>
+                            <th>Check In Time</th>
+                            <th>Check Out Time</th>
+                        </tr>
+
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.OrderBy(x => x.RegistrantName))
+                        {
+                            if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId &&
+                                                                               registrantActivity.IsReservedRegistrationAssignmentType()))
+                            {
+                                var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value);
+                                <tr>
+                                    <td>
+                                        @(isTechSupport ? $"{attendanceRegistrant.RegistrantName.MaskString(3, 3)}"
+                                                : attendanceRegistrant.RegistrantName)
+                                    </td>
+                                    <td>
+                                        @if (checkInOutInfo.Count == 0)
+                                        {
+                                            <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox"
+                                                   class="checkInOutBox newCheckbox checkIn" data-forerror="true" />
+                                            <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check In</label>
+                                        }
+                                        else
+                                        {
+                                            <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
+                                                @checkInOutInfo.Where(check => check.CheckType == CheckType.CheckIn).LastOrDefault().Date.ToShortTimeString()
+                                            </label>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (checkInOutInfo.Count > 0 && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckIn)
+                                        {
+                                            <input id="@attendanceRegistrant.ID" name="@attendanceRegistrant.RegistrantName" type="checkbox"
+                                                   class="checkInOutBox newCheckbox checkOut" data-forerror="true" />
+                                            <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-label text-bold">Check Out</label>
+                                        }
+                                        else
+                                        {
+                                            if (checkInOutInfo.Count >= 2 && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut)
+                                            {
+                                                <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
+                                                    @checkInOutInfo.LastOrDefault().Date.ToShortTimeString()
+                                                </label>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@{
+    Html.RenderPartial("~/Views/Shared/_Modal.cshtml", new ModalViewModel()
+    {
+        ActionButtonHtml = "Save Attendance",
+         ActionButtonId = "save-check-in-out",
+        HtmlBody =
+        "<div class=\"modal-body-attendance\"><p>WARNING: The selected students have not been checked in/out by an approved person. <b>Please ensure the students are accounted for before you save.</b></p>" +
+        "<div id=\"attendanceListContainer\">" +
+        "<div id=\"attendanceList\"></div>" +
+        "</div>" +
+        "</div>",
+        ID = "save-checkin",
+        Title = "Save Attendance",
+    });
+}
+<div id="modal-add-attendance-date" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close"><i class="icon s7-close"></i></button>
+            <h3 class="modal-title">Add Attendance Date</h3>
+        </div>
+        <div class="modal-body form">
+            What date do you want to take attendance for?
+            <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetimepicker">
+                <span class="input-group-addon btn btn-primary"><i class="icon-th s7-date"></i></span>
+                <input type="text" class="form-control" id="txtNewDate" name="date" onfocus="this.select()" required="required" data-type="date" />
+            </div>
+            <input type="hidden" id="activityId" name="activityId" value="@Model.ActivityId"/>
+            <div id="dateError" class="text-danger hide">Date is required.</div>
+        </div>
+        <div class="modal-footer textCenterImportant">
+            <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
+            <a id="btnAddDate" class="btn btn-primary">Add Date</a>
+        </div>
+    </div>
+</div>
+<script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        let checkInOutInfo = [];
+        let checkInStudentsName = [];
+        let checkOutStudentsName = [];
+        updateButtonState();
+        $('#activityinstance').change(function () {
+            location.href = '@Url.Action("TrackAttendance", "activity")?att=' + $(this).val();
+        });
+        $("#btnAddDate").on('click',function (){
+            let date = $("#txtNewDate").val();
+            let activityId = $("#activityId").val();
+            let params = 'activityId=' + activityId +'&date='+date;
+           if (date === undefined || date === '') {
+            $("#dateError").removeClass('hide');
+           }
+           else {
+           $("#dateError").addClass(' hide');
+           $.post(
+                   '@Url.Action("AddNewAttendanceDateWithoutSchedule", controller)',
+                       params,
+                       function (data) {
+                           if (data && data.status == 'ok') {
+                               Notifications.showBar({
+                                 title: 'Success',
+                                 success: true,
+                                 message: 'Attendance Date Added.'
+                               });
+                               location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, att = Model.ID })';
+                               hideModal('modal-add-attendance-date');
+                           } else {
+                               hideModal('modal-add-attendance-date');
+                               Notifications.showErrors(data.messages);
+                           }
+                       }
+                  );
+            }
+        });
+        $(".checkInOutBox").on('click',function () {
+            checkInOutInfo = [];
+            checkInStudentsName = [];
+            checkOutStudentsName = [];
+            $(".checkIn").each(function (){
+               if ($(this).is(':checked'))
+               {
+                   checkInOutInfo.push({
+                       Id : $(this).attr('id'),
+                       CheckType : 'CheckIn'
+                   });
+                   checkInStudentsName.push($(this).attr('name'));
+               }
+            });
+
+            $(".checkOut").each(function (){
+               if ($(this).is(':checked'))
+               {
+                   checkInOutInfo.push({
+                       Id : $(this).attr('id'),
+                       CheckType : 'CheckOut'
+                   });
+                   checkOutStudentsName.push($(this).attr('name'));
+               }
+            });
+        });
+        $("#submitAttendanceBtn").on('click',function (e){
+           let html = "";
+           if (checkInOutInfo.length === 0) {
+               e.preventDefault();
+           }
+           else {
+               if (checkInStudentsName.length > 0)
+               {
+                   html += "<br/>You are manually checking in:<br/>";
+                   checkInStudentsName.forEach(function (stdName){
+                       html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
+                   });
+               }
+               if (checkOutStudentsName.length > 0)
+               {
+                   html += "<br/>You are manually checking out:<br/>";
+                   checkOutStudentsName.forEach(function (stdName){
+                       html += "<span class='checkin-label' style='cursor:auto;'>"+stdName+"</span>"+"<br/>";
+                   });
+               }
+               $("#attendanceList").empty();
+               $("#attendanceList").append(html);
+           }
+        });
+        $('#save-check-in-out').click(function () {
+            $.post(
+               '@Url.Action("TrackCheckInOutAttendance", controller)',
+                   {
+                       attendanceId: @Model.ID,
+                       checkInOutInfo: checkInOutInfo
+                   },
+                   function (data) {
+                       if (data && data.status == 'ok') {
+                           location.href = '@Url.Action("TrackAttendance", controller, new {id = Model.ActivityUid, att = Model.ID})';
+                           Notifications.showBar({
+                             title: 'Success',
+                             success: true,
+                             message: 'Attendance Saved.'
+                           });
+                           hideModal('save-checkin');
+                       } else {
+                           hideModal('save-checkin');
+                           Notifications.showErrors(data.messages);
+                       }
+                   }
+               );
+        });
+        $(".checkInOutBox").on("change", function () {
+            updateButtonState();
+        });
+        function updateButtonState() {
+            let submitAttendanceBtn = $("#submitAttendanceBtn");
+            if (checkInOutInfo.length > 0) {
+                submitAttendanceBtn.removeClass("disabled");
+            } else {
+                submitAttendanceBtn.addClass("disabled");
+            }
+        }
+    });
+</script>
+
+

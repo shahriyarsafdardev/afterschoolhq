@@ -85,6 +85,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["HowHearAboutUs"].Value = value;
         }
 
+        public string PinCode
+        {
+            get => (string)MDV["PinCode"].Value;
+            set => MDV["PinCode"].Value = value; 
+        }
+
 
         public WebUser()
         {
@@ -115,6 +121,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "CleverUserId", SqlDbType.NVarChar, "100");
                 _dp.Add(className, "CleverUserName", SqlDbType.NVarChar, "100");
                 _dp.Add(className, "HowHearAboutUs", SqlDbType.NVarChar, "500");
+                _dp.Add(className, "PinCode",  SqlDbType.NVarChar, "100");
 
                 return _dp;
             }
@@ -231,11 +238,13 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["CleverUserName"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
-
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["HowHearAboutUs"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["PinCode"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
@@ -331,6 +340,15 @@ namespace AfterSchoolLibrary.Models
             }
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+        
+        public static WebUser LoadByPhoneByPinCode(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Phone"], phone);
+            dq.Criterias.Add(ObjectMap["PinCode"], pinCode);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
         public static WebUser LoadByUsername(string username, SystemMessages msgs, DatabaseConnection dc = null)

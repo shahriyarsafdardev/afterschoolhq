@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
 import { locationObject } from 'components/SchoolField/SchoolField';
+import { googlePlaces } from 'constants';
 
 function ApiTextField({ formik, question, currentQuestions }) {
   const inputRef = useRef();
@@ -66,7 +67,7 @@ function ApiTextField({ formik, question, currentQuestions }) {
 
       <Box className={classes.textFieldOuterWrapper}>
         <Box className={classes.textFieldContainer}>
-          <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={['places']}>
+          <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={googlePlaces}>
             <StandaloneSearchBox
               className={classes.searchBox}
               onLoad={ref => {

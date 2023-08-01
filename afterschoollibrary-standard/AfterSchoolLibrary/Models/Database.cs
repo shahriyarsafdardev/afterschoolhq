@@ -105,6 +105,7 @@ namespace AfterSchoolLibrary.Models
             MultipartAuth.Create(dc);
             Maintenance.Create(dc);
             FormQuestionSettings.Create(dc);
+            CheckInOut.Create(dc);
 
             return msgs;
         }
@@ -202,7 +203,8 @@ namespace AfterSchoolLibrary.Models
             MultipartAuth.Alter(dc);
             Maintenance.Alter(dc);
             FormQuestionSettings.Alter(dc);
-
+            CheckInOut.Alter(dc);
+            
             return msgs;
         }
 
@@ -235,6 +237,8 @@ namespace AfterSchoolLibrary.Models
                 Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsContinuousEnrollment", false}},
                 new Hashtable {{"IsContinuousEnrollment", DBNull.Value}}, Activity.ObjectMap, dc);
+            BaseObject.Update(new Hashtable {{"IsRequireCheckInCheckOut", false}},
+                new Hashtable {{"IsRequireCheckInCheckOut", DBNull.Value}}, Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"ActivityTypeId", 0}}, new Hashtable {{"ActivityTypeId", DBNull.Value}},
                 Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"LeaderTypeId", 0}}, new Hashtable {{"LeaderTypeId", DBNull.Value}},
@@ -598,6 +602,8 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_WebUser_FacebookId ON [WebUser] (FacebookId)"));
             msgs.AddRange(
                 dq.ExecuteSql("CREATE INDEX IX_WebUser_CleverUserId_IsActive ON [WebUser] (CleverUserId,IsActive)"));
+            msgs.AddRange(
+                dq.ExecuteSql("CREATE INDEX IX_WebUser_Phone_PinCode ON [WebUser] (PinCode,Phone)"));
             msgs.AddRange(dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId ON [Activity] (AccountId)"));
             msgs.AddRange(
                 dq.ExecuteSql("CREATE INDEX IX_Activity_AccountId_IsPublished ON [Activity] (AccountId,IsPublished)"));
@@ -1320,6 +1326,8 @@ namespace AfterSchoolLibrary.Models
             // Migration_20230525_UpdateLocationName.Do(amsgs, adc);
             Migration_20230620_AddFormQuestionAnswerRidQdtidIndex.Do(amsgs,adc);
             Migration_20230628_SetAccountIsPayingCustomer.Do(amsgs, adc);
+            Migration_20230713_CheckInCheckOut.Do(amsgs,adc);
+            Migration_20230731_UpdateRegistrantWebUserAuthorizationType.Do(amsgs,adc);
         }
 
         public static DatabaseConnection StartTransaction()

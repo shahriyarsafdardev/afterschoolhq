@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Models;
@@ -25,10 +25,16 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                var closestActivityInstance = activity.GetClosestActivityInstance(msgs, dc);
-
+                var closestActivityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(msgs, dc) : null;
+                if(closestActivityInstance.IsEmpty())
+                {
+                    attendance.ActivityInstanceId = null;
+                    attendance.Date = DateTime.UtcNow.Date;
+                }
+                else { 
                 attendance.ActivityInstanceId = closestActivityInstance.ID;
                 attendance.Date = closestActivityInstance.StartDateTime;
+                }
             }
 
             msgs.AddRange(attendance.Save(dc));

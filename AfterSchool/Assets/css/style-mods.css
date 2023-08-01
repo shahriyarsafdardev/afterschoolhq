@@ -167,6 +167,11 @@ div.border-light-gray {
     margin-bottom: 40px;
 }
 
+.margin-v-60 {
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
 .margin-t-10 {
     margin-top: 10px;
 }

@@ -4,8 +4,11 @@ import { useSurveyActions } from 'redux/slices/SurveySlice';
 import { useHeaderActions } from 'redux/slices/HeaderSlice';
 import { useProfileActions } from 'redux/slices/ProfileSlice';
 import { useThankYouActions } from 'redux/slices/ThankYouSlice';
+import { useAPAccessActions } from 'redux/slices/APAccessSlice';
+import { useCheckInOutActions } from 'redux/slices/CheckInOutSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
+import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
 import { useVolunteerProfileActions } from 'redux/slices/VolunteerProfileSlice';
 import { useUpdateRegistrationActions } from 'redux/slices/UpdateRegistrationSlice';
 import { useVolunteerRegistrationActions } from 'redux/slices/VolunteerRegistrationSlice';
@@ -58,4 +61,19 @@ export const useProfile = () => ({
 export const useThankYou = () => ({
   ...useSelector(state => state.thankYouSlice),
   ...useThankYouActions()
+});
+
+export const usePostRegistration = () => ({
+  ...useSelector(state => state.postRegistrationSetupSlice),
+  ...usePostRegistrationActions()
+});
+
+export const useCheckInOut = () => ({
+  ...useSelector(state => state.checkInOutSlice),
+  ...useCheckInOutActions()
+});
+
+export const useManageAPAccess = () => ({
+  ...useSelector(state => state.APAccessSlice),
+  ...useAPAccessActions()
 });

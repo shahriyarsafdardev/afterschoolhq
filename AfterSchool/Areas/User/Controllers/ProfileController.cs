@@ -22,6 +22,15 @@ namespace AfterSchool.Areas.User.Controllers
             ViewBag.Messages = new SystemMessages();
             return View(SessionVariables.CurrentUser);
         }
+        
+        [HttpGet]
+        public ActionResult EditCheckInOut()
+        {
+            var bundlePath = Server.MapPath("~/React/dist/bundle.js");
+            var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
+            ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
+            return View();
+        }
 
         [HttpPost]
         public ActionResult Edit(string id, string firstname, string lastname, string email, string password1, string password2, string isactive)

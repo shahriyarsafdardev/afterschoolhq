@@ -2418,6 +2418,9 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
+            if (participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled)
+                return Redirect($"~/reactapp/reg/setup/{id}");
+            
             var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
                 assignmentType, msgs);
             return View(result);

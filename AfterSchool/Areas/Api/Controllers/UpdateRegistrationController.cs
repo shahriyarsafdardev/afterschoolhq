@@ -24,10 +24,9 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
-                
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if(!regUid.IsGuid())
                     throw new Exception("Invalid Id");
                 
@@ -127,6 +126,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         MinAge = participationObject.AgeStart,
                         MaxAge = participationObject.AgeEnd,
                         EnforcedGender = participationObject.GenderRestriction,
+                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     },
                 };
                 

@@ -46,6 +46,10 @@ function Router() {
         {
           path: 'reactapp/registration/payment/:registrationId',
           element: <AlreadyPaidSection />
+        },
+        {
+          path: 'reactapp/reg/setup/:registrationUid',
+          element: <PostRegistrationSetup />
         }
       ]
     },
@@ -60,6 +64,10 @@ function Router() {
     {
       path: '/Org/form/edit/:formId',
       element: <FormBuilderSection />
+    },
+    {
+      path: '/User/profile/EditCheckInOut',
+      element: <ManageCheckInOutAccess />
     },
     {
       path: '*',
@@ -80,6 +88,27 @@ function Router() {
     {
       path: 'reactapp/sr/:srUid',
       element: <SurveyPinModal />
+    },
+    {
+      path: 'reactapp/pin-setup/:registrationUid',
+      element: <PinSetup />
+    },
+    {
+      path: 'reactapp/check-in-out/',
+      children: [
+        {
+          path: ':accountName',
+          element: <CheckInOut />
+        },
+        {
+          path: 'request-pin-reset',
+          element: <RequestPinReset />
+        },
+        {
+          path: 'reset-pin',
+          element: <ResetPin />
+        }
+      ]
     }
   ]);
 }
@@ -92,13 +121,20 @@ const RedirectToExternal = () => {
 const Survey = Loadable(lazy(() => import('pages/Survey')));
 const Wrapper = Loadable(lazy(() => import('pages/Wrapper/Wrapper')));
 const SurveyPinModal = Loadable(lazy(() => import('pages/Survey/PinSurvey')));
+const PostRegistrationSetup = Loadable(lazy(() => import('pages/PostRegistrationSetup')));
 const UpdateRegistration = Loadable(lazy(() => import('pages/UpdateRegistration')));
 const Registration = Loadable(lazy(() => import('pages/Registration/Registration')));
 const FormBuilderSection = Loadable(lazy(() => import('sections/FormBuilderSection')));
 const UpdateProfile = Loadable(lazy(() => import('pages/UpdateProfile/UpdateProfile')));
 const SurveyThankYouSection = Loadable(lazy(() => import('sections/SurveyThankYouSection')));
+const ManageCheckInOutAccess = Loadable(lazy(() => import('sections/ManageCheckInOutAccess')));
 const ThankYouSection = Loadable(lazy(() => import('sections/ThankYouSection/ThankYouSection')));
 const PinSurveyThankYouSection = Loadable(lazy(() => import('sections/PinSurveyThankYouSection')));
+const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
+const CheckInOut = Loadable(lazy(() => import('pages/CheckInCheckOut/CheckInOut')));
+const RequestPinReset = Loadable(lazy(() => import('pages/CheckInCheckOut/RequestPinReset')));
+const ResetPin = Loadable(lazy(() => import('pages/CheckInCheckOut/ResetPin')));
+
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

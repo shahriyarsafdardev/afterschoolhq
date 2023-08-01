@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using AfterSchool.Areas.Api.Models;
 using AfterSchool.Areas.Org.Assemblers.Activity;
 using AfterSchool.Controllers;
 using AfterSchool.Models;
@@ -20,6 +21,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Hangfire;
 using Email = AfterSchoolLibrary.Helpers.Email;
+using Extensions = AfterSchoolLibrary.Extensions;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Org.Controllers
@@ -1305,7 +1307,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode,
             string group, string cmd, string type, string inviteonly, string minseatsrequired,
             string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours,
-            string isContinuousEnrollmentEnabled)
+            string isContinuousEnrollmentEnabled, string isRequireCheckInCheckOutEnabled)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1377,6 +1379,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"costfrequencytype", costfrequencytype},
                 {"cutoffhours", cutoffhours},
                 {"isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()},
+                {"isRequireCheckInCheckOutEnabled", isRequireCheckInCheckOutEnabled.IsNotEmpty() && isRequireCheckInCheckOutEnabled.ToBoolean()},
                 {"activitylocationtype", activityLocationTypeId},
                 {"isparentpricecost", true},
             };
@@ -2738,17 +2741,31 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+            var nonScheduleDate = att.IsNotEmpty() ? AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(),msgs).Date : DateTime.UtcNow.Date;
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+            var attendance = new Attendance();
+            var activitySchedule = activity.GetSchedule(msgs);
+            List<AttendanceRegistrant> attendanceRegistrants;
+
+            if (activity.HasSchedule)
+            {
+                attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+                attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+            }
+            else
+            {
+                attendance = activity.GetOrCreateNewAttendance(currentUser, nonScheduleDate.Value, msgs);
+                attendanceRegistrants = GetOrCreateNonScheduledAttendanceRegistrants(attendance, activity, msgs);
+            }
+
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
-            var activitySchedule = activity.GetSchedule(msgs);
-            var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
+            ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.Schedule = activitySchedule;
             ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
@@ -2777,6 +2794,25 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return attendanceRegistrants;
+        }
+        
+        private List<AttendanceRegistrant> GetOrCreateNonScheduledAttendanceRegistrants(Attendance attendance,Activity activity, SystemMessages msgs)
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var registrantActivities = activity.GetRegistrantActivities(msgs);
+
+            registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
+                .ToList()
+                .ForEach(registrantActivity =>
+                {
+                    var attendanceRegistrantExists = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, 
+                        registrantActivity.RegistrantId.Value,msgs).Count > 0;
+                    
+                    if(!attendanceRegistrantExists)
+                        AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, currentUser, msgs);
+                });
+
+            return attendance.GetAttendanceRegistrants(msgs);
         }
 
         [HttpPost]
@@ -2808,6 +2844,126 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
 
             return View(attendance);
+        }
+
+        [HttpPost]
+        public ActionResult AddNewAttendanceDate(int scheduleId, DateTime date)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var activitySchedule = ActivitySchedule.Load(scheduleId, msgs);
+            var activityInstance = activitySchedule.GetInstances().FirstOrDefault();
+            var startDateTime = date.Date + activityInstance?.StartDateTime.Value.TimeOfDay;
+            var endDateTime = date.Date + activityInstance?.EndDateTime.Value.TimeOfDay;
+            var dateAlreadyExist = ActivityInstance.LoadByActivityScheduleIdByDateRange(scheduleId, startDateTime.Value,
+                endDateTime.Value, msgs).Count > 0;
+
+            if (!dateAlreadyExist)
+            {
+                var instance = new ActivityInstance
+                {
+                    ActivityScheduleId = scheduleId,
+                    StartDateTime = startDateTime,
+                    EndDateTime = endDateTime,
+                    InstanceTypeId = InstanceType.InSession,
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
+                    LastModifiedBy = currentUser.ID,
+                };
+                instance.Day = Extensions.ToDayOfWeekASL(instance.StartDateTime.Value.DayOfWeek);
+                msgs.AddRange(instance.Save());
+
+                if (msgs.HasNoErrors())
+                    return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                msgs.Add("Date already exists.", MessageType.UserError);
+            }
+
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult AddNewAttendanceDateWithoutSchedule(int activityId, DateTime date)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var dateAlreadyExist = AfterSchoolLibrary.Models.Attendance.LoadByActivityIdByDate(activityId, date.Date,msgs).Count > 0;
+
+            if (!dateAlreadyExist)
+            {
+                var attendance = new Attendance
+                {
+                    CreateDate = DateTime.UtcNow,
+                    LastModifiedDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
+                    LastModifiedBy = currentUser.ID,
+                    ActivityId = activityId,
+                    Date = date.Date,
+                    IsCompleted = true,
+
+                };
+                msgs.AddRange(attendance.Save());
+
+                if (msgs.HasNoErrors())
+                    return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
+            }
+            else
+            {
+                msgs.Add("Date already exists.", MessageType.UserError);
+            }
+
+            return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public ActionResult TrackCheckInOutAttendance(int attendanceId, List<CheckInOutAttendanceDto> checkInOutInfo)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var attendance = AfterSchoolLibrary.Models.Attendance.Load(attendanceId, msgs);
+
+            checkInOutInfo.ForEach(checkInOut =>
+            {
+                var checkInOutObj = new CheckInOut
+                {
+                    CreateDate = DateTime.UtcNow,
+                    CreatedBy = currentUser.ID,
+                    LastModifiedDate = DateTime.UtcNow,
+                    LastModifiedBy = currentUser.ID,
+                    Date = DateTime.UtcNow,
+                    Browser = Request.UserAgent,
+                    IPAddress = Request.GetUserHostAddress(),
+                    WebUserId = currentUser.ID.Value,
+                    AttendanceRegistrantId = checkInOut.Id,
+                    CheckType = checkInOut.CheckType,
+                };
+                msgs.AddRange(checkInOutObj.Save());
+
+                if (checkInOut.CheckType == CheckType.CheckIn)
+                {
+                    var attendanceRegistrant = AttendanceRegistrant.Load(checkInOut.Id, msgs);
+                    if (attendanceRegistrant.IsNotEmpty())
+                    {
+                        attendanceRegistrant.NumberPresent = 1;
+                        attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
+                        attendanceRegistrant.LastModifiedBy = currentUser.ID;
+                        msgs.AddRange(attendanceRegistrant.Save());
+                    }
+                }
+
+            });
+            
+            attendance.IsCompleted = true;
+            attendance.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(attendance.Save());
+
+            if (msgs.HasNoErrors())
+                return Json(new {status = "ok"}, JsonRequestBehavior.AllowGet);
+
+            return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
 
         // This returns all unbilled selected Attendances by Registrant

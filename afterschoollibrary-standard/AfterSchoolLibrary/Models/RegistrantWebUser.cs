@@ -28,13 +28,18 @@ namespace AfterSchoolLibrary.Models
 		public int? WebUserId { get { return (int?)MDV["WebUserId"].Value; } set { MDV["WebUserId"].Value = value; } }
 		public bool IsDeleted { get { return (bool)MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
 		
-
+        public WebUserAuthorizationType AuthorizationTypeId
+        {
+            get => (WebUserAuthorizationType)MDV["AuthorizationTypeId"].Value;
+            set => MDV["AuthorizationTypeId"].Value = value; 
+        }
+        
         public RegistrantWebUser()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(RegistrantWebUser).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.IsDeleted = false;
-			
+            this.AuthorizationTypeId = WebUserAuthorizationType.NotSet;
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -47,6 +52,7 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "RegistrantId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "WebUserId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "AuthorizationTypeId",  SqlDbType.Int);
 				
                 return _dp;
             }
@@ -135,6 +141,10 @@ namespace AfterSchoolLibrary.Models
 			dps = new BasicLibrary.DataAccess.DatabaseParameters();
 			dps.Add(ObjectMap["IsDeleted"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["AuthorizationTypeId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
 			
 
@@ -173,13 +183,19 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		
+        public static List<RegistrantWebUser> LoadByRegistrantId(int RegistrantId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
-		public void MarkAsDeleted(SystemMessages msgs, DatabaseConnection dc = null)
+        public void MarkAsDeleted(SystemMessages msgs, DatabaseConnection dc = null)
 		{
 			this.IsDeleted = true;
 			msgs.AddRange(this.Save(dc));

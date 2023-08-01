@@ -8,10 +8,27 @@ export default {
   ThankYouAPI: id => `Api/Registration/ThankYou/${id}`,
   exitRegistrationAPI: uid => `Api/Registration/Exit?uid=${uid}`,
   getProfileFormDataAPI: id => `Api/Registration/GetRegistrantForm/${id}`,
+  getRegistrationAPI: registrationUid =>
+    `Api/RegistrationPin/GetRegistrationSettings?registrationUid=${registrationUid}`,
+  AddOrUpdateRegrantUserAPI: `Api/RegistrationPin/AddOrUpdateRegistrantWebUser`,
+
   getFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
+
+  //RegistrationPin APIs
+  getPinSetupData: (registrationUid, phone) =>
+    `Api/RegistrationPin/CreateNewPin?registrationUid=${registrationUid}&phone=${phone}`,
+  updatePinSetupData: 'Api/RegistrationPin/CreateNewPin',
+  getChildListData: (accountName, phone, pinCode) =>
+    `Api/RegistrationPin/GetAllStudentsInfo?accountName=${accountName}&phone=${phone}&pinCode=${pinCode}`,
+  updateStudentCheckInOutInfoAPI: 'Api/RegistrationPin/AddOrUpdateStudentCheckInOutInfo',
+  resetPinAPI: 'Api/RegistrationPin/SendResetUrl',
+  submitResetPinAPI: 'Api/RegistrationPin/ResetPin',
+  getAuthorizedPersonsAPI: 'Api/RegistrationPin/GetAuthorizedPersonsList',
+  addOrUpdateAuthorizedPersonsAPI: 'Api/RegistrationPin/AddOrUpdateAuthorizedPersons',
+  resendInviteAPI: 'Api/RegistrationPin/ResendInvite',
   // Update Registration APIs
   getRegistrationFormDataAPI: regUid =>
     `Api/UpdateRegistration/GetRegistrationForm/?regUid=${regUid}`,
@@ -60,6 +77,7 @@ export default {
   surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,
+  postRegistrationUrl: registrationId => `/reactapp/reg/setup/${registrationId}`,
   facebookShareUrl: (activityUrl, textToShare = '') =>
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       activityUrl

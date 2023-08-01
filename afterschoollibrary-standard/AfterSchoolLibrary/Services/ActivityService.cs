@@ -795,6 +795,7 @@ namespace AfterSchoolLibrary.Services
             var costFrequencyType = values.GetValueOrDefault("costfrequencytype");
             var cutoffHours = values.GetValueOrDefault("cutoffhours");
             var isContinuousEnrollmentEnabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
+            var isRequireCheckInCheckOutEnabled = values.GetValueOrDefault("isRequireCheckInCheckOutEnabled");
             var strictgenderrestrictions = values.GetValueOrDefault("strictgenderrestrictions");
 
             var activityType = ActivityType.NotSet;
@@ -898,6 +899,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isContinuousEnrollmentEnabled.IsNotEmpty())
                 activity.IsContinuousEnrollment = isContinuousEnrollmentEnabled.ToString().ToBoolean();
+
+            if (isRequireCheckInCheckOutEnabled.IsNotEmpty())
+                activity.IsRequireCheckInCheckOut = isRequireCheckInCheckOutEnabled.ToString().ToBoolean();
 
             if (ageEnd.IsNumber())
             {
@@ -1907,7 +1911,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Attendance GetOrCreateNewAttendance(this Activity activity, int? attendanceId,
-            int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+              int? activityInstanceId, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             // get attendance by activityInstanceId if it exists
             if (activityInstanceId.HasValue)
@@ -1925,7 +1929,7 @@ namespace AfterSchoolLibrary.Services
             var closestActivityInstance = activity.GetClosestPastActivityInstance(msgs, dc);
             if (closestActivityInstance.IsEmpty())
                 return null;
-
+            
             var closestActivityInstanceAttendance = Attendance
                 .LoadByActivityInstanceId(closestActivityInstance.ID.Value, msgs, dc).FirstOrDefault();
 
@@ -1957,6 +1961,18 @@ namespace AfterSchoolLibrary.Services
 
             // otherwise return the attendance with given id
             return Attendance.Load(attendanceId.Value, msgs, dc);
+        }
+
+        public static Attendance GetOrCreateNewAttendance(this Activity activity,
+             WebUser loggedInUser, DateTime date, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+                var newAttendance = date.IsNotEmpty() ? activity.GetAttendanceByDate(date, msgs).FirstOrDefault() : null;
+                if (newAttendance.IsEmpty())
+                    return activity.CreateNewAttendance(
+                        null, loggedInUser,
+                        msgs, dc);
+
+                return Attendance.Load(newAttendance.ID.Value, msgs, dc);
         }
 
         public static List<AttendanceRegistrant> CreateNewAttendanceRegistrantByRegistrantActivities(
@@ -2004,7 +2020,7 @@ namespace AfterSchoolLibrary.Services
             return closestPastActivity.IsNotEmpty() ? closestPastActivity : closestInstancesToNow.First();
         }
 
-        public static ActivityInstance GetClosestActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc)
+        public static ActivityInstance GetClosestActivityInstance(this Activity activity, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var instances = activity
                 .GetSchedule(msgs: msgs, dc: dc)

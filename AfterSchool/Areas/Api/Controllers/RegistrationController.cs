@@ -124,6 +124,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Name = participationObject.Name,
                         Organization = participationObject.OwnerAccount.Name,
                         IsFree = !participationObject.ShouldParentPay(),
+                        IsPaid = !participationObject.IsFree,
                         RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
@@ -143,6 +144,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -380,6 +384,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Name = activity.Name,
                         Organization = activity.AccountName,
                         IsFree = !participationObject.ShouldParentPay(),
+                        IsPaid = !participationObject.IsFree,
                         RegistrantType = RegistrantPersonType.Parent.ToString(),
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         IsGradeRestricted = participationObject.RestrictByGrade(),
@@ -397,6 +402,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         EnforcedGender = participationObject.GenderRestriction,
                         AllowToPayLater = participationObject.AllowToPayLater,
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
@@ -975,9 +983,8 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult ThankYou(string id)
         {
             var currentUser = SessionVariables.CurrentUser;
-
             if (currentUser.IsEmpty())
-                throw new Exception("Unauthorized");
+                throw new Exception("Unauthorized User");
 
             var msgs = new SystemMessages();
             try
@@ -1005,6 +1012,9 @@ namespace AfterSchool.Areas.Api.Controllers
                         ProviderEmail = participationObject.OwnerAccount.Email,
                         RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
                         ApplyMode = participationObject.RegistrationMode.ToString(),
+                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                   participationObject.IsRequireCheckInCheckOutEnabled,
                     }
                 };
 
