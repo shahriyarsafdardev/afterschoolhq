@@ -465,7 +465,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
 
                         if (checkInOutInfo.Count > 0)
-                            webUser = WebUser.Load(checkInOutInfo.First().WebUserId, msgs);
+                            webUser = WebUser.Load(checkInOutInfo.Last().WebUserId, msgs);
 
                         var checkSetupInfo = new CheckInCheckOutSetupDto
                         {
