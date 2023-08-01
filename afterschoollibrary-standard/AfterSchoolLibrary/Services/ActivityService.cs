@@ -2881,7 +2881,6 @@ namespace AfterSchoolLibrary.Services
                 }
                 case BillingPeriodType.Month:
                 {
-                    // var startingDay = new DateTime(startDate.Year, startDate.Month, startDate.Day);
                     var paymentStart = new DateTime(startDate.Year, startDate.Month, startDate.Day); //startingDay.IsAfter(utcNow) ? startingDay : utcNow;
                     return (paymentStart, paymentEnd);
                 }
