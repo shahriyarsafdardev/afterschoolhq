@@ -2746,16 +2746,23 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityInstanceId = actinst.IsNumber() ? actinst.ToInteger() : new int?();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             var attendance = new Attendance();
-            if(activity.HasSchedule)
+            var activitySchedule = activity.GetSchedule(msgs);
+            List<AttendanceRegistrant> attendanceRegistrants;
+
+            if (activity.HasSchedule)
+            {
                 attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
+                attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
+            }
             else
+            {
                 attendance = activity.GetOrCreateNewAttendance(currentUser, nonScheduleDate.Value, msgs);
+                attendanceRegistrants = GetOrCreateNonScheduledAttendanceRegistrants(attendance, activity, msgs);
+            }
 
             if (attendance.IsEmpty())
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
-            var activitySchedule = activity.GetSchedule(msgs);
-            var attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
 
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
             ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
@@ -2787,6 +2794,25 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             return attendanceRegistrants;
+        }
+        
+        private List<AttendanceRegistrant> GetOrCreateNonScheduledAttendanceRegistrants(Attendance attendance,Activity activity, SystemMessages msgs)
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var registrantActivities = activity.GetRegistrantActivities(msgs);
+
+            registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
+                .ToList()
+                .ForEach(registrantActivity =>
+                {
+                    var attendanceRegistrantExists = AttendanceRegistrant.LoadByAttendanceIdByRegistrantId(attendance.ID.Value, 
+                        registrantActivity.RegistrantId.Value,msgs).Count > 0;
+                    
+                    if(!attendanceRegistrantExists)
+                        AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, currentUser, msgs);
+                });
+
+            return attendance.GetAttendanceRegistrants(msgs);;
         }
 
         [HttpPost]
@@ -2865,7 +2891,6 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
             var dateAlreadyExist = AfterSchoolLibrary.Models.Attendance.LoadByActivityIdByDate(activityId, date.Date,msgs).Count > 0;
-            var activity = Activity.Load(activityId, msgs);
 
             if (!dateAlreadyExist)
             {
@@ -2881,15 +2906,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 };
                 msgs.AddRange(attendance.Save());
-                
-                var registrantActivities = activity.GetRegistrantActivities(msgs);
-
-                registrantActivities.Where(registrant => registrant.AssignmentTypeId.In(Registration.ReservedStatuses))
-                    .ToList()
-                    .ForEach(registrantActivity =>
-                    {
-                        AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, currentUser, msgs);
-                    });
 
                 if (msgs.HasNoErrors())
                     return Json(new { status = "ok" }, JsonRequestBehavior.AllowGet);
