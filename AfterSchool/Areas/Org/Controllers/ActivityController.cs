@@ -2812,7 +2812,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         AttendanceRegistrantService.CreateNew(attendance.ID.Value, registrantActivity.RegistrantId.Value, currentUser, msgs);
                 });
 
-            return attendance.GetAttendanceRegistrants(msgs);;
+            return attendance.GetAttendanceRegistrants(msgs);
         }
 
         [HttpPost]
