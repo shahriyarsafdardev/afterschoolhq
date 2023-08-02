@@ -140,14 +140,12 @@
                         <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>                           
                         @{
                             var weeklyDate = DateTime.UtcNow.AddDays(-7);
-                            var endDate = DateTime.UtcNow.AddDays(30);
-                            for (var d = 0; weeklyDate <= endDate; d++)
+                            for (var d = 0; d <= 37; d++)
                             {
-                                <option class="@(d == 7 ? "btn-primary text-white" : "")" value="@weeklyDate.ToShortDateString()" 
-                                        id="@((subscriptionPlan != null && subscriptionPlan.StartDate.HasValue && weeklyDate.Date == subscriptionPlan.StartDate) ? "selected" : "")">
-                                    @(weeklyDate.ToString("MMMM dd"))
+                                <option class="@(d == 7 ? "btn-primary text-white" : "")" value="@weeklyDate.AddDays(d).ToShortDateString()" 
+                                        id="@(d==8 ? "selected" : "")">
+                                    @(weeklyDate.AddDays(d).ToString("MMMM dd"))
                                 </option>
-                                weeklyDate = weeklyDate.AddDays(1);
                             }
                         }
                         </select>
@@ -255,17 +253,23 @@
         });
     });
 
+    document.getElementById("subscriptionplanperiod").addEventListener("change", LoadDatesForActivityEditMode); 
+
     function LoadDatesForActivityEditMode() {
         let billingTypeId = $('#subscriptionplanperiod').val();
 
-        if (billingTypeId === "1") { //month            
+        if (billingTypeId === "1") { //month
             if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
                 $('#subscriptionperiodstartmonthday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
             } else {
                 $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("#selected").val());
             }
         } else if (billingTypeId === "3") { //weekly
-            $('#subscriptionperiodstartweekday').val($('#subscriptionperiodstartweekday').find("#selected").val());
+            if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
+                    $('#subscriptionperiodstartweekday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
+                } else {
+                $('#subscriptionperiodstartweekday').val($('#subscriptionperiodstartweekday').find("#selected").val());
+                }
         }
     }
 
