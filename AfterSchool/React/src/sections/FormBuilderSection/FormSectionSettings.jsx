@@ -9,6 +9,7 @@ import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@mat
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { newQuestion, unSavedDialogProps } from './helper';
 import formValidationSchema from './formValidationSchema';
+import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
 import { usePrompt } from 'utils/hooks/usePrompt';
 import { useFormBuilder } from 'redux/hooks';
@@ -17,17 +18,11 @@ import { Loader } from 'components';
 import useStyles from './styles';
 import Dialog from './Dialog';
 
-const DEFAULT_QUESTION_SETTINGS = [
-  { Audience: 1, Show: true, Required: true },
-  { Audience: 2, Show: true, Required: true },
-  { Audience: 3, Show: true, Required: true }
-];
-
 function FormSectionSettings() {
   const classes = useStyles();
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
-  const [allHide, setAllHide] = useState(true);
+  const [hideAll, setHideAll] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const [renderApplyToAll, setRenderApplyToAll] = useState(false);
   const { unsavedChanges, markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
@@ -224,10 +219,10 @@ function FormSectionSettings() {
 
   const shouldRenderApplyToAll = () => {
     let count = 0;
-    setAllHide(true);
+    setHideAll(true);
     Object.values(values).forEach(value => {
       if (value.checked) {
-        if (value.IsActive) setAllHide(false);
+        if (value.IsActive) setHideAll(false);
         count++;
       }
     });
@@ -321,7 +316,7 @@ function FormSectionSettings() {
             {form?.FormType !== 3 && renderApplyToAll && (
               <ApplyToAllControls
                 values={values}
-                allHide={allHide}
+                allHide={hideAll}
                 setValues={setValues}
                 reRender={reRender}
                 setReRender={setReRender}

@@ -412,7 +412,7 @@ export default makeStyles(theme => ({
     display: 'flex',
     flexWrap: 'wrap'
   },
-  applyallButton: {
+  applyToAllButton: {
     color: '#494949',
     margin: '8px 12px',
     width: '100px',
@@ -429,7 +429,7 @@ export default makeStyles(theme => ({
       right: '5px'
     }
   },
-  audienceDisplay: {
+  displayAudience: {
     marginTop: '-8px',
     marginLeft: '12px',
     [theme.breakpoints.down('sm')]: {

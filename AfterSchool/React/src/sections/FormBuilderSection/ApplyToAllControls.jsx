@@ -21,8 +21,8 @@ const ApplyToAllControls = props => {
     let newValues = { ...values };
 
     const updates = () => {
-      if (willHide != undefined) return { IsActive: willHide };
-      if (willDelete != undefined) return { IsDeleted: willDelete };
+      if (willHide !== undefined) return { IsActive: willHide };
+      if (willDelete !== undefined) return { IsDeleted: willDelete };
       if (settings) return { QuestionSettings: settings };
     };
 
@@ -92,14 +92,14 @@ const ApplyToAllControls = props => {
             questionSettings={settingsForAll}
             setShowAudience={setShowAudience}
             dataTestId="audienceListForAll"
-            styleClass={classes.audienceDisplay}
+            styleClass={classes.displayAudience}
           />
         )}
       </Box>
       <Button
         color="primary"
         variant="outlined"
-        className={classes.applyallButton}
+        className={classes.applyToAllButton}
         onClick={handleHideSection}
         data-testid="hideButtonForAll"
       >
@@ -108,7 +108,7 @@ const ApplyToAllControls = props => {
       <Button
         color="primary"
         variant="outlined"
-        className={classes.applyallButton}
+        className={classes.applyToAllButton}
         onClick={() => setIsOpen(true)}
         data-testid="deleteButtonForAll"
       >
