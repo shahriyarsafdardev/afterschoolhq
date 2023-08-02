@@ -902,7 +902,8 @@ namespace AfterSchool.Controllers
                 if (participationObject.ActivityType == ActivityType.VolunteerOpportunity)
                     return RedirectToAction("getstarted", "volunteerRegistration", new {area = "", regaccount = account.Uid});
 
-                if(account.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                if(account.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && 
+                   participationObject.ObjectType == ParticipationObjectType.Activity)
                     return RedirectToAction("getstartedAllAge", "account", new {area = "", regaccount = account.Uid});
                 
                 return RedirectToAction("getstarted", "account", new {area = "", regaccount = account.Uid});
