@@ -754,6 +754,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response = new
                 {
                     Students = studentsList,
+                    IsPinSetup = currentUser.PinCode.IsNotEmpty(),
                 };
 
                 return Json(
