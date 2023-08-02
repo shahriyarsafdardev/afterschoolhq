@@ -941,6 +941,68 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult CreateNewPinForParent(string pinCode)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                if (currentUser.PinCode.IsEmpty())
+                {
+                    currentUser.PinCode = pinCode;
+                    currentUser.LastModifiedDate = DateTime.UtcNow;
+                    msgs.AddRange(currentUser.Save());
+                }
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UpdateExistingPinForParent(string oldPinCode, string newPinCode)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                if (currentUser.PinCode.IsNotEmpty() && !currentUser.PinCode.Equals(oldPinCode))
+                    throw new Exception("Invalid PIN");
+
+                currentUser.PinCode = newPinCode;
+                currentUser.LastModifiedDate = DateTime.UtcNow;
+                msgs.AddRange(currentUser.Save());
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
         private static List<PickUpDto> GetAdditionalContactInfo(List<FormQuestionAnswer> answers, QuestionDataType firstName, QuestionDataType lastName,
             QuestionDataType phone, List<QuestionDataType> questionDataTypes)
         {
