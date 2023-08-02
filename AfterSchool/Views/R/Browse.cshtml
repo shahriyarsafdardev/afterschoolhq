@@ -1,4 +1,4 @@
-﻿@model AfterSchool.Assemblers.BrowseResult
+@model AfterSchool.Assemblers.BrowseResult
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = Model.Account.Name;
@@ -71,7 +71,7 @@
        { "Locations", Model.Locations }
    }); }
 
-<div class="margin-10">
+<div>
     <div class="col-lg-10 col-lg-offset-1 col-md-12">
         @if (!registrationOpen.Any() && !registrationWillOpen.Any() && !registrationClosed.Any())
         {
