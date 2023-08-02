@@ -755,6 +755,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 {
                     Students = studentsList,
                     IsPinSetup = currentUser.PinCode.IsNotEmpty(),
+                    IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                 };
 
                 return Json(
@@ -942,7 +943,7 @@ namespace AfterSchool.Areas.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult CreateNewPinForParent(string pinCode)
+        public ActionResult CreateNewPinForParent(string pinCode, string phone)
         {
             var msgs = new SystemMessages();
             try
@@ -952,9 +953,14 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
 
-                if (currentUser.PinCode.IsEmpty())
+                if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
                 {
-                    currentUser.PinCode = pinCode;
+                    if (currentUser.Phone.IsEmpty())
+                        currentUser.Phone = phone;
+
+                    if (currentUser.PinCode.IsEmpty())
+                        currentUser.PinCode = pinCode;
+                    
                     currentUser.LastModifiedDate = DateTime.UtcNow;
                     msgs.AddRange(currentUser.Save());
                 }
