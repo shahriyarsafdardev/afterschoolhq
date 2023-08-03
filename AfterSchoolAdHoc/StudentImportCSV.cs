@@ -11,8 +11,8 @@ internal class StudentImportCSV
 {
     public static void Run(SystemMessages msgs, DatabaseConnection dc)
     {
-        var dt = RegistrantService.GetAllStudents(msgs,dc);
-        
+        var dt = RegistrantService.GetAllStudents(msgs, dc);
+
         var studentList = (from DataRow row in dt.Rows
             select new StudentImportDto
             {
@@ -23,6 +23,7 @@ internal class StudentImportCSV
                 DOB = row["DOB"].ToString().ToDateTime(),
                 Gender = (int) StudentImportDto.GetGenderType(row["Gender"].ToString().ToLower()),
                 Address = row["Student_street"].ToString(),
+                City = row["Student_city"].ToString(),
                 ZipCode = row["Student_zip"].ToString(),
                 RegistrantId = (int) row["RegistrantId"],
             }).ToList();
@@ -33,6 +34,8 @@ internal class StudentImportCSV
                 if (student.RegistrantId.IsNotEmpty() && !recordExist)
                 {
                     var matchedColumns = $"FirstName: {student.FirstName}, LastName: {student.LastName}";
+                    var verifiedMatch = false;
+                    var matchedColumnsCount = 2;
 
                     var registrantByDateOfBirth = FormQuestionAnswer.Load(
                         new Hashtable()
@@ -79,23 +82,54 @@ internal class StudentImportCSV
                         dc: dc
                     ).FirstOrDefault();
 
+                    var registrantByCity = FormQuestionAnswer.Load(
+                        new Hashtable()
+                        {
+                            {"RegistrantId", student.RegistrantId},
+                            {"QuestionText", "City"},
+                            {"QuestionDataTypeId", (int) QuestionDataType.RegistrantCity},
+                            {"Text", student.City},
+                        },
+                        msgs: msgs,
+                        dc: dc
+                    ).FirstOrDefault();
+
                     if (registrantByGender.IsNotEmpty())
+                    {
                         matchedColumns = string.Concat(matchedColumns, $", Gender: {(GenderType) student.Gender}");
+                        matchedColumnsCount += 1;
+                    }
 
                     if (registrantByPostalCode.IsNotEmpty())
+                    {
                         matchedColumns = string.Concat(matchedColumns, $", ZipCode: {student.ZipCode}");
+                        matchedColumnsCount += 1;
+                    }
 
                     if (registrantByAddress.IsNotEmpty())
+                    {
                         matchedColumns = string.Concat(matchedColumns, $", Address: {student.Address}");
+                        matchedColumnsCount += 1;
+                    }
 
-                    matchedColumns = matchedColumns.Replace("'","''"); // for avoiding single quotes in matchedColumns during insertion
+                    if (registrantByCity.IsNotEmpty())
+                    {
+                        matchedColumns = string.Concat(matchedColumns, $", City: {student.City}");
+                        matchedColumnsCount += 1;
+                    }
+
+                    matchedColumns = matchedColumns.Replace("'", "''"); // for avoiding single quotes in matchedColumns during insertion
 
                     if (registrantByDateOfBirth.IsNotEmpty() && registrantByDateOfBirth.Text.IsNotEmpty() &&
                         student.DOB == registrantByDateOfBirth.Text.ToDateTime())
                     {
                         matchedColumns = string.Concat(matchedColumns, $", Date of Birth: {student.DOB}");
-                        RegistrantService.SaveMatchedStudentRegistrant(student.RegistrantId, student.ID, matchedColumns, msgs, dc);
+                        matchedColumnsCount += 1;
+                        verifiedMatch = true;
                     }
+
+                    RegistrantService.SaveMatchedStudentRegistrant(student.RegistrantId, student.ID,
+                        matchedColumns, verifiedMatch, matchedColumnsCount, msgs, dc);
                 }
             }
         );

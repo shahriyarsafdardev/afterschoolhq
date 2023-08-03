@@ -1941,7 +1941,7 @@ namespace AfterSchoolLibrary.Services
         public static DataTable GetAllStudents(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             string sql =
-                @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street, s.Student_zip, r.ID as RegistrantId from Registrant as r 
+                @"select s.ID,s.first_name,s.last_name,s.email, s.DOB, s.Gender,s.Student_street,s.Student_city, s.Student_zip, r.ID as RegistrantId from Registrant as r 
                   inner join StudentImportCSV as s on r.FirstName = s.first_name and r.LastName = s.last_name and r.AccountId in 
                   (select VisitorAccountId from AccountRelationship where hostaccountid = 84)";
             var dq = new DatabaseQuery();
@@ -1956,10 +1956,11 @@ namespace AfterSchoolLibrary.Services
             var dt = dq.ExecuteSelect(sql, msgs);
             return dt.Rows.Count > 0;
         }
-        public static void SaveMatchedStudentRegistrant(int registrantId, int studentId, string matchedColumns, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void SaveMatchedStudentRegistrant(int registrantId, int studentId, string matchedColumns,bool verifiedMatch,int matchedColumnsCount,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var sql = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns) " +
-                            $"values('{registrantId}','{studentId}','{matchedColumns}')";
+            var sql = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns,VerifiedMatch,NoOfColumns) " +
+                            $"values('{registrantId}','{studentId}','{matchedColumns}','{verifiedMatch}','{matchedColumnsCount}')";
             var dq = new DatabaseQuery();
             dq.Connection = dc;
             msgs.AddRange(dq.ExecuteSql(sql));
