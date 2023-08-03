@@ -1,5 +1,6 @@
 import SelectRegistrantRepository from 'repository/SelectRegistrantRepository';
 import { createSlice } from '@reduxjs/toolkit';
+import { addNewParticipant } from 'constants';
 import { useDispatch } from 'react-redux';
 import HeaderSlice from './HeaderSlice';
 import utils from 'utils';
@@ -14,19 +15,6 @@ const SelectRegistrantSlice = createSlice({
   },
   reducers: {
     setData: (state, { payload }) => {
-      const addNewParticipant = {
-        ID: 9999,
-        FirstName: 'New',
-        LastName: 'Participant',
-        BtnText: 'Add New Participant  »',
-        BtnUrl: '#',
-        CanStillRegister: false,
-        NewParticipant: true,
-        Disabled: false,
-        IneligibleText: '',
-        RegistrantGradeText: '',
-        UpdateProfileLink: ''
-      };
       state.students = [...payload.Students, addNewParticipant];
       state.participationObject = payload.ParticipationObject;
     },

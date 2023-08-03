@@ -54,3 +54,18 @@ export const applyModes = { Apply: 'Apply', Register: 'Register' };
 export const googleLocationAPI = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}&libraries=places`;
 export const NOTES_OPTIONS = ['Edit', 'Delete'];
 export const NOTES_VISIBILITY_LENGTH = 530;
+export const googlePlaces = ['places'];
+
+export const addNewParticipant = {
+  ID: 9999,
+  FirstName: 'New',
+  LastName: 'Participant',
+  BtnText: 'Add New Participant  »',
+  BtnUrl: '#',
+  CanStillRegister: false,
+  NewParticipant: true,
+  Disabled: false,
+  IneligibleText: '',
+  RegistrantGradeText: '',
+  UpdateProfileLink: ''
+};
