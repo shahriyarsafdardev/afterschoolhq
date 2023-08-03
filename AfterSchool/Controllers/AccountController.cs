@@ -627,7 +627,7 @@ namespace AfterSchool.Controllers
                 );
             }
             
-            if(msgs.HasNoErrors())
+            if(msgs.HasNoErrors() && participationObject.ObjectType == ParticipationObjectType.Activity)
                 return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrantPersonType == RegistrantPersonType.Parent ? studentReg.Uid : registrant.Uid)}");
             
             Account registrationAccount = null;
@@ -1051,7 +1051,8 @@ namespace AfterSchool.Controllers
             
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
 
-            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) &&
+                participationObject.ObjectType == ParticipationObjectType.Activity)
                 return RedirectToAction("CreateChildRegistrant", "Registration", new {area = "Api", accountName = participationObject.OwnerAccount.UniqueName , activityName = participationObject.UniqueName });
 
             var msgs = new SystemMessages();
@@ -1867,7 +1868,8 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) &&
+                participationObject.ObjectType == ParticipationObjectType.Activity)
                 return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
             
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
