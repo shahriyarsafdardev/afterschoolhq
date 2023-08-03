@@ -12,6 +12,38 @@ export default makeStyles(theme => ({
       marginLeft: 0
     }
   },
+  changePinBtn: {
+    background: theme.palette.primary.main,
+    fontSize: 14,
+    color: '#FFFFFF',
+    minWidth: 95,
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+      marginLeft: 0
+    }
+  },
+  pinSetupButtonsWrapper: {
+    maxWidth: '600px',
+    margin: 'auto',
+    textAlign: 'center',
+    paddingTop: '40px'
+  },
+  pinSetupWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    margin: 45,
+    gap: '20px'
+  },
+  changePinBtnWrapper: {
+    marginBottom: '30px',
+    marginTop: '30px'
+  },
+  textField: {
+    width: '50%',
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
+    }
+  },
   editButton: {
     cursor: 'pointer',
     textDecoration: 'underline',
@@ -143,7 +175,7 @@ export default makeStyles(theme => ({
     color: theme.palette.text.secondary
   },
   authListOuterWrapper: {
-    marginTop: '85px'
+    marginTop: '65px'
   },
   listingWrapper: {
     paddingLeft: '27px',
@@ -179,6 +211,15 @@ export default makeStyles(theme => ({
       gap: '10px'
     }
   },
+  modalButtons: {
+    display: 'flex',
+    justifyContent: 'center',
+    margin: 20,
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column',
+      gap: '10px'
+    }
+  },
   phoneNumber: {
     color: theme.palette.primary
   },
@@ -199,5 +240,49 @@ export default makeStyles(theme => ({
     [theme.breakpoints.down('sm')]: {
       width: '100%'
     }
+  },
+  sectionName: {
+    fontSize: 16,
+    color: '#333333'
+  },
+  sectionWrapper: {
+    paddingLeft: '30px',
+    marginTop: '30px',
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: 'unset'
+    }
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    maxWidth: '503px',
+    [theme.breakpoints.down('xs')]: {
+      width: '85%'
+    }
+  },
+  modalHeading: {
+    backgroundColor: '#00ae85',
+    color: 'white',
+    padding: '20px'
+  },
+  modalDescription: {
+    color: theme.palette.text.primary,
+    margin: 45
+  },
+  formWrapper: {
+    margin: 'auto'
+  },
+  fieldLabels: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  forgotPinBtn: {
+    fontStyle: 'italic',
+    color: theme.palette.text.hint,
+    textDecoration: 'underline'
   }
 }));

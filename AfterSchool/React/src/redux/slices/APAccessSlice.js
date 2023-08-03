@@ -57,9 +57,37 @@ export const useAPAccessActions = () => {
     });
   };
 
+  const createPinForParent = async (phone, pinCode, data) => {
+    const params = { phone, pinCode };
+
+    return await ManageAPAccessRepository.createNewPinForParent(params).then(
+      ({ data: { msgs } }) => {
+        dispatch(setMsgs(msgs));
+        if (!msgs.length) {
+          const obj = { ...data, IsPinSetup: true };
+          if (phone) obj.IsPhoneSetup = true;
+          dispatch(setData({ obj }));
+        }
+        return msgs;
+      }
+    );
+  };
+
+  const updateExistingPin = async (oldPinCode, newPinCode) => {
+    const params = { oldPinCode, newPinCode };
+    return await ManageAPAccessRepository.updateExistingPinForParent(params).then(
+      ({ data: { msgs } }) => {
+        dispatch(setMsgs(msgs));
+        return msgs;
+      }
+    );
+  };
+
   return {
     loadAuthorizedPersonsList,
     updateAuthorizedPersons,
+    updateExistingPin,
+    createPinForParent,
     resendInvite
   };
 };
