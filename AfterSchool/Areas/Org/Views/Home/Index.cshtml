@@ -18,7 +18,7 @@
     var hasOutstandingLeagueInvites = (bool) ViewBag.HasOutstandingLeagueInvites;
     var externalLeagueCount = (int) ViewBag.ExternalLeagueCount;
     var currentAccount = SessionVariables.CurrentAccount;
-    var logoUrl = SessionVariables.CurrentAccount.GetAccountProfile().GetLogoUrl();
+    var logoUrl = SessionVariables.CurrentAccount.GetAccountProfile()?.GetLogoUrl();
     logoUrl = logoUrl.IsNotEmpty() ? logoUrl : "";
 
     var attendanceRate = totalPresent > 0 ? (totalPresent.ToDouble() / (totalPresent + totalAbsent) * 100).Round(1).ToString("###.#") : "0";
