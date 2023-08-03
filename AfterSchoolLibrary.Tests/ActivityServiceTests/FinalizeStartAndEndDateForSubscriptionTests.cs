@@ -119,7 +119,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
         public void ShouldReturnNullForActivitiesWithoutSchedule()
         {
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(false, BillingPeriodType.Month,
-                DateTime.UtcNow, DateTime.Now, null, null, DateTime.UtcNow);
+                DateTime.UtcNow, DateTime.UtcNow, null, null, DateTime.UtcNow);
 
             Assert.That(paymentStart, Is.Null);
             Assert.That(paymentEnd, Is.Null);
