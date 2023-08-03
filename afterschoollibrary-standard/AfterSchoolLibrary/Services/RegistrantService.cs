@@ -1959,7 +1959,7 @@ namespace AfterSchoolLibrary.Services
         public static void SaveMatchedStudentRegistrant(int registrantId, int studentId, string matchedColumns,bool verifiedMatch,int matchedColumnsCount,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var sql = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns,VerifiedMatch,NoOfColumns) " +
+            var sql = $"insert into StudentRegistrant(RegistrantId,StudentId,MatchedColumns,VerifiedMatch,NoOfMatchedColumns) " +
                             $"values('{registrantId}','{studentId}','{matchedColumns}','{verifiedMatch}','{matchedColumnsCount}')";
             var dq = new DatabaseQuery();
             dq.Connection = dc;
