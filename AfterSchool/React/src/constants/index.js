@@ -50,3 +50,17 @@ export const eSignMsg = allowToPayLater =>
     : ' Your registration is not finalized until you complete payment.';
 export const applyModes = { Apply: 'Apply', Register: 'Register' };
 export const googlePlaces = ['places'];
+
+export const addNewParticipant = {
+  ID: 9999,
+  FirstName: 'New',
+  LastName: 'Participant',
+  BtnText: 'Add New Participant  »',
+  BtnUrl: '#',
+  CanStillRegister: false,
+  NewParticipant: true,
+  Disabled: false,
+  IneligibleText: '',
+  RegistrantGradeText: '',
+  UpdateProfileLink: ''
+};
