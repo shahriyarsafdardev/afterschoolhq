@@ -44,6 +44,8 @@
 
 @helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, bool includePlus = true)
 {
+    var billingType = plan.BillingPeriodTypeId == BillingPeriodType.Month || plan.BillingPeriodTypeId == BillingPeriodType.Week ?
+        plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() : null;
     if (plan.IsNotEmpty())
     {
         var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
@@ -55,7 +57,7 @@
         {
             var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
             <span>
-                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() every month.</strong>
+                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
             </span>
         }
         else
