@@ -952,9 +952,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
-                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone, msgs))
-                    throw new Exception("Invalid Phone");
+
+                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
+                    throw new Exception("Phone is already in use");
 
                 if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
                 {
