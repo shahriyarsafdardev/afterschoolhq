@@ -36,6 +36,7 @@ function SelectRegistrant() {
           {students.map((student, index) => (
             <RegistrantCard
               key={index}
+              index={index}
               student={student}
               handleClick={() => handleClick(student)}
             />

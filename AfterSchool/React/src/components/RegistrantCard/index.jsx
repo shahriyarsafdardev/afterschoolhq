@@ -3,7 +3,7 @@ import { Button, Link, Typography, CardContent, CardActions, Card } from '@mater
 
 import useStyles from './styles';
 
-function RegistrantCard({ student, handleClick }) {
+function RegistrantCard({ index, student, handleClick }) {
   const {
     FirstName,
     LastName,
@@ -36,8 +36,12 @@ function RegistrantCard({ student, handleClick }) {
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent className={classes.cardContent}>
-        <Typography className={classes.heading}>{name}</Typography>
-        <Typography className={classes.subHeading}>{registrantTypeText()}</Typography>
+        <Typography className={classes.heading} data-testid={`Registrant-Name-${index}`}>
+          {name}
+        </Typography>
+        <Typography className={classes.subHeading} data-testid={`Registrant-Type-Text-${index}`}>
+          {registrantTypeText()}
+        </Typography>
       </CardContent>
       <CardActions className={classes.actions}>
         <Button
@@ -46,13 +50,16 @@ function RegistrantCard({ student, handleClick }) {
           disabled={disabled}
           variant="contained"
           color="primary"
+          data-testid={`Participant-button-${index}`}
         >
           {buttonText} &nbsp;
         </Button>
-        <Typography className={classes.enrollMsg}>{IneligibleText}</Typography>
+        <Typography className={classes.enrollMsg} data-testid={`Ineligible-Text-${index}`}>
+          {IneligibleText}
+        </Typography>
         {updateProfileUrl && (
           <Link
-            data-testid={'Update Profile'}
+            data-testid={`Update-Profile-Link-${index}`}
             className={classes.link}
             href={updateProfileUrl}
             target="_blank"
