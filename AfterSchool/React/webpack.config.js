@@ -5,6 +5,7 @@ const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
 module.exports = {
   entry: ['babel-polyfill', './src/index.jsx'],
+  devtool: 'hidden-source-map',
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.js',

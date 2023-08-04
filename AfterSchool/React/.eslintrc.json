@@ -9,24 +9,21 @@
   },
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "node": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:prettier/recommended"
-  ],
-  "plugins": [
-    "react",
-    "prettier"
-  ],
+  "extends": ["eslint:recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
+  "plugins": ["react", "prettier"],
   "rules": {
-      "prettier/prettier": [ 1 , {
-      "printWidth": 100,
-      "singleQuote": true,
-      "trailingComma": "none",
-      "tabWidth": 2
-    }],
+    "prettier/prettier": [
+      1,
+      {
+        "printWidth": 100,
+        "singleQuote": true,
+        "trailingComma": "none",
+        "tabWidth": 2
+      }
+    ],
     "react/prop-types": "off",
     "no-console": "warn",
     "no-unused-vars": "warn"

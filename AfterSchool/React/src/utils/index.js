@@ -12,6 +12,6 @@ export default {
       ['qa.afterschoolhq.com']: 'QA',
       ['localhost:54849']: 'Local'
     };
-    return envs[window.location.host];
+    return envs[window.location.host] || 'Local';
   }
 };

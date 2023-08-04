@@ -6,8 +6,9 @@
   "scripts": {
     "lint": "eslint src/**/*.js src/**/*.jsx",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules\\.bin\\webpack --mode production",
-    "start": "rimraf dist && node_modules\\.bin\\webpack --mode development --watch"
+    "start": "node_modules\\.bin\\webpack --mode development --watch",
+    "upload-source-maps": "mv dist/*.map sourceMaps/ && sh ./upload-script.sh",
+    "build": "node_modules\\.bin\\webpack --mode production && mkdir sourceMaps && npm run upload-source-maps"
   },
   "author": "",
   "license": "ISC",
