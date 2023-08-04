@@ -966,6 +966,13 @@ namespace AfterSchool.Areas.Api.Controllers
                     
                     currentUser.LastModifiedDate = DateTime.UtcNow;
                     msgs.AddRange(currentUser.Save());
+
+                    var registrantWebUsers = RegistrantWebUser.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, msgs);
+                    registrantWebUsers.ForEach(registrantWebUser =>
+                    {
+                        registrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
+                        msgs.AddRange(registrantWebUser.Save());
+                    });
                 }
 
                 return Json(
