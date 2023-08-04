@@ -883,6 +883,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response = new
                 {
                     Students = GetAuthorizedPerson(masterRegistrants, msgs),
+                    IsPinSetup = currentUser.PinCode.IsNotEmpty(),
+                    IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                 };
 
                 return Json(
