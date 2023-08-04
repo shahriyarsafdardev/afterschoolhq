@@ -98,8 +98,9 @@ namespace AfterSchoolLibrary.Helpers
             // need to check if we need to apply pro-rating
             var isSubscription = subscriptionPlanType == SubscriptionPlanType.Subscription;
             var isOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
+            var isWeekly = plan.BillingPeriodTypeId == BillingPeriodType.Week;
 
-            if (isSubscription && !isOnCheckout)
+            if (isSubscription && !isOnCheckout && !isWeekly)
             {
                 //loading variables
                 // understand when first charge happens

@@ -1235,7 +1235,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var activity = currentAccount.GetActivity(activityId.ToInteger(), msgs);
             var dates = activity.FinalizeStartAndEndDateForSubscription((BillingPeriodType)billingPeriodType.ToInteger(),
-                dayOfWeek.IsNotEmpty() ? dayOfWeek.ToEnum<DayOfWeek>() : DayOfWeek.Sunday,
+                dayOfWeek.IsNotEmpty() ? dayOfWeek.ToDateTime() : DateTime.Now.AddDays(1),
                 dayOfMonth.IsNotEmpty() ? dayOfMonth.ToDateTime() : DateTime.Now.AddDays(1));
 
             if (dates.paymentStart.IsNotEmpty() && dates.paymentStart.HasValue && dates.paymentEnd.IsNotEmpty() &&

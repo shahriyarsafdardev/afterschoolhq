@@ -611,7 +611,7 @@
                 $("#container-subscription-month").addClass("hide");
                 $("#subscriptionperiodstartweekday").prop('required', true);
                 $("#subscriptionperiodstartmonthday").prop('required', false);
-                $('#subscriptionStartDate').val($("#subscriptionperiodstartmonthday").val());
+                $('#subscriptionStartDate').val($("#subscriptionperiodstartweekday").val());
                 LoadEndDate();
                 setPeriodStartDate();
             } else {

@@ -12,6 +12,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
         public void FinalizeStartAndEndDateForSubscriptionTest(BillingPeriodType billingPeriodType, int expectedPaymentStartDayOfMonth)
         {
             var dayOfMonth = new DateTime(2022, 11, 10, 0, 0, 0);
+            var dayOfWeek = new DateTime(2022, 11, expectedPaymentStartDayOfMonth, 0, 0, 0);
 
             var schedule = new ActivitySchedule
             {
@@ -21,10 +22,10 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
                 IsOngoing = false,
             };
 
-            var activity = new Activity {ActivityScheduleId = schedule.ID};
-            var upcomingInstance = new ActivityInstance {StartDateTime = dayOfMonth};
+            var activity = new Activity { ActivityScheduleId = schedule.ID };
+            var upcomingInstance = new ActivityInstance { StartDateTime = dayOfMonth };
 
-            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, DayOfWeek.Monday,
+            var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek,
                 dayOfMonth, schedule, upcomingInstance, new DateTime(2022, 09, 27, 0, 0, 0));
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2022, 11, expectedPaymentStartDayOfMonth, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
@@ -41,11 +42,12 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
                 EndDate = new DateTime(2132, 11, 21, 0, 0, 0),
             };
 
-            var activity = new Activity {ActivityScheduleId = schedule.ID};
+            var activity = new Activity { ActivityScheduleId = schedule.ID };
 
             var dayOfMonth = new DateTime(2122, 10, 1);
+            var dayOfWeek = new DateTime(2122, 10, 1);
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, BillingPeriodType.Month,
-                DayOfWeek.Sunday, dayOfMonth, schedule, null, DateTime.UtcNow);
+                dayOfWeek, dayOfMonth, schedule, null, DateTime.UtcNow);
 
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2122, 10, 1, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
@@ -73,9 +75,10 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
             };
 
             var now = new DateTime(2021, 11, currentDayOfMonth, 0, 0, 0);
-            var dayOfMonth = new DateTime(2021,11,expectedPaymentStartDayOfMonth);
+            var dayOfMonth = new DateTime(2021, 11, expectedPaymentStartDayOfMonth);
+            var dayOfWeek = new DateTime(2021, 11, expectedPaymentStartDayOfMonth);
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, BillingPeriodType.Week,
-                DayOfWeek.Sunday, dayOfMonth, schedule, upcomingInstance, now);
+                dayOfWeek, dayOfMonth, schedule, upcomingInstance, now);
 
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2021, 11, expectedPaymentStartDayOfMonth, 0, 0, 0)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
@@ -104,8 +107,9 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
 
             var now = new DateTime(2021, 11, currentDayOfMonth, 0, 0, 0);
             var dayOfMonth = new DateTime(2021, 11, expectedPaymentStartDayOfMonth);
+            var dayOfWeek = new DateTime(2021, 11, expectedPaymentStartDayOfMonth);
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(activity.HasSchedule, BillingPeriodType.Month,
-                DayOfWeek.Sunday, dayOfMonth, schedule, upcomingInstance, now);
+                dayOfWeek, dayOfMonth, schedule, upcomingInstance, now);
 
             Assert.That(paymentStart, Is.EqualTo(new DateTime(2021, 11, expectedPaymentStartDayOfMonth)));
             Assert.That(paymentEnd, Is.EqualTo(schedule.EndDate));
@@ -115,7 +119,7 @@ namespace AfterSchoolLibrary.Tests.ActivityServiceTests
         public void ShouldReturnNullForActivitiesWithoutSchedule()
         {
             var (paymentStart, paymentEnd) = ActivityService.FinalizeStartAndEndDateForSubscription(false, BillingPeriodType.Month,
-                DayOfWeek.Sunday, DateTime.Now, null, null, DateTime.UtcNow);
+                DateTime.UtcNow, DateTime.UtcNow, null, null, DateTime.UtcNow);
 
             Assert.That(paymentStart, Is.Null);
             Assert.That(paymentEnd, Is.Null);

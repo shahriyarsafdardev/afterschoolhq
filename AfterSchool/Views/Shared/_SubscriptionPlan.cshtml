@@ -137,13 +137,17 @@
 
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
-                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
-                            @foreach (var item in Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>())
+                        <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>                           
+                        @{
+                            var weeklyDate = DateTime.UtcNow.AddDays(-7);
+                            for (var d = 0; d <= 37; d++)
                             {
-                                <option value="@item.ToString()">
-                                    @item.ToString()
+                                <option class="@(d == 7 ? "btn-primary text-white" : "")" value="@weeklyDate.AddDays(d).ToShortDateString()" 
+                                        id="@(d==8 ? "selected" : "")">
+                                    @(weeklyDate.AddDays(d).ToString("MMMM dd"))
                                 </option>
                             }
+                        }
                         </select>
                     </div>
 
@@ -249,18 +253,23 @@
         });
     });
 
+    document.getElementById("subscriptionplanperiod").addEventListener("change", LoadDatesForActivityEditMode); 
+
     function LoadDatesForActivityEditMode() {
         let billingTypeId = $('#subscriptionplanperiod').val();
 
-        if (billingTypeId === "1") { //month            
+        if (billingTypeId === "1") { //month
             if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
                 $('#subscriptionperiodstartmonthday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
             } else {
                 $('#subscriptionperiodstartmonthday').val($('#subscriptionperiodstartmonthday').find("#selected").val());
             }
         } else if (billingTypeId === "3") { //weekly
-            let weekDay = '@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.DayOfWeek : DayOfWeek.Sunday)'
-            $('#subscriptionperiodstartweekday').val(weekDay)
+            if (@Json.Encode(subscriptionPlan.IsNotEmpty())) {
+                    $('#subscriptionperiodstartweekday').val('@(subscriptionPlan.IsNotEmpty() && subscriptionPlan.StartDate.HasValue ? subscriptionPlan.StartDate.Value.ToShortDateString() : "")');
+                } else {
+                $('#subscriptionperiodstartweekday').val($('#subscriptionperiodstartweekday').find("#selected").val());
+                }
         }
     }
 
@@ -305,9 +314,8 @@
         }
         else
         {
-            let currentWeekDay = $("#subscriptionperiodstartweekday").val();
-            let currentDate = getWeeklyCurrentDate(dayNames, currentWeekDay);
-            $('.periodstartdate').html(getFormattedDateString(currentDate, dayNames));
+            let dateObj = new Date($("#subscriptionperiodstartweekday").val());
+            $('.periodstartdate').html(getFormattedDateString(dateObj, dayNames));
         }
         showPeriodStartContent();
     }
