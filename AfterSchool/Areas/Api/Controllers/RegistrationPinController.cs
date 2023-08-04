@@ -993,7 +993,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Unauthorized User");
 
                 if (currentUser.PinCode.IsNotEmpty() && !currentUser.PinCode.Equals(oldPinCode))
-                    throw new Exception("Pin does not exist");
+                    throw new Exception("Pin is incorrect");
 
                 currentUser.PinCode = newPinCode;
                 currentUser.LastModifiedDate = DateTime.UtcNow;
