@@ -474,7 +474,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
-                        if (activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                        if (activity.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                            activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
                             {
                                 StudentUid = registrant.Uid.ToString(),
