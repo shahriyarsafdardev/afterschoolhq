@@ -273,7 +273,7 @@ else
                     else
                     {
                         // To check that atleast one period of subscription is left
-                        if (onePeriodStartDate >= plan?.EndDate)
+                        if (onePeriodStartDate >= plan?.EndDate && !Model.Schedule.IsOngoing)
                         {
                             <button class="btn btn-register btn-block" disabled title="Subscription closed">
                                 Registration Disabled
