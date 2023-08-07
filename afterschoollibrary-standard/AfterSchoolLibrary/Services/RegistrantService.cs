@@ -215,7 +215,10 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
                 startDateTime = proratingCalculation.GetStartDate();
-                endDateTime = proratingCalculation.GetEndDate();
+
+                if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
+                    endDateTime = proratingCalculation.GetEndDate();
+
                 anchorDate = proratingCalculation.GetAnchorDate();               
             }
 
