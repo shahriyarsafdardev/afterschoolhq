@@ -1360,37 +1360,16 @@ namespace AfterSchoolLibrary.Services
             var hasStripeChanges = true;
             var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
+            var activitySchedule = activity.GetSchedule(msgs, dc);
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc))
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
-                DateTime validEndDate;
-                switch (plan.BillingPeriodTypeId)
-                {
-                    case BillingPeriodType.Month:
-                        validEndDate = DateTime.UtcNow.AddMonths(1);
-                        break;
-                    case BillingPeriodType.Year:
-                        validEndDate = DateTime.UtcNow.AddYears(1);
-                        break;
-                    case BillingPeriodType.Week:
-                        validEndDate = DateTime.UtcNow.AddDays(7);
-                        break;
-                    case BillingPeriodType.Day:
-                        validEndDate = DateTime.UtcNow.AddDays(1);
-                        break;
-                    case BillingPeriodType.TwoWeeks:
-                        validEndDate = DateTime.UtcNow.AddDays(14);
-                        break;
-                    default:
-                        validEndDate = DateTime.UtcNow;
-                        break;
-                }
+                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId);
+                
                 if (subscriptionEndDate < validEndDate)
-                {
                     msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
-                }
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
                                 plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
@@ -1410,8 +1389,11 @@ namespace AfterSchoolLibrary.Services
                 }
             }
 
+            if (activitySchedule != null && activitySchedule.EndDate != null && subscriptionEndDate > activitySchedule.EndDate)
+                msgs.Add("Activity is not available after " + activitySchedule.EndDate.ToShortDateString(), MessageType.UserError);
+
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean() && hasStripeChanges)
+            if (hassubscriptionplan.ToBoolean() && hasStripeChanges && msgs.HasNoErrors())
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
