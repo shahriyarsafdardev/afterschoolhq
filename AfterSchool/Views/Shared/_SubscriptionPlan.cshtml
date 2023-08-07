@@ -155,15 +155,6 @@
             <div id="" class="row subscriptionplansection">
                 <div class="col-md-3"></div>
                 <div class="col-sm-6 col-md-9">
-
-                    @if (Model.HasSchedule)
-                    {
-                        var schedule = Model.GetSchedule();
-                        var startDate = schedule.StartDate.Value.IsOnOrBefore(DateTime.UtcNow) ? DateTime.UtcNow : schedule.StartDate.Value;
-                        var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Year, startDate.Month)) // Days: 1, 2 ... 31 etc.
-                            .Select(day => new DateTime(startDate.Year, startDate.Month, day)) // Map each day to a date
-                            .ToList();
-
                     <div id="container-subscription-week" class="input-group input-group-lg xs-mb-15 hide">
                         <span class="input-group-addon">Day of week for period start</span>
                         <select name="subscriptionperiodstartweekday" id="subscriptionperiodstartweekday" class="form-control" @(Model.IsPublished ? "disabled" : "")>                           
