@@ -9,12 +9,8 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     marginBottom: 5,
     [theme.breakpoints.up('sm')]: {
-      marginLeft: '-34px',
       maxWidth: 'unset',
       width: 'unset'
-    },
-    [theme.breakpoints.between('sm', 'md')]: {
-      marginLeft: '-24px'
     }
   },
   formControlLabelRoot: {
