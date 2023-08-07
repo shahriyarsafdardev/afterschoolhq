@@ -4,6 +4,7 @@ using MimeKit;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Configuration;
+using System.IO;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -52,6 +53,44 @@ namespace AfterSchoolLibrary.Helpers
                 msgs.Add(ex.Message, MessageType.Error, ex);
             }
 
+            return msgs;
+        }
+        public static SystemMessages SendMailwithAttachment(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body,
+            byte[] attachmentData, string attachmentFilename, SystemMessages msgs)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(fromEmail.Name, fromEmail.Email));
+                message.To.Add(new MailboxAddress(toEmail.Name, toEmail.Email));
+                message.Subject = subject;
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.TextBody = body;
+                if (attachmentData.IsNotEmpty())
+                {
+                    var attachment = new MimePart("application", "octet-stream")
+                    {
+                        Content = new MimeContent(new MemoryStream(attachmentData), ContentEncoding.Default),
+                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = attachmentFilename
+                    };
+                    bodyBuilder.Attachments.Add(attachment);
+                }
+                message.Body = bodyBuilder.ToMessageBody();
+                using (var client = new SmtpClient())
+                {
+                    client.Connect(MailTrapHost, Convert.ToInt32(MailTrapPort));
+                    client.Authenticate(MailTrapUsername, MailTrapPassword);
+                    client.Send(message);
+                    client.Disconnect(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Utilities.SystemErrorLog(ex);
+                msgs.Add(ex.Message, MessageType.Error, ex);
+            }
             return msgs;
         }
     }
