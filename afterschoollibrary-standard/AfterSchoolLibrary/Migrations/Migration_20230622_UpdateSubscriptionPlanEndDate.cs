@@ -18,7 +18,8 @@ namespace AfterSchoolLibrary.Migrations
                     var sql1 = "UPDATE SubscriptionPlan SET EndDate = ActivitySchedule.EndDate " +
                     "FROM SubscriptionPlanINNER JOIN Activity ON SubscriptionPlan.ParticipationObjectId = Activity.ID " +
                     "INNER JOIN ActivitySchedule ON Activity.Name = ActivitySchedule.Name " +
-                    "WHERE SubscriptionPlan.EndDate IS NULL;";
+                    "WHERE SubscriptionPlan.EndDate IS NULL" +
+                    "AND ActivitySchedule.IsOnGoing = 0;";
 
                     var dq = SubscriptionPlan.get_DatabaseQuery(SubscriptionPlan.ObjectMap);
                     amsgs.AddRange(dq.ExecuteSql(sql1));
