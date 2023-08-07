@@ -2,18 +2,18 @@
 @model Activity
 
 @{
-    var subscriptionPlan = (SubscriptionPlan) ViewBag.SubscriptionPlan;
-    var paymentdisabled = (string) ViewBag.paymentdisabled;
+    var subscriptionPlan = (SubscriptionPlan)ViewBag.SubscriptionPlan;
+    var paymentdisabled = (string)ViewBag.paymentdisabled;
 
     var activitySchedule = Model.GetSchedule();
 
-    var accountPackage = (AccountPackage) ViewBag.accountPackage;
+    var accountPackage = (AccountPackage)ViewBag.accountPackage;
     var showAllowSubscriptionPlans = accountPackage.HasFeature(FeatureType.AllowSubscriptionPlans);
     var showAllowSubscriptionPlansPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowSubscriptionPlans, SessionVariables.AccountPackage);
 
     var lstPlanPaymentStartType = Model.HasSchedule ?
-        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType> {PlanPaymentStartType.NotSet}) :
-        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType> {PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts, PlanPaymentStartType.OnPeriodStart});
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType> { PlanPaymentStartType.NotSet }) :
+        Enum.GetValues(typeof(PlanPaymentStartType)).Cast<PlanPaymentStartType>().Except(new List<PlanPaymentStartType> { PlanPaymentStartType.NotSet, PlanPaymentStartType.WhenActivityStarts });
 }
 
 <div class="panel-heading">
@@ -106,10 +106,11 @@
                                 selected = item == subscriptionPlan.PaymentStartTypeId ? "selected=\"selected\"" : "";
                             }
                             if ((!Model.HasSchedule && item == PlanPaymentStartType.OnCheckout) ||
+                                (!Model.HasSchedule && item == PlanPaymentStartType.OnPeriodStart) ||
                                 (Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.WhenActivityStarts) ||
                                 (!Model.GetSchedule().IsOngoing && item != PlanPaymentStartType.OnCheckout) || Model.IsPublished)
                             {
-                                <option value="@((int) item)" @selected> @item.ToString().SplitByUpperCase() </option>
+                                <option value="@((int)item)" @selected> @item.ToString().SplitByUpperCase() </option>
                             }
                         }
 
@@ -179,21 +180,40 @@
                         </select>
                     </div>
 
-                        <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
-                            <span class="input-group-addon">Day of month for period start</span>
-                            <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
-                                @{
-                                    var date = DateTime.Now.AddDays(-30);
-                                    for (var d = 0; d <= 60; d++)
-                                    {
-                                        <option class="@(d == 30 ? "btn-primary text-white" : "")"
-                                                value="@date.AddDays(d).ToShortDateString()" id="@(d == 31 ? "selected" : "")">
-                                            @(date.AddDays(d).ToString("MMMM dd"))
-                                        </option>
-                                    }
+                    <div id="container-subscription-month" class="input-group input-group-lg xs-mb-15">
+                        <span class="input-group-addon">Day of month for period start</span>
+                        <select name="subscriptionperiodstartmonthday" id="subscriptionperiodstartmonthday" class="form-control" @(Model.IsPublished ? "disabled" : "")>
+                            @{
+                                var date = DateTime.Now.AddDays(-30);
+                                for (var d = 0; d <= 60; d++)
+                                {
+                                    <option class="@(d == 30 ? "btn-primary text-white" : "")"
+                                            value="@date.AddDays(d).ToShortDateString()" id="@(d == 31 ? "selected" : "")">
+                                        @(date.AddDays(d).ToString("MMMM dd"))
+                                    </option>
                                 }
-                            </select>
-                        </div>
+                            }
+                        </select>
+                    </div>
+
+                    <span class="is-schedule-ongoing hide">@(activitySchedule != null ? activitySchedule.IsOngoing.ToString(): "null")</span>
+                    <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden" />
+
+                    @if ((bool)activitySchedule.IsEmpty())
+                    {
+                        <p class="text-muted text-medium-small is-ongoing-period-start hide">
+                            Payment will start on
+                            <b class="periodstartdate" date-loaded="false"></b> and will continue until cancelled.
+                        </p>
+                    }
+
+                    @if (Model.HasSchedule)
+                    {
+                        var schedule = Model.GetSchedule();
+                        var startDate = schedule.StartDate.Value.IsOnOrBefore(DateTime.UtcNow) ? DateTime.UtcNow : schedule.StartDate.Value;
+                        var days = Enumerable.Range(1, DateTime.DaysInMonth(startDate.Year, startDate.Month)) // Days: 1, 2 ... 31 etc.
+                            .Select(day => new DateTime(startDate.Year, startDate.Month, day)) // Map each day to a date
+                            .ToList();
 
                         <p id="container-subscription-enddate-label hide" class="text-muted text-medium-small hide">
                             <span>
@@ -227,7 +247,6 @@
                             If a registrant joins in the middle of an activity, AfterSchool HQ will pro-rate the cost at the time of registration.
                         </p>
 
-                        <input id="subscriptionStartDate" name="subscriptionStartDate" type="hidden" />
                         @*<input id="subscriptionEndDate" name="subscriptionEndDate" type="hidden" />*@
                         @*
             <div class="am-checkbox">
@@ -285,7 +304,7 @@
             showSubscriptionEndDateActivityStartInMessage();
             showSubscriptionEndDatePeriodStartInMessage();
         });
-        
+
         LoadDatesForActivityEditMode();
         $('#isOngoingSubscription').click(function () {
             $('#container-subscription-period').toggleClass('hide');
@@ -357,7 +376,11 @@
                     endDateInput.html(`payment will start on ${startDateFormatted} and it will end on ${endDateFormatted}`);
                     return false;
                 } else {
-                    clearSubscriptionPaymentHiddenInputs();
+                    if ($('.is-schedule-ongoing').html() != undefined && $('.is-schedule-ongoing').html().toLowerCase() === 'null' &&
+                        parseInt($('#subscriptionPaymentStartType').val()) !== @((int)PlanPaymentStartType.OnPeriodStart))
+                    {
+                        clearSubscriptionPaymentHiddenInputs();
+                    }      
                 }
             }
         });
