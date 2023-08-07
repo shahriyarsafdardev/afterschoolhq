@@ -23,8 +23,9 @@
 
     if(Model.ActivityType == ActivityType.Activity)
     {
-        onePeriodStartDate = (bool)plan?.EndDate.HasValue ?
-            SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId) : DateTime.UtcNow;
+        onePeriodStartDate = plan?.EndDate.HasValue == true ?
+            SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)(plan.BillingPeriodTypeId)) :
+            DateTime.UtcNow;
     }
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
