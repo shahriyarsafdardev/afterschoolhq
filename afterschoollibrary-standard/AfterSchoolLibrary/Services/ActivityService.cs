@@ -1362,17 +1362,18 @@ namespace AfterSchoolLibrary.Services
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule(msgs, dc);
 
-            if(subscriptionEndDate < DateTime.UtcNow)
+            if(subscriptionEndDate.Value.Date < DateTime.UtcNow.Date)
                 msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
+
+            var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+            if (subscriptionEndDate < validEndDate)
+                msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
 
             // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
-                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime)activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
-                
-                if (subscriptionEndDate < validEndDate)
-                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
                                 plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
@@ -1395,14 +1396,7 @@ namespace AfterSchoolLibrary.Services
             // if the subscription plan option(UI) is activated
             if (hassubscriptionplan.ToBoolean() && hasStripeChanges && msgs.HasNoErrors())
             {
-                DateTime validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
-
-                if (subscriptionEndDate < validEndDate)
-                {
-                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
-                }
-                else
-                    SubscriptionPlanService.CreateNewSubscriptionPlan(
+                SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
                     participationObjectId: activity.ID.Value,
