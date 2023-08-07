@@ -142,5 +142,24 @@ namespace AfterSchoolLibrary.Services
 
             return false;
         }
+
+        public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId,
+            int paymentsCount)
+        {
+            var startDate = originalPlan.PaymentStartTypeId switch
+            {
+                PlanPaymentStartType.OnCheckout => plan.StartDate ?? DateTime.UtcNow,
+                PlanPaymentStartType.WhenActivityStarts => participationObject.StartDate ?? DateTime.UtcNow,
+                PlanPaymentStartType.OnPeriodStart => originalPlan.StartDate ?? DateTime.UtcNow,
+                _ => DateTime.UtcNow
+            };
+
+            var nextPaymentDate = new SubscriptionPlan
+            {
+                BillingPeriodTypeId = (BillingPeriodType) billingPeriodTypeId
+            }.CalculateEndDateFromNumberOfPeriods(startDate, paymentsCount).ToShortDateString();
+
+            return nextPaymentDate;
+        }
     }
 }
