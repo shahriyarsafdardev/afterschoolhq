@@ -90,6 +90,33 @@ namespace AfterSchoolLibrary.Services
                 EndDate = subscriptionEndDate,
             };
 
+            DateTime validEndDate;
+            switch (plan.BillingPeriodTypeId)
+            {
+                case BillingPeriodType.Month:
+                    validEndDate = DateTime.UtcNow.AddMonths(1);
+                    break;
+                case BillingPeriodType.Year:
+                    validEndDate = DateTime.UtcNow.AddYears(1);
+                    break;
+                case BillingPeriodType.Week:
+                    validEndDate = DateTime.UtcNow.AddDays(7);
+                    break;
+                case BillingPeriodType.Day:
+                    validEndDate = DateTime.UtcNow.AddDays(1);
+                    break;
+                case BillingPeriodType.TwoWeeks:
+                    validEndDate = DateTime.UtcNow.AddDays(14);
+                    break;
+                default:
+                    validEndDate = DateTime.UtcNow;
+                    break;
+            }
+            if (plan.EndDate < validEndDate)
+            {
+                msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+            }
+
             msgs.AddRange(plan.SaveWithStripe(dc));
 
             return plan;
