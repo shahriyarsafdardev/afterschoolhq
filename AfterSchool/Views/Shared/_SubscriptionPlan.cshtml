@@ -214,13 +214,13 @@
                             <p class="text-muted text-medium-small not-ongoing-activity-start">
                                 Payment will start on <b>@schedule.StartDate.ToLongDateString()</b>
                                 or will be prorated for the date of registration, and the last payment will be taken out on
-                                <b><span id="endDatePlaceholder"></span></b>.
+                                <b><span id="endDateActivityStartPlaceholder"></span></b>.
 
                             </p>
                             <p class="text-muted text-medium-small not-ongoing-period-start hide">
                                 Payment will start on
                                 <b class="periodstartdate" date-loaded="false"></b> or will be prorated for the date of registration, and the last payment will be
-                                taken out on <b class="scheduleenddate"></b>.
+                                taken out on <b id="endDatePeriodStartPlaceholder"></b>.
                             </p>
                         }
                         <p class="text-muted text-medium-small">
@@ -282,7 +282,8 @@
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('#subscriptionEndDate').change(function () {
-            showSubscriptionEndDateInMessage();
+            showSubscriptionEndDateActivityStartInMessage();
+            showSubscriptionEndDatePeriodStartInMessage();
         });
         
         LoadDatesForActivityEditMode();
@@ -293,14 +294,24 @@
 
     document.getElementById("subscriptionplanperiod").addEventListener("change", LoadDatesForActivityEditMode); 
 
-    showSubscriptionEndDateInMessage();
+    showSubscriptionEndDateActivityStartInMessage();
+    showSubscriptionEndDatePeriodStartInMessage();
 
-    function showSubscriptionEndDateInMessage() {
+    function showSubscriptionEndDateInMessage(placeholderId) 
+    {
         let subscriptionEndDate = document.getElementById("subscriptionEndDate").value;
-        let pTag = document.getElementById("endDatePlaceholder");
+        let pTag = document.getElementById(placeholderId);
         let dateObj = new Date(subscriptionEndDate);
         let formattedDate = getFormattedDateString(dateObj, ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
         pTag.textContent = formattedDate;
+    }
+
+    function showSubscriptionEndDateActivityStartInMessage() {
+        showSubscriptionEndDateInMessage("endDateActivityStartPlaceholder");
+    }
+
+    function showSubscriptionEndDatePeriodStartInMessage() {
+        showSubscriptionEndDateInMessage("endDatePeriodStartPlaceholder");
     }
 
     function LoadDatesForActivityEditMode() {
