@@ -640,7 +640,10 @@
         else if ($('.is-schedule-ongoing').html() != undefined && $('.is-schedule-ongoing').html().toLowerCase() === 'null' &&
             parseInt($('#subscriptionPaymentStartType').val()) === @((int)PlanPaymentStartType.OnPeriodStart))
         {
-            $('.is-ongoing-period-start').removeClass('hide');
+            if (parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Month) || parseInt($('#subscriptionplanperiod').val()) === @((int)BillingPeriodType.Week))
+            {
+                $('.is-ongoing-period-start').removeClass('hide');
+            }
         }
         else
         {
