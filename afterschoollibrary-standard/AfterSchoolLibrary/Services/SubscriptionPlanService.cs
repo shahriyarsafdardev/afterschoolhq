@@ -90,13 +90,6 @@ namespace AfterSchoolLibrary.Services
                 EndDate = subscriptionEndDate,
             };
 
-            DateTime validEndDate = SubscriptionPlanService.GetDateByAddingBillingPeriodType(DateTime.UtcNow, (BillingPeriodType) plan.BillingPeriodTypeId);
-            
-            if (plan.EndDate < validEndDate)
-            {
-                msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
-            }
-
             msgs.AddRange(plan.SaveWithStripe(dc));
 
             return plan;
@@ -748,7 +741,7 @@ namespace AfterSchoolLibrary.Services
             return endDate;
         }
 
-        public static DateTime GetDateByAddingBillingPeriodType(DateTime dateTime, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
+        public static DateTime GetNextPeriodDate(DateTime dateTime, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
         {
             switch (billingPeriodType)
             {

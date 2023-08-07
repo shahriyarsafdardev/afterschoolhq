@@ -18,12 +18,9 @@
                          && (studentAccountViewingActivity || volunteerAccountViewingOpportunity);
 
     var plan = Model.GetSubscriptionPlan();
-    DateTime date = DateTime.UtcNow;
-
-    if (plan != null && plan.EndDate.HasValue)
-    {
-        date = SubscriptionPlanService.GetNextPeriodDate(date, (BillingPeriodType)plan.BillingPeriodTypeId);
-    }
+    var onePeriodStartDate = (bool)plan?.EndDate.HasValue ? 
+        SubscriptionPlanService.GetNextPeriodDate(DateTime.UtcNow, (BillingPeriodType)plan.BillingPeriodTypeId) : DateTime.UtcNow;
+ 
 
     if (ViewData["condensed"].IsNotEmpty() && ViewData["condensed"].ToString().ToBoolean())
     {
@@ -275,7 +272,7 @@ else
                     }
                     else
                     {
-                        if (plan != null && plan.EndDate.HasValue && date >= plan.EndDate)
+                        if (onePeriodStartDate >= plan?.EndDate)
                         {
                             <button class="btn btn-register btn-block" disabled title="Subscription closed">
                                 Registration Disabled
