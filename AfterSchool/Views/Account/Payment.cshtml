@@ -44,10 +44,10 @@
 
 @helper PrintSubscriptionCost(SubscriptionPlan plan, ParticipationObject participationObject, bool includePlus = true)
 {
-    var billingType = plan.BillingPeriodTypeId == BillingPeriodType.Month || plan.BillingPeriodTypeId == BillingPeriodType.Week ?
-        plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() : null;
     if (plan.IsNotEmpty())
     {
+        var billingType = plan.BillingPeriodTypeId == BillingPeriodType.Month || plan.BillingPeriodTypeId == BillingPeriodType.Week ?
+            plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() : null;
         var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
 
         var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
