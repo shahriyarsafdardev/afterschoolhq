@@ -34,7 +34,7 @@ const ProfileSlice = createSlice({
         registrantType
       );
 
-      state.questions = [...formQuestionUpdated, schoolField(registrantType)];
+      state.questions = [...formQuestionUpdated, schoolField(registrantType, true)];
       state.questionsGroups = [...formQuestionGroupUpdated];
       state.answeredQuestions = formQuestionAnswer;
       state.school = SchoolLocation || {};
