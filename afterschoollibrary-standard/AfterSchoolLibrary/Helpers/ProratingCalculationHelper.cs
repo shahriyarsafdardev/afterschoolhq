@@ -129,9 +129,7 @@ namespace AfterSchoolLibrary.Helpers
 
                 if (nextChargeDate.HasValue)
                     if (plan.EndDate.HasValue)
-                        EndDate = billingAccount.ConvertFromAccountTimeZone(plan.EndDate.Value);
-                    else
-                        EndDate = billingAccount.ConvertFromAccountTimeZone(plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday).Value);
+                        EndDate = plan.EndDate ?? plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday);
 
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date
