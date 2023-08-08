@@ -105,12 +105,12 @@
                     <label class="col-md-3 control-label">
                         Repeats Weekly?
                     </label>
-                    <div class="col-md-1">
+                    <div class="col-md-1 isongoing">
                         @{ Html.RenderPartial("~/Views/Shared/_SwitchButton.cshtml", Model.RepeatsWeekly, new ViewDataDictionary
                                        {
                                {"checkboxname", "repeatsweekly"},
                                {"checkboxid", "repeatsweekly"},
-                               {"disabled", false},
+                               {"disabled", isContinuousEnrollmentEnabled},
                            }); }
                     </div>
                 </div>
@@ -454,8 +454,9 @@
          {
              <text>
             ActivitySetup.showAdvancedSettings()
+            $('#repeatsweekly').prop('checked', true);
           </text>
-         }
+         }     
         // checkScheduleVal();
         showClosedDates();
         checkIsOnGoing();
