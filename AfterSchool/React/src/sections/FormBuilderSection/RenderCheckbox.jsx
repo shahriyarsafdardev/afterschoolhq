@@ -3,6 +3,7 @@ import { makeStyles, Checkbox } from '@material-ui/core';
 import { Check, RadioButtonUnchecked } from '@material-ui/icons';
 
 function RenderCheckbox({
+  styleClass,
   dataTestId,
   handleCheck,
   checked = false,
@@ -45,6 +46,7 @@ function RenderCheckbox({
         root: classes.root,
         disabled: classes.checkboxDisabled
       }}
+      className={styleClass}
       icon={
         <RadioButtonUnchecked
           style={{

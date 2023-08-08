@@ -9,6 +9,7 @@ import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@mat
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { newQuestion, unSavedDialogProps } from './helper';
 import formValidationSchema from './formValidationSchema';
+import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
 import { usePrompt } from 'utils/hooks/usePrompt';
 import { useFormBuilder } from 'redux/hooks';
@@ -21,9 +22,12 @@ function FormSectionSettings() {
   const classes = useStyles();
   const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
+  const [hideAll, setHideAll] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [renderApplyToAll, setRenderApplyToAll] = useState(false);
   const { unsavedChanges, markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
-  const [settingsForAll, setSettingsForAll] = useState({ show: [], required: [] });
+  const [settingsForAll, setSettingsForAll] = useState(cloneDeep(DEFAULT_QUESTION_SETTINGS));
+
   const [sectionNameError, setSectionNameError] = useState('');
   const [validationSchema, setValidationSchema] = useState({});
   const [saveDisabled, setSaveDisabled] = useState(false);
@@ -61,7 +65,7 @@ function FormSectionSettings() {
     const tempInitialValues = {};
 
     questions.forEach(question => {
-      let tempQuestion = { ...question };
+      let tempQuestion = { ...question, checked: false };
       tempQuestion.Options = tempQuestion.Options?.split(',').map(option => {
         const [key, value] = option.split('|');
         return { key, value };
@@ -213,34 +217,50 @@ function FormSectionSettings() {
     else setSectionNameError('');
   };
 
-  const updateAudienceSettings = useCallback(() => {
-    if (!values) return;
-
-    const audienceShowSettings = {
-      show: [false, true, true, true],
-      required: [false, true, true, true]
-    };
-
+  const shouldRenderApplyToAll = () => {
+    let count = 0;
+    setHideAll(true);
     Object.values(values).forEach(value => {
-      if (value.IsDeleted === false) {
-        value.QuestionSettings.forEach(setting => {
-          const audience = setting.Audience;
-          if (!setting.Show) audienceShowSettings.show[audience] = false;
-          if (!setting.Required) audienceShowSettings.required[audience] = false;
-        });
+      if (value.checked) {
+        if (value.IsActive) setHideAll(false);
+        count++;
       }
     });
 
-    audienceShowSettings.show[0] = [1, 2, 3].every(audience => audienceShowSettings.show[audience]);
-    audienceShowSettings.required[0] = [1, 2, 3].every(
-      audience => audienceShowSettings.required[audience]
-    );
+    return count > 1;
+  };
+
+  const updateAudienceSettings = useCallback(() => {
+    if (!values) return;
+
+    const audienceShowSettings = cloneDeep(DEFAULT_QUESTION_SETTINGS);
+
+    const audienceSetting = audience =>
+      audienceShowSettings.find(updatedSetting => updatedSetting.Audience === audience);
+
+    const updateSetting = (setting, updatedSetting) => {
+      if (!setting.Show) updatedSetting.Show = false;
+      if (!setting.Required) updatedSetting.Required = false;
+    };
+
+    const updateAudience = ({ QuestionSettings }) => {
+      QuestionSettings.forEach(setting => {
+        const audience = setting.Audience;
+        const updatedSetting = audienceSetting(audience);
+        if (updatedSetting) updateSetting(setting, updatedSetting);
+      });
+    };
+
+    Object.values(values).forEach(value => {
+      if (!value.IsDeleted && value.checked) updateAudience(value);
+    });
 
     return audienceShowSettings;
   }, [values]);
 
   useEffect(() => {
     setSettingsForAll(updateAudienceSettings());
+    setRenderApplyToAll(shouldRenderApplyToAll());
   }, [values]);
 
   const buttonText = text => {
@@ -293,17 +313,17 @@ function FormSectionSettings() {
             />
           </Box>
           <Box>
-            {form?.FormType !== 3 &&
-            false && ( //TODO: turned of Apply All Settings till further decided
-                <ApplyToAllControls
-                  values={values}
-                  setValues={setValues}
-                  reRender={reRender}
-                  setReRender={setReRender}
-                  questionGroup={questionGroup}
-                  settingsForAll={settingsForAll}
-                />
-              )}
+            {form?.FormType !== 3 && renderApplyToAll && (
+              <ApplyToAllControls
+                values={values}
+                allHide={hideAll}
+                setValues={setValues}
+                reRender={reRender}
+                setReRender={setReRender}
+                questionGroup={questionGroup}
+                settingsForAll={settingsForAll}
+              />
+            )}
             <QuestionsList
               reRender={reRender}
               setValues={setValues}

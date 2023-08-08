@@ -7,7 +7,13 @@ import RenderCheckbox from './RenderCheckbox';
 import { audienceTypes } from 'constants';
 import useStyles from './styles';
 
-const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, dataTestId }) => {
+const RenderAudienceList = ({
+  dataTestId,
+  styleClass,
+  setFieldValue,
+  setShowAudience,
+  questionSettings
+}) => {
   const classes = useStyles();
 
   const RenderAudienceRow = ({ audience: { Audience, Show, Required } }) => {
@@ -62,7 +68,7 @@ const RenderAudienceList = ({ setFieldValue, questionSettings, setShowAudience, 
 
   return (
     <ClickAwayListener onClickAway={() => setShowAudience(false)}>
-      <Box className={cs(classes.positionAbsolute, classes.audienceList)}>
+      <Box className={cs(classes.positionAbsolute, classes.audienceList, styleClass)}>
         <Grid container>
           <Grid container row className={classes.audienceRow}>
             <Grid item lg={4} xs={4} sm={4}></Grid>

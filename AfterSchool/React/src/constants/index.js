@@ -18,6 +18,12 @@ export const gradeIds = {
   '12th': 13
 };
 
+export const DEFAULT_QUESTION_SETTINGS = [
+  { Audience: 1, Show: true, Required: true },
+  { Audience: 2, Show: true, Required: true },
+  { Audience: 3, Show: true, Required: true }
+];
+
 export const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 export const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
 
