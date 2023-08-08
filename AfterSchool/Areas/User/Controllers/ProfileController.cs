@@ -81,11 +81,23 @@ namespace AfterSchool.Areas.User.Controllers
             var msgs = new SystemMessages();
             var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
 
-            return masterRegistrants.Select(masterRegistrant => Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs))
-                .Any(registrants => registrants.Select(registrant => RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
-                        .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty()))
-                    .Select(registrantActivity => registrantActivity?.GetActivity(msgs))
-                    .Any(activity => activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut));
+            foreach (var masterRegistrant in masterRegistrants)
+            {
+                var registrants = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs);
+                foreach (var registrant in registrants)
+                {
+                    var account = Account.Load(registrant.AccountId.Value, msgs);
+                    var registrantActivity = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
+                        .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
+                    var activity = registrantActivity?.GetActivity(msgs);
+
+                    if (account.IsNotEmpty() && activity.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut)  &&
+                        activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                        return true;
+                }
+            }
+
+            return false;
         }
     }
 }
