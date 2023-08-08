@@ -7,9 +7,11 @@ import photoPlaceholder from 'assets/photoPlaceholder.svg';
 import DescriptionModal from 'components/DescriptionModal';
 import ErrorBand from 'components/common/ErrorBand';
 import WebCamera from 'components/WebCamera';
-import { validFileSize } from 'constants';
+import { isValidFile } from 'constants';
 import capture from 'assets/capture.svg';
 import useStyles from './styles';
+
+const VALID_EXTENSIONS = ['png', 'jpeg', 'jpg', 'gif', 'bmp', 'webp'];
 
 const PhotoQuestion = ({ question, formik }) => {
   const classes = useStyles();
@@ -82,10 +84,13 @@ const PhotoQuestion = ({ question, formik }) => {
   }, [uploadedFile]);
 
   function isValidUpload(file) {
-    if (!validFileSize(file)) {
-      setUploadImageModal(false);
-      setUploadingStatus('FAILED');
-      return false;
+    if (file) {
+      const validStatus = isValidFile(file, VALID_EXTENSIONS);
+      if (validStatus) {
+        setUploadImageModal(false);
+        setUploadingStatus(validStatus);
+        return false;
+      }
     }
     return true;
   }
@@ -236,8 +241,13 @@ const PhotoQuestion = ({ question, formik }) => {
             </div>
           </Dialog>
         </Box>
-        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
-        {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
+        {((touched[ID] && errors[ID]) || uploadingStatus) && (
+          <ErrorBand
+            error={
+              uploadingStatus && (uploadingStatus === 'SUCCESS' ? errors[ID] : uploadingStatus)
+            }
+          />
+        )}
       </Box>
     </FieldWrapper>
   );

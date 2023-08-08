@@ -19,8 +19,6 @@ const useStyles = makeStyles(theme => ({
     }
   },
   descriptionField: {
-    border: `1px solid ${theme.palette.primary.dark}`,
-    borderRadius: 10,
     margin: '13px 0',
 
     '& .MuiOutlinedInput-multiline': {

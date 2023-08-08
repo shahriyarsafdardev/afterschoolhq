@@ -2,9 +2,21 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button, Typography, Box, FormHelperText } from '@material-ui/core';
 
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
+import { isValidFile } from 'constants';
 import useStyles from './styles';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const VALID_EXTENSIONS = [
+  'png',
+  'jpeg',
+  'jpg',
+  'pdf',
+  'txt',
+  'docx',
+  'mp4',
+  'mp3',
+  'mpeg',
+  'plain'
+];
 
 const FileUpload = ({ formik, question }) => {
   const classes = useStyles();
@@ -20,12 +32,15 @@ const FileUpload = ({ formik, question }) => {
 
   const handleUploadChange = event => {
     const file = event.target.files[0];
-    if (file && file.size <= MAX_FILE_SIZE) {
-      setFieldValue(ID, file);
-      setFileName(file.name);
-      setUploadedStatus('SUCCESS');
-    } else {
-      setUploadedStatus('FAILED');
+    if (file) {
+      const validStatus = isValidFile(file, VALID_EXTENSIONS);
+      if (validStatus) {
+        setUploadedStatus(validStatus);
+      } else {
+        setFieldValue(ID, file);
+        setFileName(file.name);
+        setUploadedStatus('SUCCESS');
+      }
     }
   };
 
@@ -77,14 +92,14 @@ const FileUpload = ({ formik, question }) => {
             data-testid={`${title}-${QuestionDataTypeId}-input`}
           />
         </div>
-        {((touched[ID] && errors[ID]) || uploadedStatus === 'FAILED') && (
+        {((touched[ID] && errors[ID]) || uploadedStatus) && (
           <Box className={classes.flexCenter}>
             <FormHelperText
               data-testid={`${title}-${QuestionDataTypeId}-error`}
               className={classes.maxWidth}
               error
             >
-              {uploadedStatus === 'FAILED' ? 'File size cannot be greater than 5MB' : errors[ID]}
+              {uploadedStatus && (uploadedStatus === 'SUCCESS' ? errors[ID] : uploadedStatus)}
             </FormHelperText>
           </Box>
         )}

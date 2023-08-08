@@ -6,6 +6,7 @@ const DescriptionModal = ({
   text,
   isOpen,
   handleClose,
+  maxLength = 4000,
   handleDescriptionSave,
   title = 'Add Description'
 }) => {
@@ -20,10 +21,12 @@ const DescriptionModal = ({
   };
 
   const handleSave = () => {
-    handleClose();
-    setTimeout(() => {
-      handleDescriptionSave(descriptionValue);
-    }, 150);
+    if (descriptionValue.length <= maxLength) {
+      handleClose();
+      setTimeout(() => {
+        handleDescriptionSave(descriptionValue);
+      }, 150);
+    }
   };
 
   useEffect(() => {
@@ -31,6 +34,8 @@ const DescriptionModal = ({
       setDescriptionValue(text);
     }, 200);
   }, [text, isOpen]);
+
+  const isExceeded = descriptionValue && descriptionValue.length > maxLength;
 
   return (
     <Dialog
@@ -53,12 +58,19 @@ const DescriptionModal = ({
           }}
           value={descriptionValue}
           onChange={handleChange}
+          error={isExceeded}
+          helperText={
+            isExceeded
+              ? `Character limit exceeded (maximum ${maxLength} characters)`
+              : `${descriptionValue?.length || 0}/${maxLength}`
+          }
         />
         <Button
           variant="contained"
           color="primary"
           className={classes.saveButton}
           onClick={handleSave}
+          disabled={isExceeded}
         >
           Save
         </Button>

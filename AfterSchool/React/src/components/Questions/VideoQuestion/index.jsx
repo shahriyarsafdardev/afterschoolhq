@@ -9,8 +9,10 @@ import VideoRecorder from 'components/VideoRecorder';
 import ErrorBand from 'components/common/ErrorBand';
 import recordButton from 'assets/recordButton.svg';
 import pauseButton from 'assets/pauseWhite.svg';
-import { validFileSize } from 'constants';
+import { isValidFile } from 'constants';
 import useStyles from './styles';
+
+const VALID_EXTENSIONS = ['mp4', 'webm', 'video/ogg'];
 
 const VideoQuestion = ({ question, formik }) => {
   const classes = useStyles();
@@ -39,10 +41,13 @@ const VideoQuestion = ({ question, formik }) => {
   };
 
   function isValidUpload(file) {
-    if (!validFileSize(file)) {
-      setUploadVideoModal(false);
-      setUploadingStatus('FAILED');
-      return false;
+    if (file) {
+      const validStatus = isValidFile(file, VALID_EXTENSIONS);
+      if (validStatus) {
+        setUploadVideoModal(false);
+        setUploadingStatus(validStatus);
+        return false;
+      }
     }
     return true;
   }
@@ -278,8 +283,13 @@ const VideoQuestion = ({ question, formik }) => {
             onChange={handleVideoChange}
           />
         </Box>
-        {touched[ID] && errors[ID] && <ErrorBand error={errors[ID]} />}
-        {uploadingStatus === 'FAILED' && <ErrorBand error="File size cannot be greater than 5MB" />}
+        {((touched[ID] && errors[ID]) || uploadingStatus) && (
+          <ErrorBand
+            error={
+              uploadingStatus && (uploadingStatus === 'SUCCESS' ? errors[ID] : uploadingStatus)
+            }
+          />
+        )}
       </Box>
     </FieldWrapper>
   );
