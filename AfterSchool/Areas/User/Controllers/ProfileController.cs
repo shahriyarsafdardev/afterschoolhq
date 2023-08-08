@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
@@ -20,6 +21,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Edit()
         {
             ViewBag.Messages = new SystemMessages();
+            ViewBag.IsRequireCheckInOut = IsRequireCheckInOutEnabled();
             return View(SessionVariables.CurrentUser);
         }
         
@@ -29,6 +31,7 @@ namespace AfterSchool.Areas.User.Controllers
             var bundlePath = Server.MapPath("~/React/dist/bundle.js");
             var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
             ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
+            ViewBag.IsRequireCheckInOut = IsRequireCheckInOutEnabled();
             return View();
         }
 
@@ -70,6 +73,19 @@ namespace AfterSchool.Areas.User.Controllers
 
             ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentUser);
+        }
+
+        private static bool IsRequireCheckInOutEnabled()
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
+
+            return masterRegistrants.Select(masterRegistrant => Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs))
+                .Any(registrants => registrants.Select(registrant => RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
+                        .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty()))
+                    .Select(registrantActivity => registrantActivity?.GetActivity(msgs))
+                    .Any(activity => activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut));
         }
     }
 }
