@@ -1675,6 +1675,8 @@ namespace AfterSchoolLibrary.Billing
             try
             {
                 source = GetSourceService().Create(options, requestOptions);
+                if ((source?.Card?.Country.IsEmpty() ?? true) || source?.Card?.Country != "US")
+                    throw new StripeException("Card origin not allowed");
             }
             catch (StripeException ex)
             {
