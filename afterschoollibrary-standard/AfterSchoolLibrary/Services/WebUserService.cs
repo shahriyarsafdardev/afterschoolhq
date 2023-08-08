@@ -1281,5 +1281,12 @@ namespace AfterSchoolLibrary.Services
         }
 
         #endregion
+        
+        public static void UpdatedPinCode(this WebUser loggedInUser, string newPinCode, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            loggedInUser.PinCode = newPinCode;
+            loggedInUser.LastModifiedDate = DateTime.UtcNow;
+            msgs.AddRange(loggedInUser.Save(dc));
+        }
     }
 }

@@ -958,25 +958,34 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
                     throw new Exception("Phone is already in use");
-
-                if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
-                {
-                    if (currentUser.Phone.IsEmpty())
-                        currentUser.Phone = phone;
-
-                    if (currentUser.PinCode.IsEmpty())
-                        currentUser.PinCode = pinCode;
-                    
-                    currentUser.LastModifiedDate = DateTime.UtcNow;
-                    msgs.AddRange(currentUser.Save());
-
-                    var registrantWebUsers = RegistrantWebUser.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, msgs);
-                    registrantWebUsers.ForEach(registrantWebUser =>
+                
+                Database.ExecuteTransaction
+                (
+                    (SystemMessages amsgs, DatabaseConnection adc) =>
                     {
-                        registrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
-                        msgs.AddRange(registrantWebUser.Save());
-                    });
-                }
+                        if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
+                        {
+                            if (currentUser.Phone.IsEmpty())
+                                currentUser.Phone = phone;
+
+                            if (currentUser.PinCode.IsEmpty())
+                                currentUser.PinCode = pinCode;
+
+                            currentUser.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(currentUser.Save(adc));
+
+                            var registrantWebUsers = RegistrantWebUser.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, amsgs, adc);
+                            registrantWebUsers.ForEach(registrantWebUser =>
+                            {
+                                registrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
+                                amsgs.AddRange(registrantWebUser.Save(adc));
+                            });
+                        }
+                    },
+                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                );
 
                 return Json(
                     new ApiResponse(msgs, null),
@@ -1004,11 +1013,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentUser.PinCode.IsNotEmpty() && !currentUser.PinCode.Equals(oldPinCode))
                     throw new Exception("Pin is incorrect");
-
-                currentUser.PinCode = newPinCode;
-                currentUser.LastModifiedDate = DateTime.UtcNow;
-                msgs.AddRange(currentUser.Save());
-
+                
+                currentUser.UpdatedPinCode(newPinCode, msgs);
+                
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
