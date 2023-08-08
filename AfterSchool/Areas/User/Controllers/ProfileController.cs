@@ -21,7 +21,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Edit()
         {
             ViewBag.Messages = new SystemMessages();
-            ViewBag.IsRequireCheckInOut = IsRequireCheckInOutEnabled();
+            ViewBag.IsRequireCheckInOut = IsCheckInOutFeatureEnabled();
             return View(SessionVariables.CurrentUser);
         }
         
@@ -31,7 +31,7 @@ namespace AfterSchool.Areas.User.Controllers
             var bundlePath = Server.MapPath("~/React/dist/bundle.js");
             var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
             ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
-            ViewBag.IsRequireCheckInOut = IsRequireCheckInOutEnabled();
+            ViewBag.IsRequireCheckInOut = IsCheckInOutFeatureEnabled();
             return View();
         }
 
@@ -75,7 +75,7 @@ namespace AfterSchool.Areas.User.Controllers
             return View(SessionVariables.CurrentUser);
         }
 
-        private static bool IsRequireCheckInOutEnabled()
+        private static bool IsCheckInOutFeatureEnabled()
         {
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
