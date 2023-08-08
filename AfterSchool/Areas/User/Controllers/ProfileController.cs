@@ -96,7 +96,6 @@ namespace AfterSchool.Areas.User.Controllers
                         return true;
                 }
             }
-
             return false;
         }
     }
