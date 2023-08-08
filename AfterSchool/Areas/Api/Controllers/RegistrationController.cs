@@ -109,7 +109,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.QuestionDataTypeId == QuestionDataType.RegistrantEmail && 
+                                   currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent ? currentUser.Email : questionAnswer.Text,
                         }
                     );
                 }
@@ -231,7 +232,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.QuestionDataTypeId == QuestionDataType.RegistrantEmail && 
+                                   currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent ? currentUser.Email : questionAnswer.Text,
                         }
                     );
                 }
@@ -368,7 +370,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.QuestionDataTypeId == QuestionDataType.RegistrantEmail && 
+                                   currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent ? currentUser.Email : questionAnswer.Text,
                         }
                     );
                 }
