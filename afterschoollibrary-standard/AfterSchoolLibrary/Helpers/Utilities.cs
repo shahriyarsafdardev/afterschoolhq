@@ -275,11 +275,11 @@ namespace AfterSchoolLibrary.Helpers
             if (stringInput.StartsWith("[["))
             {
                 // get rid of the surrounding bracs and only keep one
-                stringInput = Regex.Replace(stringInput, @"^\[+(.*?)\]+$", "[$1]");
+                stringInput = Regex.Replace(stringInput, @"^\[+(.*?)\]+$", "[$1]", RegexOptions.Singleline);
 
                 s = stringInput;
             }
-            else if (stringInput.StartsWith("[") && !stringInput.Contains("{"))
+            if (stringInput.StartsWith("[") && !stringInput.Contains("{"))
             {
                 stringInput = stringInput.Substring(1);
                 if (stringInput.EndsWith("]"))
