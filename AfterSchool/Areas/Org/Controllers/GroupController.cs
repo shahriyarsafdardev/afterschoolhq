@@ -550,11 +550,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var account = SessionVariables.CurrentAccount;
-
+            var accountPackage = SessionVariables.AccountPackage;
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
             var group = account.GetActivityGroup(id.ToGuid(), msgs);
+            var currentEmailCount = account.GetEmailCountForCurrentMessagePeriod(msgs);
+            var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
+                ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+                : 0;
 
             ViewBag.Registrants = group.GetRegistrants(msgs)
                 .Where(x => x.Email.IsNotBlank())
@@ -562,6 +566,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 .ThenBy(x => x.LastName)
                 .ToList();
             ViewBag.Messages = msgs;
+            ViewBag.currentEmailCount = currentEmailCount;
+            ViewBag.maxEmailCount = maxEmailCount;
 
             return View(group);
         }
@@ -573,8 +579,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
             var msgs = new SystemMessages();
-
+            var currentEmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
+            var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
+                ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+                : 0;
             if (subject.IsEmpty())
                 msgs.Add("Subject is required", MessageType.UserError);
             if (body.IsEmpty())
@@ -626,6 +636,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             ViewBag.Registrants = group.GetRegistrants(msgs);
             ViewBag.Messages = msgs;
+            ViewBag.currentEmailCount = currentEmailCount;
+            ViewBag.maxEmailCount = maxEmailCount;
             return View(group);
         }
 

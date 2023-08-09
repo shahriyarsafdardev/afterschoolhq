@@ -37,12 +37,12 @@
 
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
        {
-           Activity = Model,
-           IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
-           IsFullScreen = (bool?) ViewData["IsFullScreen"],
-           AccountPackage = accountPackage,
-           CurrentAccount = currentAccount,
-           CurrentUser = currentUser,
+            Activity = Model,
+            IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
+            IsFullScreen = (bool?) ViewData["IsFullScreen"],
+            AccountPackage = accountPackage,
+            CurrentAccount = currentAccount,
+            CurrentUser = currentUser,
        }); }
 
     <div class="panel panel-default">
@@ -102,7 +102,7 @@
                                  <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
                                     <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
                                     <label for="sendtostaff">Send Email To Staff</label>
-                                </div>
+                                 </div>
                             }
                         </div>
 
@@ -123,7 +123,19 @@
                             }
                         </div>
                     </div>
-
+                    if(Model.ActivityTypeId !=ActivityType.VolunteerOpportunity)
+                    {
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label"></label>
+                            <div class="col-sm-6">
+                                <div class="am-checkbox">
+                                    <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
+                                    <label for="parentsonly">Send only to parents of selected students</label>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label">
@@ -136,15 +148,15 @@
                                 <div>
                                     @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox registrant" 
-                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()" 
+                                        <div class="am-checkbox registrant"
+                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()"
                                              data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
 
-                                            <input type="checkbox" 
-                                                   class="chk-registrant" 
-                                                   id="registrant-@registrant.ID" 
-                                                   name="registrant-@registrant.ID" 
-                                                   value="1" 
+                                            <input type="checkbox"
+                                                   class="chk-registrant"
+                                                   id="registrant-@registrant.ID"
+                                                   name="registrant-@registrant.ID"
+                                                   value="1"
                                                    checked="checked" />
 
                                             <label for="registrant-@registrant.ID">
@@ -155,6 +167,9 @@
                                 </div>
                             }
                         </div>
+                    </div>
+                    <div id="message" class="msg-count-text xs-p-20 h5">
+                        <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">0</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">0</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
                     </div>
 
                     <div class="form-group">
@@ -180,14 +195,38 @@
 </div>
 
 <script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        $('.chk-registrant').on('click', updateMessageCount);
+        updateMessageCount();
+    });
     function selectAll() {
         $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', true);
         });
+        updateMessageCount();
     }
     function clearAll() {
         $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', false);
         });
+        updateMessageCount();
+    }
+    function getMessageCount() {
+        return Array.from($('.chk-registrant')).filter(checkbox => checkbox.checked).length;
+    }
+    function updateMessageCount() {
+        const checkedCount = getMessageCount();
+        updateRemainingCount();
+        $('#message-count').text(checkedCount);
+    }
+    function updateRemainingCount() {
+        const currentMessageCount = getMessageCount();
+        const remainingCount = @maxEmailCount - @currentEmailCount - currentMessageCount;
+        if (remainingCount > 0) {
+            $('#remaining-count').text(remainingCount);
+        }
+        else {
+            $('#remaining-count').text('0');
+        }
     }
 </script>
