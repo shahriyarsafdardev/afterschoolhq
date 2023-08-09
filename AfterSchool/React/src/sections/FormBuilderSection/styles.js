@@ -125,7 +125,7 @@ export default makeStyles(theme => ({
     margin: '30px 0px'
   },
   question: {
-    width: '-webkit-fill-available',
+    width: '100%',
     justifyContent: 'space-evenly',
     border: '1px solid #E4E4E4',
     flexDirection: 'row',
