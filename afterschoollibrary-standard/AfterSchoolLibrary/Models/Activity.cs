@@ -1089,7 +1089,7 @@ namespace AfterSchoolLibrary.Models
                 dcs.Add(ObjectMap["AccountId"], accountId);
                 dcs.Add(ObjectMap["ProviderAccountId"], accountId);
 
-                if (q.IsNotEmpty() && activityType == ActivityType.Activity)
+                if (q.IsNotEmpty() && (activityType == ActivityType.Activity || activityType == ActivityType.VolunteerOpportunity))
                     dq.Criterias.Add(ObjectMap["Name"], q, DatabaseCriteriaOperatorEnum.Like);
 
                 var locationQuery = get_DatabaseQuery(Location.ObjectMap, typeof(Location).Name);
