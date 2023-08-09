@@ -1282,7 +1282,7 @@ namespace AfterSchoolLibrary.Services
 
         #endregion
         
-        public static void UpdatedPinCode(this WebUser loggedInUser, string newPinCode, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void UpdatePinCode(this WebUser loggedInUser, string newPinCode, SystemMessages msgs, DatabaseConnection dc = null)
         {
             loggedInUser.PinCode = newPinCode;
             loggedInUser.LastModifiedDate = DateTime.UtcNow;

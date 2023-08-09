@@ -1014,7 +1014,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentUser.PinCode.IsNotEmpty() && !currentUser.PinCode.Equals(oldPinCode))
                     throw new Exception("Pin is incorrect");
                 
-                currentUser.UpdatedPinCode(newPinCode, msgs);
+                currentUser.UpdatePinCode(newPinCode, msgs);
                 
                 return Json(
                     new ApiResponse(msgs, null),
