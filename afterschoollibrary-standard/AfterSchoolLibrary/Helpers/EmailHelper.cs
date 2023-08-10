@@ -3091,19 +3091,19 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
             return msgs;
         }
-        
+
         public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
         {
             var msgs = new SystemMessages();
-            var registrant = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false, false).LastOrDefault();
-            
+            var registrant = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false, false, msgs).LastOrDefault();
+
             if (registrant.IsNotEmpty())
             {
-                var registration = Registration.LoadByRegistrantId(registrant.ID.Value,msgs).FirstOrDefault();
+                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).FirstOrDefault();
                 var participationObject = registration?.GetFirstParticipationObject();
                 var subject = "Your background check is complete!";
                 var emailTemplate = EmailTemplates.Volunteer_Background_Approved;
-                
+
                 var model = new NameValueCollection
                 {
                     {"FirstName", registrant.FirstName},
@@ -3116,7 +3116,7 @@ namespace AfterSchoolLibrary.Helpers
                     subject = "Your background check results";
                     emailTemplate = EmailTemplates.Volunteer_Background_Denied;
                 }
-            
+
                 var body = ProcessTemplate(
                     emailTemplate,
                     model,
