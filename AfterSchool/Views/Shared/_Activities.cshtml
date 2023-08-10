@@ -373,7 +373,7 @@ else
                                 class="btn btn-sm shadow-none featured @(activity.IsFeatured ? "btn-primary" : "btn-default")">
                             <i class="s7-pin"></i>
                         </button>
-                        <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">Publish...</a>
+                        <a href="@Url.Action("publishdetail", "activity", new {id = activity.Uid})" class="btn btn-default btn-sm">@(activity.IsPublished ? "UnPublish..." : "Publish...")  </a>
                     }
 
                     @if (activity.AccountId == currentAccount.ID)
