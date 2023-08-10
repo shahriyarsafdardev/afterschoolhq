@@ -2418,7 +2418,7 @@ namespace AfterSchool.Controllers
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
             var isSelfRegistered = masterRegistrant.WebUserId == currentUser.ID;
-            if (account.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                 participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() && participationObject.IsRequireCheckInCheckOutEnabled)
                 return Redirect($"~/reactapp/reg/setup/{id}");
             
