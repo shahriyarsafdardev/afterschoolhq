@@ -3090,5 +3090,46 @@ namespace AfterSchoolLibrary.Helpers
             msgs.AddRange(mailMsgs);
             return msgs;
         }
+        
+        public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
+        {
+            var msgs = new SystemMessages();
+            var registrant = Registrant.LoadByWebUserIdByIsMasterByIsDeleted((int) webUserId,false,false, msgs).FirstOrDefault();
+            
+            if (registrant.IsNotEmpty())
+            {
+                var registration = Registration.LoadByRegistrantId(registrant.ID.Value,msgs).FirstOrDefault();
+                var participationObject = registration?.GetFirstParticipationObject();
+                var subject = "Your background check is complete!";
+                var emailTemplate = EmailTemplates.Volunteer_Background_Approved;
+                
+                var model = new NameValueCollection
+                {
+                    {"FirstName", registrant.FirstName},
+                    {"VolunteerOpportunityName", participationObject?.Name},
+                    {"ProductName", Utilities.AppName()},
+                };
+
+                if (status == ApprovalStatus.Denied)
+                {
+                    subject = "Your background check results";
+                    emailTemplate = EmailTemplates.Volunteer_Background_Denied;
+                }
+            
+                var body = ProcessTemplate(
+                    emailTemplate,
+                    model,
+                    "volunteer_background_approval_denial",
+                    msgs
+                );
+
+                msgs.AddRange(SendGridHelper.SendMail(
+                    Email.SendGridNoReplyEmailAddress(),
+                    new EmailAddress(registrant.Email),
+                    subject,
+                    body,
+                    emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+            }
+        }
     }
 }

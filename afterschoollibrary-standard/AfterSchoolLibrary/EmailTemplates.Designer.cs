@@ -583,6 +583,26 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Volunteer_Background_Approved {
+            get {
+                object obj = ResourceManager.GetObject("Volunteer_Background_Approved", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Volunteer_Background_Denied {
+            get {
+                object obj = ResourceManager.GetObject("Volunteer_Background_Denied", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Volunteer_BackgroundCheck {
             get {
                 object obj = ResourceManager.GetObject("Volunteer_BackgroundCheck", resourceCulture);

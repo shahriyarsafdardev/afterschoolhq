@@ -1,0 +1,16 @@
+﻿<div>
+  <p>Hi @Model.FirstName,<br/></p>  
+  
+  <p>
+    Thank you for submitting your background check to become a volunteer for @Model.VolunteerOpportunityName! <b>You have passed the background check and are registered as a volunteer.</b><br/>
+  </p>
+
+  <p>
+    If you have further questions about this volunteer opportunity, please contact the opportunity provider.<br/>
+  </p>
+
+  <p>
+    Thank you,<br/>
+    @Model.ProductName
+  </p>
+</div>
