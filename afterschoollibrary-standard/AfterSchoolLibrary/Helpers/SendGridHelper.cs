@@ -62,7 +62,6 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             if (Utilities.IsLocalHost)
-            {
                 msgs.AddRange(SMTPMailTrapHelper.SendMail(
                 fromEmail,
                 toEmail,
@@ -71,7 +70,6 @@ namespace AfterSchoolLibrary
                 msgs,
                 emailTemplateId: emailTemplateId
                 ));
-            }
             else
             {
 
@@ -102,7 +100,6 @@ namespace AfterSchoolLibrary
         {
             var msgs = new SystemMessages();
             if (Utilities.IsLocalHost)
-            {
                 msgs.AddRange(SMTPMailTrapHelper.SendMailwithAttachment(fromEmail,
                     toEmail,
                     subject,
@@ -110,7 +107,6 @@ namespace AfterSchoolLibrary
                     attachmentByteData,
                     attachmentFilename,
                     msgs));
-            }
             else
             {
                 var sg = new SendGridClient(SendGridApiKey);
