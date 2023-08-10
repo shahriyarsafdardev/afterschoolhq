@@ -228,7 +228,8 @@
                 var showPartialRefundIcon = transaction.CouponId.HasValue && transaction.HasRefundableAmount(false, msgs);
                 var disableChk = !transaction.CanRequestPayout() ? "disabled" : "";
                 var enableTransfer = !transaction.UsedStripeConnect && !transaction.PayoutId.HasValue && useStripeConnect && account.StripePayoutsEnabled && !transaction.HasRefundsAHQ() && transaction.TransactionTypeId == TransactionType.Charge;
-                var payerName = WebUser.Load(transaction.CreatedBy.Value,msgs)?.DisplayName;
+                var accountOwnerId = Account.Load(transaction.PayerAccountId.Value, msgs)?.OwnerId;
+                var payerName = transaction.CreatedBy.IsNotEmpty() ? WebUser.Load(transaction.CreatedBy.Value,msgs)?.DisplayName : (accountOwnerId.IsNotEmpty() ? WebUser.Load(accountOwnerId.Value, msgs)?.DisplayName : transaction.GetPayerAccount().Name);
 
                 <tr id="@transaction.Uid">
                     <td>
