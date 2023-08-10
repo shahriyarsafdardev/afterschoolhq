@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Web;
+using AfterSchoolLibrary.Enums;
 
 namespace AfterSchoolLibrary.Helpers
 {
@@ -3094,7 +3095,7 @@ namespace AfterSchoolLibrary.Helpers
         public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
         {
             var msgs = new SystemMessages();
-            var registrant = Registrant.LoadByWebUserIdByIsMasterByIsDeleted((int) webUserId,false,false, msgs).FirstOrDefault();
+            var registrant = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false, false).LastOrDefault();
             
             if (registrant.IsNotEmpty())
             {
