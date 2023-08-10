@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Loader } from 'components';
+import { isEmpty } from 'lodash';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
-import { Box, Button, Typography } from '@material-ui/core';
-import LoadingButton from 'components/Overrides/LoadingButton';
+import React, { useEffect, useState } from 'react';
+import { Box, Button } from '@material-ui/core';
 
-import AuthorizedPersonListSetup from './AuthorizedPersonListSetup';
-import { useManageAPAccess } from 'redux/hooks';
 import useStyles from './styles';
-import { isEmpty } from 'lodash';
+import { Loader } from 'components';
+import { useManageAPAccess } from 'redux/hooks';
+import LoadingButton from 'components/Overrides/LoadingButton';
+import PinCodeSection from './PinCodeSection';
+import AuthPersonsManagementSection from './AuthPersonsManagementSection';
 
 export default function index() {
   const classes = useStyles();
@@ -23,7 +24,7 @@ export default function index() {
     loadAuthorizedPersonsList
   } = useManageAPAccess();
 
-  const { Students = [] } = data || {};
+  const { Students = [], IsPinSetup, IsPhoneSetup } = data || {};
 
   useEffect(() => {
     loadAuthorizedPersonsList();
@@ -80,46 +81,38 @@ export default function index() {
 
   return (
     <Box>
-      <Typography className={classes.heading}>
-        New authorized person(s) will be notified and prompted to create their own PIN code for
-        check in and check out.
-      </Typography>
-      <Typography className={classes.italicFont}>
-        These settings will apply to all activities.
-      </Typography>
-      <Box className={classes.authListOuterWrapper}>
-        {Object.keys(values).map(key => (
-          <AuthorizedPersonListSetup
-            key={key}
-            studentName={Students[key]?.StudentName}
-            studentUid={Students[key]?.StudentUid}
-            authorizedPersons={values[key]}
-            setValue={value => setFieldValue(key, value)}
-          />
-        ))}
+      <Box className={classes.sectionWrapper}>
+        <PinCodeSection IsPinSetup={IsPinSetup} IsPhoneSetup={IsPhoneSetup} />
       </Box>
-      <Box className={classes.buttons}>
-        <Button
-          color="primary"
-          variant="outlined"
-          className={classes.cancelButton}
-          data-testid="cancel-button"
-          onClick={handleOnCancel}
-        >
-          Cancel
-        </Button>
-        <LoadingButton
-          key="CICO-Save-Button"
-          id="CICO-Save-Button"
-          type="submit"
-          onClick={handleSubmitForm}
-          variant="contained"
-          color="primary"
-          className={classes.saveButton}
-          text={'Save'}
-          disabled={!dirty}
-          loading={isSubmitting}
+      <Box className={classes.sectionWrapper}>
+        <AuthPersonsManagementSection
+          values={values}
+          setFieldValue={setFieldValue}
+          Students={Students}
         />
+        <Box className={classes.buttons}>
+          <Button
+            color="primary"
+            variant="outlined"
+            className={classes.cancelButton}
+            data-testid="cancel-button"
+            onClick={handleOnCancel}
+          >
+            Cancel
+          </Button>
+          <LoadingButton
+            key="CICO-Save-Button"
+            id="CICO-Save-Button"
+            type="submit"
+            onClick={handleSubmitForm}
+            variant="contained"
+            color="primary"
+            className={classes.saveButton}
+            text={'Save'}
+            disabled={!dirty}
+            loading={isSubmitting}
+          />
+        </Box>
       </Box>
     </Box>
   );

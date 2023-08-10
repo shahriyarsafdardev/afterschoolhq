@@ -17,6 +17,10 @@ export default {
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
+  //PinSetup APIs
+  createNewPinForParentAPI: 'Api/RegistrationPin/CreateNewPinForParent',
+  updateExistingPinForParentAPI: 'Api/RegistrationPin/UpdateExistingPinForParent',
+
   //RegistrationPin APIs
   getPinSetupData: (registrationUid, phone) =>
     `Api/RegistrationPin/CreateNewPin?registrationUid=${registrationUid}&phone=${phone}`,
@@ -69,6 +73,7 @@ export default {
   familyUrl: '/User/family',
   accountUrl: `${window.location.origin}/User/home`,
   formSettingsPath: formId => `/Org/form/edit/${formId}`,
+  requestPinResetUrl: `/reactapp/check-in-out/request-pin-reset`,
   volunteerAccountUrl: `${window.location.origin}/Volunteer/home`,
   registerForNewChildUrl: `${window.location.origin}/account/addstudent`,
   surveyUrl: formUid => `/reactapp/survey/${formUid}`,

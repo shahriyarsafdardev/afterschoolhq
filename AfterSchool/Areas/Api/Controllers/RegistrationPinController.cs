@@ -474,7 +474,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             CheckInBy = webUser.IsNotEmpty() ? $"{webUser.FirstName} {webUser.LastName}" : "",
                         };
 
-                        if (activity.IsNotEmpty() && activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                        if (activity.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                            activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                             activityInfo.Add(new ActivityDto
                             {
                                 StudentUid = registrant.Uid.ToString(),
@@ -754,6 +755,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response = new
                 {
                     Students = studentsList,
+                    IsPinSetup = currentUser.PinCode.IsNotEmpty(),
+                    IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                 };
 
                 return Json(
@@ -881,6 +884,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 dynamic response = new
                 {
                     Students = GetAuthorizedPerson(masterRegistrants, msgs),
+                    IsPinSetup = currentUser.PinCode.IsNotEmpty(),
+                    IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
                 };
 
                 return Json(
@@ -932,6 +937,90 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
             catch(Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult CreateNewPinForParent(string pinCode, string phone)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
+                    throw new Exception("Phone is already in use");
+                
+                Database.ExecuteTransaction
+                (
+                    (SystemMessages amsgs, DatabaseConnection adc) =>
+                    {
+                        if (currentUser.Phone.IsEmpty() || currentUser.PinCode.IsEmpty())
+                        {
+                            if (currentUser.Phone.IsEmpty())
+                                currentUser.Phone = phone;
+
+                            if (currentUser.PinCode.IsEmpty())
+                                currentUser.PinCode = pinCode;
+
+                            currentUser.LastModifiedDate = DateTime.UtcNow;
+                            amsgs.AddRange(currentUser.Save(adc));
+
+                            var registrantWebUsers = RegistrantWebUser.LoadByWebUserIdByIsDeleted(currentUser.ID.Value, false, amsgs, adc);
+                            registrantWebUsers.ForEach(registrantWebUser =>
+                            {
+                                registrantWebUser.AuthorizationTypeId = WebUserAuthorizationType.FullyAuthorized;
+                                amsgs.AddRange(registrantWebUser.Save(adc));
+                            });
+                        }
+                    },
+                    (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                    (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                    (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                );
+
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult UpdateExistingPinForParent(string oldPinCode, string newPinCode)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                if (currentUser.PinCode.IsNotEmpty() && !currentUser.PinCode.Equals(oldPinCode))
+                    throw new Exception("Pin is incorrect");
+                
+                currentUser.UpdatePinCode(newPinCode, msgs);
+                
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
                 return Json(
