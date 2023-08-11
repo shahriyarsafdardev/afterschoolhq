@@ -509,6 +509,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+            var account = SessionVariables.CurrentAccount;
 
             if (userid.IsEmpty() || userid.Trim() == "0")
                 msgs.Add("User id cannot be empty", MessageType.UserError);
@@ -516,7 +517,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var user = WebUser.Load(userid.ToInteger(), msgs);
-                var awu = AccountWebUser.LoadByWebUserIdByIsDeleted(user.ID.Value, false, msgs).FirstOrDefault();
+                var awu = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, user.ID.Value, false, msgs);
 
                 if (awu.IsNotEmpty())
                     awu.UpdateUserType(currentUser, newusertypeid, msgs);
