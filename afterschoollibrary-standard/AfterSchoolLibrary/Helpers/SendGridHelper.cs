@@ -62,7 +62,6 @@ namespace AfterSchoolLibrary
             var msgs = new SystemMessages();
 
             if (Utilities.IsLocalHost)
-            {
                 msgs.AddRange(SMTPMailTrapHelper.SendMail(
                 fromEmail,
                 toEmail,
@@ -71,7 +70,6 @@ namespace AfterSchoolLibrary
                 msgs,
                 emailTemplateId: emailTemplateId
                 ));
-            }
             else
             {
 
@@ -101,35 +99,44 @@ namespace AfterSchoolLibrary
             string subject, string body, string emailTemplateId, byte[] attachmentByteData, string attachmentFilename)
         {
             var msgs = new SystemMessages();
+            if (Utilities.IsLocalHost)
+                msgs.AddRange(SMTPMailTrapHelper.SendMailwithAttachment(fromEmail,
+                    toEmail,
+                    subject,
+                    body,
+                    attachmentByteData,
+                    attachmentFilename,
+                    msgs));
+            else
+            {
+                var sg = new SendGridClient(SendGridApiKey);
 
-            var sg = new SendGridClient(SendGridApiKey);
+                if (!Utilities.IsProduction)
+                    subject = $"{Utilities.Environment} ENV: {subject}";
 
-            if (!Utilities.IsProduction)
-                subject = $"{Utilities.Environment} ENV: {subject}";
+                var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
 
-            var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
-
-            if (attachmentByteData != null)
-                mail.Attachments = new List<Attachment>
-                {
-                    new Attachment
+                if (attachmentByteData != null)
+                    mail.Attachments = new List<Attachment>
                     {
-                        Content = Convert.ToBase64String(attachmentByteData),
-                        Filename = attachmentFilename ?? "registrations.csv",
-                        Type = "text/csv",
-                        Disposition = "attachment",
-                    },
-                };
+                        new Attachment
+                        {
+                            Content = Convert.ToBase64String(attachmentByteData),
+                            Filename = attachmentFilename ?? "registrations.csv",
+                            Type = "text/csv",
+                            Disposition = "attachment",
+                        },
+                    };
 
-            mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
+                mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
 
-            var task = Task.Run(async () => await sg.SendEmailAsync(mail));
-            task.Wait();
+                var task = Task.Run(async () => await sg.SendEmailAsync(mail));
+                task.Wait();
 
-            dynamic response = task.Result;
-            if (response.StatusCode != HttpStatusCode.Accepted)
-                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-
+                dynamic response = task.Result;
+                if (response.StatusCode != HttpStatusCode.Accepted)
+                    msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            }
             return msgs;
         }
     }
