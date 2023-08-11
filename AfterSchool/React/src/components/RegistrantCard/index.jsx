@@ -10,7 +10,7 @@ function RegistrantCard({ index, student, handleClick }) {
     isAdult,
     isStudent,
     IneligibleText,
-    isParentOrGuardien,
+    isParentOrGuardian,
     Disabled: disabled,
     RegistrantGradeText,
     BtnText: buttonText,
@@ -24,10 +24,10 @@ function RegistrantCard({ index, student, handleClick }) {
     let text = '';
 
     if (!NewParticipant) {
-      text = 'Participant';
-      if (isAdult) text += ' (Adult)';
-      else if (isParentOrGuardien) text += '/Guardian';
-      else if (isStudent && RegistrantGradeText) text += ` (${RegistrantGradeText})`;
+      if (isAdult) text = ' (Adult)';
+      else if (isParentOrGuardian) text = '/Guardian';
+      else if (isStudent && RegistrantGradeText) text = ` (${RegistrantGradeText})`;
+      text = 'Participant' + text;
     }
 
     return text;
@@ -36,10 +36,10 @@ function RegistrantCard({ index, student, handleClick }) {
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent className={classes.cardContent}>
-        <Typography className={classes.heading} data-testid={`Registrant-Name-${index}`}>
+        <Typography className={classes.heading} data-testid={`registrant-name-${index}`}>
           {name}
         </Typography>
-        <Typography className={classes.subHeading} data-testid={`Registrant-Type-Text-${index}`}>
+        <Typography className={classes.subHeading} data-testid={`registrant-type-text-${index}`}>
           {registrantTypeText()}
         </Typography>
       </CardContent>
@@ -50,16 +50,16 @@ function RegistrantCard({ index, student, handleClick }) {
           disabled={disabled}
           variant="contained"
           color="primary"
-          data-testid={`Participant-button-${index}`}
+          data-testid={`participant-button-${index}`}
         >
           {buttonText} &nbsp;
         </Button>
-        <Typography className={classes.enrollMsg} data-testid={`Ineligible-Text-${index}`}>
+        <Typography className={classes.enrollMsg} data-testid={`ineligible-text-${index}`}>
           {IneligibleText}
         </Typography>
         {updateProfileUrl && (
           <Link
-            data-testid={`Update-Profile-Link-${index}`}
+            data-testid={`update-profile-link-${index}`}
             className={classes.link}
             href={updateProfileUrl}
             target="_blank"

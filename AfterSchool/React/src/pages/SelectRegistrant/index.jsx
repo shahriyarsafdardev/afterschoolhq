@@ -5,13 +5,13 @@ import { Box, Typography } from '@material-ui/core';
 import utils from 'utils';
 import useStyles from './styles';
 import { useSelectRegistrant } from 'redux/hooks';
-import { RegistrantCard, Loader } from 'components';
+import { AddNewParticipantCard, RegistrantCard, Loader } from 'components';
 
 function SelectRegistrant() {
   const { redirect } = utils;
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
-  const { msgs, loading, students, loadData, addNewRegistrant } = useSelectRegistrant();
+  const { msgs, loading, students, loadData } = useSelectRegistrant();
 
   useEffect(() => {
     loadData();
@@ -21,10 +21,7 @@ function SelectRegistrant() {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
-  const handleClick = async ({ NewParticipant = false, BtnUrl }) => {
-    if (NewParticipant) await addNewRegistrant();
-    else redirect(BtnUrl);
-  };
+  const handleClick = async ({ BtnUrl }) => redirect(BtnUrl);
 
   if (loading) return <Loader />;
 
@@ -41,6 +38,7 @@ function SelectRegistrant() {
               handleClick={() => handleClick(student)}
             />
           ))}
+          <AddNewParticipantCard />
         </Box>
       </Box>
     </Box>

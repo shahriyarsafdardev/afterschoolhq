@@ -1,6 +1,5 @@
 import SelectRegistrantRepository from 'repository/SelectRegistrantRepository';
 import { createSlice } from '@reduxjs/toolkit';
-import { addNewParticipant } from 'constants';
 import { useDispatch } from 'react-redux';
 import HeaderSlice from './HeaderSlice';
 import utils from 'utils';
@@ -9,14 +8,14 @@ const SelectRegistrantSlice = createSlice({
   name: 'selectRegistrantSlice',
   initialState: {
     msgs: [],
-    participationObject: {},
+    activityData: {},
     students: [],
     loading: true
   },
   reducers: {
     setData: (state, { payload }) => {
-      state.students = [...payload.Students, addNewParticipant];
-      state.participationObject = payload.ParticipationObject;
+      state.students = payload.Students;
+      state.activityData = payload.activityDto;
     },
     loadingStart: state => {
       state.loading = true;
@@ -50,12 +49,12 @@ export const useSelectRegistrantActions = () => {
 
       if (msgs.length > 0) return navigateTo('/login');
 
-      if (obj?.ParticipationObject) {
+      if (obj?.activityDto) {
         const {
           HeaderImageUrl,
           ActivityName: Name,
           OrganizationName: Organization
-        } = obj?.ParticipationObject;
+        } = obj?.activityDto;
 
         dispatch(setHeaderData({ Name, Organization, HeaderImageUrl }));
       }
