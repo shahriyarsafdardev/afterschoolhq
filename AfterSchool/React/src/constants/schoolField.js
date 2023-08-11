@@ -1,5 +1,5 @@
-export default registrantType => {
-  if (registrantType === 'Adult') return {};
+export default (registrantType, updatingProfile = false) => {
+  if (registrantType === 'Adult' || (updatingProfile && registrantType === 'Parent')) return {};
   return {
     ID: 99999,
     GroupTitle: 'Student Information',
