@@ -5412,7 +5412,7 @@ namespace AfterSchoolLibrary.Services
                     (PurchaseableObjectType) participationObject.ObjectType);
 
                 // if coupon is not assigned to any purchaseable object that means it can be applied to any purchaseable object
-                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty())
+                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty() )
                     msgs.Add("This coupon code is invalid", MessageType.UserError);
                 else
                 {

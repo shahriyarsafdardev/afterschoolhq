@@ -244,5 +244,15 @@ namespace AfterSchoolLibrary.Services
             coupon.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(coupon.Save(dc));
         }
+        
+        public static void MarkAsDeleted(this Coupon coupon, WebUser loggedInUser, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            coupon.IsDeleted = true;
+            coupon.LastModifiedDate = DateTime.UtcNow;
+            coupon.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(coupon.Save(dc));
+        }
+
     }
 }
