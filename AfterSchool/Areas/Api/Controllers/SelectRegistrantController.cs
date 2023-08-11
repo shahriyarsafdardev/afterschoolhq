@@ -16,23 +16,20 @@ using System.Reflection;
 using System.Text.Json;
 using System.Web.Mvc;
 using System.Windows.Interop;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
     public class SelectRegistrantController : BaseController
     {
         [HttpGet]
-
         public ActionResult GetRegistrantsForParent()
         {
             var msgs = new SystemMessages();
-
             try
             {
                 var currentAccount = SessionVariables.CurrentAccount;
                 var currentUser = SessionVariables.CurrentUser;
-
-
                 if (currentAccount.IsEmpty() || currentUser.IsEmpty())
                     throw new Exception("Unauthorized Account");
 
@@ -45,40 +42,14 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (participationObject.IsEmpty())
                     throw new Exception("No activity found");
 
-
                 var students = currentAccount.GetStudentRegistrants(msgs);
-
                 var registrantsDtos = new List<SelectRegistrantsDto>();
-
                 var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
-
-                //Get things for ParticipationObject
-                var poRegistrationMode = participationObject.RegistrationMode;
-                var poSeatsRemaining = participationObject.SeatsRemaining;
-                var poSubscriptionPlans = participationObject.SubscriptionPlans.Any();
-                var poSubscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-                var poParticipationObject = participationObject.IsSession();
-                var poActivityGroupType = participationObject.ActivityGroupType;
                 var activityName = participationObject.Name;
                 var orgName = participationObject.OwnerAccount.Name;
                 var profile = participationObject.OwnerAccount.GetAccountProfile(msgs);
-                var HeaderImageUrl = profile.GetHeaderImageUrl(msgs);
-                var resParticipationObject = new SRParticipationObjectDTO
-                {
-                    ParticipationRegistrationMode = poRegistrationMode,
-                    SeatsRemaining = poSeatsRemaining,
-                    AnySubscriptionPlans = poSubscriptionPlans,
-                    FirstSubscriptionPlan = poSubscriptionPlan,
-                    ParticipationObjectIsSession = poParticipationObject,
-                    ParticipationActivityGroupType = poActivityGroupType,
-                    ActivityName = activityName,
-                    OrganizationName = orgName,
-                    HeaderImageUrl = HeaderImageUrl
-                };
-
-
-
-                //Get things for Students
+                var headerImageUrl = profile.GetHeaderImageUrl(msgs);
+            
                 foreach (var student in students)
                 {
                     var registered = "Enrolled";
@@ -88,46 +59,32 @@ namespace AfterSchool.Areas.Api.Controllers
                         register = "Apply";
                         registered = "Applied";
                     }
-
                     if (participationObject.SeatsRemaining == 0)
-                    {
                         register = "Join Waiting List";
-                    }
-                    //changed
+ 
                     var disabled = false;
                     var btnText = ""; 
                     var registerUrl = "/account/setstudent/"+student.Uid;
                     var btnUrl = registerUrl;
-                    
-                    //
-
-                    var registrantGrade = student.GetAnswer(QuestionDataType.RegistrantGrade);
+                    var registrantGrade = student.GetAnswer(QuestionDataType.RegistrantGrade, msgs);
                     var registrantGradeText = registrantGrade?.Text;
                     var canStillRegister = false;
-
-
                     var ineligibleText = "";
-
-                    var isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student);
-                    var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student);
+                    var isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student, msgs);
+                    var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student, msgs);
                     var isGenderRestricted = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
                                            && !participationObject.AcceptsGenderType(student.GenderId);
 
-
                     if (participationObject.CanRegisterPerClass)
-                    {
-                        canStillRegister = !student.IsReservedForAllDates(participationObject, selectedDates, null);
-                    }
+                        canStillRegister = !student.IsReservedForAllDates(participationObject, selectedDates, null, msgs);
 
-
-                    if (student.HasSubmittedFor(participationObject, null) && !canStillRegister)
+                    if (student.HasSubmittedFor(participationObject, null, msgs) && !canStillRegister)
                     {
-                        if (student.HasWithdrawn(participationObject))
+                        if (student.HasWithdrawn(participationObject, msgs))
                         {
-                            if (participationObject.SubscriptionPlans.Any() && student.HasCancelledSubscription(participationObject))
-                            {
+                            if (participationObject.SubscriptionPlans.Any() && student.HasCancelledSubscription(participationObject, msgs))
                                 btnText = "Re-Enroll »";
-                            }
+
                             else
                             {
                                 btnText = "Withdrawn";
@@ -135,20 +92,18 @@ namespace AfterSchool.Areas.Api.Controllers
                                 btnUrl = "#";
                             }
                         }
-                        else if (!student.HasConsentFor(participationObject))
-                        {
+                        else if (!student.HasConsentFor(participationObject, msgs))
                             btnText = "Give Consent";
-                        }
-                        else if (student.OnWaitingListFor(participationObject))
+
+                        else if (student.OnWaitingListFor(participationObject, msgs))
                         {
                             btnText = "On Waiting List";
                             disabled = true;
                             btnUrl = "#";
                         }
-                        else if (!student.IsReservedAndPaidFor(participationObject, null) && !student.IsAppliedFor(participationObject, null) && !student.MasterRegistrantHasPlan(participationObject))
+                        else if (!student.IsReservedAndPaidFor(participationObject, null, msgs) && !student.IsAppliedFor(participationObject, null, msgs) && !student.MasterRegistrantHasPlan(participationObject, msgs))
                         {
                             var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-
                             if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
                             {
                                 btnText = "Awaiting Finalization";
@@ -158,13 +113,12 @@ namespace AfterSchool.Areas.Api.Controllers
                             else
                             {
                                 btnText = "Pay Now »";
-                                btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject).Uid });
+                                btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject,msgs).Uid });
                             }
                         }
                         else if (participationObject.IsSession())
-                        {
                             btnText = "Add To Existing Registration »";
-                        }
+
                         else
                         {
                             btnText = $"Already {registered}";
@@ -174,7 +128,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     }
                     else
                     {
-
                         if (!student.IsProfileCompleted)
                         {
                             btnText = "Update Profile & Enroll »";
@@ -190,9 +143,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     isGenderRestricted, isAgeRestricted, isGradeRestricted);
                             }
                             else
-                            {
                                 btnText = register + " »";
-                            }
 
                         }
                     }
@@ -218,17 +169,19 @@ namespace AfterSchool.Areas.Api.Controllers
                     };
                     registrantsDtos.Add(newStudent);
                 }
-
                 var Response = new
                 {
                     Students = registrantsDtos,
-                    ParticipationObject = resParticipationObject,
+                    activityDto = new
+                    {
+                        ActivityName = activityName,
+                        OrganizationName = orgName,
+                        HeaderImageUrl = headerImageUrl
+                    },
                 };
-
                 return Json(
                     new ApiResponse(msgs, Response),
                     JsonRequestBehavior.AllowGet);
-
             }
             catch (Exception ex)
             {
@@ -237,17 +190,10 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
-
             }
-
-
         }
-        
-
-       
 
         [HttpGet]
-
         public ActionResult AddNewRegistrant()
         {
             var msgs = new SystemMessages();
@@ -257,18 +203,12 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 if (currentUser.IsEmpty() || currentAccount.IsEmpty())
                     throw new Exception("Unauthorized Account");
-
                 var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-
                 if (participationObject.IsEmpty())
                     throw new Exception("No activity found");
-
-
                 var parentRegistrant = currentAccount.GetFirstParentOrGuardianRegistrant(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
-
                 Registrant studentReg = null;
-
                 Database.ExecuteTransaction
                     (
                         (amsgs, adc) =>
@@ -298,19 +238,23 @@ namespace AfterSchool.Areas.Api.Controllers
                             SessionVariables.CurrentRegistrant = studentReg;
                         },
                         fmsgs => msgs.AddRange(fmsgs),
-                        emsgs => throw new Exception(emsgs.ToString())
+                       emsgs =>
+                       {
+                           Utilities.SystemErrorLog(emsgs);
+                           throw new Exception(emsgs.ToString());
+                       }
                     );
-
                 var addnewStudentUrl = $"/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}";
-
                 var Response = new
                 {
                     AddNewStudentUrl = addnewStudentUrl,
-
                 };
-
+                if (msgs.HasNoErrors())
+                    return Json(
+                        new ApiResponse(msgs, Response),
+                        JsonRequestBehavior.AllowGet);
                 return Json(
-                    new ApiResponse(msgs, Response),
+                    new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
 
             }
@@ -322,9 +266,6 @@ namespace AfterSchool.Areas.Api.Controllers
                     new ApiResponse(msgs, null),
                     JsonRequestBehavior.AllowGet);
             }
-
         }
     }
-    
-    
 }
