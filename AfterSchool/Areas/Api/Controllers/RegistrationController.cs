@@ -109,10 +109,15 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.Text,
                         }
                     );
                 }
+                
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    formQuestionAnswerDtoList = MapParentEmailToStudent(formQuestionDtoList, formQuestionAnswerDtoList,currentRegistrant, currentUser);
+                
+                
 
                 (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
@@ -231,7 +236,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.Text,
                         }
                     );
                 }
@@ -368,10 +373,13 @@ namespace AfterSchool.Areas.Api.Controllers
                             FormQuestionId = questionAnswer.FormQuestionId,
                             QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
                             QuestionText = questionAnswer.QuestionText,
-                            Text = questionAnswer.Text
+                            Text = questionAnswer.Text,
                         }
                     );
                 }
+                
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    formQuestionAnswerDtoList = MapParentEmailToStudent(formQuestionDtoList, formQuestionAnswerDtoList,currentRegistrant, currentUser);
 
                 if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                     registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
@@ -1075,6 +1083,29 @@ namespace AfterSchool.Areas.Api.Controllers
                 }
             }
             return formQuestionDtoList;
+        }
+
+        private static List<FormQuestionAnswerDto> MapParentEmailToStudent(List<FormQuestionDto> formQuestionDtoList, 
+            List<FormQuestionAnswerDto> formQuestionAnswerDtoList, Registrant currentRegistrant,WebUser currentUser)
+        {
+            var msgs = new SystemMessages();
+            var registrantEmailFormQuestion =
+                formQuestionDtoList.FirstOrDefault(question => question.QuestionDataTypeId == QuestionDataType.RegistrantEmail);
+            var registrantEmailFormQuestionAnswer =
+                FormQuestionAnswer.LoadByRegistrantIdByQuestionDataTypeId(currentRegistrant.ID.Value, QuestionDataType.RegistrantEmail, msgs);
+
+            if (registrantEmailFormQuestion.IsNotEmpty() && registrantEmailFormQuestionAnswer.IsEmpty())
+                formQuestionAnswerDtoList.Add(
+                    new FormQuestionAnswerDto
+                    {
+                        FormQuestionId = registrantEmailFormQuestion.ID,
+                        QuestionDataTypeId = (int) registrantEmailFormQuestion.QuestionDataTypeId,
+                        QuestionText = registrantEmailFormQuestion.Text,
+                        Text = currentUser.Email,
+                    }
+                );
+
+            return formQuestionAnswerDtoList;
         }
 
     }
