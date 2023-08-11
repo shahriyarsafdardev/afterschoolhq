@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -551,7 +551,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult InviteTo(string id, string type, string list, string ret)
+        public ActionResult InviteTo(string id, string type, List<string> list, string ret)
         {
             var msgs = new SystemMessages();
             var lists = InviteToViewBag(id, type, list, msgs);
@@ -566,8 +566,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View();
         }
-
-        private List<ContactList> InviteToViewBag(string id, string type, string list, SystemMessages msgs)
+        private List<ContactList> InviteToViewBag(string id, string type, List<string> list, SystemMessages msgs)
         {
             var returnUrl = "";
             var activities = new List<Activity>();
@@ -610,7 +609,9 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Group = group;
             ViewBag.Activity = activity;
             ViewBag.ReturnUrl = returnUrl;
-            ViewBag.SelectedList = list.IsNumber() ? list.ToInteger() : new int?();
+            ViewBag.SelectedLists = (list ?? new List<string>())
+                .Select(id => new int?(id.ToInteger()))
+                .ToList();
             ViewBag.Id = id;
             ViewBag.Type = type;
             ViewBag.Activities = activities;
@@ -625,7 +626,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult InviteTo(string id, string type, string list, string invitemessage, string ret)
+        public ActionResult InviteTo(string id, string type, List<string> selectedIDsList, string invitemessage, string ret)
         {
             var msgs = new SystemMessages();
             ActivityGroup group;
@@ -638,7 +639,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activity = Activity.LoadByUid(id.ToGuid(), msgs);
                     period = activity.GetCurrentOrNextRegistrationPeriod(msgs);
 
-                    InviteContactList(list, invitemessage, period, activity, msgs);
+                    InviteContactList(selectedIDsList, invitemessage, period, activity, msgs);
 
                     ViewBag.ReturnUrl = Url.Action("publishdetail", "activity", new {id});
 
@@ -650,13 +651,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (period.ActivityGroupId.HasValue)
                     {
                         group = period.GetGroup();
-                        InviteContactList(list, invitemessage, period, group, msgs);
+                        InviteContactList(selectedIDsList, invitemessage, period, group, msgs);
                         ViewBag.ReturnUrl = Url.Action("periods", "group", new {id = group.Uid});
                     }
                     else
                     {
                         activity = period.GetActivities().FirstOrDefault();
-                        msgs.AddRange(InviteContactList(list, invitemessage, period, activity));
+                        msgs.AddRange(InviteContactList(selectedIDsList, invitemessage, period, activity));
                         ViewBag.ReturnUrl = Url.Action("registrants", "activity", new {id = activity.Uid});
                     }
 
@@ -667,7 +668,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     group = ActivityGroup.LoadByUid(id.ToGuid(), msgs);
                     period = group.GetCurrentOrNextRegistrationPeriod(msgs);
 
-                    InviteContactList(list, invitemessage, period, group, msgs);
+                    InviteContactList(selectedIDsList, invitemessage, period, group, msgs);
 
                     ViewBag.ReturnUrl = Url.Action("lists", "contact");
                     break;
@@ -680,133 +681,147 @@ namespace AfterSchool.Areas.Org.Controllers
             }
             else
             {
-                InviteToViewBag(id, type, list, msgs);
+                InviteToViewBag(id, type, selectedIDsList, msgs);
                 return View();
             }
         }
 
-        private void InviteContactList(string list, string invitemessage, RegistrationPeriod period, Activity activity, SystemMessages msgs)
+        private void InviteContactList(List<string> list, string invitemessage, RegistrationPeriod period, Activity activity, SystemMessages msgs)
         {
-            var contactList = ContactList.Load(list.ToInteger());
-            List<Registrant> contacts = null;
-
-            if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
-                msgs.Add("Invalid contact list", MessageType.UserError);
-
-            contacts = contactList.GetContacts(msgs);
-
-            // get session information because it isn't available in a background task
-            var loggedInUser = SessionVariables.CurrentUser;
-            var periodId = period.ID.HasValue ? period.ID.Value : 0;
-
-            BackgroundJob.Enqueue(() =>
-                ActivityService.EmailInvitedContacts(
-                    activity.ID.Value,
-                    periodId,
-                    contacts.Select(x => x.ID.Value).ToList(),
-                    invitemessage,
-                    activity.HomePageUrl,
-                    loggedInUser.ID.Value,
-                    null,
-                    null)
-            );
-
-            msgs.Add("Your invites will be sent shortly", MessageType.Success);
-        }
-
-        private void InviteContactList(string list, string invitemessage, RegistrationPeriod period, ActivityGroup group, SystemMessages msgs)
-        {
-            var contactList = ContactList.Load(list.ToInteger());
-            List<Registrant> contacts = null;
-
-            if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
-                msgs.Add("Invalid contact list", MessageType.UserError);
-
-            if (msgs.HasNoErrors())
+            foreach (var id in list)
             {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        var activityIds = group.GetActivities(null, false, false, null, null, false, amsgs, adc)
-                            .Where(x => Request[$"activity-{x.ID.Value.ToString()}"].IsNotBlank())
-                            .Select(x => x.ID.Value)
-                            .ToList();
+                var contactList = ContactList.Load(id.ToInteger());
+                List<Registrant> contacts = null;
 
-                        contacts = contactList.GetContacts(amsgs, adc);
+                if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
+                    msgs.Add("Invalid contact list", MessageType.UserError);
 
-                        group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        msgs.AddRange(smsgs);
+                contacts = contactList.GetContacts(msgs);
 
-                        // get session information because it isn't available in a background task
-                        var loggedInUser = SessionVariables.CurrentUser;
-                        var periodId = period.ID.HasValue ? period.ID.Value : 0;
+                // get session information because it isn't available in a background task
+                var loggedInUser = SessionVariables.CurrentUser;
+                var periodId = period.ID.HasValue ? period.ID.Value : 0;
 
-                        BackgroundJob.Enqueue(() =>
-                            ActivityGroupService.EmailInvitedContacts(
-                                group.ID.Value,
-                                periodId,
-                                contacts.Select(x => x.ID.Value).ToList(),
-                                invitemessage,
-                                group.HomePageUrl,
-                                loggedInUser.ID.Value,
-                                null,
-                                null)
-                        );
-
-                        msgs.Add("Your invites will be sent shortly", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
-                    onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                BackgroundJob.Enqueue(() =>
+                    ActivityService.EmailInvitedContacts(
+                        activity.ID.Value,
+                        periodId,
+                        contacts.Select(x => x.ID.Value).ToList(),
+                        invitemessage,
+                        activity.HomePageUrl,
+                        loggedInUser.ID.Value,
+                        null,
+                        null)
                 );
             }
+            if(msgs.HasNoErrors())
+                msgs.Add("Your invites will be sent shortly", MessageType.Success);
         }
+        private void InviteContactList(List<string> list, string invitemessage, RegistrationPeriod period, ActivityGroup group, SystemMessages msgs)
+        {
+            foreach (var id in list)
+            {
+                var contactList = ContactList.Load(id.ToInteger());
+                if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
+                    msgs.Add("Invalid contact list", MessageType.UserError);
+            }
+            if (msgs.HasNoErrors())
+            {
+                foreach(var id in list)
+                {
+                    var contactList = ContactList.Load(id.ToInteger());
+                    List<Registrant> contacts = null;
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            var activityIds = group.GetActivities(null, false, false, null, null, false, amsgs, adc)
+                                .Where(x => Request[$"activity-{x.ID.Value.ToString()}"].IsNotBlank())
+                                .Select(x => x.ID.Value)
+                                .ToList();
 
-        private SystemMessages InviteContactList(string list, string invitemessage, RegistrationPeriod period, Activity activity)
+                            contacts = contactList.GetContacts(amsgs, adc);
+
+                            group.InviteContacts(contacts, period, activityIds, SessionVariables.CurrentUser.ID.Value, amsgs, adc);
+                        },
+                        onSuccess: (SystemMessages smsgs) =>
+                        {
+                            msgs.AddRange(smsgs);
+
+                            // get session information because it isn't available in a background task
+                            var loggedInUser = SessionVariables.CurrentUser;
+                            var periodId = period.ID.HasValue ? period.ID.Value : 0;
+
+                            BackgroundJob.Enqueue(() =>
+                                ActivityGroupService.EmailInvitedContacts(
+                                    group.ID.Value,
+                                    periodId,
+                                    contacts.Select(x => x.ID.Value).ToList(),
+                                    invitemessage,
+                                    group.HomePageUrl,
+                                    loggedInUser.ID.Value,
+                                    null,
+                                    null)
+                            );
+                        },
+                        onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        onException: (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs)
+                    );
+                }
+                if(msgs.HasNoErrors())
+                    msgs.Add("Your invites will be sent shortly", MessageType.Success);
+            }
+        }
+        private SystemMessages InviteContactList(List<string> list, string invitemessage, RegistrationPeriod period, Activity activity)
         {
             var msgs = new SystemMessages();
-            var contactList = ContactList.Load(list.ToInteger());
-            List<Registrant> contacts = null;
-
-            if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
-                msgs.Add("Invalid contact list", MessageType.UserError);
-
+            foreach (var id in list)
+            {
+                var contactList = ContactList.Load(id.ToInteger());
+                if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
+                {
+                    msgs.Add("Invalid contact list", MessageType.UserError);
+                    break;
+                }
+            }
             if (msgs.HasNoErrors())
             {
-                Database.ExecuteTransaction
-                (
-                    action: (SystemMessages amsgs, DatabaseConnection adc) =>
-                    {
-                        contacts = contactList.GetContacts(amsgs, adc);
+                foreach (var id in list)
+                {
+                    var contactList = ContactList.Load(id.ToInteger());
+                    List<Registrant> contacts = null;
+                    Database.ExecuteTransaction
+                    (
+                        action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            contacts = contactList.GetContacts(amsgs, adc);
 
-                        amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.CurrentUser.ID.Value, adc));
-                    },
-                    onSuccess: (SystemMessages smsgs) =>
-                    {
-                        // get session information because it isn't available in a background task
-                        var loggedInUser = SessionVariables.CurrentUser;
+                            amsgs.AddRange(activity.InviteContacts(contacts, period, SessionVariables.CurrentUser.ID.Value, adc));
+                        },
+                        onSuccess: (SystemMessages smsgs) =>
+                        {
+                            // get session information because it isn't available in a background task
+                            var loggedInUser = SessionVariables.CurrentUser;
 
-                        BackgroundJob.Enqueue(() =>
-                            ActivityService.EmailInvitedContacts(
-                                activity.ID.Value,
-                                period.ID.Value,
-                                contacts.Select(x => x.ID.Value).ToList(),
-                                invitemessage,
-                                activity.HomePageUrl,
-                                loggedInUser.ID.Value,
-                                null)
-                        );
+                            BackgroundJob.Enqueue(() =>
+                                ActivityService.EmailInvitedContacts(
+                                    activity.ID.Value,
+                                    period.ID.Value,
+                                    contacts.Select(x => x.ID.Value).ToList(),
+                                    invitemessage,
+                                    activity.HomePageUrl,
+                                    loggedInUser.ID.Value,
+                                    null)
+                            );
 
-                        msgs.Add("Your invites will be sent shortly", MessageType.Success);
-                    },
-                    onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
-                );
+                        },
+                        onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); }
+                    );
+                }
             }
-
+            if(msgs.HasNoErrors())
+                msgs.Add("Your invites will be sent shortly", MessageType.Success);
             return msgs;
-        }
+        }   
     }
 }

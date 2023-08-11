@@ -1,10 +1,10 @@
-﻿@model List<Registrant>
+@model List<Registrant>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var id = ViewBag.Id;
     var type = ViewBag.Type;
     var lists = (List<ContactList>)ViewBag.Lists;
-    var selectedList = (int?)ViewBag.SelectedList;
+    var selectedLists = ViewBag.SelectedList as List<int?>;
     var returnUrl = ViewBag.ReturnUrl;
     var activities = (List<Activity>)ViewBag.Activities;
     var itemsPerColumn = Math.Ceiling(activities.Count / 3.0).ToInteger();
@@ -42,13 +42,12 @@
 
                                 <div class="form-group">
                                     <label for="list" class="col-md-6">Contact List</label>
-                                    <select id="list" name="list" class="form-control col-md-6" onchange="selectList()" required>
-                                        <option value="">Select List...</option>
+                                    <select id="list" name="selectedIDsList[]" class="form-control col-md-6 select2" onchange="selectList()" required multiple>
                                         <option value="0">New Contact List</option>
                                         <optgroup label="Contact Lists">
                                             @foreach (var list in lists)
                                             {
-                                                <option value="@list.ID" @(list.ID == selectedList ? "selected=\"selected\"": "")>
+                                                <option value="@list.ID" @(selectedLists != null && selectedLists.Contains(list.ID) ? "selected=\"selected\"" : "")>
                                                     @list.Name
                                                 </option>
                                             }
@@ -101,7 +100,8 @@
 
 <script>
     function selectList() {
-        if ($('#list').val() == '0') {
+        if ($('#list').val() != null && $('#list').val().includes('0')) {
+            $('#list option:selected').prop('selected', false);
             location.href = '@Url.Action("add", "contact", new { returnUrl = Url.Action("inviteto", "contact", new { id = id, type = type }) })'
         } 
     }
