@@ -9,6 +9,7 @@
     var session = Model.Session;
     var msgs = Model.Messages;
     var accountProfile = Model.AccountProfile;
+    var sortedLocations = Model.Locations?.OrderBy(loc => loc.Name).ToList();
 
     var cleverSsoEnabled = Model.CleverSsoEnabled;
 }
@@ -68,7 +69,7 @@
 @{ Html.RenderPartial("~/Views/Shared/Registration/_BrowseFilterBar.cshtml", Model.Account, new ViewDataDictionary
    {
        { "Grades", Model.Grades },
-       { "Locations", Model.Locations }
+       { "Locations", sortedLocations }
    }); }
 
 <div>
