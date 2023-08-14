@@ -744,7 +744,7 @@ namespace AfterSchoolLibrary.Models
         private static string GetSearchSql(string searchText, int accountId, int? questionId,
             RegistrationStatus regStatus, bool getVolunteers, List<int> participationObjectIds = null,
             ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet,
-            List<RegistrationAssignmentType> rats = null, bool getCount = false)
+            List<RegistrationAssignmentType> rats = null, bool getCount = false, bool isDeleted= false)
         {
             var searchTextJoin = "";
             var whereClause = "";
@@ -867,6 +867,7 @@ namespace AfterSchoolLibrary.Models
                             Registrant reg on r.RegistrantId = reg.ID
                         where
 	                        r.FirstRegistrationId is null and
+                            r.IsDeleted = {isDeleted.ToInteger()} and
                             r.AccountId = {accountId} and
 	                        r.ID in 
 	                        (
