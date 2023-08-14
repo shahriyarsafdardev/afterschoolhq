@@ -1,4 +1,4 @@
-﻿@using Stripe
+@using Stripe
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Payment";
@@ -19,6 +19,8 @@
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
     var quantity = 1;
     var datesToRemove = new List<DateTime>();
+    var startDate = (DateTime)ViewBag.startDate;
+    var endDate = (DateTime)ViewBag.endDate;
 
     if (participationObject.CanRegisterPerClass)
     {
@@ -263,9 +265,9 @@ else
                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                     }
 
-                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue && !participationObject.Schedule.IsOngoing)
+                    @if (!participationObject.Schedule.IsOngoing)
                     {
-                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date)</strong>.</p>
+                        <p>Payments will automatically end after <strong> @endDate.ToLongDateString() (Activity End Date)</strong>.</p>
                     }
 
                     <hr/>
