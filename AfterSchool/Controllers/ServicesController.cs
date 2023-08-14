@@ -196,7 +196,7 @@ namespace AfterSchool.Controllers
                 new
                 {
                     status, coupon, amount, calculatedAmountCC, calculatedAmountACH, calculatedCCFee, numberInMonths,
-                    subscriptionPlanAmount, postPayPlanAmount, discountString, messages = msgs,
+                    subscriptionPlanAmount, postPayPlanAmount, discountString, hasAnyPlan = subscriptionPlan.IsNotEmpty() || paymentPlan.IsNotEmpty()  , messages = msgs,
                 }, JsonRequestBehavior.AllowGet);
         }
 
