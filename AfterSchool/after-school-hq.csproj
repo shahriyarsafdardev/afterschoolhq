@@ -799,6 +799,7 @@
     <Content Include="Areas\Org\Views\Onboarding\StartSubscription.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\SubscriptionFail.cshtml" />
     <Content Include="Areas\Org\Views\Onboarding\SubscriptionSuccess.cshtml" />
+    <Content Include="Areas\Org\Views\Registration\Notes.cshtml" />
     <Content Include="Areas\Org\Views\Shared\_RegistrationForm.cshtml" />
     <Content Include="Areas\User\Views\Profile\EditCheckInOut.cshtml" />
     <Content Include="Areas\Volunteer\Views\Opportunity\Index.cshtml" />
