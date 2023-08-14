@@ -7,7 +7,6 @@ using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
-using Amazon.DynamoDBv2.DocumentModel;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = BasicLibrary.Utilities;
