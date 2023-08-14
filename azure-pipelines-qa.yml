@@ -19,12 +19,20 @@ jobs:
       - task: UseNode@1
         inputs:
           version: '16.0.0'
+      - powershell: |
+          $commitSHA=git rev-parse HEAD
+          echo $commitSHA
+          echo "##vso[task.setvariable variable=commitSHA]$(echo $commitSHA)"
       - script: |
           cd AfterSchool/React
           echo SMART_LOOK_KEY=$(SMART_LOOK_KEY) >> .env
           echo GOOGLE_MAPS_API_KEY=$(GOOGLE_MAPS_API_KEY) >> .env
           echo ROLLBAR_CLIENT_KEY=$(ROLLBAR_CLIENT_KEY) >> .env
           echo GTM_ID=$(GTM_ID) >> .env
+          echo ROLLBAR_SERVER_KEY=$(ROLLBAR_SERVER_KEY) >> .env
+          echo BASE_URLS=("$(QA_BASE_URL)") >> .env
+          echo CODE_VERSION=$(commitSHA) >> .env
+          cat .env
         displayName: 'Set environment variables'
       - task: Cache@2
         inputs:
