@@ -2885,13 +2885,13 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
-            var upcomingInstance = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault();
-            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, upcomingInstance,
+            var latestInstance = schedule.GetInstances(msgs: msgs, dc: dc).LastOrDefault();
+            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, latestInstance,
                 DateTime.UtcNow);
         }
 
         internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
-            BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance latestInstance,
             DateTime utcNow)
         {
             if (!activityHasSchedule)
@@ -2899,7 +2899,11 @@ namespace AfterSchoolLibrary.Services
 
             var startDate = dayOfMonth; // schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
             var startDateWeekly = dayOfWeek;
-            var paymentEnd = schedule.EndDate.Value;
+            var paymentEnd = new DateTime();
+            if (schedule.RepeatsWeekly)
+                paymentEnd = schedule.EndDate.Value;
+            else
+                paymentEnd = latestInstance.EndDateTime.Value;
 
             switch (billingPeriodType)
             {
