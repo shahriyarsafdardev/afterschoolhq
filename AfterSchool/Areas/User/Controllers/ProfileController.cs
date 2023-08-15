@@ -86,8 +86,8 @@ namespace AfterSchool.Areas.User.Controllers
                 var registrants = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs);
                 foreach (var registrant in registrants)
                 {
-                    var account = Account.Load(registrant.AccountId.Value, msgs);
-                    var registrantActivity = RegistrantActivity.LoadByRegistrantId(registrant.ID.Value, msgs)
+                    var account = registrant.GetAccount(msgs);
+                    var registrantActivity = registrant.GetRegistrantActivities(msgs)
                         .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
                     var activity = registrantActivity?.GetActivity(msgs);
 
