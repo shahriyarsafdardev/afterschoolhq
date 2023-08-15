@@ -233,7 +233,17 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
-		public static AccountWebUser LoadByWebUserIdByIsDefault(int WebUserId, bool IsDefault, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static AccountWebUser LoadByAccountIdByWebUserIdByIsDeleted(int AccountId, int WebUserId, bool IsDeleted, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["WebUserId"], WebUserId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        public static AccountWebUser LoadByWebUserIdByIsDefault(int WebUserId, bool IsDefault, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
