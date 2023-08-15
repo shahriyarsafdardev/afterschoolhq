@@ -83,7 +83,7 @@ namespace AfterSchool.Areas.User.Controllers
 
             foreach (var masterRegistrant in masterRegistrants)
             {
-                var registrants = Registrant.LoadByParentRegistrantId(masterRegistrant.ID.Value, msgs);
+                var registrants = masterRegistrant.GetSubmittedRecords(msgs);
                 foreach (var registrant in registrants)
                 {
                     var account = registrant.GetAccount(msgs);
