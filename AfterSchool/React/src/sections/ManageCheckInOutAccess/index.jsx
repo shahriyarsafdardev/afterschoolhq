@@ -18,13 +18,14 @@ export default function index() {
 
   const {
     msgs,
-    loading,
     data,
+    loading,
     updateAuthorizedPersons,
     loadAuthorizedPersonsList
   } = useManageAPAccess();
 
-  const { Students = [], IsPinSetup, IsPhoneSetup } = data || {};
+  const { Students = [], IsPinSetup, IsPhoneSetup, RegistrantType } = data || {};
+  const hasAccessToManageAPA = RegistrantType === 'Parent';
 
   useEffect(() => {
     loadAuthorizedPersonsList();
@@ -84,36 +85,38 @@ export default function index() {
       <Box className={classes.sectionWrapper}>
         <PinCodeSection IsPinSetup={IsPinSetup} IsPhoneSetup={IsPhoneSetup} />
       </Box>
-      <Box className={classes.sectionWrapper}>
-        <AuthPersonsManagementSection
-          values={values}
-          setFieldValue={setFieldValue}
-          Students={Students}
-        />
-        <Box className={classes.buttons}>
-          <Button
-            color="primary"
-            variant="outlined"
-            className={classes.cancelButton}
-            data-testid="cancel-button"
-            onClick={handleOnCancel}
-          >
-            Cancel
-          </Button>
-          <LoadingButton
-            key="CICO-Save-Button"
-            id="CICO-Save-Button"
-            type="submit"
-            onClick={handleSubmitForm}
-            variant="contained"
-            color="primary"
-            className={classes.saveButton}
-            text={'Save'}
-            disabled={!dirty}
-            loading={isSubmitting}
+      {hasAccessToManageAPA && (
+        <Box className={classes.sectionWrapper}>
+          <AuthPersonsManagementSection
+            values={values}
+            setFieldValue={setFieldValue}
+            Students={Students}
           />
+          <Box className={classes.buttons}>
+            <Button
+              color="primary"
+              variant="outlined"
+              className={classes.cancelButton}
+              data-testid="cancel-button"
+              onClick={handleOnCancel}
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              key="CICO-Save-Button"
+              id="CICO-Save-Button"
+              type="submit"
+              onClick={handleSubmitForm}
+              variant="contained"
+              color="primary"
+              className={classes.saveButton}
+              text={'Save'}
+              disabled={!dirty}
+              loading={isSubmitting}
+            />
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 }

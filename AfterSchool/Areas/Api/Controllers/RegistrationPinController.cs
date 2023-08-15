@@ -748,6 +748,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
+                
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
 
                 var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var studentsList = GetAuthorizedPerson(masterRegistrants, msgs);
@@ -757,6 +759,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     Students = studentsList,
                     IsPinSetup = currentUser.PinCode.IsNotEmpty(),
                     IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
+                    RegistrantType = currentUserRegistrant?.PersonTypeId.ToString(),
                 };
 
                 return Json(
@@ -780,6 +783,8 @@ namespace AfterSchool.Areas.Api.Controllers
             var currentUser = SessionVariables.CurrentUser;
             if (currentUser.IsEmpty())
                 throw new Exception("Unauthorized User");
+            
+            var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
 
             try
             {
@@ -886,6 +891,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     Students = GetAuthorizedPerson(masterRegistrants, msgs),
                     IsPinSetup = currentUser.PinCode.IsNotEmpty(),
                     IsPhoneSetup = currentUser.Phone.IsNotEmpty(),
+                    RegistrantType = currentUserRegistrant?.PersonTypeId.ToString(),
                 };
 
                 return Json(

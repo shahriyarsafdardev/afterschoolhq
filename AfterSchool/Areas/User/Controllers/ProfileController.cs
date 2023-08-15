@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
@@ -20,6 +21,7 @@ namespace AfterSchool.Areas.User.Controllers
         public ActionResult Edit()
         {
             ViewBag.Messages = new SystemMessages();
+            ViewBag.IsRequireCheckInOut = IsCheckInOutFeatureEnabled();
             return View(SessionVariables.CurrentUser);
         }
         
@@ -29,6 +31,7 @@ namespace AfterSchool.Areas.User.Controllers
             var bundlePath = Server.MapPath("~/React/dist/bundle.js");
             var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
             ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
+            ViewBag.IsRequireCheckInOut = IsCheckInOutFeatureEnabled();
             return View();
         }
 
@@ -70,6 +73,30 @@ namespace AfterSchool.Areas.User.Controllers
 
             ViewBag.Messages = msgs;
             return View(SessionVariables.CurrentUser);
+        }
+
+        private static bool IsCheckInOutFeatureEnabled()
+        {
+            var currentUser = SessionVariables.CurrentUser;
+            var msgs = new SystemMessages();
+            var masterRegistrants = currentUser.GetStudentRegistrants(msgs);
+
+            foreach (var masterRegistrant in masterRegistrants)
+            {
+                var registrants = masterRegistrant.GetSubmittedRecords(msgs);
+                foreach (var registrant in registrants)
+                {
+                    var account = registrant.GetAccount(msgs);
+                    var registrantActivity = registrant.GetRegistrantActivities(msgs)
+                        .FirstOrDefault(ra => ra.ActivityGroupId.IsEmpty());
+                    var activity = registrantActivity?.GetActivity(msgs);
+
+                    if (account.IsNotEmpty() && activity.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut)  &&
+                        activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
+                        return true;
+                }
+            }
+            return false;
         }
     }
 }

@@ -1,18 +1,23 @@
 @model WebUser
 @{
     ViewBag.Title = Model.DisplayName;
+    var isRequireCheckInOut = (bool) ViewBag.IsRequireCheckInOut;
     var msgs = (SystemMessages)ViewBag.Messages;
 }
 <script src="~/Assets/js/password-checker.js"></script>
 <div class="main-content">
 
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-    <div class="btn-toolbar">
-        <div class="btn-group hidden-xs">
-            <a href="@Url.Action("Edit", "profile")" class="btn btn-alt6-active">Profile</a>
-            <a href="@Url.Action("EditCheckInOut", "profile")" class="btn btn-alt6">Check In/Out</a>
-        </div>
-    </div>
+    @if(isRequireCheckInOut)
+    {
+        <div class="btn-toolbar">
+            <div class="btn-group hidden-xs">
+                <a href="@Url.Action("Edit", "profile")" class="btn btn-alt6-active">Profile</a>
+                <a href="@Url.Action("EditCheckInOut", "profile")" class="btn btn-alt6">Check In/Out</a>
+            </div>
+        </div>    
+    }
+    
     <div class="panel panel-default">
         <div class="panel-heading">
             <i class="s7-user"></i> @Model.DisplayName
