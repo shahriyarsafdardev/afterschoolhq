@@ -597,6 +597,7 @@
     <Compile Include="Areas\Admin\Controllers\UploadController.cs" />
     <Compile Include="Areas\Api\Controllers\AuthController.cs" />
     <Compile Include="Areas\Api\Controllers\FormController.cs" />
+    <Compile Include="Areas\Api\Controllers\NotesController.cs" />
     <Compile Include="Areas\Api\Controllers\RegistrationPinController.cs" />
     <Compile Include="Areas\Api\Models\ActivityDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInCheckOutSetupDto.cs" />
@@ -608,7 +609,9 @@
     <Compile Include="Areas\Api\Controllers\SurveyRequestController.cs" />
     <Compile Include="Areas\Api\Controllers\UpdateRegistrationController.cs" />
     <Compile Include="Areas\Api\Models\ManageCheckInOutAccessDto.cs" />
+    <Compile Include="Areas\Api\Models\NotesDto.cs" />
     <Compile Include="Areas\Api\Models\PickUpDto.cs" />
+    <Compile Include="Areas\Api\Models\RegistrantNotesDto.cs" />
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\SurveyRequestQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\UpdateQuestionAnswerResponse.cs" />
