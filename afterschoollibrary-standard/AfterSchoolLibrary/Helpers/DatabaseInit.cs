@@ -49,7 +49,13 @@ namespace AfterSchoolLibrary.Helpers
                     Database.RunMigrations(amsgs, adc);
                 },
                 onSuccess: (SystemMessages smsgs) => msgs.AddRange(smsgs),
-                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs)
+                onFailure: (SystemMessages fmsgs) =>
+                {
+                    msgs.AddRange(fmsgs);
+                    //To add title for the error message in Rollbar
+                    fmsgs.Insert(0, "Migration(s) Failed", MessageType.Error);
+                    Utilities.SystemErrorLog(fmsgs);
+                }
             );
 
             return msgs;
