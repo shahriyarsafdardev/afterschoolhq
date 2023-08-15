@@ -2,6 +2,7 @@ import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
 import utils from 'utils';
+import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
@@ -85,6 +86,7 @@ export const useRegistrationActions = () => {
     submitFormSection,
     setRegistrationId
   } = RegistrationSlice.actions;
+  const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
 
   const loaded = () => dispatch(formDataLoaded());
@@ -99,7 +101,12 @@ export const useRegistrationActions = () => {
     ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
       dispatch(setMsgs(msgs));
-      if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) dispatch(formDataLoaded());
+      if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) {
+        const { HeaderImageURL, Name, Organization } = obj?.activityDto;
+        dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
+        dispatch(headerLoadingCompleted());
+        dispatch(formDataLoaded());
+      }
     });
   };
 

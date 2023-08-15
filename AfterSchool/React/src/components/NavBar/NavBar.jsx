@@ -1,14 +1,13 @@
-import React, { useState, useRef } from 'react';
-// material
 import { AppBar, Button, Box, Link, MenuItem, IconButton, Typography } from '@material-ui/core';
-import { styled } from '@material-ui/core/styles';
-import { Icon } from '@iconify/react';
 import menu2Fill from '@iconify/icons-eva/menu-2-fill';
+import { styled } from '@material-ui/core/styles';
+import React, { useState, useRef } from 'react';
+import { Icon } from '@iconify/react';
+
 import MenuPopover from 'components/MenuPopover/MenuPopover';
+import { useHeader } from 'redux/hooks';
 import I18n from 'components/i18n/I18n';
 import useStyles from './styles';
-
-import { useRegistration, useVolunteerRegistration, useThankYou, useHeader } from 'redux/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -28,23 +27,12 @@ const HeaderStyle = styled(AppBar)(() => ({
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
-  const classes = useStyles();
-  const { loading, activity } = useRegistration();
-  const { loading: volunteerLoading, activity: volunteerActivity } = useVolunteerRegistration();
   const {
-    data: { ActivityName, Organization },
-    loading: isLoading
-  } = useThankYou();
-
-  const { headerData } = useHeader();
-
-  const isloaded = !loading || !isLoading || !volunteerLoading || !headerData.loading;
-  const activityName = activity.Name || ActivityName || volunteerActivity.Name || headerData?.Name;
-  const organizationName =
-    activity.Organization ||
-    Organization ||
-    volunteerActivity.Organization ||
-    headerData?.Organization;
+    headerData: { Name: activityName, Organization: organizationName, HeaderImageURL },
+    loading
+  } = useHeader();
+  const props = { headerUrl: HeaderImageURL };
+  const classes = useStyles(props);
 
   return (
     <>
@@ -99,7 +87,7 @@ export default function NavBar() {
         </Box>
       </HeaderStyle>
 
-      {isloaded && (
+      {!loading && (
         <Box className={classes.navImage}>
           <Typography className={classes.activityName}>{activityName}</Typography>
           <Typography className={classes.organizationName}>{organizationName}</Typography>

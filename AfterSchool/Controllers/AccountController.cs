@@ -2416,6 +2416,7 @@ namespace AfterSchool.Controllers
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
             var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
             var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
+            var profile = account.GetAccountProfile(msgs);
             var currentUser = SessionVariables.CurrentUser;
             var registrant = registration.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -2425,6 +2426,7 @@ namespace AfterSchool.Controllers
             
             var result = new ThankYouResultAssembler().AssembleThankYouResult(participationObject, account, currentUser, registrant, isSelfRegistered,
                 assignmentType, msgs);
+            ViewBag.AccountProfile = profile;
             return View(result);
         }
 

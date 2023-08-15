@@ -1,3 +1,4 @@
+import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 import ThankYouRepository from 'repository/ThankYouRepository';
@@ -22,12 +23,16 @@ const ThankYouSlice = createSlice({
 });
 
 export const useThankYouActions = () => {
+  const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
   const { setData, loadingStart, loadingCompleted } = ThankYouSlice.actions;
   const loadThankYouScreenData = async (id, volunteerRegistration = false) => {
     dispatch(loadingStart());
     const data = await ThankYouRepository.getThankYouScreenData(id, volunteerRegistration);
     dispatch(setData(data.obj));
+    const { HeaderImageURL, ActivityName: Name, Organization } = data.obj?.activityDto;
+    dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
+    dispatch(headerLoadingCompleted());
     dispatch(loadingCompleted());
   };
 

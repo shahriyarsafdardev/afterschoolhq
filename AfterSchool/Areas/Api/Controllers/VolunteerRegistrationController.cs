@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.Api.Models;
 using AfterSchool.Controllers;
+using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.FeatureFlag;
@@ -107,7 +108,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
                         RegistrationUid = registration?.Uid,
                         IsGenderRestricted = participationObject.IsGenderEnforced,
-                        EnforcedGender = participationObject.GenderRestriction
+                        EnforcedGender = participationObject.GenderRestriction,
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                     }
                 };
                 
@@ -352,7 +354,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
                         ActivityUrl = participationObject.GetShortHomePageUrl(),
                         ProviderEmail = participationObject.OwnerAccount.Email,
-                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString()
+                        RegistrationStatus = registrantActivity.AssignmentTypeId.ToString(),
+                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
                     }
                 };
                 return Json(
@@ -589,6 +592,5 @@ namespace AfterSchool.Areas.Api.Controllers
 
             return formQuestionDtoList;
         }
-        
     }
 }
