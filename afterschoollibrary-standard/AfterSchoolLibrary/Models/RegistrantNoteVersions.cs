@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -100,6 +102,15 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(_Alter(DatabaseQuery, dc, new DatabaseParameters { ObjectMap["IsDeleted"] }));
 
             return msgs;
+        }
+        
+        public static List<RegistrantNoteVersions> LoadByNoteIdByIsDeleted(int id, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantNoteId"], id);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         #endregion
     }
