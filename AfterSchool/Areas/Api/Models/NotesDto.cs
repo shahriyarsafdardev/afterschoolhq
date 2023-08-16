@@ -1,4 +1,6 @@
-﻿namespace AfterSchool.Areas.Api.Models
+﻿using System;
+
+namespace AfterSchool.Areas.Api.Models
 {
     public class NotesDto
     {
