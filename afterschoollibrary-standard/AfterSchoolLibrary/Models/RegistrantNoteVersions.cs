@@ -112,6 +112,22 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+
+        public static RegistrantNoteVersions SearchByNoteIdByIsDeleted(string searchQuery, bool isDeleted, int noteVersionId,
+            SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Id"], noteVersionId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            
+            var searchDcs = new DatabaseCriterias(LogicalOperatorType.Or);
+            searchDcs.Add(ObjectMap["Title"], searchQuery, DatabaseCriteriaOperatorEnum.Like);
+            searchDcs.Add(ObjectMap["Text"], searchQuery, DatabaseCriteriaOperatorEnum.Like);
+            dq.Criterias.Add(searchDcs);
+            
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
         #endregion
     }
 }

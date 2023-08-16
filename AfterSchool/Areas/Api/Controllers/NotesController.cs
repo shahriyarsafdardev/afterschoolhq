@@ -48,7 +48,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var length = recordsPerPage;
                 var registrantNotesDto = new RegistrantNotesDto();
                 var notesDto = new List<NotesDto>();
-                var totalPages = 0; //Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+                var totalPages = 0;
                 var count = 0;
                 
                 registrantNotes.ForEach(registrantNote =>
@@ -57,14 +57,11 @@ namespace AfterSchool.Areas.Api.Controllers
                         .OrderByDescending(rnv => rnv.CreateDate).FirstOrDefault();
                     
                     if (searchQuery.IsNotEmpty())
-                    {
-                        // registrantNoteVersion = RegistrantNoteVersions.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID, msgs);
-                    }
+                        registrantNoteVersion = RegistrantNoteVersions.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID.Value, msgs);
 
                     if (registrantNoteVersion.IsNotEmpty())
                     {
                         var currentUser = WebUser.Load(registrantNoteVersion.CreatedBy.Value, msgs);
-
                         notesDto.Add(new NotesDto()
                         {
                             ID = registrantNote.ID.Value,
@@ -76,13 +73,17 @@ namespace AfterSchool.Areas.Api.Controllers
                         count += 1;
                     }
                 });
-                
+
+                notesDto = notesDto.Skip(start).Take(length).ToList();
+                totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
                 registrantNotesDto.RegistrantName = currentRegistrant.Name;
                 registrantNotesDto.Notes = notesDto;
                 
                 dynamic response = new
                 {
                     RegistrantNotes = registrantNotesDto,
+                    TotalPages = totalPages,
+                    PageNo = pageNumber,
                 };
 
                 return Json(
