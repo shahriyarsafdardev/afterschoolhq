@@ -27,7 +27,7 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var pageNumber = 1;
                 var recordsPerPage = 10;
-                
+
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
@@ -38,24 +38,24 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentRegistrant = registration.GetRegistrant(msgs);
                 if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-                
+
                 if (pageNo.IsNotEmpty())
                     pageNumber = pageNo;
-                
+
                 var firstRegistrantId = currentRegistrant.FirstRegistrantId.IsEmpty() ? currentRegistrant.ID : currentRegistrant.FirstRegistrantId;
-                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value,false,msgs);
+                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs);
                 var start = recordsPerPage * (pageNumber - 1);
                 var length = recordsPerPage;
                 var registrantNotesDto = new RegistrantNotesDto();
                 var notesDto = new List<NotesDto>();
                 var totalPages = 0;
                 var count = 0;
-                
+
                 registrantNotes.ForEach(registrantNote =>
                 {
                     var registrantNoteVersion = RegistrantNoteVersions.LoadByNoteIdByIsDeleted(registrantNote.ID.Value, false, msgs)
                         .OrderByDescending(rnv => rnv.CreateDate).FirstOrDefault();
-                    
+
                     if (searchQuery.IsNotEmpty())
                         registrantNoteVersion = RegistrantNoteVersions.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID.Value, msgs);
 
@@ -78,7 +78,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
                 registrantNotesDto.RegistrantName = currentRegistrant.Name;
                 registrantNotesDto.Notes = notesDto;
-                
+
                 dynamic response = new
                 {
                     RegistrantNotes = registrantNotesDto,
@@ -98,7 +98,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult CreateRegistrantNote(string registrationUid, string title, string text, DateTime postDate)
         {
@@ -119,21 +119,21 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentRegistrant = registration.GetRegistrant(msgs);
                 if (currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
-                
-                if(title.IsEmpty())
+
+                if (title.IsEmpty())
                     throw new Exception("Invalid Note Title");
-                
-                if(text.IsEmpty())
+
+                if (text.IsEmpty())
                     throw new Exception("Invalid Note Text");
-                
-                if(postDate.IsEmpty())
+
+                if (postDate.IsEmpty())
                     throw new Exception("Invalid Note Date");
-                
+
                 var firstRegistrantId = currentRegistrant.FirstRegistrantId.IsEmpty() ? currentRegistrant.ID : currentRegistrant.FirstRegistrantId;
                 RegistrantNote registrantNote = null;
                 RegistrantNoteVersions registrantNoteVersion = null;
                 NotesDto noteDto = null;
-                
+
                 Database.ExecuteTransaction
                 (
                     (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -169,7 +169,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 );
 
                 if (registrantNote.IsNotEmpty() && registrantNoteVersion.IsNotEmpty())
-                {
                     noteDto = new NotesDto
                     {
                         ID = registrantNote.ID.Value,
@@ -177,9 +176,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         Text = registrantNoteVersion.Text,
                         CreatedByName = currentUser.DisplayName,
                         PostDate = registrantNote.PostDate,
-                    };    
-                }
-                
+                    };
+
                 dynamic response = new
                 {
                     Note = noteDto,
