@@ -25,13 +25,9 @@ namespace AfterSchool.Areas.Api.Controllers
             var msgs = new SystemMessages();
             try
             {
-                var currentUser = SessionVariables.CurrentUser;
                 var pageNumber = 1;
                 var recordsPerPage = 10;
                 
-                if (currentUser.IsEmpty())
-                    throw new Exception("Unauthorized User");
-
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
@@ -52,20 +48,33 @@ namespace AfterSchool.Areas.Api.Controllers
                 var length = recordsPerPage;
                 var registrantNotesDto = new RegistrantNotesDto();
                 var notesDto = new List<NotesDto>();
+                var totalPages = 0; //Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+                var count = 0;
                 
                 registrantNotes.ForEach(registrantNote =>
                 {
-                    var registrantNoteVersion = RegistrantNoteVersions.LoadByNoteIdByIsDeleted(registrantNote.ID.Value,false, msgs)
+                    var registrantNoteVersion = RegistrantNoteVersions.LoadByNoteIdByIsDeleted(registrantNote.ID.Value, false, msgs)
                         .OrderByDescending(rnv => rnv.CreateDate).FirstOrDefault();
                     
-                    notesDto.Add(new NotesDto()
+                    if (searchQuery.IsNotEmpty())
                     {
-                        ID = registrantNote.ID.Value,
-                        Title = registrantNoteVersion.Title,
-                        Text = registrantNoteVersion.Text,
-                        CreatedByName = currentUser.DisplayName,
-                        PostDate = registrantNote.PostDate.ToShortDateString(),
-                    });
+                        // registrantNoteVersion = RegistrantNoteVersions.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID, msgs);
+                    }
+
+                    if (registrantNoteVersion.IsNotEmpty())
+                    {
+                        var currentUser = WebUser.Load(registrantNoteVersion.CreatedBy.Value, msgs);
+
+                        notesDto.Add(new NotesDto()
+                        {
+                            ID = registrantNote.ID.Value,
+                            Title = registrantNoteVersion.Title,
+                            Text = registrantNoteVersion.Text,
+                            CreatedByName = currentUser.DisplayName,
+                            PostDate = registrantNote.PostDate,
+                        });
+                        count += 1;
+                    }
                 });
                 
                 registrantNotesDto.RegistrantName = currentRegistrant.Name;
@@ -132,7 +141,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             CreateDate = DateTime.UtcNow,
                             CreatedBy = currentUser.ID,
-                            PostDate = postDate.Date,
+                            PostDate = postDate,
                             FirstRegistrantId = firstRegistrantId.Value,
                             IsPinned = false,
                             IsDeleted = false,
@@ -166,7 +175,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Title = registrantNoteVersion.Title,
                         Text = registrantNoteVersion.Text,
                         CreatedByName = currentUser.DisplayName,
-                        PostDate = registrantNote.PostDate.ToShortDateString(),
+                        PostDate = registrantNote.PostDate,
                     };    
                 }
                 
