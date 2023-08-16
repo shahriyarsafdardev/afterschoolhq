@@ -1,13 +1,13 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
+  noteListWrapper: {
+    marginTop: '30px'
+  },
   noteWrapper: {
     border: '1px solid #E4E4E4',
-    maxWidth: '1297px',
-    margin: 'auto',
     marginBottom: '20px',
     padding: '20px',
-    width: '90%',
     color: theme.palette.text.secondary
   },
   noteHeader: {
@@ -17,7 +17,10 @@ export default makeStyles(theme => ({
   },
   subHeader: {
     display: 'flex',
-    gap: '25px'
+    gap: '25px',
+    [theme.breakpoints.down('xs')]: {
+      gap: '10px'
+    }
   },
   showMoreButton: {
     cursor: 'pointer',
@@ -90,5 +93,63 @@ export default makeStyles(theme => ({
   },
   divider: {
     marginBottom: '10px'
+  },
+  notesWrapper: {
+    padding: '10px 150px 0px 150px',
+    [theme.breakpoints.down('md')]: {
+      padding: '5px 15px 0px 15px'
+    }
+  },
+  notesStudentName: {
+    fontWeight: '600',
+    lineHeight: '24.38px'
+  },
+  notesHeading: {
+    fontSize: '18px',
+    fontWeight: '500',
+    lineHeight: '21.94px'
+  },
+  studentNameDivider: {
+    margin: '12px 0px 22px 0px',
+    width: '100%'
+  },
+  headingDivider: {
+    marginTop: '11px',
+    width: '100%'
+  },
+  newNoteButton: {
+    background: theme.palette.primary.main,
+    padding: '9.5px 25px',
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginLeft: 10
+  },
+  notesSearchBar: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column',
+      gap: '10px'
+    }
+  },
+  searchFieldWrapper: {
+    [theme.breakpoints.down('sm')]: {
+      display: 'contents'
+    }
+  },
+  notesSearchField: {
+    width: '240px',
+    '& input::placeholder': {
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    '& .MuiOutlinedInput-input': {
+      padding: '14.5px 11px'
+    }
+  },
+  paginationBar: {
+    display: 'flex',
+    justifyContent: 'end'
   }
 }));

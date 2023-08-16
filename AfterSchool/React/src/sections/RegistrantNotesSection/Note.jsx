@@ -3,19 +3,34 @@ import { Box, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import useStyles from './styles';
+import { ConfirmationDialog } from 'components';
 
 function Note({ note, handleOpenModal }) {
   const classes = useStyles();
-  const { title, writer, date, text } = note;
+  const [isOpen, setIsOpen] = useState(false);
+  const { Title: title, CreatedByName: writer, PostDate: date, Text: text } = note;
   const options = ['EDIT', 'DELETE'];
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
+  const handelDeletionModal = () => {
+    setIsOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsOpen(false);
+  };
+
   const handleChange = option => {
     setAnchorEl(null);
-    if (option === 'EDIT') handleOpenModal();
+    switch (option) {
+      case 'EDIT':
+        return handleOpenModal();
+      case 'DELETE':
+        return handelDeletionModal();
+    }
   };
 
   const [showMore, setShowMore] = useState(false);
@@ -72,6 +87,14 @@ function Note({ note, handleOpenModal }) {
           </MenuItem>
         ))}
       </Menu>
+      <ConfirmationDialog
+        open={isOpen}
+        onClose={handleCloseDialog}
+        // onSubmit={}
+        title="Delete Questions"
+        text="Do you want to delete the selected questions? This action is irreversible."
+        dataTestId="deleteSelectedQuestions"
+      />
     </Box>
   );
 }

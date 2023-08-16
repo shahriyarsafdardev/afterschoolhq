@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import { createRegistrantNote } from 'repository/RegistrantNotesRepository';
+import { createRegistrantNote, getRegistrantNotes } from 'repository/RegistrantNotesRepository';
 
 const RegistrantNotesSlice = createSlice({
   name: 'registrantNotesSlice',
   initialState: {
     registrantName: '',
     registrantNotes: [],
-    msgs: [],
-    loading: true
+    loading: true,
+    msgs: []
   },
   reducers: {
     setRegistrantName: (state, { payload }) => {
@@ -38,7 +38,19 @@ export const useRegistrantNotesActions = () => {
     setRegistrantName,
     setRegistrantNotes
   } = RegistrantNotesSlice.actions;
-  const getNotes = async params => {};
+
+  const getNotes = async (regUid, perPage, pageNo, searchQuery) => {
+    dispatch(loadingStart());
+    await getRegistrantNotes(regUid, perPage, pageNo, searchQuery).then(({ obj, msgs }) => {
+      if (obj) {
+        dispatch(setRegistrantName(obj.RegistrantNotes.RegistrantName));
+        dispatch(setRegistrantNotes(obj.RegistrantNotes.Notes));
+      }
+      dispatch(setMsgs(msgs));
+    });
+    dispatch(loadingCompleted());
+  };
+
   const createNote = async params => {
     dispatch(loadingStart());
     return await createRegistrantNote(params).then(({ data: { msgs, obj } }) => {
@@ -50,6 +62,7 @@ export const useRegistrantNotesActions = () => {
       return msgs;
     });
   };
+
   const updateNote = async params => {};
   const deleteNote = async params => {};
 

@@ -41,8 +41,8 @@ export default {
   UpdateRegistrationWithESignature: 'Api/UpdateRegistration/UpdateRegistrationWithESignature',
 
   //Registrant Notes APIs
-  getRegistrationNotesAPI: (regUid, pageNo, searchQuery) =>
-    `Api/Notes/GetRegistrantNotes?regUid=${regUid}&pageNo=${pageNo}&searchQuery=${searchQuery}`,
+  getRegistrationNotesAPI: (regUid, perPage, pageNo, searchQuery) =>
+    `Api/Notes/GetRegistrantNotes?registrationUid=${regUid}&perPage=${perPage}&pageNo=${pageNo}&searchQuery=${searchQuery}`,
   createRegistrationNoteAPI: 'Api/Notes/CreateRegistrantNote',
   updateRegistrantNoteAPI: 'Api/Notes/UpdateRegistrantNote',
   deleteRegistrantNoteAPI: 'Api/Notes/DeleteRegistrantNote',
