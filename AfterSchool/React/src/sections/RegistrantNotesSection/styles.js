@@ -38,9 +38,10 @@ export default makeStyles(theme => ({
   },
   paper: {
     backgroundColor: theme.palette.background.paper,
-    maxWidth: '503px',
-    [theme.breakpoints.down('xs')]: {
-      width: '85%'
+    maxWidth: '1000px',
+    width: '100%',
+    [theme.breakpoints.down('md')]: {
+      width: '80%'
     }
   },
   modalHeading: {
@@ -51,9 +52,43 @@ export default makeStyles(theme => ({
     justifyContent: 'space-between'
   },
   formWrapper: {
-    margin: 'auto'
+    margin: 'auto',
+    padding: '40px',
+    paddingBottom: '20px'
   },
   closeIcon: {
     cursor: 'pointer'
+  },
+  fieldsWrapper: {
+    padding: '10px'
+  },
+  subFormFields: {
+    display: 'flex'
+  },
+  controls: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: 30,
+    marginTop: 15,
+    marginBottom: 35,
+    [theme.breakpoints.down('xs')]: {
+      gap: 15,
+      paddingRight: '40px',
+      paddingLeft: '40px',
+      flexDirection: 'column'
+    }
+  },
+  gridWrapper: {
+    gap: 20,
+    justifyContent: 'space-between',
+    [theme.breakpoints.down('sm')]: {
+      gap: 15
+    }
+  },
+  headerText: {
+    color: 'white'
+  },
+  divider: {
+    marginBottom: '10px'
   }
 }));
