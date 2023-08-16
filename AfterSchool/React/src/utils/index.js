@@ -1,3 +1,7 @@
+import { useDebouncedCallback } from 'use-debounce';
+
+const DEBOUNCE_TIME = 400;
+
 export default {
   pathWithOrigin: path => `${window.location.origin}${path}`,
   navigateTo: path => {
@@ -14,4 +18,17 @@ export default {
     };
     return envs[window.location.host];
   }
+};
+
+export const Debounce = (func, time = DEBOUNCE_TIME) => useDebouncedCallback(func, time);
+
+export const buildQueryParams = (paramName = 'pageNo', paramValue, searchParams) => {
+  const queryParams = [];
+  const newQueryParam = `${paramName}=${paramValue}`;
+  for (const [key, value] of searchParams.entries()) {
+    if (key === paramName) queryParams.push(newQueryParam);
+    else queryParams.push(`${key}=${value}`);
+  }
+  if (!queryParams.includes(newQueryParam)) queryParams.push(newQueryParam);
+  return queryParams.join('&');
 };
