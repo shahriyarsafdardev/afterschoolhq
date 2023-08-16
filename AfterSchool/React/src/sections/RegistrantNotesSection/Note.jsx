@@ -35,8 +35,8 @@ function Note({ note, handleOpenModal }) {
 
   const [showMore, setShowMore] = useState(false);
 
-  const shouldShow = text.length > 200;
-  const noteText = showMore ? text : text.substring(0, 200);
+  const shouldShow = text.length > 530;
+  const noteText = showMore ? text : text.substring(0, 500);
   const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
 
   return (
@@ -90,10 +90,9 @@ function Note({ note, handleOpenModal }) {
       <ConfirmationDialog
         open={isOpen}
         onClose={handleCloseDialog}
-        // onSubmit={}
         title="Delete Questions"
+        data-testid="delete-selected-note"
         text="Do you want to delete the selected questions? This action is irreversible."
-        dataTestId="deleteSelectedQuestions"
       />
     </Box>
   );
