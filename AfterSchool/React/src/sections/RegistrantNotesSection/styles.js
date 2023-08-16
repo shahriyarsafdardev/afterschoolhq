@@ -92,6 +92,7 @@ export default makeStyles(theme => ({
     color: 'white'
   },
   divider: {
+    width: '100%',
     marginBottom: '10px'
   },
   notesWrapper: {
@@ -151,5 +152,24 @@ export default makeStyles(theme => ({
   paginationBar: {
     display: 'flex',
     justifyContent: 'end'
+  },
+  saveButton: {
+    background: theme.palette.primary.main,
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginLeft: 15,
+    minWidth: 95,
+    [theme.breakpoints.down('xs')]: {
+      width: '100%',
+      marginLeft: 0
+    }
+  },
+  cancelButton: {
+    fontSize: 14,
+    minWidth: 90,
+    color: theme.palette.primary.main,
+    [theme.breakpoints.down('xs')]: {
+      width: '100%'
+    }
   }
 }));

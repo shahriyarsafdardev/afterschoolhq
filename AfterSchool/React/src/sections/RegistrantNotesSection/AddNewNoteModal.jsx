@@ -36,20 +36,22 @@ function AddNewNoteModal(props) {
     title: Yup.string().required('Title is required'),
     text: Yup.string()
       .required('Text is required')
-      .max(20, 'Text should be less than 4000 characters'),
-    postDate: Yup.string().required('Date is required')
+      .max(4000, 'Text should be less than 4000 characters'),
+    postDate: Yup.date()
+      .required('Date is required')
+      .max(new Date(getCurrentDateTime()), `Date should be not be in future`)
   });
 
   const formik = useFormik({
     initialValues: {
       title: '',
       text: '',
-      postDate: ''
+      postDate: getCurrentDateTime()
     },
     validationSchema: ValidationSchema,
     onSubmit: async (values, { resetForm }) => {
-      const formattedDate = changeDateTimeFormat(values.postDate);
       setSaveDisabled(true);
+      const formattedDate = changeDateTimeFormat(values.postDate);
       await createNote({ ...values, postDate: formattedDate, registrationUid: regUid }).then(
         msgs => {
           if (!msgs.length) {
@@ -70,13 +72,18 @@ function AddNewNoteModal(props) {
     handleSubmit();
   };
 
+  const closeModal = () => {
+    resetForm();
+    handleClose();
+  };
+
   return (
     <Modal
       aria-labelledby="transition-modal-title"
       aria-describedby="transition-modal-description"
       className={classes.modal}
       open={open}
-      onClose={handleClose}
+      onClose={closeModal}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{
@@ -89,7 +96,7 @@ function AddNewNoteModal(props) {
             <Typography variant="h4" className={classes.headerText}>
               Add New Note
             </Typography>
-            <CloseIcon onClick={handleClose} className={classes.closeIcon} />
+            <CloseIcon onClick={closeModal} className={classes.closeIcon} />
           </Box>
           <Box className={classes.formWrapper}>
             <Grid container className={classes.gridWrapper}>
@@ -126,7 +133,7 @@ function AddNewNoteModal(props) {
               <Grid item xs={12}>
                 <TextAreaField
                   data-testid="text-field"
-                  customLabel="Text"
+                  customLabel="Note"
                   variant="outlined"
                   autofill="false"
                   required={true}
@@ -144,9 +151,7 @@ function AddNewNoteModal(props) {
               variant="outlined"
               className={classes.cancelButton}
               data-testid="cancel-button"
-              onClick={() => {
-                resetForm();
-              }}
+              onClick={closeModal}
             >
               Cancel
             </Button>
