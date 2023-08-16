@@ -26,7 +26,7 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var pageNumber = 1;
-                var recordsPerPage = 10;
+                var recordsPerPage = 3;
 
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
@@ -75,7 +75,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 });
 
                 notesDto = notesDto.Skip(start).Take(length).ToList();
-                totalPages = Math.Ceiling(count.ToDouble() / recordsPerPage).ToInteger();
+                totalPages = Math.Ceiling(count.ToDouble() / length).ToInteger();
                 registrantNotesDto.RegistrantName = currentRegistrant.Name;
                 registrantNotesDto.Notes = notesDto;
 
