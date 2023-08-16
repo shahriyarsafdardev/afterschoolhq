@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Models
                 _dp = get_BaseObjectMap(className);
 				_dp.Add(className, "Title", SqlDbType.NVarChar, "400");
 				_dp.Add(className, "Text", SqlDbType.NVarChar, "4000");
-                _dp.Add(className, "RegistrantNoteId", SqlDbType.Bit);
+                _dp.Add(className, "RegistrantNoteId", SqlDbType.Int);
 				_dp.Add(className, "IsDeleted", SqlDbType.Bit);
 				
                 return _dp;
