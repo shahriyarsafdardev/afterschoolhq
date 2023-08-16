@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Models
                 DatabaseParameters _dp = new DatabaseParameters();
                 string className = typeof(RegistrantNote).Name;
                 _dp = get_BaseObjectMap(className);
-				_dp.Add(className, "PostDate", SqlDbType.Date);
+				_dp.Add(className, "PostDate", SqlDbType.DateTime);
 				_dp.Add(className, "FirstRegistrantId", SqlDbType.Int);
                 _dp.Add(className, "IsPinned", SqlDbType.Bit);
 				_dp.Add(className, "IsDeleted", SqlDbType.Bit);
