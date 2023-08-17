@@ -23,10 +23,15 @@ namespace AfterSchool.Areas.Api.Controllers
         public ActionResult GetRegistrantNotes(string registrationUid, int pageNo, string searchQuery)
         {
             var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var isAdmin = false;
+            var pageNumber = 1;
+            var recordsPerPage = 3;
+            var count = 0;
             try
             {
-                var pageNumber = 1;
-                var recordsPerPage = 3;
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
 
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
@@ -42,14 +47,15 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (pageNo.IsNotEmpty())
                     pageNumber = pageNo;
 
-                var firstRegistrantId = currentRegistrant.FirstRegistrantId.IsEmpty() ? currentRegistrant.ID : currentRegistrant.FirstRegistrantId;
-                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs);
+                if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
+                    isAdmin = true;
+
                 var start = recordsPerPage * (pageNumber - 1);
                 var length = recordsPerPage;
+                var firstRegistrantId = currentRegistrant.FirstRegistrantId.IsEmpty() ? currentRegistrant.ID : currentRegistrant.FirstRegistrantId;
+                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs);
                 var registrantNotesDto = new RegistrantNotesDto();
                 var notesDto = new List<NotesDto>();
-                var totalPages = 0;
-                var count = 0;
 
                 registrantNotes.ForEach(registrantNote =>
                 {
@@ -61,21 +67,22 @@ namespace AfterSchool.Areas.Api.Controllers
 
                     if (registrantNoteVersion.IsNotEmpty())
                     {
-                        var currentUser = WebUser.Load(registrantNoteVersion.CreatedBy.Value, msgs);
+                        var registrantNoteWebUser = WebUser.Load(registrantNote.CreatedBy.Value, msgs);
                         notesDto.Add(new NotesDto()
                         {
                             ID = registrantNote.ID.Value,
                             Title = registrantNoteVersion.Title,
                             Text = registrantNoteVersion.Text,
-                            CreatedByName = currentUser.DisplayName,
-                            PostDate = registrantNote.PostDate,
+                            CreatedByName = registrantNoteWebUser.DisplayName,
+                            PostDate = registrantNote.PostDate.ToShortDateTimeString(),
+                            IsEditable = isAdmin || currentUser.ID == registrantNote.CreatedBy,
                         });
                         count += 1;
                     }
                 });
 
                 notesDto = notesDto.Skip(start).Take(length).ToList();
-                totalPages = Math.Ceiling(count.ToDouble() / length).ToInteger();
+                var totalPages = Math.Ceiling(count.ToDouble() / length).ToInteger();
                 registrantNotesDto.RegistrantName = currentRegistrant.Name;
                 registrantNotesDto.Notes = notesDto;
 
@@ -175,7 +182,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         Title = registrantNoteVersion.Title,
                         Text = registrantNoteVersion.Text,
                         CreatedByName = currentUser.DisplayName,
-                        PostDate = registrantNote.PostDate,
+                        PostDate = registrantNote.PostDate.ToShortDateTimeString(),
+                        IsEditable = true,
                     };
 
                 dynamic response = new
