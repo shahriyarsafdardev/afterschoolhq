@@ -458,7 +458,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
             var act = currentAccount.GetActivity(activity.ToGuid(), msgs);
             var registrant = selectedRegistration.GetRegistrant(msgs);
-            var regperiod = act.GetActiveRegistrationPeriod(msgs);
+            var regperiod = act.GetCurrentOrNextRegistrationPeriod(msgs);
             var assignmentType = (RegistrationAssignmentType) activityassignment.ToInteger();
             var choiceNumber = 1;
             var registrationPeriodId = new int?();
@@ -510,6 +510,82 @@ namespace AfterSchool.Areas.Org.Controllers
                     msgs: msgs);
 
                 msgs.Add($"{act.Name} has been added for {registrant.Name}", MessageType.Success);
+            }
+
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            return View("edit", registration);
+        }
+        
+        [HttpPost]
+        public ActionResult AddLeague(string id, string activity, string activityassignment, string r)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+
+            if (id.IsNotGuid() || r.IsNotGuid() || activity.IsNotGuid() || !activityassignment.IsInteger())
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
+            var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
+            var actGroup = currentAccount.GetActivityGroup(activity.ToGuid(), msgs);
+            var registrant = selectedRegistration.GetRegistrant(msgs);
+            var regPeriod = actGroup.GetCurrentOrNextRegistrationPeriod(msgs);
+            var assignmentType = (RegistrationAssignmentType) activityassignment.ToInteger();
+            var choiceNumber = 1;
+            var registrationPeriodId = new int?();
+            if (regPeriod.IsNotEmpty())
+                registrationPeriodId = regPeriod.ID;
+
+            registrant.AddOrUpdateParticipationObject(
+                selectedRegistration.ID.Value,
+                actGroup.ID.Value,
+                ParticipationObjectType.ActivityGroup,
+                assignmentType,
+                registrationPeriodId,
+                actGroup.ID,
+                null,
+                currentUser.ID.Value,
+                msgs);
+
+            if (msgs.HasNoErrors())
+            {
+                selectedRegistration.WasUpdated(msgs);
+
+                // notify parent
+                var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+
+                if (masterRegistrant.IsNotEmpty())
+                    selectedRegistration.SendConfirmation(
+                        new CheckoutObject
+                        {
+                            BillingAccount = currentAccount,
+                            PayingAccount = masterRegistrant.GetAccount(msgs),
+                            MasterRegistrant = masterRegistrant,
+                            NumberOfSeats = 1,
+                            ParticipationObject = actGroup.GetParticipationObject(msgs),
+                            Registration = selectedRegistration,
+                        },
+                        null, currentUser, true, msgs);
+
+                // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
+                SessionVariables.WebSession.LogActivity(
+                    account: currentAccount,
+                    actor: currentUser,
+                    actionType: WebSessionActionType.Added,
+                    objectId: registrant.ID.Value,
+                    objectType: ObjectType.Registrant,
+                    objectText: registrant.GetFirstNameLastInitial(),
+                    indirectObjectId: actGroup.ID.Value,
+                    indirectObjectType: ObjectType.Activity,
+                    indirectObjectText: actGroup.Name,
+                    msgs: msgs);
+
+                msgs.Add($"{actGroup.Name} has been added for {registrant.Name}", MessageType.Success);
             }
 
             LoadRegistrationViewBag(registration, r, msgs);
