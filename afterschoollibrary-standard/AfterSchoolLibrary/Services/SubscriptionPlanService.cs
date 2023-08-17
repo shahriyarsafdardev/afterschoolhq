@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -559,7 +560,15 @@ namespace AfterSchoolLibrary.Services
                 case PlanPaymentStartType.OnPeriodStart:
                     return plan.StartDate.Value;
                 case PlanPaymentStartType.WhenActivityStarts:
-                    return participationObject.StartDate.Value;
+                    var schedule = participationObject.Schedule;
+                    if (schedule.RepeatsWeekly)
+                        return participationObject.StartDate.Value;
+                    else
+                    {
+                        var firstInstance = (ActivityInstance)schedule.GetInstances().FirstOrDefault();
+                        return firstInstance.StartDateTime.Value;
+                    }
+
                 case PlanPaymentStartType.OnCheckout:
                     return participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
             }
