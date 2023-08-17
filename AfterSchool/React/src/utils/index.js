@@ -33,3 +33,12 @@ export const buildQueryParams = (paramName, paramValue, searchParams) => {
   if (!queryParams.includes(newQueryParam) && Boolean(paramValue)) queryParams.push(newQueryParam);
   return queryParams.join('&');
 };
+
+export const formatDate = inputDate => {
+  const dateObj = new Date(inputDate);
+  const month = dateObj.toLocaleString('default', { month: 'long' });
+  const day = dateObj.getDate();
+  const year = dateObj.getFullYear();
+
+  return `${month} ${day}, ${year}`;
+};

@@ -2,7 +2,10 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
   noteListWrapper: {
-    marginTop: '30px'
+    marginTop: '30px',
+    [theme.breakpoints.down('xs')]: {
+      marginTop: '66px'
+    }
   },
   noteWrapper: {
     border: '1px solid #E4E4E4',
@@ -13,7 +16,11 @@ export default makeStyles(theme => ({
   noteHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '30px'
+    marginBottom: '30px',
+    width: '100%',
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: 'column'
+    }
   },
   subHeader: {
     display: 'flex',
@@ -129,10 +136,7 @@ export default makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      gap: '10px'
-    }
+    position: 'relative'
   },
   searchFieldWrapper: {
     [theme.breakpoints.down('sm')]: {
@@ -141,12 +145,18 @@ export default makeStyles(theme => ({
   },
   notesSearchField: {
     width: '240px',
+    marginLeft: 'auto',
     '& input::placeholder': {
       fontSize: '14px',
       fontWeight: '500'
     },
     '& .MuiOutlinedInput-input': {
       padding: '14.5px 11px'
+    },
+    [theme.breakpoints.down('xs')]: {
+      position: 'absolute',
+      top: '55px',
+      width: '100%'
     }
   },
   paginationBar: {
@@ -171,5 +181,9 @@ export default makeStyles(theme => ({
     [theme.breakpoints.down('xs')]: {
       width: '100%'
     }
+  },
+  noteHeaderBar: {
+    display: 'flex',
+    gap: '20px'
   }
 }));
