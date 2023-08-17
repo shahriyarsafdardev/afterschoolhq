@@ -2123,8 +2123,8 @@ namespace AfterSchool.Controllers
                 if (proratingCalculation.GetIsProrated())
                     ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
             }
-            ViewBag.startDate = startDate;
-            ViewBag.endDate = endDate;
+            ViewBag.StartDate = startDate;
+            ViewBag.EndDate = endDate;
             
             return View("Payment");
         }
