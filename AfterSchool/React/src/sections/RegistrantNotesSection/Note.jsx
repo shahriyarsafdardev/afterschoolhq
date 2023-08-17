@@ -90,9 +90,9 @@ function Note({ note, handleOpenModal }) {
       <ConfirmationDialog
         open={isOpen}
         onClose={handleCloseDialog}
-        title="Delete Questions"
+        title="Delete Note"
         data-testid="delete-selected-note"
-        text="Do you want to delete the selected questions? This action is irreversible."
+        text="Do you want to delete the selected note? This action is irreversible."
       />
     </Box>
   );

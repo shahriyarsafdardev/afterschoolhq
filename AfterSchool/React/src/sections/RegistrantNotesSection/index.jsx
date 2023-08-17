@@ -5,48 +5,42 @@ import { Typography, Box, Button, TextField, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
 import NoteList from './NoteList';
-import { Loader, Pagination } from 'components';
+import { Pagination } from 'components';
 import AddNewNoteModal from './AddNewNoteModal';
 import { useRegistrantNotes } from 'redux/hooks';
 import { Debounce, buildQueryParams } from 'utils';
 
-const PER_PAGE = 5;
+const PER_PAGE = 3;
 const RegistrantNotesSection = () => {
   const classes = useStyles();
   const { regUid } = useParams();
-  const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getNotes, registrantName, registrantNotes, msgs, loading } = useRegistrantNotes();
-  const showPagination = registrantNotes.length > PER_PAGE;
+  const { getNotes, totalPages, registrantName, msgs } = useRegistrantNotes();
+  const showPagination = totalPages > 1;
+  const query = searchParams.get('searchQuery');
   const handleOpen = () => setOpen(true);
+
+  useEffect(() => {
+    if (!searchParams.get('pageNo')) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
+    if (searchParams.get('pageNo'))
+      getNotes(regUid, PER_PAGE, searchParams.get('pageNo'), searchParams.get('searchQuery'));
+  }, [searchParams.get('pageNo')]);
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
 
-  useEffect(() => {
-    setQuery(searchParams.get('searchQuery'));
-    if (!searchParams.get('pageNo')) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
-    getNotes(regUid, PER_PAGE, searchParams.get('pageNo') || 1, searchParams.get('searchQuery'));
-  }, []);
-
-  useEffect(() => {
-    getNotes(regUid, PER_PAGE, searchParams.get('pageNo'), searchParams.get('pageNo'));
-  }, [searchParams]);
-
   const debouncedSearchChange = Debounce(searchQuery => {
     setSearchParams(buildQueryParams('searchQuery', searchQuery, searchParams));
-    getNotes(regUid, PER_PAGE, searchParams.get('pageNo'), searchQuery);
-    setQuery(searchQuery);
+    getNotes(regUid, PER_PAGE, 1, searchQuery);
   });
 
   const handleSearch = e => {
+    setSearchParams(buildQueryParams('pageNo', 1, searchParams));
     debouncedSearchChange(e.target.value);
   };
-
-  if (loading) return <Loader />;
 
   return (
     <Box className={classes.notesWrapper}>
@@ -58,19 +52,19 @@ const RegistrantNotesSection = () => {
         <Typography className={classes.notesHeading}>Student Notes</Typography>
         <Box className={classes.searchFieldWrapper}>
           <TextField
-            placeholder="Search"
-            className={classes.notesSearchField}
             variant="outlined"
-            onChange={handleSearch}
-            data-testid="notesSearchField"
+            placeholder="Search"
             defaultValue={query}
+            onChange={handleSearch}
+            data-testid="notes-search-field"
+            className={classes.notesSearchField}
           />
           <Button
             color="primary"
             variant="contained"
+            onClick={handleOpen}
+            data-testid="new-note-button"
             className={classes.newNoteButton}
-            data-testid="newNoteButton"
-            onClick={() => handleOpen()}
           >
             New Note
           </Button>
@@ -80,7 +74,7 @@ const RegistrantNotesSection = () => {
       <NoteList handleOpenModal={() => {}} />
       {showPagination && (
         <Box className={classes.paginationBar}>
-          <Pagination totalPages={50} />
+          <Pagination totalPages={totalPages} />
         </Box>
       )}
       <AddNewNoteModal open={open} setOpen={setOpen} />
