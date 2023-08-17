@@ -603,6 +603,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var coupons = currentAccount.GetCoupons(msgs);
 
+            HandleTempMessages(msgs);
             ViewBag.Messages = msgs;
 
             return View(coupons);
@@ -645,16 +646,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (coupon.IsDisabled)
                 {
                     CouponService.MarkAsEnabled(coupon, currentUser, msgs);
-                    msgs.Add("Coupon marked as Enabled", MessageType.Success);
+                    msgs.Add("Coupon marked as enabled", MessageType.Success);
 
                 }
                 else
                 {
                     CouponService.MarkAsDisabled(coupon, currentUser, msgs);
-                    msgs.Add("Coupon marked as Disabled", MessageType.Success);
+                    msgs.Add("Coupon marked as disabled", MessageType.Success);
                 }
             }
 
+            SetTempMessages(msgs); 
             return RedirectToAction("Coupon", msgs);
         }
 
