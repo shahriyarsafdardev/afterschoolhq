@@ -629,6 +629,35 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(coupon);
         }
 
+        [HttpGet]
+        public ActionResult ChangeCouponStatus(string couponId)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var coupon = couponId.IsGuid() ? currentAccount.GetCoupon(couponId.ToGuid(), msgs) : null;
+
+            if (coupon.IsEmpty())
+                msgs.Add("Invalid Coupon.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                if (coupon.IsDisabled)
+                {
+                    CouponService.MarkAsEnabled(coupon, currentUser, msgs);
+                    msgs.Add("Coupon marked as Enabled", MessageType.Success);
+
+                }
+                else
+                {
+                    CouponService.MarkAsDisabled(coupon, currentUser, msgs);
+                    msgs.Add("Coupon marked as Disabled", MessageType.Success);
+                }
+            }
+
+            return RedirectToAction("Coupon", msgs);
+        }
+
         public static string GetActivityIdsForCoupon(int id)
         {
             var purchaseableObjectCoupons = PurchaseableObjectCoupon.LoadByCouponId(id);

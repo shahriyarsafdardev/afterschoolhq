@@ -1,4 +1,4 @@
-﻿
+
 @model List<Coupon>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -102,6 +102,22 @@
                                             <i class="icon icon-left s7-junk warning"></i>
                                             @(!coupon.IsDisabled && coupon.ExpirationDate > DateTime.Now ? "Enable" : "Disable")
                                         </a>*@
+
+                                        @if (coupon.IsDisabled)
+                                        {
+                                            <a href="@Url.Action("changeCouponStatus", "accounting", new { couponId = coupon.Uid })" class="btn btn-default btn-sm">
+                                                <i class="icon icon-left s7-check-circle"></i>
+                                                Enable
+                                            </a>
+                                        }
+                                        else
+                                        {   
+                                            <a href="@Url.Action("ChangeCouponStatus", "accounting", new { couponId = coupon.Uid })" class="btn text-danger btn-default btn-sm">
+                                                <i class="icon icon-left s7-close-circle"></i>
+                                                Disable
+                                            </a>
+                                        }
+
                                     </td>
 
                                 </tr>
