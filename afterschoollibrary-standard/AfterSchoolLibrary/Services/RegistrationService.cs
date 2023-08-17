@@ -775,7 +775,7 @@ namespace AfterSchoolLibrary.Services
                     default:
                         var answer = registration.GetAnswer(question);
 
-                        if (answer.IsNotEmpty())
+                        if (answer.IsNotEmpty() && answer.Text.IsNotEmpty() && answer.Text.ToLower() != "null")
                             ConvertJSONAnswersIntoText(answer, row);
                         else
                             row.Add("");
@@ -787,7 +787,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var answer = registration.GetAnswer(question);
 
-                if (answer.IsNotEmpty())
+                if (answer.IsNotEmpty() && answer.Text.IsNotEmpty() && answer.Text.ToLower() != "null")
                     ConvertJSONAnswersIntoText(answer, row);
                 else
                     row.Add("");
@@ -815,7 +815,7 @@ namespace AfterSchoolLibrary.Services
             else if (answer.FormQuestionQuestionTypeId == QuestionType.CheckboxList)
             {
                 var str = "";
-                dynamic json = JsonConvert.DeserializeObject(answer.Text);
+                dynamic json = Utilities.GetKeyValuePairs(answer.Text);
                 foreach (var item in json)
                 {
                     if (str.IsNotEmpty())
