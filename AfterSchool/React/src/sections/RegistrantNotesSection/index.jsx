@@ -19,14 +19,14 @@ const RegistrantNotesSection = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getNotes, totalPages, registrantName, msgs } = useRegistrantNotes();
   const showPagination = totalPages > 1;
-  const query = searchParams.get('searchQuery');
+  const query = searchParams.get('searchQuery') || '';
+  const pageNo = searchParams.get('pageNo');
   const handleOpen = () => setOpen(true);
 
   useEffect(() => {
-    if (!searchParams.get('pageNo')) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
-    if (searchParams.get('pageNo'))
-      getNotes(regUid, PER_PAGE, searchParams.get('pageNo'), searchParams.get('searchQuery'));
-  }, [searchParams.get('pageNo')]);
+    if (!pageNo) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
+    else getNotes(regUid, PER_PAGE, pageNo, query);
+  }, [pageNo]);
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
