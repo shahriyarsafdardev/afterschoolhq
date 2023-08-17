@@ -1,8 +1,10 @@
-﻿@model List<ContactList>
+@model List<ContactList>
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var groups = (List<ActivityGroup>)ViewBag.Groups;
     var paging = (PagingModel)ViewData["PagingModel"];
+    var accountPackage = SessionVariables.AccountPackage;
+    var showinvitepackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, accountPackage);
 
     var previousLink = "#";
     var nextLink = "#";
@@ -86,9 +88,18 @@
                                             </button>
                                         </div>
                                         <div class="btn-group">
-                                            <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">
-                                                Invite To @UILabel.ActivityGroupLabel(ActivityGroupType.Session) or @UILabel.ActivityGroupLabel(ActivityGroupType.League)<span class="caret"></span>
-                                            </button>
+                                            @if (accountPackage.HasFeature(FeatureType.AllowInvites))
+                                            {
+                                                <button type="button" data-toggle="dropdown" class="btn btn-default btn-sm dropdown-toggle" aria-expanded="false">
+                                                    Invite To @UILabel.ActivityGroupLabel(ActivityGroupType.Session) or @UILabel.ActivityGroupLabel(ActivityGroupType.League)<span class="caret"></span>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="button" class="btn btn-default btn-sm" aria-expanded="false" onclick="return showUpgradeMyPlan('@(showinvitepackage?.Name)', @(showinvitepackage?.ID))">
+                                                    Invite To @UILabel.ActivityGroupLabel(ActivityGroupType.Session) or @UILabel.ActivityGroupLabel(ActivityGroupType.League)<span class="caret"></span>
+                                                </button>
+                                            }
                                             <ul role="menu" class="dropdown-menu" id="list-add-menu">
                                                 @foreach (var group in groups)
                                                 {

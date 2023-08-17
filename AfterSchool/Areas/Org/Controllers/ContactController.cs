@@ -700,7 +700,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 // get session information because it isn't available in a background task
                 var loggedInUser = SessionVariables.CurrentUser;
-                var periodId = period.ID.HasValue ? period.ID.Value : 0;
+                var periodId = period.IsNotEmpty() && period.ID.HasValue ? period.ID.Value : 0;
 
                 BackgroundJob.Enqueue(() =>
                     ActivityService.EmailInvitedContacts(
