@@ -22,7 +22,7 @@ function AddNewNoteModal(props) {
   const { regUid } = useParams();
   const [saveDisabled, setSaveDisabled] = useState(false);
 
-  const { createNote, msgs } = useRegistrantNotes();
+  const { createNote, msgs, registrantNotes } = useRegistrantNotes();
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
@@ -52,16 +52,19 @@ function AddNewNoteModal(props) {
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       const formattedDate = changeDateTimeFormat(values.postDate);
-      await createNote({ ...values, postDate: formattedDate, registrationUid: regUid }).then(
-        msgs => {
-          if (!msgs.length) {
-            enqueueSnackbar('Submitted.', { variant: 'success' });
-            resetForm();
-            handleClose();
-          }
-          setSaveDisabled(false);
+      await createNote({
+        ...values,
+        postDate: formattedDate,
+        registrationUid: regUid,
+        registrantNotes: registrantNotes
+      }).then(msgs => {
+        if (!msgs.length) {
+          enqueueSnackbar('Submitted.', { variant: 'success' });
+          resetForm();
+          handleClose();
         }
-      );
+        setSaveDisabled(false);
+      });
     }
   });
 

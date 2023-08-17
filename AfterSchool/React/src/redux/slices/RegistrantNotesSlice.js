@@ -7,6 +7,8 @@ const RegistrantNotesSlice = createSlice({
   initialState: {
     registrantName: '',
     registrantNotes: [],
+    totalPages: 0,
+    pageNo: 0,
     loading: true,
     msgs: []
   },
@@ -16,6 +18,10 @@ const RegistrantNotesSlice = createSlice({
     },
     setRegistrantNotes: (state, { payload }) => {
       state.registrantNotes = payload;
+    },
+    setPaginationData: (state, { payload: { TotalPages, PageNo } }) => {
+      state.totalPages = TotalPages;
+      state.pageNo = PageNo;
     },
     setMsgs: (state, { payload }) => {
       state.msgs = payload;
@@ -36,27 +42,29 @@ export const useRegistrantNotesActions = () => {
     loadingStart,
     loadingCompleted,
     setRegistrantName,
+    setPaginationData,
     setRegistrantNotes
   } = RegistrantNotesSlice.actions;
 
-  const getNotes = async (regUid, perPage, pageNo, searchQuery) => {
+  const getNotes = async (regUid, perPage, pageNo, searchQuery = '') => {
     dispatch(loadingStart());
     await getRegistrantNotes(regUid, perPage, pageNo, searchQuery).then(({ obj, msgs }) => {
       if (obj) {
         dispatch(setRegistrantName(obj.RegistrantNotes.RegistrantName));
         dispatch(setRegistrantNotes(obj.RegistrantNotes.Notes));
+        dispatch(setPaginationData(obj));
       }
       dispatch(setMsgs(msgs));
     });
     dispatch(loadingCompleted());
   };
 
-  const createNote = async params => {
+  const createNote = async ({ registrantNotes, ...params }) => {
     dispatch(loadingStart());
     return await createRegistrantNote(params).then(({ data: { msgs, obj } }) => {
       dispatch(setMsgs(msgs));
       if (!msgs.length) {
-        dispatch(setRegistrantNotes(obj.Note));
+        dispatch(setRegistrantNotes([obj.Note, ...registrantNotes]));
       }
       dispatch(loadingCompleted());
       return msgs;
