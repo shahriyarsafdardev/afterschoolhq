@@ -24,6 +24,7 @@ namespace AfterSchool.Areas.Api.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             var isAdmin = false;
             var pageNumber = 1;
             var recordsPerPage = 3;
@@ -32,6 +33,9 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
+                
+                if (currentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
 
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
@@ -47,7 +51,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (pageNo.IsNotEmpty())
                     pageNumber = pageNo;
 
-                if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
+                if (FormConstants.AdminUserTypes.Contains(currentUser.GetUserType(currentAccount)))
                     isAdmin = true;
 
                 var start = recordsPerPage * (pageNumber - 1);
