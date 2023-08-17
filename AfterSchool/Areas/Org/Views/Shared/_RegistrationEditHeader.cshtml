@@ -1,4 +1,4 @@
-﻿@model Registration
+@model Registration
 @{
     var listUrl = ViewBag.ListUrl;
     var activities = (List<Activity>)ViewBag.Activities;
@@ -15,13 +15,17 @@
             <i class="s7-gleam"></i>
             Add @UILabel.ActivityLabel(ActivityType.Activity)
         </button>
+        <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add-league" id="leagueactivityadd">
+            <i class="s7-gleam"></i>
+            Add @UILabel.ActivityLabel(ActivityGroupType.League)
+        </button>
         <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
             <i class="s7-edit"></i> Edit Registration
         </a>
         @if (SessionVariables.CurrentAccount.HasFeature(FeatureType.Survey))
         {
             <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })"
-                class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
+               class="btn btn-alt6@(actionName == "surveys" ? "-active" : "")">
                 <i class="s7-cloud"></i> Surveys
             </a>
         }
@@ -29,16 +33,16 @@
             <i class="s7-paper-plane"></i> <span>Send Reg Info</span>
         </button>
         @if (canMergeWithRegistrations.Any())
-            {
-                <button type="button" class="btn btn-alt6 md-trigger hide" data-modal="modal-regmerge" id="regmerge">
-                    <i class="s7-bottom-arrow text-danger"></i> <span class="text-danger">Merge</span>
-                </button>
-            }
-            <button class="btn btn-alt6 md-trigger" data-modal="modal-confirmation" onclick="deleteReg()" id="deletereg">
-                <i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span>
+        {
+            <button type="button" class="btn btn-alt6 md-trigger hide" data-modal="modal-regmerge" id="regmerge">
+                <i class="s7-bottom-arrow text-danger"></i> <span class="text-danger">Merge</span>
             </button>
-            <a href="@listUrl" class="btn btn-alt5">&laquo; Back to List</a>
-        </div>
+        }
+        <button class="btn btn-alt6 md-trigger" data-modal="modal-confirmation" onclick="deleteReg()" id="deletereg">
+            <i class="s7-trash text-danger"></i> <span class="text-danger">Delete</span>
+        </button>
+        <a href="@listUrl" class="btn btn-alt5">&laquo; Back to List</a>
+    </div>
         <div class="hidden-lg hidden-sm hidden-md">
             <select class="form-control" onchange="handleNav(this.value)">
                 <option value="">Navigation</option>
@@ -134,6 +138,8 @@
     </div>
 
     Html.RenderPartial("_ModalRegistrationAddActivity");
+    Html.RenderPartial("_ModalRegisterLeagueActivity");
+
 
     <script>
     function handleNav(value) {

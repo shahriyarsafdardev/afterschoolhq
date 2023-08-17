@@ -631,6 +631,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var ras = registration.GetRegistrantActivities(msgs);
             var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+            var rasLeagueActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
             ViewBag.Answers = registration.GetAnswers(msgs);
@@ -643,6 +644,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     x.RegistrationPeriodId == registration.RegistrationPeriodId && x.ID != registration.ID).ToList();
 
             List<Activity> activities = null;
+            List<ActivityGroup> leagueActivities = null;
 
             if (registration.ActivityGroupId.HasValue)
                 activities = registration.GetActivityGroup(msgs).GetActivities(
@@ -654,6 +656,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     forceReload: false,
                     msgs: msgs);
             else
+            {
                 activities = currentAccount.GetActivities(
                     userType: UserType.Administrator,
                     user: currentUser,
@@ -665,12 +668,21 @@ namespace AfterSchool.Areas.Org.Controllers
                     start: null,
                     length: null,
                     msgs: msgs);
+                leagueActivities = currentAccount.GetLeagues(
+                    IsArchived: false,
+                    start: null,
+                    length: null,
+                    msgs: msgs);
+            }
 
             ViewBag.AvailableActivities = activities
                 .Where(x => x.ID.Value.NotIn(rasActivityTypes.Select(y => y.ParticipationObjectId.Value)))
                 .OrderBy(x => x.Name)
                 .ToList();
-
+            ViewBag.AvailableLeagueActivities = leagueActivities
+                            .Where(x => x.ID.Value.NotIn(rasLeagueActivityTypes.Select(y => y.ParticipationObjectId.Value)))
+                            .OrderBy(x => x.Name)
+                            .ToList();
             ViewBag.Messages = msgs;
 
             if (Request["returnurl"].IsNotEmpty())
