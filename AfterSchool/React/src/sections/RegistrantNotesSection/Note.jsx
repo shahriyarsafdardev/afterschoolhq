@@ -3,6 +3,7 @@ import { Box, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import useStyles from './styles';
+import { formatDate } from 'utils';
 import { ConfirmationDialog } from 'components';
 
 function Note({ note, handleOpenModal }) {
@@ -15,7 +16,7 @@ function Note({ note, handleOpenModal }) {
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
-  const handelDeletionModal = () => {
+  const handleDeletionDialog = () => {
     setIsOpen(true);
   };
 
@@ -29,7 +30,7 @@ function Note({ note, handleOpenModal }) {
       case 'EDIT':
         return handleOpenModal();
       case 'DELETE':
-        return handelDeletionModal();
+        return handleDeletionDialog();
     }
   };
 
@@ -41,19 +42,21 @@ function Note({ note, handleOpenModal }) {
 
   return (
     <Box className={classes.noteWrapper}>
-      <Box className={classes.noteHeader}>
-        <Box>
-          <Typography variant="h6">{title}</Typography>
-          <Typography>{`By ${writer}`}</Typography>
+      <Box className={classes.noteHeaderBar}>
+        <Box className={classes.noteHeader}>
+          <Box>
+            <Typography variant="h6">{title}</Typography>
+            <Typography>{`By ${writer}`}</Typography>
+          </Box>
+          <Box className={classes.subHeader}>
+            <Typography>{formatDate(date)}</Typography>
+          </Box>
         </Box>
-        <Box className={classes.subHeader}>
-          <Typography>{date}</Typography>
-          <MoreVertIcon
-            data-testid="options-icon"
-            className={classes.options}
-            onClick={handleClick}
-          />
-        </Box>
+        <MoreVertIcon
+          data-testid="options-icon"
+          className={classes.options}
+          onClick={handleClick}
+        />
       </Box>
       <Typography>{noteText}</Typography>
       {shouldShow && (

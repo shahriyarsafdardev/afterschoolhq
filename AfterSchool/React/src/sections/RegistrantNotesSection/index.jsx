@@ -50,25 +50,23 @@ const RegistrantNotesSection = () => {
       <Divider className={classes.studentNameDivider} />
       <Box className={classes.notesSearchBar}>
         <Typography className={classes.notesHeading}>Student Notes</Typography>
-        <Box className={classes.searchFieldWrapper}>
-          <TextField
-            variant="outlined"
-            placeholder="Search"
-            defaultValue={query}
-            onChange={handleSearch}
-            data-testid="notes-search-field"
-            className={classes.notesSearchField}
-          />
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={handleOpen}
-            data-testid="new-note-button"
-            className={classes.newNoteButton}
-          >
-            New Note
-          </Button>
-        </Box>
+        <TextField
+          variant="outlined"
+          placeholder="Search"
+          defaultValue={query}
+          onChange={handleSearch}
+          data-testid="notes-search-field"
+          className={classes.notesSearchField}
+        />
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleOpen}
+          data-testid="new-note-button"
+          className={classes.newNoteButton}
+        >
+          New Note
+        </Button>
       </Box>
       <Divider className={classes.headingDivider} />
       <NoteList handleOpenModal={() => {}} />
