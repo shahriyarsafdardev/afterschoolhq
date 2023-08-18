@@ -34,7 +34,7 @@
 </span>
 
 }
-else
+else if (instances.Any(x => x.InstanceTypeId == InstanceType.InSession))
 {
     <table class="table table-condensed">
         <thead>
@@ -46,7 +46,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var instance in instances)
+            @foreach (var instance in instances.Where(x => x.InstanceTypeId == InstanceType.InSession))
             {
                 <tr>
                     <td>@instance.StartDateTime.Value.ToString("M/d/yy")</td>
