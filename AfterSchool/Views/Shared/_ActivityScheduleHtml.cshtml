@@ -34,7 +34,7 @@
 </span>
 
 }
-else if (instances.Any(x => x.InstanceTypeId == InstanceType.InSession))
+else if (instances.Any())
 {
     <table class="table table-condensed">
         <thead>
@@ -57,4 +57,12 @@ else if (instances.Any(x => x.InstanceTypeId == InstanceType.InSession))
             }
         </tbody>
     </table>
+
+    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
+    {
+        <br />
+        <span>
+            We will <strong><em>not</em></strong> meet on the following dates: @instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession).Select(range => range.StartDateTime.ToShortDateString()).ToStringList(", ")
+        </span>
+    }
 }
