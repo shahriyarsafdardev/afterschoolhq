@@ -36,27 +36,31 @@
 }
 else if (instances.Any())
 {
-    <table class="table table-condensed">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Day</th>
-                <th>From</th>
-                <th>To</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var instance in instances.Where(x => x.InstanceTypeId == InstanceType.InSession))
-            {
+
+    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
+    {
+        <table class="table table-condensed">
+            <thead>
                 <tr>
-                    <td>@instance.StartDateTime.Value.ToString("M/d/yy")</td>
-                    <td>@instance.StartDateTime.Value.DayOfWeek.ToString().MaxChars(2)</td>
-                    <td>@instance.StartDateTime.ToShortTimeString()</td>
-                    <td>@instance.EndDateTime.ToShortTimeString()</td>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>From</th>
+                    <th>To</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var instance in instances.Where(x => x.InstanceTypeId == InstanceType.InSession))
+                {
+                    <tr>
+                        <td>@instance.StartDateTime.Value.ToString("M/d/yy")</td>
+                        <td>@instance.StartDateTime.Value.DayOfWeek.ToString().MaxChars(2)</td>
+                        <td>@instance.StartDateTime.ToShortTimeString()</td>
+                        <td>@instance.EndDateTime.ToShortTimeString()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 
     @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
     {
