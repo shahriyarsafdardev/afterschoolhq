@@ -1,7 +1,7 @@
 ﻿@model ActivitySchedule
 @{ 
     var instances = Model.GetInstances();
-    var now = Model.GetAccount().ConvertToAccountTimeZone(DateTime.UtcNow);
+    var now = Model.GetAccount().ConvertToAccountTimeZone(DateTime.UtcNow.Date);
 }
 @if (Model.RepeatsWeekly)
 {
