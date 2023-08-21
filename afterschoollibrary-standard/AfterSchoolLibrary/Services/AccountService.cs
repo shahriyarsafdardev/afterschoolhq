@@ -193,7 +193,7 @@ namespace AfterSchoolLibrary.Services
             var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
             var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc)?
                 .Count(a => a.CostPerRegistrant == 0 &&
-                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
+                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today) && !a.HasSubscriptionPlan());
 
             return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
