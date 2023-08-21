@@ -9,6 +9,7 @@ import { Pagination } from 'components';
 import AddNewNoteModal from './AddNewNoteModal';
 import { useRegistrantNotes } from 'redux/hooks';
 import { Debounce, buildQueryParams } from 'utils';
+import { getCurrentDateTime } from 'constants';
 
 const PER_PAGE = 3;
 const RegistrantNotesSection = () => {
@@ -16,12 +17,30 @@ const RegistrantNotesSection = () => {
   const { regUid } = useParams();
   const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editNoteValue, setEditNoteValue] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getNotes, totalPages, registrantName, msgs } = useRegistrantNotes();
+  const { getNotes, totalPages, registrantName, msgs, registrantNotes } = useRegistrantNotes();
   const showPagination = totalPages > 1;
   const query = searchParams.get('searchQuery') || '';
   const pageNo = searchParams.get('pageNo');
   const handleOpen = () => setOpen(true);
+
+  const handleEdit = id => {
+    const note = registrantNotes.find(note => note.ID === id);
+    const updatedNote = { ...note, PostDate: getCurrentDateTime(new Date(note.PostDate)) };
+    setEditNoteValue(updatedNote);
+    setIsUpdating(true);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    if (isUpdating) {
+      setIsUpdating(false);
+      setEditNoteValue(null);
+    }
+  };
 
   useEffect(() => {
     if (!pageNo) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
@@ -69,13 +88,21 @@ const RegistrantNotesSection = () => {
         </Button>
       </Box>
       <Divider className={classes.headingDivider} />
-      <NoteList handleOpenModal={() => {}} />
+      <NoteList handleEdit={handleEdit} />
       {showPagination && (
         <Box className={classes.paginationBar}>
           <Pagination totalPages={totalPages} />
         </Box>
       )}
-      <AddNewNoteModal open={open} setOpen={setOpen} />
+      {open && (
+        <AddNewNoteModal
+          open={open}
+          isUpdating={isUpdating}
+          handleEdit={handleEdit}
+          handleClose={handleClose}
+          noteValue={editNoteValue}
+        />
+      )}
     </Box>
   );
 };

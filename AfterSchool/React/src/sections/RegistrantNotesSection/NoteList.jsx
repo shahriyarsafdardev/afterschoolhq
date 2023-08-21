@@ -6,7 +6,7 @@ import { Loader } from 'components';
 import useStyles from './styles';
 import Note from './Note';
 
-function NoteList({ handleOpenModal }) {
+function NoteList({ handleEdit }) {
   const { registrantNotes, loading } = useRegistrantNotes();
 
   const classes = useStyles();
@@ -17,7 +17,7 @@ function NoteList({ handleOpenModal }) {
   return (
     <Box className={classes.noteListWrapper}>
       {registrantNotes.map((note, key) => (
-        <Note note={note} key={key} handleOpenModal={handleOpenModal} />
+        <Note note={note} key={key} handleEdit={handleEdit} />
       ))}
       {noRecords && <Typography variant="body1">No Notes Found!</Typography>}
     </Box>

@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Box, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-
 import useStyles from './styles';
 import { formatDate } from 'utils';
 import { ConfirmationDialog } from 'components';
 
-function Note({ note, handleOpenModal }) {
+function Note({ note, handleEdit }) {
   const classes = useStyles();
   const [isOpen, setIsOpen] = useState(false);
-  const { Title: title, CreatedByName: writer, PostDate: date, Text: text } = note;
+  const { Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
   const options = ['EDIT', 'DELETE'];
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -28,7 +27,7 @@ function Note({ note, handleOpenModal }) {
     setAnchorEl(null);
     switch (option) {
       case 'EDIT':
-        return handleOpenModal();
+        return handleEdit(note.ID);
       case 'DELETE':
         return handleDeletionDialog();
     }
@@ -52,11 +51,13 @@ function Note({ note, handleOpenModal }) {
             <Typography>{formatDate(date)}</Typography>
           </Box>
         </Box>
-        <MoreVertIcon
-          data-testid="options-icon"
-          className={classes.options}
-          onClick={handleClick}
-        />
+        {IsEditable && (
+          <MoreVertIcon
+            data-testid="options-icon"
+            className={classes.options}
+            onClick={handleClick}
+          />
+        )}
       </Box>
       <Typography>{noteText}</Typography>
       {shouldShow && (
@@ -71,7 +72,7 @@ function Note({ note, handleOpenModal }) {
         </Box>
       )}
       <Menu
-        id="options"
+        id="simple-menu"
         anchorEl={anchorEl}
         keepMounted
         open={open}
