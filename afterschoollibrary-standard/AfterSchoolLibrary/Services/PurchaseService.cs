@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Services
 
             var purchase = new Purchase()
             {
-                AmountPaid = totalCost,
+                AmountPaid = checkoutObject.StripeChargeId != null ? totalCost : 0,
                 CouponId = checkoutObject.Coupon?.ID,
                 CreateDate = checkoutObject.Date,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
