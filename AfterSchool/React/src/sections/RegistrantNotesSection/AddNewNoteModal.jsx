@@ -1,12 +1,12 @@
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { useSnackbar } from 'notistack';
+import { useParams } from 'react-router-dom';
 import CloseIcon from '@material-ui/icons/Close';
 import React, { useEffect, useState } from 'react';
 import { Backdrop, Box, Fade, Typography, Modal, Button, Grid, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
-import { useSnackbar } from 'notistack';
-import { useParams } from 'react-router-dom';
 import { useRegistrantNotes } from 'redux/hooks';
 import TextField from 'components/Overrides/TextField';
 import LoadingButton from 'components/Overrides/LoadingButton';
@@ -15,22 +15,30 @@ import { changeDateTimeFormat, getCurrentDateTime } from 'constants';
 
 function AddNewNoteModal(props) {
   const classes = useStyles();
-  const { open, setOpen } = props;
+  const { open, noteValue = {}, handleClose, isUpdating = false } = props;
+  const {
+    ID: noteId,
+    Title: title = '',
+    Text: text = '',
+    PostDate: postDate = getCurrentDateTime()
+  } = noteValue || {};
   const { enqueueSnackbar } = useSnackbar();
 
-  const handleClose = () => setOpen(false);
+  const headerText = isUpdating ? 'Update Note' : 'Add New Note';
+
   const { regUid } = useParams();
   const [saveDisabled, setSaveDisabled] = useState(false);
+  const { createNote, msgs, registrantNotes, updateNote } = useRegistrantNotes();
 
-  const { createNote, msgs, registrantNotes } = useRegistrantNotes();
+  useEffect(() => {
+    return () => {
+      resetForm();
+    };
+  }, []);
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
-
-  useEffect(() => {
-    setFieldValue('postDate', getCurrentDateTime());
-  }, []);
 
   const ValidationSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),
@@ -42,33 +50,60 @@ function AddNewNoteModal(props) {
       .max(new Date(getCurrentDateTime()), `Date should be not be in future`)
   });
 
+  const addNewNote = async () => {
+    const formattedDate = changeDateTimeFormat(values.postDate);
+    await createNote({
+      ...values,
+      postDate: formattedDate,
+      registrationUid: regUid,
+      registrantNotes: registrantNotes
+    }).then(msgs => {
+      if (!msgs.length) {
+        enqueueSnackbar('Submitted.', { variant: 'success' });
+        handleClose();
+      }
+    });
+  };
+
+  const updateExistingNote = async () => {
+    const formattedDate = changeDateTimeFormat(values.postDate);
+    const createNewVersion = !(
+      dirty &&
+      values.title === title &&
+      values.text === text &&
+      values.postDate !== postDate
+    );
+
+    await updateNote({
+      ...values,
+      postDate: formattedDate,
+      noteId,
+      createNewVersion,
+      registrantNotes: registrantNotes
+    }).then(msgs => {
+      if (!msgs.length) {
+        enqueueSnackbar('Submitted.', { variant: 'success' });
+        handleClose();
+      }
+    });
+  };
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      title: '',
-      text: '',
-      postDate: getCurrentDateTime()
+      title,
+      text,
+      postDate
     },
     validationSchema: ValidationSchema,
-    onSubmit: async (values, { resetForm }) => {
+    onSubmit: async () => {
       setSaveDisabled(true);
-      const formattedDate = changeDateTimeFormat(values.postDate);
-      await createNote({
-        ...values,
-        postDate: formattedDate,
-        registrationUid: regUid,
-        registrantNotes: registrantNotes
-      }).then(msgs => {
-        if (!msgs.length) {
-          enqueueSnackbar('Submitted.', { variant: 'success' });
-          resetForm();
-          handleClose();
-        }
-        setSaveDisabled(false);
-      });
+      isUpdating ? await updateExistingNote() : await addNewNote();
+      setSaveDisabled(false);
     }
   });
 
-  const { errors, touched, handleSubmit, getFieldProps, setFieldValue, resetForm } = formik;
+  const { errors, touched, handleSubmit, getFieldProps, resetForm, values, dirty } = formik;
 
   const submitNote = e => {
     e.preventDefault();
@@ -76,7 +111,6 @@ function AddNewNoteModal(props) {
   };
 
   const closeModal = () => {
-    resetForm();
     handleClose();
   };
 
@@ -97,7 +131,7 @@ function AddNewNoteModal(props) {
         <Box className={classes.paper}>
           <Box className={classes.modalHeading}>
             <Typography variant="h4" className={classes.headerText}>
-              Add New Note
+              {headerText}
             </Typography>
             <CloseIcon onClick={closeModal} className={classes.closeIcon} />
           </Box>
@@ -164,6 +198,7 @@ function AddNewNoteModal(props) {
               variant="contained"
               text="Save"
               loading={saveDisabled}
+              disabled={!dirty}
               data-testid="save-button"
               className={classes.saveButton}
               onClick={submitNote}

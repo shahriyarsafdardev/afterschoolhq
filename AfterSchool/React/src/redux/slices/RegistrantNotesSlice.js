@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import { createRegistrantNote, getRegistrantNotes } from 'repository/RegistrantNotesRepository';
+import {
+  createRegistrantNote,
+  getRegistrantNotes,
+  updateRegistrantNote
+} from 'repository/RegistrantNotesRepository';
 
 const RegistrantNotesSlice = createSlice({
   name: 'registrantNotesSlice',
@@ -71,7 +75,17 @@ export const useRegistrantNotesActions = () => {
     });
   };
 
-  const updateNote = async params => {};
+  const updateNote = async params => {
+    dispatch(loadingStart());
+    return await updateRegistrantNote(params).then(({ data: { msgs, obj } }) => {
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) {
+        // TODO: Update the resgistrantNotes array with the API response
+      }
+      dispatch(loadingCompleted());
+      return msgs;
+    });
+  };
   const deleteNote = async params => {};
 
   return { getNotes, createNote, updateNote, deleteNote };
