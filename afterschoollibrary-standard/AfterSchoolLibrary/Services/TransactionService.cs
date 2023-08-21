@@ -541,6 +541,9 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetStatus(this Transaction transaction, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if (transaction.TransactionTypeId == TransactionType.Refund && transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
+                return "Completed";
+
             if (transaction.PaymentSourceTypeId != PaymentSourceType.AfterSchoolPlatform)
                 return "N/A";
 

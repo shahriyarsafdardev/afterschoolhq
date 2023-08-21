@@ -419,7 +419,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary">Submit Refund</button>
+            <button type="button" data-dismiss="modal" id="btn-request-refund" onclick="processRefundRequest()" class="btn btn-primary md-close">Submit Refund</button>
         </div>
     </div>
 </div>          
@@ -443,7 +443,7 @@
         </div>
         <div class="modal-footer">
             <button type="button" data-dismiss="modal" class="btn btn-default md-close">Cancel</button>
-            <button type="button" id="btn-manual-refund" onclick="processManualRefund()" class="btn btn-primary">Record Manual Refund</button>
+            <button type="button" data-dismiss="modal" id="btn-manual-refund" onclick="processManualRefund()" class="btn btn-primary md-close">Record Manual Refund</button>
         </div>
     </div>
 </div>
@@ -478,20 +478,21 @@
     }
 
     function processManualRefund() {
-
+        showLoader();
         const uid = $('#manual-refund-transaction-uid').val();
         const amount = $('#manual-refund-amount').val();
 
         $.get(
             '@Url.Action("ProcessManualRefund", "accounting")?uid=' + uid + '&amount=' + amount,
             function (data) {
+                hideLoader();
                 if (data && data.status == 'ok') {
                     Notifications.showMessage('Success', 'Your refund for <strong>$' + amount + '</strong> has been saved', true);
                     setTimeout(function () { location.reload() }, 500);
                 } else {
                     Notifications.showErrors(data.messages);
                 }
-            }
+            }     
         );
 
     }
@@ -534,7 +535,7 @@
     }
 
     function processRefundRequest() {
-
+        showLoader();
         const uid = $('#refund-request-transaction-uid').val();
         const amount = $('#refund-request-amount').val();
         const reason = $('#refund-reason').val();
@@ -560,6 +561,7 @@ function refundTransaction(transactionUid,amount,uid) {
         $.get(
             url,
             function (data) {
+                hideLoader();
                 if (data && data.status === 'ok') {
                     Notifications.showMessage('Success', 'Transaction has been refunded', true);
                     setTimeout(function () { location.reload() }, 500);
