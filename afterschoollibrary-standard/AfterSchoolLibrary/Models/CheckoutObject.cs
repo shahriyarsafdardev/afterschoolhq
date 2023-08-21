@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary.Models
 
         internal decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (IsRegistrationFree || CreditCardPurchaseObject.IsEmpty())
+            if (IsRegistrationFree || CreditCardPurchaseObject.IsEmpty() || StripeChargeId == null)
                 return 0;
 
             var feeCalculationObject = new FeeCalculationObject(RegistrationCostNoFees, BillingAccount, ParticipationObject, msgs, dc);

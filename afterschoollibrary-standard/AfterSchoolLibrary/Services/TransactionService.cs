@@ -197,9 +197,8 @@ namespace AfterSchoolLibrary.Services
             else
             {
                 convenienceFee = checkoutObject.GetRegistrationConvenienceFee(msgs, dc);
-                paymentTypeFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc);
+                paymentTypeFee = checkoutObject.StripeChargeId != null ? checkoutObject.GetRegistrationCreditCardFee(msgs, dc) : 0;
             }
-
 
             return CreateNew(
                 checkoutObject.PayingAccount,
