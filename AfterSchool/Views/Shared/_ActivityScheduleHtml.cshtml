@@ -37,7 +37,7 @@
 else if (instances.Any())
 {
 
-    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
+    if (instances.Where(instance => instance.InstanceTypeId == InstanceType.InSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
     {
         <table class="table table-condensed">
             <thead>
@@ -62,7 +62,7 @@ else if (instances.Any())
         </table>
     }
 
-    @if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
+    if (instances.Where(instance => instance.InstanceTypeId == InstanceType.OutOfSession && instance.StartDateTime.Value.Date.IsAfter(now)).Any())
     {
         <br />
         <span>
