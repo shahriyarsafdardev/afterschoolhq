@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -198,6 +198,109 @@ namespace AfterSchool.Areas.Api.Controllers
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+        
+        [HttpPost]
+        public ActionResult UpdateRegistrantNote(string title, string text, DateTime postDate, int noteId, bool createNewVersion)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var currentUser = SessionVariables.CurrentUser;
+                NotesDto noteDto = null;
+                RegistrantNoteVersions registrantNoteVersion = null;
+
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
+                var registrantNote = RegistrantNote.LoadByIDByIsDeleted(noteId, false, msgs);
+
+                if (registrantNote.IsNotEmpty())
+                    Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        { 
+                            registrantNote.PostDate = postDate;
+                            amsgs.AddRange(registrantNote.Save(adc));
+                            if (createNewVersion)
+                            {
+                                registrantNoteVersion = new RegistrantNoteVersions
+                                {
+                                    CreateDate = DateTime.UtcNow,
+                                    CreatedBy = currentUser.ID,
+                                    Title = title,
+                                    Text = text,
+                                    RegistrantNoteId = registrantNote.ID.Value,
+                                    IsDeleted = false,
+                                };
+                                amsgs.AddRange(registrantNoteVersion.Save(adc));
+                            }   
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+
+                registrantNoteVersion = RegistrantNoteVersions.LoadByNoteIdByIsDeleted(registrantNote.ID.Value, false, msgs)
+                       .OrderByDescending(rnv => rnv.CreateDate).FirstOrDefault();
+
+                if(registrantNote.IsNotEmpty() && registrantNoteVersion.IsNotEmpty())
+                    noteDto = new NotesDto
+                    {
+                        ID = registrantNote.ID.Value,
+                        Title = registrantNoteVersion.Title,
+                        Text = registrantNoteVersion.Text,
+                        CreatedByName = currentUser.DisplayName,
+                        PostDate = registrantNote.PostDate.ToShortDateTimeString(),
+                    };
+
+                dynamic response = new
+                {
+                    Note = noteDto,
+                };
+                return Json(
+                    new ApiResponse(msgs, response),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public ActionResult DeleteRegistrantNote(int noteId)
+        {
+            var msgs = new SystemMessages();
+            try
+            {
+                var registrantNote = RegistrantNote.LoadByIDByIsDeleted(noteId, false, msgs);
+                if (registrantNote.IsNotEmpty())
+                    Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            
+                            registrantNote.IsDeleted = true;
+                            registrantNote.Save(adc);  
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                return Json(
+                   new ApiResponse(msgs, null),
+                   JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
