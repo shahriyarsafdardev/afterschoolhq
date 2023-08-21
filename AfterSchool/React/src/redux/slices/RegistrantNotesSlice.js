@@ -3,7 +3,8 @@ import { useDispatch } from 'react-redux';
 import {
   createRegistrantNote,
   getRegistrantNotes,
-  updateRegistrantNote
+  updateRegistrantNote,
+  deleteRegistrantNote
 } from 'repository/RegistrantNotesRepository';
 
 const RegistrantNotesSlice = createSlice({
@@ -86,7 +87,17 @@ export const useRegistrantNotesActions = () => {
       return msgs;
     });
   };
-  const deleteNote = async params => {};
+
+  const deleteNote = async ({ noteID, updatedRegistrantNotes }) => {
+    dispatch(loadingStart());
+    return await deleteRegistrantNote({ noteID }).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      if (!msgs.length) dispatch(setRegistrantNotes(updatedRegistrantNotes));
+      dispatch(loadingCompleted());
+
+      return msgs;
+    });
+  };
 
   return { getNotes, createNote, updateNote, deleteNote };
 };
