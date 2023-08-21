@@ -17,7 +17,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-
+using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -307,8 +307,11 @@ namespace AfterSchool.Areas.Api.Controllers
                     if (msgs.HasNoErrors())
                         ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
-                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
+                    var candidateId = await backgroundCheckWorkflow.GetSterlingCandidateId(currentUser);
+                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && candidateId.IsEmpty())
                         await InitateBackgroundCheck(currentUser, participationObject, msgs);
+                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && candidateId.IsNotEmpty())
+                        await backgroundCheckWorkflow.ScheduleBackgroundCheck();
                 }
                 
                 return Json(
