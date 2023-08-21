@@ -17,7 +17,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
