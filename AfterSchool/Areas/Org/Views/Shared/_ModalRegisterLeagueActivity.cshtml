@@ -2,7 +2,7 @@
 
 @{
     var listUrl = ViewBag.ListUrl;
-    var activities = (List<ActivityGroup>)ViewBag.AvailableLeagueActivities;
+    var leagues = (List<ActivityGroup>)ViewBag.AvailableLeagues;
     var selectedRegistration = (Registration)ViewBag.SelectedRegistration;
 
     var invalidAssignmentTypes = new RegistrationAssignmentType[] { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Invited, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined, RegistrationAssignmentType.ReservedPendingBackgroundCheck };
@@ -22,9 +22,9 @@
                     <label>@UILabel.ActivityLabel(ActivityGroupType.League)</label>
                     <select name="activity" id="activity" class="form-control" required>
                         <option value="">Select League...</option>
-                        @foreach (var activity in activities)
+                        @foreach (var league in leagues)
                         {
-                            <option value="@activity.Uid">@activity.Name</option>
+                            <option value="@league.Uid">@league.Name</option>
                         }
                     </select>
                 </div>

@@ -533,10 +533,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
             var actGroup = currentAccount.GetActivityGroup(activity.ToGuid(), msgs);
+            var accountActivityGroup = actGroup.GetAccountActivityGroup(currentAccount,msgs);
             var registrant = selectedRegistration.GetRegistrant(msgs);
             var regPeriod = actGroup.GetCurrentOrNextRegistrationPeriod(msgs);
             var assignmentType = (RegistrationAssignmentType) activityassignment.ToInteger();
-            var choiceNumber = 1;
             var registrationPeriodId = new int?();
             if (regPeriod.IsNotEmpty())
                 registrationPeriodId = regPeriod.ID;
@@ -554,7 +554,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                selectedRegistration.WasUpdated(msgs);
+                selectedRegistration.UpdateAccountActivityGroupId(accountActivityGroup.ID, msgs);
 
                 // notify parent
                 var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -720,7 +720,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     x.RegistrationPeriodId == registration.RegistrationPeriodId && x.ID != registration.ID).ToList();
 
             List<Activity> activities = null;
-            List<ActivityGroup> leagueActivities = null;
+            List<AccountActivityGroup> accountActivityGroups = null;
+            List<ActivityGroup> leagues = null;
 
             if (registration.ActivityGroupId.HasValue)
                 activities = registration.GetActivityGroup(msgs).GetActivities(
@@ -744,20 +745,20 @@ namespace AfterSchool.Areas.Org.Controllers
                     start: null,
                     length: null,
                     msgs: msgs);
-                leagueActivities = currentAccount.GetLeagues(
-                    IsArchived: false,
-                    start: null,
-                    length: null,
-                    msgs: msgs);
+
+                accountActivityGroups = AccountActivityGroup.LoadByAccountId(currentAccount.ID.Value);
+                leagues = accountActivityGroups
+                    .Where(aag => aag.InviteStatusId == InviteStatus.Accepted && !aag.ActivityGroupIsArchived)
+                    .Select(aag => aag.GetActivityGroup())
+                    .ToList();
             }
 
             ViewBag.AvailableActivities = activities
                 .Where(x => x.ID.Value.NotIn(rasActivityTypes.Select(y => y.ParticipationObjectId.Value)))
                 .OrderBy(x => x.Name)
                 .ToList();
-            ViewBag.AvailableLeagueActivities = leagueActivities
+            ViewBag.AvailableLeagues = leagues
                             .Where(x => x.ID.Value.NotIn(rasLeagueActivityTypes.Select(y => y.ParticipationObjectId.Value)))
-                            .OrderBy(x => x.Name)
                             .ToList();
             ViewBag.Messages = msgs;
 
