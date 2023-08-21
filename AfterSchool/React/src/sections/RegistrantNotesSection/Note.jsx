@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Box, Typography, Menu, MenuItem } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import useStyles from './styles';
-import { formatDate } from 'utils';
-import { ConfirmationDialog } from 'components';
+import { useSnackbar } from 'notistack';
 
-function Note({ note, handleEdit }) {
+import useStyles from './styles';
+import { ConfirmationDialog } from 'components';
+import { useRegistrantNotes } from 'redux/hooks';
+import { formatDate } from 'utils';
+
+function Note({ index, note, handleEdit }) {
   const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
-  const { Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
+  const { deleteNote, registrantNotes } = useRegistrantNotes();
+  const { ID, Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
   const options = ['EDIT', 'DELETE'];
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -21,6 +26,14 @@ function Note({ note, handleEdit }) {
 
   const handleCloseDialog = () => {
     setIsOpen(false);
+  };
+
+  const handleNoteDeletion = async () => {
+    const { [index]: deletedNote, ...updatedRegistrantNotes } = registrantNotes;
+    await deleteNote({ noteID: ID, updatedRegistrantNotes }).then(msgs => {
+      if (!msgs.length) enqueueSnackbar('Deleted.', { variant: 'success' });
+      handleCloseDialog();
+    });
   };
 
   const handleChange = option => {
@@ -91,9 +104,11 @@ function Note({ note, handleEdit }) {
           </MenuItem>
         ))}
       </Menu>
+
       <ConfirmationDialog
         open={isOpen}
         onClose={handleCloseDialog}
+        onSubmit={handleNoteDeletion}
         title="Delete Note"
         data-testid="delete-selected-note"
         text="Do you want to delete the selected note? This action is irreversible."

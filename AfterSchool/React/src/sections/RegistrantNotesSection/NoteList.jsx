@@ -17,7 +17,7 @@ function NoteList({ handleEdit }) {
   return (
     <Box className={classes.noteListWrapper}>
       {registrantNotes.map((note, key) => (
-        <Note note={note} key={key} handleEdit={handleEdit} />
+        <Note index={key} note={note} key={key} handleEdit={handleEdit} />
       ))}
       {noRecords && <Typography variant="body1">No Notes Found!</Typography>}
     </Box>
