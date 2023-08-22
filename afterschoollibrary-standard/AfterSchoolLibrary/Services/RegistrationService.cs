@@ -1041,6 +1041,13 @@ namespace AfterSchoolLibrary.Services
             registration.LastUpdated = DateTime.UtcNow;
             msgs.AddRange(registration.Save(dc: dc));
         }
+        
+        public static void UpdateAccountActivityGroupId(this Registration registration, int? accountActivityGroupId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registration.LastUpdated = DateTime.UtcNow;
+            registration.AccountActivityGroupId = accountActivityGroupId;
+            msgs.AddRange(registration.Save(dc: dc));
+        }
 
         internal static void DeleteSessionActions(this Registration registration, SystemMessages msgs,
             DatabaseConnection dc = null)

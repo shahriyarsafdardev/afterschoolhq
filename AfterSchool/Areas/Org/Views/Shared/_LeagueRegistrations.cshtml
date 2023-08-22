@@ -1,0 +1,97 @@
+@model List<RegistrantActivity>
+@{
+    var navAction = ViewData["NavAction"].ToString();
+    var navController = ViewData["NavController"].ToString();
+    var navId = ViewData["NavId"].ToString();
+
+    var editAction = ViewData["EditAction"].ToString();
+    var editController = ViewData["EditController"].ToString();
+
+    var paging = (PagingModel)ViewData["Paging"];
+    var account = (Account)ViewData["Account"];
+    var returnUrl = (string)ViewData["ReturnUrl"];
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+
+
+
+    var previousLink = "#";
+    var nextLink = "#";
+    if (paging.IsNotEmpty())
+    {
+        if (paging.PageNumber > 1)
+        {
+            previousLink = Url.Action(navAction, navController, new { id = navId, pn = paging.PageNumber - 1, rpp = Request["rpp"], q = Request["q"], regstatus = Request["regstatus"], activity = Request["activity"], group = Request["group"], at = Request["at"] });
+        }
+        if (paging.PageNumber < paging.TotalPages)
+        {
+            nextLink = Url.Action(navAction, navController, new { id = navId, pn = paging.PageNumber + 1, rpp = Request["rpp"], q = Request["q"], regstatus = Request["regstatus"], activity = Request["activity"], group = Request["group"], at = Request["at"] });
+        }
+    }
+    var queryString = ViewContext.RequestContext.HttpContext.Request.QueryString;
+    var isVolunteerList = queryString.HasKeys() && queryString["volunteers"] == "true";
+}
+
+<div class="table-responsive">
+    <table class="table table-hover">
+
+        <thead>
+            <tr>
+                <th></th>
+                <th class="text-nowrap">Name</th>
+                <th class="text-nowrap">Email</th>
+                <th class="text-nowrap">First Enrolled</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count > 0)
+            {
+                foreach (var registration in Model)
+                {
+
+                    var routeValues = isVolunteerList
+                        ? (object)new { id = registration.Uid, volunteers = "true", returnUrl }
+                        : new { id = registration.Uid, returnUrl };
+                    var editLink = Url.Action(editAction, editController, routeValues);
+                    var registrant = registration.GetRegistrant();
+                    <tr>
+                        <td>
+                            <a href="@editLink" class="btn btn-default btn-sm"><i class="icon icon-left s7-user"></i> View Details</a>
+                        </td>
+                        <td class="text-nowrap">
+                            @if (registrant.Name.IsNotEmpty())
+                            {
+                                <a href="@editLink">@(isTechSupport ? registrant.GetFirstNameLastInitial() : registrant.Name)</a>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            <a href="mailto:@registrant.Email">@registrant.Email</a>
+                        </td>
+                        <td class="text-nowrap">@account.ConvertToAccountTimeZone(registrant.CreateDate.Value).ToShortDateTimeString()</td>
+                    </tr>
+
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7">There are no @UILabel.RegistrantLabel(true).ToLower()</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+
+@{
+    Html.RenderPartial(
+        "~/Views/Shared/_Paging.cshtml",
+        paging,
+        new ViewDataDictionary()
+        {
+            { "id", navId },
+            { "querystring", string.Format("q={0}&regstatus={1}&activity={2}&group={3}&at={4}&volunteers={5}", Request["q"], Request["regstatus"], Request["activity"], Request["group"], Request["at"], Request["volunteers"]) },
+            { "action", navAction },
+            { "controller", navController }
+                }
+    );
+}
