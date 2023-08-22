@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
@@ -21,6 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = SessionVariables.AccountPackage;
+            var currentUserType = currentUser.GetUserType(currentAccount);
 
             //ISYP Directory Check
             if (currentAccount.IsInIsypDirectory(msgs))
@@ -89,13 +91,25 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            var registrationCount = new int();
+
+            if (currentUserType == UserType.Instructor)
+            {
+                var activitiesIds = currentAccount.GetActivities(currentUserType, currentUser, null, ActivityType.Activity, false, false, false, null, null, msgs).Select(a => a.ID.Value).ToList();
+                registrationCount = currentAccount.GetRegistrationsCountByActivityIDsByDate(activitiesIds, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            }
+            else
+            {
+                registrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            }
+
             ViewBag.Messages = msgs;
             ViewBag.HasVisitorAccountsToApprove = currentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
             ViewBag.HasOutstandingLeagueInvites = currentAccount.GetExternalLeagueInviteCount(msgs) > 0;
             ViewBag.TotalPaid = totalPaid;
             ViewBag.ActivityCount = activityCount;
             ViewBag.CurrentRegistrations = currentAccount.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            ViewBag.RegistrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            ViewBag.RegistrationCount = registrationCount;
             ViewBag.TotalPresent = currentAccount.GetAttendancePresentCount(msgs);
             ViewBag.TotalPossible = currentAccount.GetAttendancePossibleCount(msgs);
             ViewBag.TotalCompleted = currentAccount.GetAttendanceCompletedCount(msgs);
