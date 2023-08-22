@@ -478,7 +478,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
             var act = currentAccount.GetActivity(activity.ToGuid(), msgs);
             var registrant = selectedRegistration.GetRegistrant(msgs);
-            var regperiod = act.GetCurrentOrNextRegistrationPeriod(msgs);
+            var regperiod = act.GetActiveRegistrationPeriod(msgs);
             var assignmentType = (RegistrationAssignmentType) activityassignment.ToInteger();
             var choiceNumber = 1;
             var registrationPeriodId = new int?();
