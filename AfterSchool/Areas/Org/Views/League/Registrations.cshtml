@@ -1,8 +1,9 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
 
     var registrations = (List<Registration>)ViewBag.Registrations;
+    var registrants = (List<RegistrantActivity>)ViewBag.Registrants;
     var registrantActivities = (List<RegistrantActivity>)ViewBag.RegistrantActivities;
     var account = (Account)ViewBag.Account;
     var paging = (PagingModel)ViewBag.PagingModel;
@@ -107,11 +108,11 @@
                 </div>
             </div>
 
-            @{ Html.RenderPartial("_Registrations", registrations, new ViewDataDictionary() {
+            @{ Html.RenderPartial("_LeagueRegistrations", registrants, new ViewDataDictionary() {
                { "NavAction", "registrations" },
                { "NavController", "league" },
                { "NavId", Model.Uid },
-               { "EditAction", "edit" },
+               { "EditAction", "registrantedit" },
                { "EditController", "registration" },
                { "Account", account },
                { "Paging", paging },

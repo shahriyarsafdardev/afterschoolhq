@@ -15,10 +15,13 @@
             <i class="s7-gleam"></i>
             Add @UILabel.ActivityLabel(ActivityType.Activity)
         </button>
-        <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add-league" id="leagueactivityadd">
-            <i class="s7-gleam"></i>
-            Add @UILabel.ActivityLabel(ActivityGroupType.League)
-        </button>
+        @if(account.IsNotEmpty() && account.HasAccountPackageFeature(FeatureType.ManageExternalLeagues))
+        { 
+            <button type="button" class="btn btn-alt6 md-trigger" data-modal="modal-activity-add-league" id="leagueactivityadd">
+                <i class="s7-gleam"></i>
+                Add @UILabel.ActivityGroupLabel(ActivityGroupType.League)
+            </button>
+        }
         <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
             <i class="s7-edit"></i> Edit Registration
         </a>

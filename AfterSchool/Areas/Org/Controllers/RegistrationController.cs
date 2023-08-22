@@ -124,7 +124,27 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return RedirectToAction("index", new {volunteers, q, activity, emailed = "1", question, group, at, regstatus});
         }
+        [HttpGet]
+        public ActionResult RegistrantEdit(string id, string r, string returnUrl)
+        {
+            if (id.IsEmpty() || id.IsNotGuid())
+                return HttpNotFound();
 
+            var currentAccount = SessionVariables.CurrentAccount;
+            var msgs = new SystemMessages();
+            var registrantActivity = RegistrantActivityService.GetRegistrantActivity(id.ToGuid(), msgs);
+            var registration = registrantActivity.GetRegistration(msgs);
+            if (registrantActivity.IsEmpty())
+                return HttpNotFound();
+            ViewBag.Messages = msgs;
+            LoadRegistrationViewBag(registration, r, msgs);
+
+            if (registration.IsEmpty())
+                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
+
+            ViewBag.ReturnURl = returnUrl;
+            return View("Edit",registration);
+        }
         [HttpGet]
         public ActionResult Edit(string id, string r, string returnUrl)
         {
@@ -543,8 +563,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             registrant.AddOrUpdateParticipationObject(
                 selectedRegistration.ID.Value,
-                actGroup.ID.Value,
-                ParticipationObjectType.ActivityGroup,
+                accountActivityGroup.ID.Value,
+                ParticipationObjectType.AccountActivityGroup,
                 assignmentType,
                 registrationPeriodId,
                 actGroup.ID,
@@ -554,8 +574,6 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (msgs.HasNoErrors())
             {
-                selectedRegistration.UpdateAccountActivityGroupId(accountActivityGroup.ID, msgs);
-
                 // notify parent
                 var masterRegistrant = registrant.GetMasterRegistrant(msgs);
 
@@ -567,7 +585,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             PayingAccount = masterRegistrant.GetAccount(msgs),
                             MasterRegistrant = masterRegistrant,
                             NumberOfSeats = 1,
-                            ParticipationObject = actGroup.GetParticipationObject(msgs),
+                            ParticipationObject = accountActivityGroup.GetParticipationObject(msgs),
                             Registration = selectedRegistration,
                         },
                         null, currentUser, true, msgs);
@@ -707,7 +725,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var ras = registration.GetRegistrantActivities(msgs);
             var rasActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.Activity);
-            var rasLeagueActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
+            var rasLeagueActivityTypes = ras.Where(y => y.ParticipationObjectTypeId == ParticipationObjectType.AccountActivityGroup);
             ViewBag.Registrant = registrant;
             ViewBag.Account = currentAccount;
             ViewBag.Answers = registration.GetAnswers(msgs);
@@ -758,7 +776,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 .OrderBy(x => x.Name)
                 .ToList();
             ViewBag.AvailableLeagues = leagues
-                            .Where(x => x.ID.Value.NotIn(rasLeagueActivityTypes.Select(y => y.ParticipationObjectId.Value)))
+                            .Where(x => x.GetAccountActivityGroup(currentAccount,msgs).ID.Value.NotIn(rasLeagueActivityTypes.Select(y => y.ParticipationObjectId.Value)))
                             .ToList();
             ViewBag.Messages = msgs;
 
