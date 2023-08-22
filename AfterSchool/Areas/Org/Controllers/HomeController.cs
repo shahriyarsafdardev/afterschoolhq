@@ -99,9 +99,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationCount = currentAccount.GetRegistrationsCountByActivityIDsByDate(activitiesIds, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
             }
             else
-            {
                 registrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            }
 
             ViewBag.Messages = msgs;
             ViewBag.HasVisitorAccountsToApprove = currentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
