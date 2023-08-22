@@ -552,7 +552,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
-            var actGroup = currentAccount.GetActivityGroup(activity.ToGuid(), msgs);
+            var actGroup = ActivityGroup.LoadByUid(activity.ToGuid(),msgs);
             var accountActivityGroup = actGroup.GetAccountActivityGroup(currentAccount,msgs);
             var registrant = selectedRegistration.GetRegistrant(msgs);
             var regPeriod = actGroup.GetCurrentOrNextRegistrationPeriod(msgs);
@@ -573,38 +573,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs);
 
             if (msgs.HasNoErrors())
-            {
-                // notify parent
-                var masterRegistrant = registrant.GetMasterRegistrant(msgs);
-
-                if (masterRegistrant.IsNotEmpty())
-                    selectedRegistration.SendConfirmation(
-                        new CheckoutObject
-                        {
-                            BillingAccount = currentAccount,
-                            PayingAccount = masterRegistrant.GetAccount(msgs),
-                            MasterRegistrant = masterRegistrant,
-                            NumberOfSeats = 1,
-                            ParticipationObject = accountActivityGroup.GetParticipationObject(msgs),
-                            Registration = selectedRegistration,
-                        },
-                        null, currentUser, true, msgs);
-
-                // LOG:  CurrentWebUser added Registrant RegistrantName to Activity ActivityName
-                SessionVariables.WebSession.LogActivity(
-                    account: currentAccount,
-                    actor: currentUser,
-                    actionType: WebSessionActionType.Added,
-                    objectId: registrant.ID.Value,
-                    objectType: ObjectType.Registrant,
-                    objectText: registrant.GetFirstNameLastInitial(),
-                    indirectObjectId: actGroup.ID.Value,
-                    indirectObjectType: ObjectType.Activity,
-                    indirectObjectText: actGroup.Name,
-                    msgs: msgs);
-
                 msgs.Add($"{actGroup.Name} has been added for {registrant.Name}", MessageType.Success);
-            }
 
             LoadRegistrationViewBag(registration, r, msgs);
 

@@ -845,14 +845,10 @@ namespace AfterSchoolLibrary.Services
         public static ActivityGroup GetActivityGroup(this Account account, Guid Uid, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            if (account.IsNotEmpty() && account.FiscalAccountId.IsEmpty())
+            if (account.IsNotEmpty())
                 return ActivityGroup.LoadByUidByAccountId(Uid, account.ID.Value, msgs, dc);
-            
-            else if(account.IsNotEmpty() && account.FiscalAccountId.IsNotEmpty())
-                return ActivityGroup.LoadByUidByAccountId(Uid, account.FiscalAccountId.Value, msgs, dc);
-            
-            else 
-                return null;
+
+            return null;
         }
 
         public static List<ActivityGroup> GetActivityGroups(this Account account, SystemMessages msgs = null,
