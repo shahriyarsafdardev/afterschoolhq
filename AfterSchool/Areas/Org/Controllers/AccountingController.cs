@@ -650,7 +650,7 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 var activities = currentAccount.GetActivities(msgs)?
                     .Where(activity => activity.IsOpenOrUpcoming(msgs) && !activity.IsFree && !activity.HasPostPayPlan(msgs) &&
-                                       activity.CostPerRegistrant.HasValue && activity.CostPerRegistrant > 0)
+                                       !activity.IsRegistrationFree)
                     .Select(m => new ModalViewModel()
                     {
                         ID = m.ID.Value.ToString(),
