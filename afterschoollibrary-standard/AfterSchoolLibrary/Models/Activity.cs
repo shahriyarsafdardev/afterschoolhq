@@ -1232,6 +1232,8 @@ namespace AfterSchoolLibrary.Models
 
         public bool IsFree => (!CostPerRegistrant.HasValue || CostPerRegistrant.Value == 0) && !HasSubscriptionPlan() && !HasPaymentPlan() && !HasPostPayPlan();
 
+        public bool IsRegistrationFree => (!CostPerRegistrant.HasValue || CostPerRegistrant.Value == 0);
+
         public bool HasRegistrationFeeOrPostPayPlan => ((CostPerRegistrant.HasValue && CostPerRegistrant.Value > 0) || HasPostPayPlan()) &&
                                                        !HasSubscriptionPlan() && !HasPaymentPlan();
 
