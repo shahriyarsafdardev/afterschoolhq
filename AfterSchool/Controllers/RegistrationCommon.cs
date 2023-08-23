@@ -441,7 +441,7 @@ namespace AfterSchool.Controllers
                     else
                     {
                         submittedRecord.AddOrUpdateAnswer(
-                            qvm.Value,
+                            request.Form[qvm.Name],
                             qvm.Question,
                             registration?.ID,
                             currentUser,
