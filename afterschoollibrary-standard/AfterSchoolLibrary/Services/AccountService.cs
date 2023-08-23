@@ -198,7 +198,7 @@ namespace AfterSchoolLibrary.Services
             return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
         }
-        public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc, ActivityType activityType)
+        public static bool CanPublishFreeActivity(this Account account, ActivityType activityType, SystemMessages msgs, DatabaseConnection dc)
         {
             var freeActivityLimitPackageFeature = new AccountPackageFeature();
 
