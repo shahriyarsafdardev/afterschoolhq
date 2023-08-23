@@ -11,7 +11,7 @@ import { useRegistrantNotes } from 'redux/hooks';
 import TextField from 'components/Overrides/TextField';
 import LoadingButton from 'components/Overrides/LoadingButton';
 import TextAreaField from 'components/Overrides/TextAreaField';
-import { changeDateTimeFormat, getAndFormatDateTime } from 'constants';
+import { changeDateTimeFormat, getAndFormatDateTime } from 'utils';
 
 function AddNewNoteModal(props) {
   const classes = useStyles();
