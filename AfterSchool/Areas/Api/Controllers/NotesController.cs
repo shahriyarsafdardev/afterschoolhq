@@ -280,7 +280,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-
+        [HttpPost]
         public ActionResult DeleteRegistrantNote(int noteId)
         {
             var msgs = new SystemMessages();
