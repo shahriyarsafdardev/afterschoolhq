@@ -10,13 +10,13 @@ function NoteList({ handleEdit }) {
   const { registrantNotes, loading } = useRegistrantNotes();
 
   const classes = useStyles();
-  const noRecords = registrantNotes.length === 0;
+  const noRecords = registrantNotes?.length === 0;
 
   if (loading) return <Loader />;
 
   return (
     <Box className={classes.noteListWrapper}>
-      {registrantNotes.map((note, key) => (
+      {registrantNotes?.map((note, key) => (
         <Note index={key} note={note} key={key} handleEdit={handleEdit} />
       ))}
       {noRecords && <Typography variant="body1">No Notes Found!</Typography>}

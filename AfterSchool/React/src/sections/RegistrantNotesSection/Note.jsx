@@ -29,8 +29,7 @@ function Note({ index, note, handleEdit }) {
   };
 
   const handleNoteDeletion = async () => {
-    const { [index]: deletedNote, ...updatedRegistrantNotes } = registrantNotes;
-    await deleteNote({ noteID: ID, updatedRegistrantNotes }).then(msgs => {
+    await deleteNote({ noteID: ID }).then(msgs => {
       if (!msgs.length) enqueueSnackbar('Deleted.', { variant: 'success' });
       handleCloseDialog();
     });
@@ -90,6 +89,7 @@ function Note({ index, note, handleEdit }) {
         keepMounted
         open={open}
         onClose={() => setAnchorEl(null)}
+        disableScrollLock={true}
         PaperProps={{
           style: {}
         }}
@@ -111,7 +111,7 @@ function Note({ index, note, handleEdit }) {
         onSubmit={handleNoteDeletion}
         title="Delete Note"
         data-testid="delete-selected-note"
-        text="Do you want to delete the selected note? This action is irreversible."
+        text={`Do you want to delete the ${title} note? This action is irreversible.`}
       />
     </Box>
   );
