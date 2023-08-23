@@ -1951,6 +1951,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (activity.IsContinuousEnrollment && repeatsweekly.IsEmpty())
+                    repeatsweekly = "1";
                 if (repeatsweekly.IsEmpty() && isongoing == "1")
                     isongoing = null;
                 if (activity.IsContinuousEnrollment && hasschedule == "1")
