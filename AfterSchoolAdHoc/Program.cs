@@ -5,6 +5,7 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
 using System.Drawing.Text;
+using AfterSchoolLibrary.Integrations;
 
 internal class Program
 {
@@ -34,10 +35,18 @@ internal class Program
         }
 
         var config = JsonConvert.DeserializeObject<DatabaseConfig>(json)?.AdHocSqlServer;
+        var sterlingCred = JsonConvert.DeserializeObject<SterlingConfig>(json)?.Sterling;
         if (config is null)
         {
             Console.WriteLine(
                 @"Ad hoc config section has not been added to the local overrides file file not found; confirm file exists and is in the correct location and try again");
+            return;
+        }
+        
+        if (sterlingCred is null)
+        {
+            Console.WriteLine(
+                @"Sterling config section has not been added to the local overrides file file not found; confirm file exists and is in the correct location and try again");
             return;
         }
 
@@ -47,9 +56,9 @@ internal class Program
 
         // doCSVReportGenerator(dc);
 
-        // JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
+        //JotFormImporter.Run("Z:\\Downloads\\Get_started_with_AfterSchool_HQ2022-12-02_15_49_51_Clean.csv", msgs, dc);
 
         // FormDataFix.Run(msgs, dc);
-        InititiateVolunteerBackgroundCheck.Run(msgs,dc);
+        InititiateVolunteerBackgroundCheck.Run(sterlingCred, msgs, dc);
     }
 }
