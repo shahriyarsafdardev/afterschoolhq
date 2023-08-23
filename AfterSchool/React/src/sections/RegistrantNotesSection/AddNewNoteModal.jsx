@@ -11,7 +11,7 @@ import { useRegistrantNotes } from 'redux/hooks';
 import TextField from 'components/Overrides/TextField';
 import LoadingButton from 'components/Overrides/LoadingButton';
 import TextAreaField from 'components/Overrides/TextAreaField';
-import { changeDateTimeFormat, getCurrentDateTime } from 'constants';
+import { changeDateTimeFormat, getAndFormatDateTime } from 'constants';
 
 function AddNewNoteModal(props) {
   const classes = useStyles();
@@ -25,7 +25,7 @@ function AddNewNoteModal(props) {
     ID: noteId,
     Title: title = '',
     Text: text = '',
-    PostDate: postDate = getCurrentDateTime()
+    PostDate: postDate = getAndFormatDateTime()
   } = noteValue || {};
 
   useEffect(() => {
@@ -45,7 +45,7 @@ function AddNewNoteModal(props) {
       .max(4000, 'Text should be less than 4000 characters'),
     postDate: Yup.date()
       .required('Date is required')
-      .max(new Date(getCurrentDateTime()), `Date should be not be in future`)
+      .max(new Date(getAndFormatDateTime()), `Date should be not be in future`)
   });
 
   const addNewNote = async () => {
@@ -172,7 +172,7 @@ function AddNewNoteModal(props) {
                   autofill="false"
                   required={true}
                   multiline
-                  minRows={5}
+                  minRows={8}
                   maxRows={10}
                   {...getFieldProps('text')}
                   error={!!(touched['text'] && errors['text'])}

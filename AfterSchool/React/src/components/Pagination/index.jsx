@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Pagination, PaginationItem } from '@material-ui/lab';
 import { useSearchParams } from 'react-router-dom';
@@ -13,6 +13,9 @@ const useStyles = makeStyles(theme => ({
     },
     '& .MuiPaginationItem-rounded': {
       borderRadius: 0
+    },
+    '& .MuiButtonBase-root': {
+      fontSize: '14px'
     }
   },
   itemSelected: {
@@ -29,17 +32,15 @@ const DEFAULT_PAGE = 1;
 export default function PaginationRounded({ totalPages = 50 }) {
   const classes = useStyles();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentPage, setCurrentPage] = useState(searchParams.get('pageNo'));
-
-  const handlePageChange = (_event, value) => {
-    setCurrentPage(value);
-    setSearchParams(buildQueryParams('pageNo', value, searchParams));
-  };
+  const currentPage = Number(searchParams.get('pageNo')) || 1;
 
   useEffect(() => {
     if (!searchParams.get('pageNo')) setSearchParams(buildQueryParams('pageNo', DEFAULT_PAGE));
-    setCurrentPage(Number(searchParams.get('pageNo')) || DEFAULT_PAGE);
   }, []);
+
+  const handlePageChange = (_event, value) => {
+    setSearchParams(buildQueryParams('pageNo', value, searchParams));
+  };
 
   const renderItem = item => {
     if (['previous', 'next'].includes(item.type))

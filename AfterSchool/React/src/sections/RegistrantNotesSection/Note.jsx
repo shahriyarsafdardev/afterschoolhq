@@ -10,19 +10,26 @@ import { buildQueryParams, formatDate } from 'utils';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { PER_PAGE } from 'constants';
 
+const OPTIONS = ['EDIT', 'DELETE'];
+
 function Note({ note, handleEdit }) {
   const classes = useStyles();
+  const { regUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [showMore, setShowMore] = useState(false);
+
   const { deleteNote, registrantNotes, totalPages, getNotes } = useRegistrantNotes();
   const { ID, Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
-  const options = ['EDIT', 'DELETE'];
-  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [searchParams, setSearchParams] = useSearchParams();
-  const pageNo = Number(searchParams.get('pageNo')) || 1;
+
+  const shouldShow = text.length > 530;
   const query = searchParams.get('searchQuery') || '';
-  const { regUid } = useParams();
+  const pageNo = Number(searchParams.get('pageNo')) || 1;
+  const noteText = showMore ? text : text.substring(0, 500);
+  const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -42,7 +49,9 @@ function Note({ note, handleEdit }) {
   const handleNoteDeletion = async () => {
     await deleteNote({ noteID: ID }).then(msgs => {
       if (!msgs.length) enqueueSnackbar('Deleted.', { variant: 'success' });
+
       handleCloseDialog();
+
       if (pageNo === totalPages && registrantNotes.length === 1 && pageNo > 1) {
         setSearchParams(buildQueryParams('pageNo', pageNo - 1, searchParams));
       } else {
@@ -60,12 +69,6 @@ function Note({ note, handleEdit }) {
         return handleDeletionDialog();
     }
   };
-
-  const [showMore, setShowMore] = useState(false);
-
-  const shouldShow = text.length > 530;
-  const noteText = showMore ? text : text.substring(0, 500);
-  const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
 
   return (
     <Box className={classes.noteWrapper}>
@@ -100,20 +103,20 @@ function Note({ note, handleEdit }) {
         </Box>
       )}
       <Menu
+        open={open}
+        keepMounted
         id="simple-menu"
         anchorEl={anchorEl}
-        keepMounted
-        open={open}
-        onClose={() => setAnchorEl(null)}
         disableScrollLock={true}
+        onClose={() => setAnchorEl(null)}
         PaperProps={{
           style: {}
         }}
       >
-        {options.map(option => (
+        {OPTIONS.map(option => (
           <MenuItem
-            data-testid={`menu-item-${option}`}
             key={option}
+            data-testid={`menu-item-${option}`}
             onClick={() => handleChange(option)}
           >
             {option}
