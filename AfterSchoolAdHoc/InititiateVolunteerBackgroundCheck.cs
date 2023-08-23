@@ -20,9 +20,11 @@ internal class InititiateVolunteerBackgroundCheck
             var registration = registrant.GetRegistrations(msgs,dc).FirstOrDefault();
             var participationObject = registration.GetFirstParticipationObject(msgs, dc);
             var webUser = registrant.GetWebUser(msgs, dc);
+            var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, true, msgs)
+                .OrderByDescending(x => x.CreateDate).FirstOrDefault();
 
             // if (registration.IsNotEmpty() && participationObject.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty()
-            //     && !registration.ESignature.Equals("IMPORTED"))
+            //     && backgroundCheck.IsEmpty() && !registration.ESignature.Equals("IMPORTED"))
             //     InitateBackgroundCheck(webUser, participationObject,msgs);
         });
     }
