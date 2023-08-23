@@ -24,6 +24,14 @@ const RegistrantNotesSlice = createSlice({
     setRegistrantNotes: (state, { payload }) => {
       state.registrantNotes = payload;
     },
+    addNewRegistrantNote: (state, { payload }) => {
+      const updatedNotes = [...state.registrantNotes];
+
+      if (updatedNotes.length >= 3) {
+        updatedNotes.pop();
+      }
+      state.registrantNotes = [payload, ...updatedNotes];
+    },
     setPaginationData: (state, { payload: { TotalPages, PageNo } }) => {
       state.totalPages = TotalPages;
       state.pageNo = PageNo;
@@ -36,6 +44,18 @@ const RegistrantNotesSlice = createSlice({
     },
     loadingCompleted: state => {
       state.loading = false;
+    },
+    deleteRegNote: (state, { payload: { noteID } }) => {
+      const updatedNotes = state.registrantNotes.filter(note => note.ID !== noteID);
+      state.registrantNotes = [...updatedNotes];
+    },
+    updateRegNote: (state, { payload }) => {
+      const updatedNotes = [...state.registrantNotes];
+
+      const index = updatedNotes.findIndex(note => note.ID === payload.ID);
+
+      updatedNotes[index] = payload;
+      state.registrantNotes = updatedNotes;
     }
   }
 });
@@ -45,10 +65,13 @@ export const useRegistrantNotesActions = () => {
   const {
     setMsgs,
     loadingStart,
+    deleteRegNote,
+    updateRegNote,
     loadingCompleted,
     setRegistrantName,
     setPaginationData,
-    setRegistrantNotes
+    setRegistrantNotes,
+    addNewRegistrantNote
   } = RegistrantNotesSlice.actions;
 
   const getNotes = async (regUid, perPage, pageNo, searchQuery = '') => {
@@ -64,12 +87,12 @@ export const useRegistrantNotesActions = () => {
     dispatch(loadingCompleted());
   };
 
-  const createNote = async ({ registrantNotes, ...params }) => {
+  const createNote = async ({ ...params }) => {
     dispatch(loadingStart());
     return await createRegistrantNote(params).then(({ data: { msgs, obj } }) => {
       dispatch(setMsgs(msgs));
       if (!msgs.length) {
-        dispatch(setRegistrantNotes([obj.Note, ...registrantNotes]));
+        dispatch(addNewRegistrantNote(obj.Note));
       }
       dispatch(loadingCompleted());
       return msgs;
@@ -80,19 +103,17 @@ export const useRegistrantNotesActions = () => {
     dispatch(loadingStart());
     return await updateRegistrantNote(params).then(({ data: { msgs, obj } }) => {
       dispatch(setMsgs(msgs));
-      if (!msgs.length) {
-        // TODO: Update the resgistrantNotes array with the API response
-      }
+      if (!msgs.length) dispatch(updateRegNote(obj.Note));
       dispatch(loadingCompleted());
       return msgs;
     });
   };
 
-  const deleteNote = async ({ noteID, updatedRegistrantNotes }) => {
+  const deleteNote = async ({ noteID }) => {
     dispatch(loadingStart());
     return await deleteRegistrantNote({ noteID }).then(({ data: { msgs } }) => {
       dispatch(setMsgs(msgs));
-      if (!msgs.length) dispatch(setRegistrantNotes(updatedRegistrantNotes));
+      if (!msgs.length) dispatch(deleteRegNote({ noteID }));
       dispatch(loadingCompleted());
 
       return msgs;

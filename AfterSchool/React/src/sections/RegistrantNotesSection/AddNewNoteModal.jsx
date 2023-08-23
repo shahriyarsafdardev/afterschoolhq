@@ -15,20 +15,18 @@ import { changeDateTimeFormat, getCurrentDateTime } from 'constants';
 
 function AddNewNoteModal(props) {
   const classes = useStyles();
+  const { regUid } = useParams();
+  const { enqueueSnackbar } = useSnackbar();
+  const [saveDisabled, setSaveDisabled] = useState(false);
   const { open, noteValue = {}, handleClose, isUpdating = false } = props;
+  const { createNote, msgs, updateNote } = useRegistrantNotes();
+  const headerText = isUpdating ? 'Update Note' : 'Add New Note';
   const {
     ID: noteId,
     Title: title = '',
     Text: text = '',
     PostDate: postDate = getCurrentDateTime()
   } = noteValue || {};
-  const { enqueueSnackbar } = useSnackbar();
-
-  const headerText = isUpdating ? 'Update Note' : 'Add New Note';
-
-  const { regUid } = useParams();
-  const [saveDisabled, setSaveDisabled] = useState(false);
-  const { createNote, msgs, registrantNotes, updateNote } = useRegistrantNotes();
 
   useEffect(() => {
     return () => {
@@ -55,8 +53,7 @@ function AddNewNoteModal(props) {
     await createNote({
       ...values,
       postDate: formattedDate,
-      registrationUid: regUid,
-      registrantNotes: registrantNotes
+      registrationUid: regUid
     }).then(msgs => {
       if (!msgs.length) {
         enqueueSnackbar('Submitted.', { variant: 'success' });
@@ -78,8 +75,7 @@ function AddNewNoteModal(props) {
       ...values,
       postDate: formattedDate,
       noteId,
-      createNewVersion,
-      registrantNotes: registrantNotes
+      createNewVersion
     }).then(msgs => {
       if (!msgs.length) {
         enqueueSnackbar('Submitted.', { variant: 'success' });
@@ -89,7 +85,7 @@ function AddNewNoteModal(props) {
   };
 
   const formik = useFormik({
-    enableReinitialize: true,
+    enableReinitialize: false,
     initialValues: {
       title,
       text,
@@ -174,7 +170,15 @@ function AddNewNoteModal(props) {
                   variant="outlined"
                   autofill="false"
                   required={true}
+                  style={{ resize: 'none' }}
                   {...getFieldProps('text')}
+                  InputProps={{
+                    classes: {
+                      root: classes.root,
+                      focused: classes.focused,
+                      notchedOutline: classes.notchedOutline
+                    }
+                  }}
                   error={!!(touched['text'] && errors['text'])}
                   helperText={touched['text'] && errors['text']}
                 />

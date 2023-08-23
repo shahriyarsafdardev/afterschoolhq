@@ -10,13 +10,19 @@ const useStyles = makeStyles(theme => ({
   root: {
     '& > *': {
       marginTop: theme.spacing(2)
+    },
+    '& .MuiPaginationItem-rounded': {
+      borderRadius: 0
     }
   },
   itemSelected: {
     backgroundColor: `${theme.palette.primary.dark} !important`,
     color: 'white'
   },
-  itemButton: { height: 32, borderRadius: 4 }
+  itemButton: {
+    height: 32,
+    borderRadius: 0
+  }
 }));
 
 const DEFAULT_PAGE = 1;
