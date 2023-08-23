@@ -691,12 +691,11 @@ namespace AfterSchool.Areas.Org.Controllers
             foreach (var id in list)
             {
                 var contactList = ContactList.Load(id.ToInteger());
-                List<Registrant> contacts = null;
 
                 if (contactList.AccountId != SessionVariables.CurrentAccount.ID)
                     msgs.Add("Invalid contact list", MessageType.UserError);
 
-                contacts = contactList.GetContacts(msgs);
+                var contacts = contactList.GetContacts(msgs);
 
                 // get session information because it isn't available in a background task
                 var loggedInUser = SessionVariables.CurrentUser;
@@ -730,7 +729,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 foreach(var id in list)
                 {
                     var contactList = ContactList.Load(id.ToInteger());
-                    List<Registrant> contacts = null;
+                    var contacts = new List<Registrant>();
                     Database.ExecuteTransaction
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -789,7 +788,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 foreach (var id in list)
                 {
                     var contactList = ContactList.Load(id.ToInteger());
-                    List<Registrant> contacts = null;
+                    var contacts = new List<Registrant>();
                     Database.ExecuteTransaction
                     (
                         action: (SystemMessages amsgs, DatabaseConnection adc) =>
