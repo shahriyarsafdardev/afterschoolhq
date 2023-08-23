@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, TextareaAutosize, FormHelperText } from '@material-ui/core';
+import { Box, Typography, TextField as MuiTextField, FormHelperText } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -23,11 +23,9 @@ export default function TextAreaField(props) {
       </Box>
 
       <Box className={classes.textfieldWrapper}>
-        <TextareaAutosize
-          data-testid={customLabel}
-          minRows={10}
-          maxRows={10}
+        <MuiTextField
           className={classes.formControlClass}
+          fullWidth
           variant="outlined"
           {...fieldProps}
         />
