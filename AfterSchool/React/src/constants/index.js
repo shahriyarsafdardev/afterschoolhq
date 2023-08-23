@@ -1,6 +1,7 @@
 export { simpleQuestionTypes as questionType } from './questionType';
 export const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
 
+export const PER_PAGE = 3;
 export const gradeIds = {
   'Pre-K': 0,
   K: 1,

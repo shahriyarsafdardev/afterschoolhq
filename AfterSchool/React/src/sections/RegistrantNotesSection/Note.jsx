@@ -6,17 +6,23 @@ import { useSnackbar } from 'notistack';
 import useStyles from './styles';
 import { ConfirmationDialog } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
-import { formatDate } from 'utils';
+import { buildQueryParams, formatDate } from 'utils';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { PER_PAGE } from 'constants';
 
-function Note({ index, note, handleEdit }) {
+function Note({ note, handleEdit }) {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
   const [isOpen, setIsOpen] = useState(false);
-  const { deleteNote, registrantNotes } = useRegistrantNotes();
+  const { deleteNote, registrantNotes, totalPages, getNotes } = useRegistrantNotes();
   const { ID, Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
   const options = ['EDIT', 'DELETE'];
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const pageNo = Number(searchParams.get('pageNo')) || 1;
+  const query = searchParams.get('searchQuery') || '';
+  const { regUid } = useParams();
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -28,10 +34,20 @@ function Note({ index, note, handleEdit }) {
     setIsOpen(false);
   };
 
+  const getRegNotes = () => {
+    if (!pageNo) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
+    else getNotes(regUid, PER_PAGE, pageNo, query);
+  };
+
   const handleNoteDeletion = async () => {
     await deleteNote({ noteID: ID }).then(msgs => {
       if (!msgs.length) enqueueSnackbar('Deleted.', { variant: 'success' });
       handleCloseDialog();
+      if (pageNo === totalPages && registrantNotes.length === 1 && pageNo > 1) {
+        setSearchParams(buildQueryParams('pageNo', pageNo - 1, searchParams));
+      } else {
+        getRegNotes();
+      }
     });
   };
 
