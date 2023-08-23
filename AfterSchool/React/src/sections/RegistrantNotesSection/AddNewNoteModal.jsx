@@ -170,15 +170,10 @@ function AddNewNoteModal(props) {
                   variant="outlined"
                   autofill="false"
                   required={true}
-                  style={{ resize: 'none' }}
+                  multiline
+                  minRows={5}
+                  maxRows={10}
                   {...getFieldProps('text')}
-                  InputProps={{
-                    classes: {
-                      root: classes.root,
-                      focused: classes.focused,
-                      notchedOutline: classes.notchedOutline
-                    }
-                  }}
                   error={!!(touched['text'] && errors['text'])}
                   helperText={touched['text'] && errors['text']}
                 />

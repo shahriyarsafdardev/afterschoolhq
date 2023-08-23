@@ -17,7 +17,6 @@ export default makeStyles(theme => ({
     color: 'red'
   },
   formControlClass: {
-    border: '1px solid #c4c4c4',
     marginTop: '10px',
     display: 'block',
     width: '100%',
@@ -30,7 +29,6 @@ export default makeStyles(theme => ({
     borderRadius: '5px',
     '& .MuiOutlinedInput-root': {
       width: '100%',
-      minHeight: '40px'
     }
   },
   flexCenter: {
