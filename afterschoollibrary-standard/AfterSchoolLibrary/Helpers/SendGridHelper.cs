@@ -92,7 +92,6 @@ namespace AfterSchoolLibrary
             if (response.StatusCode != HttpStatusCode.Accepted)
                 msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
             //}
-
             return msgs;
         }
 
