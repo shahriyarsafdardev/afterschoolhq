@@ -9,9 +9,8 @@ import { Pagination } from 'components';
 import AddNewNoteModal from './AddNewNoteModal';
 import { useRegistrantNotes } from 'redux/hooks';
 import { Debounce, buildQueryParams } from 'utils';
-import { getCurrentDateTime } from 'constants';
+import { getCurrentDateTime, PER_PAGE } from 'constants';
 
-const PER_PAGE = 3;
 const RegistrantNotesSection = () => {
   const classes = useStyles();
   const { regUid } = useParams();
@@ -42,9 +41,13 @@ const RegistrantNotesSection = () => {
     }
   };
 
-  useEffect(() => {
+  const getRegNotes = () => {
     if (!pageNo) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
     else getNotes(regUid, PER_PAGE, pageNo, query);
+  };
+
+  useEffect(() => {
+    getRegNotes(regUid, pageNo, setSearchParams, searchParams, query);
   }, [pageNo]);
 
   useEffect(() => {
@@ -101,6 +104,7 @@ const RegistrantNotesSection = () => {
           handleEdit={handleEdit}
           handleClose={handleClose}
           noteValue={editNoteValue}
+          getRegNotes={getRegNotes}
         />
       )}
     </Box>

@@ -18,7 +18,7 @@ function AddNewNoteModal(props) {
   const { regUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [saveDisabled, setSaveDisabled] = useState(false);
-  const { open, noteValue = {}, handleClose, isUpdating = false } = props;
+  const { open, noteValue = {}, handleClose, isUpdating = false, getRegNotes } = props;
   const { createNote, msgs, updateNote } = useRegistrantNotes();
   const headerText = isUpdating ? 'Update Note' : 'Add New Note';
   const {
@@ -58,6 +58,7 @@ function AddNewNoteModal(props) {
       if (!msgs.length) {
         enqueueSnackbar('Submitted.', { variant: 'success' });
         handleClose();
+        getRegNotes();
       }
     });
   };
