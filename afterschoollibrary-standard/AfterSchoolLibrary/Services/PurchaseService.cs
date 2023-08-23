@@ -1,4 +1,4 @@
-﻿using BasicLibrary;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using AfterSchoolLibrary.Models;
@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Services
 
             var purchase = new Purchase()
             {
-                AmountPaid = checkoutObject.StripeChargeId != null ? totalCost : 0,
+                AmountPaid = totalCost,
                 CouponId = checkoutObject.Coupon?.ID,
                 CreateDate = checkoutObject.Date,
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
