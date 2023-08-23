@@ -57,7 +57,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var start = recordsPerPage * (pageNumber - 1);
                 var length = recordsPerPage;
                 var firstRegistrantId = currentRegistrant.FirstRegistrantId.IsEmpty() ? currentRegistrant.ID : currentRegistrant.FirstRegistrantId;
-                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs);
+                var registrantNotes = RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs)
+                    .OrderByDescending(rnv => rnv.ID).ToList();
                 var registrantNotesDto = new RegistrantNotesDto();
                 var notesDto = new List<NotesDto>();
 
@@ -239,7 +240,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     Title = title,
                                     Text = text,
                                     RegistrantNoteId = registrantNote.ID.Value,
-                                    IsDeleted = false,
+                                    IsDeleted = false,    
                                 };
                                 amsgs.AddRange(registrantNoteVersion.Save(adc));
                             }   
@@ -260,6 +261,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         Text = registrantNoteVersion.Text,
                         CreatedByName = currentUser.DisplayName,
                         PostDate = registrantNote.PostDate.ToShortDateTimeString(),
+                        IsEditable = true,
                     };
 
                 dynamic response = new
