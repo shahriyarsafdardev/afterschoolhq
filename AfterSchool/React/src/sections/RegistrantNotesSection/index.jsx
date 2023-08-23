@@ -1,45 +1,29 @@
-import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
 import { Typography, Box, Button, TextField, Divider } from '@material-ui/core';
-
 import useStyles from './styles';
 import NoteList from './NoteList';
-import { Pagination } from 'components';
 import AddNewNoteModal from './AddNewNoteModal';
+
+import { Pagination } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
 import { Debounce, buildQueryParams } from 'utils';
-import { getCurrentDateTime, PER_PAGE } from 'constants';
+import { getAndFormatDateTime, PER_PAGE } from 'constants';
 
 const RegistrantNotesSection = () => {
   const classes = useStyles();
   const { regUid } = useParams();
-  const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const [open, setOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editNoteValue, setEditNoteValue] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { getNotes, totalPages, registrantName, msgs, registrantNotes } = useRegistrantNotes();
-  const showPagination = totalPages > 1;
+
   const query = searchParams.get('searchQuery') || '';
   const pageNo = searchParams.get('pageNo');
-  const handleOpen = () => setOpen(true);
-
-  const handleEdit = id => {
-    const note = registrantNotes.find(note => note.ID === id);
-    const updatedNote = { ...note, PostDate: getCurrentDateTime(new Date(note.PostDate)) };
-    setEditNoteValue(updatedNote);
-    setIsUpdating(true);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    if (isUpdating) {
-      setIsUpdating(false);
-      setEditNoteValue(null);
-    }
-  };
+  const showPagination = totalPages > 1;
 
   const getRegNotes = () => {
     if (!pageNo) setSearchParams(buildQueryParams('pageNo', 1, searchParams));
@@ -53,6 +37,24 @@ const RegistrantNotesSection = () => {
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
   }, [msgs]);
+
+  const handleOpen = () => setOpen(true);
+
+  const handleEdit = id => {
+    const note = registrantNotes.find(note => note.ID === id);
+    const updatedNote = { ...note, PostDate: getAndFormatDateTime(new Date(note.PostDate)) };
+    setEditNoteValue(updatedNote);
+    setIsUpdating(true);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    if (isUpdating) {
+      setIsUpdating(false);
+      setEditNoteValue(null);
+    }
+  };
 
   const debouncedSearchChange = Debounce(searchQuery => {
     setSearchParams(buildQueryParams('searchQuery', searchQuery, searchParams));

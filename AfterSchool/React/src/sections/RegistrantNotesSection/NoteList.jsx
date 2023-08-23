@@ -7,9 +7,8 @@ import useStyles from './styles';
 import Note from './Note';
 
 function NoteList({ handleEdit }) {
-  const { registrantNotes, loading } = useRegistrantNotes();
-
   const classes = useStyles();
+  const { registrantNotes, loading } = useRegistrantNotes();
   const noRecords = registrantNotes?.length === 0;
 
   if (loading) return <Loader />;
