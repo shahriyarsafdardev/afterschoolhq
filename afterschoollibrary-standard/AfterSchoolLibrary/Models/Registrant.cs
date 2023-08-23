@@ -1113,6 +1113,17 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
         
+        public static List<Registrant> GetAllSelfRegisteredVolunteers(int accountId, int personTypeId,DateTime createDate, bool isDeleted, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountId"], accountId);
+            dq.Criterias.Add(ObjectMap["PersonTypeId"], personTypeId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            dq.Criterias.Add(ObjectMap["CreateDate"], createDate, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanOrEqualToParameter);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
+        }
         #endregion
     }
 }
