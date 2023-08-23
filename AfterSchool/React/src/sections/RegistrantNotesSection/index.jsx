@@ -8,8 +8,8 @@ import AddNewNoteModal from './AddNewNoteModal';
 
 import { Pagination } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
-import { Debounce, buildQueryParams } from 'utils';
-import { getAndFormatDateTime, PER_PAGE } from 'constants';
+import { PER_PAGE } from 'constants';
+import { Debounce, buildQueryParams, getAndFormatDateTime } from 'utils';
 
 const RegistrantNotesSection = () => {
   const classes = useStyles();
