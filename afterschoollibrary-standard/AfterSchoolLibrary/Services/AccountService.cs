@@ -198,7 +198,7 @@ namespace AfterSchoolLibrary.Services
             return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
         }
-        public static bool CanPublishFreeActivity(this Account account, SystemMessages msgs, DatabaseConnection dc, ActivityType activityType)
+        public static bool CanPublishFreeActivity(this Account account, ActivityType activityType, SystemMessages msgs, DatabaseConnection dc)
         {
             var freeActivityLimitPackageFeature = new AccountPackageFeature();
 
@@ -212,29 +212,24 @@ namespace AfterSchoolLibrary.Services
                     freeActivityLimitPackageFeature =
                     account.GetAccountPackageFeature(FeatureType.ManageFieldTrips, msgs, dc);
                     break;
-                case ActivityType.LearningPod:
-                    freeActivityLimitPackageFeature =
-                    account.GetAccountPackageFeature(FeatureType.ManageLearningPods, msgs, dc);
-                    break;
                 case ActivityType.PermissionSlip:
                     freeActivityLimitPackageFeature =
                     account.GetAccountPackageFeature(FeatureType.ManagePermissionSlips, msgs, dc);
                     break;
-                case ActivityType.VolunteerOpportunity:
-                    freeActivityLimitPackageFeature =
-                    account.GetAccountPackageFeature(FeatureType.ManageVolunteerOpportunities, msgs, dc);
-                    break;
             }
+            if(activityType != ActivityType.VolunteerOpportunity && activityType != ActivityType.LearningPod)
+            {
+                var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
+                var publishedActivities = account.GetPublishedActivities(msgs, dc);
+                var publishedActivitiesByTypeId = publishedActivities.Where(selectedType => selectedType.ActivityTypeId == activityType).ToList();
+                var numberOfPublishedActivities = publishedActivitiesByTypeId
+                    .Count(a => a.CostPerRegistrant == 0 &&
+                                (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
 
-            var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
-            var publishedActivities = account.GetPublishedActivities(msgs, dc);
-            var publishedActivitiesByTypeId = publishedActivities.Where(selectedType => selectedType.ActivityTypeId == activityType).ToList();
-            var numberOfPublishedActivities = publishedActivitiesByTypeId
-                .Count(a => a.CostPerRegistrant == 0 &&
-                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
-
-            return freeActivityLimit.IsNotEmpty() && (
+                return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+            }
+            return freeActivityLimitPackageFeature.IsNotEmpty();
         }
 
         #endregion

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -229,5 +229,20 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
+        public static void MarkAsEnabled(this Coupon coupon, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            coupon.IsDisabled = false;
+            coupon.LastModifiedDate = DateTime.UtcNow;
+            coupon.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(coupon.Save(dc));
+        }
+
+        public static void MarkAsDisabled(this Coupon coupon, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            coupon.IsDisabled = true;
+            coupon.LastModifiedDate = DateTime.UtcNow;
+            coupon.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
+            msgs.AddRange(coupon.Save(dc));
+        }
     }
 }
