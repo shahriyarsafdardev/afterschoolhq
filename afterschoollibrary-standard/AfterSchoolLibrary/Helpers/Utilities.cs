@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary.Helpers
         public static string AppSalesEmailAddress => $"{(Utilities.IsProduction ? "sales" : "dev")}@{ReplyHostName}";
 
 
-        public static string AppNoReplyEmailAddress => "noreply@afterschoolhq.com"; //$"noreply@{SenderHostName}";
+        public static string AppNoReplyEmailAddress => $"noreply@{SenderHostName}";
 
         public static string AppCustomersEmailAddress =>
             $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
