@@ -51,7 +51,6 @@ internal class InititiateVolunteerBackgroundCheck
                 candidateId = CreateCandidate(credentials, token.Token, webUser);
 
             backgroundCheckUrl = CreateScreen(credentials, token.Token, candidateId);
-
             var status = candidateId is null || backgroundCheckUrl is null
                 ? BackgroundCheckStatus.BackgroundCheckRequested
                 : BackgroundCheckStatus.EmailSentToVolunteer;
