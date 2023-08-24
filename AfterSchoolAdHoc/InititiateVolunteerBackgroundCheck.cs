@@ -51,35 +51,35 @@ internal class InititiateVolunteerBackgroundCheck
                 candidateId = CreateCandidate(credentials, token.Token, webUser);
 
             backgroundCheckUrl = CreateScreen(credentials, token.Token, candidateId);
+            
+            var status = candidateId is null || backgroundCheckUrl is null
+                ? BackgroundCheckStatus.BackgroundCheckRequested
+                : BackgroundCheckStatus.EmailSentToVolunteer;
+
+            var backgroundCheck = new BackgroundCheck
+            {
+                WebUserId = webUser.ID!.Value,
+                RequestedForFiscalAccountId = accountId,
+                BackgroundCheckStatusId = status,
+                BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
+                SterlingCandidateId = candidateId,
+                SterlingInviteUrl = backgroundCheckUrl,
+                BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
+                SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
+                ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
+                IsActive = true,
+                CreateDate = DateTime.UtcNow,
+            };
+
+            if (msgs.HasNoErrors())
+            {
+                msgs.AddRange(backgroundCheck.Save(dc));
+                EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, backgroundCheckUrl, msgs);
+            }
         }
         catch (Exception ex)
         {
             msgs.Add(new SystemMessage(ex.Message, MessageType.Error));
-        }
-
-        var status = candidateId is null || backgroundCheckUrl is null
-            ? BackgroundCheckStatus.BackgroundCheckRequested
-            : BackgroundCheckStatus.EmailSentToVolunteer;
-
-        var backgroundCheck = new BackgroundCheck
-        {
-            WebUserId = webUser.ID!.Value,
-            RequestedForFiscalAccountId = accountId,
-            BackgroundCheckStatusId = status,
-            BackgroundCheckResultId = SterlingBackgroundCheckResult.Pending,
-            SterlingCandidateId = candidateId,
-            SterlingInviteUrl = backgroundCheckUrl,
-            BackgroundCheckSourceId = BackgroundCheckSource.Sterling,
-            SterlingEmailSentDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow,
-            ExpirationDate = backgroundCheckUrl is null ? (DateTime?) null : DateTime.UtcNow.AddYears(1),
-            IsActive = true,
-            CreateDate = DateTime.UtcNow,
-        };
-
-        if (msgs.HasNoErrors())
-        {
-            msgs.AddRange(backgroundCheck.Save(dc));
-            EmailHelper.InitiateBackgroundCheckMail(webUser, participationObject, backgroundCheckUrl, msgs);
         }
     }
 
