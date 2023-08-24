@@ -198,6 +198,39 @@ namespace AfterSchoolLibrary.Services
             return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
         }
+        public static bool CanPublishFreeActivity(this Account account, ActivityType activityType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var freeActivityLimitPackageFeature = new AccountPackageFeature();
+
+            switch(activityType)
+            {
+                case ActivityType.Activity:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.FreeActivityLimit, msgs, dc);
+                    break;
+                case ActivityType.FieldTrip:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.ManageFieldTrips, msgs, dc);
+                    break;
+                case ActivityType.PermissionSlip:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.ManagePermissionSlips, msgs, dc);
+                    break;
+            }
+            if(activityType != ActivityType.VolunteerOpportunity && activityType != ActivityType.LearningPod)
+            {
+                var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
+                var publishedActivities = account.GetPublishedActivities(msgs, dc);
+                var publishedActivitiesByTypeId = publishedActivities.Where(selectedType => selectedType.ActivityTypeId == activityType).ToList();
+                var numberOfPublishedActivities = publishedActivitiesByTypeId
+                    .Count(a => a.CostPerRegistrant == 0 &&
+                                (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
+
+                return freeActivityLimit.IsNotEmpty() && (
+                freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+            }
+            return freeActivityLimitPackageFeature.IsNotEmpty();
+        }
 
         #endregion
 
