@@ -2142,6 +2142,11 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static int GetRegistrationsCountByActivityIDsByDate(this Account account, List<int> activityIds, DateTime startDateTime, DateTime endDateTime, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registration.GetCountByActivityIdsByDate(account, activityIds, startDateTime, endDateTime, msgs, dc);
+        }
+
         public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>
             GetParticipationObjectsByBillerAccountId(this Account billerAccount,
                 DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null,

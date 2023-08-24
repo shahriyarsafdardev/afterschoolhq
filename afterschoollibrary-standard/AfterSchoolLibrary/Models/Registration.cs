@@ -917,6 +917,31 @@ namespace AfterSchoolLibrary.Models
 
             return sql;
         }
+        private static string GetCountSqlByActivityIdsByDate(Account account, IReadOnlyCollection<int> activityIds, DateTime startDateTime, DateTime endDateTime)
+        {
+            if (activityIds.IsEmpty() || !activityIds.Any()) activityIds = null;
+
+            var validCompletionStatuses = ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList();
+            var activityIdList = activityIds.IsNotEmpty() ? activityIds.ToStrings().ToStringList() : "null";
+            const int activityParticipationType = (int) ParticipationObjectType.Activity;
+            var sql = $@"select count(r.id)
+                        from 
+	                        Registration r
+	                        inner join Registrant reg on r.RegistrantId = reg.ID
+                            inner join RegistrantActivity ra on r.ID = ra.RegistrationId
+	                        inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {activityParticipationType}
+                        where
+                            r.CompletionStatusId in ({validCompletionStatuses})
+                            and r.CreateDate >= '{startDateTime.ToString()}'
+                            and r.CreateDate <= '{endDateTime.ToString()}'
+                            and r.AccountId = '{account.ID.Value}'
+                            and ra.ParticipationObjectId in ({activityIdList}) and ra.ParticipationObjectTypeId = {activityParticipationType}
+                            and a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}
+                            and a.IsArchived = 0 
+                            and a.IsDeleted = 0";
+
+            return sql;
+        }
 
         public static List<Registration> Search(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
@@ -958,6 +983,15 @@ namespace AfterSchoolLibrary.Models
             var sql = GetSearchSqlByActivityIds(activityIds);
 
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int GetCountByActivityIdsByDate(Account account, IReadOnlyCollection<int> activityIds, DateTime startDateTime, DateTime endDateTime, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = GetCountSqlByActivityIdsByDate(account, activityIds, startDateTime, endDateTime);
+            
+            return Convert.ToInt32(dq.ExecuteSelect(sql, msgs)?.Rows[0]?.ItemArray[0]);
         }
 
         public static int SearchCount(string searchText, int accountId, int? questionId,
