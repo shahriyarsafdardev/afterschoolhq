@@ -5,6 +5,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
 import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
 import { useRegistration, useProfile, useUpdateRegistration } from 'redux/hooks';
+import { googlePlaces } from 'constants';
 
 export const locationObject = place => {
   const latitude = place?.geometry?.location?.lat();
@@ -132,7 +133,7 @@ function SchoolField({
 
         <Box className={classes.textFieldWrapper}>
           <Box className={classes.searchBoxWrapper}>
-            <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={['places']}>
+            <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={googlePlaces}>
               <StandaloneSearchBox
                 onLoad={ref => {
                   inputRef.current = ref;

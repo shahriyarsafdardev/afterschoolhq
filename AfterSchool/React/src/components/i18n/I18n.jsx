@@ -12,6 +12,7 @@ function I18n() {
   const classes = useStyles();
 
   const handleLanguageChange = event => {
+    event.preventDefault();
     setSelectedLanguage(event.target.getAttribute('value'));
     setSelectedLanguageName(event.target.innerText);
     setOpen(false);

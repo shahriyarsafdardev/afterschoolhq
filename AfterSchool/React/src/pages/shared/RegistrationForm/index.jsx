@@ -130,13 +130,10 @@ export default function RegistrationForm(props) {
                       disabled={saveDisabled}
                       key={activeGroup}
                     >
-                      {saveDisabled ? (
-                        <>
-                          {'Loading . . .'} <CircularProgress size={'20px'} />
-                        </>
-                      ) : (
-                        saveButtonText(lastSection, registrantType, isFree, skipAble)
-                      )}
+                      {saveDisabled
+                        ? 'Loading . . .'
+                        : saveButtonText(lastSection, registrantType, isFree, skipAble)}
+                      {saveDisabled && <CircularProgress size={'20px'} style={{ marginLeft: 5 }} />}
                     </Button>
                   </Box>
                 </Box>
