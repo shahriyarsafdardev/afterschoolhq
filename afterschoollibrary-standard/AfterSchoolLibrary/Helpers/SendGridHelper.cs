@@ -63,12 +63,12 @@ namespace AfterSchoolLibrary
             if (Utilities.IsLocalHost)
             {
                 msgs.AddRange(SMTPMailTrapHelper.SendMail(
-                    fromEmail,
-                    toEmail,
-                    subject,
-                    body,
-                    msgs,
-                    emailTemplateId: emailTemplateId
+                fromEmail,
+                toEmail,
+                subject,
+                body,
+                msgs,
+                emailTemplateId: emailTemplateId
                 ));
             }
             else
