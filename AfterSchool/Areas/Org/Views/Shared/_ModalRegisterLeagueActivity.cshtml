@@ -21,10 +21,17 @@
                 <div class="form-group">
                     <label>@UILabel.ActivityLabel(ActivityGroupType.League)</label>
                     <select name="activity" id="activity" class="form-control" required>
-                        <option value="">Select League...</option>
-                        @foreach (var league in leagues)
+                        @if (leagues.IsNotEmpty())
                         {
-                            <option value="@league.Uid">@league.Name</option>
+                            <option value="">Select League...</option>
+                            foreach (var league in leagues)
+                            {
+                                <option value="@league.Uid">@league.Name</option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="">Select League...</option>
                         }
                     </select>
                 </div>

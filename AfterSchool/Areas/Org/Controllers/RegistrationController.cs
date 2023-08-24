@@ -744,7 +744,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 .Where(x => x.ID.Value.NotIn(rasActivityTypes.Select(y => y.ParticipationObjectId.Value)))
                 .OrderBy(x => x.Name)
                 .ToList();
-            ViewBag.AvailableLeagues = leagues
+            ViewBag.AvailableLeagues = leagues?
                             .Where(x => x.GetAccountActivityGroup(currentAccount,msgs).ID.Value.NotIn(rasLeagueActivityTypes.Select(y => y.ParticipationObjectId.Value)))
                             .ToList();
             ViewBag.Messages = msgs;
