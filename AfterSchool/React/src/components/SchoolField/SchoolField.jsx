@@ -127,8 +127,8 @@ function SchoolField({
         <Box className={classes.fieldLabelWrapper}>
           <Typography variant="h6" className={classes.fieldLabel}>
             {Text} &nbsp;
-            <Typography className={typeClass}>{typeText}</Typography>
           </Typography>
+          <Typography className={typeClass}>{typeText}</Typography>
         </Box>
 
         <Box className={classes.textFieldWrapper}>

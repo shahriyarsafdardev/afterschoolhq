@@ -59,9 +59,9 @@ function ApiTextField({ formik, question, currentQuestions }) {
       <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {Text} &nbsp;
-          <Typography component="span" className={typeClass}>
-            {typeText}
-          </Typography>
+        </Typography>
+        <Typography component="span" className={typeClass}>
+          {typeText}
         </Typography>
       </Box>
 

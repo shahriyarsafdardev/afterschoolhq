@@ -17,9 +17,9 @@ export default function TextField(props) {
           <Typography variant="h6" className={classes.fieldLabel}>
             {customLabel}
             &nbsp;
-            <Typography component="span" className={typeClass}>
-              {typeText}
-            </Typography>
+          </Typography>
+          <Typography component="span" className={typeClass}>
+            {typeText}
           </Typography>
         </Box>
       )}
