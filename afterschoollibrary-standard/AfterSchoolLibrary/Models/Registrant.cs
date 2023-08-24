@@ -1113,7 +1113,7 @@ namespace AfterSchoolLibrary.Models
             return sql;
         }
         
-        public static List<Registrant> GetAllSelfRegisteredVolunteers(int accountId, int personTypeId,DateTime createDate, bool isDeleted, SystemMessages msgs,
+        public static List<Registrant> GetAllSelfRegisteredVolunteers(int accountId, int personTypeId,DateTime createDate, bool isDeleted, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
