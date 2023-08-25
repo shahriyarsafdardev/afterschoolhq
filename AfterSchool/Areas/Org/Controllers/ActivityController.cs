@@ -1972,9 +1972,16 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         if (!isongoing.IsBoolean())
+                        {
                             inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                        
+                            if(repeatsweekly.IsEmpty())
+                            {
+                                startdate = inSessionDates?.FirstOrDefault()?.StartDateTime.Value.ToString();
+                                enddate = inSessionDates?.FirstOrDefault()?.EndDateTime.Value.ToString();
+                            }
+                        }
+
                         outOfSessionDates =
                             ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
