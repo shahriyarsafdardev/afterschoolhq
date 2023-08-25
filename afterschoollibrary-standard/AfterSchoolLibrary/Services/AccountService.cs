@@ -224,7 +224,7 @@ namespace AfterSchoolLibrary.Services
                 var publishedActivitiesByTypeId = publishedActivities.Where(selectedType => selectedType.ActivityTypeId == activityType).ToList();
                 var numberOfPublishedActivities = publishedActivitiesByTypeId
                     .Count(a => a.CostPerRegistrant == 0 &&
-                                (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
+                                (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today) && a.IsFree);
 
                 return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
