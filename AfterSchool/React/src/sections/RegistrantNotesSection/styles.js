@@ -22,11 +22,20 @@ export default makeStyles(theme => ({
       flexDirection: 'column'
     }
   },
-  subHeader: {
+  dateSubHeader: {
     display: 'flex',
-    gap: '25px',
     [theme.breakpoints.down('xs')]: {
       gap: '10px'
+    },
+    [theme.breakpoints.up('sm')]: {
+      flexDirection: 'column'
+    }
+  },
+  titlesSubHeader: {
+    width: '70%',
+    wordBreak: 'break-word',
+    [theme.breakpoints.down('xs')]: {
+      width: '100%'
     }
   },
   showMoreButton: {
@@ -185,5 +194,8 @@ export default makeStyles(theme => ({
   noteHeaderBar: {
     display: 'flex',
     gap: '20px'
+  },
+  time: {
+    textAlign: 'end'
   }
 }));

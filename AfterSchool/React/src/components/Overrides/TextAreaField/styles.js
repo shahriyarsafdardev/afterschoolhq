@@ -28,7 +28,7 @@ export default makeStyles(theme => ({
     backgroundImage: 'none',
     borderRadius: '5px',
     '& .MuiOutlinedInput-root': {
-      width: '100%',
+      width: '100%'
     }
   },
   flexCenter: {
@@ -38,6 +38,7 @@ export default makeStyles(theme => ({
     justifyContent: 'end'
   },
   helperText: {
+    fontSize: 12,
     display: 'flex',
     justifyContent: 'space-between'
   },

@@ -22,6 +22,7 @@ function Note({ note, handleEdit }) {
 
   const { deleteNote, registrantNotes, totalPages, getNotes } = useRegistrantNotes();
   const { ID, Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
+  const splittedTimeArray = date.split(' ');
   const open = Boolean(anchorEl);
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -74,12 +75,15 @@ function Note({ note, handleEdit }) {
     <Box className={classes.noteWrapper}>
       <Box className={classes.noteHeaderBar}>
         <Box className={classes.noteHeader}>
-          <Box>
+          <Box className={classes.titlesSubHeader}>
             <Typography variant="h6">{title}</Typography>
             <Typography>{`By ${writer}`}</Typography>
           </Box>
-          <Box className={classes.subHeader}>
+          <Box className={classes.dateSubHeader}>
             <Typography>{formatDate(date)}</Typography>
+            <Typography
+              className={classes.time}
+            >{`${splittedTimeArray[1]} ${splittedTimeArray[2]}`}</Typography>
           </Box>
         </Box>
         {IsEditable && (

@@ -45,7 +45,7 @@ function AddNewNoteModal(props) {
       .max(4000, 'Text should be less than 4000 characters'),
     postDate: Yup.date()
       .required('Date is required')
-      .max(new Date(getAndFormatDateTime()), `Date should be not be in future`)
+      .max(new Date(getAndFormatDateTime()), 'Date should not be in future')
   });
 
   const addNewNote = async () => {
