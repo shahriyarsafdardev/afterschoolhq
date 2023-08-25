@@ -146,12 +146,15 @@ namespace AfterSchoolLibrary.Services
         public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId,
             int paymentsCount)
         {
+            var account = participationObject.GetActivity().GetAccount();   
             var startDate = originalPlan.PaymentStartTypeId switch
             {
-                PlanPaymentStartType.OnCheckout => plan.StartDate ?? DateTime.UtcNow,
-                PlanPaymentStartType.WhenActivityStarts => participationObject.StartDate ?? DateTime.UtcNow,
-                PlanPaymentStartType.OnPeriodStart => originalPlan.StartDate ?? DateTime.UtcNow,
-                _ => DateTime.UtcNow
+                // Plan start date is in customer time zone
+                // No need to convert in UTC as only used to display next payment date to provider/parent
+                PlanPaymentStartType.OnCheckout => plan.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
+                PlanPaymentStartType.WhenActivityStarts => participationObject.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
+                PlanPaymentStartType.OnPeriodStart => originalPlan.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
+                _ => account.ConvertToAccountTimeZone(DateTime.UtcNow)
             };
 
             var nextPaymentDate = new SubscriptionPlan
