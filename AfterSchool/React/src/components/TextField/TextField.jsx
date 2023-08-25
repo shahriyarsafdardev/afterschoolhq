@@ -16,9 +16,9 @@ export default function TextField({ formik, question, type = 'text' }) {
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
-          <Typography component="span" className={typeClass}>
-            {typeText}
-          </Typography>
+        </Typography>
+        <Typography component="span" className={typeClass}>
+          {typeText}
         </Typography>
       </Box>
 

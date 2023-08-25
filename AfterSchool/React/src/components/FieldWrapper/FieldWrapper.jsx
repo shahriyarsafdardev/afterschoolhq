@@ -14,9 +14,9 @@ export default function FieldWrapper({ label, isRequired = false, children }) {
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
-          <Typography component="span" className={typeClass}>
-            {typeText}
-          </Typography>
+        </Typography>
+        <Typography component="span" className={typeClass}>
+          {typeText}
         </Typography>
       </Box>
       <Box className={classes.childWrapper}>{children}</Box>
