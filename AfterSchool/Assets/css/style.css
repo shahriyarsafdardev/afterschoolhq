@@ -23119,3 +23119,20 @@ a.text-limit span {
         padding-left: 15px;
     }
 }
+.msg-count-text
+{
+    color: #494949;
+    background-color: #f8f8f8;
+    width: fit-content;
+    margin: 20px auto;
+}
+.color-red{
+    color: #FF7070;
+}
+.text-bold{
+    font-weight:bold;
+}
+.rotated {
+    transform: rotate(180deg);
+    display: inline-block;
+}

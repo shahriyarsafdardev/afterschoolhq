@@ -938,7 +938,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod(msgs);
             ViewBag.Body = "";
             ViewBag.Messages = msgs;
-
             return View(activity);
         }
 
@@ -950,7 +949,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-
+            var currentEmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
@@ -1002,7 +1001,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Registrants = activity.GetRegistrants(msgs);
             ViewBag.Body = body;
             ViewBag.Messages = msgs;
-
+            ViewBag.EmailCount = currentEmailCount;
             return View(activity);
         }
 
