@@ -220,7 +220,7 @@ namespace AfterSchoolLibrary.Services
             var amountPaidByRegistrant = ra.IsNotEmpty() && ra.RegistrantId.HasValue
                 ? participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc)
                 : (decimal?) null;
-            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject.ActivityType, loggedInUser.ID);
+            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject, loggedInUser.ID.Value);
             var assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
                 amountPaidByRegistrant, loggedInUser.ID, requiresBackgroundCheck);
 
@@ -263,12 +263,14 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        internal static bool IsBackgroundCheckRequired(ActivityType? participationObjectActivityType, int? webUserId)
+        internal static bool IsBackgroundCheckRequired(ParticipationObject participationObject, int webUserId)
         {
+            var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUserId).FirstOrDefault();
+            return participationObject.ActivityType == ActivityType.VolunteerOpportunity && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() &&
+                   volunteerApproval.IsEmpty();
             // TODO: Blocked pending some way to approve background checks.
             // TODO: Check if Account wants to use background checks as not all will.
             // TODO: Check if Web User has a valid background check with a completed result.
-            return false;
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent,

@@ -46,6 +46,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
 
                     if (responseBody.result == "Clear")
+                    {
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -55,7 +56,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             DateTime.UtcNow,
                             msgs
                         );
-
+                        
+                        var registrants = Registrant.LoadByWebUserId(latestBackgroundCheck.WebUserId, RegistrantPersonType.Volunteer, false,
+                            false, msgs);
+                        registrants.ForEach(registrant => 
+                        {
+                            var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).FirstOrDefault();
+                            if (registration.IsNotEmpty())
+                            {
+                                var participationObject = registration.GetFirstParticipationObject(msgs);
+                                var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs);
+                                registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs);
+                            }
+                        });
+                    }
                     if (responseBody.result == "Consider")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
