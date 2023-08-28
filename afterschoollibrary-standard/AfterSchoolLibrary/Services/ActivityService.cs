@@ -1362,7 +1362,7 @@ namespace AfterSchoolLibrary.Services
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule(msgs, dc);
 
-            if(subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < DateTime.UtcNow.Date)
+            if(subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < account.ConvertToAccountTimeZone(DateTime.UtcNow).Date )
                 msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
 
             if(activitySchedule != null && activitySchedule.StartDate.HasValue)
