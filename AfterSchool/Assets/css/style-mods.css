@@ -341,6 +341,15 @@ a {
     color: #00a38a;
     font-weight: 500;
 }
+.error-bullet 
+{
+    color: white;
+}
+    
+.error-bullet:hover 
+{
+    color: lightgray;
+}
 
 a:hover {
     color: #00c5a3;

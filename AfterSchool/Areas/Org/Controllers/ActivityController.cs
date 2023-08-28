@@ -718,7 +718,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
 
-            msgs.AddRange(activity.GetItemsRequiredToPublish(msgs));
+            msgs.AddRange(activity.GetItemsRequiredToPublish(msgs, true));
 
             if (msgs.HasNoErrors())
             {
