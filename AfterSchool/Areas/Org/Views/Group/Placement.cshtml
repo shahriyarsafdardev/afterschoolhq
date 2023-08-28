@@ -58,8 +58,7 @@
                 var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
                 var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
                 var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
-
+                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Select(x => Registrant.Load(x.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied)).Count();
                 var totalSeats = 0;
                 var totalLeft = 0;
                 var totalWL = 0;
@@ -133,8 +132,8 @@
                                     <tbody>
                                         @foreach (var activity in activities)
                                         {
-                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
-                                            var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
+                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count();
+                                            var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count();
 
                                             totalSeats += activity.SeatsAvailable.Value;
                                             totalLeft += (activity.GetSeatsRemaining() - assignedCount);
