@@ -66,7 +66,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             {
                                 var participationObject = registration.GetFirstParticipationObject(msgs);
                                 var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs);
-                                registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs);
+                                if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
+                                    registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs);
                             }
                         });
                     }
