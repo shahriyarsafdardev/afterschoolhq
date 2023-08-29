@@ -58,7 +58,16 @@
                 var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
                 var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
                 var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Select(x => Registrant.Load(x.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied)).Count();
+                var noSeatRegistrants = 0;
+                var count = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0);//.Select(x => Registrant.Load(x.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied)).Count();
+                foreach(var assign in count)
+                {
+                    foreach(var ra in assign.RegistrantActivities)
+                    {
+                        var appliedRegistrants = Registrant.Load(assign.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied);
+                        noSeatRegistrants = noSeatRegistrants + appliedRegistrants.Count();
+                    }
+                }
                 var totalSeats = 0;
                 var totalLeft = 0;
                 var totalWL = 0;
