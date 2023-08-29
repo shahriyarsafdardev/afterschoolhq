@@ -1265,8 +1265,6 @@ namespace AfterSchool.Controllers
             var dobValue = qvms.Find(qvm =>
                 qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value;
             var dateOfBirth = dobValue.IsDateTime() ? dobValue.ToDateTime() : new DateTime?();
-            //var dateOfBirth = qvms.Find(qvm =>
-            //    qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth).Value.ToDateTime();
             var studentGrade = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantGrade).Value;
 
             var isGenderRestricted = !participationObject.AcceptsGenderType(gender) && participationObject.IsGenderEnforced && 
