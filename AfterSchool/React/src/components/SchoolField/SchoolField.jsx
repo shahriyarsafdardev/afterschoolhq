@@ -58,7 +58,7 @@ export const locationObject = place => {
         country = shortName;
         break;
       case 'sublocality_level_1':
-        if (city.length === 0) city = longName;
+        if (!city) city = longName;
         break;
     }
   });
