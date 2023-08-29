@@ -1941,7 +1941,8 @@ namespace AfterSchool.Controllers
             // need to see if there are any questions required by the form on the activity/activity group that haven't been collected on the main form
             var qvms = RegistrationCommon.GetQuestionsRequiredForActivityThatHaveNotYetBeenCollected(participationObject, currentRegistrant, msgs);
             RegistrationCommon.ValidateRegisterStudentQuestions(qvms.Select(x => x.Question).ToList(), msgs, Request);
-
+            foreach (var qvm in qvms)
+                qvm.Value = Request[qvm.Name];
             if (signature.IsEmpty())
                 msgs.Add("E-signature is required", MessageType.UserError);
 
