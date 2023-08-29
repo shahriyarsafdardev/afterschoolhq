@@ -308,11 +308,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     if (msgs.HasNoErrors())
                         ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
-                    var candidateId = await backgroundCheckWorkflow.GetSterlingCandidateId(currentUser);
+                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty())
+                    {
+                        var candidateId = await backgroundCheckWorkflow.GetSterlingCandidateId(currentUser);
                     
-                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && candidateId.IsEmpty() && 
-                        (volunteerApproval.IsEmpty() || volunteerApproval?.ExpirationDate < DateTime.UtcNow))
-                        await InitateBackgroundCheck(currentUser, participationObject, msgs);
+                        if (candidateId.IsEmpty() && (volunteerApproval.IsEmpty() || volunteerApproval?.ExpirationDate < DateTime.UtcNow))
+                            await InitateBackgroundCheck(currentUser, participationObject, msgs);    
+                    }
+                    
                 }
                 
                 return Json(
