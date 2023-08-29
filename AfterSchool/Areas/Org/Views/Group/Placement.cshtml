@@ -62,10 +62,13 @@
                 var count = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0);//.Select(x => Registrant.Load(x.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied)).Count();
                 foreach(var assign in count)
                 {
-                    foreach(var ra in assign.RegistrantActivities)
+                    foreach (var ra in assign.RegistrantActivities)
                     {
-                        var appliedRegistrants = Registrant.Load(assign.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied);
-                        noSeatRegistrants = noSeatRegistrants + appliedRegistrants.Count();
+                        var appliedRegistrants = RegistrantActivity.Load(ra);
+                        if(appliedRegistrants.AssignmentTypeId == RegistrationAssignmentType.Applied)
+                        {
+                            noSeatRegistrants = noSeatRegistrants + 1;
+                        }
                     }
                 }
                 var totalSeats = 0;
