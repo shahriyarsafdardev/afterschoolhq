@@ -134,7 +134,7 @@ export const useRegistrationActions = () => {
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
       RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        dispatch(setRegistrationId(obj));
+        if (obj) dispatch(setRegistrationId(obj));
         dispatch(setMsgs(msgs));
       });
     } else
