@@ -1,10 +1,15 @@
-﻿@using Utilities = BasicLibrary.Utilities
+@using Utilities = BasicLibrary.Utilities
 @model ParticipationObject
 @{
     var showSeatsRemaining = true;
     var showLocation = false;
     var accountProfile = (AccountProfile) ViewBag.AccountProfile;
-
+    var schedule = Model.Schedule;
+    var firstInstance = new DateTime();
+    if (schedule.IsNotEmpty() && schedule.GetInstanceCount() != 0)
+    {
+        firstInstance = (DateTime)schedule.GetInstances().FirstOrDefault().StartDateTime;
+    }
     var genderOrGradeRestriction = ParticipationObjectUI.PrintAgeGradeRestrictions(Model);
     if (genderOrGradeRestriction.Contains(':'))
     {
@@ -212,13 +217,26 @@
 
             <div class="col-lg-6 col-md-5">
                 <div class="padding-v-10">
-
-                    @if (Model.StartDate.HasValue)
+                    @if (schedule.IsEmpty())
+                    {
+                        <span>
+                            <b>Start Date</b>: -
+                        </span>
+                        <br/>
+                    }
+                    else if (Model.StartDate.HasValue && schedule.RepeatsWeekly)
                     {
                         <span>
                             <b>Start Date</b>: @Model.StartDate.ToShortDateString()
                         </span>
                         <br/>
+                    }
+                    else
+                    {
+                        <span>
+                            <b>Start Date</b>: @firstInstance.ToShortDateString();
+                        </span>
+                        <br />
                     }
                     @if (Model.Schedule.IsNotEmpty())
                     {
