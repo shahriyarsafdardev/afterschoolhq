@@ -39,7 +39,7 @@
                 else
                 {
 
-                    if (activityType == ActivityType.Activity)
+                    if (activityType == ActivityType.Activity && currentAccount.HasFeature(FeatureType.Attendance))
                     {
                         <a href="@Url.Action("attendancesummary", "activity")"
                            class="btn btn-default"

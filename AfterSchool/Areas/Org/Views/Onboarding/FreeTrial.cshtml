@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     bool signedUpForDefaultPackage = (bool)ViewBag.SignedUpForDefaultPackage;
     var trialDays = (int) ViewBag.TrialDays;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
  }
 
 <style>
@@ -84,16 +85,25 @@
     <div class="free-trial-main">
         <img class="thumbs-up" src="~/Assets/img/thumbs-up.svg" alt="thumbs up" />
         <h3 class="lets-get-started">Let&rsquo;s get started!</h3>
-        <p class="free-trial-p">
-            Starting now, you will be able to get the most of AfterSchool HQ
-            <strong>free</strong>
-            for @trialDays days.
-            @if (signedUpForDefaultPackage)
-            {
-                @:In addition to features available with our free tier, you will have access to:
-            }
-        </p>
-        @if (signedUpForDefaultPackage)
+        @if (accountPackage.IsFree)
+        {
+            <p class="free-trial-p">
+                Starting now, you will have access to the AfterSchool HQ free package which enables you to get familiar with our product and start moving forward today.
+            </p>
+        }
+        else
+        {
+            <p class="free-trial-p">
+                Starting now, you will be able to get the most of AfterSchool HQ
+                <strong>free</strong>
+                for @trialDays days.
+                @if (signedUpForDefaultPackage)
+                {
+                    @:In addition to features available with our free tier, you will have access to:
+                }
+            </p>
+        }
+        @if (signedUpForDefaultPackage && !accountPackage.IsFree)
         {
             <ul class="feature-list">
                 <li>Custom Forms</li>
@@ -104,10 +114,13 @@
                 <li>Unlimited Activities</li>
             </ul>
         }
-        <p class="free-trial-p">
-            We start everyone with our @trialDays-day free trial so you can get a feel for what you need out of AfterSchool HQ.
-            We will only collect your payment information when the trial is complete.
-        </p>
+        @if (!accountPackage.IsFree)
+        {
+            <p class="free-trial-p">
+                We start everyone with our @trialDays-day free trial so you can get a feel for what you need out of AfterSchool HQ.
+                We will only collect your payment information when the trial is complete.
+            </p>
+        }
         <p class="free-trial-p">
             We just need to ask a few more questions to get you all set up.
         </p>
