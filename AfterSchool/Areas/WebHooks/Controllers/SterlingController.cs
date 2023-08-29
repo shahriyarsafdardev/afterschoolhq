@@ -49,7 +49,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
-                            "Approve By Sterling",
+                            "Approved By Sterling",
                             DateTime.UtcNow.AddYears(1),
                             null,
                             DateTime.UtcNow,
