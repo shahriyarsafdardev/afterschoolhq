@@ -56,7 +56,6 @@
                         <th>Last Name</th>
                         <th>Date Submitted</th>
                         <th>Background Check Status</th>
-                        <th>Background Check Result</th>
                         <th></th>
                     </tr>
                     @if (Model.Count > 0)
@@ -71,8 +70,10 @@
                                 <td>@(backgroundViewModel.FirstName)</td>
                                 <td>@(backgroundViewModel.LastName)</td>
                                 <td>@backgroundViewModel.DateSubmitted.ToShortDateString()</td>
-                                <td>@backgroundViewModel.BackgroundCheckStatus.ToString().SplitByUpperCase()</td>
-                                <td>@(backgroundViewModel.BackgroundCheckResult == SterlingBackgroundCheckResult.NotSet ? SterlingBackgroundCheckResult.Pending.ToString().SplitByUpperCase() : backgroundViewModel.BackgroundCheckResult.ToString().SplitByUpperCase())</td>
+                                <td>@backgroundViewModel.BackgroundCheckStatus.ToString().SplitByUpperCase() 
+                                    <i class="s7-info" title="@(backgroundViewModel.BackgroundCheckResult == SterlingBackgroundCheckResult.NotSet ?
+                                    SterlingBackgroundCheckResult.Pending.ToString().SplitByUpperCase() : backgroundViewModel.BackgroundCheckResult.ToString().SplitByUpperCase())"></i>
+                                </td>
                                 <td>
                                     <div class="pull-right">
                                         <a href="@Url.Action("Details", "Volunteer", new {id = registrantId, returnUrl = returnUrl})"

@@ -16,5 +16,6 @@ namespace AfterSchoolLibrary.Enums
         BackgroundCheckRequested,
         Consider,
         ExpiredInvite,
+        Expired,
     }
 }

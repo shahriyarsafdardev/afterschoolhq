@@ -65,6 +65,8 @@ namespace AfterSchool
 
             // Schedule reinitiate backgroundcheck
             // RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().ScheduleBackgroundCheck()) , Cron.Daily(3, 00));
+            // Update BackgroundCheck statuses for expired volunteers
+            RecurringJob.AddOrUpdate(() => app.Use<BackgroundCheckWorkflow>(resolver.GetService<IBackgroundCheckWorkflow>().UpdateBackgroundCheckStatus()) , Cron.Daily(3, 00));
         }
 
         private void ConfigureServices(IServiceCollection services)

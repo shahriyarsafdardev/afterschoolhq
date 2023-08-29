@@ -12,6 +12,7 @@ namespace AfterSchoolLibrary.Integrations
     {
         Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
         Task ScheduleBackgroundCheck();
+        Task UpdateBackgroundCheckStatus();
     }
 
     public class BackgroundCheckWorkflow : IBackgroundCheckWorkflow
@@ -41,10 +42,10 @@ namespace AfterSchoolLibrary.Integrations
             {
                 var token = await tokenQuery.GetAsync(credentials);
                 candidateId = await candidateQuery.GetByEmailAsync(credentials, token.Token, webUser);
-                
-                if(candidateId.IsEmpty())
+
+                if (candidateId.IsEmpty())
                     candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
-                
+
                 backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
             }
             catch (Exception ex)
@@ -71,11 +72,11 @@ namespace AfterSchoolLibrary.Integrations
                 IsActive = true,
                 CreateDate = DateTime.UtcNow,
             };
-            
-            if(messages.HasNoErrors())
+
+            if (messages.HasNoErrors())
                 messages.AddRange(backgroundCheckRepository.Save(backgroundCheck));
-            
-            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl , msg = messages};
+
+            return new BackgroundCheckRequestResult {BackgroundCheckUrl = backgroundCheckUrl, msg = messages};
         }
 
         public async Task ScheduleBackgroundCheck()
@@ -90,7 +91,8 @@ namespace AfterSchoolLibrary.Integrations
                     foreach (var volunteerApproval in volunteerApprovals)
                     {
                         var webUser = WebUser.Load(volunteerApproval.WebUserId.Value, msgs);
-                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, null, msgs).OrderByDescending(x => x.CreateDate).FirstOrDefault();
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId((int) webUser.ID, null, msgs).OrderByDescending(x => x.CreateDate)
+                            .FirstOrDefault();
 
                         var token = await tokenQuery.GetAsync(credentials);
 
@@ -123,9 +125,9 @@ namespace AfterSchoolLibrary.Integrations
                         if (candidateId.IsEmpty() && backgroundCheck.IsEmpty())
                         {
                             candidateId = await candidateQuery.CreateAsync(credentials, token.Token, webUser);
-                            
+
                             var backgroundCheckUrl = await createScreeningQuery.CreateAsync(credentials, token.Token, candidateId);
-                            
+
                             var newBackgroundCheck = new BackgroundCheck
                             {
                                 WebUserId = webUser.ID!.Value,
@@ -140,14 +142,14 @@ namespace AfterSchoolLibrary.Integrations
                                 IsActive = true,
                                 CreateDate = DateTime.UtcNow,
                             };
-                            
+
                             if (msgs.HasNoErrors())
                                 msgs.AddRange(backgroundCheckRepository.Save(newBackgroundCheck));
-                            
+
                             // if(msgs.HasNoErrors())
                             //     EmailHelper.InitiateBackgroundCheckMail(webUser, null, backgroundCheckUrl, msgs);
                         }
-                        
+
                     }
                 }
             }
@@ -156,7 +158,39 @@ namespace AfterSchoolLibrary.Integrations
                 msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
                 Helpers.Utilities.SystemErrorLog(ex);
             }
-            
+
+        }
+
+        public Task UpdateBackgroundCheckStatus()
+        {
+            var msgs = new SystemMessages();
+            var currentDate = DateTime.UtcNow;
+            var volunteerApprovals = VolunteerApproval.GetAllExpiredVolunteers(currentDate, msgs);
+            try
+            {
+                if (volunteerApprovals.Count > 0)
+                {
+                    foreach (var volunteerApproval in volunteerApprovals)
+                    {
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId(volunteerApproval.WebUserId.Value, true, msgs)
+                            .OrderByDescending(x => x.CreateDate).FirstOrDefault();
+                        if (backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckStatusId != BackgroundCheckStatus.Expired)
+                        {
+                            backgroundCheck.BackgroundCheckStatusId = BackgroundCheckStatus.Expired;
+                            backgroundCheck.BackgroundCheckResultId = SterlingBackgroundCheckResult.Expired;
+                            if (msgs.HasNoErrors())
+                                msgs.AddRange(backgroundCheck.Save());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
+                Helpers.Utilities.SystemErrorLog(ex);
+            }
+
+            return Task.CompletedTask;
         }
     }
 
