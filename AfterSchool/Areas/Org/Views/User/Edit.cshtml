@@ -4,6 +4,7 @@
     ViewBag.Title = account.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
     var cleverSsoEnabled = ViewBag.CleverSsoEnabled;
+    var accountPackage = SessionVariables.AccountPackage;
 }
 
 @{Html.RenderPartial("OrgAccountHeader", account.ID.ToString());}
@@ -79,7 +80,7 @@
                 }
 
                 <div class="clearfix"></div>
-                @if (cleverSsoEnabled)
+                @if (cleverSsoEnabled && account.AccountTypeId == AccountType.School)
                 {
                     <div class="row">
                         <div class="col-sm-6 col-sm-offset-3 margin-v-10">
