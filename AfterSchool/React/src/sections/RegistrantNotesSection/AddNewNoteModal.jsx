@@ -7,11 +7,12 @@ import React, { useEffect, useState } from 'react';
 import { Backdrop, Box, Fade, Typography, Modal, Button, Grid, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
+import { DateTimePicker } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
 import TextField from 'components/Overrides/TextField';
+import { changeDateTimeFormat, getTimeFromDate } from 'utils';
 import LoadingButton from 'components/Overrides/LoadingButton';
-import TextAreaField from 'components/Overrides/TextAreaField';
-import { changeDateTimeFormat, getAndFormatDateTime } from 'utils';
+import TextAreaField from 'components/Overrides/TextAreaField'; //TODO: Refactoring
 
 function AddNewNoteModal(props) {
   const classes = useStyles();
@@ -25,7 +26,7 @@ function AddNewNoteModal(props) {
     ID: noteId,
     Title: title = '',
     Text: text = '',
-    PostDate: postDate = getAndFormatDateTime()
+    PostDate: postDate = changeDateTimeFormat(new Date())
   } = noteValue || {};
 
   useEffect(() => {
@@ -42,17 +43,12 @@ function AddNewNoteModal(props) {
     title: Yup.string().required('Title is required'),
     text: Yup.string()
       .required('Text is required')
-      .max(4000, 'Text should be less than 4000 characters'),
-    postDate: Yup.date()
-      .required('Date is required')
-      .max(new Date(getAndFormatDateTime()), 'Date should not be in future')
+      .max(4000, 'Text should be less than 4000 characters')
   });
 
   const addNewNote = async () => {
-    const formattedDate = changeDateTimeFormat(values.postDate);
     await createNote({
       ...values,
-      postDate: formattedDate,
       registrationUid: regUid
     }).then(msgs => {
       if (!msgs.length) {
@@ -63,13 +59,13 @@ function AddNewNoteModal(props) {
     });
   };
 
-  const updateExistingNote = async () => {
+  const updateExistingNote = async values => {
     const formattedDate = changeDateTimeFormat(values.postDate);
     const createNewVersion = !(
       dirty &&
       values.title === title &&
       values.text === text &&
-      values.postDate !== postDate
+      getTimeFromDate(new Date(values.postDate)) !== getTimeFromDate(new Date(postDate))
     );
 
     await updateNote({
@@ -93,14 +89,23 @@ function AddNewNoteModal(props) {
       postDate
     },
     validationSchema: ValidationSchema,
-    onSubmit: async () => {
+    onSubmit: async values => {
       setSaveDisabled(true);
-      isUpdating ? await updateExistingNote() : await addNewNote();
+      isUpdating ? await updateExistingNote(values) : await addNewNote();
       setSaveDisabled(false);
     }
   });
 
-  const { errors, touched, handleSubmit, getFieldProps, resetForm, values, dirty } = formik;
+  const {
+    errors,
+    touched,
+    handleSubmit,
+    getFieldProps,
+    resetForm,
+    setFieldValue,
+    values,
+    dirty
+  } = formik;
 
   const submitNote = e => {
     e.preventDefault();
@@ -149,19 +154,18 @@ function AddNewNoteModal(props) {
                 />
               </Grid>
               <Grid item xs={12} md={4}>
-                <TextField
-                  id="datetime-local"
-                  data-testid="date-field"
+                <DateTimePicker
+                  id="postDate"
+                  data-testid="post-date-field"
                   customLabel="Date"
-                  variant="outlined"
-                  type="datetime-local"
+                  autofill="false"
                   required={true}
                   {...getFieldProps('postDate')}
-                  InputLabelProps={{
-                    shrink: true
-                  }}
                   error={!!(touched['postDate'] && errors['postDate'])}
                   helperText={touched['postDate'] && errors['postDate']}
+                  setFieldValue={dateTime => {
+                    setFieldValue('postDate', dateTime);
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>

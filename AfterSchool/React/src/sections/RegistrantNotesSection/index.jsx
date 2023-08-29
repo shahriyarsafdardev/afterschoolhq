@@ -9,7 +9,7 @@ import AddNewNoteModal from './AddNewNoteModal';
 import { Pagination } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
 import { PER_PAGE } from 'constants';
-import { Debounce, buildQueryParams, getAndFormatDateTime } from 'utils';
+import { Debounce, buildQueryParams, convertDateFormat } from 'utils';
 
 const RegistrantNotesSection = () => {
   const classes = useStyles();
@@ -42,7 +42,7 @@ const RegistrantNotesSection = () => {
 
   const handleEdit = id => {
     const note = registrantNotes.find(note => note.ID === id);
-    const updatedNote = { ...note, PostDate: getAndFormatDateTime(new Date(note.PostDate)) };
+    const updatedNote = { ...note, PostDate: convertDateFormat(new Date(note.PostDate)) };
     setEditNoteValue(updatedNote);
     setIsUpdating(true);
     setOpen(true);

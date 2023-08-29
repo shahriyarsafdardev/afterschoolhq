@@ -17,6 +17,8 @@ export default makeStyles(theme => ({
     color: 'red'
   },
   formControlClass: {
+    margin: 'auto',
+    marginBottom: '15px',
     marginTop: '10px',
     display: 'block',
     width: '100%',
@@ -29,6 +31,9 @@ export default makeStyles(theme => ({
     borderRadius: '5px',
     '& .MuiOutlinedInput-root': {
       width: '100%'
+    },
+    '& .MuiFormHelperText-root.Mui-error': {
+      fontSize: 12
     }
   },
   flexCenter: {
@@ -45,12 +50,5 @@ export default makeStyles(theme => ({
   maxWidth: {
     width: '100%',
     maxWidth: 675
-  },
-  fieldLabelWrapper: {
-    display: 'flex'
-  },
-  textfieldWrapper: {
-    margin: 'auto',
-    marginBottom: '15px'
   }
 }));
