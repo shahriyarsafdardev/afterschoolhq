@@ -19,8 +19,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
-            // if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
-            //     return ReturnOK(msgs);
+            if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+                return ReturnOK(msgs);
 
             try
             {
