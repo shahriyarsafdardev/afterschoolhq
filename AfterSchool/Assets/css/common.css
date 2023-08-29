@@ -585,10 +585,12 @@
 }
 
 .btn-upgrade-plan {
-    padding: 12px 30px;
-    box-shadow: 0 0 4px 0px #555555;
-    background-color: #c3eae0;
+    padding: 10px 50px;
+    box-shadow: 2px 2px 2px 2px #00ae85;
+    background-color: #ffff;
     border-color: #c3eae0;
+    color: #00c5a3;
+    font-weight: bold;
 }
 
 .has-search .form-control-feedback {

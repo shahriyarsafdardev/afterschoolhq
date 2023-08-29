@@ -1,10 +1,11 @@
-﻿@using AfterSchoolLibrary.Enums
+@using AfterSchoolLibrary.Enums
 <div id="upgrade-my-plan">
     <div class="Container">
         <button aria-label="Close" class="modal-close-button" onclick="hideUpgradeMyPlan()" type="button">
             <span aria-hidden="true">&times;</span>
         </button>
         <h2 class="gain-access text-center" style="font-family: Montserrat, sans-serif"></h2>
+        <h3 class="gain-forms-access" style="font-family: Montserrat, sans-serif; display:flex ; align-items: center; padding-left: 150px; padding-right: 150px; gap:50px"></h3>
         <div class="clearfix"></div>
     </div>
     <div class="clearfix"></div>
@@ -12,18 +13,21 @@
 
 <script type="text/javascript">
     let featureId;
-    function showUpgradeMyPlan(name, id, preventClose = false) {
+    function showUpgradeMyPlan(name, id, preventClose = false, FeatureType = 'NotSet' ) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
         if (name)
             $('.gain-access').html(`Upgrade to the ${name} Plan to access this feature. <a href="javascript:AccountSetup.getStripeBillingLink('', @((int)BillingPortalConfigurationType.SubscriptionUpdate))" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif">Upgrade My Plan</a>`);
-  
+
         if (id)
             featureId = id;
 
         if (name === '' || id === '') {
-            $('.gain-access').html('This feature is not accessible. contact admin for more information.');
+            if (FeatureType === 'ManageForms')
+                $('.gain-forms-access').html('<div>Your form limit has been reached. Either archive other forms or upgrade your account to create more. If you have additional questions, please <a style="color:white; text-decoration:underline" href="mailto:support@afterschoolhq.com">contact support</a>.</div><a href="javascript:AccountSetup.getStripeBillingLink(\'\', @((int)BillingPortalConfigurationType.SubscriptionUpdate))" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif;">Upgrade My Plan</a>');
+            else
+                $('.gain-access').html('This feature is not accessible. contact admin for more information.');
         }
 
         if (preventClose)
@@ -38,7 +42,7 @@
         featureId = id;
         loadUpgradePage();
     }
-    function loadUpgradePage() {        
+    function loadUpgradePage() {     
         AccountSetup.getStripeBillingLink('', @((int)BillingPortalConfigurationType.SubscriptionUpdate));
     }
 </script>

@@ -10,6 +10,12 @@
         border-radius: 7px;
     }
 
+    .gain-forms-access {
+        font-size: 18px;
+        padding-left: 80px !important;
+        padding-right: 80px !important;
+    }
+
     #upgrade-my-plan {
         position: fixed;
         z-index: 999999;
