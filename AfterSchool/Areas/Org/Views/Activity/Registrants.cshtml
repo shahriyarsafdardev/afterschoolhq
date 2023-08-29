@@ -21,7 +21,7 @@
     var studentCRMPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, accountPackage);
     var isReadOnlySeatStatus = Model.IsReadOnlySeatStatus;
     var currentUser = Model.CurrentUser;
-    var canViewRegistrantData = Model.AccountUserType != UserType.Instructor || !Model.CurrentAccount.HasFeature(FeatureType.LimitInstructorRegistrantView);
+    var canViewRegistrantData = true;
 }
 
 
