@@ -9,10 +9,8 @@ import { Backdrop, Box, Fade, Typography, Modal, Button, Grid, Divider } from '@
 import useStyles from './styles';
 import { DateTimePicker } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
-import TextField from 'components/Overrides/TextField';
 import { changeDateTimeFormat, getTimeFromDate } from 'utils';
-import LoadingButton from 'components/Overrides/LoadingButton';
-import TextAreaField from 'components/Overrides/TextAreaField'; //TODO: Refactoring
+import { TextField, LoadingButton, TextAreaField } from 'components/Overrides';
 
 function AddNewNoteModal(props) {
   const classes = useStyles();

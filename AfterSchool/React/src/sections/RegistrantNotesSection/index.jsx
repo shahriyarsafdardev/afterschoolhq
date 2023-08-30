@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Typography, Box, Button, TextField, Divider } from '@material-ui/core';
+
 import useStyles from './styles';
 import NoteList from './NoteList';
-import AddNewNoteModal from './AddNewNoteModal';
-
-import { Pagination } from 'components';
-import { useRegistrantNotes } from 'redux/hooks';
 import { PER_PAGE } from 'constants';
-import { Debounce, buildQueryParams, convertDateFormat } from 'utils';
+import { Pagination } from 'components';
+import AddNewNoteModal from './AddNewNoteModal';
+import { useRegistrantNotes } from 'redux/hooks';
+import { Debounce, buildQueryParams, changeDateTimeFormat } from 'utils';
 
 const RegistrantNotesSection = () => {
   const classes = useStyles();
@@ -42,7 +42,7 @@ const RegistrantNotesSection = () => {
 
   const handleEdit = id => {
     const note = registrantNotes.find(note => note.ID === id);
-    const updatedNote = { ...note, PostDate: convertDateFormat(new Date(note.PostDate)) };
+    const updatedNote = { ...note, PostDate: changeDateTimeFormat(new Date(note.PostDate)) };
     setEditNoteValue(updatedNote);
     setIsUpdating(true);
     setOpen(true);

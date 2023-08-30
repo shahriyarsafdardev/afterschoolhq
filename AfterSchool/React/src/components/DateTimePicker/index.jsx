@@ -3,20 +3,16 @@ import * as Yup from 'yup';
 import DateFnsUtils from '@date-io/date-fns';
 import TodayIcon from '@material-ui/icons/Today';
 import React, { useEffect, useState } from 'react';
-import { Typography, Box, FormHelperText } from '@material-ui/core';
+import { Typography, Box } from '@material-ui/core';
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
   KeyboardDatePicker
 } from '@material-ui/pickers';
 
-import {
-  changeDateTimeFormat,
-  convertDateFormat,
-  getAndFormatDateTime,
-  getTimeFromDate
-} from 'utils';
 import useStyles from './styles';
+import { ErrorBand } from 'components';
+import { changeDateTimeFormat, getAndFormatDateTime, getTimeFromDate } from 'utils';
 
 export default function DateTimePicker(props) {
   const {
@@ -47,8 +43,7 @@ export default function DateTimePicker(props) {
       return !(getTimeFromDate(new Date(value)) > getTimeFromDate(new Date()));
     });
 
-  useEffect(() => {
-    const dateTime = `${selectedDate} ${changeDateTimeFormat(selectedTime).split(', ')[1]}`;
+  const validateDateTime = dateTime =>
     dateTimeValidation
       .validate(dateTime)
       .then(() => {
@@ -58,14 +53,29 @@ export default function DateTimePicker(props) {
       .catch(err => {
         setErrors(err.message);
       });
+
+  useEffect(() => {
+    const dateTime = `${selectedDate} ${changeDateTimeFormat(selectedTime).split(', ')[1]}`;
+    validateDateTime(dateTime);
   }, [selectedDate, selectedTime]);
 
   const handleDateChange = date => {
-    if (date) setSelectedDate(convertDateFormat(date).split(', ')[0]);
+    if (date) setSelectedDate(changeDateTimeFormat(date).split(', ')[0]);
   };
 
   const handleTimeChange = time => {
     if (time) setSelectedTime(getAndFormatDateTime(new Date(time)));
+  };
+
+  const handleDateOnAccept = date => {
+    handleDateChange(date);
+    setOpenDate(false);
+    setOpenTime(true);
+  };
+
+  const handleTimeOnAccept = time => {
+    handleTimeChange(time);
+    setOpenTime(false);
   };
 
   return (
@@ -97,12 +107,7 @@ export default function DateTimePicker(props) {
               }}
               onClick={() => setOpenDate(true)}
               open={openDate}
-              onAccept={date => {
-                handleDateChange(date);
-                setOpenDate(false);
-                setOpenTime(true);
-                //TODO: Move to function
-              }}
+              onAccept={date => handleDateOnAccept(date)}
               onDismiss={() => setOpenDate(false)}
             />
             <KeyboardTimePicker
@@ -118,11 +123,7 @@ export default function DateTimePicker(props) {
               }}
               open={openTime}
               onClick={() => setOpenTime(true)}
-              onAccept={time => {
-                handleTimeChange(time);
-                setOpenTime(false);
-                //TODO: move to function
-              }}
+              onAccept={time => handleTimeOnAccept(time)}
               onDismiss={() => setOpenTime(false)}
             />
           </MuiPickersUtilsProvider>
@@ -135,14 +136,7 @@ export default function DateTimePicker(props) {
           </Box>
         </Box>
       </Box>
-      {//TODO: Replace with ErrorBand
-      (errors || error) && (
-        <Box className={classes.flexCenter}>
-          <FormHelperText data-testid="date-time-error" className={classes.error}>
-            {errors || helperText}
-          </FormHelperText>
-        </Box>
-      )}
+      {(errors || error) && <ErrorBand error={errors || helperText} />}
     </Box>
   );
 }

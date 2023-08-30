@@ -19,7 +19,6 @@ export default makeStyles(theme => ({
   formControlClass: {
     margin: 'auto',
     marginBottom: '15px',
-    marginTop: '10px',
     display: 'block',
     width: '100%',
     paddingTop: '8px',

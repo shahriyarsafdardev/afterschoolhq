@@ -64,29 +64,4 @@ export const getAndFormatDateTime = (now = new Date()) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-export const convertDateFormat = date => {
-  //TODO: refactor this function
-  var formattedDate = date;
-  if (typeof date === 'object') {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date
-      .getDate()
-      .toString()
-      .padStart(2, '0');
-
-    const hours = date.getHours();
-    const minutes = date
-      .getMinutes()
-      .toString()
-      .padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const formattedHours = (hours % 12 || 12).toString().padStart(2, '0');
-
-    formattedDate = `${year}/${month}/${day}, ${formattedHours}:${minutes} ${ampm}`;
-  }
-
-  return formattedDate;
-};
-
 export const getTimeFromDate = date => date.getTime();
