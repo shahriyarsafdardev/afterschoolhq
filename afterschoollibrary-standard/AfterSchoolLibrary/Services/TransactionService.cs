@@ -200,7 +200,6 @@ namespace AfterSchoolLibrary.Services
                 paymentTypeFee = checkoutObject.GetRegistrationCreditCardFee(msgs, dc);
             }
 
-
             return CreateNew(
                 checkoutObject.PayingAccount,
                 checkoutObject.BillingAccount,
