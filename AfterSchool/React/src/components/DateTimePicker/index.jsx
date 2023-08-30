@@ -19,6 +19,7 @@ export default function DateTimePicker(props) {
     error,
     value,
     helperText,
+    setIsValid,
     customLabel,
     setFieldValue,
     required = false,
@@ -41,6 +42,9 @@ export default function DateTimePicker(props) {
       if (allowFutureDate) return true;
 
       return !(getTimeFromDate(new Date(value)) > getTimeFromDate(new Date()));
+    })
+    .test('Date before 1900', `${customLabel} should not be before 1900-01-01`, function(value) {
+      return !(getTimeFromDate(new Date(value)) < getTimeFromDate(new Date('01/01/1900')));
     });
 
   const validateDateTime = dateTime =>
@@ -49,9 +53,11 @@ export default function DateTimePicker(props) {
       .then(() => {
         setFieldValue(dateTime);
         setErrors('');
+        setIsValid(true);
       })
       .catch(err => {
         setErrors(err.message);
+        setIsValid(false);
       });
 
   useEffect(() => {
@@ -60,11 +66,21 @@ export default function DateTimePicker(props) {
   }, [selectedDate, selectedTime]);
 
   const handleDateChange = date => {
-    if (date) setSelectedDate(changeDateTimeFormat(date).split(', ')[0]);
+    if (date) {
+      setSelectedDate(changeDateTimeFormat(date).split(', ')[0]);
+    } else {
+      setErrors('Invalid Format');
+      setIsValid(false);
+    }
   };
 
   const handleTimeChange = time => {
-    if (time) setSelectedTime(getAndFormatDateTime(new Date(time)));
+    if (time) {
+      setSelectedTime(getAndFormatDateTime(new Date(time)));
+    } else {
+      setErrors('Invalid Format');
+      setIsValid(false);
+    }
   };
 
   const handleDateOnAccept = date => {

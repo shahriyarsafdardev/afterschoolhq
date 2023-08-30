@@ -16,7 +16,9 @@ function AddNewNoteModal(props) {
   const classes = useStyles();
   const { regUid } = useParams();
   const { enqueueSnackbar } = useSnackbar();
+  const [isValid, setIsValid] = useState(true);
   const [saveDisabled, setSaveDisabled] = useState(false);
+  const [disableButton, setDisableButton] = useState(false);
   const { open, noteValue = {}, handleClose, isUpdating = false, getRegNotes } = props;
   const { createNote, msgs, updateNote } = useRegistrantNotes();
   const headerText = isUpdating ? 'Update Note' : 'Add New Note';
@@ -114,6 +116,10 @@ function AddNewNoteModal(props) {
     handleClose();
   };
 
+  useEffect(() => {
+    setDisableButton(!dirty || !isValid || !formik.isValid);
+  }, [dirty, isValid, formik.isValid]);
+
   return (
     <Modal
       aria-labelledby="transition-modal-title"
@@ -158,6 +164,7 @@ function AddNewNoteModal(props) {
                   customLabel="Date"
                   autofill="false"
                   required={true}
+                  setIsValid={setIsValid}
                   {...getFieldProps('postDate')}
                   error={!!(touched['postDate'] && errors['postDate'])}
                   helperText={touched['postDate'] && errors['postDate']}
@@ -200,7 +207,7 @@ function AddNewNoteModal(props) {
               variant="contained"
               text="Save"
               loading={saveDisabled}
-              disabled={!dirty}
+              disabled={disableButton}
               data-testid="save-button"
               className={classes.saveButton}
               onClick={submitNote}
