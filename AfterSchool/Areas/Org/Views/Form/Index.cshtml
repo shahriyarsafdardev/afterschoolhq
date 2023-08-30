@@ -125,7 +125,7 @@
                                         {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
                                             {
-                                                <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                                <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, 'ManageForms')"><i class="icon icon-left s7-edit"></i> Edit</a>
                                             }
                                             else
                                             {
@@ -151,23 +151,9 @@
                                     <td>
                                         @if (showFormFields)
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-newform" onclick="copy(@form.ID, '@form.Name' , '@form.FormTypeId')">
-                                                <i class="icon icon-left s7-copy-file"></i> Copy
-                                            </button>
-                                        }
-
-                                        else
-                                        {
-                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, 'ManageForms' )">
-                                                <i class="icon icon-left s7-copy-file"></i> Copy
-                                            </button>
-                                        }
-
-                                        @if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
-                                        {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
                                             {
-                                                <button class="btn btn-default btn-sm" data-modal="modal-newform" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                <button class="btn btn-default btn-sm" data-modal="modal-newform" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)','@(showFormFieldsPackage?.ID)', false, 'ManageForms')">
                                                     <i class="icon icon-left s7-copy-file"></i> Copy
                                                 </button>
                                             }
@@ -177,32 +163,36 @@
                                                     <i class="icon icon-left s7-copy-file"></i> Copy
                                                 </button>
                                             }
-                                            if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, 'ManageForms' )">
+                                                <i class="icon icon-left s7-copy-file"></i> Copy
+                                            </button>
+                                        }
+
+                                        @if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
+                                        {
+                                            var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
+
+                                            if (form.FormTypeId == FormType.VolunteerForm)
                                             {
-                                                var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
-
-                                                if (form.FormTypeId == FormType.VolunteerForm)
-                                                {
-                                                    formType = UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true).ToLower();
-                                                }
-
-                                                <button class="btn btn-default btn-sm md-trigger"
-                                                        data-modal="modal-setdefault"
-                                                        onclick="setFormAsDefault('@UI.JavascriptSafeString(form.Name)', '@formType', '@Url.Action("setasdefault", "form", new { id = form.ID.ToString() })')">
-                                                    Set as Default
-                                                </button>
+                                                formType = UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true).ToLower();
                                             }
 
-                                            if (!form.IsArchived)
+                                            <button class="btn btn-default btn-sm md-trigger"
+                                                    data-modal="modal-setdefault"
+                                                    onclick="setFormAsDefault('@UI.JavascriptSafeString(form.Name)', '@formType', '@Url.Action("setasdefault", "form", new { id = form.ID.ToString() })')">
+                                                Set as Default
+                                            </button>
+                                        }
+
+                                        @if (!form.IsArchived)
+                                        {
+                                            if (!isDefaultForm)
                                             {
-                                                if (!isDefaultForm)
-                                                {
-                                                    <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("archive", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Archive</button>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button> 
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-archive" onclick="archiveForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("archive", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Archive</button>
+
                                             }
                                         }
                                         else
