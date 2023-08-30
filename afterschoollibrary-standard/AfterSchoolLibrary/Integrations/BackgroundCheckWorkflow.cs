@@ -12,6 +12,7 @@ namespace AfterSchoolLibrary.Integrations
     {
         Task<BackgroundCheckRequestResult> RequestBackgroundCheck(WebUser webUser, int accountId, SystemMessages messages);
         Task ScheduleBackgroundCheck();
+        Task<string> GetSterlingCandidateId(WebUser webUser);
         Task UpdateBackgroundCheckStatus();
     }
 
@@ -158,6 +159,14 @@ namespace AfterSchoolLibrary.Integrations
                 msgs.Add(new SystemMessage(ex.Message, MessageType.ApiError));
                 Helpers.Utilities.SystemErrorLog(ex);
             }
+            
+        }
+
+        public async Task<string> GetSterlingCandidateId(WebUser webUser)
+        {
+            var token = await tokenQuery.GetAsync(credentials);
+            var candidateId = await candidateQuery.GetByEmailAsync(credentials, token.Token, webUser);
+            return candidateId;
 
         }
 
