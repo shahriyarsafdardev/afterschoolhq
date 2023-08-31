@@ -701,7 +701,7 @@ namespace AfterSchoolLibrary.Services
 
             if (reportType == RegistrationReportType.Basic)
                 return row;
-            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()!.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
+            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()?.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
             AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
 
             return row;
