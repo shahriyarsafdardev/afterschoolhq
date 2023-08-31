@@ -4,13 +4,14 @@ import { useSnackbar } from 'notistack';
 import { useFormik, FormikProvider, Form } from 'formik';
 import { useSearchParams, useParams } from 'react-router-dom';
 import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, CircularProgress, Typography, TextField, Box, Button } from '@material-ui/core';
+import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { newQuestion, unSavedDialogProps } from './helper';
 import formValidationSchema from './formValidationSchema';
 import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
+import { LoadingButton } from 'components/Overrides';
 import { usePrompt } from 'utils/hooks/usePrompt';
 import { useFormBuilder } from 'redux/hooks';
 import QuestionsList from './QuestionsList';
@@ -263,16 +264,6 @@ function FormSectionSettings() {
     setRenderApplyToAll(shouldRenderApplyToAll());
   }, [values]);
 
-  const buttonText = text => {
-    if (!saveDisabled) return text;
-
-    return (
-      <>
-        {'Loading . . .'} <CircularProgress size={'20px'} />
-      </>
-    );
-  };
-
   const formSaveHandler = event => {
     event.preventDefault();
     handleSubmit();
@@ -346,28 +337,28 @@ function FormSectionSettings() {
               >
                 + Add New Question
               </Button>
-              <Button
+              <LoadingButton
                 type="submit"
-                color="primary"
                 variant="outlined"
                 data-testid={`bottom-saveQuestions-${questionGroup}`}
-                className={classes.saveButton}
-                disabled={!unsavedChanges}
-                onClick={formSaveHandler}
-              >
-                {buttonText('Save')}
-              </Button>
-              <Button
-                type="submit"
                 color="primary"
+                onClick={formSaveHandler}
+                text="Save"
+                disabled={!unsavedChanges}
+                loading={saveDisabled}
+                className={classes.saveButton}
+              />
+              <LoadingButton
+                type="submit"
                 variant="outlined"
                 data-testid={`top-saveQuestions-${questionGroup}`}
-                className={classes.saveFormButton}
-                disabled={!unsavedChanges}
+                color="primary"
                 onClick={formSaveHandler}
-              >
-                {buttonText('Save Form')}
-              </Button>
+                text="Save Form"
+                disabled={!unsavedChanges}
+                loading={saveDisabled}
+                className={classes.saveFormButton}
+              />
             </Box>
           </Box>
         </Form>

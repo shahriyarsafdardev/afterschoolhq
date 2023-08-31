@@ -1,9 +1,10 @@
 import React from 'react';
 import cs from 'classnames';
 import { Form, FormikProvider } from 'formik';
-import { Box, Button, Grid, Typography, CircularProgress } from '@material-ui/core';
+import { Box, Button, Grid, Typography } from '@material-ui/core';
 
 import { Loader, ProgressBar, ShowQuestion } from 'components';
+import { LoadingButton } from 'components/Overrides';
 import { eSignMsg } from 'constants';
 import useStyles from './styles';
 
@@ -121,20 +122,17 @@ export default function RegistrationForm(props) {
                     >
                       Back
                     </Button>
-                    <Button
+                    <LoadingButton
+                      type="submit"
+                      variant="contained"
                       data-testid={`Save-${Name}`}
                       color="primary"
-                      className={classes.saveButton}
-                      variant="contained"
-                      type="submit"
+                      text={saveButtonText(lastSection, registrantType, isFree, skipAble)}
                       disabled={saveDisabled}
+                      loading={saveDisabled}
                       key={activeGroup}
-                    >
-                      {saveDisabled
-                        ? 'Loading . . .'
-                        : saveButtonText(lastSection, registrantType, isFree, skipAble)}
-                      {saveDisabled && <CircularProgress size={'20px'} style={{ marginLeft: 5 }} />}
-                    </Button>
+                      className={classes.saveButton}
+                    />
                   </Box>
                 </Box>
               </Box>
