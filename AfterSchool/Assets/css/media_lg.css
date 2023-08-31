@@ -11,6 +11,10 @@
         margin-left: 20px;
     }
 
+    .gain-forms-access {
+        font-size: 20px;
+    }
+
     #upgrade-my-plan {
         position: fixed;
         z-index: 999999;
