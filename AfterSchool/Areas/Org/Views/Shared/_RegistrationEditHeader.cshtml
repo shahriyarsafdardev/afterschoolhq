@@ -51,23 +51,24 @@
         <a href="@listUrl" class="btn btn-alt5">&laquo; Back to List</a>
     </div>
         <div class="hidden-lg hidden-sm hidden-md">
-            <select class="form-control" onchange="handleNav(this.value)">
+            <select class="form-control" onchange="handleNav(this.value)" id="dropdown">
                 <option value="">Navigation</option>
                 <!--
-                    <option value="modal-activity-add">Add Activity</option>
-                    -->
-            <option value="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })">Edit Registration
-                </option>
-                <!--
-                    <option value="modal-confirmation">Send Reg Info</option>
-                @if (canMergeWithRegistrations.Any())
-                {
-                            <option value="modal-regmerge">Merge</option>
-                }
-                    <option value="modal-deletereg">Delete</option>
+        <option value="modal-activity-add">Add Activity</option>
+        -->
+                <option value="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" @(actionName == "update" ? "selected=\"selected\"" : "")>Edit Registration</option>
+                <option value="@Url.Action("notes", "registration", new { id = Model.Uid.ToString()})" @(actionName == "notes" ? "selected=\"selected\"" : "")>Notes</option>
 
-                    -->
-            <option value="@listUrl">&laquo; Back to List</option>
+                <!--
+        <option value="modal-confirmation">Send Reg Info</option>
+    @if (canMergeWithRegistrations.Any())
+    {
+                <option value="modal-regmerge">Merge</option>
+    }
+        <option value="modal-deletereg">Delete</option>
+
+        -->
+                <option value="@listUrl">&laquo; Back to List</option>
             </select>
         </div>
     </div>
