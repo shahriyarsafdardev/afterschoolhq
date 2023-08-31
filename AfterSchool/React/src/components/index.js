@@ -7,6 +7,7 @@ export { default as CheckBoxList } from './CheckBoxList';
 export { default as ErrorBand } from './common/ErrorBand';
 export { default as TextField } from './TextField/TextField';
 export { default as TextBlock } from './TextBlock/TextBlock';
+export { default as GoogleLocation } from './GoogleLocation';
 export { default as ProgressBar } from './ProgressBar/ProgressBar';
 export { default as SchoolField } from './SchoolField/SchoolField';
 export { default as ApiTextField } from './ApiTextField/ApiTextField';

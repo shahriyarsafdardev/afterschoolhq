@@ -49,4 +49,4 @@ export const eSignMsg = allowToPayLater =>
     ? 'Your registration is not finalized until you have selected a payment option.'
     : ' Your registration is not finalized until you complete payment.';
 export const applyModes = { Apply: 'Apply', Register: 'Register' };
-export const googlePlaces = ['places'];
+export const googleLocationAPI = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}&libraries=places`;
