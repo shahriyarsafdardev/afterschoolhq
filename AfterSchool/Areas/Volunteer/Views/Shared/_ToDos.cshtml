@@ -2,6 +2,8 @@
 
 @{
     var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
+    var currentUserDisplayName = SessionVariables.CurrentUser.DisplayName;
+    var sterlingLink = ViewData["link"].ToString();
 }
 
 <div class="panel" style="overflow: hidden;">
@@ -11,7 +13,27 @@
         </h3>
     </div>
     <div class="panel-body">
-
+            <div class="text-medium padding-10">
+                <strong>Finalize Registration</strong>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            @currentUserDisplayName
+                        </td>
+                        <td class="text-right">
+                            <a href="@sterlingLink" target="_blank" class="btn btn-primary">
+                                Start Background Check &raquo;
+                            </a>
+                        </td>
+                    </tr>
+                </thead>
+            </table>
         @*Ask if Volunteer will ever view this because their profile will always be completed. *@
 
         @*@if (Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed))
