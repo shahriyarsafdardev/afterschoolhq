@@ -656,7 +656,23 @@ namespace AfterSchool.Areas.Api.Controllers
                             break;
                     }
                 });
+                
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
+                    currentUserPersonType == RegistrantPersonType.Parent)
+                {
+                    var studentFirstName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                    var studentLastName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
 
+                    studentRegistrants.ForEach(stdRegistrant =>
+                    {
+                        if (stdRegistrant.FirstName.IsNotEmpty() && stdRegistrant.FirstName.Equals(studentFirstName) &&
+                            stdRegistrant.LastName.IsNotEmpty() && stdRegistrant.LastName.Equals(studentLastName))
+                            throw new Exception("Student name already exists");
+                    });
+                }
+                
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName)?.Value;
