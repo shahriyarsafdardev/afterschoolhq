@@ -176,12 +176,17 @@ namespace AfterSchoolLibrary.Services
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
             var participationObject = checkoutObject.ParticipationObject;
+            var activity = participationObject.GetActivity();
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
-            var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+            var endDateTime = new DateTime?();
+
+            endDateTime = (activity.GetSchedule() != null && activity.GetSchedule().IsOngoing) ? null : 
+                plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+
             var stripeMetaData = new Dictionary<string, string>
                             {
                                 {"BillingAccountUid", billingAccount.Uid.ToString()},
@@ -215,7 +220,10 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
                 startDateTime = proratingCalculation.GetStartDate();
-                endDateTime = proratingCalculation.GetEndDate();
+
+                if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
+                    endDateTime = proratingCalculation.GetEndDate();
+
                 anchorDate = proratingCalculation.GetAnchorDate();               
             }
 

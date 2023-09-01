@@ -1360,18 +1360,30 @@ namespace AfterSchoolLibrary.Services
             var hasStripeChanges = true;
             var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
+            var activitySchedule = activity.GetSchedule(msgs, dc);
+
+            if(subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < account.ConvertToAccountTimeZone(DateTime.UtcNow).Date )
+                msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
+
+            if(activitySchedule != null && activitySchedule.StartDate.HasValue)
+            {
+                var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+                if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
+                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+            }
 
             // first: desactivate the current plan if there are any changes
-            if (activity.HasSubscriptionPlan(msgs, dc))
+            if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                   plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
-                                   plan.PaymentStartTypeId != paymentStartType ||
-                                   (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
-                                   (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
-                                   plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
+                                plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
+                                plan.PaymentStartTypeId != paymentStartType ||
+                                (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
+                                (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
+                                plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
@@ -1385,7 +1397,8 @@ namespace AfterSchoolLibrary.Services
             }
 
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean() && hasStripeChanges)
+            if (hassubscriptionplan.ToBoolean() && hasStripeChanges && msgs.HasNoErrors())
+            {
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
@@ -1403,7 +1416,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
-
+            }
             return msgs;
         }
 
