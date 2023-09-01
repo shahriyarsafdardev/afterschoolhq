@@ -1174,7 +1174,7 @@ namespace AfterSchoolLibrary.Services
                 new Hashtable()
                 {
                     {"WebUserId", user.ID.Value},
-                    {"RegistrantId", registrant.ID.Value},
+                    {"RegistrantId", registrant?.ID.Value},
                 },
                 msgs,
                 dc) > 0;
