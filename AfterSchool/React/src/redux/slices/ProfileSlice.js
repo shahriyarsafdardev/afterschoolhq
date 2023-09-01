@@ -90,11 +90,11 @@ export const useProfileActions = () => {
     formData.append('registrantId', UserUid);
     formData.append('schoolLocationID', schoolLocationID);
 
-    await ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-      dispatch(setMsgs(msgs))
-    );
-
     dispatch(submitFormSection(answers));
+    return await ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
+      dispatch(setMsgs(msgs));
+      return msgs;
+    });
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
