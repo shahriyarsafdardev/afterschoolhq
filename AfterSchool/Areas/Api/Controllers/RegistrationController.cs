@@ -444,8 +444,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-
+                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).PersonTypeId;
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+                var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
@@ -496,6 +497,19 @@ namespace AfterSchool.Areas.Api.Controllers
                             break;
                     }
                 });
+                
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
+                    currentUserPersonType == RegistrantPersonType.Parent)
+                {
+                    studentRegistrants.ForEach(stdRegistrant =>
+                    {
+                        var submittedRecord = Registrant.LoadByParentRegistrantId(stdRegistrant.ID.Value,msgs).FirstOrDefault();
+                        if(submittedRecord.IsNotEmpty() && stdRegistrant.ID != registrant.ID && submittedRecord.FirstName.IsNotEmpty() && 
+                           submittedRecord.FirstName.ToLower().Equals(registrant.FirstName.ToLower()) &&
+                           submittedRecord.LastName.IsNotEmpty() && submittedRecord.LastName.ToLower().Equals(registrant.LastName.ToLower()))
+                            throw new Exception("Student name already exists");
+                    });
+                }
 
                 if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation && registrant.PersonTypeId != RegistrantPersonType.Adult
                     && registrant.PersonTypeId != RegistrantPersonType.Volunteer)
