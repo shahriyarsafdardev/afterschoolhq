@@ -108,7 +108,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var isActivityGroup = group.IsGuid();
             var activityGroup = isActivityGroup ? currentAccount.GetActivityGroup(group.ToGuid(), msgs) : null;
-            var activities = GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
+            var activities = GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs).Where(x => x.AccountId == currentAccount.ID).ToList();
 
             if (!activities.Any() && isArchived)
             {
