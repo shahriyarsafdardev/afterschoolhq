@@ -667,8 +667,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
                     studentRegistrants.ForEach(stdRegistrant =>
                     {
-                        if (stdRegistrant.FirstName.IsNotEmpty() && stdRegistrant.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
-                            stdRegistrant.LastName.IsNotEmpty() && stdRegistrant.LastName.ToLower().Equals(studentLastName.ToLower()))
+                        var (submittedRecord, _) = stdRegistrant.GetSubmittedRecord(participationObject,msgs);
+                        if(submittedRecord.IsNotEmpty() && submittedRecord.FirstName.IsNotEmpty() && submittedRecord.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
+                            submittedRecord.LastName.IsNotEmpty() && submittedRecord.LastName.ToLower().Equals(studentLastName.ToLower()))
                             throw new Exception("Student name already exists");
                     });
                 }
