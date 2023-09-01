@@ -501,12 +501,16 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
                     currentUserPersonType == RegistrantPersonType.Parent)
                 {
+                    var studentFirstName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                    var studentLastName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                    
                     studentRegistrants.ForEach(stdRegistrant =>
                     {
-                        var submittedRecord = Registrant.LoadByParentRegistrantId(stdRegistrant.ID.Value,msgs).FirstOrDefault();
-                        if(submittedRecord.IsNotEmpty() && stdRegistrant.ID != registrant.ID && submittedRecord.FirstName.IsNotEmpty() && 
-                           submittedRecord.FirstName.ToLower().Equals(registrant.FirstName.ToLower()) &&
-                           submittedRecord.LastName.IsNotEmpty() && submittedRecord.LastName.ToLower().Equals(registrant.LastName.ToLower()))
+                        if(stdRegistrant.IsNotEmpty() && stdRegistrant.ID != registrant.ID && stdRegistrant.FirstName.IsNotEmpty() && 
+                           stdRegistrant.FirstName.ToLower().Equals(studentFirstName) &&
+                           stdRegistrant.LastName.IsNotEmpty() && stdRegistrant.LastName.ToLower().Equals(studentLastName))
                             throw new Exception("Student name already exists");
                     });
                 }
