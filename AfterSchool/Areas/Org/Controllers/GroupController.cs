@@ -980,7 +980,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activitiesAndPreferences,
                     session.GetCurrentRegistrationPeriod(msgs),
                     SessionVariables.CurrentUser,
-                    msgs);
+                    msgs:msgs);
 
             if (msgs.HasNoErrors())
                 return RedirectToAction("registrations", new {id = session.Uid});

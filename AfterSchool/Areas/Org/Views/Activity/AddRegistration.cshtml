@@ -6,6 +6,7 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var currentUser = SessionVariables.CurrentUser;
+    var assignmentTypes = Model.GetRegistrationAssignmentTypes();
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.ID.ToString());}
@@ -46,7 +47,33 @@
                         </div>
                     </div>
                 }
-
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Registration Status
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3 control-label">
+                                Set Registration Status
+                                <span class="text-danger">*</span>
+                            </div>
+                            <div class="col-md-6" data-toggle="popover" data-trigger="hover" data-content="required" data-placement="right">
+                                <select name="assignmentstatustype"
+                                        id="newassignmenttype"
+                                        class="form-control"
+                                        data-required>
+                                    <option value="">Select...</option>
+                                    @foreach (var assignmentType in assignmentTypes)
+                                    {
+                                        <option value="@( (int) assignmentType)">
+                                            @assignmentType.ToString().SplitByUpperCase()
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-3"></div>
                     <div class="col-md-6">

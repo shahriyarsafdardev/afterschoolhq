@@ -2191,7 +2191,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
-            RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            RegistrationPeriod period, WebUser loggedInUser, int? newAssignmentType = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             account.CreateNewRegistrantAndRegistration(
                 participationObject,
@@ -2199,6 +2199,7 @@ namespace AfterSchoolLibrary.Services
                 new List<(Activity activity, int preferenceNumber)>(),
                 period,
                 loggedInUser,
+                newAssignmentType,
                 msgs,
                 dc);
         }
@@ -2218,7 +2219,7 @@ namespace AfterSchoolLibrary.Services
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
             List<(Activity activity, int preferenceNumber)> activitiesAndPreferences, RegistrationPeriod period,
-            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, int? assignmentType = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant student = null;
 
@@ -2277,6 +2278,7 @@ namespace AfterSchoolLibrary.Services
                         amountCharged: participationObject.Cost,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
+                        assignmentType,
                         dc: adc);
 
                     activitiesAndPreferences.ForEach(activityAndPreference =>
