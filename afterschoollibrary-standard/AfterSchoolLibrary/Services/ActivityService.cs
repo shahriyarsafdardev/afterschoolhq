@@ -2885,7 +2885,7 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
-            var latestInstance = schedule.GetInstances(msgs: msgs, dc: dc).LastOrDefault();
+            var latestInstance = schedule.GetInstances(msgs: msgs, dc: dc)?.LastOrDefault();
             return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, latestInstance,
                 DateTime.UtcNow);
         }

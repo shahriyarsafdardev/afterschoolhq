@@ -421,7 +421,8 @@ namespace AfterSchoolLibrary.Services
                     else
                     {
                         var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
-                        return scheduleFirstInstance.Value;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
                     }
                     break;
                 case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
@@ -438,7 +439,8 @@ namespace AfterSchoolLibrary.Services
                     else
                     {
                         var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
-                        return scheduleFirstInstance.Value;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
                     }
 
                     break;

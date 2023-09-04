@@ -566,7 +566,10 @@ namespace AfterSchoolLibrary.Services
                     else
                     {
                         var firstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
-                        return firstInstance.Value;
+                        if (firstInstance.IsNotEmpty())
+                            return firstInstance.Value;
+                        else
+                            return null;
                     }
 
                 case PlanPaymentStartType.OnCheckout:

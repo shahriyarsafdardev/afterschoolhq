@@ -2085,8 +2085,8 @@ namespace AfterSchool.Controllers
             }
             else
             {
-                startDate = (DateTime)schedule.GetInstances(msgs:msgs).FirstOrDefault().StartDateTime;
-                endDate = (DateTime)schedule.GetInstances(msgs: msgs).LastOrDefault().EndDateTime;
+                startDate = (DateTime)schedule.GetInstances(msgs:msgs).FirstOrDefault()?.StartDateTime;
+                endDate = (DateTime)schedule.GetInstances(msgs: msgs).LastOrDefault()?.EndDateTime;
             }
 
             PaymentViewBag(id, participationObject, msgs);
