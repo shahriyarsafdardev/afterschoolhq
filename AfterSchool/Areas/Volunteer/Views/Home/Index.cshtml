@@ -49,7 +49,7 @@
     {
         <div class="@upcomingDivClass">
 
-            @if (showToDos)
+            @if (showToDos && isSterlingSetupRequired)
             {
                 Html.RenderPartial("_ToDos", Model, 
                     new ViewDataDictionary()
