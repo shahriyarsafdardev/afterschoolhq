@@ -91,7 +91,7 @@ export const useProfileActions = () => {
     formData.append('schoolLocationID', schoolLocationID);
 
     dispatch(submitFormSection(answers));
-    return await ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
+    return ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
       dispatch(setMsgs(msgs));
       return msgs;
     });
