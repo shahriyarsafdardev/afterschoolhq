@@ -1003,7 +1003,11 @@ namespace AfterSchoolLibrary.Models
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id AND submittedReg.CreateDate = (
+                SELECT MIN(CreateDate)
+                FROM Registrant
+                WHERE ParentRegistrantId = masterReg.ID
+                )
                 {typecondition}
             WHERE
                 reg.accountid in (
@@ -1042,7 +1046,11 @@ namespace AfterSchoolLibrary.Models
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id  AND submittedReg.CreateDate = (
+                SELECT MIN(CreateDate)
+                FROM Registrant
+                WHERE ParentRegistrantId = masterReg.ID
+                )
                 {typecondition}   
             WHERE
                 reg.accountid in (
