@@ -134,13 +134,13 @@ export const useRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      return await RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
+      return RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
         dispatch(setRegistrationId(obj));
         dispatch(setMsgs(msgs));
         return msgs;
       });
     } else
-      return await RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
+      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
         dispatch(setMsgs(msgs));
         return msgs;
       });

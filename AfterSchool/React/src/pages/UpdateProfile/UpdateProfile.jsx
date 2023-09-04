@@ -83,7 +83,7 @@ export default function UpdateProfile() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
-      let errorMsgs = [];
+      const errorMsgs = [];
       if (dirty) {
         setSaveDisabled(true);
 
@@ -107,7 +107,7 @@ export default function UpdateProfile() {
           userUid,
           schoolLocationID
         ).then(msgs => {
-          errorMsgs = msgs;
+          errorMsgs.push(...msgs);
           if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
         });
       }
