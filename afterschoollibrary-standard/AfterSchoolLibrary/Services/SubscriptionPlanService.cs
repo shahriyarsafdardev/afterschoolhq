@@ -565,8 +565,8 @@ namespace AfterSchoolLibrary.Services
                         return participationObject.StartDate.Value;
                     else
                     {
-                        var firstInstance = (ActivityInstance)schedule.GetInstances().FirstOrDefault();
-                        return firstInstance.StartDateTime.Value;
+                        var firstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        return firstInstance.Value;
                     }
 
                 case PlanPaymentStartType.OnCheckout:

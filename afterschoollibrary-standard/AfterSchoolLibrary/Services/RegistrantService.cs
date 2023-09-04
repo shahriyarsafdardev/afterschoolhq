@@ -420,7 +420,7 @@ namespace AfterSchoolLibrary.Services
                         return participationObject.StartDate.Value;
                     else
                     {
-                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault().StartDateTime;
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
                         return scheduleFirstInstance.Value;
                     }
                     break;
@@ -437,7 +437,7 @@ namespace AfterSchoolLibrary.Services
                         return participationObject.StartDate.Value;
                     else
                     {
-                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault().StartDateTime;
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
                         return scheduleFirstInstance.Value;
                     }
 
