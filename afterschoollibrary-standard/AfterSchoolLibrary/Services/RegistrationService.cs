@@ -185,13 +185,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.SelectedDates,
                 loggedInUser,
                 msgs,
-                dc);
+                dc:dc);
         }
 
         public static void ProcessRegistrationAssignment(this Registration registration,
             ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant,
             int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc = null)
+            SystemMessages msgs, int? assignmentType = null, DatabaseConnection dc = null)
         {
             registration.ProcessRegistrationAssignment(
                 participationObject,
@@ -205,13 +205,14 @@ namespace AfterSchoolLibrary.Services
                 null,
                 loggedInUser,
                 msgs,
+                assignmentType,
                 dc);
         }
 
         public static void ProcessRegistrationAssignment(this Registration registration,
             ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant,
             int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged,
-            List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, int? newAssignmentType = null, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
@@ -221,7 +222,11 @@ namespace AfterSchoolLibrary.Services
                 ? participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc)
                 : (decimal?) null;
             var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject, loggedInUser.ID.Value);
-            var assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
+            var assignmentType = new RegistrationAssignmentType();
+            if (newAssignmentType.IsNotEmpty())
+                assignmentType = (RegistrationAssignmentType)newAssignmentType;
+            else
+                assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
                 amountPaidByRegistrant, loggedInUser.ID, requiresBackgroundCheck);
 
             if (assignmentType == RegistrationAssignmentType.NotSet)

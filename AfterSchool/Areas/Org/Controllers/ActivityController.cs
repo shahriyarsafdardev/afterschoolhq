@@ -1121,7 +1121,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddRegistration(string id, string parentsig)
+        public ActionResult AddRegistration(string id, string parentsig, int? newassignmenttype = null)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -1161,6 +1161,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         break;
                 }
             });
+            if(newassignmenttype.IsEmpty())
+                msgs.Add($"Registration Status is required", MessageType.UserError);
 
             var qvms = questions.OrderBy(question => question.DisplayOrder)
                 .Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -1171,7 +1173,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: activity.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.CurrentUser,
-                    msgs: msgs);
+                    msgs: msgs,
+                    newAssignmentType: newassignmenttype);
 
             ViewBag.Messages = msgs;
             ViewBag.QuestionViewModels = qvms;
