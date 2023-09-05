@@ -1362,20 +1362,20 @@ namespace AfterSchoolLibrary.Services
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule(msgs, dc);
 
-            if(subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < account.ConvertToAccountTimeZone(DateTime.UtcNow).Date )
-                msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
-
-            if(activitySchedule != null && activitySchedule.StartDate.HasValue)
-            {
-                var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
-
-                if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
-                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
-            }
-
-            // first: desactivate the current plan if there are any changes
             if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
+                if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < account.ConvertToAccountTimeZone(DateTime.UtcNow).Date)
+                    msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
+
+                if (activitySchedule != null && activitySchedule.StartDate.HasValue)
+                {
+                    var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+                    if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
+                        msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                }
+
+                // first: desactivate the current plan if there are any changes
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
