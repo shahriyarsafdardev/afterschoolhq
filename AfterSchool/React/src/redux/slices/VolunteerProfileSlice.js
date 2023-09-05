@@ -1,12 +1,12 @@
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ProfileRepository from 'repository/ProfileRepository';
 
 const VolunteerProfileSlice = createSlice({
   name: 'volunteerProfileSlice',
   initialState: {
-    msgs: [],
     activity: {},
     questions: [],
     loading: true,
@@ -41,16 +41,13 @@ const VolunteerProfileSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useVolunteerProfileActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setFormData,
     formDataLoaded,
     loadingFormData,

@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 
-import { useUser, useVolunteerProfile } from 'redux/hooks/index';
+import { useErrorMessages, useUser, useVolunteerProfile } from 'redux/hooks/index';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import apiRoutes from 'routes';
@@ -15,8 +15,8 @@ export default function UpdateVolunteerProfile() {
   const { id: userUid } = useParams();
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
+  const { msgs } = useErrorMessages();
   const {
-    msgs,
     loaded,
     loading,
     questions,
@@ -62,10 +62,6 @@ export default function UpdateVolunteerProfile() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleRedirection = () => {
     loaded();

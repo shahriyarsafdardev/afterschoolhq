@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
+import { useErrorMessages, useUpdateRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useUpdateRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -14,8 +14,8 @@ export default function UpdateRegistration() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { thankyouUrl, volunteerThankYouUrl } = apiRoutes;
+  const { msgs } = useErrorMessages();
   const {
-    msgs,
     school,
     loading,
     questions,
@@ -75,10 +75,6 @@ export default function UpdateRegistration() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleRedirection = () => {
     const url = RegistrantType === 'Volunteer' ? volunteerThankYouUrl(regUid) : thankyouUrl(regUid);

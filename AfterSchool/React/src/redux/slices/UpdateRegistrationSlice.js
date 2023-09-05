@@ -5,13 +5,13 @@ import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import { responseMapper } from './helper';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import UpdateRegistrationRepository from 'repository/UpdateRegistrationRepository';
 
 const UpdateRegistrationSlice = createSlice({
   name: 'updateRegistrationSlice',
   initialState: {
-    msgs: [],
     school: {},
     activity: {},
     questions: [],
@@ -64,16 +64,13 @@ const UpdateRegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useUpdateRegistrationActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setSchool,
     setFormData,
     formDataLoaded,

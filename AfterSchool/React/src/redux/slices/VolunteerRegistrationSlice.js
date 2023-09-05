@@ -4,13 +4,13 @@ import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import VolunteerRegistrationRepository from 'repository/VolunteerRegistrationRepository';
 
 const VolunteerRegistrationSlice = createSlice({
   name: 'volunteerRegistrationSlice',
   initialState: {
-    msgs: [],
     activity: {},
     questions: [],
     loading: true,
@@ -55,16 +55,13 @@ const VolunteerRegistrationSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useVolunteerRegistrationActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setFormData,
     formDataLoaded,
     loadingFormData,

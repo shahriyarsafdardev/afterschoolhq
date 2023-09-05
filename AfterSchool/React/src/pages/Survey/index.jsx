@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useSurvey } from 'redux/hooks';
+import { useErrorMessages, useSurvey } from 'redux/hooks';
 import routes from 'routes';
 import utils from 'utils';
 
@@ -15,8 +15,8 @@ export default function Survey() {
   const { surveyThankyouUrl } = routes;
   const { scrollToTop } = utils;
   const { enqueueSnackbar } = useSnackbar();
+  const { msgs } = useErrorMessages();
   const {
-    msgs,
     loading,
     questions,
     loadFormData,
@@ -67,10 +67,6 @@ export default function Survey() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(() => {
     if (responseId.current && !searchParams.get('surveyResponseUid'))
