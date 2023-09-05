@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import useStyles from '../Common/styles';
-import { useSnackbar } from 'notistack';
 import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import { useSearchParams } from 'react-router-dom';
 import PhoneNumberForm from '../Common/PhoneNumberForm';
@@ -10,9 +9,8 @@ import { getPhoneFromParams } from '../Common';
 
 function index() {
   const classes = useStyles();
-  const { msgs, loading, resetPin } = useCheckInOut();
+  const { loading, resetPin } = useCheckInOut();
   const [activeStep, setActiveStep] = useState(0);
-  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const phone = getPhoneFromParams(searchParams);
   const accountName = searchParams.get('accountName') || '';
@@ -29,10 +27,6 @@ function index() {
     });
     localStorage.setItem('resetLinkSendAt', new Date().toISOString());
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(() => {
     if (phone) setActiveStep(1);

@@ -31,11 +31,7 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
     PersonPhoneDataType: 'NotSet'
   };
 
-  const { msgs, updateData } = usePostRegistration();
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
+  const { updateData } = usePostRegistration();
 
   useEffect(() => {
     const sessionCompleted = sessionStorage.getItem('isSessionCompleted');
