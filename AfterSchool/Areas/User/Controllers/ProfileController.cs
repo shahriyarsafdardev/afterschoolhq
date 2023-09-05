@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -70,8 +70,9 @@ namespace AfterSchool.Areas.User.Controllers
                     SessionVariables.CurrentUser = user;
                 }
             }
-
+            
             ViewBag.Messages = msgs;
+            ViewBag.IsRequireCheckInOut = IsCheckInOutFeatureEnabled();
             return View(SessionVariables.CurrentUser);
         }
 
