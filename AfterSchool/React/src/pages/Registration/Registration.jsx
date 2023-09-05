@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
+import { useRegistration, useErrorMessages } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -14,9 +14,9 @@ export default function Registration({ newChild = false }) {
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouUrl, postRegistrationUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
+  const { msgs } = useErrorMessages();
   const {
     exit,
-    msgs,
     school,
     loading,
     questions,
@@ -81,10 +81,6 @@ export default function Registration({ newChild = false }) {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(() => {
     sessionStorage.removeItem('isSessionCompleted');

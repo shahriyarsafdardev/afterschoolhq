@@ -4,12 +4,12 @@ import { createSlice } from '@reduxjs/toolkit';
 import utils from 'utils';
 import apiRoutes from 'routes';
 import { responseMapper } from './helper';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import SurveyRepository from 'repository/SurveyRepository';
 
 const SurveySlice = createSlice({
   name: 'surveySlice',
   initialState: {
-    msgs: [],
     questions: [],
     loading: true,
     questionsGroups: [],
@@ -47,16 +47,13 @@ const SurveySlice = createSlice({
     },
     setAnsweredQuestions: (state, { payload }) => {
       state.answeredQuestions = payload;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useSurveyActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setFormData,
     setResponseId,
     formDataLoaded,
@@ -64,6 +61,7 @@ export const useSurveyActions = () => {
     setAnsweredQuestions
   } = SurveySlice.actions;
   const dispatch = useDispatch();
+
   const redirectToThankYou = (pin, uid) => {
     if (Number(pin)) utils.navigateTo(apiRoutes.pinSurveyThankyouUrl(uid));
     else utils.navigateTo(apiRoutes.surveyThankyouUrl(uid));

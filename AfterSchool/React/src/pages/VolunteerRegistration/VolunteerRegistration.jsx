@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
+import { useErrorMessages, useVolunteerRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useVolunteerRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -15,9 +15,9 @@ export default function VolunteerRegistration() {
   const { enqueueSnackbar } = useSnackbar();
   const { volunteerThankYouUrl } = apiRoutes;
   const { accountName, activityName, regUid } = useParams();
+  const { msgs = [] } = useErrorMessages();
   const {
     exit,
-    msgs = [],
     loading,
     questions,
     loadFormData,
@@ -64,10 +64,6 @@ export default function VolunteerRegistration() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(() => {
     if (registrationId) handleRedirection();
