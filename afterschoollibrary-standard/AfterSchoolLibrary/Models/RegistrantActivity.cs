@@ -521,16 +521,6 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<RegistrantActivity> LoadByRegistrantId(int RegistrantId, RegistrationAssignmentType assignmentType, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            var dq = DatabaseQuery;
-            dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
-            dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentType);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-        }
-
         public bool IsForActivity()
         {
             return ParticipationObjectTypeId == ParticipationObjectType.Activity;

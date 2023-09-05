@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var periods = (List<RegistrationPeriod>)ViewBag.Periods;
@@ -59,7 +59,7 @@
                 var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
                 var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
                 var noSeatRegistrants = 0;
-                var count = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0);//.Select(x => Registrant.Load(x.RegistrantId).GetRegistrantActivities(RegistrationAssignmentType.Applied)).Count();
+                var count = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0);
                 foreach(var assign in count)
                 {
                     foreach (var ra in assign.RegistrantActivities)
