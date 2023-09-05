@@ -1,6 +1,20 @@
-import React from 'react';
-import { SnackbarProvider as NotistackSnackbarProvider } from 'notistack';
+import React, { useEffect } from 'react';
+import { SnackbarProvider as NotistackSnackbarProvider, useSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core';
+
+import { useErrorMessages } from 'redux/hooks';
+
+const ErrorSnackbarProvider = ({ children }) => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const { msgs } = useErrorMessages();
+
+  useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
+
+  return <div>{children}</div>;
+};
 
 function SnackbarProvider({ children }) {
   const classes = makeStyles(theme => ({
@@ -13,7 +27,7 @@ function SnackbarProvider({ children }) {
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       classes={{ variantSuccess: classes.variantSuccess }}
     >
-      {children}
+      <ErrorSnackbarProvider>{children}</ErrorSnackbarProvider>
     </NotistackSnackbarProvider>
   );
 }

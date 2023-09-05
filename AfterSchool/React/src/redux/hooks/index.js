@@ -77,3 +77,7 @@ export const useManageAPAccess = () => ({
   ...useSelector(state => state.APAccessSlice),
   ...useAPAccessActions()
 });
+
+export const useErrorMessages = () => ({
+  ...useSelector(state => state.errorMessagesSlice)
+});
