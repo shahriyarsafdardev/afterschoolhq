@@ -9,6 +9,7 @@ import APAccessSlice from './slices/APAccessSlice';
 import CheckInOutSlice from './slices/CheckInOutSlice';
 import FormBuilderSlice from './slices/FormBuilderSlice';
 import RegistrationSlice from './slices/RegistrationSlice';
+import ErrorMessagesSlice from './slices/ErrorMessagesSlice';
 import RegistrantNotesSlice from './slices/RegistrantNotesSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
 import UpdateRegistrationSlice from './slices/UpdateRegistrationSlice';
@@ -27,6 +28,7 @@ export default configureStore({
     [ThankYouSlice.name]: ThankYouSlice.reducer,
     [FormBuilderSlice.name]: FormBuilderSlice.reducer,
     [RegistrationSlice.name]: RegistrationSlice.reducer,
+    [ErrorMessagesSlice.name]: ErrorMessagesSlice.reducer,
     [RegistrantNotesSlice.name]: RegistrantNotesSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [UpdateRegistrationSlice.name]: UpdateRegistrationSlice.reducer,

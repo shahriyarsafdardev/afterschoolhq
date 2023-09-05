@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { SnackbarProvider as NotistackSnackbarProvider, useSnackbar } from 'notistack';
@@ -14,6 +14,20 @@ function SnackbarCloseButton({ snackbarKey }) {
   );
 }
 
+import { useErrorMessages } from 'redux/hooks';
+
+const ErrorSnackbarProvider = ({ children }) => {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const { msgs } = useErrorMessages();
+
+  useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
+
+  return <div>{children}</div>;
+};
+
 function SnackbarProvider({ children }) {
   const classes = makeStyles(theme => ({
     variantSuccess: { backgroundColor: `${theme.palette.primary.main} !important` }
@@ -26,7 +40,7 @@ function SnackbarProvider({ children }) {
       classes={{ variantSuccess: classes.variantSuccess }}
       action={snackbarKey => <SnackbarCloseButton snackbarKey={snackbarKey} />}
     >
-      {children}
+      <ErrorSnackbarProvider>{children}</ErrorSnackbarProvider>
     </NotistackSnackbarProvider>
   );
 }
