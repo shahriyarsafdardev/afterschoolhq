@@ -6,7 +6,7 @@
     var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
     var isSterlingSetupRequired = (bool) ViewBag.IsSterlingSetupRequired;
     var sterlingLink = (string) ViewBag.SterlingLink;
-    var showToDos = activitiesRequiringAttention.Any() || isSterlingSetupRequired || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
+    var showToDos = isSterlingSetupRequired ; // Volunteers have only todo's of background check for now.
     var showProviders = providers.Any();
     var showRightColumn = showToDos || showProviders;
     var showLeftColumn = activityInstances.Any();
@@ -49,7 +49,7 @@
     {
         <div class="@upcomingDivClass">
 
-            @if (showToDos && isSterlingSetupRequired)
+            @if (showToDos)
             {
                 Html.RenderPartial("_ToDos", Model, 
                     new ViewDataDictionary()
