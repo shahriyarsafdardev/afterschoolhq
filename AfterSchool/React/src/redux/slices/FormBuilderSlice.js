@@ -1,12 +1,12 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
+import { useErrorMessages } from 'redux/hooks';
 import FormBuilderRepository from 'repository/FormBuilderRepository';
 
 const FormBuilderSlice = createSlice({
   name: 'formBuilderSlice',
   initialState: {
-    msgs: [],
     questions: [],
     form: {},
     loading: true,
@@ -43,9 +43,6 @@ const FormBuilderSlice = createSlice({
     setSectionData: (state, { payload: { FormQuestion } }) => {
       state.questions = FormQuestion;
     },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
-    },
     clearFormQuestions: state => {
       state.questions = [];
     }
@@ -53,8 +50,8 @@ const FormBuilderSlice = createSlice({
 });
 
 export const useFormBuilderActions = () => {
+  const { setMsgs } = useErrorMessages();
   const {
-    setMsgs,
     updateForm,
     setFormData,
     setSectionData,

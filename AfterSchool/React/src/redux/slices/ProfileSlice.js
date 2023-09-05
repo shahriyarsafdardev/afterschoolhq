@@ -2,12 +2,12 @@ import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
 import schoolField from 'constants/schoolField';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ProfileRepository from 'repository/ProfileRepository';
 
 const ProfileSlice = createSlice({
   name: 'profileSlice',
   initialState: {
-    msgs: [],
     school: {},
     activity: {},
     questions: [],
@@ -49,22 +49,20 @@ const ProfileSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useProfileActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setSchool,
     setFormData,
     formDataLoaded,
     loadingFormData,
     submitFormSection
   } = ProfileSlice.actions;
+
   const dispatch = useDispatch();
 
   const loaded = () => dispatch(formDataLoaded());

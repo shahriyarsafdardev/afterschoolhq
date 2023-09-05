@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useUser, useProfile } from 'redux/hooks/index';
+import { useUser, useProfile, useErrorMessages } from 'redux/hooks/index';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -14,8 +14,8 @@ export default function UpdateProfile() {
   const { familyUrl } = apiRoutes;
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
+  const { msgs } = useErrorMessages();
   const {
-    msgs,
     loaded,
     school,
     loading,
@@ -65,10 +65,6 @@ export default function UpdateProfile() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleRedirection = () => {
     loaded();

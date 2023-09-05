@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import useStyles from '../Common/styles';
-import { useSnackbar } from 'notistack';
 import { Box, CircularProgress, Grid } from '@material-ui/core';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useCheckInOut } from 'redux/hooks';
@@ -15,7 +14,6 @@ function index() {
   const classes = useStyles();
   const navigate = useNavigate();
   const { accountName } = useParams();
-  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const phone = getPhoneFromParams(searchParams);
   const userPin = searchParams.get('pin') || '';
@@ -25,7 +23,6 @@ function index() {
   const [checkedStudents, setCheckedStudents] = useState({});
 
   const {
-    msgs,
     loading,
     selectedStudents,
     loadChildListData,
@@ -62,10 +59,6 @@ function index() {
       sessionStorage.setItem('isSessionCompleted', true);
     });
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const navigateToRoot = () => navigate(`/reactapp/check-in-out/${accountName}`);
 

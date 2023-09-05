@@ -1,7 +1,6 @@
 import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
 
 import ConfirmPinForm from '../Common/ConfirmPinForm';
 import { useCheckInOut } from 'redux/hooks';
@@ -12,7 +11,6 @@ import Thankyou from './Thankyou';
 function index() {
   const classes = useStyles();
   const [userPin, setUserPin] = useState();
-  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
   const success = searchParams.get('success') || '';
@@ -20,7 +18,7 @@ function index() {
 
   const [activeStep, setActiveStep] = useState(1);
 
-  const { msgs, loading, submitResetPin } = useCheckInOut();
+  const { loading, submitResetPin } = useCheckInOut();
 
   useEffect(() => {
     if (userPin) setActiveStep(2);
@@ -32,10 +30,6 @@ function index() {
       setSearchParams('success=true');
     }
   }, [success]);
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleSubmit = async pin => {
     await submitResetPin(token, pin).then(msgs => {

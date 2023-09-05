@@ -1,12 +1,12 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ManageAPAccessRepository from 'repository/ManageAPAccessRepository';
 
 const APAccessSlice = createSlice({
   name: 'APAccessSlice',
   initialState: {
     data: {},
-    msgs: [],
     loading: true
   },
   reducers: {
@@ -18,16 +18,15 @@ const APAccessSlice = createSlice({
     },
     loadingCompleted: state => {
       state.loading = false;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useAPAccessActions = () => {
   const dispatch = useDispatch();
-  const { setMsgs, setData, loadingStart, loadingCompleted } = APAccessSlice.actions;
+  const { setMsgs } = ErrorMessagesSlice.actions;
+  const { setData, loadingStart, loadingCompleted } = APAccessSlice.actions;
+
   const loadAuthorizedPersonsList = async () => {
     dispatch(loadingStart());
     const data = await ManageAPAccessRepository.getAuthorizedPersons();

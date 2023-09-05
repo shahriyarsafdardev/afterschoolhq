@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
-import { SnackbarProvider as NotistackSnackbarProvider, useSnackbar } from 'notistack';
 import { makeStyles } from '@material-ui/core';
+import { SnackbarProvider as NotistackSnackbarProvider, useSnackbar } from 'notistack';
 
 import { useErrorMessages } from 'redux/hooks';
 
 const ErrorSnackbarProvider = ({ children }) => {
-  const { enqueueSnackbar } = useSnackbar();
-
   const { msgs } = useErrorMessages();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));

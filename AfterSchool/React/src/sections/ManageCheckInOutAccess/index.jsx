@@ -16,13 +16,7 @@ export default function index() {
   const { enqueueSnackbar } = useSnackbar();
   const [initialValues, setInitialValue] = useState({});
 
-  const {
-    msgs,
-    data,
-    loading,
-    updateAuthorizedPersons,
-    loadAuthorizedPersonsList
-  } = useManageAPAccess();
+  const { data, loading, updateAuthorizedPersons, loadAuthorizedPersonsList } = useManageAPAccess();
 
   const { Students = [], IsPinSetup, IsPhoneSetup, RegistrantType } = data || {};
   const hasAccessToManageAPA = RegistrantType === 'Parent';
@@ -30,10 +24,6 @@ export default function index() {
   useEffect(() => {
     loadAuthorizedPersonsList();
   }, []);
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(() => {
     if (isEmpty(Students)) return;

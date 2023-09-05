@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import CheckInOutRepository from 'repository/CheckInOutRepository';
 
 const CheckInOutSlice = createSlice({
@@ -8,8 +9,7 @@ const CheckInOutSlice = createSlice({
     pinSetupData: {},
     childData: {},
     loading: false,
-    selectedStudents: [],
-    msgs: []
+    selectedStudents: []
   },
   reducers: {
     setSelectedStudentsData: (state, { payload }) => {
@@ -27,9 +27,6 @@ const CheckInOutSlice = createSlice({
     loadingCompleted: state => {
       state.loading = false;
     },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
-    },
     clearStudents: (state, { payload }) => {
       state.selectedStudents = [];
     }
@@ -38,8 +35,8 @@ const CheckInOutSlice = createSlice({
 
 export const useCheckInOutActions = () => {
   const dispatch = useDispatch();
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setPinData,
     setSelectedStudentsData,
     setChildListData,
@@ -47,6 +44,7 @@ export const useCheckInOutActions = () => {
     loadingCompleted,
     clearStudents
   } = CheckInOutSlice.actions;
+
   const loadPinData = async (registrationUid, phone) => {
     dispatch(loadingStart());
     return await CheckInOutRepository.getPinSetupData(registrationUid, phone).then(
