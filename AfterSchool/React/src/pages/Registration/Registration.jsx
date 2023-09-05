@@ -154,8 +154,8 @@ export default function Registration({ newChild = false }) {
           activityName,
           regUid
         ).then(msgs => {
-          errorMsgs.push(...msgs);
           if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errorMsgs.push(...msgs);
         });
       }
       if (!lastSection && !errorMsgs.length) {

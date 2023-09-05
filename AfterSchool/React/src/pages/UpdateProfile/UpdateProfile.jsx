@@ -107,8 +107,8 @@ export default function UpdateProfile() {
           userUid,
           schoolLocationID
         ).then(msgs => {
-          errorMsgs.push(...msgs);
           if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errorMsgs.push(...msgs);
         });
       }
       if (!errorMsgs.length) {
