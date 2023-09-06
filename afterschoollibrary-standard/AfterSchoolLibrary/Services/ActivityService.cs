@@ -1300,7 +1300,9 @@ namespace AfterSchoolLibrary.Services
                 else
                 {
                     activity.InstructorId = instructor.ToInteger();
-                    activity.AddTeamMember(instructor.ToInteger(), false, loggedInUserId, msgs, dc);
+                    var awuIds = activity.GetTeamMembers(msgs, dc).Select(x => x.WebUserId).ToList();
+                    if (!awuIds.Contains(instructor.ToInteger()))
+                        activity.AddTeamMember(instructor.ToInteger(), false, loggedInUserId, msgs, dc);
                 }
             }
             else
