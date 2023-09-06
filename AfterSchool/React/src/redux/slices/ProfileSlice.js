@@ -71,7 +71,6 @@ export const useProfileActions = () => {
     dispatch(loadingFormData());
     await ProfileRepository.getFormData(UserUid).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -89,17 +88,13 @@ export const useProfileActions = () => {
     formData.append('schoolLocationID', schoolLocationID);
 
     dispatch(submitFormSection(answers));
-    return ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
-      return msgs;
-    });
+    return ProfileRepository.submitFormSection(formData).then(({ data: { msgs } }) => msgs);
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
     if (!submit) return dispatch(setSchool({ school, noSchool }));
 
     return ProfileRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
       return { obj, msgs };
     });

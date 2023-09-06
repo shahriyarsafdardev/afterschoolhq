@@ -72,7 +72,6 @@ export const useSurveyActions = () => {
     dispatch(loadingFormData());
     await SurveyRepository.getSurveyFormData(formUid, surveyResponseUid, pin).then(
       ({ obj, msgs }) => {
-        dispatch(setMsgs(msgs));
         if (obj?.SurveyResponseStatus === 'Completed') return redirectToThankYou(obj?.Pin, formUid);
         if (obj) dispatch(setFormData(obj));
         if (!msgs.length) dispatch(formDataLoaded());
@@ -98,14 +97,11 @@ export const useSurveyActions = () => {
     formData.append('groupId', groupId);
     formData.append('isLastSection', isLastSection);
     formData.append('answers', new URLSearchParams(answerQuery).toString());
-    return await SurveyRepository.submitFormSection(formData, pin).then(
-      ({ data: { msgs, obj } }) => {
-        dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
-        dispatch(setResponseId(obj?.SurveyResponseUid));
-        dispatch(setMsgs(msgs));
-        return obj?.SurveyResponseUid;
-      }
-    );
+    return await SurveyRepository.submitFormSection(formData, pin).then(({ data: { obj } }) => {
+      dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
+      dispatch(setResponseId(obj?.SurveyResponseUid));
+      return obj?.SurveyResponseUid;
+    });
   };
 
   const clearMessages = () => {

@@ -93,7 +93,6 @@ export const useUpdateRegistrationActions = () => {
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());
       }
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -115,13 +114,8 @@ export const useUpdateRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      UpdateRegistrationRepository.eSignature(formData).then(({ data: { msgs } }) => {
-        dispatch(setMsgs(msgs));
-      });
-    } else
-      await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-        dispatch(setMsgs(msgs))
-      );
+      UpdateRegistrationRepository.eSignature(formData);
+    } else await UpdateRegistrationRepository.submitFormSection(formData);
 
     dispatch(submitFormSection(answers));
   };
@@ -130,7 +124,6 @@ export const useUpdateRegistrationActions = () => {
     if (!submit) return dispatch(setSchool({ school, noSchool }));
 
     return UpdateRegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
       return { obj, msgs };
     });
@@ -142,7 +135,6 @@ export const useUpdateRegistrationActions = () => {
 
   const exit = async (uid, activityUrl) => {
     await UpdateRegistrationRepository.exit(uid).then(({ msgs }) => {
-      dispatch(setMsgs(msgs));
       const { redirect } = utils;
       if (!msgs.length) redirect(activityUrl);
     });

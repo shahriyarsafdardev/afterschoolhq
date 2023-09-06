@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { useRegistration, useErrorMessages } from 'redux/hooks';
+import { useRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import apiRoutes from 'routes';
@@ -14,7 +14,6 @@ export default function Registration({ newChild = false }) {
   const { scrollToTop, redirect } = utils;
   const { paymentScreenPath, thankyouUrl, postRegistrationUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
-  const { msgs } = useErrorMessages();
   const {
     exit,
     school,

@@ -9,11 +9,14 @@ import theme from './theme/theme';
 import SnackbarProvider from './SnackbarProvider';
 import Router from 'Router';
 import utils from 'utils';
+import store from './redux/store';
+import { injectStore } from 'repository/axios/axios';
 
 function App() {
   const { getEnv } = utils;
 
   useEffect(() => {
+    injectStore(store);
     if (getEnv() === 'Local') return;
     InitAnalytics();
     loadZendeskWidget();

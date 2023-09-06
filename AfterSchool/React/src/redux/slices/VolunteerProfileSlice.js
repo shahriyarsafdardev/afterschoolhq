@@ -61,7 +61,6 @@ export const useVolunteerProfileActions = () => {
     dispatch(loadingFormData());
     await ProfileRepository.getFormData(UserUid, true).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -73,9 +72,7 @@ export const useVolunteerProfileActions = () => {
     formData.append('registrantId', UserUid);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
-    await ProfileRepository.submitFormSection(formData, true).then(({ data: { msgs } }) =>
-      dispatch(setMsgs(msgs))
-    );
+    await ProfileRepository.submitFormSection(formData, true);
 
     dispatch(submitFormSection(answers));
   };

@@ -1,7 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
 
-import { useErrorMessages } from 'redux/hooks';
 import FormBuilderRepository from 'repository/FormBuilderRepository';
 
 const FormBuilderSlice = createSlice({
@@ -50,7 +49,6 @@ const FormBuilderSlice = createSlice({
 });
 
 export const useFormBuilderActions = () => {
-  const { setMsgs } = useErrorMessages();
   const {
     updateForm,
     setFormData,
@@ -69,7 +67,6 @@ export const useFormBuilderActions = () => {
     dispatch(loadingFormData());
     await FormBuilderRepository.getFormData(formId).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -78,7 +75,6 @@ export const useFormBuilderActions = () => {
     dispatch(loadingSectionData());
     await FormBuilderRepository.getSectionData(formId, sectionId).then(({ obj, msgs }) => {
       if (obj) dispatch(setSectionData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(sectionDataLoaded());
     });
   };
@@ -91,7 +87,6 @@ export const useFormBuilderActions = () => {
           obj: { FormQuestion }
         }
       }) => {
-        dispatch(setMsgs(msgs));
         if (!msgs.length) {
           dispatch(setSectionData({ ...values, FormQuestion }));
           dispatch(updateQuestionsGroups(FormQuestionGroups));
@@ -102,7 +97,6 @@ export const useFormBuilderActions = () => {
 
   const deleteSectionData = async ({ FormQuestionGroups, ...values }) => {
     await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       if (!msgs.length) {
         dispatch(updateQuestionsGroups(FormQuestionGroups));
       }
@@ -112,7 +106,6 @@ export const useFormBuilderActions = () => {
   const updateFormSettings = async ({ FormSettings }) => {
     dispatch(loadingFormData());
     await FormBuilderRepository.submitFormSection({ FormSettings }).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       if (!msgs.length) {
         dispatch(updateForm(FormSettings));
         dispatch(formDataLoaded());
@@ -122,9 +115,8 @@ export const useFormBuilderActions = () => {
 
   const saveNewSectionData = async values => {
     await FormBuilderRepository.saveNewSectionData(values).then(
-      ({ data: { obj: newQuestionGroup, msgs } }) => {
+      ({ data: { obj: newQuestionGroup } }) => {
         dispatch(saveNewQuestionsGroup(newQuestionGroup));
-        dispatch(setMsgs(msgs));
       }
     );
   };
