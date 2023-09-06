@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPossible = new int();
             var totalCompleted = new int();
 
-            if (currentUserType == UserType.Instructor)
+            if (currentUserType == UserType.Instructor || currentUserType == UserType.ProgramDirector)
             {
                 var activities = currentAccount.GetActivities(currentUserType, currentUser, null, ActivityType.Activity, false, false, false, null, null, msgs);
                 var activitiesIds = activities.Select(a => a.ID.Value).ToList();

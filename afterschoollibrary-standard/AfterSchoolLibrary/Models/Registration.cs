@@ -910,7 +910,6 @@ namespace AfterSchoolLibrary.Models
                         where
                             r.CompletionStatusId in ({validCompletionStatuses})
                             and ra.ParticipationObjectId in ({activityIdList}) and ra.ParticipationObjectTypeId = {activityParticipationType}
-                            and a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}
                         order by
                             reg.FirstName,
                             reg.LastName";
