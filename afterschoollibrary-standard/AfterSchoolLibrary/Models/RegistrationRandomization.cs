@@ -1,4 +1,4 @@
-﻿using BasicLibrary;
+using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,8 @@ namespace AfterSchoolLibrary.Models
         public List<int> WaitingListAssignments { get; set; }
         public List<int> NoAssignments { get; set; }
         public List<DateRange> AssignmentDateRanges { get; set; }
+        public List<DateRange> ReservedAssignmentDateRanges { get; set; }
+
         public List<DateRange> WLAssignmentDateRanges { get; set; }
         public List<DateRange> NSAssignmentDateRanges { get; set; }
 
@@ -28,6 +30,7 @@ namespace AfterSchoolLibrary.Models
             AssignmentDateRanges = new List<DateRange>();
             WLAssignmentDateRanges = new List<DateRange>();
             NSAssignmentDateRanges = new List<DateRange>();
+            ReservedAssignmentDateRanges = new List<DateRange>();
         }
     }
 
@@ -140,6 +143,7 @@ namespace AfterSchoolLibrary.Models
 
                //get all registrant activities for this registrant
                 var registrantActivities = this.RegistrantActivities.Where(ra => ra.RegistrantId == registrant.ID).ToList();
+                registrantActivities = registrantActivities.Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied).ToList();
 
                 //get all registrant activities for this registrant that aren't registered yet
                 var registrantActivitiesNotRegisteredYet = registrantActivities
@@ -154,52 +158,71 @@ namespace AfterSchoolLibrary.Models
 
                 foreach(var ra in registrantActivitiesNotRegisteredYet)
                 {
-                    // make sure activity is not full
-                    var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId && 
-                                                            ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
-                    var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId.Value && 
-                                                                    ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                        // make sure activity is not full
+                        var activity = this.Activities.Find(x => x.ID == ra.ParticipationObjectId &&
+                                                                ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                        var activityAssignment = ActivityAssignments.Find(x => x.ActivityId == ra.ParticipationObjectId.Value &&
+                                                                        ra.ParticipationObjectTypeId == ParticipationObjectType.Activity);
 
-                    if (activityAssignment.IsEmpty())
-                    {
-                        activityAssignment = new ActivityAssignment() { ActivityId = ra.ParticipationObjectId.Value };
-                        this.ActivityAssignments.Add(activityAssignment);
-                    }
+                        var registrantActivitiesForOverlapping = this.RegistrantActivities.Where(ra => ra.RegistrantId == registrant.ID).ToList();
+                        registrantActivitiesForOverlapping = registrantActivitiesForOverlapping.Where(x => x.AssignmentTypeId == RegistrationAssignmentType.Reserved).ToList();
+                        if (registrantActivitiesForOverlapping.Any())
+                        {
+                            foreach(var act in registrantActivitiesForOverlapping)
+                            {
+                                var reservedActivity = this.Activities.Find(x => x.ID == act.ParticipationObjectId &&
+                                                                                                act.ParticipationObjectTypeId == ParticipationObjectType.Activity);
+                                var reservedDateRanges = this.ActivityDetails.Find(x => x.ActivityId == reservedActivity.ID).Dates;
+                                registrantAssignment.ReservedAssignmentDateRanges.AddRange(reservedDateRanges);
+                            }
+                        }
 
-                    var seatsTaken = activityAssignment.Assignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).ReservedSeatsTaken;
-                    var isFull = seatsTaken >= activity.SeatsAvailable.Value;
-                    var activityDates = this.ActivityDetails.Find(x => x.ActivityId == activity.ID).Dates;
-                    var hasActivityDuringScheduleAlready = false;
+                        if (activityAssignment.IsEmpty())
+                        {
+                            activityAssignment = new ActivityAssignment() { ActivityId = ra.ParticipationObjectId.Value };
+                            this.ActivityAssignments.Add(activityAssignment);
+                        }
 
-                    // check to see if the person is already registered for any days/times that would overlap, 
-                    // if so, you can't register
-                    hasActivityDuringScheduleAlready = DateRange.HasOverlappingDates(
-                                                            activityDates, 
-                                                            registrantAssignment.AssignmentDateRanges
-                                                        );
+                        var seatsTaken = activityAssignment.Assignments.Count() + ActivityDetails.Find(x => x.ActivityId == activity.ID).ReservedSeatsTaken;
+                        var isFull = seatsTaken >= activity.SeatsAvailable.Value;
+                        var activityDates = this.ActivityDetails.Find(x => x.ActivityId == activity.ID).Dates;
+                        var hasActivityDuringScheduleAlready = false;
+                        var hasReservedActivityDuringScheduleAlready = false;
 
 
-                    // keep going until you find one that is not full, then exit the loop
-                    // if not full and doesn't have conflicting dates
-                    if (!isFull && !hasActivityDuringScheduleAlready)
-                    {
-                        AddAssignment(ra, AssignmentType.Seat);
-                        allFull = false;
-                        break;
-                    }
-                    // check waiting list and put the person on it, 
-                    // unless they were placed in another activity for that same day with a higher preference number
-                    else if (!hasActivityDuringScheduleAlready)
-                    {
-                        AddAssignment(ra, AssignmentType.WaitingList);
-                    }
-                    // puts it in the not assigned list
-                    else
-                    {
-                        AddAssignment(ra, AssignmentType.NotSet);
-                    }
+                        // check to see if the person is already registered for any days/times that would overlap, 
+                        // if so, you can't register
+                        hasActivityDuringScheduleAlready = DateRange.HasOverlappingDates(
+                                                                activityDates,
+                                                                registrantAssignment.AssignmentDateRanges
+                                                            );
+                        hasReservedActivityDuringScheduleAlready = DateRange.HasOverlappingDates(
+                                                                activityDates,
+                                                                registrantAssignment.ReservedAssignmentDateRanges
+                                                            );
+
+
+                        // keep going until you find one that is not full, then exit the loop
+                        // if not full and doesn't have conflicting dates
+                        if (!isFull && !hasActivityDuringScheduleAlready && !hasReservedActivityDuringScheduleAlready)
+                        {
+                            AddAssignment(ra, AssignmentType.Seat);
+                            allFull = false;
+                            break;
+                        }
+                        // check waiting list and put the person on it, 
+                        // unless they were placed in another activity for that same day with a higher preference number
+                        else if (!hasActivityDuringScheduleAlready && !hasReservedActivityDuringScheduleAlready)
+                        {
+                            AddAssignment(ra, AssignmentType.WaitingList);
+                        }
+                        // puts it in the not assigned list
+                        else
+                        {
+                            AddAssignment(ra, AssignmentType.NotSet);
+                        }
                 }
-
+               
                 // check to see if all activities have been completed for this registrant
                 if (!registrantActivities.Where(x => x.ID.Value.NotIn(registrantAssignment.Assignments)).Any())
                     registrantsToRemove.Add(registrant);
