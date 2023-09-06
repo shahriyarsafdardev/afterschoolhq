@@ -678,9 +678,9 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Activity EditExisting(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs = null)
+            Dictionary<string, object> values, bool isEditContact = false, SystemMessages msgs = null)
         {
-            return SaveActivity(loggedInUserId, account, activityId, values, msgs);
+            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContact);
         }
 
         public static Activity CreateNew(int loggedInUserId, Account account, Dictionary<string, object> values,
@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static Activity SaveActivity(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
+            Dictionary<string, object> values, SystemMessages msgs, bool isEditContact = false, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -1097,7 +1097,7 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc));
 
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && isEditContact)
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
@@ -1294,12 +1294,13 @@ namespace AfterSchoolLibrary.Services
                         // should they be a leader by default? For right now, no.
                         activity.AddTeamMember(user.ID.Value, false, loggedInUserId, msgs, dc);
 
-                        activity.InstructorId = user.ID;
+                        activity.InstructorId = user.ID;                       
                     }
                 }
                 else
                 {
                     activity.InstructorId = instructor.ToInteger();
+                    activity.AddTeamMember(instructor.ToInteger(), false, loggedInUserId, msgs, dc);
                 }
             }
             else
@@ -1308,7 +1309,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             msgs.AddRange(activity.Save(dc));
-
+            
             return msgs;
         }
 
