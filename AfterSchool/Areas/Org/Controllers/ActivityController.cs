@@ -1980,7 +1980,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             if(repeatsweekly.IsEmpty())
                             {
                                 startdate = inSessionDates?.FirstOrDefault()?.StartDateTime.Value.ToString();
-                                enddate = inSessionDates?.FirstOrDefault()?.EndDateTime.Value.ToString();
+                                enddate = inSessionDates?.LastOrDefault()?.EndDateTime.Value.ToString();
                             }
                         }
 
