@@ -1,0 +1,25 @@
+@model RestrictionModalViewModel
+
+<div id="@Model.ID" class="md-modal colored-header custom-width md-effect-9">
+    <div class="md-content">
+        <div class="modal-header">
+            <h3 class="modal-title">@Model.Title</h3>
+        </div>
+        <div class="modal-body form">
+
+            @Html.Raw(Model.HtmlBody)
+
+        </div>
+        <div class="modal-footer">
+            @{
+                if (Model.ActionButtonId.IsNotEmpty())
+                {
+                    <a class="btn btn-default" href="#" id="@Model.ActionButtonId">@Html.Raw(Model.ActionButtonHtml)</a>
+                }
+            }
+            <button type="button" data-dismiss="modal" id="@Model.OkButtonId" class="btn btn-default btn btn-success">@Html.Raw(Model.OkButtonHtml)</button>
+
+        </div>
+    </div>
+</div>
+

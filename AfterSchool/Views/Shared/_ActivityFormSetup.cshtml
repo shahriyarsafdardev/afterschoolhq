@@ -1,21 +1,23 @@
 @model Activity
 
 @{
-    var accountPackage = (AccountPackage) ViewData["AccountPackage"];
-    var forms = (List<Form>) ViewData["Forms"];
-    var group = (ActivityGroup) ViewData["Group"];
-    var activePeriod = (RegistrationPeriod) ViewData["ActivePeriod"];
-    var activeForm = (ActivityForm) ViewData["ActiveForm"];
-    var showSeats = Model.ActivityTypeId.NotIn(new[] {ActivityType.FieldTrip, ActivityType.PermissionSlip});
+    var accountPackage = (AccountPackage)ViewData["AccountPackage"];
+    var forms = (List<Form>)ViewData["Forms"];
+    var group = (ActivityGroup)ViewData["Group"];
+    var activePeriod = (RegistrationPeriod)ViewData["ActivePeriod"];
+    var activeForm = (ActivityForm)ViewData["ActiveForm"];
+    var showSeats = Model.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip });
     var showAllowApplications = accountPackage.HasFeature(FeatureType.AllowApplications);
     var showCheckInOut = accountPackage.HasFeature(FeatureType.ManageCheckInCheckOut);
     var maximumFormCount = accountPackage.GetFeature(FeatureType.ManageForms).Max ?? 0;
     var canAddNewForm = forms.Count < maximumFormCount;
     var allowApplicationsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowApplications, SessionVariables.AccountPackage);
-    
+    var isActivityGenderRestricted = Model.GenderRestriction;
+    var isActivityGradeRestricted = Model.RestrictByGrade();
+
 }
 
-<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled"/>
+<input id="hdnAdvanceSettingToggle" type="hidden" name="isAdvanceSettingEnabled" />
 <div class="panel panel-default margin-bottom-zero">
     <div class="panel-heading activity-heading">
         Settings
@@ -104,7 +106,7 @@
                                 {"checkboxname", "isContinuousEnrollmentEnabled"},
                                 {"checkboxid", "isContinuousEnrollmentEnabled"},
                                 {"disabled", false},
-            });
+                    });
                     }
                 </div>
             </div>
@@ -152,7 +154,7 @@
                                     {"checkboxname", "isRequireCheckInCheckOutEnabled"},
                                     {"checkboxid", "isRequireCheckInCheckOutEnabled"},
                                     {"disabled", false},
-            });
+                                });
                         }
                     </div>
                 </div>
@@ -217,11 +219,10 @@
                                     activePeriod.StartDateTime.Value,
                                     new ViewDataDictionary
                                     {
-                    {"name", "registrationopentime"},
-                    {"id", "registrationopentime"},
-                    {"required", true},
-}
-                                    );
+                                        {"name", "registrationopentime"},
+                                        {"id", "registrationopentime"},
+                                        {"required", true},
+                                    });
                             }
 
                         </div>
@@ -238,8 +239,7 @@
                                         Id = "registrationclosedate",
                                         Name = "registrationclosedate",
                                         Value = activePeriod.EndDateTime.ToShortDateString(),
-                                    }
-                                    );
+                                    });
                             }
                         </div>
                         <div class="col-sm-4">
@@ -250,11 +250,10 @@
                                     activePeriod.EndDateTime.Value,
                                     new ViewDataDictionary
                                     {
-                    {"name", "registrationclosetime"},
-                    {"id", "registrationclosetime"},
-                    {"required", true},
-}
-                                    );
+                                        {"name", "registrationclosetime"},
+                                        {"id", "registrationclosetime"},
+                                        {"required", true},
+                                    });
                             }
 
                         </div>
@@ -263,78 +262,115 @@
                 </div>
             </div>
 
-                                <div class="col-md-offset-3 col-md-9 padding-v-20">
-                                    <span>
-                                        <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
-                                    </span>
-                                </div>
+            <div class="col-md-offset-3 col-md-9 padding-v-20">
+                <span>
+                    <a onclick="ActivitySetup.showAdvancedSettings()" id="btn-advanced-settings" class="pointer">Show Advanced Settings</a>
+                </span>
+            </div>
 
-                                <div class="advanced-settings hide">
-                                    <div class="form-group">
-                                        <label class="col-md-3 control-label">
-                                            Registration Form <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="col-md-6">
-                                            <select name="form" id="form" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
-                                                @if (canAddNewForm)
-                                                {
-                                                    <option value="0"> + New Form</option>
-                                                }
+            <div class="advanced-settings hide">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">
+                        Registration Form <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-md-6">
+                        <select name="form" id="form" onchange="CheckFormRestrictions(this.value)" class="form-control" @(activeForm.IsNotEmpty() && forms.Any(m => m.ID == activeForm.FormId) ? "required" : "")>
+                            @if (canAddNewForm)
+                            {
+                                <option value="0"> + New Form</option>
+                            }
 
-                                                @foreach (var form in forms)
-                                                {
-                                                    <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
+                            @foreach (var form in forms)
+                            {
+                                <option value="@form.ID" @(activeForm?.FormId == form.ID ? "selected=\"selected\"" : "")>@form.Name</option>
+                            }
+                        </select>
+                    </div>
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+                        {
+                            Title = "Age Restriction Error",
+                            HtmlBody = "<p>You have turned on age restrictions for this activity but your default form doesn't ask for date of birth. To enforce this restriction, we will ask registrants for date of birth during registration.</p>",
+                            ActionButtonHtml = "Remove Restriction",
+                            ActionButtonId = $"btn-age-restriction-error",
+                            ID = $"modal-age-restriction-error",
+                            OkButtonId = "modal-age-restriction-ok",
+                            OkButtonHtml = "Okay",
+                        });
+                    }
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+                        {
+                            Title = "Grade Restriction Error",
+                            HtmlBody = "<p>You have turned on grade restrictions for this activity but your default form doesn't ask for grade. To enforce this restriction, we will ask registrants for grade during registration.</p>",
+                            ActionButtonHtml = "Remove Restriction",
+                            ActionButtonId = $"btn-grade-restriction-error",
+                            ID = $"modal-grade-restriction-error",
+                            OkButtonId = "modal-grade-restriction-ok",
+                            OkButtonHtml = "Okay",
+                        });
+                    }
+                    @{
+                        Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+                        {
+                            Title = "Gender Restriction Error",
+                            HtmlBody = "<p>You have turned on gender restrictions for this activity but your default form doesn't ask for gender. To enforce this restriction, we will ask registrants for their gender during registration.</ p > ",
+                            ActionButtonHtml = "Remove Restriction",
+                            ActionButtonId = $"btn-gender-restriction-error",
+                            ID = $"modal-gender-restriction-error",
+                            OkButtonHtml = "Okay",
+                            OkButtonId = "modal-gender-restriction-ok",
+                        }); ;
+                    }
 
-                                            <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
-                                        </div>
-                                    </div>
+                    <div class="col-md-3">
 
-                                    @if (Model.ActivityTypeId == ActivityType.Activity)
-                                    {
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label">
-                                                Registration Mode <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="col-sm-9">
-                                                <div class="am-radio inline"
-                                                     @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
-                                                    @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
-                                                    {
-                                                        <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
-                                                               @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                                               @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
-                                                        <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
-                                                    }
-                                                </div>
-                                                <p class="text-muted">
-                                                    <em>
-                                                        <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
-                                                        <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
-                                                    </em>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
-                                    }
-                                </div>
-                                }
-                                else
-                                {
-                                <input type="hidden" name="group" value="@group.Uid" />
-                                <input type="hidden" name="regmode" value="@((int) Model.RegistrationModeId)" />
-                                <input type="hidden" name="form" value="@activeForm.FormId" />
-                                }
-                            </div>
+                        <a id="editForm" class="btn btn-block btn-link" href="@Url.Action("FormEdit", "Account", new {id = activeForm?.ID})" target="_blank">Edit Form</a>
+                    </div>
+                </div>
+
+            @if (Model.ActivityTypeId == ActivityType.Activity)
+            {
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">
+                        Registration Mode <span class="text-danger">*</span>
+                    </label>
+                    <div class="col-sm-9">
+                        <div class="am-radio inline"
+                                @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
+                            @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                            {
+                                <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
+                                        @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
+                                        @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
+                                <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
+                            }
                         </div>
+                        <p class="text-muted">
+                            <em>
+                                <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
+                                <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
+                            </em>
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
+            }
+        </div>
+        }
+        else
+        {
+            <input type="hidden" name="group" value="@group.Uid" />
+            <input type="hidden" name="regmode" value="@((int) Model.RegistrationModeId)" />
+            <input type="hidden" name="form" value="@activeForm.FormId" />
+        }
+    </div>
+</div>
 
-                        <script>
+<script>
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -357,7 +393,86 @@
         $("#isContinuousEnrollmentEnabled").on('change', function () {
             isContinuousEnabled();
         })
+        $("#btn-grade-restriction-error").click(function () {
+            $("#modal-grade-restriction-error").removeClass("md-show");
+            $.post(
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "grade"}))',
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            )
+        });
+        $("#btn-age-restriction-error").click(function () {
+            $("#modal-age-restriction-error").removeClass("md-show");
+            $.post(
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "age"}))',
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            )
+        });
+        $("#btn-gender-restriction-error").click(function () {
+            $("#modal-gender-restriction-error").removeClass("md-show");
+            $.post(
+                '@Html.Raw(Url.Action("SaveEditedRestrictions","Activity",new { activityId = @Model.Uid, type = "gender"}))',
+                function (data) {
+                    if (data && data.status == 'ok') {
+                        Notifications.showMessage('Success', 'Your settings have been saved', true);
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            )
+        });
+        $("#modal-age-restriction-ok").click(function () {
+            $("#modal-age-restriction-error").removeClass("md-show");
+        });
+        $("#modal-gender-restriction-ok").click(function () {
+            $("#modal-gender-restriction-error").removeClass("md-show");
+        });
+        $("#modal-grade-restriction-ok").click(function () {
+            $("#modal-grade-restriction-error").removeClass("md-show");
+        });
     });
+    function CheckFormRestrictions(formID)
+    {
+        if ("@Model.ID.IsNotEmpty()" == "True")
+        {
+            showLoader();
+            $.get(
+                `/org/activity/GetFormInfo?formID=${formID}`,
+                function (data)
+                {
+                    hideLoader();
+                    if (data && data.status == 'ok') {  
+                        if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
+                            $("#modal-age-restriction-error").addClass("md-show");
+                        }
+                        if (!data.isFormGradeRes && "@isActivityGradeRestricted" == "True") {
+                            $("#modal-grade-restriction-error").addClass("md-show");
+                        }
+                        if (!data.isFormGenderRes && "@isActivityGenderRestricted" !== "None") {
+                            $("#modal-gender-restriction-error").addClass("md-show");
+                        }
+                    }
+                    else {
+                        Notifications.showErrors(data.messages);
+                    }
+                }
+            );
+        }
+    };
 
     function isContinuousEnabled() {
         if ($("#isContinuousEnrollmentEnabled").is(':checked')) {
@@ -406,4 +521,4 @@
         }
     }
 
-                        </script>
+</script>
