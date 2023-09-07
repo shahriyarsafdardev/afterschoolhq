@@ -22,7 +22,7 @@ export const locationObject = place => {
     streetnumber,
     neighborhood
   } = {};
-  components.forEach(component => {
+  components?.forEach(component => {
     const type = component.types[0];
     const longName = component.long_name;
     const shortName = component.short_name;
