@@ -3531,15 +3531,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
-
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var forms = currentAccount.GetSurveyForms(null, msgs);
 
             ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs)
                 .OrderByDescending(a => a.CreateDate).ToList();
             ViewBag.Messages = msgs;
+            ViewBag.forms = forms;
             return View(activity);
         }
 
