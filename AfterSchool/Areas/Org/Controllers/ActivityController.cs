@@ -1979,8 +1979,9 @@ namespace AfterSchool.Areas.Org.Controllers
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
                             if(repeatsweekly.IsEmpty())
                             {
-                                startdate = inSessionDates?.FirstOrDefault()?.StartDateTime.Value.ToString();
-                                enddate = inSessionDates?.LastOrDefault()?.EndDateTime.Value.ToString();
+                                var sessionDates = inSessionDates.OrderBy(x => x.StartDateTime).ToList();
+                                startdate = sessionDates?.FirstOrDefault()?.StartDateTime.Value.ToString();
+                                enddate = sessionDates?.LastOrDefault()?.EndDateTime.Value.ToString();
                             }
                         }
 
