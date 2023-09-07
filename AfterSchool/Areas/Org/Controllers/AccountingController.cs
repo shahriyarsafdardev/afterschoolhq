@@ -660,6 +660,26 @@ namespace AfterSchool.Areas.Org.Controllers
             return RedirectToAction("Coupon", msgs);
         }
 
+        public ActionResult DeleteCoupon(string id)
+        {
+            var msgs = new SystemMessages();
+            var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var coupon = id.IsGuid() ? currentAccount.GetCoupon(id.ToGuid(), msgs) : null;
+
+            if (coupon.IsEmpty())
+                msgs.Add("Invalid Coupon.", MessageType.UserError);
+
+            if (msgs.HasNoErrors())
+            {
+                CouponService.MarkAsDeleted(coupon, currentUser , msgs); 
+                msgs.Add("Coupon removed successfully.", MessageType.Success);
+            }
+
+            SetTempMessages(msgs); 
+            return RedirectToAction("coupon");
+        }
+
         public static string GetActivityIdsForCoupon(int id)
         {
             var purchaseableObjectCoupons = PurchaseableObjectCoupon.LoadByCouponId(id);
