@@ -444,7 +444,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs).PersonTypeId;
+                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs)?.PersonTypeId;
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
                 var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
@@ -499,7 +499,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 });
                 
                 if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
-                    currentUserPersonType == RegistrantPersonType.Parent)
+                    currentUserPersonType.IsNotEmpty() && currentUserPersonType == RegistrantPersonType.Parent)
                 {
                     var studentFirstName = qvms
                         .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
@@ -508,10 +508,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     
                     studentRegistrants.ForEach(stdRegistrant =>
                     {
-                        if(stdRegistrant.IsNotEmpty() && stdRegistrant.ID != registrant.ID && stdRegistrant.FirstName.IsNotEmpty() && 
-                           stdRegistrant.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
-                           stdRegistrant.LastName.IsNotEmpty() && stdRegistrant.LastName.ToLower().Equals(studentLastName.ToLower()))
-                            throw new Exception("Student name already exists");
+                        if(stdRegistrant.IsNotEmpty() && stdRegistrant.ID != registrant.ID && stdRegistrant.IsDuplicateStudent(studentFirstName, studentLastName))
+                            throw new Exception("You already have a student profile with this name");
                     });
                 }
 
@@ -686,9 +684,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     studentRegistrants.ForEach(stdRegistrant =>
                     {
                         var (submittedRecord, _) = stdRegistrant.GetSubmittedRecord(participationObject,msgs);
-                        if(submittedRecord.IsNotEmpty() && submittedRecord.FirstName.IsNotEmpty() && submittedRecord.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
-                            submittedRecord.LastName.IsNotEmpty() && submittedRecord.LastName.ToLower().Equals(studentLastName.ToLower()))
-                            throw new Exception("Student name already exists");
+                        if (submittedRecord.IsNotEmpty() && submittedRecord.IsDuplicateStudent(studentFirstName, studentLastName))
+                            throw new Exception("You already have a student profile with this name");
                     });
                 }
                 
