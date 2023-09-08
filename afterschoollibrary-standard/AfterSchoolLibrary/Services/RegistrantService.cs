@@ -1944,5 +1944,13 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(registrant.Save(dc));
             }
         }
+        public static bool IsDuplicateStudent(this Registrant registrant, string studentFirstName, string studentLastName)
+        {
+            if (registrant.FirstName.IsNotEmpty() && registrant.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
+                registrant.LastName.IsNotEmpty() && registrant.LastName.ToLower().Equals(studentLastName.ToLower()))
+                return true;
+
+            return false;
+        }
     }
 }

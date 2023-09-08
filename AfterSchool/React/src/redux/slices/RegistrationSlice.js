@@ -128,21 +128,22 @@ export const useRegistrationActions = () => {
     formData.append('activityName', activityName);
     formData.append('schoolLocationID', schoolLocationID);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
+    dispatch(submitFormSection(answers));
 
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        if (obj) dispatch(setRegistrationId(obj));
+      return RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
+        dispatch(setRegistrationId(obj));
         dispatch(setMsgs(msgs));
+        return msgs;
       });
     } else
-      await RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-        dispatch(setMsgs(msgs))
-      );
-
-    dispatch(submitFormSection(answers));
+      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
+        dispatch(setMsgs(msgs));
+        return msgs;
+      });
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {

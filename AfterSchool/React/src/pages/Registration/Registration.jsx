@@ -127,6 +127,7 @@ export default function Registration({ newChild = false }) {
     initialValues: initialvalues,
     validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
+      const errorMsgs = [];
       setSaveDisabled(true);
       if (!isEmpty || dirty || secondLastSection) {
         let [schoolLocationID, errors] = [null, null];
@@ -152,9 +153,12 @@ export default function Registration({ newChild = false }) {
           accountName,
           activityName,
           regUid
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        ).then(msgs => {
+          if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errorMsgs.push(...msgs);
+        });
       }
-      if (!lastSection && !msgs.length) {
+      if (!lastSection && !errorMsgs.length) {
         handleSection('next');
         resetForm();
       } else setSaveDisabled(false);
