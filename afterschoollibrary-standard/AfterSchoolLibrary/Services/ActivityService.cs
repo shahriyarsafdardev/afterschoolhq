@@ -678,9 +678,9 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Activity EditExisting(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, bool isEditContact = false, SystemMessages msgs = null)
+            Dictionary<string, object> values, bool isEditContactSection = false, SystemMessages msgs = null)
         {
-            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContact);
+            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContactSection);
         }
 
         public static Activity CreateNew(int loggedInUserId, Account account, Dictionary<string, object> values,
@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static Activity SaveActivity(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs, bool isEditContact = false, DatabaseConnection dc = null)
+            Dictionary<string, object> values, SystemMessages msgs, bool isEditContactSection = false, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -960,7 +960,7 @@ namespace AfterSchoolLibrary.Services
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
             }
-            else if (contactPhone.IsEmpty() && activity.ActivityTypeId == ActivityType.VolunteerOpportunity) 
+            else if (contactPhone.IsEmpty() && isEditContactSection && activity.ActivityTypeId == ActivityType.VolunteerOpportunity) 
                 activity.ContactPhone = "";
 
             if (contactEmail.IsNotEmpty())
@@ -1099,7 +1099,7 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc));
 
-                        if (amsgs.HasNoErrors() && isEditContact)
+                        if (amsgs.HasNoErrors() && isEditContactSection)
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
