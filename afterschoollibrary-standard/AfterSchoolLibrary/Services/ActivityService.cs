@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Services
                 totalErrors++;
 
             totalFields++;
-            if (activity.ContactPhone.IsBlank())
+            if (activity.ContactPhone.IsBlank() && activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                 totalErrors++;
 
             totalFields++;
@@ -960,6 +960,8 @@ namespace AfterSchoolLibrary.Services
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
             }
+            else if (contactPhone.IsEmpty() && activity.ActivityTypeId == ActivityType.VolunteerOpportunity) 
+                activity.ContactPhone = "";
 
             if (contactEmail.IsNotEmpty())
                 activity.ContactEmail = contactEmail.ToString().IfBlank("").MaxChars(100);
