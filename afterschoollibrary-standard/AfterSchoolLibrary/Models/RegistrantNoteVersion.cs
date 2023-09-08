@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AfterSchoolLibrary.Models
 {
-    public class RegistrantNoteVersions : BasicObject
+    public class RegistrantNoteVersion : BasicObject
     {
         #region "ClassGenerator"
 
@@ -35,9 +35,9 @@ namespace AfterSchoolLibrary.Models
             set => MDV["IsDeleted"].Value = value;
         }
 
-        public RegistrantNoteVersions()
+        public RegistrantNoteVersion()
         {
-            Config(ObjectMap, DatabaseQuery, typeof(RegistrantNoteVersions).Name, "ID");
+            Config(ObjectMap, DatabaseQuery, typeof(RegistrantNoteVersion).Name, "ID");
             LoadObjectValues(ObjectMap);
             IsDeleted = false;
         }
@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 var _dp = new DatabaseParameters();
-                var className = typeof(RegistrantNoteVersions).Name;
+                var className = typeof(RegistrantNoteVersion).Name;
                 _dp = get_BaseObjectMap(className);
                 _dp.Add(className, "Title", SqlDbType.NVarChar, "400");
                 _dp.Add(className, "Text", SqlDbType.NVarChar, "4000");
@@ -62,15 +62,15 @@ namespace AfterSchoolLibrary.Models
         {
             get
             {
-                var dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantNoteVersions).Name);
+                var dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(RegistrantNoteVersion).Name);
 
                 return dq;
             }
         }
 
-        public static RegistrantNoteVersions LoadObject(DataRow row)
+        public static RegistrantNoteVersion LoadObject(DataRow row)
         {
-            var obj = new RegistrantNoteVersions();
+            var obj = new RegistrantNoteVersion();
             obj.LoadObjectValues(ObjectMap, row);
             return obj;
         }
@@ -78,13 +78,13 @@ namespace AfterSchoolLibrary.Models
         public SystemMessages Save(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(RegistrantNoteVersions)));
+            msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, nameof(RegistrantNoteVersion)));
             return msgs;
         }
 
         public SystemMessages Delete(DatabaseConnection dc = null)
         {
-            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantNoteVersions).Name);
+            return base._Delete2(DatabaseQuery, dc, ObjectMap, typeof(RegistrantNoteVersion).Name);
         }
 
         public static SystemMessages Create(DatabaseConnection dc = null)
@@ -104,7 +104,7 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public static List<RegistrantNoteVersions> LoadByNoteIdByIsDeleted(int noteId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<RegistrantNoteVersion> LoadByNoteIdByIsDeleted(int noteId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -113,7 +113,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static RegistrantNoteVersions SearchByNoteIdByIsDeleted(string searchQuery, bool isDeleted, int noteVersionId,
+        public static RegistrantNoteVersion SearchByNoteIdByIsDeleted(string searchQuery, bool isDeleted, int noteVersionId,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

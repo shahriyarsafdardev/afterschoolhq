@@ -7,10 +7,10 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantNoteService
     {
-        public static RegistrantNoteVersions GetLatestVersion(this RegistrantNote registrantNote, SystemMessages msgs = null,
+        public static RegistrantNoteVersion GetLatestVersion(this RegistrantNote registrantNote, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return RegistrantNoteVersions.LoadByNoteIdByIsDeleted(registrantNote.ID.Value, false, msgs, dc)
+            return RegistrantNoteVersion.LoadByNoteIdByIsDeleted(registrantNote.ID.Value, false, msgs, dc)
                 .OrderByDescending(rnv => rnv.CreateDate).FirstOrDefault();
         }
 

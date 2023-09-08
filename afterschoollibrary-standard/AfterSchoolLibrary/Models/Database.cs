@@ -107,7 +107,7 @@ namespace AfterSchoolLibrary.Models
             FormQuestionSettings.Create(dc);
             CheckInOut.Create(dc);
             RegistrantNote.Create(dc);
-            RegistrantNoteVersions.Create(dc);
+            RegistrantNoteVersion.Create(dc);
 
             return msgs;
         }
@@ -207,7 +207,7 @@ namespace AfterSchoolLibrary.Models
             FormQuestionSettings.Alter(dc);
             CheckInOut.Alter(dc);
             RegistrantNote.Alter(dc);
-            RegistrantNoteVersions.Alter(dc);
+            RegistrantNoteVersion.Alter(dc);
             
             return msgs;
         }

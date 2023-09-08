@@ -63,7 +63,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     var registrantNoteVersion = registrantNote.GetLatestVersion(msgs);
                     
                     if (searchQuery.IsNotEmpty() && registrantNoteVersion.IsNotEmpty())
-                        registrantNoteVersion = RegistrantNoteVersions.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID.Value, msgs);
+                        registrantNoteVersion = RegistrantNoteVersion.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID.Value, msgs);
 
                     if (registrantNoteVersion.IsNotEmpty())
                     {
@@ -127,7 +127,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
-                var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
+                var registration = Registration.LoadByUidByAccountId(registrationUid.ToGuid(), currentAccount.ID.Value, msgs);
                 if (registration.IsEmpty())
                     throw new Exception("No Registration");
 
@@ -152,7 +152,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var firstRegistrantId = currentRegistrant.GetFirstRegistrantId();
                 RegistrantNote registrantNote = null;
-                RegistrantNoteVersions registrantNoteVersion = null;
+                RegistrantNoteVersion registrantNoteVersion = null;
                 NotesDto noteDto = null;
 
                 Database.ExecuteTransaction
@@ -174,7 +174,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                         if (amsgs.HasNoErrors())
                         {
-                            registrantNoteVersion = new RegistrantNoteVersions
+                            registrantNoteVersion = new RegistrantNoteVersion
                             {
                                 CreateDate = DateTime.UtcNow,
                                 CreatedBy = currentUser.ID,
@@ -228,8 +228,9 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var isAdmin = false;
                 NotesDto noteDto = null;
-                RegistrantNoteVersions registrantNoteVersion = null;
+                RegistrantNoteVersion registrantNoteVersion = null;
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
@@ -254,10 +255,13 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (postDate.IsEmpty())
                     throw new Exception("Invalid Note Date");
+                
+                if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
+                    isAdmin = true;
 
                 var registrantNote = RegistrantNote.LoadByIDByIsDeleted(noteId, false, msgs);
 
-                if (registrantNote.IsNotEmpty())
+                if (registrantNote.IsNotEmpty() && (currentUser.CanEditOrDeleteNote(registrantNote, msgs) || isAdmin))
                     Database.ExecuteTransaction
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -269,7 +273,7 @@ namespace AfterSchool.Areas.Api.Controllers
                             
                             if (createNewVersion)
                             {
-                                registrantNoteVersion = new RegistrantNoteVersions
+                                registrantNoteVersion = new RegistrantNoteVersion
                                 {
                                     CreateDate = DateTime.UtcNow,
                                     CreatedBy = currentUser.ID,
@@ -285,6 +289,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
                         (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
                     );
+                else
+                    throw new Exception("You are not authorized to update this note.");
 
                 registrantNoteVersion = registrantNote.GetLatestVersion(msgs);
 
@@ -323,6 +329,7 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
+                var isAdmin = false;
                 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
@@ -333,15 +340,20 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (!currentUser.HasAccessTo(currentAccount))
                     throw new Exception("You are not authorized user to access this page.");
                 
+                if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
+                    isAdmin = true;
+                
                 var registrantNote = RegistrantNote.LoadByIDByIsDeleted(noteId, false, msgs);
                 
-                if (registrantNote.IsNotEmpty())
+                if (registrantNote.IsNotEmpty() && (currentUser.CanEditOrDeleteNote(registrantNote, msgs) || isAdmin))
                 {
                     registrantNote.IsDeleted = true;
                     registrantNote.LastModifiedBy = currentUser.ID;
                     registrantNote.LastModifiedDate = DateTime.UtcNow;
                     registrantNote.Save(); 
                 }
+                else
+                    throw new Exception("You are not authorized to delete this note.");
                 
                 return Json(
                    new ApiResponse(msgs, null),

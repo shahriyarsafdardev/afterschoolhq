@@ -1288,5 +1288,9 @@ namespace AfterSchoolLibrary.Services
             loggedInUser.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(loggedInUser.Save(dc));
         }
+        public static bool CanEditOrDeleteNote(this WebUser user, RegistrantNote registrantNote, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.IsNotEmpty() && registrantNote.CreatedBy == user.ID;
+        }
     }
 }
