@@ -36,7 +36,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid Pin.");
 
                 var currentRegistrant = Registrant.Load(surveyResponse.RegistrantId.Value, msgs);
-                if (currentRegistrant.IsEmpty())
+                if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant.");
 
                 var form = Form.Load(surveyRequest.FormId, msgs);
@@ -55,40 +55,40 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questionGroups = form.GetQuestionGroups(msgs);
 
                 var formQuestionDtoList = questions.Select(question => new FormQuestionDto
-                {
-                    ID = question.ID ?? 0,
-                    FormQuestionGroupId = question.FormQuestionGroupId,
-                    Text = question.Text,
-                    Description = question.Description,
-                    GroupTitle = question.FormQuestionGroupName,
-                    Options = question.Options,
-                    IsRequired = question.IsRequired,
-                    DisplayOrder = question.DisplayOrder,
-                    IsActive = question.IsActive,
-                    IsDeleted = question.IsDeleted,
-                    QuestionTypeId = question.QuestionTypeId,
-                    QuestionDataTypeId = question.QuestionDataTypeId,
-                    FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
-                    Link = question.Link,
-                })
+                    {
+                        ID = question.ID ?? 0,
+                        FormQuestionGroupId = question.FormQuestionGroupId,
+                        Text = question.Text,
+                        Description = question.Description,
+                        GroupTitle = question.FormQuestionGroupName,
+                        Options = question.Options,
+                        IsRequired = question.IsRequired,
+                        DisplayOrder = question.DisplayOrder,
+                        IsActive = question.IsActive,
+                        IsDeleted = question.IsDeleted,
+                        QuestionTypeId = question.QuestionTypeId,
+                        QuestionDataTypeId = question.QuestionDataTypeId,
+                        FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                        Link = question.Link,
+                    })
                     .ToList();
 
                 var formQuestionGroupDtoList = questionGroups.Select(questionGroup => new FormQuestionGroupDto
-                {
-                    Id = questionGroup.ID ?? 0,
-                    FormId = questionGroup.FormId,
-                    Name = questionGroup.Name,
-                    DisplayOrder = questionGroup.DisplayOrder,
-                    QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
-                })
+                    {
+                        Id = questionGroup.ID ?? 0,
+                        FormId = questionGroup.FormId,
+                        Name = questionGroup.Name,
+                        DisplayOrder = questionGroup.DisplayOrder,
+                        QuestionGroupDataTypeId = questionGroup.QuestionGroupDataTypeId,
+                    })
                     .ToList();
 
                 var formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
                        .Select(questionAnswer => new FormQuestionAnswerDto()
                        {
-                           FormQuestionId = questionAnswer.FormQuestionId,
-                           QuestionDataTypeId = (int)questionAnswer.QuestionDataTypeId,
-                           QuestionText = questionAnswer.QuestionText,
+                           FormQuestionId = questionAnswer.FormQuestionId, 
+                           QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
+                           QuestionText = questionAnswer.QuestionText, 
                            Text = questionAnswer.Text,
                            Description = questionAnswer.Description,
                        })
