@@ -1,4 +1,4 @@
-﻿@using Stripe
+@using Stripe
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Payment";
@@ -19,6 +19,8 @@
     var readyToAcceptPayment = subscriptionPlan.IsEmpty() || !subscriptionPlan.SplitCostEvenly || participationObject.RegistrationFinalized;
     var quantity = 1;
     var datesToRemove = new List<DateTime>();
+    var startDate = (DateTime)ViewBag.StartDate;
+    var endDate = (DateTime)ViewBag.EndDate;
 
     if (participationObject.CanRegisterPerClass)
     {

@@ -406,6 +406,7 @@ namespace AfterSchoolLibrary.Services
         {
             // start dates are in the provider's timezone, so when comparing dates, we need to start there
             var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var schedule = participationObject.Schedule;
 
             switch (plan.PlanTypeId, plan.PaymentStartTypeId)
             {
@@ -415,8 +416,14 @@ namespace AfterSchoolLibrary.Services
                     if (unexpiredCancelledRegistrantSubscriptionPlans.Any(rsp => rsp.ValidUntil.HasValue))
                         return unexpiredCancelledRegistrantSubscriptionPlans.Last(rsp => rsp.ValidUntil.HasValue).ValidUntil!.Value
                             .AddDays(1); // need to double check this
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date) && schedule.RepeatsWeekly)
                         return participationObject.StartDate.Value;
+                    else
+                    {
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
+                    }
                     break;
                 case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
                     // if on checkout, start on checkout
@@ -427,8 +434,15 @@ namespace AfterSchoolLibrary.Services
                         return plan.StartDate.Value;
                     break;
                 case (SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.WhenActivityStarts):
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date) && schedule.RepeatsWeekly)
                         return participationObject.StartDate.Value;
+                    else
+                    {
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
+                    }
+
                     break;
             }
 

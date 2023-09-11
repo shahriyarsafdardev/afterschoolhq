@@ -359,7 +359,7 @@
                                 &nbsp;
                             </td>
                             <td>
-                                <button type="button" class="btn btn-default" onclick="removeDate(@i)">Delete</button>
+                                <button type="button" class="btn btn-default @(i == 1 ? "disabled" : "")" onclick="removeDate(@i)">Delete</button>
                             </td>
                         </tr>
                     </table>
@@ -499,8 +499,10 @@
     }
 
     function removeDate(i){
-        $('#schedule-date-' + i).addClass('hide');
-        $('#meeting-open-inuse-' + i).val(0);
+        if (i != '1') {
+            $('#schedule-date-' + i).addClass('hide');
+            $('#meeting-open-inuse-' + i).val(0);
+        }  
     }
     function removeClosedDate(i) {
         $('#schedule-closed-date-' + i).addClass('hide');
