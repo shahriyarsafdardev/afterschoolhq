@@ -13,6 +13,7 @@ const SurveySlice = createSlice({
     questions: [],
     loading: true,
     questionsGroups: [],
+    surveyHeaderData: {},
     answeredQuestions: [],
     surveyResponseUid: null
   },
@@ -29,7 +30,7 @@ const SurveySlice = createSlice({
     setResponseId: (state, { payload }) => {
       if (state.surveyResponseUid !== payload) state.surveyResponseUid = payload;
     },
-    setFormData: (state, { payload: { FormDto } }) => {
+    setFormData: (state, { payload: { FormDto, ...headerData } }) => {
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto
       );
@@ -37,6 +38,12 @@ const SurveySlice = createSlice({
       state.questions = formQuestionUpdated;
       state.questionsGroups = formQuestionGroupUpdated;
       state.answeredQuestions = formQuestionAnswer;
+      state.surveyHeaderData = {
+        activityName: headerData.ActivityName,
+        providerName: headerData.ProviderName,
+        studentName: headerData.StudentName,
+        surveyName: headerData.SurveyName
+      };
     },
     setAnsweredQuestions: (state, { payload }) => {
       state.answeredQuestions = payload;
