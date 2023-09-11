@@ -69,8 +69,17 @@
         font-weight: 400;
         line-height: 22px;
     }
-    .ql-editor {
-        line-height: 0
+    .ql-align-center {
+        text-align: center;
+    }
+    .ql-align-right {
+        text-align: right;
+    }
+    .ql-align-left {
+        text-align: left;
+    }
+    .ql-align-justify {
+        text-align: justify;
     }
 </style>
 @{
@@ -217,7 +226,7 @@
     <div class="row">
         <div class="col-lg-8 col-md-12">
 
-            <div class="activity-detail-block ql-editor">
+            <div class="activity-detail-block">
                 <h3>Description</h3>
                 @Html.Raw(Model.Details)
             </div>
