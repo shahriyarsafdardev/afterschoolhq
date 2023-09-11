@@ -835,7 +835,7 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 //pre-load account info
-                if (contactPhone.IsBlank())
+                if (contactPhone.IsBlank() && activityType != ActivityType.VolunteerOpportunity)
                     contactPhone = account.Phone;
 
                 if (cost.IsBlank())
@@ -1028,7 +1028,7 @@ namespace AfterSchoolLibrary.Services
                             if (contactEmail.IsEmpty())
                                 activity.ContactEmail = account.Email;
 
-                            if (contactPhone.IsEmpty())
+                            if (contactPhone.IsEmpty() && activityType != ActivityType.VolunteerOpportunity)
                                 activity.ContactPhone = account.Phone;
                         }
 
