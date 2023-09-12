@@ -2072,23 +2072,27 @@ namespace AfterSchool.Controllers
 
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+            var hasSchedule = participationObject.Schedule.IsNotEmpty();
             var schedule = participationObject.Schedule;
             var startDate = new DateTime();
             var endDate = new DateTime();
             var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if(schedule.RepeatsWeekly)
+            if (hasSchedule)
             {
-                startDate = (DateTime)schedule.StartDate;
-                endDate = (DateTime)schedule.EndDate;
+                if (schedule.RepeatsWeekly)
+                {
+                    startDate = (DateTime) schedule.StartDate;
+                    endDate = (DateTime) schedule.EndDate;
+                }
+                else
+                {
+                    startDate = (DateTime) schedule.GetInstances(msgs: msgs).FirstOrDefault()?.StartDateTime;
+                    endDate = (DateTime) schedule.GetInstances(msgs: msgs).LastOrDefault()?.EndDateTime;
+                }
             }
-            else
-            {
-                startDate = (DateTime)schedule.GetInstances(msgs:msgs).FirstOrDefault()?.StartDateTime;
-                endDate = (DateTime)schedule.GetInstances(msgs: msgs).LastOrDefault()?.EndDateTime;
-            }
-
+            
             PaymentViewBag(id, participationObject, msgs);
 
             if (participationObject.CanRegisterPerClass)
