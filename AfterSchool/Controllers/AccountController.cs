@@ -2069,17 +2069,15 @@ namespace AfterSchool.Controllers
         {
             var results = CheckRedirect(true);
             if (results.IsNotEmpty()) return Redirect(results);
-
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var hasSchedule = participationObject.Schedule.IsNotEmpty();
             var schedule = participationObject.Schedule;
             var startDate = new DateTime();
             var endDate = new DateTime();
             var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if (hasSchedule)
+            if(schedule.IsNotEmpty())
             {
                 if (schedule.RepeatsWeekly)
                 {
