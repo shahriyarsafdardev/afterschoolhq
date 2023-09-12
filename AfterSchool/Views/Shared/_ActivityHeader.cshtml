@@ -43,7 +43,7 @@
                 <a href="@Url.Action("registrants", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "registrants" || actionName == "registrantsummary" ? "-active" : "")">
                     <i class="s7-user"></i> @(UILabel.RegistrantLabel(Model.Activity.ActivityTypeId, true))
                 </a>
-                if ((Model.Activity.HasSchedule || (Model.AccountPackage.HasFeature(FeatureType.ManageCheckInCheckOut) && Model.Activity.IsRequireCheckInCheckOut.IsNotEmpty() && Model.Activity.IsRequireCheckInCheckOut )) && Model.Activity.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }))
+                if ((Model.Activity.HasSchedule || (Model.AccountPackage.HasFeature(FeatureType.ManageCheckInCheckOut) && Model.Activity.IsRequireCheckInCheckOut.IsNotEmpty() && Model.Activity.IsRequireCheckInCheckOut)) && Model.Activity.ActivityTypeId.NotIn(new[] { ActivityType.FieldTrip, ActivityType.PermissionSlip }) && !Model.Activity.GetSchedule().IsOngoing && !Model.Activity.IsContinuousEnrollment)
                 {
                     <a href="@Url.Action("attendance", "activity", new { id = Model.Activity.Uid })" class="btn btn-alt6@(actionName == "attendance" ? "-active" : "")"><i class="s7-check"></i> Attendance</a>
                 }
