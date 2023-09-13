@@ -49,7 +49,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var surveyName = surveyRequest?.Name;
                 var activity = surveyRequest.GetActivity();
                 var activityName = activity?.Name;
-                var providerName = activity.GetAccount()?.Name;
+                var providerName = activity?.GetAccount()?.Name;
                 var studentName = currentRegistrant.Name;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
