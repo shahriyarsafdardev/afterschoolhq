@@ -47,7 +47,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid Form.");
 
                 var surveyName = surveyRequest?.Name;
-                var activity = surveyRequest.GetActivity();
+                var activity = surveyRequest?.GetActivity();
                 var activityName = activity?.Name;
                 var providerName = activity?.GetAccount()?.Name;
                 var studentName = currentRegistrant.Name;
