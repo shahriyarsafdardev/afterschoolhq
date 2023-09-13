@@ -718,7 +718,7 @@ namespace AfterSchoolLibrary.Models
             FROM Registrant subReg
                 JOIN Registrant masterReg
                 ON subReg.ParentRegistrantId = masterReg.ID AND subReg.CreateDate = (
-                SELECT MIN(CreateDate)
+                SELECT MAX(CreateDate)
                 FROM Registrant
                 WHERE ParentRegistrantId = masterReg.ID
                 )

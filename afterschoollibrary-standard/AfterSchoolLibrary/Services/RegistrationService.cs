@@ -458,8 +458,14 @@ namespace AfterSchoolLibrary.Services
 
             var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
             var registrationIds = allRegistrations.Select(x => x.ID.Value).ToList();
-
-            var registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
+            var registrantActivities = new List<RegistrantActivity>();
+            
+            registrantIds.ForEach(registrantId =>
+            {
+               var ra =  RegistrantActivity.LoadByRegistrantId(registrantId, msgs, dc).FirstOrDefault();    
+               if (ra.IsNotEmpty())
+                   registrantActivities.Add(ra);
+            });
 
             if (participationObjectIds.Any())
                 registrantActivities = registrantActivities.Where(ra =>
@@ -499,10 +505,15 @@ namespace AfterSchoolLibrary.Services
                         });
                     });
 
-            var answers = FormQuestionAnswer.LoadByRegistrationIds(registrationIds, msgs, dc)
-                .Where(x => x.Text.IsNotBlank())
-                .ToList();
-
+            var answers = new List<FormQuestionAnswer>();
+            
+            registrationIds.ForEach(registrationId =>
+            {
+                var ans = FormQuestionAnswer.LoadByRegistrationId(registrationId, msgs, dc).FirstOrDefault();
+                if(ans.IsNotEmpty() && ans.Text.IsNotBlank())
+                    answers.Add(ans);
+            });
+            
             var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
 
             var questions = FormQuestion.LoadList(questionIds, msgs, dc)
@@ -706,7 +717,7 @@ namespace AfterSchoolLibrary.Services
 
             if (reportType == RegistrationReportType.Basic)
                 return row;
-            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()!.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
+            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()?.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
             AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
 
             return row;
