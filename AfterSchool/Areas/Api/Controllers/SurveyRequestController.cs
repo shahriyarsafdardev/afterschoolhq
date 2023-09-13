@@ -46,6 +46,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (form.FormTypeId != FormType.Survey || !(form.IsPublished ?? false))
                     throw new Exception("Invalid Form.");
 
+                var surveyName = surveyRequest?.Name;
+                var activity = surveyRequest?.GetActivity();
+                var activityName = activity?.Name;
+                var providerName = activity?.GetAccount()?.Name;
+                var studentName = currentRegistrant.Name;
                 var questions = form.GetAllQuestions(msgs);
                 var questionGroups = form.GetQuestionGroups(msgs);
 
@@ -95,6 +100,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     SurveyResponseStatus = surveyResponse.SurveyFeedbackStatusTypeId.ToString(),
                     Pin = pin,
                     SurveyRequestUid = uid,
+                    SurveyName = surveyName,
+                    ActivityName = activityName,
+                    ProviderName = providerName,
+                    StudentName = studentName,
                 };
 
                 return Json(

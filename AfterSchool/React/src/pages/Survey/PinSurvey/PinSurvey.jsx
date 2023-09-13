@@ -1,4 +1,5 @@
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
+import { Box, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
@@ -6,10 +7,12 @@ import { useFormik } from 'formik';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useSurvey } from 'redux/hooks';
+import useStyles from './styles';
 import routes from 'routes';
 import utils from 'utils';
 
 export default function Survey() {
+  const classes = useStyles();
   const { scrollToTop } = utils;
   const { srUid } = useParams();
   const navigate = useNavigate();
@@ -23,7 +26,8 @@ export default function Survey() {
     clearMessages,
     questionsGroups,
     submitFormSectionData,
-    answeredQuestions = []
+    answeredQuestions = [],
+    surveyHeaderData: { activityName, providerName, studentName, surveyName }
   } = useSurvey();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -133,22 +137,38 @@ export default function Survey() {
     scrollToTop();
   }, [activeGroup, activeGroupId, questions]);
 
+  function HeaderPinSurvey() {
+    return (
+      <Box className={classes.header}>
+        <Typography variant="subtitle1" className={classes.surveyInfo}>
+          {`${surveyName} for ${studentName}`}
+        </Typography>
+        <Typography variant="h6" className={classes.activityInfo}>
+          {`${activityName} by ${providerName}`}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <RegistrationForm
-      loading={loading}
-      totalGroups={totalGroups}
-      activeGroup={activeGroup}
-      saveDisabled={saveDisabled}
-      currentQuestions={currentQuestions}
-      Name={Name}
-      saveButtonText={saveButtonText}
-      handleSection={handleSection}
-      lastSection={lastSection}
-      formik={formik}
-      handleSubmit={handleSubmit}
-      skipAble={skipAble}
-      isSurvey={true}
-      showExit={false}
-    ></RegistrationForm>
+    <>
+      {!loading && <HeaderPinSurvey />}
+      <RegistrationForm
+        loading={loading}
+        totalGroups={totalGroups}
+        activeGroup={activeGroup}
+        saveDisabled={saveDisabled}
+        currentQuestions={currentQuestions}
+        Name={Name}
+        saveButtonText={saveButtonText}
+        handleSection={handleSection}
+        lastSection={lastSection}
+        formik={formik}
+        handleSubmit={handleSubmit}
+        skipAble={skipAble}
+        isSurvey={true}
+        showExit={false}
+      ></RegistrationForm>
+    </>
   );
 }
