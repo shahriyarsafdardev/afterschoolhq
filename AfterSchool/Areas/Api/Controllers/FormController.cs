@@ -14,7 +14,7 @@ namespace AfterSchool.Areas.Api.Controllers
 {
     public class FormController : Controller
     {
-
+        
         [HttpGet]
         public ActionResult GetFormData(int formId)
         {
@@ -364,5 +364,46 @@ namespace AfterSchool.Areas.Api.Controllers
                         new ApiResponse(msgs, newSection),
                         JsonRequestBehavior.AllowGet);
         }
+
+        [HttpGet]
+        public ActionResult Publish(int formId)
+        {
+            if (formId.IsEmpty())
+                return HttpNotFound();
+
+            var msgs = new SystemMessages();
+
+            try
+            {
+                var currentAccount = SessionVariables.CurrentAccount;
+
+                if (currentAccount.IsEmpty())
+                    throw new Exception("Unauthorized Account");
+
+                var requestedForm = currentAccount.GetForm(formId, msgs);
+                if (requestedForm.IsEmpty())
+                    throw new Exception("Invalid Form Id");
+
+                var currentUser = SessionVariables.CurrentUser;
+                var form = currentAccount.GetForm(formId, msgs);
+
+                if (msgs.HasNoErrors())
+                {
+                    form.SetIsPublished(currentUser, msgs);
+                }
+
+                return Json(
+                    new ApiResponse(msgs, form.IsPublished),
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(ex.Message, MessageType.ApiError);
+                return Json(
+                    new ApiResponse(msgs, null),
+                    JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }

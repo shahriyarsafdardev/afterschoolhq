@@ -10,6 +10,7 @@ namespace AfterSchool.Areas.Api.Models
         public FormType FormType { get; set; }
         public string? FormName { get; set; }
         public string? FormDescription { get; set; }
+        public bool? IsPublished { get; set; }
 
         public bool IsNull()
         {
@@ -28,7 +29,8 @@ namespace AfterSchool.Areas.Api.Models
                 FormId = Form.ID,
                 FormType = Form.FormTypeId,
                 FormName = Form.Name,
-                FormDescription = Form.Description
+                FormDescription = Form.Description,
+                IsPublished = Form.IsPublished
             };
         }
 
