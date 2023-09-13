@@ -1417,7 +1417,18 @@ namespace AfterSchoolLibrary.Models
 
             var sql = $@"   
                             SELECT 
-                               ISNULL(SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged), 0) AS Amount 
+                                ISNULL(
+                                    SUM(Amount - ConvenienceFeeCharged - PaymentTypeFeeCharged) - 
+                                    ISNULL((
+                                        select sum(amount) 
+                                        from [Transaction]
+                                        where 
+                                            PayerAccountId = {BillerAccountId} and 
+                                            UsedStripeConnect = 1 and 
+                                            IsDeleted = 0 and 
+                                            TransactionTypeId = 2
+                                    ), 0)
+                                , 0) AS Amount 
                             FROM [Transaction] 
                             WHERE 
                                 BillerAccountId = {BillerAccountId} AND 
