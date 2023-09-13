@@ -108,7 +108,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var isActivityGroup = group.IsGuid();
             var activityGroup = isActivityGroup ? currentAccount.GetActivityGroup(group.ToGuid(), msgs) : null;
-            var activities = GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs).Where(x => x.AccountId == currentAccount.ID).ToList();
+            var activities = accountUserType == UserType.Instructor ? GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs)?.Where(x => x.AccountId == currentAccount.ID).ToList()
+                : GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
 
             if (!activities.Any() && isArchived)
             {
@@ -116,7 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activities = GetActivities(activityGroup, false, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
             }
 
-            var totalActivityCount = GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
+            var totalActivityCount = accountUserType == UserType.Instructor ? activities.Count : GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
             var hasArchivedActivities =
                 isArchived || GetActivityCount(q, currentAccount, true, activityType, accountUserType, currentUser, activityGroup, msgs) > 0;
 
