@@ -593,6 +593,15 @@
     font-weight: bold;
 }
 
+.gain-forms-access {
+    font-family: Montserrat, sans-serif;
+    display: flex;
+    align-items: center;
+    padding-left: 150px;
+    padding-right: 150px;
+    gap: 50px
+}
+
 .has-search .form-control-feedback {
     right: initial;
     left: 0;
