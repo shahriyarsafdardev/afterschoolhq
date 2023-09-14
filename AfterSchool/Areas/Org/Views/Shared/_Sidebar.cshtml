@@ -1,6 +1,7 @@
 @{
     var controller = ViewContext.RouteData.Values["controller"].ToString().ToLower();
     var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+    var accountUserType = SessionVariables.AccountUserType;
 
     string homeactive = "",
         activityactive = "",
@@ -128,7 +129,7 @@
 
             @if (currentAccount.AccountTypeId.In(FormConstants.IndividualProviderAccountTypes) && !showActivityCenter)
             {
-                if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                if (CanView(accountUserType, PermissionType.ActivitiesView))
                 {
                     <li class="@activityactive">
                         <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })">
@@ -144,13 +145,13 @@
                         <i class="icon s7-gleam"></i> <span>Activity Center</span>
                     </a>
                     <ul class="sub-menu">
-                        @if (CanView(SessionVariables.AccountUserType, PermissionType.ActivitiesView))
+                        @if (CanView(accountUserType, PermissionType.ActivitiesView))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.Activity })"><i class="icon s7-gleam"></i> Extracurricular @UILabel.ActivityLabel(ActivityType.Activity, true)</a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageFieldTrips, SessionVariables.AccountUserType, PermissionType.FieldTripsView, currentAccount))
+                        @if (CanView(FeatureType.ManageFieldTrips, accountUserType, PermissionType.FieldTripsView, currentAccount))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.FieldTrip })">
@@ -158,7 +159,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(SessionVariables.AccountUserType, PermissionType.PermissionSlipsView))
+                        @if (CanView(accountUserType, PermissionType.PermissionSlipsView))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.PermissionSlip })">
@@ -166,7 +167,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageLearningPods, SessionVariables.AccountUserType, PermissionType.LearningPodsView, currentAccount))
+                        @if (CanView(FeatureType.ManageLearningPods, accountUserType, PermissionType.LearningPodsView, currentAccount))
                         {
                             <li>
                                 <a href="@Url.Action("index", "activity", new { type = (int)ActivityType.LearningPod })">
@@ -174,7 +175,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageActivityGroups, SessionVariables.AccountUserType, PermissionType.SessionsView, currentAccount))
+                        @if (CanView(FeatureType.ManageActivityGroups, accountUserType, PermissionType.SessionsView, currentAccount))
                         {
                             <li class="">
                                 <a href="@Url.Action("index", "group")">
@@ -182,7 +183,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView, currentAccount))
+                        @if (CanView(FeatureType.ManageLeagues, accountUserType, PermissionType.LeaguesView, currentAccount))
                         {
                             <li class="">
                                 <a href="@Url.Action("indexleague", "group")">
@@ -191,7 +192,7 @@
                             </li>
                         }
 
-                        @if (CanView(FeatureType.ManageExternalLeagues, SessionVariables.AccountUserType, PermissionType.LeaguesView, currentAccount))
+                        @if (CanView(FeatureType.ManageExternalLeagues, accountUserType, PermissionType.LeaguesView, currentAccount))
                         {
                             <li class="">
                                 <a href="@Url.Action("indexexternal", "league")">
@@ -199,7 +200,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
+                        @if (CanView(FeatureType.ManageVolunteerOpportunities, accountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
                         {
                             <li>
                                 <a data-test="volunteer-opportunities" href="@Url.Action("index", "activity", new { type = (int)ActivityType.VolunteerOpportunity })">
@@ -212,14 +213,14 @@
             }
 
 
-            @if (SessionVariables.AccountUserType != UserType.Instructor || !currentAccount.HasFeature(FeatureType.LimitInstructorRegistrantView))
+            @if (accountUserType != UserType.Instructor || !currentAccount.HasFeature(FeatureType.LimitInstructorRegistrantView))
             {
                 <li class="parent @contactmenuactive">
                     <a href="#">
                         <i class="icon s7-id"></i> <span>Contacts</span>
                     </a>
                     <ul class="sub-menu">
-                        @if (CanView(SessionVariables.AccountUserType, PermissionType.StudentsView))
+                        @if (CanView(accountUserType, PermissionType.StudentsView))
                         {
                             <li class="@registrationactive">
                                 <a href="@Url.Action("index", "registration")">
@@ -227,7 +228,7 @@
                                 </a>
                             </li>
                         }
-                        @if (CanView(FeatureType.ManageVolunteerOpportunities, SessionVariables.AccountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
+                        @if (CanView(FeatureType.ManageVolunteerOpportunities, accountUserType, PermissionType.VolunteerOpportunitiesView, currentAccount))
                         {
                             <li class="@volunteercontactsactive">
                                 <a href="@Url.Action("index", "registration", new { volunteers = "true" })">
@@ -236,7 +237,7 @@
                             </li>
                         }
 
-                        @if (CanView(SessionVariables.AccountUserType, PermissionType.ContactsView))
+                        @if (CanView(accountUserType, PermissionType.ContactsView))
                         {
                             <li class="@contactactive">
                                 <a href="@Url.Action("index", "contact")"><i class="icon s7-notebook"></i> Contacts</a>
@@ -246,20 +247,20 @@
                 </li>
             }
 
-            @if (CanView(FeatureType.ManageForms, SessionVariables.AccountUserType, PermissionType.FormsView, currentAccount) && FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
+            @if (CanView(FeatureType.ManageForms, accountUserType, PermissionType.FormsView, currentAccount) && FeatureFlag.CheckFlagIsEnabled("forms-reporting"))
             {
                 <li class="@formactive">
                     <a href="@Url.Action("index", "form")"><i class="icon s7-note2"></i> Forms</a>
                 </li>
             }
 
-            @if (CanView(FeatureType.AcceptPayments, SessionVariables.AccountUserType, PermissionType.AccountingView, currentAccount))
+            @if (CanView(FeatureType.AcceptPayments, accountUserType, PermissionType.AccountingView, currentAccount))
             {
                 <li class="@accountingactive">
                     <a href="@Url.Action("index", "accounting")"><i class="icon s7-cash"></i> Accounting</a>
                 </li>
             }
-            @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+            @if (accountUserType != UserType.ProgramDirector && CanView(accountUserType, PermissionType.AccountSettingsView))
             {
                 <li class="">
                     <a href="@currentAccount.HomePageUrl?edit=1"><i class="icon s7-browser"></i> Edit Profile</a>
@@ -272,13 +273,13 @@
                 </a>
                 <ul class="sub-menu">
 
-                    @if (CanView(SessionVariables.AccountUserType, PermissionType.AccountSettingsView))
+                    @if (accountUserType != UserType.ProgramDirector && CanView(accountUserType, PermissionType.AccountSettingsView))
                     {
                         <li class="@accountactive">
                             <a href="@Url.Action("edit", "account")"><i class="icon s7-edit"></i> Settings</a>
                         </li>
                     }
-                    @if (CanView(FeatureType.TeamAccounts, SessionVariables.AccountUserType, PermissionType.TeamView, currentAccount))
+                    @if (accountUserType != UserType.ProgramDirector &&  CanView(FeatureType.TeamAccounts, accountUserType, PermissionType.TeamView, currentAccount))
                     {
                         <li class="@teamactive">
                             <a href="@Url.Action("team", "account")"><i class="icon s7-users"></i> Staff</a>
