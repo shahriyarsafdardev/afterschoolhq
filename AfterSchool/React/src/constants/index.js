@@ -1,8 +1,6 @@
 export { simpleQuestionTypes as questionType } from './questionType';
 export const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
 
-export const DEFAULT_PAGE = 1;
-export const PER_PAGE = 3;
 export const gradeIds = {
   'Pre-K': 0,
   K: 1,
@@ -52,5 +50,3 @@ export const eSignMsg = allowToPayLater =>
     : ' Your registration is not finalized until you complete payment.';
 export const applyModes = { Apply: 'Apply', Register: 'Register' };
 export const googleLocationAPI = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}&libraries=places`;
-export const NOTES_OPTIONS = ['EDIT', 'DELETE'];
-export const NOTES_VISIBILITY_LENGTH = 530;

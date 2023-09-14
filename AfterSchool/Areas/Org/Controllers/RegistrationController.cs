@@ -1013,21 +1013,5 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Messages = msgs;
             return View(registration);
         }
-
-        public ActionResult Notes(string id, string r)
-        {
-            var currentAccount = SessionVariables.CurrentAccount;
-            var msgs = new SystemMessages();
-            var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
-            var bundlePath = Server.MapPath("~/React/dist/bundle.js");
-            var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
-            
-            LoadRegistrationViewBag(registration, r, msgs);
-            if (registration.IsEmpty())
-                return new HttpStatusCodeResult(HttpStatusCode.NotFound);
-            
-            ViewBag.BundleVersion = lastModifiedDate.ToString("yyyyMMddHHmmss");
-            return View(registration);
-        }
     }
 }

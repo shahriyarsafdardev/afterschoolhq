@@ -1958,19 +1958,6 @@ namespace AfterSchoolLibrary.Services
                 msgs.AddRange(registrant.Save(dc));
             }
         }
-        public static List<RegistrantNote> GetNotes(this Registrant registrant, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            var firstRegistrantId = registrant.GetFirstRegistrantId();
-            var registrantNotes =  RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs)
-                .OrderByDescending(rnv => rnv.ID).ToList();
-            
-            return registrantNotes;
-        }
-        public static int? GetFirstRegistrantId(this Registrant registrant)
-        {
-            return registrant.FirstRegistrantId.IsEmpty() ? registrant.ID : registrant.FirstRegistrantId;
-        }
         public static bool IsDuplicateStudent(this Registrant registrant, string studentFirstName, string studentLastName)
         {
             if (registrant.FirstName.IsNotEmpty() && registrant.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&

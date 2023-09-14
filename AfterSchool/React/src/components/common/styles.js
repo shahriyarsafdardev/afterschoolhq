@@ -25,8 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
   maxWidth: {
     width: '100%',
-    maxWidth: 675,
-    fontSize: 12
+    maxWidth: 675
   }
 }));
 

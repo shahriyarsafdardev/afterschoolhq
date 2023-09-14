@@ -70,7 +70,6 @@
     "react-webcam": "^7.1.0",
     "rollbar": "^2.26.1",
     "smartlook-client": "^8.1.0",
-    "use-debounce": "^9.0.4",
     "yup": "^1.1.1"
   }
 }
