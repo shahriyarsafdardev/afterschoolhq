@@ -8,9 +8,7 @@ import { ConfirmationDialog } from 'components';
 import { useRegistrantNotes } from 'redux/hooks';
 import { buildQueryParams, formatDate } from 'utils';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { PER_PAGE } from 'constants';
-
-const OPTIONS = ['EDIT', 'DELETE'];
+import { PER_PAGE, NOTES_OPTIONS as OPTIONS, NOTES_VISIBILITY_LENGTH } from 'constants';
 
 function Note({ note, handleEdit }) {
   const classes = useStyles();
@@ -25,12 +23,11 @@ function Note({ note, handleEdit }) {
   const splittedTimeArray = date.split(' ');
   const open = Boolean(anchorEl);
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const shouldShow = text.length > 530;
   const query = searchParams.get('searchQuery') || '';
   const pageNo = Number(searchParams.get('pageNo')) || 1;
-  const noteText = showMore ? text : text.substring(0, 500);
+  const isExpandable = text.length > NOTES_VISIBILITY_LENGTH;
   const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
+  const noteText = showMore ? text : text.substring(0, NOTES_VISIBILITY_LENGTH);
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -94,8 +91,11 @@ function Note({ note, handleEdit }) {
           />
         )}
       </Box>
-      <Typography>{noteText}</Typography>
-      {shouldShow && (
+      <Typography>
+        {noteText}
+        {!showMore && isExpandable && '...'}
+      </Typography>
+      {isExpandable && (
         <Box className={classes.showMoreButtonWrapper}>
           <Typography
             data-testid="show-more-button"
@@ -113,9 +113,6 @@ function Note({ note, handleEdit }) {
         anchorEl={anchorEl}
         disableScrollLock={true}
         onClose={() => setAnchorEl(null)}
-        PaperProps={{
-          style: {}
-        }}
       >
         {OPTIONS.map(option => (
           <MenuItem

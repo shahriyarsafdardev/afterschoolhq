@@ -4,6 +4,8 @@ import { Pagination, PaginationItem } from '@material-ui/lab';
 import { useSearchParams } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 import { startCase } from 'lodash';
+
+import { DEFAULT_PAGE } from 'constants';
 import { buildQueryParams } from 'utils';
 
 const useStyles = makeStyles(theme => ({
@@ -28,7 +30,6 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const DEFAULT_PAGE = 1;
 export default function PaginationRounded({ totalPages = 50 }) {
   const classes = useStyles();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,7 +46,7 @@ export default function PaginationRounded({ totalPages = 50 }) {
   const renderItem = item => {
     if (['previous', 'next'].includes(item.type))
       return (
-        <Button {...item} className={classes.itemButton}>
+        <Button {...item} className={classes.itemButton} data-testid={`pagination-${item.type}`}>
           {startCase(item.type)}
         </Button>
       );
@@ -54,6 +55,7 @@ export default function PaginationRounded({ totalPages = 50 }) {
         classes={{
           selected: classes.itemSelected
         }}
+        data-testid={`pagination-${item.page}`}
         {...item}
         style={{ margin: 0 }}
       />
