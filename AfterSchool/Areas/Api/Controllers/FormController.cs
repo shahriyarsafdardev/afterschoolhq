@@ -385,12 +385,15 @@ namespace AfterSchool.Areas.Api.Controllers
                     throw new Exception("Invalid Form Id");
 
                 var currentUser = SessionVariables.CurrentUser;
+                if (currentUser.IsEmpty())
+                    throw new Exception("Unauthorized User");
+
                 var form = currentAccount.GetForm(formId, msgs);
+                if (form.IsEmpty())
+                    throw new Exception("Form not found");
 
                 if (msgs.HasNoErrors())
-                {
                     form.SetIsPublished(currentUser, msgs);
-                }
 
                 return Json(
                     new ApiResponse(msgs, form.IsPublished),
