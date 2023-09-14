@@ -847,7 +847,7 @@ namespace AfterSchoolLibrary.Models
             sql += @$"
                 where 
                     Registrant.AccountId = {accountId} and
-                    Registration.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed} ";
+                    Registration.CompletionStatusId in ({(int)RegistrationCompletionStatus.Completed}, {(int)RegistrationCompletionStatus.RequiresParentSignature}) ";
             
             if (formId.HasValue) 
                 sql += $" and FormQuestion.FormId = {formId.Value}";
