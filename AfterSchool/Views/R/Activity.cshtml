@@ -293,9 +293,14 @@
                     <h3>Contact</h3>
                     <p>
                         @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br/>
-                        @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                        @if (Model.ActivityType != ActivityType.VolunteerOpportunity && Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
                         {
                             <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span>
+                            <br/>
+                        }
+                        else if(Model.ContactPhone.IsNotEmpty())
+                        {
+                            <span>@Model.ContactPhone</span>
                             <br/>
                         }
                         <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br/>

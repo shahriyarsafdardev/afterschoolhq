@@ -25,9 +25,9 @@
             </div>
 
             <div class="form-group">
-                <label class="col-md-3 control-label">Contact Phone <span class="text-danger">*</span></label>
+                <label class="col-md-3 control-label">Contact Phone (Optional)</label>
                 <div class="col-md-9">
-                    <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone.IfBlank(SessionVariables.CurrentUser.Phone)" required/>
+                    <input type="text" class="form-control" id="contactphone" name="contactphone" onfocus="this.select()" value="@Model.ContactPhone"/>
                 </div>
             </div>
 

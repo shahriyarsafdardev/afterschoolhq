@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Services
                 totalErrors++;
 
             totalFields++;
-            if (activity.ContactPhone.IsBlank())
+            if (activity.ContactPhone.IsBlank() && activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                 totalErrors++;
 
             totalFields++;
@@ -678,9 +678,9 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Activity EditExisting(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, bool isEditContact = false, SystemMessages msgs = null)
+            Dictionary<string, object> values, bool isEditContactSection = false, SystemMessages msgs = null)
         {
-            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContact);
+            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContactSection);
         }
 
         public static Activity CreateNew(int loggedInUserId, Account account, Dictionary<string, object> values,
@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static Activity SaveActivity(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs, bool isEditContact = false, DatabaseConnection dc = null)
+            Dictionary<string, object> values, SystemMessages msgs, bool isEditContactSection = false, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -835,7 +835,7 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 //pre-load account info
-                if (contactPhone.IsBlank())
+                if (contactPhone.IsBlank() && activityType != ActivityType.VolunteerOpportunity)
                     contactPhone = account.Phone;
 
                 if (cost.IsBlank())
@@ -960,6 +960,8 @@ namespace AfterSchoolLibrary.Services
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
             }
+            else if (contactPhone.IsEmpty() && isEditContactSection && activity.ActivityTypeId == ActivityType.VolunteerOpportunity) 
+                activity.ContactPhone = "";
 
             if (contactEmail.IsNotEmpty())
                 activity.ContactEmail = contactEmail.ToString().IfBlank("").MaxChars(100);
@@ -1026,7 +1028,7 @@ namespace AfterSchoolLibrary.Services
                             if (contactEmail.IsEmpty())
                                 activity.ContactEmail = account.Email;
 
-                            if (contactPhone.IsEmpty())
+                            if (contactPhone.IsEmpty() && activityType != ActivityType.VolunteerOpportunity)
                                 activity.ContactPhone = account.Phone;
                         }
 
@@ -1097,7 +1099,7 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc));
 
-                        if (amsgs.HasNoErrors() && isEditContact)
+                        if (amsgs.HasNoErrors() && isEditContactSection)
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),

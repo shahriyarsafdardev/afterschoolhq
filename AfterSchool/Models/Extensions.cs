@@ -163,7 +163,7 @@ namespace AfterSchool.Models
             if (activity.ContactName.IsBlank())
                 contactMsgs.Add("Contact Name", MessageType.UserError);
 
-            if (activity.ContactPhone.IsBlank())
+            if (activity.ContactPhone.IsBlank() && activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                 contactMsgs.Add("Contact Phone", MessageType.UserError);
 
             if (activity.ContactEmail.IsBlank())
