@@ -1783,14 +1783,15 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, ParticipationObject participationObject, SystemMessages msgs,
-            DatabaseConnection dc = null)
+            DatabaseConnection dc = null, bool orderByDesc = false)
         {
             return RegistrantActivity.LoadByParticipationObjectByRegistrant(
                 participationObject.ObjectID.Value,
                 participationObject.ObjectType,
                 registrant.ID.Value,
                 msgs,
-                dc);
+                dc,
+                orderByDesc);
         }
 
         public static void MarkAsDeleted(this Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)

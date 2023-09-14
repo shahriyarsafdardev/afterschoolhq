@@ -2047,7 +2047,7 @@ namespace AfterSchool.Controllers
         {
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
             var registrant = registration.GetRegistrant(msgs);
-            var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs);
+            var registrantActivity = registrant.GetRegistrantActivity(participationObject, msgs, null, true);
 
             if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue &&
                 participationObject.Cost > registrantActivity.AmountCharged)
@@ -2181,7 +2181,7 @@ namespace AfterSchool.Controllers
 
             // get original cost
             var submittedRecord = registration.GetRegistrant(msgs);
-            var registrantActivity = submittedRecord.GetRegistrantActivity(participationObject, msgs);
+            var registrantActivity = submittedRecord.GetRegistrantActivity(participationObject, msgs, null, true);
             if (registrantActivity.IsNotEmpty() && registrantActivity.AmountCharged.HasValue && participationObject.Cost > registrantActivity.AmountCharged)
                 participationObject.Cost = registrantActivity.AmountCharged;
 
