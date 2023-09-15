@@ -6,6 +6,7 @@ export { default as Pagination } from './Pagination';
 export { default as PinModal } from './common/PinModal';
 export { default as CheckBoxList } from './CheckBoxList';
 export { default as ErrorBand } from './common/ErrorBand';
+export { default as CopyClipBoard } from './CopyClipBoard';
 export { default as TextField } from './TextField/TextField';
 export { default as TextBlock } from './TextBlock/TextBlock';
 export { default as DateTimePicker } from './DateTimePicker';

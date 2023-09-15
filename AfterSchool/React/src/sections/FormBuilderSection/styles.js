@@ -170,12 +170,12 @@ export default makeStyles(theme => ({
     }
   },
   saveButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
     border: '1px solid #E4E4E4',
     '& .MuiCircularProgress-colorPrimary': {
-      color: '#494949'
+      color: theme.palette.text.secondary
     }
   },
   saveFormButton: {
@@ -204,6 +204,40 @@ export default makeStyles(theme => ({
     },
     '& .MuiCircularProgress-colorPrimary': {
       color: '#FFFFFF'
+    }
+  },
+  publishButton: {
+    width: '100%',
+    fontSize: 14
+  },
+  publishBtnscolors: {
+    color: 'white',
+    border: '#EF6262',
+    backgroundColor: '#EF6262',
+    '&:hover': {
+      color: 'white',
+      border: '#EF6262',
+      backgroundColor: '#EF6262'
+    }
+  },
+  publishButtonsGroup: {
+    position: 'absolute',
+    left: '84.1%',
+    top: '60px',
+    right: '10px',
+    [theme.breakpoints.down('md')]: {
+      top: '60px'
+    },
+    [theme.breakpoints.only('md')]: {
+      width: '17%'
+    },
+    [theme.breakpoints.down('sm')]: {
+      left: 'unset',
+      top: '20px'
+    },
+    '& .MuiButtonGroup-groupedOutlinedHorizontal:not(:first-child)': {
+      borderLeft: 'none',
+      marginLeft: 0
     }
   },
   backButton: {
@@ -289,7 +323,7 @@ export default makeStyles(theme => ({
     }
   },
   applyToAllControlsItem: {
-    padiing: '5px',
+    // padiing: '5px',
     display: 'flex',
     alignItems: 'center',
     [theme.breakpoints.up('md')]: {
@@ -373,16 +407,21 @@ export default makeStyles(theme => ({
   dialogContentText: { fontSize: '16px', padding: '20px', textAlign: 'center' },
   dialogActions: { display: 'flex', justifyContent: 'center' },
   addNewSectionButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
     marginTop: '25px',
     border: '1px solid #E4E4E4'
   },
   addNewQuestionButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
+    border: '1px solid #E4E4E4'
+  },
+  selectMood: {
+    color: theme.palette.text.secondary,
+    fontSize: '14px',
     border: '1px solid #E4E4E4'
   },
   dropDownIcon: { width: '20px', height: 'auto', marginLeft: '2px' },
@@ -413,13 +452,13 @@ export default makeStyles(theme => ({
     flexWrap: 'wrap'
   },
   applyToAllButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     margin: '8px 12px',
     width: '100px',
     fontSize: '14px',
     border: '1px solid #E4E4E4',
     '& .MuiCircularProgress-colorPrimary': {
-      color: '#494949'
+      color: theme.palette.text.secondary
     }
   },
   questionCheckbox: {
@@ -447,5 +486,68 @@ export default makeStyles(theme => ({
   },
   marginTop: {
     marginTop: 30
+  },
+  marginAuto: {
+    margin: 'auto'
+  },
+  moodSelector: {
+    marginLeft: '10%',
+    marginBottom: '15px',
+    [theme.breakpoints.down('md')]: {
+      marginLeft: '2%'
+    }
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'space-evenly'
+  },
+  emojisWrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center'
+  },
+  emojisList: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    listStyle: 'none',
+    padding: theme.spacing(0.5)
+  },
+  chip: {
+    margin: theme.spacing(0.5),
+    '& .MuiChip': {
+      root: {
+        backgroundColor: '#f2f2f5'
+      }
+    }
+  },
+  chipRoot: {
+    backgroundColor: '#f2f2f5 !important'
+  },
+  emojiContent: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  emojiOuterWrapper: {
+    border: '1px solid #E4E4E4',
+    borderRadius: '3px',
+    marginTop: '4px',
+    marginLeft: '-15px',
+    backgroundColor: '#F9F9F9',
+    boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
+    minWidth: '350px',
+    padding: '8px 12px',
+    zIndex: 1,
+    [theme.breakpoints.down('sm')]: {
+      minWidth: '250px',
+      marginTop: '35px',
+      marginLeft: '-120px'
+    }
+  },
+  emoji: {
+    backgroundColor: '#e0e0e0'
+  },
+  errorMessage: {
+    margin: 10
   }
 }));
