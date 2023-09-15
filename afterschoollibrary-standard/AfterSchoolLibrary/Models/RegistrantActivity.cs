@@ -324,6 +324,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int) participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName);
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.GetCount() > 0;
         }
 
