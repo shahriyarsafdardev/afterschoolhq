@@ -40,6 +40,13 @@ export default {
   UpdateRegistrationSchoolAPI: 'Api/UpdateRegistration/CreateOrUpdateFromGoogle',
   UpdateRegistrationWithESignature: 'Api/UpdateRegistration/UpdateRegistrationWithESignature',
 
+  //Registrant Notes APIs
+  getRegistrationNotesAPI: (regUid, perPage, pageNo, searchQuery) =>
+    `Api/Notes/GetRegistrantNotes?registrationUid=${regUid}&perPage=${perPage}&pageNo=${pageNo}&searchQuery=${searchQuery}`,
+  createRegistrationNoteAPI: 'Api/Notes/CreateRegistrantNote',
+  updateRegistrantNoteAPI: 'Api/Notes/UpdateRegistrantNote',
+  deleteRegistrantNoteAPI: 'Api/Notes/DeleteRegistrantNote',
+
   //VolunteerRegistration
   VolunteerRegisterAPI: 'Api/VolunteerRegistration/Register',
   submitVolunteerFormDataAPI: 'Api/VolunteerRegistration/AddUpdateAnswers',
