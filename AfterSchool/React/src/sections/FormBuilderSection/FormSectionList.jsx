@@ -39,12 +39,13 @@ function FormSectionList() {
   const [showNewSectionField, setShowNewSectionField] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
-  const classes = useStyles({ questionGroup });
+
+  const { questionsGroups, saveNewSectionData, deleteSectionData, form } = useFormBuilder();
+  const classes = useStyles({ questionGroup: questionGroup || form.FormType == 2 });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
   const { unsavedChanges } = useUnsavedChanges();
-  const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 
   const questionsGroupsToShow = questionsGroups.filter(
     questionsGroup => questionsGroup.IsDeleted === false
@@ -68,6 +69,8 @@ function FormSectionList() {
       FormQuestion: null,
       FormQuestionGroups: updatedQuestionGroups
     }).then(() => enqueueSnackbar('Deleted.', { variant: 'success' }));
+
+    return updatedQuestionGroups;
   };
 
   const addNewSectionHandler = async () => {
@@ -80,16 +83,25 @@ function FormSectionList() {
   };
 
   const handleDeleteSection = async () => {
-    await handleDelete(deleteSectionId);
-    handleCloseDialog();
+    const updatedQuestionGroups = await handleDelete(deleteSectionId);
 
     if (questionGroup == deleteSectionId) {
-      if (questionsGroupsToShow.length > 0) {
-        setSearchParams(`qg=${firstSectionId}`);
+      const updatedQuestionsGroupsToShow = updatedQuestionGroups.filter(
+        questionsGroup => questionsGroup.IsDeleted === false
+      );
+
+      if (updatedQuestionsGroupsToShow.length > 0) {
+        const updatedFirstSectionId = updatedQuestionsGroupsToShow.length
+          ? updatedQuestionsGroupsToShow[0].Id
+          : -1;
+
+        setSearchParams(`qg=${updatedFirstSectionId}`);
       } else {
         navigate(formSettingsPath(formId));
       }
     }
+
+    handleCloseDialog();
   };
 
   const handleCloseDialog = () => {
@@ -139,6 +151,7 @@ function FormSectionList() {
             variant="h6"
             className={classes.sectionsListHeading}
             onClick={() => {
+              if (!questionsGroupsToShow.length) return;
               if (!unsavedChanges) {
                 setSearchParams(`qg=${firstSectionId}`);
                 toggleShowSettings();

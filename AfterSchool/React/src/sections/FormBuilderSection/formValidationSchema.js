@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
-import { questionType } from 'constants';
+import { questionTypes as allQuestionTypes } from 'constants';
 
 const formValidationSchema = values => {
-  const { dropdown, radioList, checkBoxList, textBlock } = questionType;
+  const { dropdown, radioList, checkBoxList, textBlock, mood } = allQuestionTypes;
   const isQuestionWithOptions = questionTypeId =>
-    [dropdown, radioList, checkBoxList].includes(questionTypeId);
+    [dropdown, radioList, checkBoxList, mood].includes(questionTypeId);
 
   return Yup.object().shape(
     Object.keys(values).reduce((acc, key) => {

@@ -19,8 +19,10 @@ import {
 } from '@material-ui/core';
 
 import QuestionControlActions from './QuestionControlActions';
-import { audienceTypes, questionType } from 'constants';
+import { audienceTypes, questionType, questionTypes as allQuestionTypes } from 'constants';
+import RatingQuestion from './components/RatingQuestion';
 import RenderAudienceList from './RenderAudienceList';
+import MoodQuestion from './components/MoodQuestion';
 import { StyledImage, getMaxLimit } from './helper';
 import LabeledCheckBox from './LabeledCheckBox';
 import RenderOptions from './RenderOptions';
@@ -50,7 +52,8 @@ const RenderQuestion = ({
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const [showOptionsList, setShowOptionsList] = useState(false);
-  const { dropdown, radioList, checkBoxList, checkBox } = questionType;
+  const questions = formType === 2 ? allQuestionTypes : questionType;
+  const { dropdown, radioList, checkBoxList, checkBox, mood, rating } = allQuestionTypes;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
     ID,
@@ -68,10 +71,10 @@ const RenderQuestion = ({
   const questionHasOptions = (qTypeId = QuestionTypeId) =>
     [dropdown, radioList, checkBoxList].includes(qTypeId);
   const showOptions =
-    (questionHasOptions() && showOptionsList) || Boolean(touched?.Options && errors?.Options);
+    ((questionHasOptions() && showOptionsList) || Boolean(touched?.Options && errors?.Options)) &&
+    QuestionTypeId !== mood;
   const [options, setOptions] = useState(cloneDeep(Options) || []);
   const customQuestion = QuestionDataTypeId === 0;
-
   const updateValue = () => {
     if (timeoutConst) {
       clearTimeout(timeoutConst);
@@ -82,8 +85,8 @@ const RenderQuestion = ({
     setTimeoutConst(tempTimeout);
   };
 
-  const questionTypesOptions = Object.keys(questionType).map(key => ({
-    key: questionType[key],
+  const questionTypesOptions = Object.keys(questions).map(key => ({
+    key: questions[key],
     value: key
   }));
 
@@ -263,6 +266,20 @@ const RenderQuestion = ({
               setQuestion={setQuestion}
               customQuestion={customQuestion}
               QuestionDataTypeId={QuestionDataTypeId}
+            />
+          )}
+          {QuestionTypeId === rating && (
+            <RatingQuestion options={options} setOptions={setOptions} />
+          )}
+          {QuestionTypeId === mood && (
+            <MoodQuestion
+              initialized={initialized}
+              setQuestion={setQuestion}
+              setOptions={setOptions}
+              question={question}
+              touched={touched}
+              options={options}
+              errors={errors}
             />
           )}
           <RenderOptions
