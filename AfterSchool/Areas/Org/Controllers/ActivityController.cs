@@ -2870,7 +2870,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activitySchedule = activity.GetSchedule(msgs);
             List<AttendanceRegistrant> attendanceRegistrants;
 
-            if (activity.HasSchedule)
+            if (activity.HasSchedule && !activity.GetSchedule().IsOngoing)
             {
                 attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
                 attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
@@ -2953,9 +2953,16 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents,
-                    SessionVariables.CurrentUser, msgs);
+            {
+                if (attendance.ActivityInstanceId.IsNotEmpty())
+                    attendance.UpdateAttendance(presentStudents,
+                        SessionVariables.CurrentUser, attendance.ActivityInstanceId.Value, msgs);
+                else
+                    attendance.UpdateAttendance(presentStudents,
+                        SessionVariables.CurrentUser, null, msgs);
+            }
 
+            ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
             ViewBag.Schedule = activitySchedule;
             var currentUser = SessionVariables.CurrentUser;
@@ -3086,7 +3093,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
-
+       
         // This returns all unbilled selected Attendances by Registrant
         private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(
             Account currentAccount, List<RegistrantActivity> registrantActivities, List<Attendance> attendances,
