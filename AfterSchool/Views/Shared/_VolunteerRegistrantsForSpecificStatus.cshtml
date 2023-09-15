@@ -62,11 +62,11 @@
                             @if (participationObject.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() 
                                  && backgroundCheck.IsNotEmpty())
                             {
-                                <td>@backgroundCheck.BackgroundCheckStatusId</td>
+                                <td>@backgroundCheck.BackgroundCheckStatusId.ToString().SplitByUpperCase()</td>
                             }
                             else
                             {
-                                <td>@BackgroundCheckStatus.NotSet</td>
+                                <td>@BackgroundCheckStatus.NotSet.ToString().SplitByUpperCase()</td>
                             }
                             <td>@ra.RegistrantPhone</td>
                             <td>
