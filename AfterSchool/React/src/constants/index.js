@@ -1,4 +1,4 @@
-export { simpleQuestionTypes as questionType } from './questionType';
+export { default as questionTypes, simpleQuestionTypes as questionType } from './questionType';
 export const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
 
 export const gradeIds = {
@@ -50,3 +50,5 @@ export const eSignMsg = allowToPayLater =>
     : ' Your registration is not finalized until you complete payment.';
 export const applyModes = { Apply: 'Apply', Register: 'Register' };
 export const googleLocationAPI = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_MAPS_API_KEY}&libraries=places`;
+export const emojis =
+  ':grinning:|Happy,:grin:|Thrilled,:blush:|Pleased,:laughing:|Laughing,:sweat_smile:|Relieved,:joy:|Funny,:wink:|Playful,:slight_smile:|Content,:upside_down:|Upside Down,:heart_eyes:|Love,:innocent:|Innocent,:stuck_out_tongue:|Goofy,:thinking:|Unsure,:neutral_face:|Neutral,:sleeping:|Tired,:mask:|Sick,:slight_frown:|Sad,:cold_sweat:|Anxious,:angry:|Angry,:grimacing:|Yikes';

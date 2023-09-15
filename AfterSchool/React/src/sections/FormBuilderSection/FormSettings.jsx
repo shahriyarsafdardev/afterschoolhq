@@ -1,25 +1,30 @@
 import * as Yup from 'yup';
+import cs from 'classnames';
 import { isEmpty } from 'lodash';
-import React, { useEffect } from 'react';
 import { useSnackbar } from 'notistack';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import LinkIcon from '@material-ui/icons/Link';
 import { useFormik, FormikProvider, Form } from 'formik';
-import { Grid, Typography, Box, Button } from '@material-ui/core';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Grid, Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 
 import TextField from './components/TextField/TextField';
 import TextAreaQuestion from './components/TextAreaQuestion';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
+import { CopyClipBoard } from 'components';
 import { formTypes } from 'constants';
 import useStyles from './styles';
 
 function FormSettings() {
   const classes = useStyles();
+  const { formId } = useParams();
   const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { form, questionsGroups, updateFormSettings } = useFormBuilder();
+  const { form, questionsGroups, updateFormSettings, publishOrUnpublishSurvey } = useFormBuilder();
   const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
   const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].Id : -1;
+  const { FormType: formType, IsPublished: isPublished, PublishedURL: publishedURL } = form;
 
   const validationSchema = Yup.object().shape({
     FormName: Yup.string().required('Form Name is required'),
@@ -47,12 +52,42 @@ function FormSettings() {
     }
   }, [dirty]);
 
+  const handleSurveyPublish = formId => {
+    publishOrUnpublishSurvey(formId).then(res => {
+      enqueueSnackbar(res ? 'Published' : 'Unpublished', { variant: 'success' });
+    });
+  };
+
   return (
     <Grid item lg={9} md={9} xs={12} sm={12}>
       <Box>
         <Typography variant="h6" className={classes.sectionHeading}>
           Settings
         </Typography>
+        {formType === 2 && (
+          <ButtonGroup
+            disableElevation
+            variant="outlined"
+            color="primary"
+            className={classes.publishButtonsGroup}
+          >
+            <Button
+              type="submit"
+              data-testid={`publish-unPublish-${formId}`}
+              onClick={() => handleSurveyPublish(formId)}
+              className={cs(classes.publishButton, isPublished ? classes.publishBtnscolors : '')}
+            >
+              {isPublished ? 'Unpublish' : 'Publish'}
+            </Button>
+            {form.IsPublished && (
+              <Button>
+                <CopyClipBoard textToCopy={publishedURL}>
+                  {<LinkIcon fontSize="large" />}
+                </CopyClipBoard>
+              </Button>
+            )}
+          </ButtonGroup>
+        )}
       </Box>
 
       <FormikProvider value={formik}>
