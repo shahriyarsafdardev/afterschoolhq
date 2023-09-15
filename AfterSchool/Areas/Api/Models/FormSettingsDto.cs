@@ -1,4 +1,5 @@
 using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Services;
 using System.Linq;
 using System.Web.WebPages;
 
@@ -11,6 +12,7 @@ namespace AfterSchool.Areas.Api.Models
         public string? FormName { get; set; }
         public string? FormDescription { get; set; }
         public bool? IsPublished { get; set; }
+        public string PublishedURL { get; set; }    
 
         public bool IsNull()
         {
@@ -30,7 +32,8 @@ namespace AfterSchool.Areas.Api.Models
                 FormType = Form.FormTypeId,
                 FormName = Form.Name,
                 FormDescription = Form.Description,
-                IsPublished = Form.IsPublished
+                IsPublished = Form.IsPublished ?? false,
+                PublishedURL = (Form.IsPublished ?? false) ? FormService.BuildShortHomePageUrlForm(Form.Uid) : null
             };
         }
 
