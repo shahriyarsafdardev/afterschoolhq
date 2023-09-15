@@ -33,7 +33,7 @@ namespace AfterSchool.Areas.Api.Models
                 FormName = Form.Name,
                 FormDescription = Form.Description,
                 IsPublished = Form.IsPublished ?? false,
-                PublishedURL = (Form.IsPublished ?? false) ? FormService.BuildShortHomePageUrlForm(Form.Uid) : null
+                PublishedURL = FormService.BuildShortHomePageUrlForm(Form.Uid)
             };
         }
 
