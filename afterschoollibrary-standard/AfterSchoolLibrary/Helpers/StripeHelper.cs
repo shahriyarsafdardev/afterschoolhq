@@ -1284,7 +1284,7 @@ namespace AfterSchoolLibrary.Billing
 
             var options = new Stripe.SubscriptionUpdateOptions() 
             { 
-                ProrationBehavior = "always_invoice",
+                ProrationBehavior = ProrationBehaviorNone,
                 BillingCycleAnchor = SubscriptionBillingCycleAnchor.Now
             };
 
@@ -1351,8 +1351,7 @@ namespace AfterSchoolLibrary.Billing
             if (trialEndDate.HasValue)
                 options.TrialEnd = trialEndDate;
 
-            if (prorate.HasValue)
-                options.ProrationBehavior = prorate.Value ? "create_prorations" : "none";
+            options.ProrationBehavior = ProrationBehaviorNone;
 
             try
             {
