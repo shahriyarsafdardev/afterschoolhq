@@ -68,6 +68,7 @@
                         <td>@account.ConvertToAccountTimeZone(ra.CreateDate.Value).ToLongDateTimeString()</td>
                         @{
                             var hasPaymentPlan = ra.HasPaymentPlan(false);
+                            var hasPlan = ra.HasPlan();
                             var registrant = ra.GetRegistrant();
                             var amountPaid = ra.GetAmountPaid();
                         }
@@ -194,7 +195,7 @@
                                                 showButton = false;
                                             }
                                         }
-                                        if (hasPaymentPlan)
+                                        if (hasPlan)
                                         {
                                             showButton = false;
                                         }
