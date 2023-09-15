@@ -2557,7 +2557,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
 
                     amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
 
@@ -2574,6 +2573,8 @@ namespace AfterSchoolLibrary.Services
                         loggedInUser,
                         amsgs,
                         adc);
+
+                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
 
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
