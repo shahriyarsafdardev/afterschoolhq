@@ -1,6 +1,7 @@
 ﻿@model List<RegistrantActivity>
 @{
     var activity = (Activity) ViewData["Activity"];
+    var participationObject = activity.GetParticipationObject();
     var editaction = ViewData["EditAction"].ToString();
     var editcontroller = ViewData["EditController"].ToString();
     var headerTitle = (RegistrationAssignmentType) ViewData["HeaderTitle"];
@@ -40,7 +41,9 @@
                     foreach (var ra in Model)
                     {
                         var instanceSeats = ra.GetInstanceSeats();
-
+                        var registrant = ra.GetRegistrant();
+                        var backgroundCheck = registrant.IsNotEmpty() && registrant.WebUserId.IsNotEmpty() ? 
+                            BackgroundCheck.LoadByWebUserId(registrant.WebUserId.Value, true).LastOrDefault() : null;
                         <tr class="instance @instanceSeats.Select(x => $"instance-{x.ActivityInstanceId.ToString()}").ToStringList(" ")">
                             <td>
                                 @if (ra.RegistrationId.HasValue && ra.AssignmentTypeId != RegistrationAssignmentType.Invited)
@@ -56,8 +59,15 @@
                                         ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
                                         : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
                             </td>
-                            <!--When Background check will complete then here we will need to do changes-->
-                            <td>Pending Review</td>
+                            @if (participationObject.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() 
+                                 && backgroundCheck.IsNotEmpty())
+                            {
+                                <td>@backgroundCheck.BackgroundCheckStatusId</td>
+                            }
+                            else
+                            {
+                                <td>@BackgroundCheckStatus.NotSet</td>
+                            }
                             <td>@ra.RegistrantPhone</td>
                             <td>
                                 @if (ra.AssignmentTypeId == RegistrationAssignmentType.Withdrawn)
