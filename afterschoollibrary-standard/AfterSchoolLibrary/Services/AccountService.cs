@@ -113,6 +113,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             account.IsDeleted = true;
+            account.IsActive = false;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
