@@ -20,19 +20,6 @@ namespace AfterSchoolLibrary.Migrations
 
                     // update packages, set ManageStudentNotes feature to zero
                     Package.LoadByIsActive(true, amsgs, adc).ForEach(package => package.AddFeature(FeatureType.ManageStudentNotes, 0, webUser, amsgs, adc));
-
-
-                    // get all accounts with packages
-                    var accounts = Account.LoadByAccountTypeIds(FormConstants.ProviderAccountTypes.ToList(), false, null, null, amsgs, adc);
-                    accounts.ForEach(account =>
-                    {
-                        var accountPackage = account.GetActiveAccountPackage(amsgs, adc);
-
-                        if (accountPackage.IsNotEmpty())
-                            accountPackage.AddOrUpdatePackageFeature(FeatureType.ManageStudentNotes, 0, webUser, amsgs, adc);
-                        else
-                            amsgs.Add($"{account.Name} missing package??", MessageType.Notice);
-                    });
                 },
                 uniqueIdenfier: "Migration_20230918_StudentNotes",
                 msgs: msgs,
