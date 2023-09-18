@@ -28,6 +28,7 @@ export const DEFAULT_QUESTION_SETTINGS = [
 
 export const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 export const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
+export const formTypeId = { notSet: 0, studentForm: 1, survey: 2, volunteerForm: 3 };
 
 export const isFileTypeValid = (file, validExtensions) => {
   const fileExtension = file.type.split('/')[1];

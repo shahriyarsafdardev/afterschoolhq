@@ -12,9 +12,9 @@ import {
   unSavedDialogProps,
   filterNotDeletedQuestions
 } from './helper';
+import { DEFAULT_QUESTION_SETTINGS, formTypeId } from 'constants';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import formValidationSchema from './formValidationSchema';
-import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
 import { LoadingButton } from 'components/Overrides';
 import { usePrompt } from 'utils/hooks/usePrompt';
@@ -307,7 +307,7 @@ function FormSectionSettings() {
             />
           </Box>
           <Box>
-            {form?.FormType !== 3 && renderApplyToAll && (
+            {form?.FormType !== formTypeId.volunteerForm && renderApplyToAll && (
               <ApplyToAllControls
                 values={values}
                 allHide={hideAll}

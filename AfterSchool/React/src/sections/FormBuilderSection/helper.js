@@ -87,3 +87,5 @@ export const mapOptions = options => {
   });
   return optionsArr;
 };
+
+export const emojiContent = key => (key === ':slight_frown:' ? ':slightly_frowning:' : key);
