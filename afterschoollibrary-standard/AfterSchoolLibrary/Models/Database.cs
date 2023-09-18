@@ -1333,6 +1333,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230713_CheckInCheckOut.Do(amsgs,adc);
             Migration_20230731_UpdateRegistrantWebUserAuthorizationType.Do(amsgs,adc);
             Migration_20230811_AddCouponIsDeletedDefault.Do(amsgs,adc);
+            Migration_20230918_StudentNotes.Do(amsgs,adc);
         }
 
         public static DatabaseConnection StartTransaction()
