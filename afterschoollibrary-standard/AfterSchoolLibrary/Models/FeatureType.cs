@@ -41,5 +41,6 @@ public enum FeatureType
     AdvancedReports = 40,
     LimitInstructorRegistrantView = 41,
     AllAgeRegistration = 42,
-    ManageCheckInCheckOut = 43
+    ManageCheckInCheckOut = 43,
+    ManageStudentNotes = 44,
 }

@@ -25,10 +25,13 @@
         <a href="@Url.Action("update", "registration", new { id = Model.Uid.ToString() })" class="btn btn-alt6">
             <i class="s7-edit"></i> Edit Registration
         </a>
-        <a href="@Url.Action("notes", "registration", new { id = Model.Uid.ToString() })" 
-           class="btn btn-alt6@(actionName == "notes" ? "-active" : "")">
-            <i class="s7-note"></i> Notes
-        </a>
+        @if (SessionVariables.CurrentAccount.HasFeature(FeatureType.ManageStudentNotes))
+        {
+            <a href="@Url.Action("notes", "registration", new { id = Model.Uid.ToString() })" 
+               class="btn btn-alt6@(actionName == "notes" ? "-active" : "")">
+                <i class="s7-note"></i> Notes
+            </a>            
+        }
         @if (SessionVariables.CurrentAccount.HasFeature(FeatureType.Survey))
         {
             <a href="@Url.Action("surveys", "registration", new { id = Model.Uid.ToString() })"
