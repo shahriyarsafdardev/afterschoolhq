@@ -8,12 +8,12 @@ import { useFormik, FormikProvider, Form } from 'formik';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Grid, Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 
-import TextField from './components/TextField/TextField';
 import TextAreaQuestion from './components/TextAreaQuestion';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
+import TextField from './components/TextField/TextField';
+import { formTypes, formTypeId } from 'constants';
 import { useFormBuilder } from 'redux/hooks';
 import { CopyClipBoard } from 'components';
-import { formTypes } from 'constants';
 import useStyles from './styles';
 
 function FormSettings() {
@@ -64,7 +64,7 @@ function FormSettings() {
         <Typography variant="h6" className={classes.sectionHeading}>
           Settings
         </Typography>
-        {formType === 2 && (
+        {formType === formTypeId.survey && (
           <ButtonGroup
             disableElevation
             variant="outlined"
@@ -79,8 +79,8 @@ function FormSettings() {
             >
               {isPublished ? 'Unpublish' : 'Publish'}
             </Button>
-            {form.IsPublished && (
-              <Button>
+            {isPublished && (
+              <Button data-testid={`copy-published-survey-link-${formId}`}>
                 <CopyClipBoard textToCopy={publishedURL}>
                   {<LinkIcon fontSize="large" />}
                 </CopyClipBoard>

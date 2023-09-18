@@ -543,8 +543,5 @@ export default makeStyles(theme => ({
   },
   emoji: {
     backgroundColor: '#e0e0e0'
-  },
-  errorMessage: {
-    margin: 10
   }
 }));
