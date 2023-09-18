@@ -143,8 +143,6 @@
 
 <script>
     PageEvent.add(PageEvent.AFTER_INIT, function () {
-        
-        updateButtonState();
         $('#activityinstance').change(function () {
             location.href = '@Url.Action("TrackAttendance", "activity")?att=' + $(this).val();
         });
