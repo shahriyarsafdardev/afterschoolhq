@@ -18,6 +18,7 @@ import {
 import { unSavedDialogProps, deleteItemDialogProps } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
+import { formTypeId } from 'constants';
 import useStyles from './styles';
 import Dialog from './Dialog';
 import paths from 'routes';
@@ -40,8 +41,14 @@ function FormSectionList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
 
-  const { questionsGroups, saveNewSectionData, deleteSectionData, form } = useFormBuilder();
-  const classes = useStyles({ questionGroup: questionGroup || form.FormType == 2 });
+  const {
+    questionsGroups,
+    saveNewSectionData,
+    deleteSectionData,
+    form: { FormType: formType }
+  } = useFormBuilder();
+
+  const classes = useStyles({ questionGroup: questionGroup || formType == formTypeId.survey });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
@@ -87,7 +94,7 @@ function FormSectionList() {
 
     if (questionGroup == deleteSectionId) {
       const updatedQuestionsGroupsToShow = updatedQuestionGroups.filter(
-        questionsGroup => questionsGroup.IsDeleted === false
+        questionsGroup => !questionsGroup.IsDeleted
       );
 
       if (updatedQuestionsGroupsToShow.length > 0) {
@@ -133,6 +140,21 @@ function FormSectionList() {
     setIsUnsaved(true);
   };
 
+  const onSectionsClickHandler = () => {
+    if (!questionsGroupsToShow.length) return;
+    if (!unsavedChanges) {
+      setSearchParams(`qg=${firstSectionId}`);
+      toggleShowSettings();
+    } else unsavedModal();
+  };
+
+  const showSectionHandler = key => {
+    if (!unsavedChanges) {
+      setSearchParams(`qg=${key}`);
+      toggleShowSettings();
+    } else unsavedModal(key);
+  };
+
   const SectionList = () => (
     <Grid item lg={2} md={2} xs={12} sm={12} className={classes.sectionListWrapper}>
       {!isMobile && (
@@ -150,13 +172,7 @@ function FormSectionList() {
           <Typography
             variant="h6"
             className={classes.sectionsListHeading}
-            onClick={() => {
-              if (!questionsGroupsToShow.length) return;
-              if (!unsavedChanges) {
-                setSearchParams(`qg=${firstSectionId}`);
-                toggleShowSettings();
-              } else unsavedModal();
-            }}
+            onClick={onSectionsClickHandler}
             data-testid={'formSections'}
           >
             Sections
@@ -169,12 +185,7 @@ function FormSectionList() {
             <Typography
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
-              onClick={() => {
-                if (!unsavedChanges) {
-                  setSearchParams(`qg=${key}`);
-                  toggleShowSettings();
-                } else unsavedModal(key);
-              }}
+              onClick={() => showSectionHandler(key)}
               data-testid={`formSection-${Name}`}
             >
               {Name}

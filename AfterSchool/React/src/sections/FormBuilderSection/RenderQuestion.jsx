@@ -18,15 +18,20 @@ import {
   Box
 } from '@material-ui/core';
 
+import {
+  audienceTypes,
+  questionType,
+  questionTypes as allQuestionTypes,
+  formTypeId
+} from 'constants';
 import QuestionControlActions from './QuestionControlActions';
-import { audienceTypes, questionType, questionTypes as allQuestionTypes } from 'constants';
-import RatingQuestion from './components/RatingQuestion';
 import RenderAudienceList from './RenderAudienceList';
-import MoodQuestion from './components/MoodQuestion';
 import { StyledImage, getMaxLimit } from './helper';
 import LabeledCheckBox from './LabeledCheckBox';
+import RatingQuestion from './RatingQuestion';
 import RenderOptions from './RenderOptions';
 import CheckBoxLink from './CheckBoxLink';
+import MoodQuestion from './MoodQuestion';
 import LockIcon from 'assets/lock.svg';
 import DropDown from './DropDown';
 import useStyles from './styles';
@@ -52,7 +57,7 @@ const RenderQuestion = ({
   const [showAudience, setShowAudience] = useState(false);
   const [deleteSectionId, setdeleteSectionId] = useState(null);
   const [showOptionsList, setShowOptionsList] = useState(false);
-  const questions = formType === 2 ? allQuestionTypes : questionType;
+  const questions = formType === formTypeId.survey ? allQuestionTypes : questionType;
   const { dropdown, radioList, checkBoxList, checkBox, mood, rating } = allQuestionTypes;
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const {
