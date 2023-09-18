@@ -2583,8 +2583,7 @@ namespace AfterSchoolLibrary.Services
                     var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
-                    if (!accountPackageToRemove.IsDuringTrial)
-                        defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
+                    defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
 
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
