@@ -13,7 +13,7 @@
 
 <script type="text/javascript">
     let featureId;
-    function showUpgradeMyPlan(name, id, preventClose = false, FeatureType = 'NotSet' ) {
+    function showUpgradeMyPlan(name, id, preventClose = false, FeatureType = '@FeatureType.NotSet' ) {
         $('#app-body').addClass('overlay')
         $('#upgrade-my-plan').fadeIn();
 
@@ -24,7 +24,7 @@
             featureId = id;
 
         if (name === '' || id === '') {
-            if (FeatureType === 'ManageForms')
+            if (FeatureType === '@FeatureType.ManageForms.ToString()')
                 $('.gain-forms-access').html('<div>Your form limit has been reached. Either archive other forms or upgrade your account to create more. If you have additional questions, please <a style="color:white; text-decoration:underline" href="mailto:support@afterschoolhq.com">contact support</a>.</div><a href="javascript:AccountSetup.getStripeBillingLink(\'\')" class="btn btn-default btn-upgrade-plan btn-lg" style="font-family: Montserrat, sans-serif;">Upgrade My Plan</a>');
             else
                 $('.gain-access').html('This feature is not accessible. contact admin for more information.');
