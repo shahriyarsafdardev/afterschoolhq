@@ -49,6 +49,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var forms = currentAccount.GetForms(archived, formType, q, start, length, msgs);
             var formCount = currentAccount.GetFormCount(archived, formType, q, msgs);
             var totalPages = Math.Ceiling(formCount.ToDouble() / recordsPerPage).ToInteger();
+            var accountTotalForms = currentAccount.GetFormCount(false, FormType.NotSet, null, msgs);
 
             ViewBag.PagingModel = new PagingModel
             {
@@ -57,6 +58,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 RecordsPerPage = recordsPerPage,
                 TotalPages = totalPages,
             };
+            ViewBag.AccountTotalForms = accountTotalForms; 
             ViewBag.Messages = msgs;
             ViewBag.FromSurvey = fromSurvey;
             ViewBag.Archived = archived;
