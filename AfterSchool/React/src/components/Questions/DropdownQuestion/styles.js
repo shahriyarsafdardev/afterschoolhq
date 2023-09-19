@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
       backgroundColor: '#ffffff'
     },
     '& .MuiSelect-outlined.MuiSelect-outlined': {
-      textWrap: 'wrap'
+      whiteSpace: 'inherit'
     }
   },
   dropdown: {
@@ -51,7 +51,7 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     width: 675,
-    textWrap: 'inherit',
+    whiteSpace: 'inherit',
     padding: '10px 22px',
     fontFamily: 'Montserrat',
     borderBottom: `1px solid ${theme.palette.text.disabled}`,
