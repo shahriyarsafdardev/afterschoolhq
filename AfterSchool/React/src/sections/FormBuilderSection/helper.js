@@ -89,3 +89,6 @@ export const mapOptions = options => {
 };
 
 export const emojiContent = key => (key === ':slight_frown:' ? ':slightly_frowning:' : key);
+
+export const getQuestionGroupsToShow = questionsGroups =>
+  questionsGroups.filter(questionsGroup => !questionsGroup.IsDeleted);

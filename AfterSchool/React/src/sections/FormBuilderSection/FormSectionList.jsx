@@ -15,7 +15,7 @@ import {
   Popover
 } from '@material-ui/core';
 
-import { unSavedDialogProps, deleteItemDialogProps } from './helper';
+import { unSavedDialogProps, deleteItemDialogProps, getQuestionGroupsToShow } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
 import { formTypeId } from 'constants';
@@ -54,9 +54,7 @@ function FormSectionList() {
   const [showSettings, setShowSettings] = useState(!isMobile);
   const { unsavedChanges } = useUnsavedChanges();
 
-  const questionsGroupsToShow = questionsGroups.filter(
-    questionsGroup => questionsGroup.IsDeleted === false
-  );
+  const questionsGroupsToShow = getQuestionGroupsToShow(questionsGroups);
 
   const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].Id : -1;
 
@@ -93,9 +91,7 @@ function FormSectionList() {
     const updatedQuestionGroups = await handleDelete(deleteSectionId);
 
     if (questionGroup == deleteSectionId) {
-      const updatedQuestionsGroupsToShow = updatedQuestionGroups.filter(
-        questionsGroup => !questionsGroup.IsDeleted
-      );
+      const updatedQuestionsGroupsToShow = getQuestionGroupsToShow(updatedQuestionGroups);
 
       if (updatedQuestionsGroupsToShow.length > 0) {
         const updatedFirstSectionId = updatedQuestionsGroupsToShow.length
