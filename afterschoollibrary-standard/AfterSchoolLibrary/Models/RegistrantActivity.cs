@@ -282,7 +282,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
 		}
 
 		
