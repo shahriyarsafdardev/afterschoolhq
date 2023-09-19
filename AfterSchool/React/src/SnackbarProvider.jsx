@@ -9,6 +9,7 @@ function SnackbarCloseButton({ snackbarKey }) {
 
   return (
     <CloseIcon
+      data-testid="close-icon"
       style={{ cursor: 'pointer', fontSize: 'small' }}
       onClick={() => closeSnackbar(snackbarKey)}
     />

@@ -115,7 +115,7 @@ export const useVolunteerRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      VolunteerRegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
+      VolunteerRegistrationRepository.register(formData).then(({ data: { obj } }) => {
         dispatch(setRegistrationId(obj));
       });
     } else await VolunteerRegistrationRepository.submitFormSection(formData);

@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useErrorMessages, useSurvey } from 'redux/hooks';
+import { useSurvey } from 'redux/hooks';
 import routes from 'routes';
 import utils from 'utils';
 
@@ -15,7 +15,6 @@ export default function Survey() {
   const { surveyThankyouUrl } = routes;
   const { scrollToTop } = utils;
   const { enqueueSnackbar } = useSnackbar();
-  const { msgs } = useErrorMessages();
   const {
     loading,
     questions,
@@ -86,7 +85,7 @@ export default function Survey() {
       if (dirty || lastSection || firstSection) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
         await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
-          respId => {
+          ([respId, msgs]) => {
             responseId.current = respId;
             if (!msgs.length) {
               enqueueSnackbar('Submitted.', { variant: 'success' });

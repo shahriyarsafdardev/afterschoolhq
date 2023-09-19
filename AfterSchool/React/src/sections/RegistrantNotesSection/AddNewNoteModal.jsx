@@ -20,7 +20,7 @@ function AddNewNoteModal(props) {
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [disableButton, setDisableButton] = useState(false);
   const { open, noteValue = {}, handleClose, isUpdating = false, getRegNotes } = props;
-  const { createNote, msgs, updateNote } = useRegistrantNotes();
+  const { createNote, updateNote } = useRegistrantNotes();
   const headerText = isUpdating ? 'Update Note' : 'Add New Note';
   const {
     ID: noteId,
@@ -34,10 +34,6 @@ function AddNewNoteModal(props) {
       resetForm();
     };
   }, []);
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const ValidationSchema = Yup.object().shape({
     title: Yup.string().required('Title is required'),

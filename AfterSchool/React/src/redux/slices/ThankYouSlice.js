@@ -6,7 +6,6 @@ import ThankYouRepository from 'repository/ThankYouRepository';
 const ThankYouSlice = createSlice({
   name: 'thankYouSlice',
   initialState: {
-    msgs: [],
     data: {},
     loading: true
   },
@@ -19,9 +18,6 @@ const ThankYouSlice = createSlice({
     },
     loadingCompleted: state => {
       state.loading = false;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
@@ -29,21 +25,18 @@ const ThankYouSlice = createSlice({
 export const useThankYouActions = () => {
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
-  const { setMsgs, setData, loadingStart, loadingCompleted } = ThankYouSlice.actions;
+  const { setData, loadingStart, loadingCompleted } = ThankYouSlice.actions;
   const loadThankYouScreenData = async (id, volunteerRegistration = false) => {
     dispatch(loadingStart());
-    await ThankYouRepository.getThankYouScreenData(id, volunteerRegistration).then(
-      ({ obj, msgs }) => {
-        dispatch(setMsgs(msgs));
-        if (obj) {
-          dispatch(setData(obj));
-          const { HeaderImageURL, ActivityName: Name, Organization } = obj?.activityDto;
-          dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
-          dispatch(headerLoadingCompleted());
-          dispatch(loadingCompleted());
-        }
+    await ThankYouRepository.getThankYouScreenData(id, volunteerRegistration).then(({ obj }) => {
+      if (obj) {
+        dispatch(setData(obj));
+        const { HeaderImageURL, ActivityName: Name, Organization } = obj?.activityDto;
+        dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
+        dispatch(headerLoadingCompleted());
+        dispatch(loadingCompleted());
       }
-    );
+    });
   };
 
   return { loadThankYouScreenData };
