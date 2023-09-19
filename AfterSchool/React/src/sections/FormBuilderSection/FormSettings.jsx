@@ -11,6 +11,7 @@ import { Grid, Typography, Box, Button, ButtonGroup } from '@material-ui/core';
 import TextAreaQuestion from './components/TextAreaQuestion';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import TextField from './components/TextField/TextField';
+import { getQuestionGroupsToShow } from './helper';
 import { formTypes, formTypeId } from 'constants';
 import { useFormBuilder } from 'redux/hooks';
 import { CopyClipBoard } from 'components';
@@ -23,7 +24,10 @@ function FormSettings() {
   const [, setSearchParams] = useSearchParams();
   const { form, questionsGroups, updateFormSettings, publishOrUnpublishSurvey } = useFormBuilder();
   const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
-  const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].Id : -1;
+  const notDeletedQuestionGroups = getQuestionGroupsToShow(questionsGroups);
+  const firstSectionQuestionGroupId = notDeletedQuestionGroups.length
+    ? notDeletedQuestionGroups[0].Id
+    : -1;
   const { FormType: formType, IsPublished: isPublished, PublishedURL: publishedURL } = form;
 
   const validationSchema = Yup.object().shape({
@@ -145,6 +149,7 @@ function FormSettings() {
                 color="primary"
                 className={classes.getStartedButton}
                 variant="contained"
+                disabled={firstSectionQuestionGroupId === -1}
                 onClick={() => {
                   dirty && handleSubmit();
                   isEmpty(errors) && setSearchParams(`qg=${firstSectionQuestionGroupId}`);
