@@ -2870,7 +2870,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activitySchedule = activity.GetSchedule(msgs);
             List<AttendanceRegistrant> attendanceRegistrants;
 
-            if (activity.HasSchedule && !activity.GetSchedule().IsOngoing)
+            if (activity.HasSchedule && !activitySchedule.IsOngoing)
             {
                 attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
                 attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
@@ -2940,6 +2940,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -2956,10 +2957,10 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 if (attendance.ActivityInstanceId.IsNotEmpty())
                     attendance.UpdateAttendance(presentStudents,
-                        SessionVariables.CurrentUser, attendance.ActivityInstanceId.Value, msgs);
+                        currentUser, attendance.ActivityInstanceId.Value, msgs);
                 else
                     attendance.UpdateAttendance(presentStudents,
-                        SessionVariables.CurrentUser, null, msgs);
+                        currentUser, null, msgs);
             }
 
             ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
