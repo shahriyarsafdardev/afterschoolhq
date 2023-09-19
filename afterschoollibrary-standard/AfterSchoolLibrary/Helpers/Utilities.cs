@@ -32,6 +32,8 @@ namespace AfterSchoolLibrary.Helpers
         public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
         public const int MaxFileSize = 5242880;
 
+        public static int MessageFileSize => 1024 * 1024 * 25;
+        public const int MessageTotalFileSize = 52428800;
         public static string SurveyBaseUrl => Environment switch
         {
             Production => "app.afterschoolhq.com",

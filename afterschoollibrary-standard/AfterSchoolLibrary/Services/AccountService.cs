@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AfterSchool.Models;
@@ -311,6 +312,16 @@ namespace AfterSchoolLibrary.Services
             );
 
             return am;
+        }
+        public static string UploadFile(this Account account, Stream file, string filename, SystemMessages msgs)
+        {
+            var ah = Utilities.GetNewAmazonHelper();
+            var accountFolder = $"{account.UniqueName}-{account.ID}";
+            var amazonFilePath = $"{accountFolder}/{filename}".ToLower();
+
+            msgs.AddRange(ah.AddFile(file, amazonFilePath));
+
+            return ah.GetFileLink(amazonFilePath);
         }
 
         #endregion

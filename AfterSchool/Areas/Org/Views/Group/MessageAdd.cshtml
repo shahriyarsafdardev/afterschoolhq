@@ -22,7 +22,7 @@
             @{Html.RenderPartial("_ActivityGroupTitle", Model.Name + " - Send Message"); }
         </div>
         <div class="panel-body">
-            <form method="post" action="@Url.Action("messageadd", "group", new { id = Model.Uid })" class="form-horizontal">
+            <form method="post" action="@Url.Action("messageadd", "group", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
 
                 @if (registrants.Count == 0)
                 {
@@ -52,6 +52,17 @@
                         <div class="col-sm-6">
                             <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
                             <p class="text-muted">Max of 1000 characters</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Attachment(s)</label>
+                        <div class="col-md-6">
+                            <div id="selected-files"></div>
+                            <div class="border-gray">
+                                <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
+                                <label id="file-label" class="btn btn-default" for="file-input">Choose File(s)<i class="icon s7-upload"></i></label>
+                            </div>
                         </div>
                     </div>
 
@@ -136,6 +147,70 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('.chk-registrant').on('click', updateMessageCount);
         updateMessageCount();
+        const fileInput = document.getElementById("file-input");
+        const selectedFiles = document.getElementById("selected-files");
+        let validFiles = [];
+        
+        fileInput.addEventListener("change", function () {
+            selectedFiles.innerHTML = "";
+            const files = this.files;
+            let totalFileSize = 0;
+            if (files.length >= 1 && files.length <= 10) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    const fileSizeKB = (file.size / 1024).toFixed(2);
+
+                    if (file.size > 25 * 1024 * 1024) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: "File size exceeds the limit 25 MB",
+                            success: false
+                        });
+                    } else {
+                        if (totalFileSize + file.size > 50 * 1024 * 1024) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: "Total file size exceeds the limit (50 MB)!",
+                                success: false
+                            });
+                            break;
+                        }
+
+                        totalFileSize += file.size;
+
+                        const fileItem = document.createElement("div");
+                        fileItem.classList.add("form-control");
+                        fileItem.classList.add("col-md-6");
+                        fileItem.innerHTML = `
+                        <span class="file-name">${file.name}</span>
+                        <span class="float-right">
+                            <span class="mr-3">${fileSizeMB > 1 ? fileSizeMB + " MB" : fileSizeKB + " KB"}</span>
+                            <i class="s7-trash text-danger" data-index="${i}" onclick="deleteFile(event)"></i>
+                        </span>`;
+                        selectedFiles.appendChild(fileItem);
+
+                        validFiles.push(file);
+                    }
+                }
+
+                const newFileList = new DataTransfer();
+                validFiles.forEach(file => {
+                    newFileList.items.add(file);
+                });
+                fileInput.files = newFileList.files;
+            }
+            else
+            {
+                const newFileList = new DataTransfer();
+                fileInput.files = newFileList.files;
+                Notifications.showBar({
+                    title: 'Error',
+                    message: "You can't attach more than 10 files",
+                    success: false
+                });
+            }
+        });
     });
     function selectAll() {
         $('input[type="checkbox"].chk-registrant').each(function () {
@@ -167,5 +242,13 @@
             $('#remaining-count').text('0');
         }
 
+    }
+    function deleteFile(event) {
+        const fileInput = document.getElementById("file-input");
+        const index = event.target.getAttribute("data-index");
+        const selectedFiles = document.getElementById("selected-files");
+        fileInput.files[index] = null;
+        selectedFiles.removeChild(event.target.parentElement.parentElement);
+        fileInput.value = "";
     }
 </script>

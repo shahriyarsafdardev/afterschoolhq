@@ -53,140 +53,151 @@
               }); }
         </div>
         <div class="panel-body">
-            <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
+            <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
 
                 @if (registrants.Count == 0)
                 {
-                    <div>
-                        <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Message List</a>
-                        <p>There are no @registrantsLabel.ToLower() with valid email addresses</p>
-                    </div>
+                <div>
+                    <a href="@Url.Action("messages", "activity", new { id = Model.Uid })" class="btn btn-default pull-right">&laquo; Message List</a>
+                    <p>There are no @registrantsLabel.ToLower() with valid email addresses</p>
+                </div>
                 }
                 else
                 {
-                    <div class="form-group" id="subject-group">
-                        <label class="col-sm-3 control-label">Message Reason</label>
-                        <div class="col-sm-6">
-                            <select name="subject" id="subject" class="form-control">
-                                <option value="">Select a Message Reason...</option>
-                                @{
+                <div class="form-group" id="subject-group">
+                    <label class="col-sm-3 control-label">Message Reason</label>
+                    <div class="col-sm-6">
+                        <select name="subject" id="subject" class="form-control">
+                            <option value="">Select a Message Reason...</option>
+                            @{
                                     var reasons = isVolunteer ? FormConstants.VolunteerMessageReasons() : FormConstants.StudentMessageReasons();
                                     foreach (var reason in reasons)
                                     {
-                                        <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
                                     }
-                                }
-                            </select>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Message Body</label>
+                    <div class="col-sm-6">
+                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control">@body</textarea>
+                        <p class="text-muted">Max of 1000 characters</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Attachment(s)</label>
+                    <div class="col-md-6">
+                        <div id="selected-files"></div>
+                        <div class="border-gray">
+                            <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
+                            <label id="file-label" class="btn btn-default" for="file-input">Choose File(s)<i class="icon s7-upload"></i></label>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">Message Body</label>
-                        <div class="col-sm-6">
-                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control">@body</textarea>
-                            <p class="text-muted">Max of 1000 characters</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-3">
-                            @if (!emailQuotaExceeded)
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-3">
+                        @if (!emailQuotaExceeded)
                             {
-                                <div class="am-checkbox">
-                                    <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
-                                    <label for="sendtostaff">Send Email To Staff</label>
-                                </div>
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
+                            <label for="sendtostaff">Send Email To Staff</label>
+                        </div>
                             } else
                             {
-                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
-                                    <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
-                                    <label for="sendtostaff">Send Email To Staff</label>
-                                 </div>
-                            }
+                        <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
+                            <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
+                            <label for="sendtostaff">Send Email To Staff</label>
                         </div>
+                            }
+                    </div>
 
-                        <div class="col-sm-3 hidden">
-                            @if (!textQuotaExceeded)
+                    <div class="col-sm-3 hidden">
+                        @if (!textQuotaExceeded)
                             {
-                                <div class="am-checkbox">
-                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" />
-                                    <label for="sendtextmessages">Send Text Messages</label>
-                                </div>
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" />
+                            <label for="sendtextmessages">Send Text Messages</label>
+                        </div>
                             }
                             else
                             {
-                                <div class="am-checkbox" onclick="return showUpgradeMyPlan('@(textMessagingPackage?.Name)', @(textMessagingPackage?.ID))">
-                                    <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
-                                    <label for="sendtextmessages">Send Text Messages</label>
-                                </div>
-                            }
+                        <div class="am-checkbox" onclick="return showUpgradeMyPlan('@(textMessagingPackage?.Name)', @(textMessagingPackage?.ID))">
+                            <input type="checkbox" id="sendtextmessages" name="sendtextmessages" value="0" disabled="disabled" />
+                            <label for="sendtextmessages">Send Text Messages</label>
                         </div>
+                            }
                     </div>
+                </div>
                     if(Model.ActivityTypeId !=ActivityType.VolunteerOpportunity)
                     {
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label"></label>
-                            <div class="col-sm-6">
-                                <div class="am-checkbox">
-                                    <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
-                                    <label for="parentsonly">Send only to parents of selected students</label>
-                                </div>
-                            </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="am-checkbox">
+                            <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
+                            <label for="parentsonly">Send only to parents of selected students</label>
                         </div>
+                    </div>
+                </div>
                     }
-                    
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label">
-                            Select @registrantsLabel<br />
-                            <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
-                        </label>
-                        <div class="col-sm-6">
-                            @for (int i = 0; i < 3; i++)
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">
+                        Select @registrantsLabel<br />
+                        <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                    </label>
+                    <div class="col-sm-6">
+                        @for (int i = 0; i < 3; i++)
                             {
-                                <div>
-                                    @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
+                        <div>
+                            @foreach (var registrant in registrants.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                     {
-                                        <div class="am-checkbox registrant"
-                                             data-has-email="@registrant.Email.IsNotEmpty().ToInteger()"
-                                             data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
+                            <div class="am-checkbox registrant"
+                                 data-has-email="@registrant.Email.IsNotEmpty().ToInteger()"
+                                 data-has-phone-number="@registrant.Phone.IsNotEmpty().ToInteger()">
 
-                                            <input type="checkbox"
-                                                   class="chk-registrant"
-                                                   id="registrant-@registrant.ID"
-                                                   name="registrant-@registrant.ID"
-                                                   value="1"
-                                                   checked="checked" />
+                                <input type="checkbox"
+                                       class="chk-registrant"
+                                       id="registrant-@registrant.ID"
+                                       name="registrant-@registrant.ID"
+                                       value="1"
+                                       checked="checked" />
 
-                                            <label for="registrant-@registrant.ID">
-                                                @registrant.DisplayName.MaxChars(20, "...")
-                                            </label>
-                                        </div>
+                                <label for="registrant-@registrant.ID">
+                                    @registrant.DisplayName.MaxChars(20, "...")
+                                </label>
+                            </div>
                                     }
-                                </div>
+                        </div>
                             }
-                        </div>
                     </div>
-                    <div id="message" class="msg-count-text xs-p-20 h5">
-                        <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">0</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">0</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
-                    </div>
+                </div>
+                <div id="message" class="msg-count-text xs-p-20 h5">
+                    <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">0</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">0</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
+                </div>
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
-                            <div class="pull-left">
-                                <a href="@cancelRedirectUrl" class="text-muted">
-                                    &laquo; Cancel
-                                </a>
-                            </div>
-                            <div class="pull-right">
-                                <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
-                                    <i class="s7-mail"></i> Send Message to Selected @registrantsLabel &raquo;
-                                </button>
-                            </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-6">
+                        <div class="pull-left">
+                            <a href="@cancelRedirectUrl" class="text-muted">
+                                &laquo; Cancel
+                            </a>
+                        </div>
+                        <div class="pull-right">
+                            <button id="send-btn" type="submit" class="btn btn-primary btn-lg btn-block pull-right">
+                                <i class="s7-mail"></i> Send Message to Selected @registrantsLabel &raquo;
+                            </button>
                         </div>
                     </div>
+                </div>
                 }
             </form>
         </div>
@@ -198,7 +209,76 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('.chk-registrant').on('click', updateMessageCount);
         updateMessageCount();
+        const fileInput = document.getElementById("file-input");
+        const selectedFiles = document.getElementById("selected-files");
+        let validFiles = []; 
+
+        fileInput.addEventListener("change", function ()
+        {
+            debugger
+            selectedFiles.innerHTML = "";
+            const files = this.files;
+            let totalFileSize = 0;
+            if (files.length >= 1 && files.length <= 10) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    const fileSizeKB = (file.size / 1024).toFixed(2);
+
+                    if (file.size > 25 * 1024 * 1024) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: "File size exceeds the limit 25 MB",
+                            success: false
+                        });
+                    }
+                    else
+                    {
+                        if (totalFileSize + file.size > 50 * 1024 * 1024) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: "Total file size exceeds the limit (50 MB)!",
+                                success: false
+                            });
+                            break; 
+                        }
+
+                        totalFileSize += file.size;
+
+                        const fileItem = document.createElement("div");
+                        fileItem.classList.add("form-control");
+                        fileItem.classList.add("col-md-6");
+                        fileItem.innerHTML = `
+                        <span class="file-name">${file.name}</span>
+                        <span class="float-right">
+                            <span class="mr-3">${fileSizeMB > 1 ? fileSizeMB + " MB" : fileSizeKB + " KB"}</span>
+                            <i class="s7-trash text-danger" data-index="${i}" onclick="deleteFile(event)"></i>
+                        </span>`;
+                        selectedFiles.appendChild(fileItem);
+
+                        validFiles.push(file); 
+                    }
+                }
+
+                const newFileList = new DataTransfer();
+                validFiles.forEach(file => {
+                    newFileList.items.add(file);
+                });
+                fileInput.files = newFileList.files;
+            }
+            else
+            {
+                const newFileList = new DataTransfer();
+                fileInput.files = newFileList.files;
+                Notifications.showBar({
+                    title: 'Error',
+                    message: "You can't attach more than 10 files",
+                    success: false
+                });
+            }
+        });
     });
+
     function selectAll() {
         $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', true);
@@ -228,5 +308,13 @@
         else {
             $('#remaining-count').text('0');
         }
+    }
+    function deleteFile(event) {
+        const fileInput = document.getElementById("file-input");
+        const index = event.target.getAttribute("data-index");
+        const selectedFiles = document.getElementById("selected-files");
+        fileInput.files[index] = null;
+        selectedFiles.removeChild(event.target.parentElement.parentElement);
+        fileInput.value = "";
     }
 </script>
