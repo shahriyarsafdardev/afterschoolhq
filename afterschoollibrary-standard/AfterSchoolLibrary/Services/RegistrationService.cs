@@ -1043,10 +1043,11 @@ namespace AfterSchoolLibrary.Services
         public static void RemoveParticipation(this Registration registration, int participationObjectId,
             ParticipationObjectType participationObjectType, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrantByIsDeleted(
                 participationObjectId,
                 participationObjectType,
                 registration.RegistrantId.Value,
+                false,
                 msgs,
                 dc);
 

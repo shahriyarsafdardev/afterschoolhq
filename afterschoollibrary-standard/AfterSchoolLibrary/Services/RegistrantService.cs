@@ -718,12 +718,13 @@ namespace AfterSchoolLibrary.Services
 
             var submittedRecords = masterRegistrant.GetSubmittedRecords(participationObject.OwnerAccount.ID.Value, msgs, dc);
 
-            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrants(
+            return submittedRecords.Any() && RegistrantActivity.ExistsByParticipationObjectByRegistrantsByIsDeleted(
                 participationObjectId: participationObject.ObjectID.Value,
                 participationObjectType: participationObject.ObjectType,
                 registrantIds: submittedRecords.Select(item => item.ID.Value).ToList(),
                 assignmentTypes: assignmentTypes,
                 hasParentalConsent: hasParentalConsent,
+                false,
                 msgs: msgs,
                 dc: dc);
         }
@@ -1096,14 +1097,14 @@ namespace AfterSchoolLibrary.Services
         public static (Registrant, Registration) GetSubmittedRecord(this Registrant registrant, ParticipationObject participationObject,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc);
+            var submittedRecords = registrant.GetSubmittedRecords(msgs, dc).Where(x => !x.IsDeleted).ToList();
 
             if (!submittedRecords.Any())
                 return (null, null);
 
             var submittedRecordIds = submittedRecords.Select(child => child.ID.Value).ToList();
 
-            var ras = RegistrantActivity.LoadByRegistrantIds(submittedRecordIds, msgs, dc);
+            var ras = RegistrantActivity.LoadByRegistrantIdsByIsDeleted(submittedRecordIds, false, msgs, dc);
 
             var submittedRecordRA = ras.FirstOrDefault(ra =>
                 ra.ParticipationObjectId == participationObject.ObjectID && ra.ParticipationObjectTypeId == participationObject.ObjectType);
@@ -1111,7 +1112,7 @@ namespace AfterSchoolLibrary.Services
             if (submittedRecordRA.IsNotEmpty() && submittedRecordRA.RegistrationId.IsNotEmpty())
                 return (
                     submittedRecords.First(child => child.ID == submittedRecordRA.RegistrantId),
-                    Registration.Load(submittedRecordRA.RegistrationId.Value, msgs, dc)
+                    Registration.LoadByIdByIsDeleted(submittedRecordRA.RegistrationId.Value,false, msgs, dc)
                 );
 
             return (null, null);
@@ -1141,10 +1142,11 @@ namespace AfterSchoolLibrary.Services
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
-            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+            var ra = RegistrantActivity.LoadByParticipationObjectByRegistrantByIsDeleted(
                 participationObjectId,
                 participationObjectType,
                 registrant.ID.Value,
+                false,
                 msgs,
                 dc);
 

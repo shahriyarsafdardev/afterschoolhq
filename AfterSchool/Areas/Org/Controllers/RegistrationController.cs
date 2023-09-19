@@ -446,7 +446,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var registration = currentAccount.GetRegistration(id.ToGuid(), msgs);
             var selectedRegistration = currentAccount.GetRegistration(r.ToGuid(), msgs);
-            var registrantActivity = RegistrantActivity.Load(ra.ToInteger(), msgs);
+            var registrantActivity = RegistrantActivity.LoadByIdByIsDeleted(ra.ToInteger(),false, msgs);
             var activity = registrantActivity.GetActivity(msgs);
 
             selectedRegistration.RemoveParticipation(registrantActivity.ParticipationObjectId.Value,
