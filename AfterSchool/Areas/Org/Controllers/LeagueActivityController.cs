@@ -1055,7 +1055,13 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(activityinstance.ToInteger(), presentStudents, currentUser, msgs);
+            {
+                if (activityinstance.IsNotEmpty())
+                    attendance.UpdateAttendance(presentStudents, currentUser, activityinstance.ToInteger(), msgs);
+                else
+                    attendance.UpdateAttendance(presentStudents, currentUser, null, msgs);
+
+            }
 
 
             ViewBag.Messages = msgs;

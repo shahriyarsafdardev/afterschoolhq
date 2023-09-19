@@ -25,7 +25,7 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                var closestActivityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(msgs, dc) : null;
+                var closestActivityInstance = activity.HasSchedule && !activity.GetSchedule().IsOngoing ? activity.GetClosestActivityInstance(msgs, dc) : null;
                 if(closestActivityInstance.IsEmpty())
                 {
                     attendance.ActivityInstanceId = null;
@@ -55,7 +55,7 @@ namespace AfterSchoolLibrary.Services
                 });
         }
 
-        public static void UpdateAttendance(this Attendance attendance, int activityInstanceId, List<int> attendanceRegistrantIds, WebUser loggedInUser,
+        public static void UpdateAttendance(this Attendance attendance, List<int> attendanceRegistrantIds, WebUser loggedInUser, int? activityInstanceId,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction

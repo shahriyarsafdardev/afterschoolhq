@@ -39,7 +39,7 @@
                     if(AccountPackageFeature.HasAccountPackageByFeatureTypeId(accountPackage.ID.Value,FeatureType.ManageCheckInCheckOut) &&
                        activity.IsRequireCheckInCheckOut.IsNotEmpty() && activity.IsRequireCheckInCheckOut)
                     {
-                        if(activity.HasSchedule)
+                        if(activity.HasSchedule && !activity.GetSchedule().IsOngoing)
                         {
                             Html.RenderPartial(
                            "_CheckInOutAttendance",
@@ -67,7 +67,22 @@
                     }
                     else
                     {
-                        Html.RenderPartial(
+                        if (!activity.HasSchedule || (activity.HasSchedule && activity.GetSchedule().IsOngoing))
+                        {
+                            Html.RenderPartial(
+                            "~/Views/Shared/_RegistrantAttendanceNoSchedule.cshtml",
+                            Model,
+                            new ViewDataDictionary
+                            {
+                                { "AttendanceRegistrants", ViewBag.AttendanceRegistrants },
+                                { "RegistrantActivities", ViewBag.RegistrantActivities },
+                                { "Controller", "activity" },
+                                 {"AttendanceList",ViewBag.AttendanceList },
+                            });
+                        }
+                        else
+                        {
+                            Html.RenderPartial(
                             "~/Views/Shared/_RegistrantAttendance.cshtml",
                             Model,
                             new ViewDataDictionary
@@ -77,6 +92,7 @@
                                 { "RegistrantActivities", ViewBag.RegistrantActivities },
                                 { "Controller", "activity" },
                             });
+                        }
                     }
 
                 }
