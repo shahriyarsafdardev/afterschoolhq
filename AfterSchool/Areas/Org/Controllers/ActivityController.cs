@@ -3456,14 +3456,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
-            var registrantsToRemove = attendanceRegistrants
-            .Where(att => !att.AttendanceIsCompleted)
-            .ToList();
-
-            foreach (var att in registrantsToRemove)
-                attendanceRegistrants.Remove(att);
-
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs)
+            ?.Where(att => att.AttendanceIsCompleted)
+            ?.ToList(); ;
+            
             var model = new AttendanceReportResults()
             {
                 AttendanceRegistrants = attendanceRegistrants,
