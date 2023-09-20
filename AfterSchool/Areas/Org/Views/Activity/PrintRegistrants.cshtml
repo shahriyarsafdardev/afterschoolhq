@@ -43,13 +43,15 @@
 </div>
 
 <script>
-    function printWithoutMaintenance() {
+    function printWithoutMaintenance()
+    {
         var maintenanceBar = document.querySelector('.maintenance-bar');
         if (maintenanceBar) {
             maintenanceBar.style.display = 'none';
             window.print();
             maintenanceBar.style.display = 'block';
         }
-        else 
+        else
             window.print();
+    }
 </script>
