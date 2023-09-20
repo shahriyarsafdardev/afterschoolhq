@@ -108,6 +108,8 @@ namespace AfterSchoolLibrary.Models
             CheckInOut.Create(dc);
             RegistrantNote.Create(dc);
             RegistrantNoteVersion.Create(dc);
+            SubscriptionPaymentHistory.Create(dc);
+            SubscriptionSchedule.Create(dc);
 
             return msgs;
         }
@@ -208,7 +210,9 @@ namespace AfterSchoolLibrary.Models
             CheckInOut.Alter(dc);
             RegistrantNote.Alter(dc);
             RegistrantNoteVersion.Alter(dc);
-            
+            SubscriptionPaymentHistory.Alter(dc);
+            SubscriptionSchedule.Alter(dc);
+
             return msgs;
         }
 
