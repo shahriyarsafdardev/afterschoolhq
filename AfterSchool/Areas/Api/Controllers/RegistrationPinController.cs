@@ -9,6 +9,7 @@ using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -873,6 +874,23 @@ namespace AfterSchool.Areas.Api.Controllers
                                                 user.ID.Value, amsgs, adc);
 
                                         registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
+
+                                        if (registrantWebUser.IsDeleted)
+                                        {
+                                            EmailHelper.SendCheckInCheckOutRevokeAccessEmail(user.DisplayName, masterRegistrant.FirstName, currentUserRegistrant.Email, currentUserRegistrant.FirstName);
+
+                                            var smsBody = $"This is an automated message from AfterSchool HQ. " +
+                                            $"You are no longer an authorized person for {masterRegistrant.DisplayName}. " +
+                                            $"If you believe this is an error,  please contact {masterRegistrant.FirstName}’s parent or guardian.";
+
+                                            TwilioHelper.SendSMS(
+                                                user.Phone,
+                                                smsBody,
+                                                null,
+                                                null,
+                                                msgs);
+                                        }
+
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
                                 }
