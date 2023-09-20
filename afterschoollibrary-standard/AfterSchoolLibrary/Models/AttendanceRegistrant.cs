@@ -246,15 +246,17 @@ namespace AfterSchoolLibrary.Models
             }
         }
 
-        private static void AddCritieriasForAttendanceAssigmentTypes(DatabaseQuery dq)
+        private static void AddCritieriasForAttendanceAssigmentTypes(DatabaseQuery dq, int? participationObjectId = null)
         {
             var assignmentTypesForAttendance = new List<RegistrationAssignmentType>() { RegistrationAssignmentType.Reserved, RegistrationAssignmentType.ReservedPendingPayment, RegistrationAssignmentType.ReservedPendingParentalConsent };
 
             dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], assignmentTypesForAttendance.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
+            if(participationObjectId.IsNotEmpty() )
+                dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectId"], participationObjectId);
         }
 
-        public static int GetPresentCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetPresentCount(int attendanceId,int participationObjectId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -265,7 +267,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["attendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
-            AddCritieriasForAttendanceAssigmentTypes(dq);
+            AddCritieriasForAttendanceAssigmentTypes(dq, participationObjectId);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -274,7 +276,7 @@ namespace AfterSchoolLibrary.Models
             return 0;
         }
 
-        public static int GetPossibleCount(int attendanceId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetPossibleCount(int attendanceId, int participationObjectId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
@@ -285,7 +287,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceId"], attendanceId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
-            AddCritieriasForAttendanceAssigmentTypes(dq);
+            AddCritieriasForAttendanceAssigmentTypes(dq, participationObjectId);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -305,7 +307,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
-            AddCritieriasForAttendanceAssigmentTypes(dq);
+            AddCritieriasForAttendanceAssigmentTypes(dq, activityId);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())
@@ -325,7 +327,7 @@ namespace AfterSchoolLibrary.Models
             dq.SelectParameters.Add(sp);
             dq.Criterias.Add(ObjectMap["AttendanceActivityId"], activityId);
             dq.Criterias.Add(ObjectMap["AttendanceIsCompleted"], true);
-            AddCritieriasForAttendanceAssigmentTypes(dq);
+            AddCritieriasForAttendanceAssigmentTypes(dq, activityId);
 
             var results = dq.Select(msgs);
             if (results.Rows.Any())

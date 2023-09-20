@@ -102,12 +102,12 @@ namespace AfterSchoolLibrary.Services
 
         public static int GetAttendanceRegistrantCount(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPossibleCount(attendance.ID.Value, dc: dc);
+            return AttendanceRegistrant.GetPossibleCount(attendance.ID.Value,attendance.ActivityId.Value, dc: dc);
         }
 
         public static int GetPresentCount(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return AttendanceRegistrant.GetPresentCount(attendance.ID.Value, msgs, dc);
+            return AttendanceRegistrant.GetPresentCount(attendance.ID.Value,attendance.ActivityId.Value, msgs, dc);
         }
 
         public static Activity GetActivity(this Attendance attendance, SystemMessages msgs = null, DatabaseConnection dc = null)

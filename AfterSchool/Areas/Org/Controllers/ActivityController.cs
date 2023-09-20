@@ -3030,7 +3030,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     LastModifiedBy = currentUser.ID,
                     ActivityId = activityId,
                     Date = date.Date,
-                    IsCompleted = true,
+                    IsCompleted = false,
 
                 };
                 msgs.AddRange(attendance.Save());
@@ -3457,6 +3457,12 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
+            var registrantsToRemove = attendanceRegistrants
+            .Where(att => !att.AttendanceIsCompleted)
+            .ToList();
+
+            foreach (var att in registrantsToRemove)
+                attendanceRegistrants.Remove(att);
 
             var model = new AttendanceReportResults()
             {
