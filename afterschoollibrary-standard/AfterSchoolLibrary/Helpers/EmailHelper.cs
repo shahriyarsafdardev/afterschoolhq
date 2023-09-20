@@ -3094,6 +3094,34 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendCheckInCheckOutRevokeAccessEmail(string UserFullName, string MasterRegistrantFirstName, string currentRegistrantEmail, string registrantFullName)
+        {
+            var msgs = new SystemMessages();
+
+            var model = new NameValueCollection
+            {
+                {"UserFullName", UserFullName},
+                {"MasterRegistrantFirstName", MasterRegistrantFirstName},
+                {"RegistrantFullName", registrantFullName}
+            };
+
+            var body = ProcessTemplate(
+                 EmailTemplates.CheckInCheckOut_RevokeAccess,
+                 model,
+                 "CheckInOutRevokeAccess",
+                 msgs);
+
+            var subject = $"Check In/Out Access Revoked";
+
+            SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(),
+                new EmailAddress(currentRegistrantEmail),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            );
+        }
+
         public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
         {
             var msgs = new SystemMessages();
