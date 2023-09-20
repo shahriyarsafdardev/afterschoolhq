@@ -13,11 +13,11 @@
     <div class="panel panel-default">
         <div class="panel-body">
             <div class="row">
-                 <button onclick="window.print()" class="btn btn-primary btn-space hidden-print">
-                     <i class="s7-print"></i> Print Registrations
+                <button onclick="printWithoutMaintenance()" class="btn btn-primary btn-space hidden-print">
+                    <i class="s7-print"></i> Print Registrations
                 </button>
-                 <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
-                     <i class="s7-close-circle"></i> Close
+                <button onclick="window.close()" class="btn btn-default btn-space hidden-print">
+                    <i class="s7-close-circle"></i> Close
                 </button>
             </div>
             <div class="row">
@@ -41,3 +41,15 @@
         </div>
     </div>
 </div>
+
+<script>
+    function printWithoutMaintenance() {
+        var maintenanceBar = document.querySelector('.maintenance-bar');
+        if (maintenanceBar) {
+            maintenanceBar.style.display = 'none';
+            window.print();
+            maintenanceBar.style.display = 'block';
+        }
+        else 
+            window.print();
+</script>
