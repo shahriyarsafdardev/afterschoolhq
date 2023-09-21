@@ -16,7 +16,7 @@ namespace AfterSchoolLibrary.Models
 
         public Guid Uid { get { return (Guid) MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 
-        public string SubscriptionId { get { return (string) MDV["SubscriptionId"].Value; } set { MDV["SubscriptionId"].Value = value; } }
+        public int SubscriptionScheduleId { get { return (int) MDV["SubscriptionScheduleId"].Value; } set { MDV["SubscriptionScheduleId"].Value = value; } }
 
         public decimal AmountInCents { get { return (decimal) MDV["AmountInCents"].Value; } set { MDV["AmountInCents"].Value = value; } }
 
@@ -54,7 +54,7 @@ namespace AfterSchoolLibrary.Models
                 var _dp = new DatabaseParameters();
                 var className = typeof(SubscriptionPaymentHistory).Name;
                 _dp = get_BaseObjectMap(className);
-                _dp.Add(className, "SubscriptionId", SqlDbType.NVarChar, "50");
+                _dp.Add(className, "SubscriptionScheduleId", System.Data.SqlDbType.Int);
                 _dp.Add(className, "AmountInCents", System.Data.SqlDbType.Money);
                 _dp.Add(className, "DateCharged", System.Data.SqlDbType.DateTime);
                 _dp.Add(className, "StripeChargeId", SqlDbType.NVarChar, "50");
@@ -101,8 +101,8 @@ namespace AfterSchoolLibrary.Models
         {
             var msgs = new SystemMessages();
 
-            if (this.SubscriptionId.IsEmpty())
-                msgs.Add("SubscriptionId is required on SubscriptionPaymentHostory object", MessageType.Error);
+            if (this.SubscriptionScheduleId.IsEmpty())
+                msgs.Add("SubscriptionScheduleId is required on SubscriptionPaymentHostory object", MessageType.Error);
             if (this.DateCharged.IsEmpty())
                 msgs.Add("DateCharged is required on SubscriptionPaymentHostory object", MessageType.Error);
             if (this.StripeChargeId.IsEmpty())
@@ -111,7 +111,7 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("StripeRawResponse is required on SubscriptionPaymentHostory object", MessageType.Error);
 
             if (msgs.HasNoErrors())
-                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SubscriptionPlan).Name));
+                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(SubscriptionPaymentHistory).Name));
 
             return msgs;
         }
@@ -122,7 +122,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["SubscriptionId"]);
+            dps.Add(ObjectMap["SubscriptionScheduleId"]);
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
