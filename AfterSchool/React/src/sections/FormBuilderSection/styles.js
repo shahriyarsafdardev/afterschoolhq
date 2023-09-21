@@ -444,5 +444,8 @@ export default makeStyles(theme => ({
   },
   setAudienceWrapper: {
     position: 'relative'
+  },
+  marginTop: {
+    marginTop: 30
   }
 }));
