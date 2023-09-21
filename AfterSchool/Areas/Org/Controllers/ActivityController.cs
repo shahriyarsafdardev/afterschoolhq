@@ -2844,6 +2844,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Attendances = attendances;
+            ViewBag.Meetings = totalAttendanceCount;
             ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalAttendanceCount,
@@ -3030,7 +3031,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     LastModifiedBy = currentUser.ID,
                     ActivityId = activityId,
                     Date = date.Date,
-                    IsCompleted = true,
+                    IsCompleted = false,
 
                 };
                 msgs.AddRange(attendance.Save());
@@ -3456,8 +3457,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
-
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs)
+            ?.Where(att => att.AttendanceIsCompleted)
+            ?.ToList();
+            
             var model = new AttendanceReportResults()
             {
                 AttendanceRegistrants = attendanceRegistrants,

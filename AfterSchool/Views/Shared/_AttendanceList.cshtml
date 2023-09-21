@@ -2,6 +2,7 @@
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     var list = (List<Attendance>)ViewData["attendances"];
+    var meetings = (int)ViewData["meetings"];
     var totalPresent = Model.GetAttendancePresentCount();
     var totalSeats = Model.GetAttendancePossibleCount();
     var totalAbsent = totalSeats - totalPresent;
@@ -24,14 +25,7 @@
     <div class="col-md-3">
         <div class="widget widget-tile widget-bordered">
             <div class="data-info">
-                @if (list != null)
-                {
-                    <div data-toggle="counter" data-end="@list.Count" data-decimals="0" data-suffix="" class="value">@list.Count</div>
-                }
-                else
-                {
-                    <div data-toggle="counter" data-end="0" data-decimals="0" data-suffix="" class="value">0</div>
-                }
+                    <div data-toggle="counter" data-end="@meetings" data-decimals="0" data-suffix="" class="value">@meetings</div>
 
                 <div class="desc">Meetings</div>
             </div>
