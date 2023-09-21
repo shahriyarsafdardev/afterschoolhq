@@ -41,6 +41,7 @@ namespace AfterSchoolLibrary.Models
         {
             Config(ObjectMap, DatabaseQuery, typeof(SubscriptionPaymentHistory).Name, "ID");
             LoadObjectValues(ObjectMap);
+            Uid = Guid.NewGuid();
             ProratedCharge = false;
             Status = LastChargeStatus.NotSet;
             RetryNumber = 0;
@@ -63,6 +64,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "AmountToConnectAccountInCents", System.Data.SqlDbType.Money);
                 _dp.Add(className, "AmountToStripeInCents", System.Data.SqlDbType.Money);
                 _dp.Add(className, "RetryNumber", System.Data.SqlDbType.Int);
+                _dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
 
                 return _dp;
             }
@@ -158,6 +160,10 @@ namespace AfterSchoolLibrary.Models
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
             dps.Add(ObjectMap["RetryNumber"]);
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Uid"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
