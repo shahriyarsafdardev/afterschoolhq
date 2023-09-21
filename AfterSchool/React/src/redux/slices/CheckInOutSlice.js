@@ -62,14 +62,16 @@ export const useCheckInOutActions = () => {
 
   const loadChildListData = async (accountName, phone, pinCode) => {
     dispatch(loadingStart());
-    return await CheckInOutRepository.getChildListData(accountName, phone, pinCode).then(
-      ({ obj, msgs }) => {
-        dispatch(setChildListData(obj));
-        dispatch(setMsgs(msgs));
-        dispatch(loadingCompleted());
-        return msgs;
-      }
-    );
+    return await CheckInOutRepository.getChildListData(
+      accountName,
+      encodeURIComponent(phone),
+      pinCode
+    ).then(({ obj, msgs }) => {
+      dispatch(setChildListData(obj));
+      dispatch(setMsgs(msgs));
+      dispatch(loadingCompleted());
+      return msgs;
+    });
   };
 
   const clearSelectedStudents = () => {
