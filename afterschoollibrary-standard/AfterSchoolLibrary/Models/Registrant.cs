@@ -846,6 +846,7 @@ namespace AfterSchoolLibrary.Models
 
             sql += @$"
                 where 
+                    Registrant.IsDeleted = 0 and 
                     Registrant.AccountId = {accountId} and
                     Registration.CompletionStatusId in ({(int)RegistrationCompletionStatus.Completed}, {(int)RegistrationCompletionStatus.RequiresParentSignature}) ";
             
