@@ -2392,7 +2392,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetTotalAttendanceCount(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Attendance.GetCount(new Hashtable {{"ActivityId", activity.ID.Value}}, msgs, dc);
+            return Attendance.GetCount(new Hashtable {{"ActivityId", activity.ID.Value},{ "IsCompleted", true } }, msgs, dc);
         }
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity,

@@ -2844,6 +2844,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Attendances = attendances;
+            ViewBag.Meetings = totalAttendanceCount;
             ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalAttendanceCount,
