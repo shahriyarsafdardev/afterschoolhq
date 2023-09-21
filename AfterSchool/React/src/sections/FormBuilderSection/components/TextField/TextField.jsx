@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Typography, TextField as MuiTextField } from '@material-ui/core';
+import { Box, Typography, TextField as MuiTextField } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -8,21 +8,18 @@ export default function TextField({ formikProps, label }) {
   const [typeClass, typeText] = [classes.fieldLabelRequired, '*'];
 
   return (
-    <Grid className={classes.textFieldBox} xs={12} data-testid={`${label}-text-field`}>
-      <Grid xs={12} md={4} item className={classes.titleGrid}>
+    <Box className={classes.outerWrapper} data-testid={`${label}-text-field`}>
+      <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
           &nbsp;
-          <Typography className={typeClass}>{typeText}</Typography>
         </Typography>
-      </Grid>
-      <Grid
-        xs={12}
-        md={8}
-        item
-        className={classes.textFieldGrid}
-        data-testid={`${label}-text-field-input`}
-      >
+        <Typography component="span" className={typeClass}>
+          {typeText}
+        </Typography>
+      </Box>
+
+      <Box className={classes.textfieldWrapper} data-testid={`${label}-text-field-input`}>
         <MuiTextField
           data-testid={`${label}-form-control`}
           inputProps={{
@@ -38,7 +35,7 @@ export default function TextField({ formikProps, label }) {
             'data-testid': `${label}-error`
           }}
         />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

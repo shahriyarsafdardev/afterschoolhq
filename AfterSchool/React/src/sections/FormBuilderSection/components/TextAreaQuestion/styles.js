@@ -2,48 +2,20 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles(theme => ({
   fieldLabel: {
-    display: 'flex',
-    justifyContent: 'end',
+    textAlign: 'left',
+    display: '-webkit-inline-box',
     [theme.breakpoints.down('sm')]: {
-      justifyContent: 'start',
-      textAlign: 'left',
-      padding: '0px 12px',
+      display: 'inline-block',
       fontSize: '14px'
-    }
-  },
-  fieldLabelOptional: {
-    fontStyle: 'italic'
-  },
-  fieldLabelRequired: {
-    color: 'red'
-  },
-  textFieldGrid: {
-    maxWidth: 600,
-    width: '100%',
-    padding: '8px 12px',
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  titleGrid: {
-    [theme.breakpoints.down('sm')]: {
-      width: '100%'
-    }
-  },
-  textFieldBox: {
-    display: 'flex',
-    alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
-      justifyContent: 'flex-start'
     }
   },
   formControlClass: {
     border: '1px solid #c4c4c4',
+    marginTop: '10px',
     display: 'block',
     maxWidth: 600,
     width: '100%',
-    padding: '8px 12px',
+    paddingTop: '8px',
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',
@@ -57,7 +29,18 @@ export default makeStyles(theme => ({
   },
   flexCenter: {
     display: 'flex',
-    paddingLeft: 20
+    paddingLeft: 14
+  },
+  outerWrapper: {
+    maxWidth: '600px',
+    margin: 'auto'
+  },
+  fieldLabelWrapper: {
+    display: 'flex'
+  },
+  textfieldWrapper: {
+    margin: 'auto',
+    marginBottom: '15px'
   },
   helperText: {
     width: '95%',
