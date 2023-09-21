@@ -5,6 +5,7 @@ const useStyles = makeStyles(theme => ({
     width: '100%'
   },
   dropdownWrapper: {
+    height: 'fit-content',
     display: 'block',
     maxWidth: 675,
     width: '100%',
@@ -20,10 +21,13 @@ const useStyles = makeStyles(theme => ({
     '& .MuiOutlinedInput-root': {
       borderRadius: 5,
       width: '100%',
-      height: '40px'
+      height: 'fit-content'
     },
     '& .MuiSelect-select:focus': {
       backgroundColor: '#ffffff'
+    },
+    '& .MuiSelect-outlined.MuiSelect-outlined': {
+      whiteSpace: 'inherit'
     }
   },
   dropdown: {
@@ -42,14 +46,20 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 10
   },
   select: {
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
+    padding: '9.5px 14px'
   },
   list: {
+    width: 675,
+    whiteSpace: 'inherit',
     padding: '10px 22px',
     fontFamily: 'Montserrat',
     borderBottom: `1px solid ${theme.palette.text.disabled}`,
     '&:last-child': {
       borderBottom: 0
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
     }
   },
   formControlClass: {
