@@ -1374,7 +1374,7 @@ namespace AfterSchoolLibrary.Services
             {
                 var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
 
-                if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < validEndDate.Date)
+                if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date.IsBefore(validEndDate.Date))
                     msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
             }
 
