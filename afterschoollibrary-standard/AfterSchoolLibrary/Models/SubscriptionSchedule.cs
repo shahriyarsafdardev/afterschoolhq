@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AfterSchoolLibrary.Models
 {
-    internal class SubscriptionSchedule : BasicObjectWithModified
+    public class SubscriptionSchedule : BasicObjectWithModified
     {
         #region "ClassGenerator"
 
@@ -61,6 +61,7 @@ namespace AfterSchoolLibrary.Models
         {
             Config(ObjectMap, DatabaseQuery, typeof(SubscriptionSchedule).Name, "ID");
             LoadObjectValues(ObjectMap);
+            Uid = Guid.NewGuid();
             ProrateFirstCharge = false;
             ProrateLastCharge = false;
             BillingPeriodType = BillingPeriodType.NotSet;
@@ -100,6 +101,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "Metadata", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
                 _dp.Add(className, "IsCancelled", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
 
                 return _dp;
             }
@@ -238,6 +240,10 @@ namespace AfterSchoolLibrary.Models
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
             dps.Add(ObjectMap["IsCancelled"]);
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Uid"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
