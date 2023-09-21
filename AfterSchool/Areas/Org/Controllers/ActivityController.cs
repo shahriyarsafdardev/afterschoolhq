@@ -3459,7 +3459,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs)
             ?.Where(att => att.AttendanceIsCompleted)
-            ?.ToList(); ;
+            ?.ToList();
             
             var model = new AttendanceReportResults()
             {
