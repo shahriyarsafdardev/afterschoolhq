@@ -2557,7 +2557,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
 
                     amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
 
@@ -2575,6 +2574,8 @@ namespace AfterSchoolLibrary.Services
                         amsgs,
                         adc);
 
+                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
+
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
 
@@ -2582,8 +2583,7 @@ namespace AfterSchoolLibrary.Services
                     var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
-                    if (!accountPackageToRemove.IsDuringTrial)
-                        defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
+                    defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
 
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
