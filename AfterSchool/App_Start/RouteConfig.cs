@@ -124,6 +124,12 @@ namespace AfterSchool
                new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
+               "Lambda",
+               "AWSSubscriptionLambda/Lambda",
+               new { controller = "AWSSubscriptionLambda", action = "Lambda" },
+               new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
                 "RegUpdate",
                 "reg/{action}/{regUid}",
                 new {controller = "r", action = "update", regUid = UrlParameter.Optional});
