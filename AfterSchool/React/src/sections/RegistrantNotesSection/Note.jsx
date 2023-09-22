@@ -61,9 +61,9 @@ function Note({ note, handleEdit }) {
   const handleChange = option => {
     setAnchorEl(null);
     switch (option) {
-      case 'EDIT':
+      case 'Edit':
         return handleEdit(note.ID);
-      case 'DELETE':
+      case 'Delete':
         return handleDeletionDialog();
     }
   };
