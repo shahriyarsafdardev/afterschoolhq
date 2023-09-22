@@ -2071,25 +2071,9 @@ namespace AfterSchool.Controllers
             if (results.IsNotEmpty()) return Redirect(results);
             var msgs = new SystemMessages();
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
-            var schedule = participationObject.Schedule;
-            var startDate = new DateTime();
-            var endDate = new DateTime();
             var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if(schedule.IsNotEmpty())
-            {
-                if (schedule.RepeatsWeekly)
-                {
-                    startDate = (DateTime) schedule.StartDate;
-                    endDate = (DateTime) schedule.EndDate;
-                }
-                else
-                {
-                    startDate = (DateTime) schedule.GetInstances(msgs: msgs).FirstOrDefault()?.StartDateTime;
-                    endDate = (DateTime) schedule.GetInstances(msgs: msgs).LastOrDefault()?.EndDateTime;
-                }
-            }
             
             PaymentViewBag(id, participationObject, msgs);
 
@@ -2125,8 +2109,6 @@ namespace AfterSchool.Controllers
                 if (proratingCalculation.GetIsProrated())
                     ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
             }
-            ViewBag.StartDate = startDate;
-            ViewBag.EndDate = endDate;
             
             return View("Payment");
         }
