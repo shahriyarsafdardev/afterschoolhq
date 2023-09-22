@@ -20,7 +20,6 @@ function index() {
   const phone = getPhoneFromParams(searchParams);
   const userPin = searchParams.get('pin') || '';
   const success = searchParams.get('success') || false;
-  const [userSignature, setUserSignature] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [checkedStudents, setCheckedStudents] = useState({});
 
@@ -42,11 +41,10 @@ function index() {
   }, [phone, userPin]);
 
   const handlePinInput = pin => {
-    setSearchParams(`phone=${phone}&pin=${pin}`);
+    setSearchParams(`phone=${encodeURIComponent(phone)}&pin=${pin}`);
   };
 
   const setSignature = async (sign, checkedInStudents, checkedOutStudents) => {
-    setUserSignature(sign);
     setCheckedStudents({
       checkedInStudents: checkedInStudents,
       checkedOutStudents: checkedOutStudents

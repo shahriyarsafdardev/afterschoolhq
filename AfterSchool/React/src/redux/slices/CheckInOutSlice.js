@@ -49,26 +49,29 @@ export const useCheckInOutActions = () => {
   } = CheckInOutSlice.actions;
   const loadPinData = async (registrationUid, phone) => {
     dispatch(loadingStart());
-    return await CheckInOutRepository.getPinSetupData(registrationUid, phone).then(
-      ({ obj, msgs }) => {
-        dispatch(setPinData(obj));
-        dispatch(setMsgs(msgs));
-        dispatch(loadingCompleted());
-        return msgs;
-      }
-    );
+    return await CheckInOutRepository.getPinSetupData(
+      registrationUid,
+      encodeURIComponent(phone)
+    ).then(({ obj, msgs }) => {
+      dispatch(setPinData(obj));
+      dispatch(setMsgs(msgs));
+      dispatch(loadingCompleted());
+      return msgs;
+    });
   };
 
   const loadChildListData = async (accountName, phone, pinCode) => {
     dispatch(loadingStart());
-    return await CheckInOutRepository.getChildListData(accountName, phone, pinCode).then(
-      ({ obj, msgs }) => {
-        dispatch(setChildListData(obj));
-        dispatch(setMsgs(msgs));
-        dispatch(loadingCompleted());
-        return msgs;
-      }
-    );
+    return await CheckInOutRepository.getChildListData(
+      accountName,
+      encodeURIComponent(phone),
+      pinCode
+    ).then(({ obj, msgs }) => {
+      dispatch(setChildListData(obj));
+      dispatch(setMsgs(msgs));
+      dispatch(loadingCompleted());
+      return msgs;
+    });
   };
 
   const clearSelectedStudents = () => {
