@@ -38,7 +38,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 {
                     case "invoice.payment_succeeded":
                         msgs.Add("Getting payment_succeeded", MessageType.Notice);
-                        return InvoicePaymentSucceeded(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
+                        return InvoicePaymentSucceeded(subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
                     
                     default:
                         return ReturnOK(msgs);
@@ -60,9 +60,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             
             // new logic
 
-            var rsp = RegistrantSubscriptionPlan.Load(135, msgs, dc: dc);
-            var sc = new AfterSchoolLibrary.Models.SubscriptionSchedule();
-            var sph = new AfterSchoolLibrary.Models.SubscriptionPaymentHistory();
+            var rsp = RegistrantSubscriptionPlan.Load(2164, msgs, dc);
+
             var plan = rsp.GetSubscriptionPlan(msgs);
             var registrant = rsp.GetRegistrant(msgs);
             var masterRegistrant = registrant.GetMasterRegistrant(msgs);
@@ -85,28 +84,30 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
 
             var useConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
-            var usePlatformFees = useConnectedAccount && sph.AmountInCents.IsEmpty();
+            var usePlatformFees = useConnectedAccount && subscriptionPaymentHistory.AmountInCents.IsEmpty();
             var platFormFlatFee = (!participationObject.IsRegistrationFree) ? billingAccount.GetPlatformConvenienceFlatFee(msgs, dc) : 0;
             var platformPercentFee = billingAccount.GetPlatformConveniencePercentFee(msgs, dc);
             
          
-            var amountPaidByParent = sc.AmountInCents;
-            
+            var amountPaidByParent = subscriptionSchedule.AmountInCents;
+
             // get the original price
-            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(plan.StripePlanId, msgs); //revisit
-            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
-            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+            // have to get real data
+            //var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(plan.StripePlanId, msgs); //revisit
+            //var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
+            //var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+            var stripeSubscriptionPrice = 30;
             var paymentType = rsp.PaymentTypeId;
             var isAmountProrated = false;
             
             // TODO: potentially problematic as the plan may have changed
             var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
             var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
-            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
+            //var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
 
-            if (paymentType == PaymentType.ACH)
-                stripeSubscriptionPrice -= calculatedFullCCFee;
+            //if (paymentType == PaymentType.ACH)
+            //    stripeSubscriptionPrice -= calculatedFullCCFee;
 
             isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
             
@@ -140,7 +141,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 billingAccount,
                 convenienceFeePayer,
                 creditCardFeePayer,
-                sph.AmountInCents,
+                subscriptionPaymentHistory.AmountInCents,
                 participationObject?.Name,
                 null, // as we have'nt created purchase yet.
                 TransactionType.Charge,
@@ -150,11 +151,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 usePlatformFees ? platformPercentFee : new decimal?(),
                 convenienceFeeOverrideAmount, //need to revisit
                 paymentTypeFeeOverrideAmount ?? 0, // need to revisit
-                sph.StripeChargeId,
-                sc.Description,
+                subscriptionPaymentHistory.StripeChargeId,
+                subscriptionSchedule.Description,
                 DateTime.UtcNow,
                 useConnectedAccount,
-                SessionVariables.LoggedInUser,
+                null,
                 null,
                 null,
                 msgs,
