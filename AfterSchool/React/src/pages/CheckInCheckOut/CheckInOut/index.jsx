@@ -20,7 +20,6 @@ function index() {
   const phone = getPhoneFromParams(searchParams);
   const userPin = searchParams.get('pin') || '';
   const success = searchParams.get('success') || false;
-  const [, setUserSignature] = useState('');
   const [activeStep, setActiveStep] = useState(0);
   const [checkedStudents, setCheckedStudents] = useState({});
 
@@ -46,7 +45,6 @@ function index() {
   };
 
   const setSignature = async (sign, checkedInStudents, checkedOutStudents) => {
-    setUserSignature(sign);
     setCheckedStudents({
       checkedInStudents: checkedInStudents,
       checkedOutStudents: checkedOutStudents
