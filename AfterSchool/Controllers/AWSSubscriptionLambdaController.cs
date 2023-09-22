@@ -39,7 +39,7 @@ namespace AfterSchool.Controllers
                     {
                         // Create a charge for the current schedule
                         var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
-                            fromCustomerId: "cus_O3CX9NkjA7u96Y",
+                            fromCustomerId: schedule.StripeCustomerId,
                             destinationAccountId: null,
                             platformFee: null,
                             tokenOrSourceId: schedule.StripeSourceId, // Use the StripeSourceId from the schedule
