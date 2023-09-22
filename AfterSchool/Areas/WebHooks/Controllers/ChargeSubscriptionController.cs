@@ -160,7 +160,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 null,
                 msgs,
                 dc);
-            return Return500(msgs);
+            return ReturnOK(msgs);
         }
 
 

@@ -4,6 +4,7 @@ using BasicLibrary;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -12,7 +13,14 @@ namespace AfterSchoolLibrary.Services
         public static List<SubscriptionSchedule> GetSubscriptionSchedulePendingToday(SystemMessages msgs,
             DatabaseConnection dc = null)
         {
-            var subscriptionSchedulespendingToday = SubscriptionSchedule.LoadSubscriptionSchedulesPendingToday(DateTime.UtcNow, msgs, dc);
+            var subscriptionSchedulesNotCancelled = SubscriptionSchedule.LoadActiveSubscriptionSchedule(msgs, dc);
+            var currentDate = DateTime.UtcNow.Date;
+            var subscriptionSchedulespendingToday = subscriptionSchedulesNotCancelled
+               .Where(x =>
+                    x.NextBillDate.Value.Date.Equals(currentDate)
+                )
+                .ToList();
+
             return subscriptionSchedulespendingToday;
         }
     }
