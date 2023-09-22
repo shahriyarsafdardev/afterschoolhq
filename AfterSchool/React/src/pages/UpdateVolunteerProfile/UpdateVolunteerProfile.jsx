@@ -3,7 +3,7 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 
-import { useErrorMessages, useUser, useVolunteerProfile } from 'redux/hooks/index';
+import { useUser, useVolunteerProfile } from 'redux/hooks/index';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import apiRoutes from 'routes';
@@ -15,7 +15,6 @@ export default function UpdateVolunteerProfile() {
   const { id: userUid } = useParams();
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
-  const { msgs } = useErrorMessages();
   const {
     loaded,
     loading,
@@ -76,15 +75,18 @@ export default function UpdateVolunteerProfile() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
+      let errorMsgs = [];
       if (dirty) {
         setSaveDisabled(true);
 
-        await submitFormSectionData(
-          formSectionSubmitObject(values, activeGroupId),
-          userUid
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), userUid).then(
+          errors => {
+            if (!errors.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+            else errorMsgs = errors;
+          }
+        );
       }
-      if (!msgs.length) {
+      if (!errorMsgs?.length) {
         if (!lastSection) {
           handleSection('next');
           resetForm();

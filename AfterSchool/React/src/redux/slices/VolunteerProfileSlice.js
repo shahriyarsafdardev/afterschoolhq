@@ -72,9 +72,10 @@ export const useVolunteerProfileActions = () => {
     formData.append('registrantId', UserUid);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
-    await ProfileRepository.submitFormSection(formData, true);
-
     dispatch(submitFormSection(answers));
+    return await ProfileRepository.submitFormSection(formData, true).then(
+      ({ data: { msgs } }) => msgs
+    );
   };
 
   const clearMessages = () => {

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { useErrorMessages, useVolunteerRegistration } from 'redux/hooks';
+import { useVolunteerRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import apiRoutes from 'routes';
@@ -15,7 +15,6 @@ export default function VolunteerRegistration() {
   const { enqueueSnackbar } = useSnackbar();
   const { volunteerThankYouUrl } = apiRoutes;
   const { accountName, activityName, regUid } = useParams();
-  const { msgs = [] } = useErrorMessages();
   const {
     exit,
     loading,
@@ -89,6 +88,7 @@ export default function VolunteerRegistration() {
     validate: values => validator(values, genderRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
+      let errorMsgs = [];
       if (!isEmpty || dirty || secondLastSection) {
         await submitFormSectionData(
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
@@ -96,9 +96,12 @@ export default function VolunteerRegistration() {
           accountName,
           activityName,
           regUid
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        ).then(errors => {
+          if (!errors.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errorMsgs = errors;
+        });
       }
-      if (!lastSection && !msgs?.length) {
+      if (!lastSection && !errorMsgs.length) {
         handleSection('next');
         resetForm();
       } else setSaveDisabled(false);

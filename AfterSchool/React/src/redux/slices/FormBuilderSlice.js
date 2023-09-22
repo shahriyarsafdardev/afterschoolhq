@@ -80,7 +80,7 @@ export const useFormBuilderActions = () => {
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
-    await FormBuilderRepository.submitFormSection({ ...values, SaveQuestion: true }).then(
+    return await FormBuilderRepository.submitFormSection({ ...values, SaveQuestion: true }).then(
       ({
         data: {
           msgs,
@@ -91,6 +91,7 @@ export const useFormBuilderActions = () => {
           dispatch(setSectionData({ ...values, FormQuestion }));
           dispatch(updateQuestionsGroups(FormQuestionGroups));
         }
+        return msgs;
       }
     );
   };

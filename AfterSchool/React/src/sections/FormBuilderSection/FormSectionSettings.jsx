@@ -13,7 +13,7 @@ import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
 import { LoadingButton } from 'components/Overrides';
 import { usePrompt } from 'utils/hooks/usePrompt';
-import { useErrorMessages, useFormBuilder } from 'redux/hooks';
+import { useFormBuilder } from 'redux/hooks';
 import QuestionsList from './QuestionsList';
 import { Loader } from 'components';
 import useStyles from './styles';
@@ -36,7 +36,6 @@ function FormSectionSettings() {
   const [reRender, setReRender] = useState(false);
   const questionGroup = searchParams.get('qg');
 
-  const { msgs } = useErrorMessages();
   const {
     submitFormSectionData,
     loadSectionData,
@@ -112,7 +111,7 @@ function FormSectionSettings() {
         FormQuestionGroups: updatedQuestionGroups,
         FormSettings: { FormId: formId },
         FormQuestion: formQuestions
-      }).then(() => {
+      }).then(msgs => {
         if (msgs.length) return;
 
         enqueueSnackbar('Submitted.', { variant: 'success' });

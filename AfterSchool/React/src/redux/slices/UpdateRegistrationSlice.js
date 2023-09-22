@@ -103,6 +103,7 @@ export const useUpdateRegistrationActions = () => {
     schoolLocationID,
     regUid
   ) => {
+    dispatch(submitFormSection(answers));
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
     formData.append('groupId', groupId);
@@ -114,10 +115,13 @@ export const useUpdateRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      UpdateRegistrationRepository.eSignature(formData);
-    } else await UpdateRegistrationRepository.submitFormSection(formData);
-
-    dispatch(submitFormSection(answers));
+      return await UpdateRegistrationRepository.eSignature(formData).then(
+        ({ data: { msgs } }) => msgs
+      );
+    } else
+      return await UpdateRegistrationRepository.submitFormSection(formData).then(
+        ({ data: { msgs } }) => msgs
+      );
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {

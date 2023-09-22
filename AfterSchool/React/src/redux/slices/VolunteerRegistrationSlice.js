@@ -111,16 +111,25 @@ export const useVolunteerRegistrationActions = () => {
     formData.append('groupId', groupId);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
+    dispatch(submitFormSection(answers));
+
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      VolunteerRegistrationRepository.register(formData).then(({ data: { obj } }) => {
-        dispatch(setRegistrationId(obj));
-      });
-    } else await VolunteerRegistrationRepository.submitFormSection(formData);
-
-    dispatch(submitFormSection(answers));
+      return await VolunteerRegistrationRepository.register(formData).then(
+        ({ data: { obj, msgs } }) => {
+          dispatch(setRegistrationId(obj));
+          return msgs;
+        }
+      );
+    } else
+      return await VolunteerRegistrationRepository.submitFormSection(formData).then(
+        ({ data: { obj, msgs } }) => {
+          dispatch(setRegistrationId(obj));
+          return msgs;
+        }
+      );
   };
 
   const clearMessages = () => {
