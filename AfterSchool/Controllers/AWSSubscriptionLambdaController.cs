@@ -13,6 +13,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Http;
+using System.Web.Http.Controllers;
 using System.Web.Mvc;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 using SubscriptionScheduleService = AfterSchoolLibrary.Services.SubscriptionScheduleService;
@@ -23,7 +25,7 @@ namespace AfterSchool.Controllers
     public class AWSSubscriptionLambdaController : Controller
     {
         // GET: AWSSubscriptionLambdaController/Lambda
-        [HttpGet]
+        [System.Web.Http.HttpGet]
         public void Lambda()
         {
             SystemMessages msgs = new SystemMessages();
@@ -60,12 +62,12 @@ namespace AfterSchool.Controllers
                             msgs: msgs
                         );
 
-                        if (charge != null && charge.Status == LastChargeStatus.succeeded.ToString())
-                        {
-                            //have to calculate amountToStripeInCents
-                            var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(schedule.ID.Value, schedule.AmountInCents, DateTime.UtcNow,
+                        //have to calculate amountToStripeInCents
+                        var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(schedule.ID.Value, schedule.AmountInCents, DateTime.UtcNow,
                                 charge.Id, false, LastChargeStatus.succeeded, charge.StripeResponse.ToString(), schedule.AmountToConnectAccountInCents, 50, 0);
 
+                        if (charge != null && charge.Status == LastChargeStatus.succeeded.ToString())
+                        {
                             var webhookPayload = new WebhookPayload
                             {
                                 PaymentHistory = subscriptionPaymentHistory,
@@ -74,11 +76,32 @@ namespace AfterSchool.Controllers
 
                             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
 
-                            SendWebhook(jsonPayload);
+                            var response = SendWebhook(jsonPayload);
+
+                            var x = "";
+
+                            //if successful, send email to customer and AHQ 
                         }
                         else
                         {
                             msgs.Add("Charge failed", MessageType.Error);
+
+                            subscriptionPaymentHistory.Status = LastChargeStatus.failed;
+
+                            var retryNumber = subscriptionPaymentHistory.RetryNumber;
+
+                            if(retryNumber < 3)
+                                subscriptionPaymentHistory.RetryNumber = retryNumber + 1;
+
+                            msgs.AddRange(subscriptionPaymentHistory.Save());
+
+                            //send email to customer and provider notifying user of charge failure
+
+                            //if Bad card or insufficient funds??????
+                            //redirect to Card details which should require login
+
+                            //if Need to cancel?    
+                            //Cancel subscription, notify main AHQ system
                         }
                     }
                     else
@@ -94,21 +117,26 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             try
             {
-                HttpResponseMessage response;
+                //HttpResponseMessage response;
                 using (HttpClient client = new HttpClient())
                 {
                     // Set the base URL of your Web API
-                    string baseUrl = Utilities.SurveyBaseUrl; 
+                    //string baseUrl = Utilities.SurveyBaseUrl; 
 
-                    string apiUrl = $"{baseUrl}/webhooks/ChargeSubscription/Updated";
+                    //string apiUrl = $"{baseUrl}/webhooks/ChargeSubscription/Updated";
 
                     var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    response = client.PostAsync(apiUrl, content).Result;
+                    //var response = client.PostAsync(apiUrl, content).Result;
 
-                    if (response.IsSuccessStatusCode)
+
+                    client.BaseAddress = new Uri(Utilities.SurveyBaseUrl);
+                    var response = await client.PostAsync("webhooks/ChargeSubscription/Updated", content);
+
+                    //if (response.IsSuccessStatusCode)
+                    if (response!=null)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
+                        //var responseContent = await response.Content.ReadAsStringAsync();
                         // what to do next
                     }
                     else
