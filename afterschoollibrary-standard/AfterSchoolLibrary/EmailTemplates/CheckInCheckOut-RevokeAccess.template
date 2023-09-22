@@ -6,7 +6,7 @@
     <br/>
     
     <p>
-        This is an automated message from AfterSchool HQ. You have successfully removed <strong>@Model.UserFullName</strong> <br />
+        This is an automated message from AfterSchool HQ. You have successfully removed <strong>@Model.UserFullName</strong>
         as an authorized person for <strong>@Model.MasterRegistrantFirstName</strong>. If you didn't mean to do this or believe it was a mistake,<br />
         you can re-authorize them by logging into your AfterSchool HQ account.<br />
         To learn more, see our support article on how to <a href="https://afterschoolhq.zendesk.com/hc/en-us/articles/18034079374349" target="_blank">remove and restore authorized people</a>.
