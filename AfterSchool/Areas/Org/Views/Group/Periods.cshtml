@@ -4,6 +4,8 @@
 
     var periods = (List<RegistrationPeriod>)ViewBag.Periods;
     var account = (Account)ViewBag.Account;
+    var accountPackage = SessionVariables.AccountPackage;
+    var showinvitepackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.AllowInvites, accountPackage);
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -68,9 +70,18 @@
                                                     <button type="button" class="btn btn-default btn-sm md-trigger hide" data-modal="modal-send" onclick="sendPeriod(@period.ID)">
                                                         Invite All @UILabel.RegistrantLabel(true)
                                                     </button>
-                                                    <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
-                                                        Invite Contact List
-                                                    </a>
+                                                    if (accountPackage.HasFeature(FeatureType.AllowInvites))
+                                                    {
+                                                        <a class="btn btn-default btn-sm" href="@Url.Action("inviteto", "contact", new { id = period.Uid, type = "period" })">
+                                                            Invite Contact List
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showinvitepackage?.Name)', @(showinvitepackage?.ID))">
+                                                            Invite Contact List
+                                                        </a>
+                                                    }
                                                 }
                                             }
                                         </div>

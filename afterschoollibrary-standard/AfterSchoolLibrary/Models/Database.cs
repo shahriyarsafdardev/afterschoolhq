@@ -106,6 +106,8 @@ namespace AfterSchoolLibrary.Models
             Maintenance.Create(dc);
             FormQuestionSettings.Create(dc);
             CheckInOut.Create(dc);
+            RegistrantNote.Create(dc);
+            RegistrantNoteVersion.Create(dc);
 
             return msgs;
         }
@@ -204,6 +206,8 @@ namespace AfterSchoolLibrary.Models
             Maintenance.Alter(dc);
             FormQuestionSettings.Alter(dc);
             CheckInOut.Alter(dc);
+            RegistrantNote.Alter(dc);
+            RegistrantNoteVersion.Alter(dc);
             
             return msgs;
         }
@@ -1328,6 +1332,8 @@ namespace AfterSchoolLibrary.Models
             Migration_20230628_SetAccountIsPayingCustomer.Do(amsgs, adc);
             Migration_20230713_CheckInCheckOut.Do(amsgs,adc);
             Migration_20230731_UpdateRegistrantWebUserAuthorizationType.Do(amsgs,adc);
+            Migration_20230811_AddCouponIsDeletedDefault.Do(amsgs,adc);
+            Migration_20230918_StudentNotes.Do(amsgs,adc);
         }
 
         public static DatabaseConnection StartTransaction()

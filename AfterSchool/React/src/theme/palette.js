@@ -36,5 +36,8 @@ export default {
   gray: {
     primary: '#555555',
     secondary: '#B2B2B4'
+  },
+  white: {
+    primary: '#FFFFFF'
   }
 };

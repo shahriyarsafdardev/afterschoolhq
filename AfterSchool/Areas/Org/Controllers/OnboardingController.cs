@@ -723,9 +723,12 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var account = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
+            var accountPackage = SessionVariables.AccountPackage;
 
-            ViewBag.SignedUpForDefaultPackage = SessionVariables.AccountPackage.GetPackage(msgs).IsDefaultCustomerPackage;
-            ViewBag.TrialDays = SessionVariables.AccountPackage.GetFeature(FeatureType.TrialDays)?.Max ?? 14;
+            ViewBag.SignedUpForDefaultPackage = accountPackage.GetPackage(msgs).IsDefaultCustomerPackage;
+            ViewBag.AccountPackage = accountPackage;
+            ViewBag.TrialDays = accountPackage.GetFeature(FeatureType.TrialDays)?.Max ?? 14;
+            
             return View(account);
         }
     }

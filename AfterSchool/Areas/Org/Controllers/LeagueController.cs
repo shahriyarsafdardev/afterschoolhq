@@ -314,6 +314,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Account = SessionVariables.CurrentAccount;
             ViewBag.Registrations = registrations;
             ViewBag.RegistrantActivities = group.GetRegistrantActivities(registrations);
+            ViewBag.Registrants = aag.IsNotEmpty() ? aag.GetRegistrantActivities() : null;
             ViewBag.ReservedSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses) : aag.GetSeatCountByAssignmentTypes(Registration.ReservedStatuses);
             ViewBag.WaitingListSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.WaitingList);
             ViewBag.ApplicationSeats = aag.IsEmpty() ? group.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied) : aag.GetSeatCountByAssignmentType(RegistrationAssignmentType.Applied);

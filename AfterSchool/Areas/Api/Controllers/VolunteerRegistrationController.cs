@@ -17,7 +17,6 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
-
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -296,6 +295,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(backgroundCheck.IsNotEmpty() && backgroundCheck.BackgroundCheckResultId == SterlingBackgroundCheckResult.Cancelled)
                     throw new Exception("Background Check has been failed");
 
+                var volunteerApproval = VolunteerApproval.LoadByWebUserId(currentUser.ID.Value).FirstOrDefault();
+
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var registration = RegistrationCommon.CreateRegistration(participationObject, qvms, json.esignature, Request, msgs);
 
@@ -307,8 +308,14 @@ namespace AfterSchool.Areas.Api.Controllers
                     if (msgs.HasNoErrors())
                         ProcessRegistration(currentRegistrant, participationObject, registration, msgs);
 
-                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && backgroundCheck.IsEmpty())
-                        await InitateBackgroundCheck(currentUser, participationObject, msgs);
+                    if (msgs.HasNoErrors() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty())
+                    {
+                        var candidateId = await backgroundCheckWorkflow.GetSterlingCandidateId(currentUser);
+                    
+                        if (candidateId.IsEmpty() && (volunteerApproval.IsEmpty() || volunteerApproval?.ExpirationDate < DateTime.UtcNow))
+                            await InitateBackgroundCheck(currentUser, participationObject, msgs);    
+                    }
+                    
                 }
                 
                 return Json(

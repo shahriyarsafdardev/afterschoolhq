@@ -757,7 +757,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"FirstName", loggedInUser.FirstName},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"ActivityContactEmail", participationObject.ContactEmail},
-                {"ActivityContactPhone", participationObject.ContactPhone},
+                {"ActivityContactPhone", participationObject.ContactPhone.IsNotEmpty() ? 
+                    $"either by phone ({participationObject.ContactPhone}) or": "by"},
                 {"ActivityContactName", participationObject.ContactName},
                 {"CustomMessage", customMessage},
                 {"ActivityName", participationObject.Name},
@@ -1351,7 +1352,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"LoginLink", loginLink},
                 {"ActivityName", participationObject.Name},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
-                {"ActivityContactPhone", participationObject.ContactPhone.IfBlank(billingAccount.Phone)},
+                {"ActivityContactPhone", $"either by phone ({participationObject.ContactPhone.IfBlank(billingAccount.Phone)}) or"},
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
@@ -1722,7 +1723,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"LoginLink", Utilities.LoginUrl()},
                 {"ActivityName", checkoutObject.ParticipationObject.Name},
                 {"ActivityContactEmail", billingAccount.Email},
-                {"ActivityContactPhone", billingAccount.Phone},
+                {"ActivityContactPhone", billingAccount.Phone.IsNotEmpty() ? 
+                    $"either by phone ({billingAccount.Phone}) or": "by"},
                 {"ActivityContactName", billingAccount.Name},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},

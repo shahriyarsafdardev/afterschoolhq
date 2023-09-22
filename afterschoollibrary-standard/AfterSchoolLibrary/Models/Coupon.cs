@@ -47,7 +47,8 @@ namespace AfterSchoolLibrary.Models
 		public string StripeCouponId { get { return (string)MDV["StripeCouponId"].Value; } set { MDV["StripeCouponId"].Value = value; } }
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public bool IsDisabled { get { return (bool)MDV["IsDisabled"].Value; } set { MDV["IsDisabled"].Value = value; } }
-		
+        public bool IsDeleted { get { return (bool) MDV["IsDeleted"].Value; } set { MDV["IsDeleted"].Value = value; } }
+
 
         public Coupon()
         {
@@ -57,7 +58,7 @@ namespace AfterSchoolLibrary.Models
 			this.AppliesTo = CouponApplyType.NotSet;
 			this.Uid = Guid.NewGuid();
 			this.IsDisabled = false;
-			
+            this.IsDeleted = false;
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -78,7 +79,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "StripeCouponId", System.Data.SqlDbType.NVarChar , "100");
 				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
 				_dp.Add(className, "IsDisabled", System.Data.SqlDbType.Bit);
-				
+                _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
+
                 return _dp;
             }
         }
@@ -203,7 +205,9 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["IsDisabled"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["IsDeleted"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
@@ -218,7 +222,8 @@ namespace AfterSchoolLibrary.Models
 			var dq = DatabaseQuery;
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
 		public static Coupon LoadByAccountIdByCouponCode(int AccountId, string CouponCode, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -227,7 +232,9 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
 			dq.Criterias.Add(ObjectMap["CouponCode"], CouponCode);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            dq.Criterias.Add(ObjectMap["IsDisabled"], false);
+			dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		public static Coupon LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -244,7 +251,8 @@ namespace AfterSchoolLibrary.Models
 			dq.Connection = dc;
 			dq.Criterias.Add(ObjectMap["Uid"], Uid);
 			dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
 
 		

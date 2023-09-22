@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var periods = (List<RegistrationPeriod>)ViewBag.Periods;
@@ -58,8 +58,19 @@
                 var reservedRegistrants = assignments.Where(x => x.Assignments.Count > 0).Count();
                 var waitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0).Count();
                 var onlyWaitingListRegistrants = assignments.Where(x => x.WaitingListAssignments.Count > 0 && x.Assignments.Count == 0).Count();
-                var noSeatRegistrants = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0).Count();
-
+                var noSeatRegistrants = 0;
+                var count = assignments.Where(x => x.Assignments.Count == 0 && x.WaitingListAssignments.Count == 0);
+                foreach(var assign in count)
+                {
+                    foreach (var ra in assign.RegistrantActivities)
+                    {
+                        var appliedRegistrants = RegistrantActivity.Load(ra);
+                        if(appliedRegistrants.AssignmentTypeId == RegistrationAssignmentType.Applied)
+                        {
+                            noSeatRegistrants = noSeatRegistrants + 1;
+                        }
+                    }
+                }
                 var totalSeats = 0;
                 var totalLeft = 0;
                 var totalWL = 0;
@@ -133,8 +144,8 @@
                                     <tbody>
                                         @foreach (var activity in activities)
                                         {
-                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.Applied);
-                                            var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count(x => x.AssignmentTypeId == RegistrationAssignmentType.WaitingList);
+                                            var assignedCount = assignedRegistrantActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count();
+                                            var waitingListCount = waitingListActivities.Where(x => x.ParticipationObjectId == activity.ID && x.ParticipationObjectTypeId == ParticipationObjectType.Activity).Count();
 
                                             totalSeats += activity.SeatsAvailable.Value;
                                             totalLeft += (activity.GetSeatsRemaining() - assignedCount);

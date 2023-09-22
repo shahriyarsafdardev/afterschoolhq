@@ -51,7 +51,7 @@ namespace AfterSchoolLibrary.Services
                 totalErrors++;
 
             totalFields++;
-            if (activity.ContactPhone.IsBlank())
+            if (activity.ContactPhone.IsBlank() && activity.ActivityTypeId != ActivityType.VolunteerOpportunity)
                 totalErrors++;
 
             totalFields++;
@@ -678,9 +678,9 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static Activity EditExisting(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs = null)
+            Dictionary<string, object> values, bool isEditContactSection = false, SystemMessages msgs = null)
         {
-            return SaveActivity(loggedInUserId, account, activityId, values, msgs);
+            return SaveActivity(loggedInUserId, account, activityId, values, msgs, isEditContactSection);
         }
 
         public static Activity CreateNew(int loggedInUserId, Account account, Dictionary<string, object> values,
@@ -690,7 +690,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static Activity SaveActivity(int loggedInUserId, Account account, string activityId,
-            Dictionary<string, object> values, SystemMessages msgs, DatabaseConnection dc = null)
+            Dictionary<string, object> values, SystemMessages msgs, bool isEditContactSection = false, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -835,7 +835,7 @@ namespace AfterSchoolLibrary.Services
                 }
 
                 //pre-load account info
-                if (contactPhone.IsBlank())
+                if (contactPhone.IsBlank() && activityType != ActivityType.VolunteerOpportunity)
                     contactPhone = account.Phone;
 
                 if (cost.IsBlank())
@@ -960,6 +960,8 @@ namespace AfterSchoolLibrary.Services
                 else
                     msgs.Add("Contact Phone must be a valid phone number", MessageType.UserError);
             }
+            else if (contactPhone.IsEmpty() && isEditContactSection && activity.ActivityTypeId == ActivityType.VolunteerOpportunity) 
+                activity.ContactPhone = "";
 
             if (contactEmail.IsNotEmpty())
                 activity.ContactEmail = contactEmail.ToString().IfBlank("").MaxChars(100);
@@ -1026,7 +1028,7 @@ namespace AfterSchoolLibrary.Services
                             if (contactEmail.IsEmpty())
                                 activity.ContactEmail = account.Email;
 
-                            if (contactPhone.IsEmpty())
+                            if (contactPhone.IsEmpty() && activityType != ActivityType.VolunteerOpportunity)
                                 activity.ContactPhone = account.Phone;
                         }
 
@@ -1097,7 +1099,7 @@ namespace AfterSchoolLibrary.Services
                                 loggedInUserId,
                                 adc));
 
-                        if (amsgs.HasNoErrors())
+                        if (amsgs.HasNoErrors() && isEditContactSection)
                             amsgs.AddRange(activity.SetupInstructor(
                                 account,
                                 instructor.IfEmpty(""),
@@ -1294,12 +1296,15 @@ namespace AfterSchoolLibrary.Services
                         // should they be a leader by default? For right now, no.
                         activity.AddTeamMember(user.ID.Value, false, loggedInUserId, msgs, dc);
 
-                        activity.InstructorId = user.ID;
+                        activity.InstructorId = user.ID;                       
                     }
                 }
                 else
                 {
                     activity.InstructorId = instructor.ToInteger();
+                    var awuIds = activity.GetTeamMembers(msgs, dc).Select(x => x.WebUserId).ToList();
+                    if (!awuIds.Contains(instructor.ToInteger()))
+                        activity.AddTeamMember(instructor.ToInteger(), false, loggedInUserId, msgs, dc);
                 }
             }
             else
@@ -1308,7 +1313,7 @@ namespace AfterSchoolLibrary.Services
             }
 
             msgs.AddRange(activity.Save(dc));
-
+            
             return msgs;
         }
 
@@ -1360,18 +1365,30 @@ namespace AfterSchoolLibrary.Services
             var hasStripeChanges = true;
             var paymentStartType = subscriptionPaymentStartType.ToInteger().ToEnum<PlanPaymentStartType>();
             var isParentPrice = isparentpricesubscription.ToBoolean();
+            var activitySchedule = activity.GetSchedule(msgs, dc);
 
-            // first: desactivate the current plan if there are any changes
-            if (activity.HasSubscriptionPlan(msgs, dc))
+            if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
+                if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date < account.ConvertToAccountTimeZone(DateTime.UtcNow).Date)
+                    msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
+
+                if (activitySchedule != null && activitySchedule.StartDate.HasValue)
+                {
+                    var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+                    if (subscriptionEndDate.HasValue && subscriptionEndDate < validEndDate)
+                        msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                }
+
+                // first: desactivate the current plan if there are any changes
                 var plan = activity.GetSubscriptionPlan(msgs, dc);
 
                 hasStripeChanges = plan.CostPerPeriod.Value != subscriptionplancost.ToDecimal() ||
-                                   plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
-                                   plan.PaymentStartTypeId != paymentStartType ||
-                                   (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
-                                   (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
-                                   plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
+                                plan.BillingPeriodTypeId != (BillingPeriodType) subscriptionplanperiod.ToInteger() ||
+                                plan.PaymentStartTypeId != paymentStartType ||
+                                (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
+                                (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
+                                plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
                 if (hasStripeChanges || !hassubscriptionplan.ToBoolean())
@@ -1385,7 +1402,8 @@ namespace AfterSchoolLibrary.Services
             }
 
             // if the subscription plan option(UI) is activated
-            if (hassubscriptionplan.ToBoolean() && hasStripeChanges)
+            if (hassubscriptionplan.ToBoolean() && hasStripeChanges && msgs.HasNoErrors())
+            {
                 SubscriptionPlanService.CreateNewSubscriptionPlan(
                     planOwner: account,
                     participationObjectType: ParticipationObjectType.Activity,
@@ -1403,7 +1421,7 @@ namespace AfterSchoolLibrary.Services
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
-
+            }
             return msgs;
         }
 
@@ -2374,7 +2392,7 @@ namespace AfterSchoolLibrary.Services
         public static int GetTotalAttendanceCount(this Activity activity, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
-            return Attendance.GetCount(new Hashtable {{"ActivityId", activity.ID.Value}}, msgs, dc);
+            return Attendance.GetCount(new Hashtable {{"ActivityId", activity.ID.Value},{ "IsCompleted", true } }, msgs, dc);
         }
 
         public static List<ActivityRegistrationPeriod> GetActivityRegistrationPeriods(this Activity activity,
@@ -2872,13 +2890,13 @@ namespace AfterSchoolLibrary.Services
                 return (null, null);
 
             var schedule = activity.GetSchedule(msgs, dc);
-            var upcomingInstance = schedule.GetUpcomingInstance(msgs, dc).FirstOrDefault();
-            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, upcomingInstance,
+            var latestInstance = schedule.GetInstances(msgs: msgs, dc: dc)?.LastOrDefault();
+            return FinalizeStartAndEndDateForSubscription(activity.HasSchedule, billingPeriodType, dayOfWeek, dayOfMonth, schedule, latestInstance,
                 DateTime.UtcNow);
         }
 
         internal static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(bool activityHasSchedule,
-            BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance upcomingInstance,
+            BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth, ActivitySchedule schedule, ActivityInstance latestInstance,
             DateTime utcNow)
         {
             if (!activityHasSchedule)
@@ -2886,7 +2904,11 @@ namespace AfterSchoolLibrary.Services
 
             var startDate = dayOfMonth; // schedule.IsOngoing ? schedule.StartDate.Value : upcomingInstance.StartDateTime.Value;
             var startDateWeekly = dayOfWeek;
-            var paymentEnd = schedule.EndDate.Value;
+            var paymentEnd = new DateTime();
+            if (schedule.RepeatsWeekly)
+                paymentEnd = schedule.EndDate.Value;
+            else
+                paymentEnd = latestInstance.EndDateTime.Value;
 
             switch (billingPeriodType)
             {

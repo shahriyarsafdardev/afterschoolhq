@@ -4,8 +4,8 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentAccount = SessionVariables.CurrentAccount;
     var maxFormCount = accountPackage.IsNotEmpty() ? (int)accountPackage.GetFeature(FeatureType.ManageForms).Max.Value : 0;
-    var currentFormCount = Model.Count;
-    var showFormFields = !(currentFormCount >= maxFormCount);
+    var accountTotalForms = ViewBag.AccountTotalForms; 
+    var showFormFields = !(accountTotalForms >= maxFormCount);
     var showFormFieldsPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.ManageForms, SessionVariables.AccountPackage);
     var archived = (bool)ViewBag.Archived;
     var hasSurveyFeature = accountPackage.HasFeature(FeatureType.Survey);       
@@ -34,7 +34,7 @@
                         }
                         else
                         {
-                            <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                            <button class="btn btn-primary btn-space md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()' )">
                                 <i class="icon icon-left s7-plus"></i>
                                 Add Form
                             </button>
@@ -51,7 +51,7 @@
                 <p class="pull-right text-bold formCount">
                     @if (!archived)
                     { 
-                        @:<span id="currentFormNumber">@currentFormCount</span> of @maxFormCount Forms
+                        @:<span id="currentFormNumber">@accountTotalForms</span> of @maxFormCount Forms
                     }
                     else 
                     {
@@ -109,7 +109,7 @@
                         @if (maxFormCount == 0)
                         {
                             <tr>
-                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">upgrade your plan.</a></td>
+                                <td colspan="4">No forms available. Please <a href="#" class="md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()')">upgrade your plan.</a></td>
                             </tr>
                         }
                         else if (Model.Count > 0)
@@ -125,7 +125,7 @@
                                         {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
                                             {
-                                                <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                                <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()')"><i class="icon icon-left s7-edit"></i> Edit</a>
                                             }
                                             else
                                             {
@@ -134,7 +134,7 @@
                                         }
                                         else
                                         {
-                                        <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))"><i class="icon icon-left s7-edit"></i> Edit</a>
+                                            <a href="#" class="btn btn-default btn-sm" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()')"><i class="icon icon-left s7-edit"></i> Edit</a>
                                         }
 
                                         @if (FeatureFlag.CheckFlagIsEnabled("forms-reporting") && currentAccount.HasFeature(FeatureType.AdvancedReports))
@@ -153,7 +153,7 @@
                                         {
                                             if (!hasSurveyFeature && form.FormTypeId == FormType.Survey)
                                             {
-                                                <button class="btn btn-default btn-sm" data-modal="modal-newform" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                                <button class="btn btn-default btn-sm" data-modal="modal-newform" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)','@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()')">
                                                     <i class="icon icon-left s7-copy-file"></i> Copy
                                                 </button>
                                             }
@@ -166,10 +166,11 @@
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', @(showFormFieldsPackage?.ID))">
+                                            <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()' )">
                                                 <i class="icon icon-left s7-copy-file"></i> Copy
                                             </button>
                                         }
+
                                         @if (!isDefaultForm && !form.IsArchived && form.FormTypeId != FormType.Survey)
                                         {
                                             var formType = UILabel.ActivityLabel(ActivityType.Activity, true).ToLower();
@@ -195,7 +196,16 @@
                                         }
                                         else
                                         {
-                                            <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            if (showFormFields)
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" data-modal="modal-restore" onclick="restoreForm('@UI.JavascriptSafeString(form.Name)', '@Url.Action("restore", "form", new { id = form.ID.ToString() })')"><i class="s7-albums"></i> Restore</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-default btn-sm md-trigger" onclick="return showUpgradeMyPlan('@(showFormFieldsPackage?.Name)', '@(showFormFieldsPackage?.ID)', false, '@FeatureType.ManageForms.ToString()')">
+                                                    <i class="s7-albums"></i> Restore
+                                                </button>
+                                            }
                                         }
                                     </td>
                                 </tr>

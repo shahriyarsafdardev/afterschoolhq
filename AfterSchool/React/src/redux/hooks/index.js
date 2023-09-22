@@ -8,6 +8,7 @@ import { useAPAccessActions } from 'redux/slices/APAccessSlice';
 import { useCheckInOutActions } from 'redux/slices/CheckInOutSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
+import { useRegistrantNotesActions } from 'redux/slices/RegistrantNotesSlice';
 import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
 import { useVolunteerProfileActions } from 'redux/slices/VolunteerProfileSlice';
 import { useUpdateRegistrationActions } from 'redux/slices/UpdateRegistrationSlice';
@@ -76,4 +77,9 @@ export const useCheckInOut = () => ({
 export const useManageAPAccess = () => ({
   ...useSelector(state => state.APAccessSlice),
   ...useAPAccessActions()
+});
+
+export const useRegistrantNotes = () => ({
+  ...useSelector(state => state.registrantNotesSlice),
+  ...useRegistrantNotesActions()
 });

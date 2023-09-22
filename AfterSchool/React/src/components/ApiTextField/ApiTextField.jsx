@@ -1,13 +1,11 @@
 import cs from 'classnames';
 import useStyles from './styles';
-import React, { useRef, useState, useEffect } from 'react';
-import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
-import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import { Typography, Box } from '@material-ui/core';
 import { locationObject } from 'components/SchoolField/SchoolField';
-import { googlePlaces } from 'constants';
+import { GoogleLocation } from 'components';
 
 function ApiTextField({ formik, question, currentQuestions }) {
-  const inputRef = useRef();
   const classes = useStyles();
   const [disabled, setDisable] = useState(true);
   const { touched, values, errors, setFieldValue } = formik;
@@ -42,8 +40,7 @@ function ApiTextField({ formik, question, currentQuestions }) {
     });
   };
 
-  const handlePlaceChanged = () => {
-    const [place] = inputRef.current.getPlaces();
+  const handlePlaceChanged = place => {
     if (place) setFieldValue(ID, place.name);
     setAddressFields(locationObject(place));
   };
@@ -59,38 +56,29 @@ function ApiTextField({ formik, question, currentQuestions }) {
       <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {Text} &nbsp;
-          <Typography component="span" className={typeClass}>
-            {typeText}
-          </Typography>
+        </Typography>
+        <Typography component="span" className={typeClass}>
+          {typeText}
         </Typography>
       </Box>
 
       <Box className={classes.textFieldOuterWrapper}>
         <Box className={classes.textFieldContainer}>
-          <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={googlePlaces}>
-            <StandaloneSearchBox
-              className={classes.searchBox}
-              onLoad={ref => {
-                inputRef.current = ref;
-              }}
-              onPlacesChanged={handlePlaceChanged}
-            >
-              <MuiTextField
-                inputProps={{
-                  'data-testid': `${Text}-${QuestionDataTypeId}`
-                }}
-                variant="outlined"
-                fullWidth
-                {...formik.getFieldProps(question.ID)}
-                error={touched[ID] && errors[ID]}
-                helperText={touched[ID] && errors[ID]}
-                type="text"
-                className={cs('form-control', classes.formControlClass)}
-                placeholder={`Enter your ${Text}`}
-                disabled={disabled}
-              />
-            </StandaloneSearchBox>
-          </LoadScript>
+          <GoogleLocation
+            handlePlaceChanged={handlePlaceChanged}
+            inputProps={{
+              'data-testid': `${Text}-${QuestionDataTypeId}`
+            }}
+            variant="outlined"
+            fullWidth
+            {...formik.getFieldProps(question.ID)}
+            error={touched[ID] && errors[ID]}
+            helperText={touched[ID] && errors[ID]}
+            type="text"
+            className={cs('form-control', classes.formControlClass)}
+            placeholder={`Enter your ${Text}`}
+            disabled={disabled}
+          />
         </Box>
       </Box>
     </Box>

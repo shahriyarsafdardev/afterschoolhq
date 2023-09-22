@@ -108,7 +108,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var isActivityGroup = group.IsGuid();
             var activityGroup = isActivityGroup ? currentAccount.GetActivityGroup(group.ToGuid(), msgs) : null;
-            var activities = GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
+            var activities = accountUserType == UserType.Instructor ? GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs)?.Where(x => x.AccountId == currentAccount.ID).ToList()
+                : GetActivities(activityGroup, isArchived, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
 
             if (!activities.Any() && isArchived)
             {
@@ -116,7 +117,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 activities = GetActivities(activityGroup, false, start, length, currentAccount, accountUserType, currentUser, q, activityType, msgs);
             }
 
-            var totalActivityCount = GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
+            var totalActivityCount = accountUserType == UserType.Instructor ? activities.Count : GetActivityCount(q, currentAccount, isArchived, activityType, accountUserType, currentUser, activityGroup, msgs);
             var hasArchivedActivities =
                 isArchived || GetActivityCount(q, currentAccount, true, activityType, accountUserType, currentUser, activityGroup, msgs) > 0;
 
@@ -718,7 +719,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (mustRequestToPublish)
                 msgs.Add("You do not have permissions to publish", MessageType.UserError);
 
-            msgs.AddRange(activity.GetItemsRequiredToPublish(msgs));
+            msgs.AddRange(activity.GetItemsRequiredToPublish(msgs, true));
 
             if (msgs.HasNoErrors())
             {
@@ -938,7 +939,6 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.TextCount = currentAccount.GetTextMessageCountForCurrentMessagePeriod(msgs);
             ViewBag.Body = "";
             ViewBag.Messages = msgs;
-
             return View(activity);
         }
 
@@ -950,7 +950,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-
+            var currentEmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
@@ -1002,7 +1002,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.Registrants = activity.GetRegistrants(msgs);
             ViewBag.Body = body;
             ViewBag.Messages = msgs;
-
+            ViewBag.EmailCount = currentEmailCount;
             return View(activity);
         }
 
@@ -1122,7 +1122,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpPost]
-        public ActionResult AddRegistration(string id, string parentsig)
+        public ActionResult AddRegistration(string id, string parentsig, int? newassignmenttype = null)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = new SystemMessages();
@@ -1162,6 +1162,8 @@ namespace AfterSchool.Areas.Org.Controllers
                         break;
                 }
             });
+            if(newassignmenttype.IsEmpty())
+                msgs.Add($"Registration Status is required", MessageType.UserError);
 
             var qvms = questions.OrderBy(question => question.DisplayOrder)
                 .Select(question => question.ToFormQuestionViewModel(Request.Params)).ToList();
@@ -1172,7 +1174,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     questionsAndAnswers: qvms.Select(qvm => (qvm.Question, qvm.Value)).ToList(),
                     period: activity.GetCurrentRegistrationPeriod(msgs),
                     loggedInUser: SessionVariables.CurrentUser,
-                    msgs: msgs);
+                    msgs: msgs,
+                    newAssignmentType: newassignmenttype);
 
             ViewBag.Messages = msgs;
             ViewBag.QuestionViewModels = qvms;
@@ -1753,6 +1756,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     account: currentAccount,
                     activityId: activity.ID.Value.ToString(),
                     values: values,
+                    true,
                     msgs: msgs);
 
             // Show Success Message
@@ -1951,6 +1955,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
             if (activity.IsNotEmpty())
             {
+                if (activity.IsContinuousEnrollment && repeatsweekly.IsEmpty())
+                    repeatsweekly = "1";
                 if (repeatsweekly.IsEmpty() && isongoing == "1")
                     isongoing = null;
                 if (activity.IsContinuousEnrollment && hasschedule == "1")
@@ -1970,9 +1976,16 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (msgs.HasNoErrors())
                     {
                         if (!isongoing.IsBoolean())
+                        {
                             inSessionDates = ActivityScheduleUI.PrepScheduleDates(repeatsweekly, days, startdate,
                                 enddate, dailystarttime, dailyendtime, Request.Params.Filter("meeting-open-"));
-                        
+                            if(repeatsweekly.IsEmpty())
+                            {
+                                startdate = inSessionDates?.FirstOrDefault()?.StartDateTime.Value.ToString();
+                                enddate = inSessionDates?.LastOrDefault()?.EndDateTime.Value.ToString();
+                            }
+                        }
+
                         outOfSessionDates =
                             ActivityScheduleUI.PrepScheduleDatesClosed(Request.Params.Filter("meeting-closed-"));
 
@@ -2671,6 +2684,114 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
+        public JsonResult GetFormInfo(int formID)
+        {
+            var msgs = new SystemMessages();
+            var currentForm = SessionVariables.CurrentAccount.GetForm(formID, msgs);
+            var gardeQuestion = currentForm.GetQuestion(QuestionDataType.RegistrantGrade,msgs);
+            var gradeQuestionSettings = FormQuestionSettings.LoadByQuestionIds(gardeQuestion.ID);
+            var genderQuestion = currentForm.GetQuestion(QuestionDataType.RegistrantGender, msgs);
+            var genderQuestionSettings = FormQuestionSettings.LoadByQuestionIds(genderQuestion.ID);
+            var ageQuestion = currentForm.GetQuestion(QuestionDataType.RegistrantDateOfBirth, msgs);
+            var ageQuestionSettings = FormQuestionSettings.LoadByQuestionIds(ageQuestion.ID);
+            var isFormAgeRestricted = false;
+            var isFormGenderRestricted = false;
+            var isFormGradeRestricted = false;
+            if (gradeQuestionSettings.Count == 0)
+                isFormGradeRestricted = gardeQuestion.IsRequired;
+            else
+            {
+                var notRequiredCount = gradeQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = gradeQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                    isFormGradeRestricted = true;
+            }
+
+            if (ageQuestionSettings.Count == 0)
+                isFormAgeRestricted = ageQuestion.IsRequired;
+            else
+            {
+                var notRequiredCount = ageQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = ageQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                    isFormAgeRestricted = true;
+            }
+
+            if (genderQuestionSettings.Count == 0)
+                isFormGenderRestricted = genderQuestion.IsRequired;
+            else
+            {
+                var notRequiredCount = genderQuestionSettings.Where(question => question.Required == false).Count();
+                var notShowCount = genderQuestionSettings.Where(question => question.Show == false).Count();
+                if (notRequiredCount == 0 && notShowCount == 0)
+                    isFormGenderRestricted = true;
+            }
+            if(msgs.HasNoErrors())
+                return Json(new
+                {
+                    status = "ok",
+                    isFormGenderRes = isFormGenderRestricted,
+                    isFormAgeRes = isFormAgeRestricted,
+                    isFormGradeRes = isFormGradeRestricted
+                }, JsonRequestBehavior.AllowGet);
+
+            return Json(new
+            {status = "error",messages = msgs }, JsonRequestBehavior.AllowGet);
+
+        }
+        [HttpPost]
+        public JsonResult SaveEditedRestrictions(Guid activityId, string type)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var activity = currentAccount.GetActivity(activityId, msgs);
+            if (!activity.IsEmpty())
+            {
+                Database.ExecuteTransaction
+                    (
+                        (SystemMessages amsgs, DatabaseConnection adc) =>
+                        {
+                            if (type == "grade")
+                            {
+                                activity.AgeStart = 0;
+                                activity.AgeEnd = 18;
+                                activity.GradeLevelStart = null;
+                                activity.GradeLevelEnd = null;
+                            }
+                            else if (type == "age")
+                            {
+                                var grades = GradeLevel.Load(msgs: amsgs, dc: adc);
+                                activity.GradeLevelStart = grades.First().ID;
+                                activity.GradeLevelEnd = grades.Last().ID;
+                                activity.AgeStart = null;
+                                activity.AgeEnd = null;
+                            }
+                            else if (type == "gender")
+                            {
+                                activity.GenderRestriction = GenderRestrictionType.None;
+                            }
+                            activity.Save(adc);
+                        },
+                        (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                        (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                        (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+                    );
+                if (msgs.HasNoErrors())
+                    return Json(new
+                    {
+                        status = "ok",
+                        messages = msgs,
+                    }, JsonRequestBehavior.AllowGet);
+            }
+            msgs.Add("Activity not found",MessageType.ApiError);
+            return Json(new
+            {
+                status = "error",
+                messages = msgs,
+            }, JsonRequestBehavior.AllowGet);
+        }
+            
+
 
         #endregion
 
@@ -2723,6 +2844,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 currentUser.IsActivityLeader(activity, msgs));
             ViewBag.AccountPackage = SessionVariables.AccountPackage;
             ViewBag.Attendances = attendances;
+            ViewBag.Meetings = totalAttendanceCount;
             ViewBag.PagingModel = new PagingModel
             {
                 TotalCount = totalAttendanceCount,
@@ -2749,7 +2871,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activitySchedule = activity.GetSchedule(msgs);
             List<AttendanceRegistrant> attendanceRegistrants;
 
-            if (activity.HasSchedule)
+            if (activity.HasSchedule && !activitySchedule.IsOngoing)
             {
                 attendance = activity.GetOrCreateNewAttendance(attendanceId, activityInstanceId, currentUser, msgs);
                 attendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
@@ -2819,6 +2941,7 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult TrackAttendance(string id, string att)
         {
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
             var presentStudents = new List<int>();
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -2832,12 +2955,18 @@ namespace AfterSchool.Areas.Org.Controllers
             });
 
             if (msgs.HasNoErrors())
-                attendance.UpdateAttendance(attendance.ActivityInstanceId.Value, presentStudents,
-                    SessionVariables.CurrentUser, msgs);
+            {
+                if (attendance.ActivityInstanceId.IsNotEmpty())
+                    attendance.UpdateAttendance(presentStudents,
+                        currentUser, attendance.ActivityInstanceId.Value, msgs);
+                else
+                    attendance.UpdateAttendance(presentStudents,
+                        currentUser, null, msgs);
+            }
 
+            ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
             ViewBag.Schedule = activitySchedule;
-            var currentUser = SessionVariables.CurrentUser;
             ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);
@@ -2902,7 +3031,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     LastModifiedBy = currentUser.ID,
                     ActivityId = activityId,
                     Date = date.Date,
-                    IsCompleted = true,
+                    IsCompleted = false,
 
                 };
                 msgs.AddRange(attendance.Save());
@@ -2965,7 +3094,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return Json(new {status = "error", messages = msgs}, JsonRequestBehavior.AllowGet);
         }
-
+       
         // This returns all unbilled selected Attendances by Registrant
         private Dictionary<RegistrantActivity, List<Attendance>> GetAttendancesToBillPerRegistrantActivity(
             Account currentAccount, List<RegistrantActivity> registrantActivities, List<Attendance> attendances,
@@ -3328,8 +3457,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
-
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs)
+            ?.Where(att => att.AttendanceIsCompleted)
+            ?.ToList();
+            
             var model = new AttendanceReportResults()
             {
                 AttendanceRegistrants = attendanceRegistrants,
@@ -3412,15 +3543,16 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var msgs = TempData["msgs"].IsNotEmpty() ? (SystemMessages)TempData["msgs"] : new SystemMessages();
-
             if (currentAccount.IsEmpty())
                 return HttpNotFound();
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var forms = currentAccount.GetSurveyForms(null, msgs);
 
             ViewBag.Surveys = SurveyRequest.LoadByActivityId(activity.ID.Value, msgs)
                 .OrderByDescending(a => a.CreateDate).ToList();
             ViewBag.Messages = msgs;
+            ViewBag.forms = forms;
             return View(activity);
         }
 

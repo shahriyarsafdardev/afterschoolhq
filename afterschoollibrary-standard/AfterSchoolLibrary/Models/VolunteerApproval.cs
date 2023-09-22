@@ -133,6 +133,15 @@ namespace AfterSchoolLibrary.Models
             return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
+        public static List<VolunteerApproval> GetAllExpiredVolunteers(DateTime dateTime,SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ExpirationDate"], dateTime, DatabaseCriteriaOperatorEnum.DBValueIsLessThanParameter);
+            dq.Criterias.Add(ObjectMap["IsActive"], true.ToInteger());
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).ToList();
+        }
+        
         public static SystemMessages Alter(DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();

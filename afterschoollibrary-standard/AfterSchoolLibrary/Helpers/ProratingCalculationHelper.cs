@@ -100,7 +100,7 @@ namespace AfterSchoolLibrary.Helpers
             var isOnCheckout = plan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout;
             var isWeekly = plan.BillingPeriodTypeId == BillingPeriodType.Week;
 
-            if (isSubscription && !isOnCheckout && !isWeekly)
+            if (isSubscription && !isOnCheckout && !isWeekly && !(!participationObject.GetActivity().HasSchedule && plan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart))
             {
                 //loading variables
                 // understand when first charge happens
@@ -128,7 +128,8 @@ namespace AfterSchoolLibrary.Helpers
                 var lengthOfSubscriptionFromToday = plan.NumberOfPeriodsForSubscription(checkoutDateProviderTimeZone, lastActivityDateProviderTimeZone);
 
                 if (nextChargeDate.HasValue)
-                    EndDate = plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday);
+                    if (plan.EndDate.HasValue)
+                        EndDate = plan.EndDate ?? plan.CalculateEndDateFromNumberOfPeriods(nextChargeDate.Value, lengthOfSubscriptionFromToday);
 
                 // needs prorating
                 // time to prorate if the checkout date is after the billing start date

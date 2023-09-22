@@ -1174,7 +1174,7 @@ namespace AfterSchoolLibrary.Services
                 new Hashtable()
                 {
                     {"WebUserId", user.ID.Value},
-                    {"RegistrantId", registrant.ID.Value},
+                    {"RegistrantId", registrant?.ID.Value},
                 },
                 msgs,
                 dc) > 0;
@@ -1287,6 +1287,10 @@ namespace AfterSchoolLibrary.Services
             loggedInUser.PinCode = newPinCode;
             loggedInUser.LastModifiedDate = DateTime.UtcNow;
             msgs.AddRange(loggedInUser.Save(dc));
+        }
+        public static bool CanEditOrDeleteNote(this WebUser user, RegistrantNote registrantNote, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return user.IsNotEmpty() && registrantNote.CreatedBy == user.ID;
         }
     }
 }

@@ -4,7 +4,9 @@
     var activityInstances = (List<(ActivityInstance ActivityInstance, Registrant Registrant, int? ParticipationObjectId, ParticipationObjectType ParticipationObjectType)>) ViewBag.ActivityInstances;
     var providers = (List<Account>) ViewBag.Providers;
     var activitiesRequiringAttention = (List<RegistrantActivity>) ViewBag.ActivitiesRequiringAttention;
-    var showToDos = activitiesRequiringAttention.Any() || Model.Any(registrant => registrant.ProfileStatusId != RegistrantProfileStatus.Completed);
+    var isSterlingSetupRequired = (bool) ViewBag.IsSterlingSetupRequired;
+    var sterlingLink = (string) ViewBag.SterlingLink;
+    var showToDos = isSterlingSetupRequired ; // Volunteers have only todo's of background check for now.
     var showProviders = providers.Any();
     var showRightColumn = showToDos || showProviders;
     var showLeftColumn = activityInstances.Any();
@@ -49,7 +51,11 @@
 
             @if (showToDos)
             {
-                Html.RenderPartial("_ToDos", Model);
+                Html.RenderPartial("_ToDos", Model, 
+                    new ViewDataDictionary()
+                    {
+                        { "link", sterlingLink },
+                    });
             }
 
             @if (showProviders)

@@ -846,8 +846,9 @@ namespace AfterSchoolLibrary.Models
 
             sql += @$"
                 where 
+                    Registrant.IsDeleted = 0 and 
                     Registrant.AccountId = {accountId} and
-                    Registration.CompletionStatusId = {(int)RegistrationCompletionStatus.Completed} ";
+                    Registration.CompletionStatusId in ({(int)RegistrationCompletionStatus.Completed}, {(int)RegistrationCompletionStatus.RequiresParentSignature}) ";
             
             if (formId.HasValue) 
                 sql += $" and FormQuestion.FormId = {formId.Value}";
@@ -1003,7 +1004,11 @@ namespace AfterSchoolLibrary.Models
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id 
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id AND submittedReg.CreateDate = (
+                SELECT MAX(CreateDate)
+                FROM Registrant
+                WHERE ParentRegistrantId = masterReg.ID
+                )
                 {typecondition}
             WHERE
                 reg.accountid in (
@@ -1042,7 +1047,11 @@ namespace AfterSchoolLibrary.Models
             from
                 Registrant submittedReg inner join
                 Registration reg on submittedReg.id = reg.registrantid inner JOIN
-                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id
+                Registrant masterReg on submittedReg.ParentRegistrantId = masterReg.id AND submittedReg.CreateDate = (
+                SELECT MAX(CreateDate)
+                FROM Registrant
+                WHERE ParentRegistrantId = masterReg.ID
+                )
                 {typecondition}   
             WHERE
                 reg.accountid in (

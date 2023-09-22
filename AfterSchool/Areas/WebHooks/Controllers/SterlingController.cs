@@ -46,16 +46,31 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
 
                     if (responseBody.result == "Clear")
+                    {
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
-                            "Approve By Sterling",
+                            "Approved By Sterling",
                             DateTime.UtcNow.AddYears(1),
                             null,
                             DateTime.UtcNow,
                             msgs
                         );
-
+                        
+                        var registrants = Registrant.LoadByWebUserId(latestBackgroundCheck.WebUserId, RegistrantPersonType.Volunteer, false,
+                            false, msgs);
+                        registrants.ForEach(registrant => 
+                        {
+                            var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).FirstOrDefault();
+                            if (registration.IsNotEmpty())
+                            {
+                                var participationObject = registration.GetFirstParticipationObject(msgs);
+                                var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs);
+                                if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
+                                    registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs);
+                            }
+                        });
+                    }
                     if (responseBody.result == "Consider")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,

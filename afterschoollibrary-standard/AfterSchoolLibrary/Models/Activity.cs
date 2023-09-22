@@ -1033,7 +1033,7 @@ namespace AfterSchoolLibrary.Models
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
-            dq.Criterias.Add(ObjectMap["ID"], ids.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["ID"], ids.Count > 0 ? ids.ToArray() : null, ids.Count > 0 ? DatabaseCriteriaOperatorEnum.In : DatabaseCriteriaOperatorEnum.Equals);
 
             if (activityGroupId.IsNotEmpty())
                 dq.Criterias.Add(ObjectMap["ActivityGroupId"], activityGroupId);

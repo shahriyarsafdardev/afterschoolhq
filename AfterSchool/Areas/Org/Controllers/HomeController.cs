@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
@@ -21,6 +22,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = SessionVariables.AccountPackage;
+            var currentUserType = currentUser.GetUserType(currentAccount);
 
             //ISYP Directory Check
             if (currentAccount.IsInIsypDirectory(msgs))
@@ -89,16 +91,38 @@ namespace AfterSchool.Areas.Org.Controllers
 
             HandleTempMessages(msgs);
 
+            var registrationCount = new int();
+            var totalPresent = new int();
+            var totalPossible = new int();
+            var totalCompleted = new int();
+
+            if (currentUserType == UserType.Instructor)
+            {
+                var activities = currentAccount.GetActivities(currentUserType, currentUser, null, ActivityType.Activity, false, false, false, null, null, msgs);
+                var activitiesIds = activities.Select(a => a.ID.Value).ToList();
+                totalPresent = activities.Sum(activity => activity.GetAttendancePresentCount(msgs));
+                totalPossible = activities.Sum(activity => activity.GetAttendancePossibleCount(msgs));
+                totalCompleted = activities.Sum(activity => activity.GetCompletedAttendance(msgs).Count());
+                registrationCount = currentAccount.GetRegistrationsCountByActivityIDsByDate(activitiesIds, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+            }
+            else
+            {
+                registrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
+                totalPresent = currentAccount.GetAttendancePresentCount(msgs);
+                totalPossible = currentAccount.GetAttendancePossibleCount(msgs);
+                totalCompleted = currentAccount.GetAttendanceCompletedCount(msgs);
+            }
+
             ViewBag.Messages = msgs;
             ViewBag.HasVisitorAccountsToApprove = currentAccount.GetRequestedVisitorAccountsCount(msgs) > 0;
             ViewBag.HasOutstandingLeagueInvites = currentAccount.GetExternalLeagueInviteCount(msgs) > 0;
             ViewBag.TotalPaid = totalPaid;
             ViewBag.ActivityCount = activityCount;
             ViewBag.CurrentRegistrations = currentAccount.GetRegistrationsByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            ViewBag.RegistrationCount = currentAccount.GetRegistrationCountByDate(DateTime.UtcNow.AddDays(-30), DateTime.UtcNow, msgs);
-            ViewBag.TotalPresent = currentAccount.GetAttendancePresentCount(msgs);
-            ViewBag.TotalPossible = currentAccount.GetAttendancePossibleCount(msgs);
-            ViewBag.TotalCompleted = currentAccount.GetAttendanceCompletedCount(msgs);
+            ViewBag.RegistrationCount = registrationCount;
+            ViewBag.TotalPresent = totalPresent;
+            ViewBag.TotalPossible = totalPossible;
+            ViewBag.TotalCompleted = totalCompleted;
             ViewBag.ExternalLeagueCount = currentAccount.GetExternalLeagueCount(msgs);
 
             return View(currentAccount);

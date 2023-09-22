@@ -2,6 +2,7 @@
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     var list = (List<Attendance>)ViewData["attendances"];
+    var meetings = (int)ViewData["meetings"];
     var totalPresent = Model.GetAttendancePresentCount();
     var totalSeats = Model.GetAttendancePossibleCount();
     var totalAbsent = totalSeats - totalPresent;
@@ -24,14 +25,7 @@
     <div class="col-md-3">
         <div class="widget widget-tile widget-bordered">
             <div class="data-info">
-                @if (list != null)
-                {
-                    <div data-toggle="counter" data-end="@list.Count" data-decimals="0" data-suffix="" class="value">@list.Count</div>
-                }
-                else
-                {
-                    <div data-toggle="counter" data-end="0" data-decimals="0" data-suffix="" class="value">0</div>
-                }
+                    <div data-toggle="counter" data-end="@meetings" data-decimals="0" data-suffix="" class="value">@meetings</div>
 
                 <div class="desc">Meetings</div>
             </div>
@@ -52,14 +46,7 @@
 
 @{
 
-    if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
-    {
         <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid.ToString() })" class="btn btn-primary btn-space">Take Attendance</a>
-    }
-    else if (Model.ActivityTypeId.NotIn(new ActivityType[] { ActivityType.PermissionSlip, ActivityType.FieldTrip }))
-    {
-        <p>In order to take attendance, please <a href="@Url.Action("editschedule", "activity", new { id = Model.Uid })">add a schedule</a> to @Model.Name</p>
-    }
 
     if (postPayPlan)
     {
@@ -125,13 +112,10 @@
                         }
 
                         <td>
-                            @if (Model.HasSchedule || account.HasFeature(FeatureType.ManageCheckInCheckOut))
-                            {
                                 <a href="@Url.Action("trackattendance", controller, new { id = Model.Uid, att = attendance.ID, actinst = attendance.ActivityInstanceId })" class="btn btn-primary btn-xs"><i class="icon icon-left s7-user"></i> View Details</a>
-                            }
                         </td>
 
-                        <td>@(Model.HasSchedule ? account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString() : attendance.Date.Value.ToLongDateString() )</td>
+                        <td>@(Model.HasSchedule && !Model.GetSchedule().IsOngoing ? account.ConvertToAccountTimeZone(attendance.Date.Value).ToLongDateString() : attendance.Date.Value.ToLongDateString() )</td>
 
                         <td>@seatsPossible</td>
 

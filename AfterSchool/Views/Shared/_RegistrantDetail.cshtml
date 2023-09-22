@@ -2,6 +2,7 @@
 @{
     var answers = Model.GetAnswers();
     var account = SessionVariables.CurrentAccount;
+    var accountUserType = SessionVariables.AccountUserType;
     var backToListAction = ViewData["BackToListAction"].ToString();
     var backToListController = ViewData["BackToListController"].ToString();
     var activity = Model.GetActivity();
@@ -9,13 +10,14 @@
 
     var isPrintView = ViewData["IsPrintView"].IsNotEmpty() && ViewData["IsPrintView"].ToString().IsBoolean() && ViewData["IsPrintView"].ToString().ToBoolean();
     var tableCondensed = isPrintView ? "table-condensed" : "";
+    var canViewCRMData = accountUserType != UserType.Instructor || !account.HasFeature(FeatureType.LimitInstructorRegistrantView);
 }
 <div class="panel panel-default">
 <div class="panel-heading" style="margin:0">
     @if (!isPrintView)
     {
         <div class="div-group pull-right">
-            @if (activity.BelongsTo(account))
+            @if (activity.BelongsTo(account) && canViewCRMData)
             {
                 <a href="@Url.Action("edit", "registration", new { id = registration.Uid.ToString(), returnUrl = Request.Url.ToString() })" class="btn btn-primary">
                     View Full Registration

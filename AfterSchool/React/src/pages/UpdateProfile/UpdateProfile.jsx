@@ -83,6 +83,7 @@ export default function UpdateProfile() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
+      const errorMsgs = [];
       if (dirty) {
         setSaveDisabled(true);
 
@@ -105,9 +106,12 @@ export default function UpdateProfile() {
           formSectionSubmitObject(values, activeGroupId),
           userUid,
           schoolLocationID
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        ).then(msgs => {
+          if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errorMsgs.push(...msgs);
+        });
       }
-      if (!msgs.length) {
+      if (!errorMsgs.length) {
         if (!lastSection) {
           handleSection('next');
           resetForm();

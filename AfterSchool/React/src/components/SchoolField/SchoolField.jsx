@@ -1,10 +1,10 @@
 import cs from 'classnames';
 import useStyles from './styles';
 import SimpleCheckBox from 'components/SimpleCheckBox';
-import React, { useRef, useState, useEffect } from 'react';
-import { StandaloneSearchBox, LoadScript } from '@react-google-maps/api';
-import { Typography, TextField as MuiTextField, Box } from '@material-ui/core';
+import React, { useState, useEffect } from 'react';
+import { Typography, Box } from '@material-ui/core';
 import { useRegistration, useProfile, useUpdateRegistration } from 'redux/hooks';
+import { GoogleLocation } from 'components';
 
 export const locationObject = place => {
   const latitude = place?.geometry?.location?.lat();
@@ -22,7 +22,7 @@ export const locationObject = place => {
     streetnumber,
     neighborhood
   } = {};
-  components.forEach(component => {
+  components?.forEach(component => {
     const type = component.types[0];
     const longName = component.long_name;
     const shortName = component.short_name;
@@ -57,7 +57,7 @@ export const locationObject = place => {
         country = shortName;
         break;
       case 'sublocality_level_1':
-        if (city.length === 0) city = longName;
+        if (!city) city = longName;
         break;
     }
   });
@@ -87,7 +87,6 @@ function SchoolField({
   isUpdatingRegistration = false,
   isUpdating: isUpdatingProfile = false
 }) {
-  const inputRef = useRef();
   const classes = useStyles();
   const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
@@ -101,8 +100,7 @@ function SchoolField({
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];
 
-  const handlePlaceChanged = () => {
-    const [place] = inputRef.current.getPlaces();
+  const handlePlaceChanged = place => {
     if (place) {
       setSchoolValue(place.name);
       setFieldValue(ID, place.name);
@@ -126,40 +124,32 @@ function SchoolField({
         <Box className={classes.fieldLabelWrapper}>
           <Typography variant="h6" className={classes.fieldLabel}>
             {Text} &nbsp;
-            <Typography className={typeClass}>{typeText}</Typography>
           </Typography>
+          <Typography className={typeClass}>{typeText}</Typography>
         </Box>
 
         <Box className={classes.textFieldWrapper}>
           <Box className={classes.searchBoxWrapper}>
-            <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={['places']}>
-              <StandaloneSearchBox
-                onLoad={ref => {
-                  inputRef.current = ref;
-                }}
-                onPlacesChanged={handlePlaceChanged}
-              >
-                <MuiTextField
-                  inputProps={{
-                    'data-testid': `${Text}-${QuestionDataTypeId}`
-                  }}
-                  variant="outlined"
-                  fullWidth
-                  {...formik.getFieldProps(question.ID)}
-                  helperText={touched[ID] && errors[ID]}
-                  error={!!(touched[ID] && errors[ID])}
-                  onChange={changeHandler}
-                  value={schoolValue}
-                  type="text"
-                  className={cs('form-control', classes.formControlClass)}
-                  placeholder={`Enter your ${Text}`}
-                  disabled={noSchool}
-                  FormHelperTextProps={{
-                    'data-testid': `${Text}-${QuestionDataTypeId}-error`
-                  }}
-                />
-              </StandaloneSearchBox>
-            </LoadScript>
+            <GoogleLocation
+              handlePlaceChanged={handlePlaceChanged}
+              inputProps={{
+                'data-testid': `${Text}-${QuestionDataTypeId}`
+              }}
+              variant="outlined"
+              fullWidth
+              {...formik.getFieldProps(question.ID)}
+              helperText={touched[ID] && errors[ID]}
+              error={!!(touched[ID] && errors[ID])}
+              onChange={changeHandler}
+              value={schoolValue}
+              type="text"
+              className={cs('form-control', classes.formControlClass)}
+              placeholder={`Enter your ${Text}`}
+              disabled={noSchool}
+              FormHelperTextProps={{
+                'data-testid': `${Text}-${QuestionDataTypeId}-error`
+              }}
+            />
           </Box>
         </Box>
       </Box>

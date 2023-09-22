@@ -22,6 +22,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
   const [copySuccess, setCopySuccess] = useState('Copy URL');
   const { Register, Apply } = applyModes;
   const {
+    msgs,
     loading,
     data: {
       isParent,
@@ -38,6 +39,10 @@ function ThankYouSection({ volunteerRegistration = false }) {
   useEffect(() => {
     loadThankYouScreenData(registrationId, volunteerRegistration);
   }, []);
+
+  useEffect(() => {
+    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
+  }, [msgs]);
 
   if (loading) return <Loader />;
 

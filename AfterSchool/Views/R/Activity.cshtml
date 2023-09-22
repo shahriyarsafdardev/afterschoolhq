@@ -69,6 +69,18 @@
         font-weight: 400;
         line-height: 22px;
     }
+    .ql-align-center {
+        text-align: center;
+    }
+    .ql-align-right {
+        text-align: right;
+    }
+    .ql-align-left {
+        text-align: left;
+    }
+    .ql-align-justify {
+        text-align: justify;
+    }
 </style>
 @{
     Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", account, new ViewDataDictionary
@@ -281,9 +293,14 @@
                     <h3>Contact</h3>
                     <p>
                         @Model.ContactName.IfEmpty(Model.OwnerAccount.Name)<br/>
-                        @if (Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
+                        @if (Model.ActivityType != ActivityType.VolunteerOpportunity && Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone).IsNotBlank())
                         {
                             <span>@Model.ContactPhone.IfEmpty(Model.OwnerAccount.Phone)</span>
+                            <br/>
+                        }
+                        else if(Model.ContactPhone.IsNotEmpty())
+                        {
+                            <span>@Model.ContactPhone</span>
                             <br/>
                         }
                         <a href="mailto:@Model.ContactEmail.IfEmpty(Model.OwnerAccount.Email)">Send Email</a><br/>

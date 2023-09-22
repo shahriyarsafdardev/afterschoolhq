@@ -41,7 +41,9 @@ namespace AfterSchool.Helpers
             {
                 var upcomingMaintenance = maintenanceSchedules.OrderBy(schedule => schedule.StartTime).First();
                 var startTime = upcomingMaintenance.StartTime;
-                var formattedTime = startTime.ToString("MMMM") + " " + startTime.Day + ", " + startTime.Year + " at " + startTime.ToString("h:mm tt") + " EST";
+                TimeZoneInfo estTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+                var estTime = TimeZoneInfo.ConvertTimeFromUtc(startTime, estTimeZone);
+                var formattedTime = estTime.ToString("MMMM") + " " + estTime.Day + ", " + estTime.Year + " at " + estTime.ToString("h:mm tt") + " EST";
                 TimeSpan duration = upcomingMaintenance.EndTime - startTime;
                 string hours;
                 if (duration.TotalHours >= 1)

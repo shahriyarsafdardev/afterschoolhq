@@ -444,8 +444,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-
+                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs)?.PersonTypeId;
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
+                var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
 
                 if (registrant.PersonTypeId == RegistrantPersonType.Student)
@@ -496,6 +497,21 @@ namespace AfterSchool.Areas.Api.Controllers
                             break;
                     }
                 });
+                
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
+                    currentUserPersonType.IsNotEmpty() && currentUserPersonType == RegistrantPersonType.Parent)
+                {
+                    var studentFirstName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                    var studentLastName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
+                    
+                    studentRegistrants.ForEach(stdRegistrant =>
+                    {
+                        if(stdRegistrant.IsNotEmpty() && stdRegistrant.ID != registrant.ID && stdRegistrant.IsDuplicateStudent(studentFirstName, studentLastName))
+                            throw new Exception("You already have a student profile with this name");
+                    });
+                }
 
                 if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation && registrant.PersonTypeId != RegistrantPersonType.Adult
                     && registrant.PersonTypeId != RegistrantPersonType.Volunteer)
@@ -656,7 +672,23 @@ namespace AfterSchool.Areas.Api.Controllers
                             break;
                     }
                 });
+                
+                if (json.groupid.ToInteger() == (int) QuestionGroupDataType.PersonalInformation &&
+                    currentUserPersonType == RegistrantPersonType.Parent)
+                {
+                    var studentFirstName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantFirstName).Value;
+                    var studentLastName = qvms
+                        .FirstOrDefault(question => question.Question.QuestionDataTypeId == QuestionDataType.RegistrantLastName).Value;
 
+                    studentRegistrants.ForEach(stdRegistrant =>
+                    {
+                        var (submittedRecord, _) = stdRegistrant.GetSubmittedRecord(participationObject,msgs);
+                        if (submittedRecord.IsNotEmpty() && submittedRecord.IsDuplicateStudent(studentFirstName, studentLastName))
+                            throw new Exception("You already have a student profile with this name");
+                    });
+                }
+                
                 var parent1FirstName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1FirstName).Value;
                 var parent1LastName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1LastName).Value;
                 var parent1MiddleName = qvms.Find(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.Parent1MiddleName)?.Value;

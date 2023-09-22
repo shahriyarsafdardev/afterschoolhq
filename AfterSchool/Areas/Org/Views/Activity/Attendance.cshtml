@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     ViewBag.Title = Model.AccountName;
     SystemMessages msgs = (SystemMessages)ViewBag.Messages;
@@ -35,6 +35,7 @@
             @{Html.RenderPartial("~/Views/Shared/_AttendanceList.cshtml", Model, new ViewDataDictionary() {
                   { "controller", "activity" },
                   { "attendances", ViewBag.Attendances },
+                  { "meetings", ViewBag.Meetings },
                   { "PagingModel", ViewBag.PagingModel }
               });}
 

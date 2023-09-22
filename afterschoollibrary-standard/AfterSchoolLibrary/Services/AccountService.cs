@@ -113,6 +113,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             account.IsDeleted = true;
+            account.IsActive = false;
             account.LastModifiedDate = DateTime.UtcNow;
             account.LastModifiedBy = loggedInUser?.ID.IfEmpty(0);
             msgs.AddRange(account.Save(dc));
@@ -193,10 +194,43 @@ namespace AfterSchoolLibrary.Services
             var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
             var numberOfPublishedActivities = account.GetPublishedActivities(msgs, dc)?
                 .Count(a => a.CostPerRegistrant == 0 &&
-                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today));
+                            (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today) && a.IsFree);
 
             return freeActivityLimit.IsNotEmpty() && (
                 freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+        }
+        public static bool CanPublishFreeActivity(this Account account, ActivityType activityType, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var freeActivityLimitPackageFeature = new AccountPackageFeature();
+
+            switch(activityType)
+            {
+                case ActivityType.Activity:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.FreeActivityLimit, msgs, dc);
+                    break;
+                case ActivityType.FieldTrip:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.ManageFieldTrips, msgs, dc);
+                    break;
+                case ActivityType.PermissionSlip:
+                    freeActivityLimitPackageFeature =
+                    account.GetAccountPackageFeature(FeatureType.ManagePermissionSlips, msgs, dc);
+                    break;
+            }
+            if(activityType != ActivityType.VolunteerOpportunity && activityType != ActivityType.LearningPod)
+            {
+                var freeActivityLimit = freeActivityLimitPackageFeature?.Max.Value;
+                var publishedActivities = account.GetPublishedActivities(msgs, dc);
+                var publishedActivitiesByTypeId = publishedActivities.Where(selectedType => selectedType.ActivityTypeId == activityType).ToList();
+                var numberOfPublishedActivities = publishedActivitiesByTypeId
+                    .Count(a => a.CostPerRegistrant == 0 &&
+                                (!a.HasSchedule || a.GetSchedule(msgs, dc).EndDate >= DateTime.Today) && a.IsFree);
+
+                return freeActivityLimit.IsNotEmpty() && (
+                freeActivityLimit == int.MaxValue || freeActivityLimit > numberOfPublishedActivities);
+            }
+            return freeActivityLimitPackageFeature.IsNotEmpty();
         }
 
         #endregion
@@ -2109,6 +2143,11 @@ namespace AfterSchoolLibrary.Services
                 dc: dc);
         }
 
+        public static int GetRegistrationsCountByActivityIDsByDate(this Account account, List<int> activityIds, DateTime startDateTime, DateTime endDateTime, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registration.GetCountByActivityIdsByDate(account, activityIds, startDateTime, endDateTime, msgs, dc);
+        }
+
         public static List<(int ID, ParticipationObjectType ParticipationObjectTypeId, string Name)>
             GetParticipationObjectsByBillerAccountId(this Account billerAccount,
                 DateTime? startDate, DateTime? endDate, bool isDeleted, SystemMessages msgs = null,
@@ -2153,7 +2192,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
-            RegistrationPeriod period, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            RegistrationPeriod period, WebUser loggedInUser, int? newAssignmentType = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             account.CreateNewRegistrantAndRegistration(
                 participationObject,
@@ -2161,6 +2200,7 @@ namespace AfterSchoolLibrary.Services
                 new List<(Activity activity, int preferenceNumber)>(),
                 period,
                 loggedInUser,
+                newAssignmentType,
                 msgs,
                 dc);
         }
@@ -2180,7 +2220,7 @@ namespace AfterSchoolLibrary.Services
         public static void CreateNewRegistrantAndRegistration(this Account account,
             ParticipationObject participationObject, List<(FormQuestion question, string answer)> questionsAndAnswers,
             List<(Activity activity, int preferenceNumber)> activitiesAndPreferences, RegistrationPeriod period,
-            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            WebUser loggedInUser, int? assignmentType = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             Registrant student = null;
 
@@ -2239,6 +2279,7 @@ namespace AfterSchoolLibrary.Services
                         amountCharged: participationObject.Cost,
                         loggedInUser: loggedInUser,
                         msgs: amsgs,
+                        assignmentType,
                         dc: adc);
 
                     activitiesAndPreferences.ForEach(activityAndPreference =>
@@ -2516,7 +2557,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     var accountPackageToRemove = account.GetActiveAccountPackage(amsgs, adc);
                     var stripeHelper = StripeHelper.GetStripeHelperSubscriberAccount();
-                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
 
                     amsgs.AddRange(accountPackageToRemove.CancelPackage(adc));
 
@@ -2534,6 +2574,8 @@ namespace AfterSchoolLibrary.Services
                         amsgs,
                         adc);
 
+                    var newTrialEndDate = accountPackageToRemove.IsDuringTrial ? newAccountPackage.GetTrialEndDate(amsgs, adc) : newTrialEndDateOverride;
+
                     if (keepTrialDays && accountPackageToRemove.IsDuringTrial)
                         newAccountPackage.ContinueTrialFromPreviousPackage(accountPackageToRemove, loggedInUser, amsgs, adc);
 
@@ -2541,8 +2583,7 @@ namespace AfterSchoolLibrary.Services
                     var referrerCouponId = account.ReferrerAccountId.HasValue ? StripeHelper.ReferralCouponId : null;
                     var defaultPaymentMethod = "";
 
-                    if (!accountPackageToRemove.IsDuringTrial)
-                        defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
+                    defaultPaymentMethod = stripeHelper.GetPaymentMethods(account.StripeCustomerId, StripePaymentMethodType.card, amsgs).LastOrDefault()
                             ?.Id;
 
                     var newStripeSubscription = stripeHelper.CreatePackageSubscription(
@@ -5372,7 +5413,7 @@ namespace AfterSchoolLibrary.Services
                     (PurchaseableObjectType) participationObject.ObjectType);
 
                 // if coupon is not assigned to any purchaseable object that means it can be applied to any purchaseable object
-                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty())
+                if (coupon.HasPurchaseableObjects(msgs) && purchaseableObjectCoupon.IsEmpty() )
                     msgs.Add("This coupon code is invalid", MessageType.UserError);
                 else
                 {

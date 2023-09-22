@@ -185,13 +185,13 @@ namespace AfterSchoolLibrary.Services
                 checkoutObject.SelectedDates,
                 loggedInUser,
                 msgs,
-                dc);
+                dc:dc);
         }
 
         public static void ProcessRegistrationAssignment(this Registration registration,
             ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant,
             int seatsRequested, int? activityGroupId, int? periodId, decimal? amountCharged, WebUser loggedInUser,
-            SystemMessages msgs, DatabaseConnection dc = null)
+            SystemMessages msgs, int? assignmentType = null, DatabaseConnection dc = null)
         {
             registration.ProcessRegistrationAssignment(
                 participationObject,
@@ -205,13 +205,14 @@ namespace AfterSchoolLibrary.Services
                 null,
                 loggedInUser,
                 msgs,
+                assignmentType,
                 dc);
         }
 
         public static void ProcessRegistrationAssignment(this Registration registration,
             ParticipationObject participationObject, Registrant masterRegistrant, Registrant registrant,
             int seatsRequested, int preferenceNumber, int? activityGroupId, int? periodId, decimal? amountCharged,
-            List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+            List<DateTime> registeredDates, WebUser loggedInUser, SystemMessages msgs, int? newAssignmentType = null, DatabaseConnection dc = null)
         {
             // NOTE: getting only one activity per registration at the moment, 
             // but could be problem in the future
@@ -220,8 +221,12 @@ namespace AfterSchoolLibrary.Services
             var amountPaidByRegistrant = ra.IsNotEmpty() && ra.RegistrantId.HasValue
                 ? participationObject.GetAmountPaidByRegistrant(ra.RegistrantId.Value, msgs, dc)
                 : (decimal?) null;
-            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject.ActivityType, loggedInUser.ID);
-            var assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
+            var requiresBackgroundCheck = IsBackgroundCheckRequired(participationObject, loggedInUser.ID.Value);
+            var assignmentType = new RegistrationAssignmentType();
+            if (newAssignmentType.IsNotEmpty())
+                assignmentType = (RegistrationAssignmentType)newAssignmentType;
+            else
+                assignmentType = GetRegistrationAssignmentType(participationObject, masterRegistrant, seatsRequested, ra?.AssignmentTypeId,
                 amountPaidByRegistrant, loggedInUser.ID, requiresBackgroundCheck);
 
             if (assignmentType == RegistrationAssignmentType.NotSet)
@@ -263,12 +268,14 @@ namespace AfterSchoolLibrary.Services
             }
         }
 
-        internal static bool IsBackgroundCheckRequired(ActivityType? participationObjectActivityType, int? webUserId)
+        internal static bool IsBackgroundCheckRequired(ParticipationObject participationObject, int webUserId)
         {
+            var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUserId).FirstOrDefault();
+            return participationObject.ActivityType == ActivityType.VolunteerOpportunity && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() &&
+                   volunteerApproval.IsEmpty();
             // TODO: Blocked pending some way to approve background checks.
             // TODO: Check if Account wants to use background checks as not all will.
             // TODO: Check if Web User has a valid background check with a completed result.
-            return false;
         }
 
         public static void AddESignature(this Registration registration, string esignature, string userAgent,
@@ -451,8 +458,14 @@ namespace AfterSchoolLibrary.Services
 
             var registrantIds = allRegistrations.Select(x => x.RegistrantId.Value).ToList();
             var registrationIds = allRegistrations.Select(x => x.ID.Value).ToList();
-
-            var registrantActivities = RegistrantActivity.LoadByRegistrantIds(registrantIds, msgs, dc);
+            var registrantActivities = new List<RegistrantActivity>();
+            
+            registrantIds.ForEach(registrantId =>
+            {
+               var ra =  RegistrantActivity.LoadByRegistrantId(registrantId, msgs, dc).FirstOrDefault();    
+               if (ra.IsNotEmpty())
+                   registrantActivities.Add(ra);
+            });
 
             if (participationObjectIds.Any())
                 registrantActivities = registrantActivities.Where(ra =>
@@ -492,10 +505,15 @@ namespace AfterSchoolLibrary.Services
                         });
                     });
 
-            var answers = FormQuestionAnswer.LoadByRegistrationIds(registrationIds, msgs, dc)
-                .Where(x => x.Text.IsNotBlank())
-                .ToList();
-
+            var answers = new List<FormQuestionAnswer>();
+            
+            registrationIds.ForEach(registrationId =>
+            {
+                var ans = FormQuestionAnswer.LoadByRegistrationId(registrationId, msgs, dc).FirstOrDefault();
+                if(ans.IsNotEmpty() && ans.Text.IsNotBlank())
+                    answers.Add(ans);
+            });
+            
             var questionIds = answers.Select(x => x.FormQuestionId.Value).Distinct().ToList();
 
             var questions = FormQuestion.LoadList(questionIds, msgs, dc)
@@ -699,7 +717,7 @@ namespace AfterSchoolLibrary.Services
 
             if (reportType == RegistrationReportType.Basic)
                 return row;
-            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()!.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
+            row.Add(volunteerReport ? registration.RegistrantActivities.FirstOrDefault()?.AssignmentTypeId.ToString() : registration.GetAmountPaid(msgs, dc).ToCurrency());
             AddQuestionsToCSVReport(row, standardQuestions, customQuestions, registration);
 
             return row;
@@ -1039,6 +1057,13 @@ namespace AfterSchoolLibrary.Services
         public static void WasUpdated(this Registration registration, SystemMessages msgs, DatabaseConnection dc = null)
         {
             registration.LastUpdated = DateTime.UtcNow;
+            msgs.AddRange(registration.Save(dc: dc));
+        }
+        
+        public static void UpdateAccountActivityGroupId(this Registration registration, int? accountActivityGroupId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            registration.LastUpdated = DateTime.UtcNow;
+            registration.AccountActivityGroupId = accountActivityGroupId;
             msgs.AddRange(registration.Save(dc: dc));
         }
 

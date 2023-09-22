@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from 'components';
-import { Box, Button, CircularProgress, TextField, Typography } from '@material-ui/core';
+import { LoadingButton } from 'components/Overrides';
+import { Box, TextField, Typography } from '@material-ui/core';
 
 import useStyles from './styles';
 function PinModal({ isOpen, onChange, onSubmit, submitDisabled }) {
@@ -17,21 +18,16 @@ function PinModal({ isOpen, onChange, onSubmit, submitDisabled }) {
           onChange={onChange}
           className={classes.modalElementMargin}
         />
-        <Button
-          color="primary"
+        <LoadingButton
+          type="submit"
           onClick={onSubmit}
           variant="contained"
-          className={classes.modalElementMargin}
+          color="primary"
+          text="Start"
           disabled={submitDisabled}
-        >
-          {submitDisabled ? (
-            <>
-              {'Loading . . .'} <CircularProgress size={'20px'} />
-            </>
-          ) : (
-            'Start'
-          )}
-        </Button>
+          loading={submitDisabled}
+          className={classes.modalElementMargin}
+        />
       </Box>
     </Modal>
   );

@@ -440,8 +440,9 @@ namespace AfterSchool.Controllers
                     }
                     else
                     {
+                        var answerText = qvm.Value.IsNotEmpty() ? qvm.Value : request.Form[qvm.Name];
                         submittedRecord.AddOrUpdateAnswer(
-                            qvm.Value,
+                            answerText,
                             qvm.Question,
                             registration?.ID,
                             currentUser,

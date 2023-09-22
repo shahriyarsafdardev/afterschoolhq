@@ -30,6 +30,9 @@ export default makeStyles(theme => ({
     '& .MuiOutlinedInput-root': {
       width: '100%',
       height: '40px'
+    },
+    '& .MuiFormHelperText-root.Mui-error': {
+      fontSize: 12
     }
   },
   outerWrapper: {

@@ -282,7 +282,7 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
 			dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
 		}
 
 		
@@ -324,6 +324,7 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int) participationObjectType);
             dq.Criterias.Add(ObjectMap["RegistrantFirstName"], firstName);
             dq.Criterias.Add(ObjectMap["RegistrantLastName"], lastName);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], false);
             return dq.GetCount() > 0;
         }
 

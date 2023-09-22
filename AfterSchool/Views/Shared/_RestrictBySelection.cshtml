@@ -15,17 +15,42 @@
     var allAgeRegistrationEnabled = SessionVariables.AccountPackage.HasFeature(FeatureType.AllAgeRegistration);
 }
 
+@{
+    Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+    {
+        Title = "Age Restriction Error",
+        HtmlBody = "<p>You have turned on age restrictions for this activity but your default form doesn't ask for date of birth. To enforce this restriction, we will ask registrants for date of birth during registration.</p>",
+        ActionButtonHtml = "Remove Restriction",
+        ActionButtonId = $"btn-age-restriction-error",
+        ID = $"modal-age-restriction-error",
+        OkButtonId = "modal-age-restriction-ok",
+        OkButtonHtml = "Okay",
+    });
+}
+@{
+    Html.RenderPartial("~/Views/Shared/_RestrictionModal.cshtml", new RestrictionModalViewModel()
+    {
+        Title = "Grade Restriction Error",
+        HtmlBody = "<p>You have turned on grade restrictions for this activity but your default form doesn't ask for grade. To enforce this restriction, we will ask registrants for grade during registration.</p>",
+        ActionButtonHtml = "Remove Restriction",
+        ActionButtonId = $"btn-grade-restriction-error",
+        ID = $"modal-grade-restriction-error",
+        OkButtonId = "modal-grade-restriction-ok",
+        OkButtonHtml = "Okay",
+    });
+}
+
 <div class="form-group">
     <label class="col-lg-3 control-label">
         Restrict by
     </label>
     <div class="col-lg-9 margin-left-sm">
         <div class="am-radio inline">
-            <input type="radio" id="restrictby-grade" name="restrictbygrade" class="form-control" value="1" @(restrictbygrade ? "checked=\"checked\"" : "") />
+            <input type="radio" id="restrictby-grade" name="restrictbygrade" data-modal="modal-grade-restriction-error" class="form-control " value="1" @(restrictbygrade ? "checked=\"checked\"" : "") />
             <label for="restrictby-grade">Grade</label>
         </div>
         <div class="am-radio inline">
-            <input type="radio" id="restrictby-age" name="restrictbygrade" class="form-control" value="0" @(!restrictbygrade ? "checked=\"checked\"" : "") />
+            <input type="radio" id="restrictby-age" name="restrictbygrade" data-modal="modal-age-restriction-error" class="form-control " value="0" @(!restrictbygrade ? "checked=\"checked\"" : "") />
             <label for="restrictby-age">Age</label>
         </div>
     </div>
@@ -74,7 +99,6 @@
                     validateByAge();
                 }
             });
-
             gradeOrAgeCheck();
         }
     );

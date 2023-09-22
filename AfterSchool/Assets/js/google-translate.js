@@ -72,10 +72,12 @@ $(document).ready(function () {
         $(".goog-te-combo option").each(function () {
             values.push($(this).val());
         });
-        var selectIndex = 0;
-        var a = document.querySelector("#google_translate_element select");
-        selectIndex = values.indexOf(languageCode);
-        a.selectedIndex = selectIndex;
-        a.dispatchEvent(new Event('change'));
+        if (values.length > 0) {
+            var selectIndex = 0;
+            var a = document.querySelector("#google_translate_element select");
+            selectIndex = values.indexOf(languageCode);
+            a.selectedIndex = selectIndex;
+            a.dispatchEvent(new Event('change'));
+        }     
     }
 })

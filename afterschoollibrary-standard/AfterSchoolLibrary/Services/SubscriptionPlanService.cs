@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -554,12 +555,23 @@ namespace AfterSchoolLibrary.Services
 
         public static DateTime? GetFirstChargeDateProviderTimeZone(this SubscriptionPlan plan, ParticipationObject participationObject)
         {
-            switch(plan.PaymentStartTypeId)
+            switch (plan.PaymentStartTypeId)
             {
                 case PlanPaymentStartType.OnPeriodStart:
                     return plan.StartDate.Value;
                 case PlanPaymentStartType.WhenActivityStarts:
-                    return participationObject.StartDate.Value;
+                    var schedule = participationObject.Schedule;
+                    if (schedule.RepeatsWeekly)
+                        return participationObject.StartDate.Value;
+                    else
+                    {
+                        var firstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        if (firstInstance.IsNotEmpty())
+                            return firstInstance.Value;
+                        else
+                            return null;
+                    }
+
                 case PlanPaymentStartType.OnCheckout:
                     return participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
             }
@@ -696,9 +708,9 @@ namespace AfterSchoolLibrary.Services
         {
             if (plan.PlanTypeId == SubscriptionPlanType.Subscription && participationObject.EndDate.HasValue)
                 return plan.CalculatePlanEndDate(
-                        plan.GetFirstChargeDateProviderTimeZone(participationObject).Value, 
+                        plan.GetFirstChargeDateProviderTimeZone(participationObject).Value,
                         participationObject.EndDate.Value.Date);
-            
+
             return null;
         }
 
@@ -739,6 +751,32 @@ namespace AfterSchoolLibrary.Services
             }
 
             return endDate;
+        }
+
+        public static DateTime GetNextPeriodDate(DateTime dateTime, BillingPeriodType billingPeriodType, SystemMessages msgs = null)
+        {
+            switch (billingPeriodType)
+            {
+                case BillingPeriodType.Month:
+                    dateTime = dateTime.AddMonths(1);
+                    break;
+                case BillingPeriodType.Year:
+                    dateTime = dateTime.AddYears(1);
+                    break;
+                case BillingPeriodType.Week:
+                    dateTime = dateTime.AddDays(7);
+                    break;
+                case BillingPeriodType.Day:
+                    dateTime = dateTime.AddDays(1);
+                    break;
+                case BillingPeriodType.TwoWeeks:
+                    dateTime = dateTime.AddDays(14);
+                    break;
+                default:
+                    dateTime = DateTime.UtcNow;
+                    break;
+            }
+            return dateTime;
         }
     }
 }

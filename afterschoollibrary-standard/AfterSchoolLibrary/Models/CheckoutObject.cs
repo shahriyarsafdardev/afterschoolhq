@@ -281,7 +281,7 @@ namespace AfterSchoolLibrary.Models
 
         internal decimal GetRegistrationCreditCardFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (IsRegistrationFree || CreditCardPurchaseObject.IsEmpty())
+            if (IsRegistrationFree || CreditCardPurchaseObject.IsEmpty() || RegistrationCostWithCoupon(msgs, dc) == 0)
                 return 0;
 
             var feeCalculationObject = new FeeCalculationObject(RegistrationCostNoFees, BillingAccount, ParticipationObject, msgs, dc);
@@ -290,7 +290,7 @@ namespace AfterSchoolLibrary.Models
 
         internal decimal GetRegistrationConvenienceFee(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            if (IsRegistrationFree)
+            if (IsRegistrationFree || RegistrationCostWithCoupon(msgs, dc) == 0)
                 return 0;
 
             var feeCalculationObject = new FeeCalculationObject(RegistrationCostNoFees, BillingAccount, ParticipationObject, msgs, dc);

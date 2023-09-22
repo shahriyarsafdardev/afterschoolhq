@@ -1,4 +1,4 @@
-﻿@using Stripe
+@using Stripe
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
     ViewBag.Title = "Payment";
@@ -57,7 +57,7 @@
         {
             var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
             <span>
-                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
+                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription <b>today</b>.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
             </span>
         }
         else
@@ -263,9 +263,9 @@ else
                         <p>Pay @PrintSubscriptionCost(subscriptionPlan, participationObject, false)</p>
                     }
 
-                    @if (participationObject.Schedule.IsNotEmpty() && participationObject.Schedule.EndDate.HasValue && !participationObject.Schedule.IsOngoing)
+                    @if (subscriptionPlan.EndDate.HasValue && !participationObject.Schedule.IsOngoing)
                     {
-                        <p>Payments will automatically end after <strong> @participationObject.Schedule.EndDate.ToLongDateString() (Activity End Date)</strong>.</p>
+                        <p>Payments will automatically end after <strong> @subscriptionPlan.EndDate.ToLongDateString() (Subscription End Date)</strong>.</p>
                     }
 
                     <hr/>

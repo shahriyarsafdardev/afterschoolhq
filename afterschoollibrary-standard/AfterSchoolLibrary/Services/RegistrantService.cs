@@ -176,12 +176,17 @@ namespace AfterSchoolLibrary.Services
             var plan = subscriptionPlanType == SubscriptionPlanType.PaymentPlan ? checkoutObject.PaymentPlan : checkoutObject.SubscriptionPlan;
 
             var participationObject = checkoutObject.ParticipationObject;
+            var activity = participationObject.GetActivity();
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
-            var endDateTime = plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+            var endDateTime = new DateTime?();
+
+            endDateTime = (activity.GetSchedule() != null && activity.GetSchedule().IsOngoing) ? null : 
+                plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+
             var stripeMetaData = new Dictionary<string, string>
                             {
                                 {"BillingAccountUid", billingAccount.Uid.ToString()},
@@ -215,7 +220,10 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
                 startDateTime = proratingCalculation.GetStartDate();
-                endDateTime = proratingCalculation.GetEndDate();
+
+                if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
+                    endDateTime = proratingCalculation.GetEndDate();
+
                 anchorDate = proratingCalculation.GetAnchorDate();               
             }
 
@@ -398,6 +406,7 @@ namespace AfterSchoolLibrary.Services
         {
             // start dates are in the provider's timezone, so when comparing dates, we need to start there
             var today = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow);
+            var schedule = participationObject.Schedule;
 
             switch (plan.PlanTypeId, plan.PaymentStartTypeId)
             {
@@ -407,8 +416,14 @@ namespace AfterSchoolLibrary.Services
                     if (unexpiredCancelledRegistrantSubscriptionPlans.Any(rsp => rsp.ValidUntil.HasValue))
                         return unexpiredCancelledRegistrantSubscriptionPlans.Last(rsp => rsp.ValidUntil.HasValue).ValidUntil!.Value
                             .AddDays(1); // need to double check this
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date) && schedule.RepeatsWeekly)
                         return participationObject.StartDate.Value;
+                    else
+                    {
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
+                    }
                     break;
                 case (SubscriptionPlanType.Subscription, PlanPaymentStartType.OnCheckout):  
                     // if on checkout, start on checkout
@@ -419,8 +434,15 @@ namespace AfterSchoolLibrary.Services
                         return plan.StartDate.Value;
                     break;
                 case (SubscriptionPlanType.PaymentPlan, PlanPaymentStartType.WhenActivityStarts):
-                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date))
+                    if (participationObject.StartDate.HasValue && participationObject.StartDate.Value.Date.IsAfter(today.Date) && schedule.RepeatsWeekly)
                         return participationObject.StartDate.Value;
+                    else
+                    {
+                        var scheduleFirstInstance = schedule.GetInstances().FirstOrDefault()?.StartDateTime;
+                        if(scheduleFirstInstance.IsNotEmpty())
+                            return scheduleFirstInstance.Value;
+                    }
+
                     break;
             }
 
@@ -1935,6 +1957,27 @@ namespace AfterSchoolLibrary.Services
                 registrant.GenderId = FormService.GetGenderFromAnswer(formQuestionAnswer.Text);
                 msgs.AddRange(registrant.Save(dc));
             }
+        }
+        public static List<RegistrantNote> GetNotes(this Registrant registrant, SystemMessages msgs,
+            DatabaseConnection dc = null)
+        {
+            var firstRegistrantId = registrant.GetFirstRegistrantId();
+            var registrantNotes =  RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs)
+                .OrderByDescending(rnv => rnv.ID).ToList();
+            
+            return registrantNotes;
+        }
+        public static int? GetFirstRegistrantId(this Registrant registrant)
+        {
+            return registrant.FirstRegistrantId.IsEmpty() ? registrant.ID : registrant.FirstRegistrantId;
+        }
+        public static bool IsDuplicateStudent(this Registrant registrant, string studentFirstName, string studentLastName)
+        {
+            if (registrant.FirstName.IsNotEmpty() && registrant.FirstName.ToLower().Equals(studentFirstName.ToLower()) &&
+                registrant.LastName.IsNotEmpty() && registrant.LastName.ToLower().Equals(studentLastName.ToLower()))
+                return true;
+
+            return false;
         }
     }
 }
