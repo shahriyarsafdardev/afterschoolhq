@@ -684,6 +684,7 @@
     <Compile Include="Areas\Volunteer\Controllers\ProfileController.cs" />
     <Compile Include="Areas\Volunteer\Controllers\SettingController.cs" />
     <Compile Include="Areas\Volunteer\VolunteerAreaRegistration.cs" />
+    <Compile Include="Areas\WebHooks\Controllers\ChargeSubscriptionController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\SterlingController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeController.cs" />
     <Compile Include="Areas\WebHooks\Controllers\StripeSubscriberController.cs" />
@@ -2650,6 +2651,7 @@
     <Folder Include="Areas\Org\Views\Period\" />
     <Folder Include="Areas\Org\Views\Registrant\" />
     <Folder Include="Areas\WebHooks\Models\" />
+    <Folder Include="Areas\WebHooks\Views\ChargeSubscription\" />
     <Folder Include="Areas\WebHooks\Views\Shared\" />
     <Folder Include="Areas\WebHooks\Views\Stripe\" />
     <Folder Include="Areas\WebHooks\Views\Twilio\" />

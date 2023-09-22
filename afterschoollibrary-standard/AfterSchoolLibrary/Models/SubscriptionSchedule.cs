@@ -256,6 +256,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static List<SubscriptionSchedule> LoadSubscriptionSchedulesPendingToday(DateTime nextBillDate, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            //dq.Criterias.Add(ObjectMap["NextBillDate"], nextBillDate.Date);
+            //dq.Criterias.Add(ObjectMap["DateCancelled"], null);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         #endregion
     }
 }
