@@ -23,5 +23,19 @@ namespace AfterSchoolLibrary.Services
 
             return subscriptionSchedulespendingToday;
         }
+
+        public static List<SubscriptionSchedule> GetSubscriptionSchedulePendingInThreeDays(SystemMessages msgs,
+           DatabaseConnection dc = null)
+        {
+            var subscriptionSchedulesNotCancelled = SubscriptionSchedule.LoadActiveSubscriptionSchedule(msgs, dc);
+            var date = DateTime.UtcNow.AddDays(3).Date;
+            var subscriptionSchedules = subscriptionSchedulesNotCancelled
+               .Where(x =>
+                    x.NextBillDate.Value.Date.Equals(date) &&
+                    (x.BillingPeriodType == BillingPeriodType.Month || x.BillingPeriodType == BillingPeriodType.Year)
+                )
+                .ToList();
+            return subscriptionSchedules;
+        }
     }
 }
