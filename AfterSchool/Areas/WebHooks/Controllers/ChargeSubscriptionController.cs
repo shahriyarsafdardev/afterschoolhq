@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using static AfterSchool.Controllers.AWSSubscriptionLambdaController;
+using Account = AfterSchoolLibrary.Models.Account;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
@@ -60,7 +61,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             
             // new logic
 
-            var rsp = RegistrantSubscriptionPlan.Load(2164, msgs, dc);
+            var rsp = RegistrantSubscriptionPlan.Load(135, msgs, dc);
 
             var plan = rsp.GetSubscriptionPlan(msgs);
             var registrant = rsp.GetRegistrant(msgs);
@@ -70,8 +71,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var participationObject = plan.GetParticipationObject(msgs);
 
 
-            AfterSchoolLibrary.Models.Account convenienceFeePayer;
-            AfterSchoolLibrary.Models.Account creditCardFeePayer;
+            Account convenienceFeePayer;
+            Account creditCardFeePayer;
 
             if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
                 convenienceFeePayer = purchasingAccount;
@@ -88,26 +89,25 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var platFormFlatFee = (!participationObject.IsRegistrationFree) ? billingAccount.GetPlatformConvenienceFlatFee(msgs, dc) : 0;
             var platformPercentFee = billingAccount.GetPlatformConveniencePercentFee(msgs, dc);
             
-         
             var amountPaidByParent = subscriptionSchedule.AmountInCents;
 
             // get the original price
             // have to get real data
-            //var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(plan.StripePlanId, msgs); //revisit
-            //var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
-            //var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
-            var stripeSubscriptionPrice = 30;
+            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(rsp.StripeSubscriptionId, msgs);
+            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
+            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+            
             var paymentType = rsp.PaymentTypeId;
             var isAmountProrated = false;
             
             // TODO: potentially problematic as the plan may have changed
             var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
             var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
-            //var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
+            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
 
-            //if (paymentType == PaymentType.ACH)
-            //    stripeSubscriptionPrice -= calculatedFullCCFee;
+            if (paymentType == PaymentType.ACH)
+                stripeSubscriptionPrice -= calculatedFullCCFee;
 
             isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
             
