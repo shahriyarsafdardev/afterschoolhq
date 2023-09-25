@@ -29,7 +29,7 @@ namespace AfterSchool.Areas.User.Controllers
                 registrant.GetSubmittedRecords(msgs).ForEach(submittedRecord =>
                 {
                     var ras = submittedRecord.GetRegistrantActivities(msgs)
-                        .Where(ra => ra.ParticipationObjectTypeId != ParticipationObjectType.ActivityGroup)
+                        .Where(ra => ra.ParticipationObjectTypeId != ParticipationObjectType.ActivityGroup && ra.IsDeleted == false)
                         .ToList();
 
                     ras.ForEach(ra =>
@@ -45,8 +45,8 @@ namespace AfterSchool.Areas.User.Controllers
                             participationViewModels.Add(new ParticipationViewModel(participationObject, ra, submittedRecord, RegistrationStatus.Future));
                     });
                 });
-
-                registeredActivities.Add(new RegistrantActivityViewModel(registrant, participationViewModels));
+                if (participationViewModels.Count > 0)
+                    registeredActivities.Add(new RegistrantActivityViewModel(registrant, participationViewModels));
             });
 
             return View(registeredActivities);

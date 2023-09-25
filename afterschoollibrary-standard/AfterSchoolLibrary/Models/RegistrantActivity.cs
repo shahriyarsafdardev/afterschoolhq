@@ -120,6 +120,14 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
+        public static RegistrantActivity LoadByIdByIsDeleted(int id, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ID"], id);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
         public static List<RegistrantActivity> Load(Hashtable criterias = null, int? start = null, int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
@@ -284,12 +292,22 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
 		}
+        public static RegistrantActivity LoadByParticipationObjectByRegistrantByIsDeleted(int ParticipationObjectId, ParticipationObjectType ParticipationObjectTypeId, int RegistrantId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
+            dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], (int)ParticipationObjectTypeId);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
 
-		
+
 
         #endregion
 
-		#region "UserDefined"        
+        #region "UserDefined"        
 
         public string RegistrantName => BaseWebUser.BuildDisplayName(RegistrantFirstName, RegistrantLastName);
 
@@ -365,6 +383,29 @@ namespace AfterSchoolLibrary.Models
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
+
+            if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
+                dq.Criterias.Add(ObjectMap["AssignmentTypeId"], assignmentTypes.Select(x => (int)x).ToArray(), DatabaseCriteriaOperatorEnum.In);
+
+            if (hasParentalConsent.HasValue)
+            {
+                var criteriaOperator = hasParentalConsent.Value ? DatabaseCriteriaOperatorEnum.IsNot : DatabaseCriteriaOperatorEnum.Is;
+
+                dq.Joins.Add(Registration.ObjectMap["ID"], ObjectMap["RegistrationId"], DatabaseJoinTypeEnum.InnerJoin);
+                dq.Criterias.Add(Registration.ObjectMap["ESignature"], DBNull.Value, criteriaOperator);
+            }
+
+            return dq.GetCount(msgs) > 0;
+        }
+        public static bool ExistsByParticipationObjectByRegistrantsByIsDeleted(int participationObjectId, ParticipationObjectType participationObjectType, List<int> registrantIds, List<RegistrationAssignmentType> assignmentTypes, bool? hasParentalConsent, bool isDeleted = false, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
+            dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
 
             if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
@@ -509,6 +550,14 @@ namespace AfterSchoolLibrary.Models
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+        public static List<RegistrantActivity> LoadByRegistrantIdsByIsDeleted(List<int> registrantIds, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
