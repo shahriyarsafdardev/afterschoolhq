@@ -1,13 +1,12 @@
 import { useDispatch } from 'react-redux';
 import { createSlice } from '@reduxjs/toolkit';
-import PostRegistrationSetupRepository from 'repository/PostRegistrationSetupRepository';
 import { useHeaderActions } from './HeaderSlice';
+import PostRegistrationSetupRepository from 'repository/PostRegistrationSetupRepository';
 
 const PostRegistrationSetupSlice = createSlice({
   name: 'postRegistrationSetupSlice',
   initialState: {
     data: {},
-    msgs: [],
     loading: true
   },
   reducers: {
@@ -19,9 +18,6 @@ const PostRegistrationSetupSlice = createSlice({
     },
     loadingCompleted: state => {
       state.loading = false;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
@@ -29,7 +25,7 @@ const PostRegistrationSetupSlice = createSlice({
 export const usePostRegistrationActions = () => {
   const dispatch = useDispatch();
   const { loadHeader } = useHeaderActions();
-  const { setMsgs, setData, loadingStart, loadingCompleted } = PostRegistrationSetupSlice.actions;
+  const { setData, loadingStart, loadingCompleted } = PostRegistrationSetupSlice.actions;
 
   const postRegistration = async regUid => {
     dispatch(loadingStart());
@@ -43,10 +39,7 @@ export const usePostRegistrationActions = () => {
 
   const updateData = async params => {
     return await PostRegistrationSetupRepository.addOrUpdateRegistrantUser(params).then(
-      ({ data: { msgs } }) => {
-        dispatch(setMsgs(msgs));
-        return msgs;
-      }
+      ({ data: { msgs } }) => msgs
     );
   };
 

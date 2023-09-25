@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import RegistrationRepository from 'repository/RegistrationRepository';
@@ -11,7 +12,6 @@ import RegistrationRepository from 'repository/RegistrationRepository';
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
   initialState: {
-    msgs: [],
     school: {},
     activity: {},
     questions: [],
@@ -69,16 +69,12 @@ const RegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useRegistrationActions = () => {
   const {
-    setMsgs,
     setSchool,
     setFormData,
     formDataLoaded,
@@ -86,6 +82,7 @@ export const useRegistrationActions = () => {
     submitFormSection,
     setRegistrationId
   } = RegistrationSlice.actions;
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
 
@@ -100,7 +97,6 @@ export const useRegistrationActions = () => {
       registrantUid
     ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length && !obj?.activityDto?.RegistrationIsCompleted) {
         const { HeaderImageURL, Name, Organization } = obj?.activityDto;
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
@@ -134,23 +130,19 @@ export const useRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
+
       return RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
         dispatch(setRegistrationId(obj));
-        dispatch(setMsgs(msgs));
         return msgs;
       });
     } else
-      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
-        dispatch(setMsgs(msgs));
-        return msgs;
-      });
+      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => msgs);
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
     if (!submit) return dispatch(setSchool({ school, noSchool }));
 
     return RegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
       return { obj, msgs };
     });
@@ -162,7 +154,6 @@ export const useRegistrationActions = () => {
 
   const exit = async (uid, activityUrl) => {
     await RegistrationRepository.exit(uid).then(({ msgs }) => {
-      dispatch(setMsgs(msgs));
       const { redirect } = utils;
       if (!msgs.length) redirect(activityUrl);
     });

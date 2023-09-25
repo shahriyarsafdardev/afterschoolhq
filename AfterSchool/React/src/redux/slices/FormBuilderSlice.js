@@ -6,7 +6,6 @@ import FormBuilderRepository from 'repository/FormBuilderRepository';
 const FormBuilderSlice = createSlice({
   name: 'formBuilderSlice',
   initialState: {
-    msgs: [],
     questions: [],
     form: {},
     loading: true,
@@ -43,9 +42,6 @@ const FormBuilderSlice = createSlice({
     setSectionData: (state, { payload: { FormQuestion } }) => {
       state.questions = FormQuestion;
     },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
-    },
     clearFormQuestions: state => {
       state.questions = [];
     }
@@ -54,7 +50,6 @@ const FormBuilderSlice = createSlice({
 
 export const useFormBuilderActions = () => {
   const {
-    setMsgs,
     updateForm,
     setFormData,
     setSectionData,
@@ -72,7 +67,6 @@ export const useFormBuilderActions = () => {
     dispatch(loadingFormData());
     await FormBuilderRepository.getFormData(formId).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -81,31 +75,29 @@ export const useFormBuilderActions = () => {
     dispatch(loadingSectionData());
     await FormBuilderRepository.getSectionData(formId, sectionId).then(({ obj, msgs }) => {
       if (obj) dispatch(setSectionData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(sectionDataLoaded());
     });
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
-    await FormBuilderRepository.submitFormSection({ ...values, SaveQuestion: true }).then(
+    return await FormBuilderRepository.submitFormSection({ ...values, SaveQuestion: true }).then(
       ({
         data: {
           msgs,
           obj: { FormQuestion }
         }
       }) => {
-        dispatch(setMsgs(msgs));
         if (!msgs.length) {
           dispatch(setSectionData({ ...values, FormQuestion }));
           dispatch(updateQuestionsGroups(FormQuestionGroups));
         }
+        return msgs;
       }
     );
   };
 
   const deleteSectionData = async ({ FormQuestionGroups, ...values }) => {
     await FormBuilderRepository.submitFormSection(values).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       if (!msgs.length) {
         dispatch(updateQuestionsGroups(FormQuestionGroups));
       }
@@ -115,7 +107,6 @@ export const useFormBuilderActions = () => {
   const updateFormSettings = async ({ FormSettings }) => {
     dispatch(loadingFormData());
     await FormBuilderRepository.submitFormSection({ FormSettings }).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       if (!msgs.length) {
         dispatch(updateForm(FormSettings));
         dispatch(formDataLoaded());
@@ -125,9 +116,8 @@ export const useFormBuilderActions = () => {
 
   const saveNewSectionData = async values => {
     await FormBuilderRepository.saveNewSectionData(values).then(
-      ({ data: { obj: newQuestionGroup, msgs } }) => {
+      ({ data: { obj: newQuestionGroup } }) => {
         dispatch(saveNewQuestionsGroup(newQuestionGroup));
-        dispatch(setMsgs(msgs));
       }
     );
   };

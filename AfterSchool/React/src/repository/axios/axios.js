@@ -1,5 +1,8 @@
 import axios from 'axios';
 import utils from 'utils';
+import ErrorMessagesSlice from 'redux/slices/ErrorMessagesSlice';
+
+let store;
 
 const { navigateTo } = utils;
 axios.defaults.baseURL = window.location.origin;
@@ -9,22 +12,33 @@ axios.defaults.headers = {
   Expires: '0'
 };
 
-axios.interceptors.response.use(
-  response => {
-    const { msgs = [], obj = {} } = response.data;
-    if (msgs?.length && msgs[0].IsError)
-      if (msgs.find(msg => ['No Registrant', 'Unauthorized'].includes(msg.Text)))
-        navigateTo('/login');
-      else if (msgs.find(msg => ['Invalid Form.'].includes(msg.Text))) navigateTo('/404.html');
+axios.interceptors.response.use(responseHandler, errorHandler);
 
-    return { ...response, data: { obj, msgs } };
-  },
-  error => {
-    if (error.response?.status === 404) navigateTo('/login');
+function responseHandler(response) {
+  const { setMsgs } = ErrorMessagesSlice.actions;
+  const { msgs = [], obj = {} } = response.data;
 
-    return Promise.reject(error);
+  if (msgs?.length && msgs[0].IsError) {
+    if (msgs.find(msg => ['No Registrant', 'Unauthorized'].includes(msg.Text)))
+      navigateTo('/login');
+    else if (msgs.find(msg => ['Invalid Form.'].includes(msg.Text))) {
+      navigateTo('/404.html');
+    }
   }
-);
+  store.dispatch(setMsgs(msgs));
+
+  return { ...response, data: { obj, msgs } };
+}
+
+function errorHandler(error) {
+  if (error.response?.status === 404) navigateTo('/login');
+
+  return Promise.reject(error);
+}
+
+export const injectStore = _store => {
+  store = _store;
+};
 
 export default {
   get: async url => {

@@ -16,7 +16,6 @@ export default function Survey() {
   const { scrollToTop } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    msgs,
     loading,
     questions,
     loadFormData,
@@ -69,10 +68,6 @@ export default function Survey() {
   };
 
   useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
-
-  useEffect(() => {
     if (responseId.current && !searchParams.get('surveyResponseUid'))
       location.search = location.search + `&surveyResponseUid=${responseId.current}`;
   }, [searchParams.get('surveyResponseUid')]);
@@ -90,7 +85,7 @@ export default function Survey() {
       if (dirty || lastSection || firstSection) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
         await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
-          respId => {
+          ([respId, msgs]) => {
             responseId.current = respId;
             if (!msgs.length) {
               enqueueSnackbar('Submitted.', { variant: 'success' });

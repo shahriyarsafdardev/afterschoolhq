@@ -16,7 +16,6 @@ export default function UpdateVolunteerProfile() {
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    msgs,
     loaded,
     loading,
     questions,
@@ -63,10 +62,6 @@ export default function UpdateVolunteerProfile() {
     }
   };
 
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
-
   const handleRedirection = () => {
     loaded();
     redirect(volunteerAccountUrl);
@@ -80,15 +75,18 @@ export default function UpdateVolunteerProfile() {
     initialValues: initialvalues,
     validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
+      let errorMsgs = [];
       if (dirty) {
         setSaveDisabled(true);
 
-        await submitFormSectionData(
-          formSectionSubmitObject(values, activeGroupId),
-          userUid
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        await submitFormSectionData(formSectionSubmitObject(values, activeGroupId), userUid).then(
+          errors => {
+            if (!errors.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+            else errorMsgs = errors;
+          }
+        );
       }
-      if (!msgs.length) {
+      if (!errorMsgs?.length) {
         if (!lastSection) {
           handleSection('next');
           resetForm();

@@ -8,8 +8,7 @@ const CheckInOutSlice = createSlice({
     pinSetupData: {},
     childData: {},
     loading: false,
-    selectedStudents: [],
-    msgs: []
+    selectedStudents: []
   },
   reducers: {
     setSelectedStudentsData: (state, { payload }) => {
@@ -27,9 +26,6 @@ const CheckInOutSlice = createSlice({
     loadingCompleted: state => {
       state.loading = false;
     },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
-    },
     clearStudents: (state, { payload }) => {
       state.selectedStudents = [];
     }
@@ -39,7 +35,6 @@ const CheckInOutSlice = createSlice({
 export const useCheckInOutActions = () => {
   const dispatch = useDispatch();
   const {
-    setMsgs,
     setPinData,
     setSelectedStudentsData,
     setChildListData,
@@ -47,6 +42,7 @@ export const useCheckInOutActions = () => {
     loadingCompleted,
     clearStudents
   } = CheckInOutSlice.actions;
+
   const loadPinData = async (registrationUid, phone) => {
     dispatch(loadingStart());
     return await CheckInOutRepository.getPinSetupData(
@@ -54,7 +50,6 @@ export const useCheckInOutActions = () => {
       encodeURIComponent(phone)
     ).then(({ obj, msgs }) => {
       dispatch(setPinData(obj));
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
       return msgs;
     });
@@ -68,7 +63,6 @@ export const useCheckInOutActions = () => {
       pinCode
     ).then(({ obj, msgs }) => {
       dispatch(setChildListData(obj));
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
       return msgs;
     });
@@ -84,7 +78,6 @@ export const useCheckInOutActions = () => {
     dispatch(loadingStart());
     return await CheckInOutRepository.updatePinSetupData(params).then(({ data: { msgs } }) => {
       dispatch(loadingCompleted());
-      dispatch(setMsgs(msgs));
       return msgs;
     });
   };
@@ -93,7 +86,6 @@ export const useCheckInOutActions = () => {
     const params = { phone, account };
     dispatch(loadingStart());
     return await CheckInOutRepository.resetPin(params).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
       return msgs;
     });
@@ -103,7 +95,6 @@ export const useCheckInOutActions = () => {
     const params = { token, code };
     dispatch(loadingStart());
     return await CheckInOutRepository.submitResetPin(params).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
       return msgs;
     });
@@ -126,7 +117,6 @@ export const useCheckInOutActions = () => {
     dispatch(loadingStart());
     return await CheckInOutRepository.updateStudentCheckInOutInfo(formData).then(
       ({ data: { msgs } }) => {
-        dispatch(setMsgs(msgs));
         dispatch(loadingCompleted());
         return msgs;
       }

@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
+import { useUpdateRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
-import { useUpdateRegistration } from 'redux/hooks';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -15,7 +15,6 @@ export default function UpdateRegistration() {
   const { enqueueSnackbar } = useSnackbar();
   const { thankyouUrl, volunteerThankYouUrl } = apiRoutes;
   const {
-    msgs,
     school,
     loading,
     questions,
@@ -76,10 +75,6 @@ export default function UpdateRegistration() {
     }
   };
 
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
-
   const handleRedirection = () => {
     const url = RegistrantType === 'Volunteer' ? volunteerThankYouUrl(regUid) : thankyouUrl(regUid);
     navigate(`${url}?update=1`);
@@ -105,8 +100,9 @@ export default function UpdateRegistration() {
     validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
+      let schoolLocationID = null;
+      let errors = [];
       if (!isEmpty || dirty || secondLastSection) {
-        let [schoolLocationID, errors] = [null, null];
         if (
           Name === 'Student Information' &&
           RegistrantType !== 'Adult' &&
@@ -126,13 +122,16 @@ export default function UpdateRegistration() {
           lastSection,
           schoolLocationID,
           regUid
-        ).then(() => enqueueSnackbar('Submitted.', { variant: 'success' }));
+        ).then(errorMsgs => {
+          if (!errorMsgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
+          else errors = errorMsgs;
+        });
       }
-      if (!lastSection && !msgs.length) {
+      if (!lastSection && !errors?.length) {
         handleSection('next');
         resetForm();
       } else {
-        lastSection && !msgs.length && handleRedirection();
+        lastSection && !errors?.length && handleRedirection();
         setSaveDisabled(false);
       }
     }

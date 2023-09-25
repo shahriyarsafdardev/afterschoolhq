@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
 import { Box } from '@material-ui/core';
 import useStyles from './styles';
@@ -16,16 +16,11 @@ function PinSetupForm(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [saveDisabled, setSaveDisabled] = useState(false);
   const {
-    msgs,
     updateData,
     data: { setupDto }
   } = usePostRegistration();
 
   const { IsPhoneSetup } = setupDto;
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const ValidationSchema = Yup.object().shape({
     phone: Yup.string().when([], {

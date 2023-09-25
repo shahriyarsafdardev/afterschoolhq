@@ -83,3 +83,7 @@ export const useRegistrantNotes = () => ({
   ...useSelector(state => state.registrantNotesSlice),
   ...useRegistrantNotesActions()
 });
+
+export const useErrorMessages = () => ({
+  ...useSelector(state => state.errorMessagesSlice)
+});

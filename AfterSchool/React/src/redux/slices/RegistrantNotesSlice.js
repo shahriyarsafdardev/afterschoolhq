@@ -10,7 +10,6 @@ import {
 const RegistrantNotesSlice = createSlice({
   name: 'registrantNotesSlice',
   initialState: {
-    msgs: [],
     pageNo: 0,
     loading: true,
     totalPages: 0,
@@ -27,9 +26,6 @@ const RegistrantNotesSlice = createSlice({
     setPaginationData: (state, { payload: { TotalPages, PageNo } }) => {
       state.totalPages = TotalPages;
       state.pageNo = PageNo;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     },
     loadingStart: state => {
       state.loading = true;
@@ -50,7 +46,6 @@ const RegistrantNotesSlice = createSlice({
 export const useRegistrantNotesActions = () => {
   const dispatch = useDispatch();
   const {
-    setMsgs,
     loadingStart,
     updateRegNote,
     loadingCompleted,
@@ -61,13 +56,12 @@ export const useRegistrantNotesActions = () => {
 
   const getNotes = async (regUid, perPage, pageNo, searchQuery = '') => {
     dispatch(loadingStart());
-    await getRegistrantNotes(regUid, perPage, pageNo, searchQuery).then(({ obj, msgs }) => {
+    await getRegistrantNotes(regUid, perPage, pageNo, searchQuery).then(({ obj }) => {
       if (obj) {
         dispatch(setRegistrantName(obj.RegistrantNotes.RegistrantName));
         dispatch(setRegistrantNotes(obj.RegistrantNotes.Notes));
         dispatch(setPaginationData(obj));
       }
-      dispatch(setMsgs(msgs));
     });
     dispatch(loadingCompleted());
   };
@@ -75,16 +69,13 @@ export const useRegistrantNotesActions = () => {
   const createNote = async ({ ...params }) => {
     dispatch(loadingStart());
     return await createRegistrantNote(params).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
-
       return msgs;
     });
   };
 
   const updateNote = async params => {
     return await updateRegistrantNote(params).then(({ data: { msgs, obj } }) => {
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(updateRegNote(obj.Note));
 
       return msgs;
@@ -94,9 +85,7 @@ export const useRegistrantNotesActions = () => {
   const deleteNote = async ({ noteID }) => {
     dispatch(loadingStart());
     return await deleteRegistrantNote({ noteID }).then(({ data: { msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(loadingCompleted());
-
       return msgs;
     });
   };

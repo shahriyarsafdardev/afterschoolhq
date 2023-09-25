@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
-import { useSnackbar } from 'notistack';
 import { Typography, Box, Button, TextField, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
@@ -14,12 +13,11 @@ import { Debounce, buildQueryParams, changeDateTimeFormat } from 'utils';
 const RegistrantNotesSection = () => {
   const classes = useStyles();
   const { regUid } = useParams();
-  const { enqueueSnackbar } = useSnackbar();
   const [open, setOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [editNoteValue, setEditNoteValue] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { getNotes, totalPages, registrantName, msgs, registrantNotes } = useRegistrantNotes();
+  const { getNotes, totalPages, registrantName, registrantNotes } = useRegistrantNotes();
 
   const query = searchParams.get('searchQuery') || '';
   const pageNo = searchParams.get('pageNo');
@@ -33,10 +31,6 @@ const RegistrantNotesSection = () => {
   useEffect(() => {
     getRegNotes(regUid, pageNo, setSearchParams, searchParams, query);
   }, [pageNo]);
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleOpen = () => setOpen(true);
 

@@ -15,7 +15,6 @@ export default function UpdateProfile() {
   const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    msgs,
     loaded,
     school,
     loading,
@@ -65,10 +64,6 @@ export default function UpdateProfile() {
       clearMessages();
     }
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleRedirection = () => {
     loaded();

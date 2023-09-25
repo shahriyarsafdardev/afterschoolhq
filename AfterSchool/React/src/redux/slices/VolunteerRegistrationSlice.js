@@ -4,13 +4,13 @@ import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import VolunteerRegistrationRepository from 'repository/VolunteerRegistrationRepository';
 
 const VolunteerRegistrationSlice = createSlice({
   name: 'volunteerRegistrationSlice',
   initialState: {
-    msgs: [],
     activity: {},
     questions: [],
     loading: true,
@@ -55,16 +55,13 @@ const VolunteerRegistrationSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useVolunteerRegistrationActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setFormData,
     formDataLoaded,
     loadingFormData,
@@ -82,7 +79,6 @@ export const useVolunteerRegistrationActions = () => {
       ({ obj, msgs }) => {
         if (obj) dispatch(setFormData(obj));
 
-        dispatch(setMsgs(msgs));
         const {
           Name,
           CanAccess,
@@ -115,20 +111,25 @@ export const useVolunteerRegistrationActions = () => {
     formData.append('groupId', groupId);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
+    dispatch(submitFormSection(answers));
+
     if (lastSection) {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      VolunteerRegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        dispatch(setRegistrationId(obj));
-        dispatch(setMsgs(msgs));
-      });
-    } else
-      await VolunteerRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-        dispatch(setMsgs(msgs))
+      return await VolunteerRegistrationRepository.register(formData).then(
+        ({ data: { obj, msgs } }) => {
+          dispatch(setRegistrationId(obj));
+          return msgs;
+        }
       );
-
-    dispatch(submitFormSection(answers));
+    } else
+      return await VolunteerRegistrationRepository.submitFormSection(formData).then(
+        ({ data: { obj, msgs } }) => {
+          dispatch(setRegistrationId(obj));
+          return msgs;
+        }
+      );
   };
 
   const clearMessages = () => {
@@ -137,7 +138,6 @@ export const useVolunteerRegistrationActions = () => {
 
   const exit = async (uid, activityUrl) => {
     await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
-      dispatch(setMsgs(msgs));
       const { redirect } = utils;
       if (!msgs.length) redirect(activityUrl);
     });

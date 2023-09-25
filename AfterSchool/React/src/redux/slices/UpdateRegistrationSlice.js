@@ -5,13 +5,13 @@ import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import { responseMapper } from './helper';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import UpdateRegistrationRepository from 'repository/UpdateRegistrationRepository';
 
 const UpdateRegistrationSlice = createSlice({
   name: 'updateRegistrationSlice',
   initialState: {
-    msgs: [],
     school: {},
     activity: {},
     questions: [],
@@ -64,16 +64,13 @@ const UpdateRegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useUpdateRegistrationActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setSchool,
     setFormData,
     formDataLoaded,
@@ -96,7 +93,6 @@ export const useUpdateRegistrationActions = () => {
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());
       }
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -107,6 +103,7 @@ export const useUpdateRegistrationActions = () => {
     schoolLocationID,
     regUid
   ) => {
+    dispatch(submitFormSection(answers));
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
     formData.append('groupId', groupId);
@@ -118,22 +115,19 @@ export const useUpdateRegistrationActions = () => {
       const eSignature = answers.find(answer => answer.QuestionText === 'E-Signature').Text;
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
-      UpdateRegistrationRepository.eSignature(formData).then(({ data: { msgs } }) => {
-        dispatch(setMsgs(msgs));
-      });
-    } else
-      await UpdateRegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) =>
-        dispatch(setMsgs(msgs))
+      return await UpdateRegistrationRepository.eSignature(formData).then(
+        ({ data: { msgs } }) => msgs
       );
-
-    dispatch(submitFormSection(answers));
+    } else
+      return await UpdateRegistrationRepository.submitFormSection(formData).then(
+        ({ data: { msgs } }) => msgs
+      );
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
     if (!submit) return dispatch(setSchool({ school, noSchool }));
 
     return UpdateRegistrationRepository.submitSchoolData(school).then(({ data: { obj, msgs } }) => {
-      dispatch(setMsgs(msgs));
       dispatch(setSchool({ school: { ...school, id: obj }, noSchool }));
       return { obj, msgs };
     });
@@ -145,7 +139,6 @@ export const useUpdateRegistrationActions = () => {
 
   const exit = async (uid, activityUrl) => {
     await UpdateRegistrationRepository.exit(uid).then(({ msgs }) => {
-      dispatch(setMsgs(msgs));
       const { redirect } = utils;
       if (!msgs.length) redirect(activityUrl);
     });

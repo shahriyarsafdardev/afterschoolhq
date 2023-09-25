@@ -1,12 +1,12 @@
 import { useDispatch } from 'react-redux';
 import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
+import ErrorMessagesSlice from './ErrorMessagesSlice';
 import ProfileRepository from 'repository/ProfileRepository';
 
 const VolunteerProfileSlice = createSlice({
   name: 'volunteerProfileSlice',
   initialState: {
-    msgs: [],
     activity: {},
     questions: [],
     loading: true,
@@ -41,16 +41,13 @@ const VolunteerProfileSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
 
 export const useVolunteerProfileActions = () => {
+  const { setMsgs } = ErrorMessagesSlice.actions;
   const {
-    setMsgs,
     setFormData,
     formDataLoaded,
     loadingFormData,
@@ -64,7 +61,6 @@ export const useVolunteerProfileActions = () => {
     dispatch(loadingFormData());
     await ProfileRepository.getFormData(UserUid, true).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      dispatch(setMsgs(msgs));
       if (!msgs.length) dispatch(formDataLoaded());
     });
   };
@@ -76,11 +72,10 @@ export const useVolunteerProfileActions = () => {
     formData.append('registrantId', UserUid);
     formData.append('answers', new URLSearchParams(answersQuery).toString());
 
-    await ProfileRepository.submitFormSection(formData, true).then(({ data: { msgs } }) =>
-      dispatch(setMsgs(msgs))
-    );
-
     dispatch(submitFormSection(answers));
+    return await ProfileRepository.submitFormSection(formData, true).then(
+      ({ data: { msgs } }) => msgs
+    );
   };
 
   const clearMessages = () => {

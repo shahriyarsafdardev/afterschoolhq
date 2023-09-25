@@ -1,7 +1,6 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Box, Card, CircularProgress, Grid } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
-import { useSnackbar } from 'notistack';
 import { isEmpty } from 'lodash';
 
 import PhoneNumberForm from '../Common/PhoneNumberForm';
@@ -18,12 +17,10 @@ function index() {
   const [isSetupCompleted, setIsSetupCompleted] = useState(false);
   const navigate = useNavigate();
   const { registrationUid } = useParams();
-  const { enqueueSnackbar } = useSnackbar();
   const [searchParams, setSearchParams] = useSearchParams();
   const phone = getPhoneFromParams(searchParams);
 
   const {
-    msgs,
     loadPinData,
     updatePinData,
     pinSetupData: { currentUserInfo = {} },
@@ -36,10 +33,6 @@ function index() {
     updatePinData(registrationUid, phone, pin);
     setIsSetupCompleted(true);
   };
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   useEffect(async () => {
     if (phone) {

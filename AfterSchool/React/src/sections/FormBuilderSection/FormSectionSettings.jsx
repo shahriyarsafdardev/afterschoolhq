@@ -43,8 +43,7 @@ function FormSectionSettings() {
     clearQuestions,
     sectionLoading,
     questions,
-    form,
-    msgs
+    form
   } = useFormBuilder();
 
   const currentSectionIndex = questionsGroups.findIndex(qg => qg.Id == questionGroup);
@@ -112,7 +111,7 @@ function FormSectionSettings() {
         FormQuestionGroups: updatedQuestionGroups,
         FormSettings: { FormId: formId },
         FormQuestion: formQuestions
-      }).then(() => {
+      }).then(msgs => {
         if (msgs.length) return;
 
         enqueueSnackbar('Submitted.', { variant: 'success' });

@@ -19,7 +19,6 @@ export default function Survey() {
   const { pinSurveyThankyouUrl } = routes;
   const { enqueueSnackbar } = useSnackbar();
   const {
-    msgs,
     loading,
     questions,
     loadFormData,
@@ -72,10 +71,6 @@ export default function Survey() {
     }
   };
 
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
-
   const lastSection = activeGroup === totalGroups - 1;
   const firstSection = activeGroup === 0;
   const initialvalues = initialValues();
@@ -88,12 +83,14 @@ export default function Survey() {
       setSaveDisabled(true);
       if (dirty || lastSection || firstSection) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
-        await submitFormSectionData(submitObj, null, null, lastSection, srUid, pin).then(() => {
-          if (!msgs.length) {
-            enqueueSnackbar('Submitted.', { variant: 'success' });
-            lastSection && navigate(pinSurveyThankyouUrl(srUid));
+        await submitFormSectionData(submitObj, null, null, lastSection, srUid, pin).then(
+          ([, msgs]) => {
+            if (!msgs.length) {
+              enqueueSnackbar('Submitted.', { variant: 'success' });
+              lastSection && navigate(pinSurveyThankyouUrl(srUid));
+            }
           }
-        });
+        );
       }
 
       handleSection('next');
