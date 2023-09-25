@@ -49,7 +49,7 @@ namespace AfterSchoolLibrary.Models
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public DateTime? DateCancelled { get { return (DateTime?)MDV["DateCancelled"].Value; } set { MDV["DateCancelled"].Value = value; } }
 		public DateTime? ValidUntil { get { return (DateTime?)MDV["ValidUntil"].Value; } set { MDV["ValidUntil"].Value = value; } }
-		
+        public Guid SubscriptionScheduleUid { get { return (Guid) MDV["SubscriptionScheduleUid"].Value; } set { MDV["SubscriptionScheduleUid"].Value = value; } }
 
         public RegistrantSubscriptionPlan()
         {
@@ -85,7 +85,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "BillingPeriodTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "DateCancelled", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "ValidUntil", System.Data.SqlDbType.DateTime);
-				
+                _dp.Add(className, "SubscriptionScheduleUid", System.Data.SqlDbType.UniqueIdentifier);
+
                 return _dp;
             }
         }
@@ -232,7 +233,9 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["ValidUntil"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["SubscriptionScheduleUid"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             return msgs;
         }
@@ -282,8 +285,6 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["StripeSubscriptionId"], StripeSubscriptionId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
 		}
-
-		
 
         #endregion
 
