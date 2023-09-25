@@ -13,7 +13,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using System.Web.Http;
+//using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Mvc;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
@@ -25,12 +25,13 @@ namespace AfterSchool.Controllers
     public class AWSSubscriptionLambdaController : Controller
     {
         // GET: AWSSubscriptionLambdaController/Lambda
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public void Lambda()
         {
             SystemMessages msgs = new SystemMessages();
 
             var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs, null);
+            var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs, null);
 
             if (subscriptionSchedulespendingToday != null)
             {
@@ -47,7 +48,7 @@ namespace AfterSchool.Controllers
                             tokenOrSourceId: schedule.StripeSourceId, // Use the StripeSourceId from the schedule
                             totalAmount: schedule.AmountInCents / 100.0m, // Convert cents to dollars
                             description: schedule.Description,
-                            statementDescriptor: "ABCD",
+                            statementDescriptor: "AHQ Subscription charge",
                             metaData: new Dictionary<string, string>
                             {
                                 //{"ActivityUid", ""},
@@ -76,13 +77,9 @@ namespace AfterSchool.Controllers
 
                             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
 
-                            var response = SendWebhook(jsonPayload);
-
-                            var x = "";
-
-                            //if successful, send email to customer and AHQ 
+                            SendWebhook(jsonPayload);
                         }
-                        else
+                        else if(charge.Status == LastChargeStatus.failed.ToString())
                         {
                             msgs.Add("Charge failed", MessageType.Error);
 
@@ -103,12 +100,19 @@ namespace AfterSchool.Controllers
                             //if Need to cancel?    
                             //Cancel subscription, notify main AHQ system
                         }
+                        else
+                        {
+                            //pending status?????
+                        }
                     }
                     else
-                    {
                         msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
-                    }
                 }
+            }
+
+            if(subscriptionSchedulesAfterThreeDays != null)
+            {
+                //send email that you have upcoming payment
             }
         }
 
@@ -121,23 +125,20 @@ namespace AfterSchool.Controllers
                 using (HttpClient client = new HttpClient())
                 {
                     // Set the base URL of your Web API
-                    //string baseUrl = Utilities.SurveyBaseUrl; 
+                    string baseUrl = Utilities.SurveyBaseUrl; 
 
-                    //string apiUrl = $"{baseUrl}/webhooks/ChargeSubscription/Updated";
+                    string apiUrl = $"{baseUrl}/webhooks/ChargeSubscription/Updated";
 
                     var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-                    //var response = client.PostAsync(apiUrl, content).Result;
+                    client.DefaultRequestHeaders.Add("User-Agent", "AFTRSCHL/.1");
 
+                    var response = client.PostAsync(apiUrl, content).Result;
 
-                    client.BaseAddress = new Uri(Utilities.SurveyBaseUrl);
-                    var response = await client.PostAsync("webhooks/ChargeSubscription/Updated", content);
-
-                    //if (response.IsSuccessStatusCode)
-                    if (response!=null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        //var responseContent = await response.Content.ReadAsStringAsync();
-                        // what to do next
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        //if successful, send email to customer and AHQ 
                     }
                     else
                     {
