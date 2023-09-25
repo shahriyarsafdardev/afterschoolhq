@@ -38,8 +38,8 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(volunteerApproval.Save(dc: dc));
             
-            if(msgs.HasNoErrors())
-                EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
+            // if(msgs.HasNoErrors())
+            //     EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
             
             return volunteerApproval;
         }
