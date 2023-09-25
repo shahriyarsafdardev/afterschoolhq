@@ -1474,6 +1474,17 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("registrationthankyouemail", "Thank you for registering.");
                 values.Add("applicationthankyouemail", "Thank you for applying.");
 
+                // Add activity schedule for activity
+                values.Add("schedule", "0");
+                values.Add("startdate", DateTime.UtcNow);
+                values.Add("enddate", DateTime.UtcNow.AddDays(8));
+                values.Add("dailystarttime", DateTime.UtcNow.AddMinutes(0));
+                values.Add("dailyendtime", DateTime.UtcNow.AddHours(8));
+                values.Add("scheduledates", new List<ActivityInstance>());
+                values.Add("scheduledatesclosed", new List<DateTime>());
+                values.Add("repeatsweekly", "1");
+                values.Add("days", "1,2");
+
                 activity = ActivityService.CreateNew(
                     loggedInUserId: currentUser.ID.Value,
                     account: currentAccount,
