@@ -11,6 +11,8 @@ using System.IO;
 using System;
 using AfterSchoolLibrary.Helpers;
 using System.Net.Mail;
+using MimeKit;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace AfterSchoolLibrary
 {
@@ -73,7 +75,12 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static SystemMessages SendMailWithAttachments(EmailAddress fromEmail, EmailAddress toEmail,
+        public static void ReadPdfIntoMemoryStream(MemoryStream memoryStream, string fileName, byte[] attachmentBytes)
+        {
+            memoryStream.Write(attachmentBytes, 0, attachmentBytes.Length);
+        }
+
+        public static  SystemMessages SendMailWithAttachments(EmailAddress fromEmail, EmailAddress toEmail,
             string subject, string body, byte[] attachmentByteData, string attachmentFilename)
         {
             var msgs = new SystemMessages();
@@ -82,57 +89,67 @@ namespace AfterSchoolLibrary
             {
                 // Initialize your SES client
                 var sesClient = new AmazonSimpleEmailServiceClient(Utilities.AmazonAccessKeyId, Utilities.AmazonSecretAccessKeyId, Utilities.AmazonRegionEndPoint);
-
-
+                var bodyBuilder = new BodyBuilder();
+                bodyBuilder.HtmlBody = body;
                 MailMessage message = new MailMessage(fromEmail.Email.ToString(), toEmail.Email.ToString(), subject, body);
                 var attachmentStream = new MemoryStream(attachmentByteData);
                 var attachment = new System.Net.Mail.Attachment(attachmentStream, attachmentFilename);
                
                 message.Attachments.Add(attachment);
-                // Create a MemoryStream for the attachment data
-                //MemoryStream attachmentStream = null;
-
-                //if (attachmentByteData != null)
-                //{
-                //    attachmentStream = new MemoryStream(attachmentByteData);
-                //}
-
-                // Create the SendRawEmailRequest
-                var request = new SendRawEmailRequest
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    RawMessage = new RawMessage
-                    {
-                        Data = CreateRawEmailData(
-                            fromEmail.Email.ToString(),
-                            toEmail.Email.ToString(),
-                            subject,
-                            body,
-                            attachmentStream,
-                            attachmentFilename
-                        )
-                    },
-                    Destinations = new List<string> { toEmail.Email.ToString() }, // Destination email address
-                    Source = fromEmail.Email.ToString(), // Sender email address
-                                                         // Reply-To addresses can be added here if needed
-                };
+                    ReadPdfIntoMemoryStream(ms,attachmentFilename, attachmentByteData);
+                    ms.Seek(0, System.IO.SeekOrigin.Begin);
+                    bodyBuilder.Attachments.Add(attachmentFilename, ms, new ContentType("application", "pdf"));
+                }
+                var mimeMessage = new MimeMessage();
+                mimeMessage.From.Add(new MailboxAddress(fromEmail.Name, fromEmail.Email));
+                mimeMessage.To.Add(new MailboxAddress(toEmail.Name, "ibad@wellcraftedconsulting.com"));
+                mimeMessage.Subject = subject;
 
-                //using (MemoryStream memoryStream = new MemoryStream())
-                //{
-                //    message.Save(memoryStream);
-                //    SendRawEmailRequest request = new SendRawEmailRequest
-                //    {
-                //        RawMessage = new RawMessage { Data = memoryStream }
-                //    };
-                //    await client.SendRawEmailAsync(request);
-                //}
+                mimeMessage.Body = bodyBuilder.ToMessageBody();
+                using (var messageStream = new MemoryStream())
+                {
+                    Task.Run(async () => await mimeMessage.WriteToAsync(messageStream));
+                    var request = new SendRawEmailRequest { RawMessage = new RawMessage(messageStream) };
+                    //var task = await sesClient.SendRawEmailAsync(request);
+                    // Create the SendRawEmailRequest
+                    //var request = new SendRawEmailRequest
+                    //{
+                    //    RawMessage = new RawMessage
+                    //    {
+                    //        Data = CreateRawEmailData(
+                    //            fromEmail.Email.ToString(),
+                    //            toEmail.Email.ToString(),
+                    //            subject,
+                    //            body,
+                    //            attachmentStream,
+                    //            attachmentFilename
+                    //        )
+                    //    },
+                    //    Destinations = new List<string> { toEmail.Email.ToString() }, // Destination email address
+                    //    Source = fromEmail.Email.ToString(), // Sender email address
+                    //                                         // Reply-To addresses can be added here if needed
+                    //};
 
-                // Send the email with attachments
-                var task = Task.Run(async () => await sesClient.SendRawEmailAsync(request));
-                //var response = sesClient.SendRawEmailAsync(request);
+                    //using (MemoryStream memoryStream = new MemoryStream())
+                    //{
+                    //    message.Save(memoryStream);
+                    //    SendRawEmailRequest request = new SendRawEmailRequest
+                    //    {
+                    //        RawMessage = new RawMessage { Data = memoryStream }
+                    //    };
+                    //    await client.SendRawEmailAsync(request);
+                    //}
 
-                dynamic response = task.Result;
-                if (response.HttpStatusCode != HttpStatusCode.OK)
-                    msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+                    // Send the email with attachments
+                    var task = Task.Run(async () => await sesClient.SendRawEmailAsync(request));
+                    //var response = sesClient.SendRawEmailAsync(request);
+
+                    dynamic response = task.Result;
+                    if (response.HttpStatusCode != HttpStatusCode.OK)
+                        msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+                }
             }
             catch (Exception ex)
             {

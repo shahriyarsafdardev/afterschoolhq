@@ -11,6 +11,8 @@ using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using AfterSchoolLibrary.Enums;
 using System.Text.RegularExpressions;
+using System.Collections.Specialized;
+using EmailHelper = AfterSchoolLibrary.Helpers.EmailHelper;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -366,10 +368,18 @@ namespace AfterSchoolLibrary.Services
                 var csv = CsvFile.Create(table);
                 var csvByteData = Encoding.UTF8.GetBytes(csv);
                 var subject = $"Submission Data Report";
-                var body = @$"<p>Your Submission Data report is attached.</p>
-                        {Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")}";
+                var model = new NameValueCollection
+                {
+                    {"AppSignature", Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")},
+                    {"Body", "Your Submission Data report is attached."},
+                };
+                var body = EmailHelper.ProcessTemplate(
+                EmailTemplates.Form_Report,
+                model,
+                "Form_Email_Report",
+                msgs);
 
-                msgs.AddRange(SendGridHelper.SendMailWithAttachments(
+                msgs.AddRange(AmazonSESHelper.SendMailWithAttachments(
                     fromEmail: new EmailAddress(
                         Email.AppNoReplyEmailAddress,
                         "AfterSchool HQ"
@@ -377,7 +387,7 @@ namespace AfterSchoolLibrary.Services
                     toEmail: new EmailAddress(loggedInUser.Email),
                     subject: subject,
                     body: body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
+                    //emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
                     attachmentByteData: csvByteData,
                     attachmentFilename: $"{attachmentName}.csv"
                 ));

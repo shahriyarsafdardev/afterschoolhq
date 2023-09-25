@@ -223,6 +223,16 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Form_Report {
+            get {
+                object obj = ResourceManager.GetObject("Form_Report", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Initiate_BackgoundCheck {
             get {
                 object obj = ResourceManager.GetObject("Initiate_BackgoundCheck", resourceCulture);
