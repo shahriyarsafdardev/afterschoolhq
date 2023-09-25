@@ -125,7 +125,7 @@ namespace AfterSchoolLibrary.Models
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
-            dq.Criterias.Add(ObjectMap["IsDeleted"], (bool)isDeleted);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
@@ -297,7 +297,7 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ParticipationObjectId"], ParticipationObjectId);
-            dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], ParticipationObjectTypeId);
+            dq.Criterias.Add(ObjectMap["ParticipationObjectTypeId"], (int)ParticipationObjectTypeId);
             dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
@@ -405,7 +405,7 @@ namespace AfterSchoolLibrary.Models
             dq.UseParameterizedQuery = false;
             dq.Criterias.Add(ObjectMap["participationObjectId"], participationObjectId);
             dq.Criterias.Add(ObjectMap["participationObjectTypeId"], (int)participationObjectType);
-            dq.Criterias.Add(ObjectMap["isDeleted"], (bool)isDeleted);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds, DatabaseCriteriaOperatorEnum.In);
 
             if (assignmentTypes.IsNotEmpty() && assignmentTypes.Count > 0)
@@ -557,7 +557,7 @@ namespace AfterSchoolLibrary.Models
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["RegistrantId"], registrantIds.ToArray(), DatabaseCriteriaOperatorEnum.In);
-            dq.Criterias.Add(ObjectMap["isDeleted"], (bool)isDeleted);
+            dq.Criterias.Add(ObjectMap["isDeleted"], isDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
