@@ -365,8 +365,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         JsonRequestBehavior.AllowGet);
         }
 
-        [HttpGet]
-        public ActionResult Publish(int formId)
+        [HttpPost]
+        public ActionResult TogglePublish(int formId)
         {
             if (formId.IsEmpty())
                 return HttpNotFound();
