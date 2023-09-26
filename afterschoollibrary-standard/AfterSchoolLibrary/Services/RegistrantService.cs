@@ -631,7 +631,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         internal static void SendEmail(this Registrant registrant, Account account, string activityName, string fromName, string replyToEmail,
-            string replyToName, string subject, string body, string utmCampaign = "", SystemMessages msgs = null)
+            string replyToName, string subject, string body, string contactPhone, string utmCampaign = "",  SystemMessages msgs = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -650,6 +650,7 @@ namespace AfterSchoolLibrary.Services
                     subject,
                     body,
                     utmCampaign,
+                    contactPhone,
                     msgs);
         }
 

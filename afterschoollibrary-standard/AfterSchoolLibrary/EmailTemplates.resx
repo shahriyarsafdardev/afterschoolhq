@@ -169,6 +169,9 @@
   <data name="AuthCode_Email" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>EmailTemplates\AuthCode-Email.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+    <data name="Email_Message" type="System.Resources.ResXFileRef, System.Windows.Forms">
+        <value>EmailTemplates\Email-Message.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </data>
   <data name="Interest_Confirmation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>emailtemplates\interest-confirmation.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

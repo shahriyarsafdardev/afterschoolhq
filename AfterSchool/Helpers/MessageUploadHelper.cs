@@ -22,5 +22,11 @@ namespace AfterSchool.Helpers
             }
             return body;
         }
+        public static string UploadFileAndGetLink(HttpPostedFileBase importedFile, Account currentAccount, SystemMessages msgs)
+        {
+            var body = string.Empty;
+            var fileLink = currentAccount.UploadFile(importedFile.InputStream, importedFile.FileName, msgs);
+            return fileLink;
+        }
     }
 }
