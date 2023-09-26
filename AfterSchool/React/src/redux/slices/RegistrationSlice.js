@@ -69,6 +69,14 @@ const RegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
+    },
+    setSectionStatusAsCompleted: (state, { payload }) => {
+      const updatedGroups = state.questionsGroups;
+      const groupIndex = updatedGroups.findIndex(
+        section => section.QuestionGroupDataTypeId === payload
+      );
+      updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
+      state.questionsGroups = updatedGroups;
     }
   }
 });
@@ -80,7 +88,8 @@ export const useRegistrationActions = () => {
     formDataLoaded,
     loadingFormData,
     submitFormSection,
-    setRegistrationId
+    setRegistrationId,
+    setSectionStatusAsCompleted
   } = RegistrationSlice.actions;
   const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -132,11 +141,15 @@ export const useRegistrationActions = () => {
       dispatch(loadingFormData());
 
       return RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
+        dispatch(setSectionStatusAsCompleted(groupId));
         dispatch(setRegistrationId(obj));
         return msgs;
       });
     } else
-      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => msgs);
+      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
+        dispatch(setSectionStatusAsCompleted(groupId));
+        return msgs;
+      });
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {

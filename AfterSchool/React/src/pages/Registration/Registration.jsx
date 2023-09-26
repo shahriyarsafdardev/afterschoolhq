@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { useRegistration } from 'redux/hooks';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
+import SidebarSection from 'pages/shared/Sidebar';
+import { useRegistration } from 'redux/hooks';
+import { Box } from '@material-ui/core';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -124,6 +126,14 @@ export default function Registration({ newChild = false }) {
     onSubmit: async (values, { resetForm }) => {
       const errorMsgs = [];
       setSaveDisabled(true);
+      if (lastSection) {
+        const notCompletedSection = questionsGroups.find(section => section.Status !== 'completed');
+        if (notCompletedSection) {
+          setSaveDisabled(false);
+          enqueueSnackbar('Complete all your sections.', { variant: 'error' });
+          return;
+        }
+      }
       if (!isEmpty || dirty || secondLastSection) {
         let [schoolLocationID, errors] = [null, null];
         if (
@@ -202,24 +212,27 @@ export default function Registration({ newChild = false }) {
   };
 
   return (
-    <RegistrationForm
-      allowToPayLater={AllowToPayLater}
-      loading={loading}
-      totalGroups={totalGroups}
-      activeGroup={activeGroup}
-      saveDisabled={saveDisabled}
-      currentQuestions={currentQuestions}
-      Name={Name}
-      saveButtonText={saveButtonText}
-      handleSection={handleSection}
-      lastSection={lastSection}
-      formik={formik}
-      handleSubmit={handleSubmit}
-      skipAble={skipAble}
-      registrantType={RegistrantType}
-      isFree={IsFree}
-      firstSection={activeGroup === 0}
-      exitHandler={exitHandler}
-    ></RegistrationForm>
+    <Box style={{ position: 'relative' }}>
+      <RegistrationForm
+        allowToPayLater={AllowToPayLater}
+        loading={loading}
+        totalGroups={totalGroups}
+        activeGroup={activeGroup}
+        saveDisabled={saveDisabled}
+        currentQuestions={currentQuestions}
+        Name={Name}
+        saveButtonText={saveButtonText}
+        handleSection={handleSection}
+        lastSection={lastSection}
+        formik={formik}
+        handleSubmit={handleSubmit}
+        skipAble={skipAble}
+        registrantType={RegistrantType}
+        isFree={IsFree}
+        firstSection={activeGroup === 0}
+        exitHandler={exitHandler}
+      ></RegistrationForm>
+      {questionsGroups?.length && <SidebarSection questionsGroups={questionsGroups} />}
+    </Box>
   );
 }
