@@ -20,8 +20,12 @@ using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
-    public class SelectRegistrantController : BaseController
+    public class SelectRegistrantController : BaseLoggedInController
     {
+        public SelectRegistrantController() : base(new List<AccountType> { AccountType.AfterSchool })
+        {
+        }   
+
         [HttpGet]
         public ActionResult GetRegistrantsForParent()
         {
@@ -245,7 +249,7 @@ namespace AfterSchool.Areas.Api.Controllers
                        }
                     );
                 var addnewStudentUrl = $"/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}";
-                var Response = new
+                var response = new
                 {
                     AddNewStudentUrl = addnewStudentUrl,
                 };
