@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, TextareaAutosize, FormHelperText } from '@material-ui/core';
+import { Box, Typography, TextareaAutosize, FormHelperText } from '@material-ui/core';
 
 import useStyles from './styles';
 
@@ -8,14 +8,14 @@ export default function TextAreaQuestion({ formikProps, label }) {
   const { error, value } = formikProps;
 
   return (
-    <Grid className={classes.textFieldBox} xs={12}>
-      <Grid xs={12} md={4} item className={classes.titleGrid}>
+    <Box className={classes.outerWrapper}>
+      <Box className={classes.fieldLabelWrapper}>
         <Typography variant="h6" className={classes.fieldLabel}>
           {label}
-          &nbsp;
         </Typography>
-      </Grid>
-      <Grid xs={12} md={8} item className={classes.textFieldGrid}>
+      </Box>
+
+      <Box className={classes.textfieldWrapper}>
         <TextareaAutosize
           data-testid={`${label}`}
           minRows={4}
@@ -32,7 +32,7 @@ export default function TextAreaQuestion({ formikProps, label }) {
             {`${value?.length || 0}/400`}
           </FormHelperText>
         </Box>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }

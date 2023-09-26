@@ -16,7 +16,7 @@ import useStyles from './styles';
 function FormSettings() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const { form, questionsGroups, updateFormSettings } = useFormBuilder();
   const { markChangesAsUnsaved, markChangesAsSaved } = useUnsavedChanges();
   const firstSectionQuestionGroupId = questionsGroups.length ? questionsGroups[0].Id : -1;
@@ -26,9 +26,11 @@ function FormSettings() {
     FormDescription: Yup.string().max(400, 'Text cannot be longer than 400 characters')
   });
 
+  const updatedForm = { ...form, FormDescription: form.FormDescription || '' };
+
   const formik = useFormik({
     enableReinitialize: true,
-    initialValues: form,
+    initialValues: updatedForm,
     validationSchema,
     onSubmit: async values => {
       await updateFormSettings({
@@ -57,7 +59,7 @@ function FormSettings() {
 
       <FormikProvider value={formik}>
         <Form autoComplete="off" noValidate className={classes.form}>
-          <Box>
+          <Box className={classes.marginTop}>
             <TextField
               formikProps={{
                 ...getFieldProps('FormName'),
@@ -84,8 +86,8 @@ function FormSettings() {
                 helperText: touched['FormDescription'] && errors['FormDescription'],
                 errorMsg: errors['FormDescription']
               }}
-              label={'Description'}
-              data-testid={'Description'}
+              label="Internal Description"
+              data-testid="Description"
             />
           </Box>
           <Box className={classes.buttonOuterWrapper}>
