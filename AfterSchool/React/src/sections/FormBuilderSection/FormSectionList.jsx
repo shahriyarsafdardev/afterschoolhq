@@ -36,7 +36,7 @@ function FormSectionList() {
   const [newSectionName, setNewSectionName] = useState('');
   const [newSearchParams, setNewSearchParams] = useState('');
   const [newSectionError, setNewSectionError] = useState('');
-  const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [deleteSectionId, setDeleteSectionId] = useState(null);
   const [showNewSectionField, setShowNewSectionField] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
@@ -48,7 +48,7 @@ function FormSectionList() {
     form: { FormType: formType }
   } = useFormBuilder();
 
-  const classes = useStyles({ questionGroup: questionGroup || formType == formTypeId.survey });
+  const classes = useStyles({ questionGroup: questionGroup || formType === formTypeId.survey });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
@@ -108,7 +108,7 @@ function FormSectionList() {
   };
 
   const handleCloseDialog = () => {
-    setdeleteSectionId(null);
+    setDeleteSectionId(null);
     setIsOpen(false);
   };
 
@@ -194,7 +194,7 @@ function FormSectionList() {
                 style={{ cursor: 'pointer', color: '#B2B2B4' }}
                 onClick={() => {
                   setIsOpen(true);
-                  setdeleteSectionId(key);
+                  setDeleteSectionId(key);
                 }}
               />
             )}

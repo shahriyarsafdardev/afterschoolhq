@@ -34,6 +34,8 @@ export default {
     disabled: '#F2F2F5'
   },
   gray: {
+    light: '#F9F9F9',
+    main: '#E4E4E4',
     primary: '#555555',
     secondary: '#B2B2B4'
   },

@@ -65,7 +65,7 @@ export default {
     `Api/Form/GetFormQuestions/?FormId=${formId}&SectionId=${sectionId}`,
   submitFormBuilderDataAPI: 'Api/Form/SaveFormData',
   saveNewSectionDataAPI: 'Api/Form/SaveNewSection',
-  getPublishUnpublishSurveyAPI: formId => `Api/Form/Publish/?FormId=${formId}`,
+  publishUnpublishSurveyAPI: 'Api/Form/TogglePublish',
 
   // Survey Form APIs
   getSurveyFormDataAPI: (formUid, surveyResponseUid) =>

@@ -9,6 +9,6 @@ export default {
   getFormData: formId => axios.get(ApiRoutes.getFormBuilderDataAPI(formId)).then(res => res),
   getSectionData: (formId, sectionId) =>
     axios.get(ApiRoutes.getFormBuilderSectionDataAPI(formId, sectionId)).then(res => res),
-  publishUnpublishSurvey: formId =>
-    axios.get(ApiRoutes.getPublishUnpublishSurveyAPI(formId)).then(res => res)
+  publishUnpublishSurvey: params =>
+    axios.post(ApiRoutes.publishUnpublishSurveyAPI, params).then(res => res)
 };
