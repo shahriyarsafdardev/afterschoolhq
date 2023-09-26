@@ -33,7 +33,7 @@ export default makeStyles(theme => ({
       marginTop: props => (props.questionGroup ? '104px' : '0px')
     },
     [theme.breakpoints.down('sm')]: {
-      backgroundColor: '#F9F9F9',
+      backgroundColor: theme.palette.gray.light,
       boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
       zIndex: 1,
       maxHeight: '600px',
@@ -127,7 +127,7 @@ export default makeStyles(theme => ({
   question: {
     width: '100%',
     justifyContent: 'space-evenly',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     flexDirection: 'row',
     borderRadius: '3px',
     display: 'flex',
@@ -173,7 +173,7 @@ export default makeStyles(theme => ({
     color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     '& .MuiCircularProgress-colorPrimary': {
       color: theme.palette.text.secondary
     }
@@ -252,7 +252,7 @@ export default makeStyles(theme => ({
     fontSize: 14,
     width: 120,
     height: '40px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     margin: '8px 12px'
   },
   setAudienceButton: {
@@ -262,7 +262,7 @@ export default makeStyles(theme => ({
     width: 120,
     fontSize: 14,
     margin: '20px 0px 25px 0px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     [theme.breakpoints.down('sm')]: {
       width: '100%'
     }
@@ -278,11 +278,11 @@ export default makeStyles(theme => ({
     position: 'absolute'
   },
   audienceList: {
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     borderRadius: '3px',
     marginTop: '-45px',
     marginLeft: '110px',
-    backgroundColor: '#F9F9F9',
+    backgroundColor: theme.palette.gray.light,
     boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
     minWidth: '350px',
     padding: '8px 12px',
@@ -323,7 +323,6 @@ export default makeStyles(theme => ({
     }
   },
   applyToAllControlsItem: {
-    // padiing: '5px',
     display: 'flex',
     alignItems: 'center',
     [theme.breakpoints.up('md')]: {
@@ -411,18 +410,18 @@ export default makeStyles(theme => ({
     fontSize: '14px',
     fontWeight: 'bold',
     marginTop: '25px',
-    border: '1px solid #E4E4E4'
+    border: `1px solid ${theme.palette.gray.main}`
   },
   addNewQuestionButton: {
     color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
-    border: '1px solid #E4E4E4'
+    border: `1px solid ${theme.palette.gray.main}`
   },
   selectMood: {
     color: theme.palette.text.secondary,
     fontSize: '14px',
-    border: '1px solid #E4E4E4'
+    border: `1px solid ${theme.palette.gray.main}`
   },
   dropDownIcon: { width: '20px', height: 'auto', marginLeft: '2px' },
   checkboxWrapper: {
@@ -456,7 +455,7 @@ export default makeStyles(theme => ({
     margin: '8px 12px',
     width: '100px',
     fontSize: '14px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     '& .MuiCircularProgress-colorPrimary': {
       color: theme.palette.text.secondary
     }
@@ -517,23 +516,23 @@ export default makeStyles(theme => ({
     margin: theme.spacing(0.5),
     '& .MuiChip': {
       root: {
-        backgroundColor: '#f2f2f5'
+        backgroundColor: theme.palette.text.disabled
       }
     }
   },
   chipRoot: {
-    backgroundColor: '#f2f2f5 !important'
+    backgroundColor: `${theme.palette.text.disabled} !important`
   },
   emojiContent: {
     display: 'flex',
     flexDirection: 'column'
   },
   emojiOuterWrapper: {
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     borderRadius: '3px',
     marginTop: '4px',
     marginLeft: '-15px',
-    backgroundColor: '#F9F9F9',
+    backgroundColor: theme.palette.gray.light,
     boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
     minWidth: '350px',
     padding: '8px 12px',

@@ -84,10 +84,12 @@ export const useFormBuilderActions = () => {
   };
 
   const publishOrUnpublishSurvey = async formId => {
-    return await FormBuilderRepository.publishUnpublishSurvey(formId).then(({ obj, msgs }) => {
-      if (!msgs.length) dispatch(setIsPublishedSurvey(obj));
-      return obj;
-    });
+    return await FormBuilderRepository.publishUnpublishSurvey({ formId }).then(
+      ({ data: { obj, msgs } }) => {
+        if (!msgs.length) dispatch(setIsPublishedSurvey(obj));
+        return obj;
+      }
+    );
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
