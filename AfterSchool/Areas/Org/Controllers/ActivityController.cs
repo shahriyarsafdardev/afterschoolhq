@@ -976,7 +976,6 @@ namespace AfterSchool.Areas.Org.Controllers
                     body += $@"<div class=""attachments text-left""><p> <span class=""text-muted "">{importedFiles.Count} {attachmentLabel}</span> <span class=""color-green margin-l-10 download-link"">{downloadLabel}</span></p>";
                     foreach (var file in importedFiles)
                     {
-                        var fileLink = MessageUploadHelper.UploadFileAndGetLink(file, currentAccount, msgs);
                         double fileSize = ((double)file.ContentLength / (1024 * 1024));
                         string formattedSize = fileSize.ToString("F2") + "mb";
                         if(fileSize == 0)
@@ -984,6 +983,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             fileSize = (double)file.ContentLength / 1024;
                             formattedSize = fileSize.ToString("F2") + "kb";
                         }
+                        var fileLink = MessageUploadHelper.UploadFileAndGetLink(file, currentAccount, msgs);
                         body += $@"<div class=""file-box""><div class=""file-box-icon""><i class=""icon icon-left s7-file attachment-icon""></i></div><div class=""file-box-info""><a class=""file-link"" href=""{fileLink}"" data-file-name=""{file.FileName}"">{file.FileName}</a><span class=""text-muted"">{formattedSize}</span></div></div>";
                     }
                     body += @"</div>";
