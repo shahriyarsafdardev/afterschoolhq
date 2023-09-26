@@ -1478,8 +1478,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("schedule", "0");
                 values.Add("startdate", DateTime.UtcNow);
                 values.Add("enddate", DateTime.UtcNow.AddDays(8));
-                values.Add("dailystarttime", DateTime.UtcNow.AddMinutes(0));
-                values.Add("dailyendtime", DateTime.UtcNow.AddHours(8));
+                values.Add("dailystarttime", DateTime.UtcNow.Date.AddHours(15));
+                values.Add("dailyendtime", DateTime.UtcNow.Date.AddHours(17));
                 values.Add("scheduledates", new List<ActivityInstance>());
                 values.Add("scheduledatesclosed", new List<DateTime>());
                 values.Add("repeatsweekly", "1");
