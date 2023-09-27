@@ -1,11 +1,18 @@
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { Box } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { useUpdateRegistration } from 'redux/hooks';
+import {
+  handleStatusAndRedirection,
+  setSectionIndexToStorage,
+  setSkipableStatusAsCompleted
+} from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
+import { useUpdateRegistration } from 'redux/hooks';
+import SidebarSection from 'pages/shared/Sidebar';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -21,6 +28,7 @@ export default function UpdateRegistration() {
     loadFormData,
     questionsGroups,
     answeredQuestions,
+    setStatusCompleted,
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
@@ -102,6 +110,7 @@ export default function UpdateRegistration() {
       setSaveDisabled(true);
       let schoolLocationID = null;
       let errors = [];
+      const groupId = secondLastSection ? -1 : activeGroupId;
       if (!isEmpty || dirty || secondLastSection) {
         if (
           Name === 'Student Information' &&
@@ -118,22 +127,24 @@ export default function UpdateRegistration() {
         }
 
         await submitFormSectionData(
-          formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
+          formSectionSubmitObject(values, groupId),
           lastSection,
           schoolLocationID,
           regUid
         ).then(errorMsgs => {
-          if (!errorMsgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
-          else errors = errorMsgs;
+          if (!errorMsgs.length) {
+            if (lastSection) localStorage.removeItem('lastCompletedSectionId');
+            enqueueSnackbar('Submitted.', { variant: 'success' });
+          } else errors = errorMsgs;
         });
       }
       if (!lastSection && !errors?.length) {
-        handleSection('next');
-        resetForm();
+        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, groupId);
       } else {
         lastSection && !errors?.length && handleRedirection();
         setSaveDisabled(false);
       }
+      setSectionIndexToStorage(activeGroup);
     }
   });
   const { handleSubmit, dirty, values } = formik;
@@ -147,6 +158,10 @@ export default function UpdateRegistration() {
   useEffect(() => {
     if (questionsGroups.length)
       setActiveGroupId(questionsGroups[activeGroup].QuestionGroupDataTypeId);
+  }, [questionsGroups.length]);
+
+  useEffect(() => {
+    if (questionsGroups.length) setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted);
   }, [questionsGroups.length]);
 
   useEffect(() => {
@@ -177,24 +192,27 @@ export default function UpdateRegistration() {
   const updatedSaveButton = () => 'E-Sign';
 
   return (
-    <RegistrationForm
-      loading={loading}
-      totalGroups={totalGroups}
-      activeGroup={activeGroup}
-      saveDisabled={saveDisabled}
-      currentQuestions={currentQuestions}
-      Name={Name}
-      saveButtonText={lastSection ? updatedSaveButton : saveButtonText}
-      handleSection={handleSection}
-      lastSection={lastSection}
-      formik={formik}
-      handleSubmit={handleSubmit}
-      skipAble={skipAble}
-      registrantType={RegistrantType}
-      isFree={IsFree}
-      firstSection={activeGroup === 0}
-      isUpdatingRegistration={true}
-      showExit={false}
-    ></RegistrationForm>
+    <Box style={{ position: 'relative' }}>
+      <RegistrationForm
+        loading={loading}
+        totalGroups={totalGroups}
+        activeGroup={activeGroup}
+        saveDisabled={saveDisabled}
+        currentQuestions={currentQuestions}
+        Name={Name}
+        saveButtonText={lastSection ? updatedSaveButton : saveButtonText}
+        handleSection={handleSection}
+        lastSection={lastSection}
+        formik={formik}
+        handleSubmit={handleSubmit}
+        skipAble={skipAble}
+        registrantType={RegistrantType}
+        isFree={IsFree}
+        firstSection={activeGroup === 0}
+        isUpdatingRegistration={true}
+        showExit={false}
+      ></RegistrationForm>
+      {!loading && <SidebarSection questionsGroups={questionsGroups} />}
+    </Box>
   );
 }

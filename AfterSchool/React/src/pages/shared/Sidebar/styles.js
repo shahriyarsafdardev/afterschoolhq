@@ -9,7 +9,7 @@ export default makeStyles(theme => ({
     borderRadius: 10,
     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
     position: 'absolute',
-    top: 178,
+    top: 160,
     right: 50,
     [theme.breakpoints.down('lg')]: {
       display: 'none'
@@ -33,9 +33,14 @@ export default makeStyles(theme => ({
   },
   sectionItemWrapper: {
     gap: 10,
-    cursor: 'pointer',
     display: 'flex',
     alignItems: 'flex-start'
+  },
+  sectionItemWrapperHover: {
+    '&:hover': {
+      textDecoration: 'underline',
+      cursor: 'pointer'
+    }
   },
   icon: {
     width: 20

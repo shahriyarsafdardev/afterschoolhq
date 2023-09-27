@@ -3,7 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 export default makeStyles(theme => ({
   exitButtonWrapper: {
     display: 'flex',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    minHeight: '37px'
   },
   form: {
     height: '105vh'
@@ -84,7 +85,7 @@ export default makeStyles(theme => ({
   saveButton: {
     background: theme.palette.primary.main,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: theme.palette.white.primary,
     marginLeft: 15,
     minWidth: 200,
     [theme.breakpoints.down('sm')]: {
@@ -103,7 +104,7 @@ export default makeStyles(theme => ({
   outerWrapper: {
     minHeight: '100%',
     position: 'relative',
-    background: '#ffffff',
+    background: theme.palette.white.primary,
     borderRadius: '20px',
     border: '1px solid #f9f9f9',
     boxShadow: '0 2px 4px rgb(0 0 0 / 30%)',
@@ -147,7 +148,7 @@ export default makeStyles(theme => ({
     fontSize: '13px',
     lineHeight: '1.42857143',
     color: '#777777',
-    backgroundColor: '#ffffff',
+    backgroundColor: theme.palette.white.primary,
     backgroundImage: 'none',
     borderRadius: '0',
     '& .MuiOutlinedInput-root': {
@@ -173,5 +174,10 @@ export default makeStyles(theme => ({
   },
   sectionName: {
     padding: '30px 0px'
+  },
+  progressBar: {
+    [theme.breakpoints.up('xl')]: {
+      display: 'none'
+    }
   }
 }));

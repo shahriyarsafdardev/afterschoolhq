@@ -70,11 +70,13 @@ const RegistrationSlice = createSlice({
       state.school = school;
       state.noSchool = noSchool;
     },
-    setSectionStatusAsCompleted: (state, { payload }) => {
+    setStatusAsCompleted: (state, { payload }) => {
       const updatedGroups = state.questionsGroups;
-      const groupIndex = updatedGroups.findIndex(
-        section => section.QuestionGroupDataTypeId === payload
-      );
+      const groupIndex =
+        payload == -1
+          ? updatedGroups.length - 2
+          : updatedGroups.findIndex(section => section.QuestionGroupDataTypeId === payload);
+
       updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
       state.questionsGroups = updatedGroups;
     }
@@ -89,7 +91,7 @@ export const useRegistrationActions = () => {
     loadingFormData,
     submitFormSection,
     setRegistrationId,
-    setSectionStatusAsCompleted
+    setStatusAsCompleted
   } = RegistrationSlice.actions;
   const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -141,15 +143,11 @@ export const useRegistrationActions = () => {
       dispatch(loadingFormData());
 
       return RegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        dispatch(setSectionStatusAsCompleted(groupId));
         dispatch(setRegistrationId(obj));
         return msgs;
       });
     } else
-      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => {
-        dispatch(setSectionStatusAsCompleted(groupId));
-        return msgs;
-      });
+      return RegistrationRepository.submitFormSection(formData).then(({ data: { msgs } }) => msgs);
   };
 
   const setSchoolFieldValue = ({ school, noSchool }, submit) => {
@@ -165,6 +163,10 @@ export const useRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
+  const setStatusCompleted = groupId => {
+    dispatch(setStatusAsCompleted(groupId));
+  };
+
   const exit = async (uid, activityUrl) => {
     await RegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -172,7 +174,15 @@ export const useRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded, exit };
+  return {
+    submitFormSectionData,
+    setSchoolFieldValue,
+    setStatusCompleted,
+    clearMessages,
+    loadFormData,
+    loaded,
+    exit
+  };
 };
 
 export default RegistrationSlice;

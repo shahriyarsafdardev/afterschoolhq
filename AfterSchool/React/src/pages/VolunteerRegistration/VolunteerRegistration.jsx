@@ -1,11 +1,18 @@
 import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { Box } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { useVolunteerRegistration } from 'redux/hooks';
+import {
+  handleStatusAndRedirection,
+  setSkipableStatusAsCompleted,
+  setSectionIndexToStorage
+} from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
+import { useVolunteerRegistration } from 'redux/hooks';
+import SidebarSection from 'pages/shared/Sidebar';
 import apiRoutes from 'routes';
 import utils from 'utils';
 
@@ -24,6 +31,7 @@ export default function VolunteerRegistration() {
     registrationId,
     questionsGroups,
     answeredQuestions,
+    setStatusCompleted,
     submitFormSectionData,
     activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender, ActivityUrl }
   } = useVolunteerRegistration();
@@ -68,6 +76,10 @@ export default function VolunteerRegistration() {
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
+  useEffect(() => {
+    if (questionsGroups.length) setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted);
+  }, [questionsGroups.length]);
+
   const handleRedirection = () => {
     const thankyouUrl = volunteerThankYouUrl(registrationId);
     window.history.pushState(null, '', thankyouUrl);
@@ -89,22 +101,25 @@ export default function VolunteerRegistration() {
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       let errorMsgs = [];
+      const groupId = secondLastSection ? -1 : activeGroupId;
       if (!isEmpty || dirty || secondLastSection) {
         await submitFormSectionData(
-          formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
+          formSectionSubmitObject(values, groupId),
           lastSection,
           accountName,
           activityName,
           regUid
         ).then(errors => {
-          if (!errors.length) enqueueSnackbar('Submitted.', { variant: 'success' });
-          else errorMsgs = errors;
+          if (!errors.length) {
+            if (lastSection) localStorage.removeItem('lastCompletedSectionId');
+            enqueueSnackbar('Submitted.', { variant: 'success' });
+          } else errorMsgs = errors;
         });
       }
       if (!lastSection && !errorMsgs.length) {
-        handleSection('next');
-        resetForm();
+        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, groupId);
       } else setSaveDisabled(false);
+      setSectionIndexToStorage(activeGroup);
     }
   });
 
@@ -151,23 +166,26 @@ export default function VolunteerRegistration() {
   };
 
   return (
-    <RegistrationForm
-      loading={loading}
-      totalGroups={totalGroups}
-      activeGroup={activeGroup}
-      saveDisabled={saveDisabled}
-      currentQuestions={currentQuestions}
-      Name={Name}
-      saveButtonText={saveButtonText}
-      handleSection={handleSection}
-      lastSection={lastSection}
-      formik={formik}
-      handleSubmit={handleSubmit}
-      skipAble={skipAble}
-      registrantType={RegistrantType}
-      isFree={IsFree}
-      firstSection={activeGroup === 0}
-      exitHandler={exitHandler}
-    ></RegistrationForm>
+    <Box style={{ position: 'relative' }}>
+      <RegistrationForm
+        loading={loading}
+        totalGroups={totalGroups}
+        activeGroup={activeGroup}
+        saveDisabled={saveDisabled}
+        currentQuestions={currentQuestions}
+        Name={Name}
+        saveButtonText={saveButtonText}
+        handleSection={handleSection}
+        lastSection={lastSection}
+        formik={formik}
+        handleSubmit={handleSubmit}
+        skipAble={skipAble}
+        registrantType={RegistrantType}
+        isFree={IsFree}
+        firstSection={activeGroup === 0}
+        exitHandler={exitHandler}
+      ></RegistrationForm>
+      {!loading && <SidebarSection questionsGroups={questionsGroups} />}
+    </Box>
   );
 }

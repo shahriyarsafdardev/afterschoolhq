@@ -55,6 +55,16 @@ const VolunteerRegistrationSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
+    },
+    setStatusAsCompleted: (state, { payload }) => {
+      const updatedGroups = state.questionsGroups;
+      const groupIndex =
+        payload == -1
+          ? updatedGroups.length - 2
+          : updatedGroups.findIndex(section => section.QuestionGroupDataTypeId === payload);
+
+      updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
+      state.questionsGroups = updatedGroups;
     }
   }
 });
@@ -66,7 +76,8 @@ export const useVolunteerRegistrationActions = () => {
     formDataLoaded,
     loadingFormData,
     submitFormSection,
-    setRegistrationId
+    setRegistrationId,
+    setStatusAsCompleted
   } = VolunteerRegistrationSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
@@ -136,6 +147,10 @@ export const useVolunteerRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
+  const setStatusCompleted = groupId => {
+    dispatch(setStatusAsCompleted(groupId));
+  };
+
   const exit = async (uid, activityUrl) => {
     await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -143,7 +158,7 @@ export const useVolunteerRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, clearMessages, loaded, exit };
+  return { loadFormData, setStatusCompleted, submitFormSectionData, clearMessages, loaded, exit };
 };
 
 export default VolunteerRegistrationSlice;
