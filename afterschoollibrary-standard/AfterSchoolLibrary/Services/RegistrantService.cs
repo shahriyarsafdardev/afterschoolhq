@@ -248,6 +248,10 @@ namespace AfterSchoolLibrary.Services
             var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
             var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
 
+            //var firstRenewalDate = SubscriptionScheduleService.GetNextChargeDate(participationObject, plan.EndDate, plan.BillingPeriodTypeId);
+
+            var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, feeObject, purchase, loggedInUser, msgs, dc);
+
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 submittedRecord,
                 startDateTime,
