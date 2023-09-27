@@ -66,6 +66,7 @@ namespace AfterSchoolLibrary.Models
             ProrateLastCharge = false;
             BillingPeriodType = BillingPeriodType.NotSet;
             LastChargeStatus = LastChargeStatus.NotSet;
+            DateCancelled = null;
             LastChargeFailed = false;
             IsCancelled = false;
             IsDeleted = false;

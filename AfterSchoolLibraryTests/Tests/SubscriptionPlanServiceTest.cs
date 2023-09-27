@@ -93,6 +93,8 @@ namespace AfterSchoolLibraryTests.Tests
                                false,
                                false,
                                true,
+                               true,
+                               true,
                                LoggedInUser.ID.Value,
                                msgs, 
                                dc);

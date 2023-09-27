@@ -64,7 +64,7 @@ namespace AfterSchoolLibrary.Services
             decimal costPerPeriod, BillingPeriodType billingPeriodType,
             PlanPaymentStartType paymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate, bool isongoingsubscription,
             bool doesAutoRenew, bool splitCostEvenly, bool regFeeAsDownPayment,
-            bool isConvenienceFeeTakenOutOfCost, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+            bool isConvenienceFeeTakenOutOfCost, bool? prorateFirstCharge, bool? prorateLastCharge, int? loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -89,6 +89,8 @@ namespace AfterSchoolLibrary.Services
                 IsConvenienceFeeTakenOutOfCost = isConvenienceFeeTakenOutOfCost,
                 StartDate = subscriptionStartDate,
                 EndDate = subscriptionEndDate,
+                ProrateFirstCharge = prorateFirstCharge,
+                ProrateLastCharge = prorateLastCharge,
             };
 
             msgs.AddRange(plan.SaveWithStripe(dc));
