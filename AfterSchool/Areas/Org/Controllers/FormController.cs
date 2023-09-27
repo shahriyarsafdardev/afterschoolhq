@@ -138,7 +138,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
 
         //CHANGES ABOVE
-
+        [ValidateInput(false)]
         [HttpPost]
         public ActionResult Edit(string id, string copyfrom, string qg, string name, string description, string cmd,
             string formtype, string formUrl)
