@@ -7,10 +7,19 @@
     var registrantsPerColumn = 0;
     var account = SessionVariables.CurrentAccount;
     var group = Model.GetActivityGroup();
-    
+
     if(amrs.IsNotEmpty())
     {
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
+    }
+    var body = Model.Body;
+    int startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var attachments = "";
+    var bodyText = "";
+    if (startIndex != -1)
+    {
+        attachments = body.Substring(startIndex);
+        bodyText = body.Substring(0, startIndex);
     }
 }
 
@@ -45,16 +54,22 @@
                 <form method="post" action="@Url.Action("messageadd", "group", new { id = group.Uid })" class="form-horizontal">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Subject</label>
+                        <label class="col-sm-3 control-label text-bold">Subject<span class="text-danger">*</span></label>
                         <div class="col-sm-6 padding-10">
                             @Model.Subject
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Body</label>
+                        <label class="col-sm-3 control-label text-bold">Body<span class="text-danger">*</span></label>
                         <div class="col-sm-6 padding-10">
-                            @Html.Raw(Model.Body)
+                            @Html.Raw(@bodyText.IsNotEmpty() ? bodyText.Replace("\n", "<br />") : body.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
+                        <div class="col-sm-6 padding-10">
+                            @Html.Raw(attachments)
                         </div>
                     </div>
                     @if (Model.DateSent.HasValue)
@@ -69,8 +84,8 @@
                     @if (amrs.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Recipients
+                            <label class="col-sm-3 control-label text-bold">
+                                    Recipients
                             </label>
                             <div class="col-sm-6">
                                 @for (int i = 0; i < 3; i++)

@@ -40,7 +40,7 @@
                 }
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">@activityLabel</label>
+                    <label class="col-sm-3 control-label text-bold">@activityLabel</label>
                     <div class="col-sm-6">
                         @if (selectedActivities.Any() || selectedGroups.Any())
                         {
@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Seat Assignments</label>
+                    <label class="col-sm-3 control-label text-bold">Seat Assignments</label>
                     <div class="col-sm-6">
                         @if (Request["at"].IsNotEmpty() && Request["at"].IsNumber())
                         {
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Registration Status</label>
+                    <label class="col-sm-3 control-label text-bold">Registration Status</label>
                     <div class="col-sm-6">
                         @if (Request["regstatus"].IsNotEmpty() && Request["regstatus"].IsNumber())
                         {
@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="form-group" id="subject-group">
-                    <label class="col-sm-3 control-label">Message Reason</label>
+                    <label class="col-sm-3 control-label text-bold">Message Reason <span class="text-danger">*</span></label>
                     <div class="col-sm-6">
                         <select name="subject" id="subject" class="form-control" required>
                             <option value="">Select a Message Reason...</option>
@@ -106,7 +106,7 @@
                 <input type="hidden" name="volunteers" value="@isVolunteers.ToString()">
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Message Body</label>
+                    <label class="col-sm-3 control-label text-bold">Message Body <span class="text-danger">*</span></label>
                     <div class="col-sm-6">
                         <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
                         <p class="text-muted">Max of 1000 characters</p>
@@ -114,7 +114,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Attachment(s)</label>
+                    <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
                     <div class="col-md-6">
                         <div id="selected-files"></div>
                         <div class="border-gray-bold">
@@ -146,7 +146,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Selected @recipients</label>
+                    <label class="col-sm-3 control-label text-bold">Selected @recipients</label>
                     <div class="col-sm-6">
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">

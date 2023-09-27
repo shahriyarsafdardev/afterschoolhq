@@ -35,7 +35,7 @@
                 {
 
                     <div class="form-group" id="subject-group">
-                        <label class="col-sm-3 control-label">Message Reason</label>
+                        <label class="col-sm-3 control-label text-bold">Message Reason<span class="text-danger">*</span></label>
                         <div class="col-sm-6">
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
@@ -48,7 +48,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Message Body</label>
+                        <label class="col-sm-3 control-label text-bold">Message Body<span class="text-danger">*</span></label>
                         <div class="col-sm-6">
                             <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
                             <p class="text-muted">Max of 1000 characters</p>
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Attachment(s)</label>
+                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
                         <div class="col-md-6">
                             <div id="selected-files"></div>
                             <div class="border-gray-bold">
@@ -88,7 +88,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">
+                        <label class="col-sm-3 control-label text-bold">
                             Select @UILabel.RegistrantLabel(true)<br />
                             <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>

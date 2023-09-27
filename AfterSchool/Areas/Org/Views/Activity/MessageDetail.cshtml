@@ -14,6 +14,15 @@
     }
     var accountPackage = SessionVariables.AccountPackage;
     var currentUser = SessionVariables.CurrentUser;
+    var body = Model.Body;
+    int startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var attachments = "";
+    var bodyText = "";
+    if (startIndex != -1)
+    {
+        attachments = body.Substring(startIndex);
+        bodyText = body.Substring(0,startIndex);
+    }
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -48,25 +57,31 @@
 
                 <form method="post" action="@Url.Action("messageadd", "activity", new { id = activity.Uid })" class="form-horizontal">
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Message Reason</label>
+                        <label class="col-sm-3 control-label text-bold">Message Reason<span class="text-danger">*</span></label>
                         <div class="col-sm-6 padding-10">
                             @Model.Subject
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Message Body</label>
+                        <label class="col-sm-3 control-label text-bold">Message Body<span class="text-danger">*</span> </label>
                         <div class="col-sm-6 padding-10">
-                            @Html.Raw(Model.Body.Replace("\n", "<br />"))
+                            @Html.Raw(@bodyText.IsNotEmpty()?bodyText.Replace("\n", "<br />"): body.Replace("\n", "<br />"))
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Sent to Staff</label>
+                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
+                        <div class="col-sm-6 padding-10">
+                            @Html.Raw(attachments)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label text-bold">Sent to Staff</label>
                         <div class="col-sm-6 padding-10">
                             @Model.SendToStaff.ToYesNo()
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Sent only to parents of selected students</label>
+                        <label class="col-sm-3 control-label text-bold">Sent only to parents of selected students</label>
                         <div class="col-sm-6 padding-10">
                             @Model.ParentsOnly.ToYesNo()
                         </div>
@@ -83,8 +98,8 @@
                     @if (amrs.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                @UILabel.RegistrantLabel(activity.ActivityTypeId) Recipients
+                            <label class="col-sm-3 control-label text-bold">
+                                    @UILabel.RegistrantLabel(activity.ActivityTypeId) Recipients
                             </label>
                             <div class="col-sm-6 padding-10">
                                 @if (amrs.Count > 0)
