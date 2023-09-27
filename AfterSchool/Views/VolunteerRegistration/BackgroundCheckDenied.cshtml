@@ -1,0 +1,66 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
+    ViewBag.Title = "Already Denied";
+    var providerEmail = (string) ViewBag.ProviderEmail;
+    var expDate = (string) ViewBag.ExpirationDate;
+    var opportunityUrl = (string) ViewBag.OpportunityRegistrationPageUrl;
+}
+<style>
+    .btn-border {
+        font-size: 13px;
+        letter-spacing: 2px;
+        text-shadow: 0px 0px 0px #000000;
+        font-weight: 500;
+        border-color: #FEFFFF;
+        padding: 15px 20px 15px 20px;
+        border-radius: 10px 10px 10px 10px;
+        border-width: 3px;
+    }
+    .btn-clean {
+        box-shadow: 0 1px 3px rgba(0,0,1,.25), inset 0 1px 0 0 rgba(255,255,255,.15);
+    }
+    .img-101-style {
+        width: 100px;
+    }
+    .btn-caribbean-green {
+        background: #00C5A3;
+        font-size: medium;
+        color: #FFFFFF;
+    }
+    .wire-btn-caribbean-green {
+        color: #00C5A3 !important;
+        border-color: #00C5A3;
+        font-size: medium;
+    }
+    .btn-caribbean-green:hover {
+        background: #009e82;
+        color: #FFFFFF;
+    }
+    .margin-top
+    {
+    margin-top: 10%;
+    }
+    h3
+    {
+     font-size: 20px !important;
+    }
+
+</style>
+@{ Html.RenderPartial("~/Views/Shared/Registration/_AccountTopBar.cshtml", SessionVariables.RegistrationStartPageAccount); }
+
+<div class="col-md-6 col-md-offset-3 col-sm-12 margin-t-35 text-center margin-top">
+    <img src="~/img/warning.png" class="img-fluid img-101-style" alt="warning"/>
+    <h1 class="font-weight-400">
+        Background Check Denied
+    </h1>
+    <h3 class="margin-t-30">
+        You've been denied as a volunteer and are not able to register for opportunities sponsored by Indianapolis Public Schools until @expDate.
+        <br/>
+        <br/>
+        If you have questions or believe this is an error, please contact the provider.
+    </h3>
+    <div>
+        <a href="@opportunityUrl" class="btn wire-btn-caribbean-green margin-r-20 btn-border margin-t-35 btn-clean">Back To Opportunity</a>
+        <a href="mailto:@providerEmail" class="btn btn-caribbean-green btn-border margin-t-35 btn-clean">Contact Provider</a>
+    </div>
+</div>

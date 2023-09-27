@@ -494,7 +494,18 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentUser = SessionVariables.CurrentUser;
             var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
-            
+            var volunteerApproval = VolunteerApproval.LoadByWebUserId(currentUser.ID.Value).FirstOrDefault();
+
+            if (volunteerApproval.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() &&
+                volunteerApproval.ApprovalStatusId == ApprovalStatus.Denied && volunteerApproval.ExpirationDate.IsNotEmpty()
+                && volunteerApproval.ExpirationDate >= DateTime.UtcNow)
+                return RedirectToAction("alreadydenied", new
+                {
+                    contactEmail = participationObject.ContactEmail,
+                    url = participationObject.GetShortHomePageUrl(),
+                    expireDate = volunteerApproval.ExpirationDate.ToLongDateString(),
+                });
+                
             if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
                 return Redirect($"~/ReactApp/volunteer-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
             
@@ -527,6 +538,15 @@ namespace AfterSchool.Controllers
             }
 
             return AssembleResultAndGoToRegisterView(participationObject, msgs, questions, currentRegistrant);
+        }
+
+        public ActionResult AlreadyDenied(string contactEmail, string url, string expireDate)
+        {
+            ViewBag.ProviderEmail = contactEmail;
+            ViewBag.OpportunityRegistrationPageUrl = url;
+            ViewBag.ExpirationDate = expireDate;
+
+            return View("BackgroundCheckDenied");
         }
 
         private ActionResult AssembleResultAndGoToRegisterView(ParticipationObject participationObject, SystemMessages msgs,
