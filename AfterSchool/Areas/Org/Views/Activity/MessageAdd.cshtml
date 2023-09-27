@@ -219,11 +219,13 @@
             selectedFiles.innerHTML = "";
             const files = this.files;
             let totalFileSize = 0;
+            let validExtensions = [".jpg", ".pdf", ".jpeg", ".png"];
             if (files.length >= 1 && files.length <= 10) {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
                     const fileSizeKB = (file.size / 1024).toFixed(2);
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
 
                     if (file.size > 25 * 1024 * 1024) {
                         Notifications.showBar({
@@ -232,16 +234,23 @@
                             success: false
                         });
                     }
+                    else if(!validExtensions.includes("." + fileExtension)) {
+                         Notifications.showBar({
+                            title: 'Error',
+                            message: "Please add the valid jpg, png or pdf file",
+                            success: false
+                         });
+                    }
                     else
                     {
-                        if (totalFileSize + file.size > 50 * 1024 * 1024) {
+                         if (totalFileSize + file.size > 50 * 1024 * 1024) {
                             Notifications.showBar({
                                 title: 'Error',
                                 message: "Total file size exceeds the limit (50 MB)!",
                                 success: false
                             });
                             break; 
-                        }
+                         }
 
                         totalFileSize += file.size;
 
