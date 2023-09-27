@@ -55,7 +55,10 @@ namespace AfterSchoolLibrary.Models
 		public bool IsOngoingSubscription { get { return (bool)MDV["IsOngoingSubscription"].Value; } set { MDV["IsOngoingSubscription"].Value = value; } }
 		public DateTime? StartDate { get { return (DateTime?)MDV["StartDate"].Value; } set { MDV["StartDate"].Value = value; } }
 		public DateTime? EndDate { get { return (DateTime?)MDV["EndDate"].Value; } set { MDV["EndDate"].Value = value; } }
-		
+        public bool? ProrateFirstCharge { get { return (bool?) MDV["ProrateFirstCharge"].Value; } set { MDV["ProrateFirstCharge"].Value = value; } }
+        public bool? ProrateLastCharge { get { return (bool?) MDV["ProrateLastCharge"].Value; } set { MDV["ProrateLastCharge"].Value = value; } }
+
+
 
         public SubscriptionPlan()
         {
@@ -100,7 +103,9 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "IsOngoingSubscription", System.Data.SqlDbType.Bit);
 				_dp.Add(className, "StartDate", System.Data.SqlDbType.DateTime);
 				_dp.Add(className, "EndDate", System.Data.SqlDbType.DateTime);
-				
+                _dp.Add(className, "ProrateFirstCharge", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "ProrateLastCharge", System.Data.SqlDbType.Bit);
+
                 return _dp;
             }
         }
@@ -257,7 +262,14 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["EndDate"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["ProrateFirstCharge"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["ProrateLastCharge"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+
 
             return msgs;
         }

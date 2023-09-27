@@ -61,7 +61,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             
             // new logic
 
-            var rsp = RegistrantSubscriptionPlan.Load(135, msgs, dc);
+            var rsp = RegistrantSubscriptionPlan.Load(2170, msgs, dc);
 
             var plan = rsp.GetSubscriptionPlan(msgs);
             var registrant = rsp.GetRegistrant(msgs);
