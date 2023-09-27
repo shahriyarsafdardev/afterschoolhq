@@ -33,7 +33,11 @@ namespace AfterSchool.Controllers
             var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs, null);
             var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs, null);
 
-            if (subscriptionSchedulespendingToday != null)
+            //if (!subscriptionSchedulespendingToday.Any())
+            //{
+            //    return;
+            //}
+            if (subscriptionSchedulespendingToday.Any())
             {
                 foreach (var schedule in subscriptionSchedulespendingToday)
                 {
@@ -71,13 +75,23 @@ namespace AfterSchool.Controllers
                         {
                             var webhookPayload = new WebhookPayload
                             {
+                                //pass Uid instead of whole object
                                 PaymentHistory = subscriptionPaymentHistory,
                                 Schedule = schedule
                             };
 
                             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
 
-                            SendWebhook(jsonPayload);
+                            var response = SendWebhook(jsonPayload);
+
+                            if(response != null /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
+                            {
+                                UpdateRecordOnSuccess(schedule, msgs, null);
+                            }
+                            else
+                            {
+                                //what to do if webhook fails
+                            }
                         }
                         else if(charge.Status == LastChargeStatus.failed.ToString())
                         {
@@ -91,6 +105,8 @@ namespace AfterSchool.Controllers
                                 subscriptionPaymentHistory.RetryNumber = retryNumber + 1;
 
                             msgs.AddRange(subscriptionPaymentHistory.Save());
+
+                            //what should be updated in Subscription Schedule in this case????
 
                             //send email to customer and provider notifying user of charge failure
 
@@ -116,16 +132,15 @@ namespace AfterSchool.Controllers
             }
         }
 
-        private async Task SendWebhook(string payload)
+        private async Task<HttpResponseMessage> SendWebhook(string payload)
         {
             var msgs = new SystemMessages();
             try
             {
-                //HttpResponseMessage response;
                 using (HttpClient client = new HttpClient())
                 {
                     // Set the base URL of your Web API
-                    string baseUrl = Utilities.SurveyBaseUrl; 
+                    string baseUrl = Utilities.SurveyBaseUrl;
 
                     string apiUrl = $"{baseUrl}/webhooks/ChargeSubscription/Updated";
 
@@ -133,25 +148,33 @@ namespace AfterSchool.Controllers
 
                     client.DefaultRequestHeaders.Add("User-Agent", "AFTRSCHL/.1");
 
-                    var response = client.PostAsync(apiUrl, content).Result;
+                    var response = await client.PostAsync(apiUrl, content);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        //if successful, send email to customer and AHQ 
-                    }
-                    else
-                    {
-                        msgs.Add("Webhook was unsuccessful", MessageType.Error);
-                    }
+                    return response;
                 }
             }
             catch (Exception ex)
             {
                 msgs.Add(ex.Message, MessageType.ApiError);
+                return null;
             }
         }
 
+        public void UpdateRecordOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue &&
+                subscriptionSchedule.NextBillDate.Value.Date != subscriptionSchedule.LastDateToBill.Value.Date)
+            {
+                subscriptionSchedule.NextBillDate = subscriptionSchedule.BillingPeriodType switch
+                {
+                    BillingPeriodType.Week => subscriptionSchedule.NextBillDate?.AddDays(7),
+                    BillingPeriodType.Month => subscriptionSchedule.NextBillDate?.AddMonths(1),
+                    BillingPeriodType.Year => subscriptionSchedule.NextBillDate?.AddYears(1),
+                    _ => throw new ArgumentException("Invalid subscription interval specified.")
+                };
+            }
+            msgs.AddRange(subscriptionSchedule.Save(dc));
+        }
 
         public class WebhookPayload
         {

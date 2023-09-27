@@ -713,6 +713,8 @@ namespace AfterSchoolLibrary.Services
             var details = values.GetValueOrDefault("details");
             var location = values.GetValueOrDefault("location");
             var locationName = values.GetValueOrDefault("locationname");
+            var prorateFirstCharge = values.GetValueOrDefault("proratefirstcharge");
+            var prorateLastCharge = values.GetValueOrDefault("proratelastcharge");
             var locationDetails = values.GetValueOrDefault("locationdetails");
             var scheduleDetails = values.GetValueOrDefault("scheduledetails");
             var address1 = values.GetValueOrDefault("address1");
@@ -1200,6 +1202,8 @@ namespace AfterSchoolLibrary.Services
                                 splitCostEvenly.IfEmpty(""),
                                 registrationFeeDownPayment.IfEmpty(""),
                                 isParentPriceSubscription.IfEmpty("0"),
+                                prorateFirstCharge.IfEmpty("0"),
+                                prorateLastCharge.IfEmpty("0"),
                                 loggedInUserId,
                                 adc
                             ));
@@ -1358,7 +1362,7 @@ namespace AfterSchoolLibrary.Services
             string subscriptionPlanPeriodNumber,
             string subscriptionPaymentStartType, DateTime? subscriptionStartDate, DateTime? subscriptionEndDate,
             string isongoingsubscription, string splitcostevenly, string regfeedownpayment,
-            string isparentpricesubscription,
+            string isparentpricesubscription, string isfirstchargeprorated, string islastchargeprorated,
             int loggedInUserId, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
@@ -1388,6 +1392,8 @@ namespace AfterSchoolLibrary.Services
                                 plan.PaymentStartTypeId != paymentStartType ||
                                 (subscriptionStartDate.HasValue && subscriptionStartDate.Value != plan.StartDate) ||
                                 (subscriptionEndDate.HasValue && subscriptionEndDate.Value != plan.EndDate) ||
+                                (isfirstchargeprorated != null && isfirstchargeprorated.ToBoolean() != plan.ProrateFirstCharge) ||
+                                (islastchargeprorated != null && islastchargeprorated.ToBoolean() != plan.ProrateLastCharge) ||
                                 plan.IsConvenienceFeeTakenOutOfCost != isParentPrice;
 
                 // if has stripe changes or subscription option has been turned off
@@ -1418,6 +1424,8 @@ namespace AfterSchoolLibrary.Services
                     splitCostEvenly: splitcostevenly.ToBoolean(),
                     regFeeAsDownPayment: regfeedownpayment.ToBoolean(),
                     isConvenienceFeeTakenOutOfCost: isParentPrice,
+                    prorateFirstCharge: isfirstchargeprorated.ToBoolean(),
+                    prorateLastCharge: islastchargeprorated.ToBoolean(),
                     loggedInUserId: loggedInUserId,
                     msgs: msgs,
                     dc: dc);
