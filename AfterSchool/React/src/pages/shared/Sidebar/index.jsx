@@ -23,12 +23,13 @@ export default function SidebarSection(props) {
   };
 
   const isNavigationAllowed = sectionIndex => {
+    if (isUpdatingRegistration) return true;
     const lastCompletedSectionId = localStorage.getItem('lastCompletedSectionId');
 
-    return (
+    return Boolean(
       lastCompletedSectionId &&
-      questionsGroups[lastCompletedSectionId].Status === 'completed' &&
-      sectionIndex <= Number(lastCompletedSectionId) + 1
+        questionsGroups[lastCompletedSectionId].Status === 'completed' &&
+        sectionIndex <= Number(lastCompletedSectionId) + 1
     );
   };
 
@@ -43,24 +44,26 @@ export default function SidebarSection(props) {
           What's Next?
         </Typography>
         <Box className={classes.sectionsListWrapper} ref={ref}>
-          {questionsGroups.map((section, index) => (
-            <Box
-              key={index}
-              data-testid={`${section.Name}-section-link`}
-              className={cs(
-                classes.sectionItemWrapper,
-                isNavigationAllowed(index) && classes.sectionItemWrapperHover
-              )}
-              onClick={() => handleNavigation(section.Name, index)}
-            >
-              <Typography className={classes.icon}>
-                {sectionName === section.Name
-                  ? statusIcons.currentlyEditing
-                  : statusIcons[section.Status]}
-              </Typography>
-              <Typography className={classes.sectionName}>{section.Name}</Typography>
-            </Box>
-          ))}
+          {questionsGroups.map((section, index) => {
+            return (
+              <Box
+                key={index}
+                data-testid={`${section.Name}-section-link`}
+                className={cs(
+                  classes.sectionItemWrapper,
+                  isNavigationAllowed(index) && classes.sectionItemWrapperHover
+                )}
+                onClick={() => handleNavigation(section.Name, index)}
+              >
+                <Typography className={classes.icon}>
+                  {sectionName === section.Name
+                    ? statusIcons.currentlyEditing
+                    : statusIcons[section.Status]}
+                </Typography>
+                <Typography className={classes.sectionName}>{section.Name}</Typography>
+              </Box>
+            );
+          })}
         </Box>
         {showSeeMoreButton && (
           <Typography variant="body2" className={classes.scrollText}>
