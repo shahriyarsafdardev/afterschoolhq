@@ -70,11 +70,11 @@
                         <select name="subject" id="subject" class="form-control">
                             <option value="">Select a Message Reason...</option>
                             @{
-                                    var reasons = isVolunteer ? FormConstants.VolunteerMessageReasons() : FormConstants.StudentMessageReasons();
-                                    foreach (var reason in reasons)
-                                    {
-                                <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
-                                    }
+                                var reasons = isVolunteer ? FormConstants.VolunteerMessageReasons() : FormConstants.StudentMessageReasons();
+                                foreach (var reason in reasons)
+                                {
+                                    <option value="@reason.ToString().SplitByUpperCase()">@reason.ToString().SplitByUpperCase()</option>
+                                }
                             }
                         </select>
                     </div>
@@ -83,7 +83,7 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label text-bold">Message Body <span class="text-danger">*</span></label>
                     <div class="col-sm-6">
-                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control">@body</textarea>
+                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control" maxlength="1000">@body</textarea>
                         <p class="text-muted">Max of 1000 characters</p>
                     </div>
                 </div>
@@ -212,10 +212,10 @@
         updateMessageCount();
         const fileInput = document.getElementById("file-input");
         const selectedFiles = document.getElementById("selected-files");
-        let validFiles = []; 
 
         fileInput.addEventListener("change", function ()
         {
+            let validFiles = [];
             selectedFiles.innerHTML = "";
             const files = this.files;
             let totalFileSize = 0;
@@ -322,8 +322,13 @@
         const fileInput = document.getElementById("file-input");
         const index = event.target.getAttribute("data-index");
         const selectedFiles = document.getElementById("selected-files");
-        fileInput.files[index] = null;
+        const newFileList = new DataTransfer();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (i != index) {
+                newFileList.items.add(fileInput.files[i]);
+            }
+        }
+        fileInput.files = newFileList.files;
         selectedFiles.removeChild(event.target.parentElement.parentElement);
-        fileInput.value = "";
     }
 </script>
