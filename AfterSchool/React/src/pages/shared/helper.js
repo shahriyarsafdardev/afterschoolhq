@@ -9,9 +9,13 @@ export const handleStatusAndRedirection = (
   resetForm();
 };
 
-export const setSkipableStatusAsCompleted = (questionsGroups, setStatusCompleted) => {
+export const setSkipableStatusAsCompleted = (
+  questionsGroups,
+  setStatusCompleted,
+  setStatusNotStarted
+) => {
   const lastCompletedSectionId = localStorage.getItem('lastCompletedSectionId');
-  if (!lastCompletedSectionId) return;
+  if (!lastCompletedSectionId) return setStatusNotStarted();
   for (let index = 0; index <= lastCompletedSectionId; index++) {
     setStatusCompleted(questionsGroups[index].QuestionGroupDataTypeId);
   }

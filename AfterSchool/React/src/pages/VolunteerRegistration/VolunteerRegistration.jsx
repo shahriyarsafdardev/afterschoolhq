@@ -32,6 +32,7 @@ export default function VolunteerRegistration() {
     questionsGroups,
     answeredQuestions,
     setStatusCompleted,
+    setStatusNotStarted,
     submitFormSectionData,
     activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender, ActivityUrl }
   } = useVolunteerRegistration();
@@ -77,7 +78,8 @@ export default function VolunteerRegistration() {
   }, [registrationId]);
 
   useEffect(() => {
-    if (questionsGroups.length) setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted);
+    if (questionsGroups.length)
+      setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted, setStatusNotStarted);
   }, [questionsGroups.length]);
 
   const handleRedirection = () => {

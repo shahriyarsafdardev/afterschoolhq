@@ -31,6 +31,7 @@ export default function Registration({ newChild = false }) {
     questionsGroups,
     answeredQuestions,
     setStatusCompleted,
+    setStatusNotStarted,
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
@@ -95,7 +96,8 @@ export default function Registration({ newChild = false }) {
   }, [registrationId]);
 
   useEffect(() => {
-    if (questionsGroups.length) setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted);
+    if (questionsGroups.length)
+      setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted, setStatusNotStarted);
   }, [questionsGroups.length]);
 
   const handleRedirection = () => {

@@ -79,6 +79,13 @@ const RegistrationSlice = createSlice({
 
       updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
       state.questionsGroups = updatedGroups;
+    },
+    setStatusAsNotStarted: state => {
+      let updatedQuestionGroups = [];
+      updatedQuestionGroups = state.questionsGroups.map(section => {
+        return { ...section, Status: 'notStarted' };
+      });
+      state.questionsGroups = updatedQuestionGroups;
     }
   }
 });
@@ -91,7 +98,8 @@ export const useRegistrationActions = () => {
     loadingFormData,
     submitFormSection,
     setRegistrationId,
-    setStatusAsCompleted
+    setStatusAsCompleted,
+    setStatusAsNotStarted
   } = RegistrationSlice.actions;
   const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -167,6 +175,10 @@ export const useRegistrationActions = () => {
     dispatch(setStatusAsCompleted(groupId));
   };
 
+  const setStatusNotStarted = () => {
+    dispatch(setStatusAsNotStarted());
+  };
+
   const exit = async (uid, activityUrl) => {
     await RegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -177,6 +189,7 @@ export const useRegistrationActions = () => {
   return {
     submitFormSectionData,
     setSchoolFieldValue,
+    setStatusNotStarted,
     setStatusCompleted,
     clearMessages,
     loadFormData,

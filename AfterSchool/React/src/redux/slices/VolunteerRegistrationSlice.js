@@ -65,6 +65,13 @@ const VolunteerRegistrationSlice = createSlice({
 
       updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
       state.questionsGroups = updatedGroups;
+    },
+    setStatusAsNotStarted: state => {
+      let updatedQuestionGroups = [];
+      updatedQuestionGroups = state.questionsGroups.map(section => {
+        return { ...section, Status: 'notStarted' };
+      });
+      state.questionsGroups = updatedQuestionGroups;
     }
   }
 });
@@ -77,7 +84,8 @@ export const useVolunteerRegistrationActions = () => {
     loadingFormData,
     submitFormSection,
     setRegistrationId,
-    setStatusAsCompleted
+    setStatusAsCompleted,
+    setStatusAsNotStarted
   } = VolunteerRegistrationSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
@@ -151,6 +159,10 @@ export const useVolunteerRegistrationActions = () => {
     dispatch(setStatusAsCompleted(groupId));
   };
 
+  const setStatusNotStarted = () => {
+    dispatch(setStatusAsNotStarted());
+  };
+
   const exit = async (uid, activityUrl) => {
     await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -158,7 +170,15 @@ export const useVolunteerRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, setStatusCompleted, submitFormSectionData, clearMessages, loaded, exit };
+  return {
+    submitFormSectionData,
+    setStatusNotStarted,
+    setStatusCompleted,
+    clearMessages,
+    loadFormData,
+    loaded,
+    exit
+  };
 };
 
 export default VolunteerRegistrationSlice;
