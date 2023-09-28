@@ -316,10 +316,14 @@ namespace AfterSchoolLibrary.Services
         public static string UploadFile(this Account account, Stream file, string filename, SystemMessages msgs)
         {
             var ah = Utilities.GetNewAmazonHelper();
-            var accountFolder = $"{account.UniqueName}-{account.ID}";
+            var regEx = new Regex(
+                BasicLibrary.Utilities.UrlFriendlyRegEx,
+                RegexOptions.IgnoreCase | RegexOptions.Singleline
+            );
+            var accountFolder = $"{account.UniqueName.Replace(regEx, "")}-{account.ID}";
             var amazonFilePath = $"{accountFolder}/{filename}".ToLower();
 
-            msgs.AddRange(ah.AddFile(file, amazonFilePath));
+            msgs.AddRange(ah.AddFile(file, amazonFilePath, true));
 
             return ah.GetFileLink(amazonFilePath);
         }

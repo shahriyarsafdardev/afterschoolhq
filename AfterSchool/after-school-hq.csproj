@@ -701,7 +701,6 @@
     <Compile Include="Helpers\AccountProfileHelper.cs" />
     <Compile Include="Helpers\IconForActivityType.cs" />
     <Compile Include="Helpers\MaintenanceHelper.cs" />
-    <Compile Include="Helpers\MessageUploadHelper.cs" />
     <Compile Include="Helpers\MessageValidationHelper.cs" />
     <Compile Include="Models\ActivityHeaderModel.cs" />
     <Compile Include="Models\MultiFactorViewModel.cs" />

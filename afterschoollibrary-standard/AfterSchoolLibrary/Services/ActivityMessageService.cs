@@ -144,6 +144,7 @@ namespace AfterSchoolLibrary.Services
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
             var signature = Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign);
+            body = body.Replace("<i class=\"icon icon-left s7-file attachment-icon\"></i>", "<span class=\"docIcon\"></span>");
             var model = new NameValueCollection()
             {
                 {"subject", subject },
