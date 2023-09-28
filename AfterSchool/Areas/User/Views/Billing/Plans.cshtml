@@ -85,7 +85,7 @@
                                     if (payments?.Count < (plan.TotalPeriods ?? 0) || !activity.HasSchedule)
                                     {
                                         nextPaymentDate = RegistrantSubscriptionPlanService.GetNextPaymentDate(originalPlan, participationObject, plan,
-                                            billingPeriodTypeId, payments.Count);
+                                            billingPeriodTypeId);
                                     }
                                     else if (plan.StartDate.Value.IsAfter(DateTime.UtcNow))
                                     {
