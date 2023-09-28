@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -38,10 +40,30 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(volunteerApproval.Save(dc: dc));
             
+            if (msgs.HasNoErrors() && approvalStatus == ApprovalStatus.Approved)
+                UpdateVolunteerRegistrationStatus(webUserId, msgs, dc: dc);
+            
             // if(msgs.HasNoErrors())
             //     EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
             
             return volunteerApproval;
+        }
+
+        private static void UpdateVolunteerRegistrationStatus(int? webUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var registrants = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false,
+                false, msgs, dc);
+            registrants.ForEach(registrant =>
+            {
+                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs, dc).FirstOrDefault();
+                if (registration.IsNotEmpty())
+                {
+                    var participationObject = registration.GetFirstParticipationObject(msgs, dc);
+                    var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs, dc);
+                    if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
+                        registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs, dc);
+                }
+            });
         }
     }
 }
