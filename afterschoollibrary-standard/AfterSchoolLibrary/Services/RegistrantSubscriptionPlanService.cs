@@ -4,7 +4,6 @@ using System.Linq;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using AfterSchoolLibrary.Models;
-using System.Diagnostics;
 
 namespace AfterSchoolLibrary.Services
 {
