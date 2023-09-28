@@ -49,8 +49,13 @@ const UpdateRegistrationSlice = createSlice({
         IsGenderRestricted
       );
 
+      let updatedQuestionGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      updatedQuestionGroups = updatedQuestionGroups.map(section => {
+        return { ...section, Status: 'completed' };
+      });
+
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = updatedQuestionGroups;
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -64,16 +69,6 @@ const UpdateRegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
-    },
-    setStatusAsCompleted: (state, { payload }) => {
-      const updatedGroups = state.questionsGroups;
-      const groupIndex =
-        payload == -1
-          ? updatedGroups.length - 2
-          : updatedGroups.findIndex(section => section.QuestionGroupDataTypeId === payload);
-
-      updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
-      state.questionsGroups = updatedGroups;
     }
   }
 });
@@ -85,8 +80,7 @@ export const useUpdateRegistrationActions = () => {
     setFormData,
     formDataLoaded,
     loadingFormData,
-    submitFormSection,
-    setStatusAsCompleted
+    submitFormSection
   } = UpdateRegistrationSlice.actions;
 
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -148,10 +142,6 @@ export const useUpdateRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
-  const setStatusCompleted = groupId => {
-    dispatch(setStatusAsCompleted(groupId));
-  };
-
   const exit = async (uid, activityUrl) => {
     await UpdateRegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -162,7 +152,6 @@ export const useUpdateRegistrationActions = () => {
   return {
     submitFormSectionData,
     setSchoolFieldValue,
-    setStatusCompleted,
     clearMessages,
     loadFormData,
     loaded,

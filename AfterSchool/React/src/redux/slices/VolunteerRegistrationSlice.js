@@ -2,9 +2,9 @@ import utils from 'utils';
 import Routes from 'routes';
 import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
-import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
 import ErrorMessagesSlice from './ErrorMessagesSlice';
+import { responseMapper, setStatuses } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import VolunteerRegistrationRepository from 'repository/VolunteerRegistrationRepository';
 
@@ -46,7 +46,7 @@ const VolunteerRegistrationSlice = createSlice({
       );
 
       state.questions = [...questions, ...formQuestionUpdated];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = setStatuses([...formQuestionGroupUpdated, ...questionsGroups]);
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
@@ -58,20 +58,8 @@ const VolunteerRegistrationSlice = createSlice({
     },
     setStatusAsCompleted: (state, { payload }) => {
       const updatedGroups = state.questionsGroups;
-      const groupIndex =
-        payload == -1
-          ? updatedGroups.length - 2
-          : updatedGroups.findIndex(section => section.QuestionGroupDataTypeId === payload);
-
-      updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
+      updatedGroups[payload] = { ...updatedGroups[payload], Status: 'completed' };
       state.questionsGroups = updatedGroups;
-    },
-    setStatusAsNotStarted: state => {
-      let updatedQuestionGroups = [];
-      updatedQuestionGroups = state.questionsGroups.map(section => {
-        return { ...section, Status: 'notStarted' };
-      });
-      state.questionsGroups = updatedQuestionGroups;
     }
   }
 });
@@ -84,8 +72,7 @@ export const useVolunteerRegistrationActions = () => {
     loadingFormData,
     submitFormSection,
     setRegistrationId,
-    setStatusAsCompleted,
-    setStatusAsNotStarted
+    setStatusAsCompleted
   } = VolunteerRegistrationSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
@@ -159,10 +146,6 @@ export const useVolunteerRegistrationActions = () => {
     dispatch(setStatusAsCompleted(groupId));
   };
 
-  const setStatusNotStarted = () => {
-    dispatch(setStatusAsNotStarted());
-  };
-
   const exit = async (uid, activityUrl) => {
     await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -172,7 +155,6 @@ export const useVolunteerRegistrationActions = () => {
 
   return {
     submitFormSectionData,
-    setStatusNotStarted,
     setStatusCompleted,
     clearMessages,
     loadFormData,

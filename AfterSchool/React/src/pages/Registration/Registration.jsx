@@ -3,11 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import {
-  handleStatusAndRedirection,
-  setSkipableStatusAsCompleted,
-  setSectionIndexToStorage
-} from 'pages/shared/helper';
+import { handleStatusAndRedirection, setSectionIndexToStorage } from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import SidebarSection from 'pages/shared/Sidebar';
@@ -31,7 +27,6 @@ export default function Registration({ newChild = false }) {
     questionsGroups,
     answeredQuestions,
     setStatusCompleted,
-    setStatusNotStarted,
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
@@ -94,11 +89,6 @@ export default function Registration({ newChild = false }) {
     sessionStorage.removeItem('isSessionCompleted');
     if (registrationId) handleRedirection();
   }, [registrationId]);
-
-  useEffect(() => {
-    if (questionsGroups.length)
-      setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted, setStatusNotStarted);
-  }, [questionsGroups.length]);
 
   const handleRedirection = () => {
     if (IsPaid && !IsFree) {
@@ -166,14 +156,15 @@ export default function Registration({ newChild = false }) {
         ).then(msgs => {
           if (!msgs.length) {
             if (lastSection) localStorage.removeItem('lastCompletedSectionId');
+
             enqueueSnackbar('Submitted.', { variant: 'success' });
           } else errorMsgs.push(...msgs);
         });
       }
       if (!lastSection && !errorMsgs.length) {
-        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, groupId);
+        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, activeGroup);
       } else setSaveDisabled(false);
-      setSectionIndexToStorage(activeGroup);
+      if (!lastSection) setSectionIndexToStorage(activeGroup);
     }
   });
 
@@ -239,6 +230,7 @@ export default function Registration({ newChild = false }) {
         isFree={IsFree}
         firstSection={activeGroup === 0}
         exitHandler={exitHandler}
+        showProgressBar={false}
       ></RegistrationForm>
       {!loading && <SidebarSection questionsGroups={questionsGroups} />}
     </Box>

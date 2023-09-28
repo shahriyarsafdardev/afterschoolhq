@@ -5,9 +5,9 @@ import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import ErrorMessagesSlice from './ErrorMessagesSlice';
-import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import RegistrationRepository from 'repository/RegistrationRepository';
+import { responseMapper, handleRedirection, setStatuses } from './helper';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
@@ -55,7 +55,7 @@ const RegistrationSlice = createSlice({
       );
 
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = setStatuses([...formQuestionGroupUpdated, ...questionsGroups]);
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -72,20 +72,8 @@ const RegistrationSlice = createSlice({
     },
     setStatusAsCompleted: (state, { payload }) => {
       const updatedGroups = state.questionsGroups;
-      const groupIndex =
-        payload == -1
-          ? updatedGroups.length - 2
-          : updatedGroups.findIndex(section => section.QuestionGroupDataTypeId === payload);
-
-      updatedGroups[groupIndex] = { ...updatedGroups[groupIndex], Status: 'completed' };
+      updatedGroups[payload] = { ...updatedGroups[payload], Status: 'completed' };
       state.questionsGroups = updatedGroups;
-    },
-    setStatusAsNotStarted: state => {
-      let updatedQuestionGroups = [];
-      updatedQuestionGroups = state.questionsGroups.map(section => {
-        return { ...section, Status: 'notStarted' };
-      });
-      state.questionsGroups = updatedQuestionGroups;
     }
   }
 });
@@ -98,8 +86,7 @@ export const useRegistrationActions = () => {
     loadingFormData,
     submitFormSection,
     setRegistrationId,
-    setStatusAsCompleted,
-    setStatusAsNotStarted
+    setStatusAsCompleted
   } = RegistrationSlice.actions;
   const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -175,10 +162,6 @@ export const useRegistrationActions = () => {
     dispatch(setStatusAsCompleted(groupId));
   };
 
-  const setStatusNotStarted = () => {
-    dispatch(setStatusAsNotStarted());
-  };
-
   const exit = async (uid, activityUrl) => {
     await RegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -189,7 +172,6 @@ export const useRegistrationActions = () => {
   return {
     submitFormSectionData,
     setSchoolFieldValue,
-    setStatusNotStarted,
     setStatusCompleted,
     clearMessages,
     loadFormData,

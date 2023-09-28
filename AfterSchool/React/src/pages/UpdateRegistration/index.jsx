@@ -4,11 +4,6 @@ import { Box } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import {
-  handleStatusAndRedirection,
-  setSectionIndexToStorage,
-  setSkipableStatusAsCompleted
-} from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useUpdateRegistration } from 'redux/hooks';
@@ -28,7 +23,6 @@ export default function UpdateRegistration() {
     loadFormData,
     questionsGroups,
     answeredQuestions,
-    setStatusCompleted,
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
@@ -139,12 +133,12 @@ export default function UpdateRegistration() {
         });
       }
       if (!lastSection && !errors?.length) {
-        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, groupId);
+        handleSection('next');
+        resetForm();
       } else {
         lastSection && !errors?.length && handleRedirection();
         setSaveDisabled(false);
       }
-      setSectionIndexToStorage(activeGroup);
     }
   });
   const { handleSubmit, dirty, values } = formik;
@@ -158,10 +152,6 @@ export default function UpdateRegistration() {
   useEffect(() => {
     if (questionsGroups.length)
       setActiveGroupId(questionsGroups[activeGroup].QuestionGroupDataTypeId);
-  }, [questionsGroups.length]);
-
-  useEffect(() => {
-    if (questionsGroups.length) setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted);
   }, [questionsGroups.length]);
 
   useEffect(() => {
@@ -211,8 +201,11 @@ export default function UpdateRegistration() {
         firstSection={activeGroup === 0}
         isUpdatingRegistration={true}
         showExit={false}
+        showProgressBar={false}
       ></RegistrationForm>
-      {!loading && <SidebarSection questionsGroups={questionsGroups} />}
+      {!loading && (
+        <SidebarSection questionsGroups={questionsGroups} isUpdatingRegistration={true} />
+      )}
     </Box>
   );
 }

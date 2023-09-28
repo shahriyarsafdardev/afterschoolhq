@@ -1,16 +1,22 @@
-import React from 'react';
 import cs from 'classnames';
 import { Box, Typography } from '@material-ui/core';
 import { useSearchParams } from 'react-router-dom';
+import React, { createRef, useEffect, useState } from 'react';
 
 import useStyles from './styles';
 import { statusIcons } from 'constants';
 
 export default function SidebarSection(props) {
+  const ref = createRef();
   const classes = useStyles();
-  const { questionsGroups } = props;
+  const [showSeeMoreButton, setShowSeeMoreButton] = useState(false);
+  const { questionsGroups, isUpdatingRegistration = false } = props;
   const [searchParams, setSearchParams] = useSearchParams();
   const sectionName = searchParams.get('section');
+
+  useEffect(() => {
+    if (ref.current.clientHeight < ref.current.scrollHeight) setShowSeeMoreButton(true);
+  }, [ref]);
 
   const setSectionParam = name => {
     setSearchParams(`section=${encodeURIComponent(name)}`);
@@ -27,9 +33,7 @@ export default function SidebarSection(props) {
   };
 
   const handleNavigation = (name, index) => {
-    const allowNavigation = isNavigationAllowed(index);
-
-    if (allowNavigation) setSectionParam(name);
+    if (isUpdatingRegistration || isNavigationAllowed(index)) setSectionParam(name);
   };
 
   return (
@@ -38,10 +42,11 @@ export default function SidebarSection(props) {
         <Typography className={classes.sidebarHeader} variant="h6">
           What's Next?
         </Typography>
-        <Box className={classes.sectionsListWrapper}>
+        <Box className={classes.sectionsListWrapper} ref={ref}>
           {questionsGroups.map((section, index) => (
             <Box
               key={index}
+              data-testid={`${section.Name}-section-link`}
               className={cs(
                 classes.sectionItemWrapper,
                 isNavigationAllowed(index) && classes.sectionItemWrapperHover
@@ -57,9 +62,11 @@ export default function SidebarSection(props) {
             </Box>
           ))}
         </Box>
-        <Typography variant="body2" className={classes.scrollText}>
-          Scroll for more
-        </Typography>
+        {showSeeMoreButton && (
+          <Typography variant="body2" className={classes.scrollText}>
+            Scroll for more
+          </Typography>
+        )}
       </Box>
     )
   );

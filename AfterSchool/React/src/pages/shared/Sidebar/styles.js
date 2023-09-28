@@ -26,7 +26,14 @@ export default makeStyles(theme => ({
     flexDirection: 'column',
     height: 250,
     overflowY: 'auto',
-    textAlign: 'left'
+    textAlign: 'left',
+    '&::-webkit-scrollbar': {
+      width: 7
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: theme.palette.text.hint,
+      borderRadius: 6
+    }
   },
   sectionName: {
     color: theme.palette.text.primary

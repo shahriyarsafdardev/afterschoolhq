@@ -33,6 +33,7 @@ export default function RegistrationForm(props) {
     currentQuestions,
     handleRedirection,
     isUpdating = false,
+    showProgressBar = true,
     isUpdatingRegistration = false
   } = props;
   const outerWrapperClass =
@@ -87,7 +88,7 @@ export default function RegistrationForm(props) {
                   )
                 ))}
             </Box>
-            <Box className={classes.progressBar}>
+            <Box className={showProgressBar ? '' : classes.progressBar}>
               <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
             </Box>
             <Box className={classes.formWrapper}>

@@ -4,11 +4,7 @@ import { Box } from '@material-ui/core';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import {
-  handleStatusAndRedirection,
-  setSkipableStatusAsCompleted,
-  setSectionIndexToStorage
-} from 'pages/shared/helper';
+import { handleStatusAndRedirection, setSectionIndexToStorage } from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useVolunteerRegistration } from 'redux/hooks';
@@ -32,7 +28,6 @@ export default function VolunteerRegistration() {
     questionsGroups,
     answeredQuestions,
     setStatusCompleted,
-    setStatusNotStarted,
     submitFormSectionData,
     activity: { IsFree, RegistrantType, IsGenderRestricted, EnforcedGender, ActivityUrl }
   } = useVolunteerRegistration();
@@ -77,11 +72,6 @@ export default function VolunteerRegistration() {
     if (registrationId) handleRedirection();
   }, [registrationId]);
 
-  useEffect(() => {
-    if (questionsGroups.length)
-      setSkipableStatusAsCompleted(questionsGroups, setStatusCompleted, setStatusNotStarted);
-  }, [questionsGroups.length]);
-
   const handleRedirection = () => {
     const thankyouUrl = volunteerThankYouUrl(registrationId);
     window.history.pushState(null, '', thankyouUrl);
@@ -119,9 +109,9 @@ export default function VolunteerRegistration() {
         });
       }
       if (!lastSection && !errorMsgs.length) {
-        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, groupId);
+        handleStatusAndRedirection(setStatusCompleted, handleSection, resetForm, activeGroup);
       } else setSaveDisabled(false);
-      setSectionIndexToStorage(activeGroup);
+      if (!lastSection) setSectionIndexToStorage(activeGroup);
     }
   });
 
@@ -186,6 +176,7 @@ export default function VolunteerRegistration() {
         isFree={IsFree}
         firstSection={activeGroup === 0}
         exitHandler={exitHandler}
+        showProgressBar={false}
       ></RegistrationForm>
       {!loading && <SidebarSection questionsGroups={questionsGroups} />}
     </Box>
