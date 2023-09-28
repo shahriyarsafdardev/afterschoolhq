@@ -13,6 +13,8 @@ using AfterSchoolLibrary.Helpers;
 using System.Net.Mail;
 using MimeKit;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
+using System.Linq;
 
 namespace AfterSchoolLibrary
 {
@@ -51,17 +53,23 @@ namespace AfterSchoolLibrary
             {
                 var templateDataObj = new { subject = subject.ToString(), body = body.ToString() };
                 string templateData = JsonConvert.SerializeObject(templateDataObj);
+                string sanitizedEmail = new string(toEmail.Email
+                .Where(c => Char.IsLetterOrDigit(c) || c == '_' || c == '-')
+                .ToArray());
                 var mail = new SendTemplatedEmailRequest
                 {
                     Source = fromEmail.Email.ToString(),
-                    Template = "AHQGenericTemplate5",
+                    Template = "AHQGenericTemplate6",
                     Destination = new Destination
                     {
-                        ToAddresses = new List<string> { toEmail.Email.ToString() }
+                        ToAddresses = new List<string> { toEmail.Email }
                     },
                     TemplateData = templateData,
-                    ReplyToAddresses = new List<string> { replyTo.Email.ToString() },
+                    ConfigurationSetName = "ses_logs",
+                    //Tags = new List<MessageTag> { new MessageTag { Name = "ses_message_tag", Value = sanitizedEmail } }
                 };
+                if (replyTo != null)
+                    mail.ReplyToAddresses = new List<string> { replyTo.Email.ToString() };
 
                 if (ccEmail != null)
                     mail.Destination.CcAddresses = new List<string> { ccEmail.Email.ToString() };
@@ -104,14 +112,14 @@ namespace AfterSchoolLibrary
                 }
                 var mimeMessage = new MimeMessage();
                 mimeMessage.From.Add(new MailboxAddress(fromEmail.Name, fromEmail.Email));
-                mimeMessage.To.Add(new MailboxAddress(toEmail.Name, "ibad@wellcraftedconsulting.com"));
+                mimeMessage.To.Add(new MailboxAddress(toEmail.Name, toEmail.Email));
                 mimeMessage.Subject = subject;
 
                 mimeMessage.Body = bodyBuilder.ToMessageBody();
                 using (var messageStream = new MemoryStream())
                 {
                     Task.Run(async () => await mimeMessage.WriteToAsync(messageStream));
-                    var request = new SendRawEmailRequest { RawMessage = new RawMessage(messageStream) };
+                    var request = new SendRawEmailRequest { RawMessage = new RawMessage(messageStream), ConfigurationSetName = "ses_logs" };
                     //var task = await sesClient.SendRawEmailAsync(request);
                     // Create the SendRawEmailRequest
                     //var request = new SendRawEmailRequest

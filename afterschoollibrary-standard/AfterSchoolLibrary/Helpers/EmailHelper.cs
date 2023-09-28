@@ -2351,12 +2351,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"{Utilities.AppName(isAfterSchool)}: Authentication Code";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(user.Email),
                 subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                body
+                //emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
             );
 
             msgs.AddRange(mailMsgs);
