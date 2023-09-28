@@ -21,7 +21,7 @@
         <div class="panel-heading">
             @{Html.RenderPartial("_ActivityGroupTitle", Model.Name + " - Send Message"); }
         </div>
-        <div class="panel-body">
+        <div class="panel-body form-body">
             <form method="post" action="@Url.Action("messageadd", "group", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
 
                 @if (registrants.Count == 0)
@@ -35,8 +35,8 @@
                 {
 
                     <div class="form-group" id="subject-group">
-                        <label class="col-sm-3 control-label text-bold">Message Reason<span class="text-danger">*</span></label>
-                        <div class="col-sm-6">
+                        <label class="control-label text-bold">Message Reason<span class="text-danger">*</span></label>
+                        <div>
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
                                 @foreach (var reason in Enum.GetValues(typeof(ActivityMessageReason)).Cast<ActivityMessageReason>().Except(ActivityMessageReason.NotSet.AsList()).OrderBy(x => x.ToString()))
@@ -48,16 +48,16 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Message Body<span class="text-danger">*</span></label>
-                        <div class="col-sm-6">
+                        <label class="control-label text-bold">Message Body<span class="text-danger">*</span></label>
+                        <div>
                             <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control" maxlength="1000"></textarea>
                             <p class="text-muted">Max of 1000 characters</p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
-                        <div class="col-md-6">
+                        <label class="control-label text-bold">Attachment(s)</label>
+                        <div>
                             <div id="selected-files"></div>
                             <div class="border-gray-bold">
                                 <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
@@ -68,8 +68,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
+                        <label class="control-label"></label>
+                        <div>
                             <div class="am-checkbox">
                                 <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
                                 <label for="sendtostaff">Send Message To Staff</label>
@@ -78,8 +78,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
+                        <label class="control-label"></label>
+                        <div>
                             <div class="am-checkbox">
                                 <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
                                 <label for="parentsonly">Send only to parents of selected students</label>
@@ -88,11 +88,11 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">
-                            Select @UILabel.RegistrantLabel(true)<br />
-                            <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                        <label class="control-label text-bold">
+                            Select @UILabel.RegistrantLabel(true)
+                            <a href="javascript:selectAll()"class="xs-ml-40">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
-                        <div class="col-sm-6">
+                        <div>
                             @for (int i = 0; i < 3; i++)
                             {
                                 <div class="col-md-4">
@@ -123,8 +123,8 @@
                         <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">0</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">0</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
+                        <label class="control-label"></label>
+                        <div>
                             <div class="pull-left">
                                 <a href="@Url.Action("messages", "group", new { id = Model.Uid })" class="text-muted">
                                     &laquo; Cancel

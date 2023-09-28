@@ -34,10 +34,10 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("_ActivityGroupTitle", Model.Subject + " - Message"); }
+            <a href="@Url.Action("messages", "group", new { id = group.Uid})" class="btn btn-default pull-right">&laquo; Back to List</a>
         </div>
-        <div class="panel-body">
+        <div class="panel-body form-body">
             <div class="col-md-10 col-md-offset-1">
-
                 <div class="row">
                     <div class="btn-group pull-right">
                         @if (Model.GetUnsentCount() > 0)
@@ -47,36 +47,35 @@
                                 Resend Message to Unreached Recipients
                             </button>
                         }
-                        <a href="@Url.Action("messages", "group", new { id = group.Uid})" class="btn btn-default">&laquo; Back to List</a>
                     </div>
                 </div>
 
                 <form method="post" action="@Url.Action("messageadd", "group", new { id = group.Uid })" class="form-horizontal">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Subject<span class="text-danger">*</span></label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Subject<span class="text-danger">*</span></label>
+                        <div>
                             @Model.Subject
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Body<span class="text-danger">*</span></label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Body<span class="text-danger">*</span></label>
+                        <div>
                             @Html.Raw(@bodyText.IsNotEmpty() ? bodyText.Replace("\n", "<br />") : body.Replace("\n", "<br />"))
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Attachment(s)</label>
+                        <div>
                             @Html.Raw(attachments)
                         </div>
                     </div>
                     @if (Model.DateSent.HasValue)
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Date Sent</label>
-                            <div class="col-sm-6 padding-10">
+                            <label class="control-label text-bold">Date Sent</label>
+                            <div>
                                 @account.ConvertToAccountTimeZone(Model.DateSent.Value).ToLongDateTimeString()
                             </div>
                         </div>
@@ -84,16 +83,16 @@
                     @if (amrs.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label text-bold">
+                            <label class="control-label text-bold">
                                     Recipients
                             </label>
-                            <div class="col-sm-6">
+                            <div>
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
                                         @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
-                                            <div class="padding-10">
+                                            <div>
                                                 @if (amr.DateSent.HasValue)
                                                 {
                                                     <i class="s7-check-circle text-success text-bold"></i>

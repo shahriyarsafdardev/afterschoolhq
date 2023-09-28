@@ -47,50 +47,48 @@
               {
                   {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(activity.ActivityTypeId)},
               }); }
+            <a href="@Url.Action("messages", "activity", new { id = activity.Uid})" class="btn btn-primary pull-right">&laquo; Message List</a>
         </div>
-        <div class="panel-body">
+        <div class="panel-body form-body">
             <div class="col-md-10 col-md-offset-1">
 
-                <div class="row">
-                    <a href="@Url.Action("messages", "activity", new { id = activity.Uid})" class="btn btn-primary pull-right">&laquo; Message List</a>
-                </div>
 
                 <form method="post" action="@Url.Action("messageadd", "activity", new { id = activity.Uid })" class="form-horizontal">
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Message Reason<span class="text-danger">*</span></label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Message Reason<span class="text-danger">*</span></label>
+                        <div>
                             @Model.Subject
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Message Body<span class="text-danger">*</span> </label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Message Body<span class="text-danger">*</span> </label>
+                        <div>
                             @Html.Raw(@bodyText.IsNotEmpty()?bodyText.Replace("\n", "<br />"): body.Replace("\n", "<br />"))
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Attachment(s)</label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Attachment(s)</label>
+                        <div class="padding-10">
                             @Html.Raw(attachments)
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Sent to Staff</label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Sent to Staff</label>
+                        <div>
                             @Model.SendToStaff.ToYesNo()
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label text-bold">Sent only to parents of selected students</label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Sent only to parents of selected students</label>
+                        <div>
                             @Model.ParentsOnly.ToYesNo()
                         </div>
                     </div>
                     @if (Model.DateSent.HasValue)
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Date Sent</label>
-                            <div class="col-sm-6 padding-10">
+                            <label class="control-label text-bold">Date Sent</label>
+                            <div>
                                 @account.ConvertToAccountTimeZone(Model.DateSent.Value).ToLongDateTimeString()
                             </div>
                         </div>
@@ -98,10 +96,10 @@
                     @if (amrs.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label text-bold">
+                            <label class="control-label text-bold">
                                     @UILabel.RegistrantLabel(activity.ActivityTypeId) Recipients
                             </label>
-                            <div class="col-sm-6 padding-10">
+                            <div>
                                 @if (amrs.Count > 0)
                                 {
                                     for (int i = 0; i < 3; i++)
@@ -109,7 +107,7 @@
                                         <div class="col-md-4">
                                             @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                             {
-                                                <div class="padding-10">
+                                                <div>
                                                     @if (amr.DateSent.HasValue)
                                                     {
                                                         <i class="s7-check-circle text-success text-bold"></i>
