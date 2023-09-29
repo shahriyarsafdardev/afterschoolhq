@@ -248,9 +248,9 @@ namespace AfterSchoolLibrary.Services
             var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
             var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
 
-            //var firstRenewalDate = SubscriptionScheduleService.GetNextChargeDate(participationObject, plan.EndDate, plan.BillingPeriodTypeId);
+            var firstRenewalDate = SubscriptionScheduleService.GetFirstRenewalDate(participationObject, plan.EndDate, plan.BillingPeriodTypeId);
 
-            var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, feeObject, purchase, loggedInUser, msgs, dc);
+            var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, feeObject, firstRenewalDate, loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 submittedRecord,
@@ -261,6 +261,55 @@ namespace AfterSchoolLibrary.Services
                 loggedInUser,
                 msgs,
                 dc);
+
+            //run first charge 
+            if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
+            {
+                var amount = checkoutObject.GetRegistrationCostWithFees();
+                var subscriptionFees = checkoutObject.GetSubscriptionCostTodayNoFees(msgs, dc);
+
+                if (subscriptionSchedule.ProrateFirstCharge)
+                    subscriptionFees = SubscriptionScheduleService.CalculateProratedAmount(DateTime.UtcNow, startDateTime, subscriptionFees);
+
+                var totalAmount = amount + subscriptionFees;
+
+                //make seperate function for this
+                var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
+                    fromCustomerId: subscriptionSchedule.StripeCustomerId,
+                    destinationAccountId: null,
+                    platformFee: null,
+                    tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
+                    totalAmount: totalAmount,
+                    description: subscriptionSchedule.Description,
+                    statementDescriptor: "AHQ Subscription charge",
+                    metaData: new Dictionary<string, string>
+                    {
+                        //{"ActivityUid", ""},
+                        //{"BillingAccountUid", ""},
+                        //{"PayingAccountUid", ""},
+                        //{"RegistrationUid", ""},
+                        //{"CreditCardFeePayer", ""},
+                        //{"ConvenienceFeePayer", ""},
+                        //{"PurchasedBy", ""},
+                        //{"BilledBy", ""},
+                    },
+                    msgs: msgs
+                );
+
+                if(charge.IsEmpty())
+                    msgs.Add("Unable to perform charge", MessageType.Error);
+
+                else
+                {
+                    var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, subscriptionSchedule.AmountInCents, DateTime.UtcNow,
+                                charge.Id, false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, 50, 0, msgs);
+
+                    if(subscriptionPaymentHistory.IsEmpty())
+                        msgs.Add("Payment history record not created", MessageType.Error);
+                }
+            }
 
             checkoutObject.ProratingCalculation = proratingCalculation;
         }

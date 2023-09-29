@@ -44,13 +44,23 @@ namespace AfterSchool.Controllers
                     // Check if the schedule has a valid StripeSourceId
                     if (schedule.StripeSourceId.HasValue())
                     {
+                        var amount = schedule.AmountInCents / 100.0m;
+
+                        //will only prorate last charge if subscription end date exists???
+                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && schedule.ProrateLastCharge)
+                        {
+                            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+                            var enddate = rsp.GetSubscriptionPlan().EndDate;
+                            amount = SubscriptionScheduleService.CalculateProratedAmount((DateTime)enddate, DateTime.UtcNow, amount);
+                        }
+
                         // Create a charge for the current schedule
                         var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                             fromCustomerId: schedule.StripeCustomerId,
                             destinationAccountId: null,
                             platformFee: null,
                             tokenOrSourceId: schedule.StripeSourceId, // Use the StripeSourceId from the schedule
-                            totalAmount: schedule.AmountInCents / 100.0m, // Convert cents to dollars
+                            totalAmount: amount, // Convert cents to dollars
                             description: schedule.Description,
                             statementDescriptor: "AHQ Subscription charge",
                             metaData: new Dictionary<string, string>

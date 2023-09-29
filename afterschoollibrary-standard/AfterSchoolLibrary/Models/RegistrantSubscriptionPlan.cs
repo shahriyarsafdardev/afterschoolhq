@@ -348,6 +348,14 @@ namespace AfterSchoolLibrary.Models
 			return dq.GetCount(msgs) > 0;
 		}
 
-		#endregion
-	}
+        public static RegistrantSubscriptionPlan LoadBySubscriptionScheduleUid(Guid uid, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SubscriptionScheduleUid"], uid);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+        #endregion
+    }
 }
