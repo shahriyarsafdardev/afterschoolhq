@@ -1,4 +1,3 @@
-import { useSnackbar } from 'notistack';
 import React, { useEffect } from 'react';
 import { Box, Typography } from '@material-ui/core';
 
@@ -10,16 +9,11 @@ import { AddNewParticipantCard, RegistrantCard, Loader } from 'components';
 function SelectRegistrant() {
   const { redirect } = utils;
   const classes = useStyles();
-  const { enqueueSnackbar } = useSnackbar();
-  const { msgs, loading, students, loadData } = useSelectRegistrant();
+  const { loading, students, loadData } = useSelectRegistrant();
 
   useEffect(() => {
     loadData();
   }, []);
-
-  useEffect(() => {
-    msgs.forEach(msg => enqueueSnackbar(msg.Text, { variant: 'error' }));
-  }, [msgs]);
 
   const handleClick = async ({ BtnUrl }) => redirect(BtnUrl);
 

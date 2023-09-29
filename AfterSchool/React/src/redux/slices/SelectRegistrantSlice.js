@@ -7,7 +7,6 @@ import utils from 'utils';
 const SelectRegistrantSlice = createSlice({
   name: 'selectRegistrantSlice',
   initialState: {
-    msgs: [],
     activityData: {},
     students: [],
     loading: true
@@ -22,9 +21,6 @@ const SelectRegistrantSlice = createSlice({
     },
     loadingCompleted: state => {
       state.loading = false;
-    },
-    setMsgs: (state, { payload }) => {
-      state.msgs = payload;
     }
   }
 });
@@ -36,7 +32,7 @@ export const useSelectRegistrantActions = () => {
     loadingStart: headerLoadingStart,
     loadingCompleted: headerLoadingCompleted
   } = HeaderSlice.actions;
-  const { setMsgs, setData, loadingStart, loadingCompleted } = SelectRegistrantSlice.actions;
+  const { setData, loadingStart, loadingCompleted } = SelectRegistrantSlice.actions;
 
   const loadData = async () => {
     const { navigateTo } = utils;
@@ -45,8 +41,6 @@ export const useSelectRegistrantActions = () => {
     dispatch(headerLoadingStart());
 
     await SelectRegistrantRepository.getData().then(({ obj, msgs }) => {
-      dispatch(setMsgs(msgs));
-
       if (msgs.length > 0) return navigateTo('/login');
 
       if (obj?.activityDto) {
@@ -69,8 +63,6 @@ export const useSelectRegistrantActions = () => {
     return await SelectRegistrantRepository.addNewRegistrant().then(
       ({ msgs, obj: { AddNewStudentUrl } }) => {
         const { redirect } = utils;
-        dispatch(setMsgs(msgs));
-
         if (msgs.length > 0) return;
         redirect(AddNewStudentUrl);
       }
