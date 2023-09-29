@@ -451,11 +451,14 @@ namespace AfterSchool.Controllers
             var currentUser = SessionVariables.CurrentUser;
             var currentAccount = SessionVariables.CurrentAccount;
             ParticipationObject session = null;
-
+         
             if (account.IsNotEmpty())
             {
                 if (account.IsDeleted)
                     return HttpNotFound();
+
+                if (!account.IsActive)
+                    return Redirect($"~/404.html");
 
                 var activity =
                     AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value,
