@@ -43,7 +43,8 @@ namespace AfterSchoolLibrary.Services
         //    return subscriptionSchedule;
         //}
 
-        public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime? startDateTime, PlanFeeObject feeObject, Purchase purchase, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime? startDateTime, PlanFeeObject feeObject,
+            DateTime firstRenewalDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             //remove hard coded values
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -54,11 +55,11 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 StartDate = startDateTime.IfEmpty(DateTime.UtcNow),
-                AmountInCents = (decimal) purchase.AmountPaid,
+                AmountInCents = feeObject.Amount,
                 EndDate = DateTime.UtcNow, //calculate and also can be null
-                FirstRenewal = DateTime.UtcNow,//????
-                ProrateFirstCharge = (bool)checkoutObject.SubscriptionPlan.ProrateFirstCharge, //FE
-                ProrateLastCharge = (bool) checkoutObject.SubscriptionPlan.ProrateLastCharge, //FE
+                FirstRenewal = firstRenewalDate,
+                ProrateFirstCharge = (bool)checkoutObject.SubscriptionPlan.ProrateFirstCharge, 
+                ProrateLastCharge = (bool) checkoutObject.SubscriptionPlan.ProrateLastCharge,
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,
@@ -67,7 +68,7 @@ namespace AfterSchoolLibrary.Services
                 AmountToConnectAccountInCents = feeObject.Amount - feeObject.ConvenienceFee,
                 LastDateToBill = DateTime.UtcNow,
                 Description = "description", //???
-                NextBillDate = DateTime.UtcNow, //
+                NextBillDate = firstRenewalDate,
                 LastChargeFailed = false,
                 CancelledReason = "reason",
                 Metadata = "metadata", //?????
@@ -166,6 +167,13 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("No subscription plan found", MessageType.Error);
 
             return firstRenewalDate;
+        }
+
+        public static decimal CalculateProratedAmount(DateTime nextChargeDate, DateTime purchaseDate, decimal fullChargeAmount)
+        {
+            var diffInDays = (nextChargeDate.Date - purchaseDate.Date).TotalDays;
+            var currentMonthTotalDays = DateTime.DaysInMonth(nextChargeDate.Year, nextChargeDate.Month);
+            return (diffInDays / currentMonthTotalDays).ToDecimal() * fullChargeAmount;
         }
     }
 }
