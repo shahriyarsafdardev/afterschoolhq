@@ -74,7 +74,7 @@ function Note({ note, handleEdit }) {
         <Box className={classes.noteHeader}>
           <Box className={classes.titlesSubHeader}>
             <Typography variant="h6">{title}</Typography>
-            <Typography>{`By ${writer}`}</Typography>
+            <Typography>{`Last Modified By ${writer}`}</Typography>
           </Box>
           <Box className={classes.dateSubHeader}>
             <Typography>{formatDate(date)}</Typography>
