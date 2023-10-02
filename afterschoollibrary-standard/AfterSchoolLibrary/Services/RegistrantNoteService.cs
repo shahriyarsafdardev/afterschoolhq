@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -18,6 +18,12 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             return WebUser.Load(registrantNote.CreatedBy.Value, msgs, dc);
+        }
+
+        public static WebUser GetLastEditor(this RegistrantNote registrantNote, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            return WebUser.Load(registrantNote.LastModifiedBy.Value, msgs, dc);
         }
     }
 }
