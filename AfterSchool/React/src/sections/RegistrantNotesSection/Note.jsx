@@ -19,7 +19,15 @@ function Note({ note, handleEdit }) {
   const [showMore, setShowMore] = useState(false);
 
   const { deleteNote, registrantNotes, totalPages, getNotes } = useRegistrantNotes();
-  const { ID, Title: title, CreatedByName: writer, PostDate: date, Text: text, IsEditable } = note;
+  const {
+    ID,
+    Title: title,
+    LastModifiedByName: writer,
+    PostDate: date,
+    Text: text,
+    IsEditable,
+    IsEdited
+  } = note;
   const splittedTimeArray = date.split(' ');
   const open = Boolean(anchorEl);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +36,7 @@ function Note({ note, handleEdit }) {
   const isExpandable = text.length > NOTES_VISIBILITY_LENGTH;
   const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
   const noteText = showMore ? text : text.substring(0, NOTES_VISIBILITY_LENGTH);
+  const NoteWriterName = `${IsEdited ? 'Last Modified By' : 'By'} ${writer}`;
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -74,7 +83,7 @@ function Note({ note, handleEdit }) {
         <Box className={classes.noteHeader}>
           <Box className={classes.titlesSubHeader}>
             <Typography variant="h6">{title}</Typography>
-            <Typography>{`Last Modified By ${writer}`}</Typography>
+            <Typography>{NoteWriterName}</Typography>
           </Box>
           <Box className={classes.dateSubHeader}>
             <Typography>{formatDate(date)}</Typography>
