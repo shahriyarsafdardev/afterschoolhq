@@ -176,6 +176,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static SubscriptionPaymentHistory LoadBySubscriptionScheduleId(int SubscriptionScheduleId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], SubscriptionScheduleId);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static List<SubscriptionPaymentHistory> LoadByStatus(LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
