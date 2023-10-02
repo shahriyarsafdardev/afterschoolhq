@@ -628,7 +628,7 @@ namespace AfterSchool.Areas.Org.Controllers
                                     formattedSize = fileSize.ToString("F2") + "kb";
                                 }
                                 var fileLink = currentAccount.UploadFile(file.InputStream, file.FileName, msgs);
-                                body += $@"<div class=""file-box""><div class=""file-box-icon""><i class=""icon icon-left s7-file attachment-icon""></i></div><div class=""file-box-info""><a class=""file-link"" href=""{fileLink}"" data-file-name=""{file.FileName}"">{file.FileName}</a><span class=""text-muted"">{formattedSize}</span></div></div>";
+                                body += $@"<div class=""file-box""><div class=""file-box-icon""><i class=""icon icon-left s7-file attachment-icon""></i></div><div class=""file-box-info""><a class=""file-link"" href=""{fileLink}"" data-file-name=""{file.FileName}"" TARGET = ""_blank"">{file.FileName}</a><span class=""text-muted"">{formattedSize}</span></div></div>";
                             }
                             body += @"</div>";
                         }

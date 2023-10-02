@@ -119,7 +119,7 @@
                         <div id="selected-files"></div>
                         <div class="border-gray-bold">
                             <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
-                            <label id="file-label" class="btn attachment-btn" for="file-input">Choose File(s)<i class="icon s7-upload"></i></label>
+                            <label id="file-label" class="btn attachment-btn" for="file-input"><span class="media-middle">Choose File(s)</span><i class="icon s7-upload"></i></label>
                         </div>
                         <p class="text-muted">Max of 25 mb per file</p>
                     </div>
@@ -199,9 +199,9 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         const fileInput = document.getElementById("file-input");
         const selectedFiles = document.getElementById("selected-files");
-        let validFiles = []; 
 
         fileInput.addEventListener("change", function () {
+            let validFiles = [];
             selectedFiles.innerHTML = "";
             const files = this.files;
             let totalFileSize = 0;
@@ -284,8 +284,13 @@
         const fileInput = document.getElementById("file-input");
         const index = event.target.getAttribute("data-index");
         const selectedFiles = document.getElementById("selected-files");
-        fileInput.files[index] = null;
+        const newFileList = new DataTransfer();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (i != index) {
+                newFileList.items.add(fileInput.files[i]);
+            }
+        }
+        fileInput.files = newFileList.files;
         selectedFiles.removeChild(event.target.parentElement.parentElement);
-        fileInput.value = "";
     }
 </script>
