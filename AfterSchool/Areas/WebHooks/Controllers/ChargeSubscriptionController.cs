@@ -13,6 +13,7 @@ using System.Web.Http;
 using static AfterSchool.Controllers.AWSSubscriptionLambdaController;
 using Account = AfterSchoolLibrary.Models.Account;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
+using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
@@ -24,30 +25,17 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var msgs = new SystemMessages();
             try
             {
-                msgs.Add("Getting serializedJson", MessageType.Notice);
                 var serializedJson = JsonConvert.SerializeObject(json);
                 WebhookPayload webhookPayload = JsonConvert.DeserializeObject<WebhookPayload>(serializedJson);
 
                 var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
                 var subscriptionSchedule = webhookPayload.Schedule;
 
-                //msgs.Add("Getting stripeEvent", MessageType.Notice);
-                //var stripeEvent = (Stripe.Event) Stripe.EventUtility.ParseEvent(serializedJson, throwOnApiVersionMismatch: false);
-                var stripeEvent = "invoice.payment_succeeded";
-
-                switch (stripeEvent)
-                {
-                    case "invoice.payment_succeeded":
-                        msgs.Add("Getting payment_succeeded", MessageType.Notice);
-                        return InvoicePaymentSucceeded(subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
-                    
-                    default:
-                        return ReturnOK(msgs);
-                }
+                return InvoicePaymentSucceeded(subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
             }
             catch (Exception ex)
             {
-                AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
+                Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
             }
@@ -55,13 +43,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         
         private IHttpActionResult InvoicePaymentSucceeded(SubscriptionSchedule subscriptionSchedule, 
             SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
-        {
-            //var paymentIntent = (Stripe.PaymentIntent) stripeEvent.Data.Object;
-            //var stripeInvoice = paymentIntent.Invoice;
-            
+        {            
             // new logic
 
-            var rsp = RegistrantSubscriptionPlan.Load(2170, msgs, dc);
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
 
             var plan = rsp.GetSubscriptionPlan(msgs);
             var registrant = rsp.GetRegistrant(msgs);
@@ -160,10 +145,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 null,
                 msgs,
                 dc);
-            return ReturnOK(msgs);
+
+            if (msgs.HasNoErrors())
+                return ReturnOK(msgs);
+            else
+                return Return500(msgs);
         }
-
-
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
@@ -171,16 +158,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         }
         private IHttpActionResult Return500(SystemMessages msgs)
         {
-            SendLogEmail(msgs);
             return InternalServerError(new Exception(msgs.RenderMessageList(MessageOutputType.Text)));
-        }
-        private void SendLogEmail(SystemMessages msgs)
-        {
-            string toEmail = "dev@afterschoolhq.com";
-            string subject = $"Stripe Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
-
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
         }
     }
 }

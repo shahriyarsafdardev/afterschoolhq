@@ -11,38 +11,6 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SubscriptionScheduleService
     {
-        //public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime? startDateTime, PlanFeeObject feeObject, Purchase purchase, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    if (msgs.IsEmpty()) msgs = new SystemMessages();
-        //    var subscriptionSchedule = new SubscriptionSchedule()
-        //    {
-        //        CreateDate = DateTime.UtcNow,
-        //        CreatedBy = loggedInUser?.ID.IfEmpty(0),
-        //        LastModifiedDate = DateTime.UtcNow,
-        //        LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-        //        StartDate = startDateTime.IfEmpty(DateTime.UtcNow),
-        //        AmountInCents = (decimal) purchase.AmountPaid,
-        //        EndDate = checkoutObject.SubscriptionPlan.EndDate, //calculate and also can be null
-        //        FirstRenewal = firstRenewal,//????
-        //        ProrateFirstCharge = false, //FE
-        //        ProrateLastCharge = false, //FE
-        //        BillingPeriodType = feeObject.BillingPeriodType,
-        //        StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
-        //        StripeSourceId = checkoutObject.StripeSourceId,
-        //        LastChargeStatus = lastChargeStatus, //run the charge and then pass the status
-        //        StripeConnectId = checkoutObject.BillingAccount.GetStripeConnectedAccount(msgs).Id,
-        //        AmountToConnectAccountInCents = amountToConnectAccountInCents,
-        //        LastDateToBill = lastDateToBill,
-        //        Description = "description", //???
-        //        NextBillDate = nextBillDate, //
-        //        LastChargeFailed = lastChargeFailed,
-        //        CancelledReason = "reason",
-        //        Metadata = "metadata", //?????
-        //    };
-        //    msgs.AddRange(subscriptionSchedule.Save(dc));
-        //    return subscriptionSchedule;
-        //}
-
         public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime? startDateTime, PlanFeeObject feeObject,
             DateTime firstRenewalDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
