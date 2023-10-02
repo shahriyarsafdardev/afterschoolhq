@@ -1,8 +1,10 @@
 import React from 'react';
 import CheckIcon from '@material-ui/icons/Check';
 import { Checkbox, FormControlLabel, Box, Typography } from '@material-ui/core';
+
 import useStyles from './styles';
 import { ErrorBand } from 'components';
+import { withoutSignsPhoneNumber } from 'utils';
 
 function AuthorizedPersonListRow({ handleChange, touched, person, errors, handleEdit }) {
   const classes = useStyles();
@@ -37,7 +39,7 @@ function AuthorizedPersonListRow({ handleChange, touched, person, errors, handle
           </Box>
 
           <Box className={classes.phoneField}>
-            <Typography>{Phone}</Typography>
+            <Typography>{withoutSignsPhoneNumber(Phone)}</Typography>
             {canEdit && (
               <Typography
                 onClick={handleEdit}
