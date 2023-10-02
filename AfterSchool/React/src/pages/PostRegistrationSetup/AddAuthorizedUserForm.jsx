@@ -6,6 +6,7 @@ import React from 'react';
 
 import TextField from 'components/Overrides/TextField';
 import { phoneValidationRegex } from 'constants/regex';
+import { withoutSignsPhoneNumber } from 'utils';
 import Controls from './Controls';
 import useStyles from './styles';
 
@@ -29,7 +30,13 @@ function AddAuthorizedUserForm({ setFieldValue, handleDeleteField, person: user 
     initialValues: user,
     validationSchema: ValidationSchema,
     onSubmit: () => {
-      setFieldValue({ ...values, default: true, newObject: false });
+      const updatedValues = {
+        ...values,
+        default: true,
+        newObject: false,
+        Phone: withoutSignsPhoneNumber(values.Phone)
+      };
+      setFieldValue(updatedValues);
     }
   });
 

@@ -3,9 +3,10 @@ import { Grid, Box, Container, Typography, Divider } from '@material-ui/core';
 
 import useStyles from './styles';
 import { useFormik } from 'formik';
+import { withoutSignsPhoneNumber } from 'utils';
 import { isEmpty, isEqual, toArray } from 'lodash';
-import AuthorizedPersonListRow from './AuthorizedPersonListRow';
 import AddAuthorizedUserForm from './AddAuthorizedUserForm';
+import AuthorizedPersonListRow from './AuthorizedPersonListRow';
 
 const newUser = {
   ID: -1,
@@ -27,7 +28,7 @@ function AuthorizedPersonListSetup({ studentName, authorizedPersons, setValue, s
     const initialState = {};
     const authorizedPersonsPhoneList = [];
     authorizedPersons.forEach((person, index) => {
-      authorizedPersonsPhoneList.push(person.Phone);
+      authorizedPersonsPhoneList.push(withoutSignsPhoneNumber(person.Phone));
       initialState[index] = { HasAccess: false, ...person, default: true, newObject: false };
     });
     setInitialValue(initialState);

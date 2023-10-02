@@ -70,3 +70,11 @@ export const getError = (uploadingStatus, errorId) => {
   if (uploadingStatus) return uploadingStatus === 'SUCCESS' ? errorId : uploadingStatus;
   else return errorId;
 };
+
+export const withoutSignsPhoneNumber = phone => {
+  return phone
+    .split('+1')
+    .join('')
+    .split('-')
+    .join('');
+};

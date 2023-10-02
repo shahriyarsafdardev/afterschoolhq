@@ -5,10 +5,11 @@ import { useSnackbar } from 'notistack';
 import { Box, Button } from '@material-ui/core';
 
 import useStyles from './styles';
+import { withoutSignsPhoneNumber } from 'utils';
+import { useManageAPAccess } from 'redux/hooks';
 import TextField from 'components/Overrides/TextField';
 import LoadingButton from 'components/Overrides/LoadingButton';
 import { phoneValidationRegex, numericValidationRegex } from 'constants/regex';
-import { useManageAPAccess } from 'redux/hooks';
 
 function PinSetupForm(props) {
   const classes = useStyles();
@@ -45,13 +46,15 @@ function PinSetupForm(props) {
     validationSchema: ValidationSchema,
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
-      await createPinForParent(values.phone, values.pin, data).then(msgs => {
-        if (!msgs.length) {
-          enqueueSnackbar('Submitted.', { variant: 'success' });
-          resetForm();
+      await createPinForParent(withoutSignsPhoneNumber(values.phone), values.pin, data).then(
+        msgs => {
+          if (!msgs.length) {
+            enqueueSnackbar('Submitted.', { variant: 'success' });
+            resetForm();
+          }
+          setSaveDisabled(false);
         }
-        setSaveDisabled(false);
-      });
+      );
     }
   });
 

@@ -5,6 +5,7 @@ import React from 'react';
 
 import TextField from 'components/Overrides/TextField';
 import { phoneValidationRegex } from 'constants/regex';
+import { withoutSignsPhoneNumber } from 'utils';
 import Controls from './Controls';
 import useStyles from './styles';
 
@@ -20,7 +21,10 @@ function AddAuthorizedUserForm({
     Phone: Yup.string()
       .matches(phoneValidationRegex, 'Phone is not valid')
       .test('unique-phone', 'Phone already exists', function(value) {
-        return !authorizedPersonsPhoneList.includes(value) || user.Phone === value;
+        const phoneWithoutSign = withoutSignsPhoneNumber(value);
+        return (
+          !authorizedPersonsPhoneList.includes(phoneWithoutSign) || user.Phone === phoneWithoutSign
+        );
       })
       .required('Phone is required'),
     FirstName: Yup.string().required('First Name is required'),
@@ -31,7 +35,13 @@ function AddAuthorizedUserForm({
     initialValues: user,
     validationSchema: ValidationSchema,
     onSubmit: () => {
-      setFieldValue({ ...values, default: true, newObject: false });
+      const updatedValues = {
+        ...values,
+        default: true,
+        newObject: false,
+        Phone: withoutSignsPhoneNumber(values.Phone)
+      };
+      setFieldValue(updatedValues);
     }
   });
 
