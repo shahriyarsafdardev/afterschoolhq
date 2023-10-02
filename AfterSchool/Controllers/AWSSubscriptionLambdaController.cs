@@ -31,6 +31,8 @@ namespace AfterSchool.Controllers
             SystemMessages msgs = new SystemMessages();
 
             var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs, null);
+            var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs, null);
+            var subscriptionPaymentHistoryFailedStatus = new List<SubscriptionSchedule>();
             var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs, null);
 
             //if (!subscriptionSchedulespendingToday.Any())
@@ -77,9 +79,11 @@ namespace AfterSchool.Controllers
                             msgs: msgs
                         );
 
+                        var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
                         //have to calculate amountToStripeInCents
                         var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(schedule.ID.Value, schedule.AmountInCents, DateTime.UtcNow,
-                                charge.Id, false, LastChargeStatus.succeeded, charge.StripeResponse.ToString(), schedule.AmountToConnectAccountInCents, 50, 0);
+                                charge.Id, false, chargeStatus, charge.StripeResponse.ToString(), schedule.AmountToConnectAccountInCents, 50, 0);
 
                         if (charge != null && charge.Status == LastChargeStatus.succeeded.ToString())
                         {
@@ -136,7 +140,48 @@ namespace AfterSchool.Controllers
                 }
             }
 
-            if(subscriptionSchedulesAfterThreeDays != null)
+            if (subscriptionPaymentHistoryPendingStatus.Any())
+            {
+                foreach (var paymentHistory in subscriptionPaymentHistoryPendingStatus)
+                {
+                    var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
+                    var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
+                    var chargeStatus = Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+                    if (chargeStatus.Equals(LastChargeStatus.succeeded))
+                    {
+                        //check if final payment
+                        if (schedule.LastDateToBill.Equals(DateTime.UtcNow))
+                            schedule.NextBillDate = null;
+                        else        
+                        {
+                            schedule.NextBillDate = new SubscriptionPlan
+                            {
+                                BillingPeriodTypeId = schedule.BillingPeriodType
+                            }.CalculateEndDateFromNumberOfPeriods((DateTime) schedule.NextBillDate, 1);
+                        }
+                        paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+                        msgs.AddRange(schedule.Save());
+                        msgs.AddRange(paymentHistory.Save());
+                    }
+                    else if(chargeStatus.Equals(LastChargeStatus.failed))
+                    {
+                        paymentHistory.Status = LastChargeStatus.failed;
+
+                        if (paymentHistory.RetryNumber < 3)
+                            paymentHistory.RetryNumber += 1;
+
+                        msgs.AddRange(paymentHistory.Save());
+                        subscriptionPaymentHistoryFailedStatus.Add(schedule);
+                    }
+                    else
+                    {
+                        //what if charge is still pending and status didn't updated??
+                    }
+                }
+            }
+
+            if (subscriptionSchedulesAfterThreeDays != null)
             {
                 //send email that you have upcoming payment
             }
