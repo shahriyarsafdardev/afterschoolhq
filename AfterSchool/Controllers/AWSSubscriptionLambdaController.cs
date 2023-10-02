@@ -30,10 +30,10 @@ namespace AfterSchool.Controllers
         {
             SystemMessages msgs = new SystemMessages();
 
-            var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs, null);
+            var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs);
             var subscriptionSchedulesFailed = SubscriptionScheduleService.GetFailedSubscriptionSchedules(msgs, null);
-            var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs, null);
-            var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs, null);
+            var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs);
+            var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs);
 
             //if (!subscriptionSchedulespendingToday.Any())
             //{
@@ -49,7 +49,7 @@ namespace AfterSchool.Controllers
                         var amount = schedule.AmountInCents / 100.0m;
 
                         //will only prorate last charge if subscription end date exists???
-                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && schedule.ProrateLastCharge)
+                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
                         {
                             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
                             var enddate = rsp.GetSubscriptionPlan().EndDate;
@@ -191,7 +191,7 @@ namespace AfterSchool.Controllers
                         var amount = schedule.AmountInCents / 100.0m;
 
                         //will only prorate last charge if subscription end date exists???
-                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && schedule.ProrateLastCharge)
+                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
                         {
                             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
                             var enddate = rsp.GetSubscriptionPlan().EndDate;

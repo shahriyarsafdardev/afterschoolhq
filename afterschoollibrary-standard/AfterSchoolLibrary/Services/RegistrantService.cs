@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary.Services
                 var amount = checkoutObject.GetRegistrationCostWithFees();
                 var subscriptionFees = checkoutObject.GetSubscriptionCostTodayNoFees(msgs, dc);
 
-                if (subscriptionSchedule.ProrateFirstCharge)
+                if (subscriptionSchedule.ProrateFirstCharge ?? false)
                     subscriptionFees = SubscriptionScheduleService.CalculateProratedAmount(DateTime.UtcNow, startDateTime, subscriptionFees);
 
                 var totalAmount = amount + subscriptionFees;
