@@ -168,14 +168,21 @@ namespace AfterSchoolLibrary.Models
             return msgs;
         }
 
-        public static SubscriptionPaymentHistory Load(int id, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static SubscriptionPaymentHistory Load(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["ID"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static List<SubscriptionPaymentHistory> LoadByStatus(LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Status"], status);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
         #endregion
     }
 }
