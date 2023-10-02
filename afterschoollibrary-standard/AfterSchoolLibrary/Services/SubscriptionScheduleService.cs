@@ -91,6 +91,25 @@ namespace AfterSchoolLibrary.Services
             return subscriptionSchedulespendingToday;
         }
 
+        public static List<SubscriptionSchedule> GetFailedSubscriptionSchedules(SystemMessages msgs,
+          DatabaseConnection dc = null)
+        {
+            var subscriptionPaymentsFailed = SubscriptionPaymentHistory.LoadByStatus(LastChargeStatus.failed, msgs, dc);
+            var subscriptionSchedulesNotCancelled = SubscriptionSchedule.LoadActiveSubscriptionSchedule(msgs, dc);
+            var currentDate = DateTime.UtcNow.Date;
+
+            var subscriptionSchedulesFailed = subscriptionSchedulesNotCancelled
+                .Where(schedule =>
+                   subscriptionPaymentsFailed.Any(paymentFailed =>
+                   paymentFailed.SubscriptionScheduleId == schedule.ID &&
+                    schedule.NextBillDate.Value.Date == currentDate.AddDays(-paymentFailed.RetryNumber) &&
+                    paymentFailed.RetryNumber < 3)
+                )
+                .ToList(); 
+
+            return subscriptionSchedulesFailed;
+        }
+
         public static List<SubscriptionSchedule> GetSubscriptionSchedulePendingInThreeDays(SystemMessages msgs,
            DatabaseConnection dc = null)
         {
