@@ -58,8 +58,8 @@ namespace AfterSchoolLibrary.Services
                 AmountInCents = feeObject.Amount,
                 EndDate = DateTime.UtcNow, //calculate and also can be null
                 FirstRenewal = firstRenewalDate,
-                ProrateFirstCharge = (bool)checkoutObject.SubscriptionPlan.ProrateFirstCharge, 
-                ProrateLastCharge = (bool) checkoutObject.SubscriptionPlan.ProrateLastCharge,
+                ProrateFirstCharge = checkoutObject.SubscriptionPlan.ProrateFirstCharge, 
+                ProrateLastCharge = checkoutObject.SubscriptionPlan.ProrateLastCharge,
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,

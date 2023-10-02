@@ -21,9 +21,9 @@ namespace AfterSchoolLibrary.Models
 
         public DateTime? FirstRenewal { get { return (DateTime?) MDV["FirstRenewal"].Value; } set { MDV["FirstRenewal"].Value = value; } }
 
-        public bool ProrateFirstCharge { get { return (bool) MDV["ProrateFirstCharge"].Value; } set { MDV["ProrateFirstCharge"].Value = value; } }
+        public bool? ProrateFirstCharge { get { return (bool) MDV["ProrateFirstCharge"].Value; } set { MDV["ProrateFirstCharge"].Value = value; } }
 
-        public bool ProrateLastCharge { get { return (bool) MDV["ProrateLastCharge"].Value; } set { MDV["ProrateLastCharge"].Value = value; } }
+        public bool? ProrateLastCharge { get { return (bool) MDV["ProrateLastCharge"].Value; } set { MDV["ProrateLastCharge"].Value = value; } }
 
         public DateTime? DateCancelled { get { return (DateTime?) MDV["DateCancelled"].Value; } set { MDV["DateCancelled"].Value = value; } }
 
