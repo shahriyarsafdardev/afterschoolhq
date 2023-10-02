@@ -2,5 +2,6 @@ public enum LastChargeStatus
 {
     NotSet = 0,
     succeeded,
-    failed
+    failed,
+    pending
 }
