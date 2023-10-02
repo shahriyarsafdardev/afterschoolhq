@@ -34,266 +34,189 @@ namespace AfterSchool.Controllers
             var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs);
             var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs);
 
-            //if (!subscriptionSchedulespendingToday.Any())
-            //{
-            //    return;
-            //}
-            if (subscriptionSchedulespendingToday.Any())
-            {
-                foreach (var schedule in subscriptionSchedulespendingToday)
-                {
-                    // Check if the schedule has a valid StripeSourceId
-                    if (schedule.StripeSourceId.HasValue())
-                    {
-                        var amount = schedule.AmountInCents / 100.0m;
-
-                        //will only prorate last charge if subscription end date exists???
-                        if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                        {
-                            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
-                            var enddate = rsp.GetSubscriptionPlan()?.EndDate;
-                            amount = SubscriptionScheduleService.CalculateProratedAmount((DateTime)enddate, DateTime.UtcNow, amount);
-                        }
-
-                        // Create a charge for the current schedule
-                        var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
-                            fromCustomerId: schedule.StripeCustomerId,
-                            destinationAccountId: null,
-                            platformFee: null,
-                            tokenOrSourceId: schedule.StripeSourceId, 
-                            totalAmount: amount, // Convert cents to dollars
-                            description: schedule.Description,
-                            statementDescriptor: "AHQ Subscription charge",
-                            metaData: new Dictionary<string, string>
-                            {
-                                //{"ActivityUid", ""},
-                                //{"BillingAccountUid", ""},
-                                //{"PayingAccountUid", ""},
-                                //{"RegistrationUid", ""},
-                                //{"CreditCardFeePayer", ""},
-                                //{"ConvenienceFeePayer", ""},
-                                //{"PurchasedBy", ""},
-                                //{"BilledBy", ""},
-                            },
-                            msgs: msgs
-                        );
-
-                        if (charge.IsEmpty())
-                            msgs.Add("Error in running the charge", MessageType.Error);
-                        else
-                        {
-                            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-
-                            //have to calculate amountToStripeInCents
-                            var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(schedule.ID.Value, schedule.AmountInCents, DateTime.UtcNow,
-                                    charge.Id, false, chargeStatus, charge.StripeResponse.ToString(), schedule.AmountToConnectAccountInCents, 50, 0);
-
-                            if (charge.Status.Equals(LastChargeStatus.succeeded))
-                            {
-                                var webhookPayload = new WebhookPayload
-                                {
-                                    //pass Uid instead of whole object
-                                    PaymentHistory = subscriptionPaymentHistory,
-                                    Schedule = schedule
-                                };
-
-                                var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
-
-                                var response = SendWebhook(jsonPayload);
-
-                                if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
-                                {
-                                    UpdateNextBillDateOnSuccess(schedule, msgs);
-                                }
-                                else
-                                {
-                                    //what to do if webhook fails
-                                }
-                            }
-                            else if (charge.Status.Equals(LastChargeStatus.failed))
-                            {
-                                msgs.Add("Charge failed", MessageType.Error);
-
-                                if (subscriptionPaymentHistory.RetryNumber < 3)
-                                    subscriptionPaymentHistory.RetryNumber += 1;
-
-                                msgs.AddRange(subscriptionPaymentHistory.Save());
-
-                                //what should be updated in Subscription Schedule in this case????
-
-                                //send email to customer and provider notifying user of charge failure
-
-                                //if Bad card or insufficient funds??????
-                                //redirect to Card details which should require login
-
-                                //if Need to cancel?    
-                                //Cancel subscription, notify main AHQ system
-                            }
-                            else
-                            {
-                                //pending status?????
-                            }
-                        }
-                    }
-                    else
-                        msgs.Add("StripeSourceId is empty", MessageType.Error);
-                }
-            }
-
-            if (subscriptionPaymentHistoryPendingStatus.Any())
-            {
-                foreach (var paymentHistory in subscriptionPaymentHistoryPendingStatus)
-                {
-                    var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
-                    var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
-                    if (charge.IsEmpty())
-                        msgs.Add("Unable to get the charge", MessageType.Error);
-                    else
-                    {
-                        var chargeStatus = Enum.Parse(typeof(LastChargeStatus), charge.Status);
-
-                        paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-                        msgs.AddRange(paymentHistory.Save());
-
-                        if (chargeStatus.Equals(LastChargeStatus.succeeded))
-                        {
-                            var webhookPayload = new WebhookPayload
-                            {
-                                //pass Uid instead of whole object
-                                PaymentHistory = paymentHistory,
-                                Schedule = schedule
-                            };
-
-                            var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
-
-                            var response = SendWebhook(jsonPayload);
-
-                            if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
-                            {
-                                UpdateNextBillDateOnSuccess(schedule, msgs);
-                            }
-                            else
-                            {
-                                //what to do if webhook fails
-                            }
-                        }
-                        else if (chargeStatus.Equals(LastChargeStatus.failed))
-                        {
-                            if (paymentHistory.RetryNumber < 3)
-                                paymentHistory.RetryNumber += 1;
-
-                            msgs.AddRange(paymentHistory.Save());
-                            subscriptionSchedulesFailed.Add(schedule);
-                        }
-                        else
-                        {
-                            //what if charge is still pending and status didn't updated??
-                        }
-                    }
-                }
-            }
-
-            if (subscriptionSchedulesFailed.Any())
-            {
-                foreach (var schedule in subscriptionSchedulesFailed)
-                {
-                    // Check if the schedule has a valid StripeSourceId
-                    if (schedule.StripeSourceId.HasValue())
-                    {
-                        var amount = schedule.AmountInCents / 100.0m;
-
-                        //will only prorate last charge if subscription end date exists???
-                        if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                        {
-                            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
-                            var enddate = rsp.GetSubscriptionPlan()?.EndDate;
-                            amount = SubscriptionScheduleService.CalculateProratedAmount((DateTime) enddate, DateTime.UtcNow, amount);
-                        }
-
-                        // Create a charge for the current schedule
-                        var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
-                            fromCustomerId: schedule.StripeCustomerId,
-                            destinationAccountId: null,
-                            platformFee: null,
-                            tokenOrSourceId: schedule.StripeSourceId, 
-                            totalAmount: amount, // Convert cents to dollars
-                            description: schedule.Description,
-                            statementDescriptor: "AHQ Subscription charge",
-                            metaData: new Dictionary<string, string>
-                            {
-                                //{"ActivityUid", ""},
-                                //{"BillingAccountUid", ""},
-                                //{"PayingAccountUid", ""},
-                                //{"RegistrationUid", ""},
-                                //{"CreditCardFeePayer", ""},
-                                //{"ConvenienceFeePayer", ""},
-                                //{"PurchasedBy", ""},
-                                //{"BilledBy", ""},
-                            },
-                            msgs: msgs
-                        );
-
-                        var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs, null);
-
-                        if (charge.IsEmpty())
-                            msgs.Add("Error in running the charge", MessageType.Error);
-                        else
-                        {
-                            if (charge.Status.Equals(LastChargeStatus.succeeded))
-                            {
-                                var webhookPayload = new WebhookPayload
-                                {
-                                    //pass Uid instead of whole object
-                                    PaymentHistory = subscriptionPaymentHistory,
-                                    Schedule = schedule
-                                };
-
-                                var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
-
-                                var response = SendWebhook(jsonPayload);
-
-                                if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
-                                {
-                                    UpdateNextBillDateOnSuccess(schedule, msgs);
-                                }
-                                else
-                                {
-                                    //what to do if webhook fails
-                                }
-                            }
-                            else if (charge.Status.Equals(LastChargeStatus.failed))
-                            {
-                                msgs.Add("Charge failed", MessageType.Error);
-
-                                if (subscriptionPaymentHistory.RetryNumber < 3)
-                                    subscriptionPaymentHistory.RetryNumber += 1;
-
-                                msgs.AddRange(subscriptionPaymentHistory.Save());
-
-                                //what should be updated in Subscription Schedule in this case????
-
-                                //send email to customer and provider notifying user of charge failure
-
-                                //if Bad card or insufficient funds??????
-                                //redirect to Card details which should require login
-
-                                //if Need to cancel?    
-                                //Cancel subscription, notify main AHQ system
-                            }
-                            else
-                            {
-                                //pending status?????
-                            }
-                        }
-                    }
-                    else
-                        msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
-                }
-            }
+            ProcessSubscriptionSchedules(subscriptionSchedulespendingToday, msgs);
+            ProcessPaymentHistory(subscriptionPaymentHistoryPendingStatus, msgs);
+            ProcessFailedSubscriptionSchedules(subscriptionSchedulesFailed, msgs);
 
             if (subscriptionSchedulesAfterThreeDays.IsNotEmpty())
             {
-                //send email that you have upcoming payment
+                // Send an email for upcoming payments.
+            }
+        }
+
+        private void ProcessSubscriptionSchedules(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
+        {
+            foreach (var schedule in schedules)
+            {
+                if (schedule.StripeSourceId.HasValue())
+                {
+                    var amount = schedule.AmountInCents / 100.0m;
+
+                    if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
+                    {
+                        amount = CalculateProratedAmount(schedule, msgs);
+                    }
+
+                    var charge = CreateCharge(schedule, amount, msgs);
+
+                    if (charge.IsEmpty())
+                        msgs.Add("Error in running the charge", MessageType.Error);
+                    else
+                        ProcessCharge(charge, schedule, null, msgs);
+                }
+                else
+                    msgs.Add("StripeSourceId is empty", MessageType.Error);
+            }
+        }
+
+        private decimal CalculateProratedAmount(SubscriptionSchedule schedule, SystemMessages msgs)
+        {
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+            var enddate = rsp.GetSubscriptionPlan()?.EndDate;
+            return SubscriptionScheduleService.CalculateProratedAmount((DateTime) enddate, DateTime.UtcNow, schedule.AmountInCents / 100.0m);
+        }
+
+        private Charge CreateCharge(SubscriptionSchedule schedule, decimal amount, SystemMessages msgs)
+        {
+            // Create a charge for the current schedule
+            return StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
+                fromCustomerId: schedule.StripeCustomerId,
+                destinationAccountId: null,
+                platformFee: null,
+                tokenOrSourceId: schedule.StripeSourceId,
+                totalAmount: amount,
+                description: schedule.Description,
+                statementDescriptor: "AHQ Subscription charge",
+                metaData: new Dictionary<string, string>
+                {
+                    //{"ActivityUid", ""},
+                    //{"BillingAccountUid", ""},
+                    //{"PayingAccountUid", ""},
+                    //{"RegistrationUid", ""},
+                    //{"CreditCardFeePayer", ""},
+                    //{"ConvenienceFeePayer", ""},
+                    //{"PurchasedBy", ""},
+                    //{"BilledBy", ""},
+                },
+                msgs: msgs
+            );
+        }
+
+        private void ProcessCharge(Charge charge, SubscriptionSchedule schedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,  SystemMessages msgs)
+        {
+            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+            if(subscriptionPaymentHistory.IsEmpty())
+            {
+                subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(
+                schedule.ID.Value,
+                schedule.AmountInCents,
+                DateTime.UtcNow,
+                charge.Id,
+                false,
+                chargeStatus,
+                charge.StripeResponse.ToString(),
+                schedule.AmountToConnectAccountInCents,
+                50,
+                0
+                );
+            }
+
+            HandleCharge(charge, schedule, subscriptionPaymentHistory, msgs);
+        }
+
+
+        private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory, 
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (charge.Status.Equals(LastChargeStatus.succeeded))
+            {
+                var webhookPayload = new WebhookPayload
+                {
+                    PaymentHistory = subscriptionPaymentHistory,
+                    Schedule = subscriptionSchedule
+                };
+
+                var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
+                var response = SendWebhook(jsonPayload);
+
+                if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
+                {
+                    UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+                }
+                else
+                {
+                    // Handle webhook failure
+                }
+            }
+            else if (charge.Status.Equals(LastChargeStatus.failed))
+            {
+                msgs.Add("Charge failed", MessageType.Error);
+
+                if (subscriptionPaymentHistory.RetryNumber < 3)
+                    subscriptionPaymentHistory.RetryNumber += 1;
+
+                msgs.AddRange(subscriptionPaymentHistory.Save());
+
+                //what should be updated in Subscription Schedule in this case????
+                //send email to customer and provider notifying user of charge failure
+                //if Bad card or insufficient funds??????
+                //redirect to Card details which should require login
+                //if Need to cancel?    
+                //Cancel subscription, notify main AHQ system
+            }
+            else
+            {
+                // Handle pending status
+            }
+        }
+
+
+        private void ProcessPaymentHistory(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
+        {
+            foreach (var paymentHistory in paymentHistories)
+            {
+                var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
+                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
+
+                if (charge.IsEmpty())
+                    msgs.Add("\"Error in running the charge", MessageType.Error);
+                
+                else
+                {
+                    var chargeStatus = Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+                    paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+                    msgs.AddRange(paymentHistory.Save());
+
+                    HandleCharge(charge, schedule, paymentHistory, msgs);
+                    //subscriptionSchedulesFailed.Add(schedule);
+                }
+            }
+        }
+
+        private void ProcessFailedSubscriptionSchedules(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
+        {
+            foreach (var schedule in schedules)
+            {
+                if (schedule.StripeSourceId.HasValue())
+                {
+                    var amount = schedule.AmountInCents / 100.0m;
+
+                    if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
+                        amount = CalculateProratedAmount(schedule, msgs);
+
+                    var charge = CreateCharge(schedule, amount, msgs);
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
+
+                    if (charge.IsEmpty())
+                        msgs.Add("Error in running the charge", MessageType.Error);
+
+                    else
+                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, msgs);
+                }
+                else
+                    msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
             }
         }
 
