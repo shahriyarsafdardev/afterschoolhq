@@ -11,8 +11,14 @@ export default makeStyles(theme => ({
     position: 'absolute',
     top: 160,
     right: 50,
-    [theme.breakpoints.down('lg')]: {
+    [theme.breakpoints.down('md')]: {
       display: 'none'
+    },
+    [theme.breakpoints.only('lg')]: {
+      right: 15,
+      minWidth: 200,
+      padding: 10,
+      width: '18%'
     }
   },
   sidebarHeader: {

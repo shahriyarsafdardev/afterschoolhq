@@ -176,7 +176,7 @@ export default makeStyles(theme => ({
     padding: '30px 0px'
   },
   progressBar: {
-    [theme.breakpoints.up('xl')]: {
+    [theme.breakpoints.up('lg')]: {
       display: 'none'
     }
   }
