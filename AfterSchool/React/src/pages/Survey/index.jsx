@@ -81,6 +81,7 @@ export default function Survey() {
     initialValues: initialvalues,
     // validate: values => validator(values),
     onSubmit: async values => {
+      let errors = [];
       setSaveDisabled(true);
       if (dirty || lastSection || firstSection) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
@@ -90,12 +91,11 @@ export default function Survey() {
             if (!msgs.length) {
               enqueueSnackbar('Submitted.', { variant: 'success' });
               lastSection && navigate(surveyThankyouUrl(formUid));
-            }
+            } else errors = msgs;
           }
         );
       }
-
-      handleSection('next');
+      if (!errors.length) handleSection('next');
       setSaveDisabled(false);
     }
   });
