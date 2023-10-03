@@ -2228,6 +2228,8 @@ namespace AfterSchoolLibrary.Helpers
                 {"PaymentAmount", plan.CostPerPeriod.ToCurrency()},
                 {"ActivityName", activityName},
                 {"LoginLink", $"{Email.BaseUrl()}login"},
+                {"ProductName", Utilities.AppName(isAfterSchool)},
+                {"SupportEmail", Email.AppSupportEmailAddress},
             };
 
             var body = ProcessTemplate(
