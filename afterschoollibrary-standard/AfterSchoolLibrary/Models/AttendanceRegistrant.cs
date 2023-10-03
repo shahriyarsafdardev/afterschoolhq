@@ -255,7 +255,7 @@ namespace AfterSchoolLibrary.Models
             if(activityId.IsNotEmpty())
             {
                 dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectId"], activityId);
-                dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], ParticipationObjectType.Activity);
+                dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)ParticipationObjectType.Activity);
             }
         }
 
