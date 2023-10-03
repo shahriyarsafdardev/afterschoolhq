@@ -85,7 +85,7 @@ export default function VolunteerRegistration() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values, genderRestrictions),
+    // validate: values => validator(values, genderRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       let errorMsgs = [];
