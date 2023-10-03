@@ -122,14 +122,14 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            HandleCharge(charge, schedule, subscriptionPaymentHistory, msgs);
+            HandleCharge(charge, schedule, subscriptionPaymentHistory, chargeStatus, msgs);
         }
 
 
         private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory, 
-            SystemMessages msgs, DatabaseConnection dc = null)
+            LastChargeStatus chargeStatus, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (charge.Status.Equals(LastChargeStatus.succeeded))
+            if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
                 var webhookPayload = new WebhookPayload
                 {
@@ -184,12 +184,12 @@ namespace AfterSchool.Controllers
                 
                 else
                 {
-                    var chargeStatus = Enum.Parse(typeof(LastChargeStatus), charge.Status);
+                    var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                     paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     msgs.AddRange(paymentHistory.Save());
 
-                    HandleCharge(charge, schedule, paymentHistory, msgs);
+                    HandleCharge(charge, schedule, paymentHistory, chargeStatus, msgs);
                     //subscriptionSchedulesFailed.Add(schedule);
                 }
             }
