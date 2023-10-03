@@ -444,7 +444,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs)?.PersonTypeId;
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentUserPersonType = currentUserRegistrant?.PersonTypeId;
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
                 var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
@@ -463,6 +464,19 @@ namespace AfterSchool.Areas.Api.Controllers
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
+                GetAllFormQuestions(currentUserRegistrant, questions)
+                    .Where(ques => (int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger())
+                    .ToList()
+                    .ForEach(ques =>
+                    {
+                        var question = FormQuestion.Load(ques.ID);
+                        var answer = question.ToFormQuestionViewModel(collection);
+                        if (ques.IsRequired && answer.Value.IsEmpty())
+                        {
+                            msgs.Add($"{ques.Text} is required", MessageType.UserError);
+                        }
+                    });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
@@ -609,6 +623,7 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(json.accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
@@ -628,6 +643,25 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
+                // Get URL of client side
+                string FormSection = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
+
+                GetAllFormQuestions(currentUserRegistrant, questions)
+                    .Where(ques => ((int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger() &&
+                        json.groupid.ToInteger() != (int) QuestionGroupDataType.NotSet) ||
+                        ((json.groupid.ToInteger() == 0 || json.groupid.ToInteger() == -1) &&
+                        FormSection == ques.GroupTitle))
+                    .ToList()
+                    .ForEach(ques =>
+                    {
+                        var question = FormQuestion.Load(ques.ID);
+                        var answer = question.ToFormQuestionViewModel(collection);
+                        if (ques.IsRequired && answer.Value.IsEmpty())
+                        {
+                            msgs.Add($"{ques.Text} is required", MessageType.UserError);
+                        }
+                    });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
