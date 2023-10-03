@@ -35,7 +35,7 @@ function Note({ note, handleEdit }) {
   const pageNo = Number(searchParams.get('pageNo')) || 1;
   const isExpandable = text.length > NOTES_VISIBILITY_LENGTH;
   const showMoreButtonText = showMore ? 'Show Less' : 'Show More';
-  const NoteWriterName = `${IsEdited ? 'Last modified by' : 'By'} ${writer}`;
+  const noteWriterName = `${IsEdited ? 'Last modified by' : 'By'} ${writer}`;
   const noteText = showMore ? text : text.substring(0, NOTES_VISIBILITY_LENGTH);
 
   const handleClick = event => setAnchorEl(event.currentTarget);
@@ -83,7 +83,7 @@ function Note({ note, handleEdit }) {
         <Box className={classes.noteHeader}>
           <Box className={classes.titlesSubHeader}>
             <Typography variant="h6">{title}</Typography>
-            <Typography>{NoteWriterName}</Typography>
+            <Typography>{noteWriterName}</Typography>
           </Box>
           <Box className={classes.dateSubHeader}>
             <Typography>{formatDate(date)}</Typography>
