@@ -73,21 +73,5 @@ namespace AfterSchoolLibrary.Services
                 && volunteerApproval.ExpirationDate.IsNotEmpty()
                 && volunteerApproval.ExpirationDate >= DateTime.UtcNow;
         }
-        private static void UpdateVolunteerRegistrationStatus(int? webUserId, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            var registrants = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false,
-                false, msgs, dc);
-            registrants.ForEach(registrant =>
-            {
-                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs, dc).FirstOrDefault();
-                if (registration.IsNotEmpty())
-                {
-                    var participationObject = registration.GetFirstParticipationObject(msgs, dc);
-                    var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs, dc);
-                    if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
-                        registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs, dc);
-                }
-            });
-        }
     }
 }
