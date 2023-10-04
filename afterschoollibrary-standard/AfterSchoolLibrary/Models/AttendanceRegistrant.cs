@@ -252,10 +252,11 @@ namespace AfterSchoolLibrary.Models
 
             dq.Joins.Add(RegistrantActivity.ObjectMap["RegistrantId"], Registrant.ObjectMap["ID"], BasicLibrary.DataAccess.DatabaseJoinTypeEnum.InnerJoin, "RegistrantActivity");
             dq.Criterias.Add(RegistrantActivity.ObjectMap["AssignmentTypeId"], assignmentTypesForAttendance.Select(x => (int)x).ToList(), BasicLibrary.DataAccess.DatabaseCriteriaOperatorEnum.In);
-            if(activityId.IsNotEmpty())
+
+            if (activityId.IsNotEmpty())
             {
                 dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectId"], activityId);
-                dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], ParticipationObjectType.Activity);
+                dq.Criterias.Add(RegistrantActivity.ObjectMap["ParticipationObjectTypeId"], (int)ParticipationObjectType.Activity);
             }
         }
 
