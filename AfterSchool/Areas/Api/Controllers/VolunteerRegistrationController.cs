@@ -477,6 +477,16 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
 
+                qvms.Where(qvm => (int) qvm.Question.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger())
+                    .ToList()
+                    .ForEach(qvm =>
+                    {
+                        if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                        {
+                            msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+                        }
+                });
+
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
                     switch (qvm.Question.QuestionDataTypeId)
