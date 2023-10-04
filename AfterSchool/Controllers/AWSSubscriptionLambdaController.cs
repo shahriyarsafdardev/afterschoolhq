@@ -143,6 +143,8 @@ namespace AfterSchool.Controllers
                 if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
                 {
                     UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+
+
                 }
                 else
                 {
