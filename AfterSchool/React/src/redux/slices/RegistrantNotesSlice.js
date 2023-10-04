@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
+import { orderBy } from 'lodash';
 import {
   createRegistrantNote,
   getRegistrantNotes,
@@ -38,7 +39,8 @@ const RegistrantNotesSlice = createSlice({
       const index = updatedNotes.findIndex(note => note.ID === payload.ID);
 
       updatedNotes[index] = payload;
-      state.registrantNotes = updatedNotes;
+      const sortedAndUpdatedNotes = orderBy(updatedNotes, 'PostDate', 'desc');
+      state.registrantNotes = sortedAndUpdatedNotes;
     }
   }
 });
