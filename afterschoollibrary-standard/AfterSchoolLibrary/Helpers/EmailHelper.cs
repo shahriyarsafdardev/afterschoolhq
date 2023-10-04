@@ -3094,14 +3094,14 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendCheckInCheckOutRevokeAccessEmail(string UserFullName, string MasterRegistrantFirstName, string currentRegistrantEmail, string registrantFullName)
+        public static SystemMessages SendCheckInCheckOutRevokeAccessEmail(string userFullName, string masterRegistrantFirstName, string currentRegistrantEmail, string registrantFullName)
         {
             var msgs = new SystemMessages();
 
             var model = new NameValueCollection
             {
-                {"UserFullName", UserFullName},
-                {"MasterRegistrantFirstName", MasterRegistrantFirstName},
+                {"UserFullName", userFullName},
+                {"MasterRegistrantFirstName", masterRegistrantFirstName},
                 {"RegistrantFullName", registrantFullName}
             };
 
@@ -3113,13 +3113,16 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Check In/Out Access Revoked";
 
-            SendGridHelper.SendMail(
+            var mailMsgs = SendGridHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 new EmailAddress(currentRegistrantEmail),
                 subject,
                 body,
                 emailTemplateId: SendGridHelper.GetGenericTemplateId()
             );
+
+            msgs.AddRange(mailMsgs);
+            return msgs;
         }
 
         public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
