@@ -873,11 +873,9 @@ namespace AfterSchool.Areas.Api.Controllers
                                         registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
                                                 user.ID.Value, amsgs, adc);
 
-                                        registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
-
-                                        if (registrantWebUser.IsDeleted)
+                                        if (!registrantWebUser.IsDeleted && !authorizedPerson.HasAccess)
                                         {
-                                            EmailHelper.SendCheckInCheckOutRevokeAccessEmail(user.DisplayName, masterRegistrant.FirstName, currentUserRegistrant.Email, currentUserRegistrant.FirstName);
+                                            amsgs.AddRange(EmailHelper.SendCheckInCheckOutRevokeAccessEmail(user.DisplayName, masterRegistrant.FirstName, currentUserRegistrant.Email, currentUserRegistrant.FirstName));
 
                                             var smsBody = $"This is an automated message from AfterSchool HQ. " +
                                             $"You are no longer an authorized person for {masterRegistrant.DisplayName}. " +
@@ -888,8 +886,10 @@ namespace AfterSchool.Areas.Api.Controllers
                                                 smsBody,
                                                 null,
                                                 null,
-                                                msgs);
+                                                amsgs);
                                         }
+
+                                        registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
 
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
