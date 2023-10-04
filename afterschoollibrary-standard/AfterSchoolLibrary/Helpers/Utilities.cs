@@ -325,6 +325,8 @@ namespace AfterSchoolLibrary.Helpers
 
         public static string AppNoReplyEmailAddress => $"noreply@{SenderHostName}";
 
+        public static string AmazonSESTemplateName => "AHQGenericTemplate";
+
         public static string AppCustomersEmailAddress =>
             $"{(Utilities.IsProduction ? "customers" : "dev")}@{ReplyHostName}";
 

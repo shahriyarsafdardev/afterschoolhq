@@ -18,12 +18,12 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendEmail(string toEmail, string subject, string body, bool isAfterSchool)
         {
             var msgs = new SystemMessages();
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(toEmail),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -34,12 +34,12 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendEmailToSupport(string subject, string body)
         {
             var msgs = new SystemMessages();
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                Email.SendGridSupportEmailAddress,
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                Email.SendGridSupportEmailAddress, 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -90,12 +90,12 @@ namespace AfterSchoolLibrary.Helpers
                 "Payment_Reminder-1.03",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(parentOrGuardian.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(parentOrGuardian.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
 
@@ -152,12 +152,12 @@ namespace AfterSchoolLibrary.Helpers
 
         public static void SendSurveyEmailLastStep(string subject, string email, string body, SystemMessages msgs)
         {
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(email),
-                subject,
-                body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(email), 
+                subject, 
+                body, 
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
         }
@@ -196,12 +196,12 @@ namespace AfterSchoolLibrary.Helpers
                 "Payment_Reminder-1.03",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(parentOrGuardian.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(parentOrGuardian.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
 
@@ -283,12 +283,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(participationObject.ContactEmail),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(participationObject.ContactEmail), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendContactProviderEmail(Account account, Registrant contact, string message,
@@ -321,12 +321,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(account.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(account.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendStripeHasUnfulFilledRequirementsEmail(Stripe.Account stripeAccount,
@@ -361,12 +361,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             mailMsgs.AddRange(
-                SendGridHelper.SendMail(
+                AmazonSESHelper.SendMail(
                     Email.AppCustomersEmailAddress,
                     Email.AppSupportEmailAddress,
                     subject,
                     body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                    emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendClaimEmail(Account account, SystemMessages msgs)
@@ -391,12 +391,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(account.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(account.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendClaimProfileEmail(Account account, Guid userGuid, string email, SystemMessages msgs)
@@ -421,12 +421,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendNonRecognizedProfileClaimEmail(Account account, WebUser requester, SystemMessages msgs)
@@ -454,12 +454,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(account.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(account.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendProfileClaimedEmail(Account account, string firstName, string lastName, string email,
@@ -487,12 +487,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to activity contact
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(account.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(account.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         private static string AddLotteryTable(List<RegistrantActivity> ras, Registrant registrant, string action,
@@ -585,12 +585,12 @@ namespace AfterSchoolLibrary.Helpers
             var toEmail = parent?.Email ??
                           registrant.GetAnswer(QuestionDataType.Parent1Email, msgs, dc).Text ?? registrant.Email;
 
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(toEmail),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(toEmail), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             if (sendBcc)
             {
@@ -603,12 +603,12 @@ namespace AfterSchoolLibrary.Helpers
                     emails.Add(billingAccount.Email.ToLower());
 
                 emails.ForEach(email =>
-                    SendGridHelper.SendMail(
+                    AmazonSESHelper.SendMail(
                         Email.SendGridNoReplyEmailAddress(),
                         new EmailAddress(email),
                         $"Lottery CC: {subject}",
                         body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                        emailTemplateName: Email.AmazonSESTemplateName));
             }
 
             msgs.AddRange(mailMsgs);
@@ -668,12 +668,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Thanks for sharing your interest in {participationObject.Name}";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(loggedInUser.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(loggedInUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             // Send BCC
             var emails = new List<string>();
@@ -682,12 +682,12 @@ namespace AfterSchoolLibrary.Helpers
                 emails.Add(participationObject.ContactEmail.ToLower());
 
             emails.ForEach(email =>
-                SendGridHelper.SendMail(
+                AmazonSESHelper.SendMail(
                     Email.SendGridNoReplyEmailAddress(),
                     new EmailAddress(email),
                     $"Interest Form CC: {subject}",
                     $"{bccPrepend}{body}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                    emailTemplateName: Email.AmazonSESTemplateName));
 
             msgs.AddRange(mailMsgs);
         }
@@ -733,12 +733,12 @@ namespace AfterSchoolLibrary.Helpers
                 emails.Add(accountOwner.Email.ToLower());
 
             emails.ForEach(email =>
-                msgs.AddRange(SendGridHelper.SendMail(
+                msgs.AddRange(AmazonSESHelper.SendMail(
                     Email.SendGridNoReplyEmailAddress(),
                     new EmailAddress(email),
                     $"Contact Form Submitted by {contact.Name}",
                     $"{body}",
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId())));
+                    emailTemplateName: Email.AmazonSESTemplateName)));
         }
 
         public static SystemMessages SendVolunteerRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage,
@@ -786,12 +786,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to registerer
-            mailMsgs.AddRange(SendGridHelper.SendMail(
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(loggedInUser.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             // send bcc to activity contact
             if (sendBcc)
@@ -803,12 +803,12 @@ namespace AfterSchoolLibrary.Helpers
                     emails.Add(participationObject.ContactEmail.ToLower());
 
                 emails.ForEach(email =>
-                    SendGridHelper.SendMail(
+                    AmazonSESHelper.SendMail(
                         Email.SendGridNoReplyEmailAddress(isAfterSchool),
                         new EmailAddress(email),
                         $"Registration CC: {subject}",
                         body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                        emailTemplateName: Email.AmazonSESTemplateName));
             }
 
             msgs.AddRange(mailMsgs);
@@ -865,12 +865,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to registerer
-            mailMsgs.AddRange(SendGridHelper.SendMail(
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(loggedInUser.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             // send bcc to activity contact
             if (sendBcc)
@@ -882,12 +882,12 @@ namespace AfterSchoolLibrary.Helpers
                     emails.Add(participationObject.ContactEmail.ToLower());
 
                 emails.ForEach(email =>
-                    SendGridHelper.SendMail(
+                    AmazonSESHelper.SendMail(
                         Email.SendGridNoReplyEmailAddress(isAfterSchool),
                         new EmailAddress(email),
                         $"Registration CC: {subject}",
                         body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                        emailTemplateName: Email.AmazonSESTemplateName));
             }
 
             msgs.AddRange(mailMsgs);
@@ -1381,12 +1381,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to registerer
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(loggedInUser.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(loggedInUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             // send bcc to activity contact
             if (sendBcc)
@@ -1398,12 +1398,12 @@ namespace AfterSchoolLibrary.Helpers
                     emails.Add(participationObject.ContactEmail.ToLower());
 
                 emails.ForEach(email =>
-                    SendGridHelper.SendMail(
-                        Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                        new EmailAddress(email),
-                        $"Registration CC: {subject}",
+                    AmazonSESHelper.SendMail(
+                        Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                        new EmailAddress(email), 
+                        $"Registration CC: {subject}", 
                         body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                        emailTemplateName: Email.AmazonSESTemplateName));
             }
 
             msgs.AddRange(mailMsgs);
@@ -1457,20 +1457,20 @@ namespace AfterSchoolLibrary.Helpers
             var emails = new List<string>() {purchaser.Email};
             if(!emails.Contains(registrantEmail) && registrantEmail.IsNotEmpty()) emails.Add(registrantEmail);
             
-            emails.ForEach(email => mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(email),
-                subject,
+            emails.ForEach(email => mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool))));
+                emailTemplateName: Email.AmazonSESTemplateName)));
 
             // Send email to provider as cc
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(billingAccountOwner.Email),
-                "ReEnrollment CC: " + subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(billingAccountOwner.Email), 
+                "ReEnrollment CC: " + subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             msgs.AddRange(mailMsgs);
 
@@ -1520,20 +1520,20 @@ namespace AfterSchoolLibrary.Helpers
             var emails = new List<string>() {purchaser.Email};
             if(!emails.Contains(registrantEmail) && registrantEmail.IsNotEmpty()) emails.Add(registrantEmail);
             
-            emails.ForEach(email => mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(email),
-                subject,
+            emails.ForEach(email => mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool))));
+                emailTemplateName: Email.AmazonSESTemplateName)));
 
             // Send email to provider as cc
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(billingAccountOwner.Email),
-                "ReEnrollment CC: " + subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(billingAccountOwner.Email), 
+                "ReEnrollment CC: " + subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             msgs.AddRange(mailMsgs);
 
@@ -1619,12 +1619,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs);
 
             // Send email to activity account
-            msgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(account.Email),
-                subject,
+            msgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(account.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
         }
 
         public static void SendPaymentConfirmation(CheckoutObject checkoutObject, string customMessage,
@@ -1754,12 +1754,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to registerer
-            mailMsgs.AddRange(SendGridHelper.SendMail(
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(purchaserWebuser.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             // send bcc to activity contact
             if (sendBcc)
@@ -1767,12 +1767,12 @@ namespace AfterSchoolLibrary.Helpers
                 var emails = new List<string> { billingAccount.Email };
 
                 emails.ForEach(email =>
-                    SendGridHelper.SendMail(
-                        Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                        new EmailAddress(email),
-                        $"Payment CC: {subject}",
+                    AmazonSESHelper.SendMail(
+                        Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                        new EmailAddress(email), 
+                        $"Payment CC: {subject}", 
                         body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                        emailTemplateName: Email.AmazonSESTemplateName));
             }
 
 
@@ -1901,12 +1901,12 @@ namespace AfterSchoolLibrary.Helpers
             var mailMsgs = new SystemMessages();
 
             // Send email to parent for attendance charge
-            mailMsgs.AddRange(SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(purchaserWebUser.Email),
-                subject,
+            mailMsgs.AddRange(AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(purchaserWebUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)));
+                emailTemplateName: Email.AmazonSESTemplateName));
 
             msgs.AddRange(mailMsgs);
         }
@@ -1933,12 +1933,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Password reset request from {Utilities.AppName(isAfterSchool)}";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(user.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -1971,12 +1971,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"A refund has been requested by ${loggedInUser.DisplayName}";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 new EmailAddress(billingAccountOwner.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             Utilities.SystemErrorLog(mailMsgs);
@@ -2024,12 +2024,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = "Refund Processed";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 new EmailAddress(email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             Utilities.SystemErrorLog(mailMsgs);   
         }
@@ -2060,12 +2060,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = "Your refund request has been denied";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(requester.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(requester.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             Utilities.SystemErrorLog(mailMsgs);
@@ -2089,12 +2089,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"ACTION REQUIRED: Complete Volunteer Background Check for {participationObject.Name}";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(webUser.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(webUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
         }
 
@@ -2135,12 +2135,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"You've received a coupon from {sendingAccount.Name}";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(receivingAccountOwner.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2168,12 +2168,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"You can now accept payments on {Utilities.AppName(isAfterSchool)}!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(user.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(user.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2197,12 +2197,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Finalize your account on {Utilities.AppName()}";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(user.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(user.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
             return msgs;
@@ -2239,12 +2239,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Your payment failed for ${activityName}";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(user.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool),
+                emailTemplateName: Email.AmazonSESTemplateName,
                 ccEmail: new EmailAddress(Email.AppSupportEmailAddress),
                 replyTo: new EmailAddress(Email.AppSupportEmailAddress)
             );
@@ -2279,12 +2279,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 new EmailAddress(payingAccountUser.Email),
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2315,12 +2315,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"{Utilities.AppName(isAfterSchool)}: Please verify your email address";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(isAfterSchool),
-                new EmailAddress(user.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(isAfterSchool), 
+                new EmailAddress(user.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2355,8 +2355,8 @@ namespace AfterSchoolLibrary.Helpers
                 Email.SendGridNoReplyEmailAddress(isAfterSchool),
                 new EmailAddress(user.Email),
                 subject,
-                body
-                //emailTemplateId: SendGridHelper.GetGenericTemplateId(isAfterSchool)
+                body,
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2382,21 +2382,21 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Welcome to {Utilities.AppName(account.IsAfterSchool)}!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
-                new EmailAddress(user.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool), 
+                new EmailAddress(user.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             // send copy to enroll hq team
-            SendGridHelper.SendMail(
+            AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
                 Email.SendGridSupportEmailAddress,
                 $"CC: {Utilities.AppName(account.IsAfterSchool)} TRIAL - {subject}",
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2423,21 +2423,21 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Welcome to the {Utilities.AppName(account.IsAfterSchool)} Family!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
-                new EmailAddress(user.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool), 
+                new EmailAddress(user.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             // send copy to afterschool hq team
-            SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool),
-                Email.SendGridSupportEmailAddress,
-                $"CC: {Utilities.AppName(account.IsAfterSchool)} SIGNUP - {subject}",
+            AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(account.IsAfterSchool), 
+                Email.SendGridSupportEmailAddress, 
+                $"CC: {Utilities.AppName(account.IsAfterSchool)} SIGNUP - {subject}", 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2465,21 +2465,21 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"Welcome to the {Utilities.AppName(IsAccountAfterSchool)} Family!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool),
-                new EmailAddress(userEmail),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool), 
+                new EmailAddress(userEmail), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(IsAccountAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             // send copy to afterschool hq team
-            SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool),
-                Email.SendGridSupportEmailAddress,
-                $"CC: {Utilities.AppName(IsAccountAfterSchool)} SIGNUP - {subject}",
+            AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(IsAccountAfterSchool), 
+                Email.SendGridSupportEmailAddress, 
+                $"CC: {Utilities.AppName(IsAccountAfterSchool)} SIGNUP - {subject}", 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(IsAccountAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2513,12 +2513,12 @@ namespace AfterSchoolLibrary.Helpers
             var subject =
                 $"{loggedInUser.DisplayName} has invited you to use {Utilities.AppName(invitedAccount.IsAfterSchool)}!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
-                new EmailAddress(invitedUser.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool), 
+                new EmailAddress(invitedUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2569,13 +2569,13 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"You have been invited to register for {session.Name}!";
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 new EmailAddress(contact.Email),
                 subject,
                 body,
                 new EmailAddress(invitingAccount.Email, invitingAccount.Name),
-                SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
         }
@@ -2620,13 +2620,13 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"You have been invited to register for {activity.Name}!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(contact.Email),
-                subject,
-                body,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(contact.Email), 
+                subject, 
+                body, 
                 new EmailAddress(invitingAccount.Email, invitingAccount.Name),
-                SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
         }
@@ -2670,12 +2670,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
-                new EmailAddress(invitedUser.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool), 
+                new EmailAddress(invitedUser.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2717,12 +2717,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool),
-                new EmailAddress(leagueOwner.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(invitedAccount.IsAfterSchool), 
+                new EmailAddress(leagueOwner.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(invitedAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2758,21 +2758,21 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool),
-                new EmailAddress(hostAccount.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool), 
+                new EmailAddress(hostAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(hostAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             // send copy to enroll hq team
-            SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool),
-                Email.SendGridSupportEmailAddress,
-                subject,
+            AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(visitorAccount.IsAfterSchool), 
+                Email.SendGridSupportEmailAddress, 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(hostAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2801,12 +2801,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
-                new EmailAddress(visitorAccount.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool), 
+                new EmailAddress(visitorAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2834,12 +2834,12 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
-                new EmailAddress(visitorAccount.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool), 
+                new EmailAddress(visitorAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2870,19 +2870,19 @@ namespace AfterSchoolLibrary.Helpers
                 msgs
             );
 
-            var mailMsgsHost = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
-                new EmailAddress(hostAccount.Email),
-                subject,
+            var mailMsgsHost = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool), 
+                new EmailAddress(hostAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
-            var mailMsgsVisitor = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
-                new EmailAddress(visitorAccount.Email),
-                subject,
+            var mailMsgsVisitor = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool), 
+                new EmailAddress(visitorAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgsHost);
@@ -2925,12 +2925,12 @@ namespace AfterSchoolLibrary.Helpers
                 "provideraccountadded",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool),
-                new EmailAddress(visitorAccount.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(hostAccount.IsAfterSchool), 
+                new EmailAddress(visitorAccount.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(visitorAccount.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -2955,12 +2955,12 @@ namespace AfterSchoolLibrary.Helpers
                 "Payout_Request-1.00",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
+            var mailMsgs = AmazonSESHelper.SendMail(
                 Email.SendGridNoReplyEmailAddress(),
                 Email.SendGridSupportEmailAddress,
                 subject,
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
 
@@ -2989,12 +2989,12 @@ namespace AfterSchoolLibrary.Helpers
                 "Publish_Request-1.00",
                 msgs);
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(accountOwner.Email),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(accountOwner.Email), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+                emailTemplateName: Email.AmazonSESTemplateName);
 
             msgs.AddRange(mailMsgs);
 
@@ -3048,12 +3048,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"{studentFirstName} has invited you for account creation on AfterSchool HQ!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(parentEmail),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(parentEmail), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -3082,12 +3082,12 @@ namespace AfterSchoolLibrary.Helpers
 
             var subject = $"{studentFirstName} need your approval for account creation on AfterSchool HQ!";
 
-            var mailMsgs = SendGridHelper.SendMail(
-                Email.SendGridNoReplyEmailAddress(),
-                new EmailAddress(parentEmail),
-                subject,
+            var mailMsgs = AmazonSESHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(), 
+                new EmailAddress(parentEmail), 
+                subject, 
                 body,
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             );
 
             msgs.AddRange(mailMsgs);
@@ -3126,12 +3126,12 @@ namespace AfterSchoolLibrary.Helpers
                     msgs
                 );
 
-                msgs.AddRange(SendGridHelper.SendMail(
+                msgs.AddRange(AmazonSESHelper.SendMail(
                     Email.SendGridNoReplyEmailAddress(),
                     new EmailAddress(registrant.Email),
                     subject,
                     body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+                    emailTemplateName: Email.AmazonSESTemplateName));
             }
         }
     }

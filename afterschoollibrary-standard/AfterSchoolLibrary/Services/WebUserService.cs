@@ -77,13 +77,13 @@ namespace AfterSchoolLibrary.Services
 
         public static SystemMessages SendInviteToAccount(this WebUser user, Account account, string message, WebUser loggedInUser, DatabaseConnection dc = null)
         {
-            return SendGridHelper.SendMail(
+            return AmazonSESHelper.SendMail(
                 fromEmail: new EmailAddress(Email.AppNoReplyEmailAddress, Utilities.AppName(account.IsAfterSchool)),
                 toEmail: new EmailAddress(user.Email),
                 subject: BuildAccountInviteSubject(account),
                 body: BuildAccountInviteBody(user, account, message),
                 replyTo: new EmailAddress(loggedInUser.Email, loggedInUser.DisplayName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                emailTemplateName: Email.AmazonSESTemplateName
             );
         }
 

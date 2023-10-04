@@ -23,7 +23,7 @@ namespace AfterSchoolLibrary.Helpers
         public static string MailTrapHost { get; set; }
         public static string MailTrapPort { get; set; }
         public static SystemMessages SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body, SystemMessages msgs,
-         EmailAddress replyTo = null, string emailTemplateId = null, EmailAddress ccEmail = null)
+         EmailAddress replyTo = null, EmailAddress ccEmail = null)
         {
             try
             {

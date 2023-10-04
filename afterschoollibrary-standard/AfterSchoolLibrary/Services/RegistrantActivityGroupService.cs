@@ -1,4 +1,4 @@
-﻿using AfterSchoolLibrary.Models;
+using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System;
@@ -54,12 +54,12 @@ namespace AfterSchoolLibrary.Services
                     var body = $"<p>Hello,</p><p>{rag.RegistrantName.IfEmpty(rag.RegistrantEmail)} has opted to decline the invitation to register for {rag.ActivityGroupName}</p>{Helpers.Email.GetAppSignature(true, "declined_invite_notice")}";
                     var account = rag.GetGroup(msgs, dc).GetAccount(msgs, dc);
 
-                    SendGridHelper.SendMail(
+                    AmazonSESHelper.SendMail(
                         fromEmail: Helpers.Email.SendGridNoReplyEmailAddress(),
                         toEmail: new SendGrid.Helpers.Mail.EmailAddress(account.Email, account.Name),
                         subject: string.Format("An invitation was declined for {0}", rag.ActivityGroupName),
                         body: body,
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                        emailTemplateName: Helpers.Email.AmazonSESTemplateName
                     );
 
                     msgs.Add("Your invitation has been declined", MessageType.Success);

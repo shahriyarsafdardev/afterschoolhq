@@ -2966,7 +2966,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.AttendanceRegistrants = GetAttendanceRegistrants(attendance, activity, activitySchedule, msgs);
             ViewBag.Schedule = activitySchedule;
-            var currentUser = SessionVariables.CurrentUser;
+            //var currentUser = SessionVariables.CurrentUser;
             ViewBag.IsActivityLeader = EditHelpers.IsActivityLeader(currentAccount.ID, activity.AccountId, SessionVariables.AccountUserType,
                 currentUser.IsActivityLeader(activity, msgs));
             ViewBag.RegistrantActivities = activity.GetRegistrantActivities(msgs);

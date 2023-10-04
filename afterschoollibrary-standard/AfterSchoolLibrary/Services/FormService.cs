@@ -370,8 +370,7 @@ namespace AfterSchoolLibrary.Services
                 var subject = $"Submission Data Report";
                 var model = new NameValueCollection
                 {
-                    {"AppSignature", Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")},
-                    {"Body", "Your Submission Data report is attached."},
+                    {"Body", "Your Submission Data report is attached." + Email.GetAppSignature(isAfterSchool: currentAccount.IsAfterSchool, utm_campaign: "submission_data_report")},
                 };
                 var body = EmailHelper.ProcessTemplate(
                 EmailTemplates.Form_Report,
@@ -387,7 +386,6 @@ namespace AfterSchoolLibrary.Services
                     toEmail: new EmailAddress(loggedInUser.Email),
                     subject: subject,
                     body: body,
-                    //emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool),
                     attachmentByteData: csvByteData,
                     attachmentFilename: $"{attachmentName}.csv"
                 ));
@@ -399,7 +397,7 @@ namespace AfterSchoolLibrary.Services
                 if (currentAccount.IsNotEmpty() && loggedInUser.IsNotEmpty())
                 {
                     // send to customer
-                    msgs.AddRange(SendGridHelper.SendMail(
+                    msgs.AddRange(AmazonSESHelper.SendMail(
                         fromEmail: new EmailAddress(
                             Email.AppNoReplyEmailAddress,
                             "AfterSchool HQ"
@@ -407,11 +405,11 @@ namespace AfterSchoolLibrary.Services
                         toEmail: new EmailAddress(loggedInUser.Email),
                         subject: "Error generating your Submission Data Report",
                         body: $"There has been an error while creating your report. If you continue having issues, please reach out to us at {Email.AppSupportEmailAddress}",
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool)
+                        emailTemplateName: Email.AmazonSESTemplateName
                     ));
 
                     // send to internal team
-                    msgs.AddRange(SendGridHelper.SendMail(
+                    msgs.AddRange(AmazonSESHelper.SendMail(
                         fromEmail: new EmailAddress(
                             Email.AppNoReplyEmailAddress,
                             "AfterSchool HQ"
@@ -419,7 +417,7 @@ namespace AfterSchoolLibrary.Services
                         toEmail: new EmailAddress(Email.AppCustomersEmailAddress),
                         subject: $"Error generating Submission Data Report for {currentAccount.Name}",
                         body: $"Logged In User: {loggedInUser.DisplayName}",
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(currentAccount.IsAfterSchool)
+                        emailTemplateName: Email.AmazonSESTemplateName
                     ));
                 }
             }

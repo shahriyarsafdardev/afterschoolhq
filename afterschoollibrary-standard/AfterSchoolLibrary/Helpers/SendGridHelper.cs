@@ -67,8 +67,7 @@ namespace AfterSchoolLibrary
                 toEmail,
                 subject,
                 body,
-                msgs,
-                emailTemplateId: emailTemplateId
+                msgs
                 ));
             else
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -401,6 +402,17 @@ namespace AfterSchoolLibrary.Services
 
             body +=
                 $"<p>Your {uiActivityLabel} report is attached.</p>{Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report")}";
+            
+            var model = new NameValueCollection
+            {
+                {"Body", body},
+            };
+
+            body = EmailHelper.ProcessTemplate(
+            EmailTemplates.Form_Report,
+            model,
+            "Form_Email_Report",
+            msgs);
 
             var emailList = new List<string>();
 
@@ -418,7 +430,7 @@ namespace AfterSchoolLibrary.Services
             // send to email list
             emailList.ForEach(email =>
             {
-                msgs.AddRange(SendGridHelper.SendMailWithAttachments(
+                msgs.AddRange(AmazonSESHelper.SendMailWithAttachments(
                     fromEmail: new EmailAddress(
                         Email.AppNoReplyEmailAddress,
                         $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
@@ -426,7 +438,6 @@ namespace AfterSchoolLibrary.Services
                     toEmail: new EmailAddress(email),
                     subject: subject,
                     body: body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool),
                     attachmentByteData: byteData,
                     attachmentFilename: filename
                 ));

@@ -32,7 +32,6 @@
                     <td>
                         <div class="body-div">
                             <p>@Model.Body</p>
-                            @Model.AppSignature
                         </div>
                     </td>
                 </tr>

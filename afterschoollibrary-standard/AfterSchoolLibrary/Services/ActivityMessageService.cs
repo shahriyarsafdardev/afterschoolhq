@@ -1,4 +1,4 @@
-﻿    using AfterSchoolLibrary.Models;
+    using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Twilio.Rest.Api.V2010.Account;
+using Email = AfterSchoolLibrary.Helpers.Email;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -145,7 +146,7 @@ namespace AfterSchoolLibrary.Services
 
             body = $"<p>{body.Replace("\n", "<br />")}</p>";
 
-            msgs.AddRange(SendGridHelper.SendMail(
+            msgs.AddRange(AmazonSESHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
                     Helpers.Email.AppNoReplyEmailAddress,
                     $"{fromName} via {Helpers.Utilities.AppName()}"),
@@ -153,7 +154,7 @@ namespace AfterSchoolLibrary.Services
                 subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
                 body: $"{header}{body}{sentBy}{Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign)}",
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+                emailTemplateName: Email.AmazonSESTemplateName
             ));
         }
 

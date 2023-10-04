@@ -436,7 +436,7 @@ namespace AfterSchoolLibrary.Services
                     var acceptInviteTextWithLink = string.Format(acceptInviteText, finalInviteUrl);
                     var declineInviteTextWithLink = string.Format(declineInviteText, declineUrl);
 
-                    SendGridHelper.SendMail(
+                    AmazonSESHelper.SendMail(
                         fromEmail: new EmailAddress(
                             Email.AppNoReplyEmailAddress,
                             $"{account.Name} via {Helpers.Utilities.AppName(account.IsAfterSchool)}"),
@@ -452,7 +452,7 @@ namespace AfterSchoolLibrary.Services
                             userSignature,
                             Email.GetAppSignature(account.IsAfterSchool, "invite_contacts")),
                         replyTo: new EmailAddress(account.Email, account.Name),
-                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                        emailTemplateName: Email.AmazonSESTemplateName
                     );
                 });
             }

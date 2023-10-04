@@ -18,18 +18,17 @@ namespace AfterSchoolLibrary
     internal class AmazonSESHelper
     {
         public static SystemMessages SendMail(string fromEmail, string toEmail, string subject, string body,
-            string replyTo = null, string emailTemplateId = null)
+            string replyTo = null, string emailTemplateName = null)
         {
             EmailAddress replyToEmail = null;
             if (replyTo.IsNotBlank())
                 replyToEmail = new EmailAddress(replyTo);
 
-            return SendMail(new EmailAddress(fromEmail), new EmailAddress(toEmail), subject, body, replyToEmail,
-                emailTemplateId);
+            return SendMail(new EmailAddress(fromEmail), new EmailAddress(toEmail), subject, body, replyToEmail, emailTemplateName);
         }
 
         public static SystemMessages SendMail(EmailAddress fromEmail, EmailAddress toEmail, string subject, string body,
-          EmailAddress replyTo = null, string emailTemplateId = null, EmailAddress ccEmail = null)
+          EmailAddress replyTo = null, string emailTemplateName = null, EmailAddress ccEmail = null)
         {
             var msgs = new SystemMessages();
             if (Utilities.IsLocalHost)
@@ -38,9 +37,7 @@ namespace AfterSchoolLibrary
                 toEmail,
                 subject,
                 body,
-                msgs,
-                emailTemplateId: emailTemplateId
-                ));
+                msgs));
             else
             {
                 if (!Utilities.IsProduction)
@@ -53,7 +50,7 @@ namespace AfterSchoolLibrary
                     var mail = new SendTemplatedEmailRequest
                     {
                         Source = fromEmail.Email.ToString(),
-                        Template = "AHQGenericTemplate6",
+                        Template = emailTemplateName,
                         Destination = new Destination
                         {
                             ToAddresses = new List<string> { toEmail.Email }
@@ -69,6 +66,7 @@ namespace AfterSchoolLibrary
                         mail.Destination.CcAddresses = new List<string> { ccEmail.Email.ToString() };
 
                     var task = Task.Run(async () => await client.SendTemplatedEmailAsync(mail));
+                    task.Wait();
                     dynamic response = task.Result;
                     if (response.HttpStatusCode != HttpStatusCode.OK)
                         msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
@@ -77,12 +75,12 @@ namespace AfterSchoolLibrary
             return msgs;
         }
 
-        public static void ReadPdfIntoMemoryStream(MemoryStream memoryStream, string fileName, byte[] attachmentBytes)
+        public static void ReadDataIntoMemoryStream(MemoryStream memoryStream, string fileName, byte[] attachmentBytes)
         {
             memoryStream.Write(attachmentBytes, 0, attachmentBytes.Length);
         }
 
-        public static  SystemMessages SendMailWithAttachments(EmailAddress fromEmail, EmailAddress toEmail,
+        public static SystemMessages SendMailWithAttachments(EmailAddress fromEmail, EmailAddress toEmail,
             string subject, string body, byte[] attachmentByteData, string attachmentFilename)
         {
             var msgs = new SystemMessages();
@@ -109,7 +107,7 @@ namespace AfterSchoolLibrary
                     message.Attachments.Add(attachment);
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        ReadPdfIntoMemoryStream(ms, attachmentFilename, attachmentByteData);
+                        ReadDataIntoMemoryStream(ms, attachmentFilename, attachmentByteData);
                         ms.Seek(0, System.IO.SeekOrigin.Begin);
                         bodyBuilder.Attachments.Add(attachmentFilename, ms, new ContentType("application", "pdf"));
                     }
@@ -121,11 +119,12 @@ namespace AfterSchoolLibrary
 
                     using (var messageStream = new MemoryStream())
                     {
-                        Task.Run(async () => await mimeMessage.WriteToAsync(messageStream));
+                        var writeMessageToStream = Task.Run(async () => await mimeMessage.WriteToAsync(messageStream));
+                        writeMessageToStream.Wait();
                         var request = new SendRawEmailRequest { RawMessage = new RawMessage(messageStream), ConfigurationSetName = "ses_logs",
                                       Tags = new List<MessageTag> { new MessageTag { Name = "ses_message_tag", Value = "afterschoolhq" } }};
                         var task = Task.Run(async () => await sesClient.SendRawEmailAsync(request));
-
+                        task.Wait();
                         dynamic response = task.Result;
                         if (response.HttpStatusCode != HttpStatusCode.OK)
                             msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
