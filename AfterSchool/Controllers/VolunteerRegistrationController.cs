@@ -496,9 +496,10 @@ namespace AfterSchool.Controllers
             var currentRegistrant = currentUser.GetMasterVolunteerRegistrant();
             var volunteerApproval = VolunteerApproval.LoadByWebUserId(currentUser.ID.Value).FirstOrDefault();
 
-            if (volunteerApproval.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() &&
-                volunteerApproval.ApprovalStatusId == ApprovalStatus.Denied && volunteerApproval.ExpirationDate.IsNotEmpty()
-                && volunteerApproval.ExpirationDate >= DateTime.UtcNow)
+            if (volunteerApproval.IsNotEmpty() && 
+                participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() && 
+                volunteerApproval.IsCurrentlyDenied())
+
                 return RedirectToAction("alreadydenied", new
                 {
                     contactEmail = participationObject.ContactEmail,
