@@ -89,5 +89,12 @@ namespace AfterSchoolLibrary.Services
                 }
             });
         }
+        public static bool IsCurrentlyDenied(this VolunteerApproval volunteerApproval)
+        {
+            return
+                volunteerApproval.ApprovalStatusId == ApprovalStatus.Denied
+                && volunteerApproval.ExpirationDate.IsNotEmpty()
+                && volunteerApproval.ExpirationDate >= DateTime.UtcNow;
+        }
     }
 }
