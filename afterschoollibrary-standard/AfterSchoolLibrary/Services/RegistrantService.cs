@@ -1965,7 +1965,7 @@ namespace AfterSchoolLibrary.Services
         {
             var firstRegistrantId = registrant.GetFirstRegistrantId();
             var registrantNotes =  RegistrantNote.LoadByFirstRegistrantIdByIsDeleted(firstRegistrantId.Value, false, msgs)
-                .OrderByDescending(rnv => rnv.ID).ToList();
+                .OrderByDescending(rnv => rnv.PostDate).ToList();
             
             return registrantNotes;
         }
