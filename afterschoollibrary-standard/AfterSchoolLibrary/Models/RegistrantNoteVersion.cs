@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -111,6 +111,15 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["RegistrantNoteId"], noteId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static int VersionsCount(int noteId, bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["RegistrantNoteId"], noteId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], isDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().Count();
         }
 
         public static RegistrantNoteVersion SearchByNoteIdByIsDeleted(string searchQuery, bool isDeleted, int noteVersionId,

@@ -28,10 +28,10 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if (currentAccount.IsEmpty())
                     throw new Exception("Unauthorized Account");
-                
+
                 if (!currentUser.HasAccessTo(currentAccount))
                     throw new Exception("You are not authorized user to access this page.");
 
@@ -61,21 +61,23 @@ namespace AfterSchool.Areas.Api.Controllers
                 registrantNotes.ForEach(registrantNote =>
                 {
                     var registrantNoteVersion = registrantNote.GetLatestVersion(msgs);
-                    
+
                     if (searchQuery.IsNotEmpty() && registrantNoteVersion.IsNotEmpty())
                         registrantNoteVersion = RegistrantNoteVersion.SearchByNoteIdByIsDeleted(searchQuery, false, registrantNoteVersion.ID.Value, msgs);
 
                     if (registrantNoteVersion.IsNotEmpty())
                     {
-                        var registrantNoteWebUser = registrantNote.GetCreator(msgs);
+                        var registrantNoteLastEditorWebUser = registrantNote.GetLastEditor(msgs);
+                        var versionCount = RegistrantNoteVersion.VersionsCount(registrantNote.ID.Value, false, msgs);
                         notesDto.Add(new NotesDto()
                         {
                             ID = registrantNote.ID.Value,
                             Title = registrantNoteVersion.Title,
                             Text = registrantNoteVersion.Text,
-                            CreatedByName = registrantNoteWebUser.DisplayName,
+                            LastModifiedByName = registrantNoteLastEditorWebUser.DisplayName,
                             PostDate = registrantNote.PostDate.ToShortDateTimeString(),
                             IsEditable = isAdmin || currentUser.ID == registrantNote.CreatedBy,
+                            IsEdited = versionCount > 1,
                         });
                         count += 1;
                     }
@@ -114,13 +116,13 @@ namespace AfterSchool.Areas.Api.Controllers
             {
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if (currentAccount.IsEmpty())
                     throw new Exception("Unauthorized Account");
-                
+
                 if (!currentUser.HasAccessTo(currentAccount))
                     throw new Exception("You are not authorized user to access this page.");
 
@@ -137,13 +139,13 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (title.IsEmpty())
                     throw new Exception("Invalid Note Title");
-                
+
                 if (title.Trim().Length > 400)
                     throw new Exception("Title should be 1 to 400 characters.");
-                
+
                 if (text.IsEmpty())
                     throw new Exception("Invalid Note Text");
-                
+
                 if (text.Trim().Length > 4000)
                     throw new Exception("Text should be 1 to 4000 characters.");
 
@@ -197,9 +199,10 @@ namespace AfterSchool.Areas.Api.Controllers
                         ID = registrantNote.ID.Value,
                         Title = registrantNoteVersion.Title,
                         Text = registrantNoteVersion.Text,
-                        CreatedByName = currentUser.DisplayName,
+                        LastModifiedByName = currentUser.DisplayName,
                         PostDate = registrantNote.PostDate.ToShortDateTimeString(),
                         IsEditable = true,
+                        IsEdited = false,
                     };
 
                 dynamic response = new
@@ -219,7 +222,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         [HttpPost]
         public ActionResult UpdateRegistrantNote(string title, string text, DateTime postDate, int noteId, bool createNewVersion)
         {
@@ -234,28 +237,28 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if (currentAccount.IsEmpty())
                     throw new Exception("Unauthorized Account");
-                
+
                 if (!currentUser.HasAccessTo(currentAccount))
                     throw new Exception("You are not authorized user to access this page.");
-                
+
                 if (title.IsEmpty())
                     throw new Exception("Invalid Note Title");
-                
+
                 if (title.Trim().Length > 400)
                     throw new Exception("Title should be 1 to 400 characters.");
-                
+
                 if (text.IsEmpty())
                     throw new Exception("Invalid Note Text");
-                
+
                 if (text.Trim().Length > 4000)
                     throw new Exception("Text should be 1 to 4000 characters.");
 
                 if (postDate.IsEmpty())
                     throw new Exception("Invalid Note Date");
-                
+ 
                 if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
                     isAdmin = true;
 
@@ -265,12 +268,12 @@ namespace AfterSchool.Areas.Api.Controllers
                     Database.ExecuteTransaction
                     (
                         (SystemMessages amsgs, DatabaseConnection adc) =>
-                        { 
+                        {
                             registrantNote.PostDate = postDate;
                             registrantNote.LastModifiedBy = currentUser.ID;
                             registrantNote.LastModifiedDate = DateTime.UtcNow;
                             amsgs.AddRange(registrantNote.Save(adc));
-                            
+
                             if (createNewVersion)
                             {
                                 registrantNoteVersion = new RegistrantNoteVersion
@@ -280,10 +283,10 @@ namespace AfterSchool.Areas.Api.Controllers
                                     Title = title.Trim(),
                                     Text = text.Trim(),
                                     RegistrantNoteId = registrantNote.ID.Value,
-                                    IsDeleted = false,    
+                                    IsDeleted = false,
                                 };
                                 amsgs.AddRange(registrantNoteVersion.Save(adc));
-                            }   
+                            }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
@@ -300,9 +303,10 @@ namespace AfterSchool.Areas.Api.Controllers
                         ID = registrantNote.ID.Value,
                         Title = registrantNoteVersion.Title,
                         Text = registrantNoteVersion.Text,
-                        CreatedByName = currentUser.DisplayName,
+                        LastModifiedByName = currentUser.DisplayName,
                         PostDate = registrantNote.PostDate.ToShortDateTimeString(),
                         IsEditable = true,
+                        IsEdited = true,
                     };
 
                 dynamic response = new
@@ -330,31 +334,31 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var currentAccount = SessionVariables.CurrentAccount;
                 var isAdmin = false;
-                
+
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
-                
+
                 if (currentAccount.IsEmpty())
                     throw new Exception("Unauthorized Account");
-                
+
                 if (!currentUser.HasAccessTo(currentAccount))
                     throw new Exception("You are not authorized user to access this page.");
-                
+
                 if (SessionVariables.AccountUserType.In(FormConstants.AdminUserTypes))
                     isAdmin = true;
-                
+
                 var registrantNote = RegistrantNote.LoadByIDByIsDeleted(noteId, false, msgs);
-                
+
                 if (registrantNote.IsNotEmpty() && (currentUser.CanEditOrDeleteNote(registrantNote, msgs) || isAdmin))
                 {
                     registrantNote.IsDeleted = true;
                     registrantNote.LastModifiedBy = currentUser.ID;
                     registrantNote.LastModifiedDate = DateTime.UtcNow;
-                    registrantNote.Save(); 
+                    registrantNote.Save();
                 }
                 else
                     throw new Exception("You are not authorized to delete this note.");
-                
+
                 return Json(
                    new ApiResponse(msgs, null),
                    JsonRequestBehavior.AllowGet);
