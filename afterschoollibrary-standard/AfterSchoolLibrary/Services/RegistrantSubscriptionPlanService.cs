@@ -146,11 +146,11 @@ namespace AfterSchoolLibrary.Services
         public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId)
         {
             var activity = participationObject.GetActivity(); 
+
+            if (activity.IsEmpty())
+                return "-";
+
             var account = activity?.GetAccount();
-
-            if (account.IsEmpty())
-                return "-"; 
-
             var startDate = originalPlan.PaymentStartTypeId switch
             {
                 // Plan start date is in customer time zone
