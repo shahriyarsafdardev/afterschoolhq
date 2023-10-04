@@ -145,8 +145,11 @@ namespace AfterSchoolLibrary.Services
 
         public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId)
         {
-            var activity = participationObject.GetActivity();
-            var account = activity.GetAccount();
+            var activity = participationObject.GetActivity(); 
+            var account = activity?.GetAccount();
+
+            if (account.IsEmpty())
+                return "-"; 
 
             var startDate = originalPlan.PaymentStartTypeId switch
             {
