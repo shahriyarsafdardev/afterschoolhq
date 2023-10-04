@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.101.2" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.202.20" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.101" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.101.30" />
     <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="3.6.0" />
