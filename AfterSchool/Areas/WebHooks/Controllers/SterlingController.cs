@@ -57,19 +57,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs
                         );
                         
-                        var registrants = Registrant.LoadByWebUserId(latestBackgroundCheck.WebUserId, RegistrantPersonType.Volunteer, false,
-                            false, msgs);
-                        registrants.ForEach(registrant => 
-                        {
-                            var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).FirstOrDefault();
-                            if (registration.IsNotEmpty())
-                            {
-                                var participationObject = registration.GetFirstParticipationObject(msgs);
-                                var registrantActivity = registration.GetRegistrantActivity(participationObject, msgs);
-                                if (registrantActivity.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingBackgroundCheck)
-                                    registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs);
-                            }
-                        });
                     }
                     if (responseBody.result == "Consider")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
