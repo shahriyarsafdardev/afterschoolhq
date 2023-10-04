@@ -143,24 +143,29 @@ namespace AfterSchoolLibrary.Services
             return false;
         }
 
-        public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId,
-            int paymentsCount)
+        public static string GetNextPaymentDate(SubscriptionPlan originalPlan, ParticipationObject participationObject, RegistrantSubscriptionPlan plan, BillingPeriodType billingPeriodTypeId)
         {
-            var account = participationObject.GetActivity().GetAccount();   
+            var activity = participationObject.GetActivity(); 
+
+            if (activity.IsEmpty())
+                return "-";
+
+            var account = activity?.GetAccount();
             var startDate = originalPlan.PaymentStartTypeId switch
             {
                 // Plan start date is in customer time zone
                 // No need to convert in UTC as only used to display next payment date to provider/parent
                 PlanPaymentStartType.OnCheckout => plan.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
                 PlanPaymentStartType.WhenActivityStarts => participationObject.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
-                PlanPaymentStartType.OnPeriodStart => originalPlan.StartDate ?? account.ConvertToAccountTimeZone(DateTime.UtcNow),
+                PlanPaymentStartType.OnPeriodStart => (DateTime) (activity.HasSchedule ? originalPlan.StartDate : account.ConvertToAccountTimeZone(DateTime.UtcNow)),
                 _ => account.ConvertToAccountTimeZone(DateTime.UtcNow)
             };
 
+            var totalPeriodsUptillNow = originalPlan.NumberOfPeriodsForSubscription( startDate, account.ConvertToAccountTimeZone(DateTime.UtcNow));
             var nextPaymentDate = new SubscriptionPlan
             {
                 BillingPeriodTypeId = (BillingPeriodType) billingPeriodTypeId
-            }.CalculateEndDateFromNumberOfPeriods(startDate, paymentsCount).ToShortDateString();
+            }.CalculateEndDateFromNumberOfPeriods(startDate, totalPeriodsUptillNow).ToShortDateString();
 
             return nextPaymentDate;
         }
