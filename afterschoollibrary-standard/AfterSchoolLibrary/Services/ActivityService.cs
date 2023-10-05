@@ -1372,7 +1372,7 @@ namespace AfterSchoolLibrary.Services
                 if (subscriptionEndDate.Value.Date.IsBefore(account.ConvertToAccountTimeZone(DateTime.UtcNow).Date))
                     msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
 
-                if (activitySchedule != null && activitySchedule.StartDate.HasValue)
+                if (activitySchedule.IsNotEmpty() && activitySchedule.StartDate.HasValue)
                 {
                     var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
 
