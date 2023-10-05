@@ -34,8 +34,8 @@ namespace AfterSchool.Controllers
             var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs);
             var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs);
 
-            ProcessSubscriptionSchedules(subscriptionSchedulespendingToday, msgs);
-            ProcessPaymentHistory(subscriptionPaymentHistoryPendingStatus, msgs);
+            ProcessSubscriptionSchedulesPendingToday(subscriptionSchedulespendingToday, msgs);
+            ProcessPaymentHistoryWithPendingStatus(subscriptionPaymentHistoryPendingStatus, msgs);
             ProcessFailedSubscriptionSchedules(subscriptionSchedulesFailed, msgs);
 
             if (subscriptionSchedulesAfterThreeDays.IsNotEmpty())
@@ -44,7 +44,7 @@ namespace AfterSchool.Controllers
             }
         }
 
-        private void ProcessSubscriptionSchedules(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
+        private void ProcessSubscriptionSchedulesPendingToday(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
         {
             foreach (var schedule in schedules)
             {
@@ -134,7 +134,8 @@ namespace AfterSchool.Controllers
                 var webhookPayload = new WebhookPayload
                 {
                     PaymentHistory = subscriptionPaymentHistory,
-                    Schedule = subscriptionSchedule
+                    Schedule = subscriptionSchedule,
+                    ChargeId = charge.Id
                 };
 
                 var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -142,7 +143,7 @@ namespace AfterSchool.Controllers
 
                 if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
                 {
-                    UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+                    UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs, dc);
                 }
                 else
                 {
@@ -172,7 +173,7 @@ namespace AfterSchool.Controllers
         }
 
 
-        private void ProcessPaymentHistory(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
+        private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
         {
             foreach (var paymentHistory in paymentHistories)
             {
@@ -272,6 +273,7 @@ namespace AfterSchool.Controllers
         {
             public SubscriptionPaymentHistory PaymentHistory { get; set; }
             public SubscriptionSchedule Schedule { get; set; }
+            public string ChargeId { get; set; }
         }
     }
 }
