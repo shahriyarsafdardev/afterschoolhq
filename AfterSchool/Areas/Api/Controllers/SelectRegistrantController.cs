@@ -20,9 +20,9 @@ using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
-    public class SelectRegistrantController : BaseLoggedInController
+    public class SelectRegistrantController : BaseLoggedInApiController
     {
-        public SelectRegistrantController() : base(new List<AccountType> { AccountType.AfterSchool })
+        public SelectRegistrantController() : base(new List<AccountType> { AccountType.Registrant })
         {
         }   
 
@@ -173,7 +173,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     };
                     registrantsDtos.Add(newStudent);
                 }
-                var Response = new
+                var response = new
                 {
                     Students = registrantsDtos,
                     activityDto = new
@@ -184,7 +184,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     },
                 };
                 return Json(
-                    new ApiResponse(msgs, Response),
+                    new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
@@ -255,7 +255,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 };
                 if (msgs.HasNoErrors())
                     return Json(
-                        new ApiResponse(msgs, Response),
+                        new ApiResponse(msgs, response),
                         JsonRequestBehavior.AllowGet);
                 return Json(
                     new ApiResponse(msgs, null),

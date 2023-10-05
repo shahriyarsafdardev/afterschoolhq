@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using AfterSchool.Areas.Api.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -291,6 +292,18 @@ namespace AfterSchool.Models
             return RedirectToAction("index", "Login", new {returnurl = returnUrl, area = ""});
         }
 
+        internal ActionResult LogoutAPI(SystemMessages msgs, string returnUrl = null, bool goToLoginScreenBeforeReturn = false)
+        {
+            SessionVariables.CurrentUser = null;
+            SessionVariables.OriginalLoggedInUser = null;
+            SessionVariables.CurrentAccount = null;
+            SessionVariables.CurrentRegistrant = null;
+            SessionVariables.ParentAccount = null;
+            ClearCookies(); 
+            return Json(
+            new ApiResponse(msgs, null),
+            JsonRequestBehavior.AllowGet);
+        }
         internal SystemMessages HandleMultiPartAuth(WebUser user)
         {
             var msgs = new SystemMessages();
