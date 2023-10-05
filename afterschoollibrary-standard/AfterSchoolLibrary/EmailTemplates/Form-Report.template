@@ -12,12 +12,12 @@
     </style>
 </head>
 <div>
-        <span class="sg-image" data-imagelibrary="%7B%22alignment%22%3A%22center%22%2C%22link%22%3A%22https%3A//afterschoolhq.com%22%2C%22src%22%3A%22https%3A//marketing-image-production.s3.amazonaws.com/uploads/7d3962f0ec15e5c1391e961a59b432aca13f48188cc6c2558c382d00703507e496157a16075be552a74cc1946cb22803608234201534c35ce953f598c2a709b4.jpg%22%2C%22alt_text%22%3A%22AfterSchool%20-%20Your%20home%20for%20after%20school%20experiences%22%2C%22height%22%3A163%2C%22width%22%3A%22650%22%2C%22widthPercent%22%3A100%2C%22isResponsive%22%3Afalse%2C%22classes%22%3A%7B%22sg-image%22%3A1%7D%7D"
+        <span class="sg-image"
             style="float: none; display: block; text-align: center;">
             <a href="https://afterschoolhq.com">
                 <img alt="AfterSchool - Your home for after school experiences" border="0" class="max-width"
                     data-proportionally-constrained="true" height="163"
-                    src="https://marketing-image-production.s3.amazonaws.com/uploads/7d3962f0ec15e5c1391e961a59b432aca13f48188cc6c2558c382d00703507e496157a16075be552a74cc1946cb22803608234201534c35ce953f598c2a709b4.jpg"
+                    src="https://afterschoolhq-status.s3.us-east-2.amazonaws.com/img/ahq_email_header.png"
                     style="color: rgb(0, 0, 0); text-decoration: none; font-family: Helvetica, arial, sans-serif; font-size: 16px;"
                     width="650"/>
                 </a>
