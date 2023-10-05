@@ -30,8 +30,13 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
                 var subscriptionSchedule = webhookPayload.Schedule;
+                //load charge from id of webhook
+                var charge = new Charge();
+                var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
-                return InvoicePaymentSucceeded(subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
+                ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
+
+                return Return500(msgs);
             }
             catch (Exception ex)
             {
@@ -40,12 +45,24 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 return Return500(msgs);
             }
         }
-        
-        private IHttpActionResult InvoicePaymentSucceeded(SubscriptionSchedule subscriptionSchedule, 
-            SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
-        {            
-            // new logic
 
+        private IHttpActionResult ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule,
+            SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+            HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, chargeStatus, msgs);
+            CreateTransaction(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
+
+            if (msgs.HasNoErrors())
+                return ReturnOK(msgs);
+            else
+                return Return500(msgs);
+        }
+        
+        private void CreateTransaction(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory, 
+            SystemMessages msgs, DatabaseConnection dc)
+        {
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
 
             var plan = rsp.GetSubscriptionPlan(msgs);
@@ -145,11 +162,60 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 null,
                 msgs,
                 dc);
+        }
 
-            if (msgs.HasNoErrors())
-                return ReturnOK(msgs);
+        private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,
+            LastChargeStatus chargeStatus, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (chargeStatus.Equals(LastChargeStatus.succeeded))
+            {
+                UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+
+                if(subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed)) 
+                    subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
+
+                msgs.AddRange(subscriptionPaymentHistory.Save());
+            }
+            else if (charge.Status.Equals(LastChargeStatus.failed))
+            {
+                msgs.Add("Charge failed", MessageType.Error);
+
+                if (subscriptionPaymentHistory.RetryNumber < 3)
+                    subscriptionPaymentHistory.RetryNumber += 1;
+
+                msgs.AddRange(subscriptionPaymentHistory.Save());
+
+                //what should be updated in Subscription Schedule in this case????
+                //send email to customer and provider notifying user of charge failure
+                //if Bad card or insufficient funds??????
+                //redirect to Card details which should require login
+                //if Need to cancel?    
+                //Cancel subscription, notify main AHQ system
+            }
             else
-                return Return500(msgs);
+            {
+                // Handle pending status (pending status is already saved in payment history)
+            }
+        }
+
+        public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //What to do for ongoing activities as they don't have LastDateToBill?
+            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
+            {
+                //check if it was the final payment
+                if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+                    subscriptionSchedule.NextBillDate = null;
+                else
+                {
+                    subscriptionSchedule.NextBillDate = new SubscriptionPlan
+                    {
+                        BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
+                    }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
+                }
+            }
+
+            msgs.AddRange(subscriptionSchedule.Save(dc));
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)

@@ -183,6 +183,8 @@ namespace AfterSchoolLibrary.Services
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = new DateTime?();
+            var lastDateToBill = new DateTime?();
+            var nextBillDate = new DateTime();
 
             endDateTime = (activity.GetSchedule() != null && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
@@ -250,7 +252,18 @@ namespace AfterSchoolLibrary.Services
 
             var firstRenewalDate = SubscriptionScheduleService.GetFirstRenewalDate(participationObject, plan.EndDate, plan.BillingPeriodTypeId);
 
-            var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, feeObject, firstRenewalDate, loggedInUser, msgs, dc);
+            if (activity.HasSchedule && (!activity.GetSchedule()?.IsOngoing ?? false))
+                lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
+            else
+                endDateTime = null;
+
+            if (startDateTime.IsAfter(DateTime.UtcNow))
+                nextBillDate = startDateTime;
+            else
+                nextBillDate = firstRenewalDate;
+
+            var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, endDateTime, nextBillDate, lastDateToBill, feeObject,
+                firstRenewalDate, loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 submittedRecord,
@@ -265,13 +278,11 @@ namespace AfterSchoolLibrary.Services
             //run first charge 
             if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
             {
-                var amount = checkoutObject.GetRegistrationCostWithFees();
-                var subscriptionFees = checkoutObject.GetSubscriptionCostTodayNoFees(msgs, dc);
+                var subscriptionFees = checkoutObject.SubscriptionPlan?.CostPerPeriod ?? 0;
 
-                if (subscriptionSchedule.ProrateFirstCharge ?? false)
-                    subscriptionFees = SubscriptionScheduleService.CalculateProratedAmount(DateTime.UtcNow, startDateTime, subscriptionFees);
-
-                var totalAmount = amount + subscriptionFees;
+                if (plan.PaymentStartTypeId.Equals(PlanPaymentStartType.WhenActivityStarts) || plan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) &&
+                    (subscriptionSchedule.ProrateFirstCharge ?? false))
+                    subscriptionFees = SubscriptionScheduleService.CalculateProratedAmount(firstRenewalDate, DateTime.UtcNow, subscriptionFees);
 
                 //make seperate function for this
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
@@ -279,7 +290,7 @@ namespace AfterSchoolLibrary.Services
                     destinationAccountId: null,
                     platformFee: null,
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
-                    totalAmount: totalAmount,
+                    totalAmount: subscriptionFees,
                     description: subscriptionSchedule.Description,
                     statementDescriptor: "AHQ Subscription charge",
                     metaData: new Dictionary<string, string>
@@ -303,7 +314,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
-                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, subscriptionSchedule.AmountInCents, DateTime.UtcNow,
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount, DateTime.UtcNow,
                                 charge.Id, false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, 50, 0, msgs);
 
                     if(subscriptionPaymentHistory.IsEmpty())
