@@ -1475,12 +1475,19 @@ namespace AfterSchool.Areas.Org.Controllers
                 values.Add("applicationthankyouemail", "Thank you for applying.");
 
                 // Add activity schedule for activity
+                var days = new List<DayOfWeekASL> { DayOfWeekASL.Sunday, DayOfWeekASL.Monday };
+                var inSessionDates = ActivityScheduleUI.PrepScheduleDates("1", days, DateTime.UtcNow.ToString("M/d/yyyy"),
+                    DateTime.UtcNow.AddDays(8).ToString("M/d/yyyy"),
+                    DateTime.UtcNow.Date.AddHours(15).ToString("h:mm tt"),
+                    DateTime.UtcNow.Date.AddHours(17).ToString("h:mm tt"),
+                    new NameValueCollection());
+
                 values.Add("schedule", "0");
                 values.Add("startdate", DateTime.UtcNow);
                 values.Add("enddate", DateTime.UtcNow.AddDays(8));
                 values.Add("dailystarttime", DateTime.UtcNow.Date.AddHours(15));
                 values.Add("dailyendtime", DateTime.UtcNow.Date.AddHours(17));
-                values.Add("scheduledates", new List<ActivityInstance>());
+                values.Add("scheduledates", inSessionDates);
                 values.Add("scheduledatesclosed", new List<DateTime>());
                 values.Add("repeatsweekly", "1");
                 values.Add("days", "1,2");
