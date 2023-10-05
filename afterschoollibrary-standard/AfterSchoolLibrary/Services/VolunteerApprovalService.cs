@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using AfterSchoolLibrary.Enums;
 using AfterSchoolLibrary.Helpers;
@@ -8,7 +8,7 @@ using BasicLibrary.DataAccess;
 
 namespace AfterSchoolLibrary.Services
 {
-    public class VolunteerApprovalService
+    public static class VolunteerApprovalService
     {
         public static VolunteerApproval CreateNewApproval(int? webUserId, int? accountId, ApprovalStatus approvalStatus, string reason,DateTime expirationDate 
             ,WebUser loggedInUser, DateTime CreateDate, SystemMessages msgs, DatabaseConnection dc = null)
@@ -64,6 +64,14 @@ namespace AfterSchoolLibrary.Services
                         registrantActivity.SetAssignmentType(RegistrationAssignmentType.Reserved, null, msgs, dc);
                 }
             });
+        }
+
+        public static bool IsCurrentlyDenied(this VolunteerApproval volunteerApproval)
+        {
+            return
+                volunteerApproval.ApprovalStatusId == ApprovalStatus.Denied
+                && volunteerApproval.ExpirationDate.IsNotEmpty()
+                && volunteerApproval.ExpirationDate >= DateTime.UtcNow;
         }
     }
 }
