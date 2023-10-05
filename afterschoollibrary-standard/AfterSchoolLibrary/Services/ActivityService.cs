@@ -1367,16 +1367,19 @@ namespace AfterSchoolLibrary.Services
             var isParentPrice = isparentpricesubscription.ToBoolean();
             var activitySchedule = activity.GetSchedule(msgs, dc);
 
-            if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date.IsBefore(account.ConvertToAccountTimeZone(DateTime.UtcNow).Date))
-                msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
-
-            if (activitySchedule != null && activitySchedule.StartDate.HasValue)
+            if (subscriptionEndDate.HasValue)
             {
-                var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+                if (subscriptionEndDate.Value.Date.IsBefore(account.ConvertToAccountTimeZone(DateTime.UtcNow).Date))
+                    msgs.Add("The subscription end date cannot be in the past", MessageType.UserError);
 
-                if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date.IsBefore(validEndDate.Date))
-                    msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
-            }
+                if (activitySchedule.IsNotEmpty() && activitySchedule.StartDate.HasValue)
+                {
+                    var validEndDate = SubscriptionPlanService.GetNextPeriodDate((DateTime) activitySchedule.StartDate, (BillingPeriodType) subscriptionplanperiod.ToInteger());
+
+                    if (subscriptionEndDate.HasValue && subscriptionEndDate.Value.Date.IsBefore(validEndDate.Date))
+                        msgs.Add("Minimum subscription end date should be " + validEndDate.ToShortDateString(), MessageType.UserError);
+                }
+            } 
 
             if (activity.HasSubscriptionPlan(msgs, dc) && msgs.HasNoErrors())
             {
