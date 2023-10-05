@@ -48,7 +48,7 @@
             text-align:center;
             margin-top:50px;
             }
-            img{
+            .f-fileicon{
             width: 35px;
             height: 38px;
             margin: 5px;
