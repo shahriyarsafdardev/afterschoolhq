@@ -83,7 +83,7 @@ export default function Survey() {
     onSubmit: async values => {
       let errors = [];
       setSaveDisabled(true);
-      if (dirty || lastSection || firstSection) {
+      if (dirty || lastSection || firstSection || !sectionSkipAble) {
         const submitObj = formSectionSubmitObject(values, activeGroupId);
         await submitFormSectionData(submitObj, formUid, responseId.current, lastSection).then(
           ([respId, msgs]) => {

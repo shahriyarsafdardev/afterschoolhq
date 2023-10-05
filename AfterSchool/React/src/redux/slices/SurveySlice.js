@@ -100,7 +100,8 @@ export const useSurveyActions = () => {
     formData.append('answers', new URLSearchParams(answerQuery).toString());
     return await SurveyRepository.submitFormSection(formData, pin).then(
       ({ data: { obj, msgs } }) => {
-        dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
+        if (obj?.FormQuestionAnswers.length)
+          dispatch(setAnsweredQuestions(obj?.FormQuestionAnswers));
         dispatch(setResponseId(obj?.SurveyResponseUid));
         return [obj?.SurveyResponseUid, msgs];
       }
