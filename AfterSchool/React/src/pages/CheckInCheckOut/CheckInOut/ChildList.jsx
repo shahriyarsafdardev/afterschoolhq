@@ -22,7 +22,7 @@ export default function ChildList({ setActiveStep, navigateToRoot }) {
         {StudentsInfo.length > 0 ? (
           StudentsInfo.map((student, index) => <ChildListRow student={student} key={index} />)
         ) : (
-          <Typography className={classes.subHeaderText}>Your access has been revoked!</Typography>
+          <Typography className={classes.noAccessMessage}>Your access has been revoked!</Typography>
         )}
       </Box>
       <Grid item xs={12} className={classes.listButtonWrapper}>
