@@ -68,8 +68,7 @@ export const getTimeFromDate = date => date.getTime();
 
 export const withoutSignsPhoneNumber = phone => {
   return phone
-    .split('+1')
-    .join('')
-    .split('-')
-    .join('');
+    .replaceAll(' ', '')
+    .replace('+1', '')
+    .replaceAll('-', '');
 };
