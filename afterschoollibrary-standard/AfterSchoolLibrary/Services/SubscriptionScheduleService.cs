@@ -11,8 +11,9 @@ namespace AfterSchoolLibrary.Services
 {
     public static class SubscriptionScheduleService
     {
-        public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime? startDateTime, PlanFeeObject feeObject,
-            DateTime firstRenewalDate, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime startDateTime, DateTime? endDateTime,
+            DateTime? nextBillDate, DateTime? lastDateToBill, PlanFeeObject feeObject, DateTime? firstRenewalDate, WebUser loggedInUser, 
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
             //remove hard coded values
             if (msgs.IsEmpty()) msgs = new SystemMessages();
@@ -22,11 +23,11 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                StartDate = startDateTime.IfEmpty(DateTime.UtcNow),
+                StartDate = startDateTime,
                 AmountInCents = feeObject.Amount,
-                EndDate = DateTime.UtcNow, //calculate and also can be null
+                EndDate = endDateTime,
                 FirstRenewal = firstRenewalDate,
-                ProrateFirstCharge = checkoutObject.SubscriptionPlan.ProrateFirstCharge, 
+                ProrateFirstCharge = checkoutObject.SubscriptionPlan.ProrateFirstCharge,
                 ProrateLastCharge = checkoutObject.SubscriptionPlan.ProrateLastCharge,
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
@@ -34,9 +35,9 @@ namespace AfterSchoolLibrary.Services
                 LastChargeStatus = LastChargeStatus.succeeded, //run the charge and then pass the status
                 StripeConnectId = "scid123",
                 AmountToConnectAccountInCents = feeObject.Amount - feeObject.ConvenienceFee,
-                LastDateToBill = DateTime.UtcNow,
+                LastDateToBill = lastDateToBill,
                 Description = "description", //???
-                NextBillDate = firstRenewalDate,
+                NextBillDate = nextBillDate,
                 LastChargeFailed = false,
                 CancelledReason = "reason",
                 Metadata = "metadata", //?????
@@ -102,13 +103,10 @@ namespace AfterSchoolLibrary.Services
             {
                 paymentDates.Add(currentPaymentDate);
 
-                currentPaymentDate = billingPeriodType switch
+                currentPaymentDate = (DateTime)new SubscriptionPlan
                 {
-                    BillingPeriodType.Week => currentPaymentDate.AddDays(7),
-                    BillingPeriodType.Month => currentPaymentDate.AddMonths(1),
-                    BillingPeriodType.Year => currentPaymentDate.AddYears(1),
-                    _ => throw new ArgumentException("Invalid subscription interval specified.")
-                };
+                    BillingPeriodTypeId = billingPeriodType
+                }.CalculateEndDateFromNumberOfPeriods(currentPaymentDate, 1);
             }
 
             return paymentDates;
@@ -132,15 +130,21 @@ namespace AfterSchoolLibrary.Services
                         firstRenewalDate = (DateTime) (activity.HasSchedule ? schedule.IsOngoing ? subscriptionPlan.StartDate : participationObject.StartDate : checkoutDateProviderTimeZone);
                     else
                         firstRenewalDate = checkoutDateProviderTimeZone;
-                    while (firstRenewalDate.IsOnOrBefore(checkoutDateProviderTimeZone))
-                    {
-                        firstRenewalDate = billingPeriodType switch
+
+                    if(firstRenewalDate.IsAfter(checkoutDateProviderTimeZone))
+                        firstRenewalDate = (DateTime) new SubscriptionPlan
                         {
-                            BillingPeriodType.Week => firstRenewalDate.AddDays(7),
-                            BillingPeriodType.Month => firstRenewalDate.AddMonths(1),
-                            BillingPeriodType.Year => firstRenewalDate.AddYears(1),
-                            _ => throw new ArgumentException("Invalid subscription interval specified.")
-                        };
+                            BillingPeriodTypeId = billingPeriodType
+                        }.CalculateEndDateFromNumberOfPeriods(firstRenewalDate, 1);
+                    else
+                    {
+                        while (firstRenewalDate.IsOnOrBefore(checkoutDateProviderTimeZone))
+                        {
+                            firstRenewalDate = (DateTime) new SubscriptionPlan
+                            {
+                                BillingPeriodTypeId = billingPeriodType
+                            }.CalculateEndDateFromNumberOfPeriods(firstRenewalDate, 1);
+                        }
                     }
                 }
                 else
@@ -159,7 +163,7 @@ namespace AfterSchoolLibrary.Services
         public static decimal CalculateProratedAmount(DateTime nextChargeDate, DateTime purchaseDate, decimal fullChargeAmount)
         {
             var diffInDays = (nextChargeDate.Date - purchaseDate.Date).TotalDays;
-            var currentMonthTotalDays = DateTime.DaysInMonth(nextChargeDate.Year, nextChargeDate.Month);
+            var currentMonthTotalDays = DateTime.DaysInMonth(purchaseDate.Year, purchaseDate.Month);
             return (diffInDays / currentMonthTotalDays).ToDecimal() * fullChargeAmount;
         }
     }

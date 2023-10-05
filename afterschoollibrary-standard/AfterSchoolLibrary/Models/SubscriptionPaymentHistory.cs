@@ -181,7 +181,7 @@ namespace AfterSchoolLibrary.Models
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], SubscriptionScheduleId);
-            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
         }
 
         public static List<SubscriptionPaymentHistory> LoadByStatus(LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
