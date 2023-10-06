@@ -7,7 +7,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 
 import { useUnsavedChanges } from './UnsavedChangesProvider';
-import { newQuestion, unSavedDialogProps } from './helper';
+import { newQuestion, unSavedDialogProps, filterNotDeletedQuestions } from './helper';
 import formValidationSchema from './formValidationSchema';
 import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
@@ -65,11 +65,14 @@ function FormSectionSettings() {
     const tempInitialValues = {};
 
     questions.forEach(question => {
-      let tempQuestion = { ...question, checked: false };
-      tempQuestion.Options = tempQuestion.Options?.split(',').map(option => {
-        const [key, value] = option.split('|');
-        return { key, value };
-      });
+      const { Text } = question;
+      let tempQuestion = { ...question, Text: Text || '', checked: false };
+
+      tempQuestion.Options =
+        tempQuestion.Options?.split(',').map(option => {
+          const [key, value = ''] = option.split('|');
+          return { key, value };
+        }) || [];
       tempInitialValues[tempQuestion.DisplayOrder] = tempQuestion;
     });
 
@@ -150,12 +153,7 @@ function FormSectionSettings() {
   }, [values]);
 
   const addNewQuestionHandler = index => {
-    const questionsToShow = () =>
-      Object.keys(values).reduce((qs, key) => {
-        if (!values[key].IsDeleted) return [...qs, values[key]];
-
-        return qs;
-      }, []);
+    const questionsToShow = filterNotDeletedQuestions(values);
     const newDisplayOrder = Number(index || questionsToShow().at(-1)?.DisplayOrder || 0) + 1;
 
     const newQuest = {
