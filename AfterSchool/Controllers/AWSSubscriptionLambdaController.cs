@@ -122,7 +122,25 @@ namespace AfterSchool.Controllers
                 );
             }
 
-            HandleCharge(charge, schedule, subscriptionPaymentHistory, chargeStatus, msgs);
+            var webhookPayload = new WebhookPayload
+            {
+                PaymentHistory = subscriptionPaymentHistory,
+                Schedule = schedule,
+            };
+
+            var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
+            var response = SendWebhook(jsonPayload);
+
+            if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
+            {
+                //?????
+            }
+            else
+            {
+                //????
+            }
+
+            //HandleCharge(charge, schedule, subscriptionPaymentHistory, chargeStatus, msgs);
         }
 
 
@@ -135,7 +153,6 @@ namespace AfterSchool.Controllers
                 {
                     PaymentHistory = subscriptionPaymentHistory,
                     Schedule = subscriptionSchedule,
-                    ChargeId = charge.Id
                 };
 
                 var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -172,7 +189,6 @@ namespace AfterSchool.Controllers
             }
         }
 
-
         private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
         {
             foreach (var paymentHistory in paymentHistories)
@@ -181,17 +197,14 @@ namespace AfterSchool.Controllers
                 var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
 
                 if (charge.IsEmpty())
-                    msgs.Add("\"Error in running the charge", MessageType.Error);
+                    msgs.Add("Error in running the charge", MessageType.Error);
                 
                 else
                 {
-                    var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-
                     paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     msgs.AddRange(paymentHistory.Save());
 
-                    HandleCharge(charge, schedule, paymentHistory, chargeStatus, msgs);
-                    //subscriptionSchedulesFailed.Add(schedule);
+                    ProcessCharge(charge, schedule, paymentHistory, msgs);
                 }
             }
         }
@@ -273,7 +286,6 @@ namespace AfterSchool.Controllers
         {
             public SubscriptionPaymentHistory PaymentHistory { get; set; }
             public SubscriptionSchedule Schedule { get; set; }
-            public string ChargeId { get; set; }
         }
     }
 }
