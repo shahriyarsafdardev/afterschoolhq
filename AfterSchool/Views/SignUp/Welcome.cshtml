@@ -1,4 +1,4 @@
-﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model SignUpIndexViewModel
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
@@ -584,7 +584,7 @@
         PageEvent.add(PageEvent.AFTER_INIT, function () {
 
             signupAccountSearch.keyup(function (e) {
-            
+
                 var searchLength = signupAccountSearch.val().length;
 
                 if (searchLength >= 40) {
@@ -615,10 +615,10 @@
                 } else if (!isSearchSchoolPage) {
                     btnContinue.prop('disabled', false);
                     hiddenAccountName.val(signupAccountSearch.val());
-                }                        
-                
+                }
+
                 if (isSearchSchoolPage)
-                {                
+                {
                     signupAccountSearchList.removeClass('hide');
                     signupAccountSearchList.html('');
                     signupAccountSearchList.append(`
@@ -627,11 +627,11 @@
                         id="signup-search-listItem">
                         <strong>Searching... Type the account name</strong>
                     </div>`);
-    
+
                     if (!isSearching) {
                         clearTimeout(searchTimeout);
                     }
-    
+
                     searchTimeout = setTimeout(function () {
                         doAccountSearch(signupAccountSearch, signupAccountSearchList)
                     }, 250);
@@ -645,13 +645,28 @@
                   <text>$("#NoAccountFoundPopup").modal('show');</text>
               }
         });
-        
+
+        $('#email').on('input', function () {
+            var emailvalue = $(this).val();
+            var suspiciousdomains = ['yopmail.com'];
+
+            if (emailvalue.tolowercase().includes(suspiciousdomains)) {
+                $('.emailvalidation').text("This email domain is not permitted.please enter a different email address.");
+                $('.register-continue').prop('disabled', true);
+                $("#email").attr('style', 'border: 1px solid red;');
+            } else {
+                $(".register-continue").prop('disabled', false);
+                $("#email").attr('style', '');
+                $('.emailvalidation').text("");
+            }
+        });
+
         function validateEmailServerSide(value) {
-            
+
             // this is getting hit as soon as the page loads in Edge for some reason
             // need to review
             return;
-            
+
             if (value.length > 0 && validateEmail(value)) {
                 var dataToSend = JSON.stringify({ emailId: value });
                 $.ajax({
@@ -682,7 +697,7 @@
                                 message: 'Something went wrong. Please contact customer support.',
                                 success: false
                             });
-                            
+
                         }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
@@ -691,7 +706,7 @@
                             message: 'Something went wrong. Please contact customer support.',
                             success: false
                         });
-                        
+
                     }
                 });
             }
@@ -745,7 +760,7 @@
         }
 
         function doAccountSearch(search, list) {
-            
+
             if (search.val().length > 0 && !isSearching) {
                 isSearching = true;
 
@@ -972,7 +987,7 @@
                             message: 'Something went wrong. Please contact customer support.',
                             success: false
                         });
-                        
+
                     }
                 });
             }
@@ -1006,7 +1021,7 @@
                             message: 'Something went wrong. Please contact customer support.',
                             success: false
                         });
-                        
+
                     }
                 });
             }

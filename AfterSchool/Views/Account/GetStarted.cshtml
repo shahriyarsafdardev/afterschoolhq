@@ -28,7 +28,7 @@
             {"ParticipationObject", participationObject},
             {"isDuringProfileSetup", isDuringProfileSetup},
             {"CleverSsoEnabled", cleverSsoEnabled},
-        });
+                });
 }
 
 @{
@@ -38,7 +38,7 @@
         new ViewDataDictionary
         {
             {"hidebuttons", true},
-        });
+                });
 }
 
 <div>
@@ -78,6 +78,7 @@
                                                required="required"
                                                value=""
                                                data-test="register-email"/>
+                                        <p class="emailvalidation text-danger"></p>
                                     </div>
                                 </div>
 
@@ -123,7 +124,7 @@
                                                     @:Please finalize your family account setup to begin registration.
                                                 }
                                                 else
-                                                {   
+                                                {
                                                     @:Please enter your info below to begin registration.
                                                 }
                                             </p>
@@ -223,7 +224,7 @@
         new ViewDataDictionary
         {
             {"IsDuringCheckout", true},
-        });
+                    });
 }
 <script src="~/Assets/js/password-checker.js"></script>
 <script>
@@ -232,6 +233,20 @@
         $('#signup-form').submit(function () {
             $('#form-submit').html('Saving...');
             $('#form-submit').prop('disabled', true);
+        });
+        $('#email-check').on('input', function () {
+            var emailvalue = $(this).val();
+            var suspiciousDomains = ['yopmail.com'];
+            if (emailvalue.toLowerCase().includes(suspiciousDomains)) {
+                $('#btn-check-email').prop('disabled', true);
+                $("#email-check").attr('style', 'border: 1px solid red;');
+                $('.emailvalidation').text("This email domain is not permitted.Please enter a different email address.");
+
+            } else {
+                $('#btn-check-email').prop('disabled', false);
+                $("#email-check").attr('style', '');
+                $('.emailvalidation').text("");
+            }
         });
     });
 
