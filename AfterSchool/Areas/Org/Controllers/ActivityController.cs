@@ -2908,8 +2908,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     var ra = activity.GetRegistrantActivity(ar.RegistrantId.Value, msgs);
                     var instance = schedule.GetInSessionInstanceByDate(attendance.Date.Value, msgs);
-                    if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
-                        arsToRemove.Add(ar);
+                    if (instance.IsNotEmpty())
+                        if (ra.GetInstanceSeats(instance, msgs).IsEmpty())
+                            arsToRemove.Add(ar);
                 });
 
                 arsToRemove.ForEach(ar => attendanceRegistrants.Remove(ar));
