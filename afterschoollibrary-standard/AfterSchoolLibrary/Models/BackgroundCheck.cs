@@ -246,6 +246,15 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static BackgroundCheck LoadByCandidateIdActive(string candidateId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SterlingCandidateId"], candidateId);
+            dq.Criterias.Add(ObjectMap["IsActive"], true);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static List<BackgroundCheck> LoadByRequestedForFiscalAccountId(int requestedForFiscalAccountId, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
@@ -261,6 +270,17 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["WebUserId"], webUserID);
             return dq.GetCount() > 0;
+        }
+
+        public static List<BackgroundCheck> LoadByStatusAndActive(BackgroundCheckStatus backgroundCheckStatus, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["BackgroundCheckStatusId"], (int)backgroundCheckStatus);
+            dq.Criterias.Add(ObjectMap["IsActive"], 1);
+            dq.Criterias.Add(ObjectMap["ID"], 1, DatabaseCriteriaOperatorEnum.NotEqualTo);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
@@ -37,10 +37,10 @@ namespace AfterSchoolLibrary.Services
             volunteerApproval.IsActive = true;
 
             msgs.AddRange(volunteerApproval.Save(dc: dc));
-            
-            if(msgs.HasNoErrors())
-                EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
-            
+
+            if (msgs.HasNoErrors())
+                EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus, dc);
+
             return volunteerApproval;
         }
     }

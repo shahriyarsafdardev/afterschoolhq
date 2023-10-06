@@ -3092,14 +3092,14 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status)
+        public static void SendVolunteerBackgroundApprovalDenialEmail(int? webUserId, ApprovalStatus status, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
-            var registrant = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false, false, msgs).LastOrDefault();
+            var registrant = Registrant.LoadByWebUserId((int) webUserId, RegistrantPersonType.Volunteer, false, false, msgs, dc).LastOrDefault();
 
             if (registrant.IsNotEmpty())
             {
-                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs).FirstOrDefault();
+                var registration = Registration.LoadByRegistrantId(registrant.ID.Value, msgs,dc).FirstOrDefault();
                 var participationObject = registration?.GetFirstParticipationObject();
                 var subject = "Your background check is complete!";
                 var emailTemplate = EmailTemplates.Volunteer_Background_Approved;
