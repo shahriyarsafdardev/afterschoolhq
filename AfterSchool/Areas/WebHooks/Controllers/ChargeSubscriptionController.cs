@@ -30,13 +30,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
                 var subscriptionSchedule = webhookPayload.Schedule;
-                //load charge from id of webhook
+                //var charge = webhookPayload.Charge;
                 var charge = new Charge();
+                //load charge from id of webhook
+                //var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                 ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
-
-                return Return500(msgs);
+                return ReturnOK(msgs);
             }
             catch (Exception ex)
             {
@@ -173,8 +174,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 if(subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed)) 
                     subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
-
-                msgs.AddRange(subscriptionPaymentHistory.Save());
             }
             else if (charge.Status.Equals(LastChargeStatus.failed))
             {
@@ -182,8 +181,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 if (subscriptionPaymentHistory.RetryNumber < 3)
                     subscriptionPaymentHistory.RetryNumber += 1;
-
-                msgs.AddRange(subscriptionPaymentHistory.Save());
 
                 //what should be updated in Subscription Schedule in this case????
                 //send email to customer and provider notifying user of charge failure
@@ -196,6 +193,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 // Handle pending status (pending status is already saved in payment history)
             }
+            msgs.AddRange(subscriptionPaymentHistory.Save());
         }
 
         public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
