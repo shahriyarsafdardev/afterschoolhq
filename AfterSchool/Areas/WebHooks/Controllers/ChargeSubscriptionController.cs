@@ -30,9 +30,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
                 var subscriptionSchedule = webhookPayload.Schedule;
-                //var charge = webhookPayload.Charge;
-                var charge = new Charge();
-                //load charge from id of webhook
+                var charge = webhookPayload.Charge;
                 //var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
@@ -170,7 +168,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
-                UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+                //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
 
                 if(subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed)) 
                     subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
@@ -196,25 +194,25 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             msgs.AddRange(subscriptionPaymentHistory.Save());
         }
 
-        public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            //What to do for ongoing activities as they don't have LastDateToBill?
-            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
-            {
-                //check if it was the final payment
-                if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
-                    subscriptionSchedule.NextBillDate = null;
-                else
-                {
-                    subscriptionSchedule.NextBillDate = new SubscriptionPlan
-                    {
-                        BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
-                    }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
-                }
-            }
+        //public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
+        //{
+        //    //What to do for ongoing activities as they don't have LastDateToBill?
+        //    if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
+        //    {
+        //        //check if it was the final payment
+        //        if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+        //            subscriptionSchedule.NextBillDate = null;
+        //        else
+        //        {
+        //            subscriptionSchedule.NextBillDate = new SubscriptionPlan
+        //            {
+        //                BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
+        //            }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
+        //        }
+        //    }
 
-            msgs.AddRange(subscriptionSchedule.Save(dc));
-        }
+        //    msgs.AddRange(subscriptionSchedule.Save(dc));
+        //}
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
