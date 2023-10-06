@@ -126,6 +126,7 @@ namespace AfterSchool.Controllers
             {
                 PaymentHistory = subscriptionPaymentHistory,
                 Schedule = schedule,
+                Charge = charge,
             };
 
             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -153,6 +154,7 @@ namespace AfterSchool.Controllers
                 {
                     PaymentHistory = subscriptionPaymentHistory,
                     Schedule = subscriptionSchedule,
+                    Charge = charge,
                 };
 
                 var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -286,6 +288,7 @@ namespace AfterSchool.Controllers
         {
             public SubscriptionPaymentHistory PaymentHistory { get; set; }
             public SubscriptionSchedule Schedule { get; set; }
+            public Charge Charge { get; set; }
         }
     }
 }
