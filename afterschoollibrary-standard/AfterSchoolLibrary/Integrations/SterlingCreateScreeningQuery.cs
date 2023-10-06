@@ -83,8 +83,22 @@ namespace AfterSchoolLibrary.Integrations
 
     public class SterlingScreeningResponse
     {
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+
         [JsonProperty(PropertyName = "invite")]
         public SterlingScreeningInviteResponse Invite { get; set; }
+
+        [JsonProperty(PropertyName = "callback")]
+        public SterlingScreeningCallBackUri Callback { get; set; }
+
+        [JsonProperty(PropertyName = "result")]
+        public string Result { get; set; }
+
+        [JsonProperty(PropertyName = "status")]
+        public string Status { get; set; }
+        [JsonProperty(PropertyName = "updatedAt")]
+        public DateTime UpdatedAt { get; set; }
     }
 
     public class SterlingScreeningInviteResponse

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Web;
@@ -99,5 +100,7 @@ namespace AfterSchoolLibrary.Integrations
     public class SterlingCandidateResponse
     {
         [JsonProperty(PropertyName = "id")] public string Id { get; set; }
+
+        [JsonProperty(PropertyName = "screeningIds")] public IEnumerable<string> ScreeningId { get; set; }
     }
 }
