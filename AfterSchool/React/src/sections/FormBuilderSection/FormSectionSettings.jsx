@@ -154,7 +154,7 @@ function FormSectionSettings() {
 
   const addNewQuestionHandler = index => {
     const questionsToShow = filterNotDeletedQuestions(values);
-    const newDisplayOrder = Number(index || questionsToShow().at(-1)?.DisplayOrder || 0) + 1;
+    const newDisplayOrder = Number(index || questionsToShow.at(-1)?.DisplayOrder || 0) + 1;
 
     const newQuest = {
       ...cloneDeep(newQuestion(form?.FormType)),
