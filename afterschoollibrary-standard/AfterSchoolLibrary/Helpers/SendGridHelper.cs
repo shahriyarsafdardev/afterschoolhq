@@ -21,10 +21,10 @@ namespace AfterSchoolLibrary
         public const string EnrollHQGenericTemplateId = "c672e668-1b54-4721-84be-50fe3cde7cb2";
         public const string AfterSchoolHQGenericTemplateId = "70362a81-6361-4140-9d5b-25b28e97ceca";
         public const string MarketingUrlPath = "marketing/contacts";
-        public static string ProductionSendGridApiKey => ConfigurationManager.AppSettings["SendGrid.ProductionApiKey"];
+        public static string ProductionSendGridApiKey => "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";
 
         public static string DevelopmentSendGridApiKey =>
-            ConfigurationManager.AppSettings["SendGrid.DevelopmentApiKey"];
+            "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";
 
         public static string SendGridApiKey
         {
@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary
             EmailAddress replyTo = null, string emailTemplateId = null, EmailAddress ccEmail = null)
         {
             var msgs = new SystemMessages();
-            if (Utilities.IsLocalHost)
+            /*if (Utilities.IsLocalHost)
             {
                 msgs.AddRange(SMTPMailTrapHelper.SendMail(
                 fromEmail,
@@ -72,26 +72,26 @@ namespace AfterSchoolLibrary
                 ));
             }
             else
-            {
-                var sg = new SendGridClient(SendGridApiKey);
+            {*/
+            var sg = new SendGridClient(SendGridApiKey);
 
-                if (!Utilities.IsProduction)
-                    subject = $"{Utilities.Environment} ENV: {subject}";
+            // if (!Utilities.IsProduction)
+            //     subject = $"{Utilities.Environment} ENV: {subject}";
 
-                var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
+            var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
 
-                mail.ReplyTo = replyTo;
-                mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
-                if (ccEmail != null)
-                    mail.AddCc(ccEmail);
+            mail.ReplyTo = replyTo;
+            mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
+            if (ccEmail != null)
+                mail.AddCc(ccEmail);
 
-                var task = Task.Run(async () => await sg.SendEmailAsync(mail));
-                task.Wait();
+            var task = Task.Run(async () => await sg.SendEmailAsync(mail));
+            task.Wait();
 
-                dynamic response = task.Result;
-                if (response.StatusCode != HttpStatusCode.Accepted)
-                    msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-            }
+            dynamic response = task.Result;
+            if (response.StatusCode != HttpStatusCode.Accepted)
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            //}
 
             return msgs;
         }
