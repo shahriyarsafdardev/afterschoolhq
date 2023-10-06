@@ -134,7 +134,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
-                var surveyFeedbackStatusType = isLastSection ? SurveyFeedbackStatus.Completed : SurveyFeedbackStatus.InProgress;
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupId.ToInteger()).ToList().ForEach(qvm =>
                 {
@@ -143,6 +142,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
                     }
                 });
+
+                var surveyFeedbackStatusType = isLastSection && msgs.HasNoErrors() ? SurveyFeedbackStatus.Completed : SurveyFeedbackStatus.InProgress;
 
                 Database.ExecuteTransaction
                 (
@@ -166,7 +167,8 @@ namespace AfterSchool.Areas.Api.Controllers
                             surveyResponse = SurveyResponse.LoadByUid(surveyResponseUid.Value, amsgs, adc);
                             if (isLastSection)
                             {
-                                surveyResponse.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed;
+                                if (msgs.HasNoErrors())
+                                    surveyResponse.SurveyFeedbackStatusTypeId = SurveyFeedbackStatus.Completed;
                                 surveyResponse.LastModifiedDate = DateTime.UtcNow;
                                 amsgs.AddRange(surveyResponse.Save(adc));
                             }
@@ -184,7 +186,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (msgs.HasNoErrors() && surveyResponse.IsNotEmpty())
                 {
-                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value,msgs)
+                    formQuestionAnswerDtoList = FormQuestionAnswer.LoadBySurveyResponseId(surveyResponse.ID.Value, msgs)
                         .Select(questionAnswer => new FormQuestionAnswerDto()
                         {
                             FormQuestionId = questionAnswer.FormQuestionId, QuestionDataTypeId = (int) questionAnswer.QuestionDataTypeId,
@@ -213,7 +215,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     JsonRequestBehavior.AllowGet);
             }
         }
-        
+
         public static void AddCustomQuestions(SurveyResponse surveyResponse, List<FormQuestionViewModel> qvms, HttpRequestBase request, SystemMessages msgs, 
             DatabaseConnection dc = null)
         {
