@@ -107,18 +107,8 @@ namespace AfterSchool.Areas.Api.Controllers
                         }
                         else if (!student.IsReservedAndPaidFor(participationObject, null, msgs) && !student.IsAppliedFor(participationObject, null, msgs) && !student.MasterRegistrantHasPlan(participationObject, msgs))
                         {
-                            var subscriptionPlan = participationObject.SubscriptionPlans.FirstOrDefault();
-                            if (subscriptionPlan.IsNotEmpty() && subscriptionPlan.SplitCostEvenly && !participationObject.RegistrationFinalized)
-                            {
-                                btnText = "Awaiting Finalization";
-                                disabled = true;
-                                btnUrl = "#";
-                            }
-                            else
-                            {
-                                btnText = "Pay Now »";
-                                btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject,msgs).Uid });
-                            }
+                            btnText = "Pay Now »";
+                            btnUrl = Url.Action("makepayment", "account", new { id = student.GetRegistrationWithParticipationObject(participationObject,msgs).Uid });
                         }
                         else if (participationObject.IsSession())
                             btnText = "Add To Existing Registration »";
