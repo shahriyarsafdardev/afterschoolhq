@@ -78,20 +78,20 @@ namespace AfterSchoolLibrary
             // if (!Utilities.IsProduction)
             //     subject = $"{Utilities.Environment} ENV: {subject}";
 
-                var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
+            var mail = MailHelper.CreateSingleEmail(fromEmail, toEmail, subject, null, body);
 
-                mail.ReplyTo = replyTo;
-                mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
-                if (ccEmail != null)
-                    mail.AddCc(ccEmail);
+            mail.ReplyTo = replyTo;
+            mail.TemplateId = emailTemplateId ?? EnrollHQGenericTemplateId;
+            if (ccEmail != null)
+                mail.AddCc(ccEmail);
 
-                var task = Task.Run(async () => await sg.SendEmailAsync(mail));
-                task.Wait();
+            var task = Task.Run(async () => await sg.SendEmailAsync(mail));
+            task.Wait();
 
-                dynamic response = task.Result;
-                if (response.StatusCode != HttpStatusCode.Accepted)
-                    msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
-            }
+            dynamic response = task.Result;
+            if (response.StatusCode != HttpStatusCode.Accepted)
+                msgs.Add(response.Body.ReadAsStringAsync().Result, MessageType.Error);
+            //}
 
             return msgs;
         }
