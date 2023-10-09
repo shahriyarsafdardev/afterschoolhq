@@ -140,55 +140,6 @@ namespace AfterSchool.Controllers
             {
                 //????
             }
-
-            //HandleCharge(charge, schedule, subscriptionPaymentHistory, chargeStatus, msgs);
-        }
-
-
-        private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory, 
-            LastChargeStatus chargeStatus, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            if (chargeStatus.Equals(LastChargeStatus.succeeded))
-            {
-                var webhookPayload = new WebhookPayload
-                {
-                    PaymentHistory = subscriptionPaymentHistory,
-                    Schedule = subscriptionSchedule,
-                    Charge = charge,
-                };
-
-                var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
-                var response = SendWebhook(jsonPayload);
-
-                if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
-                {
-                    UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs, dc);
-                }
-                else
-                {
-                    // Handle webhook failure
-                }
-            }
-            else if (charge.Status.Equals(LastChargeStatus.failed))
-            {
-                msgs.Add("Charge failed", MessageType.Error);
-
-                if (subscriptionPaymentHistory.RetryNumber < 3)
-                    subscriptionPaymentHistory.RetryNumber += 1;
-
-                msgs.AddRange(subscriptionPaymentHistory.Save());
-
-                //what should be updated in Subscription Schedule in this case????
-                //send email to customer and provider notifying user of charge failure
-                //if Bad card or insufficient funds??????
-                //redirect to Card details which should require login
-                //if Need to cancel?    
-                //Cancel subscription, notify main AHQ system
-            }
-            else
-            {
-                // Handle pending status
-            }
         }
 
         private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
@@ -262,26 +213,6 @@ namespace AfterSchool.Controllers
                 msgs.Add(ex.Message, MessageType.ApiError);
                 return null;
             }
-        }
-
-        public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
-        {
-            //What to do for ongoing activities as they don't have LastDateToBill?
-            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
-            {
-                //check if it was the final payment
-                if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
-                    subscriptionSchedule.NextBillDate = null;
-                else
-                {
-                    subscriptionSchedule.NextBillDate = new SubscriptionPlan
-                    {
-                        BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
-                    }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
-                }
-            }
-                
-            msgs.AddRange(subscriptionSchedule.Save(dc));
         }
 
         public class WebhookPayload
