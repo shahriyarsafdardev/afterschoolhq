@@ -1287,37 +1287,46 @@ namespace AfterSchoolLibrary.Helpers
                 }
             }
 
+            //if (customMessage.IsEmpty())
+            //{
+            //    customMessage = registrationThankYou;
+
+            //    if (customMessage == "Thank you for registering")
+            //        customMessage += ".";
+
+            //    if (customMessage.Contains("<p>Thank you for registering.</p>"))
+            //        customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
+
+            //    if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
+            //    {
+            //        var addClosingP = false;
+
+            //        if (customMessage.Contains("<p>"))
+            //        {
+            //            customMessage += "<p>";
+            //            addClosingP = true;
+            //        }
+
+            //        if (isParentCopy)
+            //            customMessage += $"{masterRegistrant.FirstName} has registered";
+            //        else if (loggedInUser.HasAccessTo(billingAccount))
+            //            customMessage =
+            //                $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+            //        if (showTable)
+            //            customMessage += " for the following:";
+
+            //        if (addClosingP)
+            //            customMessage += "</p>";
+            //    }
+            //}
+
             if (customMessage.IsEmpty())
             {
-                customMessage = registrationThankYou;
-
-                if (customMessage == "Thank you for registering")
-                    customMessage += ".";
-
-                if (customMessage.Contains("<p>Thank you for registering.</p>"))
-                    customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
-
-                if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
-                {
-                    var addClosingP = false;
-
-                    if (customMessage.Contains("<p>"))
-                    {
-                        customMessage += "<p>";
-                        addClosingP = true;
-                    }
-
-                    if (isParentCopy)
-                        customMessage += $"{masterRegistrant.FirstName} has registered";
-                    else if (loggedInUser.HasAccessTo(billingAccount))
-                        customMessage =
-                            $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
-                    if (showTable)
-                        customMessage += " for the following:";
-
-                    if (addClosingP)
-                        customMessage += "</p>";
-                }
+                customMessage = "<p>";
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+                if (showTable)
+                    customMessage += " for the following:";
+                customMessage += "</p>";
             }
 
             var virtualInfo = "";
@@ -1719,6 +1728,9 @@ namespace AfterSchoolLibrary.Helpers
                 "Registration_Confirmation_Table-1.0",
                 msgs);
 
+            if (customMessage.IsEmpty())
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+
             var model = new NameValueCollection
             {
                 {"FirstName", purchaserWebuser.FirstName},
@@ -1734,7 +1746,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"AmountDueOrPaid", "Amount Paid"},
                 {"TotalCost", totalCostWithFees.ToCurrency()},
                 {"RegistrationTable", registrationTable},
-                {"CustomMessage", customMessage ?? $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}"},
+                {"CustomMessage", customMessage},
                 {"CreditCardFee", checkoutObject.PaymentTypeFeeOverrideAmount.ToCurrency()},
                 {"LoginText", "Login"},
                 {"RegistrationDetails", "to your account to view more details about this payment.<p><br></p>"},
