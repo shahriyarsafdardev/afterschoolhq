@@ -122,12 +122,21 @@ namespace AfterSchoolLibrary.Services
             if (activity?.GetSubscriptionPlan() != null)
             {
                 var subscriptionPlan = participationObject.GetActivity()?.GetSubscriptionPlan();
-                if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnCheckout ||
-                    (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart && schedule == null) ||
-                     subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart && schedule != null && schedule.IsOngoing)
+                if (subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnCheckout) ||
+                    (subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) && schedule.IsEmpty()) ||
+                     subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) && schedule.IsNotEmpty() && schedule.IsOngoing)
                 {
                     if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
-                        firstRenewalDate = (DateTime) (activity.HasSchedule ? schedule.IsOngoing ? subscriptionPlan.StartDate : participationObject.StartDate : checkoutDateProviderTimeZone);
+                    {
+                        if (activity.HasSchedule)
+                            firstRenewalDate = (DateTime)(schedule.IsOngoing
+                                ? subscriptionPlan.StartDate
+                                : participationObject.StartDate);
+                        else
+                            firstRenewalDate = (DateTime) (subscriptionPlan.StartDate > checkoutDateProviderTimeZone
+                                ? subscriptionPlan.StartDate
+                                : checkoutDateProviderTimeZone);
+                    }
                     else
                         firstRenewalDate = checkoutDateProviderTimeZone;
 
