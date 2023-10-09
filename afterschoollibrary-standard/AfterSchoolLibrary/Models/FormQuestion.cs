@@ -481,7 +481,6 @@ namespace AfterSchoolLibrary.Models
                 DisplayOrder = DisplayOrder,
                 QuestionTypeId = QuestionTypeId,
                 Text = Text,
-                Description = Description,
                 IsActive = IsActive,
                 IsLocked = IsLocked,
                 IsDeleted = IsDeleted,

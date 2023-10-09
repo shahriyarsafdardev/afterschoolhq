@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { questionType } from 'constants';
-import { filterNotDeletedQuestions } from './helper';
 
 const formValidationSchema = values => {
   const { dropdown, radioList, checkBoxList, textBlock } = questionType;
@@ -8,7 +7,7 @@ const formValidationSchema = values => {
     [dropdown, radioList, checkBoxList].includes(questionTypeId);
 
   return Yup.object().shape(
-    Object.keys(filterNotDeletedQuestions).reduce((acc, key) => {
+    Object.keys(values).reduce((acc, key) => {
       acc[key] = Yup.object().shape({
         QuestionTypeId: Yup.number(),
         DisplayOrder: Yup.number(),

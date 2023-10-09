@@ -57,10 +57,3 @@ export const StyledImage = styled('img')(() => ({
   margin: '4px 6px',
   cursor: 'pointer'
 }));
-
-export const filterNotDeletedQuestions = values =>
-  Object.keys(values).reduce((qs, key) => {
-    if (!values[key].IsDeleted) return [...qs, values[key]];
-
-    return qs;
-  }, []);
