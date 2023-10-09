@@ -9,7 +9,7 @@ namespace AfterSchoolLibrary.Services
 {
     public static class RegistrantSubscriptionPlanService
     {
-        public static RegistrantSubscriptionPlan CreateNew(Registrant registrant, SubscriptionPlan plan, DateTime startDate, int? purchaseId, string stripeSubscriptionId, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        public static RegistrantSubscriptionPlan CreateNew(Registrant registrant, SubscriptionPlan plan, DateTime startDate, int? purchaseId, string stripeSubscriptionId, Guid subscriptionScheduleUid, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();
 
@@ -24,6 +24,7 @@ namespace AfterSchoolLibrary.Services
                 StartDate = startDate,
                 PurchaseId = purchaseId,
                 StripeSubscriptionId = stripeSubscriptionId,
+                SubscriptionScheduleUid = subscriptionScheduleUid, 
                 ConvenienceFee = feeObject.ConvenienceFee,
                 PaymentTypeFee = feeObject.PaymentTypeFee,
                 ConvenienceFeesPaidBy = feeObject.ConvenienceFeesPaidBy,

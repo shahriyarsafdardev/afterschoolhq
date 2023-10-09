@@ -49,7 +49,7 @@ namespace AfterSchoolLibrary.Models
 		public BillingPeriodType BillingPeriodTypeId { get { return (BillingPeriodType)MDV["BillingPeriodTypeId"].Value; } set { MDV["BillingPeriodTypeId"].Value = value; } }
 		public DateTime? DateCancelled { get { return (DateTime?)MDV["DateCancelled"].Value; } set { MDV["DateCancelled"].Value = value; } }
 		public DateTime? ValidUntil { get { return (DateTime?)MDV["ValidUntil"].Value; } set { MDV["ValidUntil"].Value = value; } }
-        public Guid SubscriptionScheduleUid { get { return (Guid) MDV["SubscriptionScheduleUid"].Value; } set { MDV["SubscriptionScheduleUid"].Value = value; } }
+        public Guid? SubscriptionScheduleUid { get { return (Guid?) MDV["SubscriptionScheduleUid"].Value; } set { MDV["SubscriptionScheduleUid"].Value = value; } }
 
         public RegistrantSubscriptionPlan()
         {
