@@ -473,7 +473,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static RegistrantSubscriptionPlan AddRegistrant(this SubscriptionPlan plan, Registrant registrant, DateTime? startDateTime, Purchase purchase,
-            string stripeSubscriptionId, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
+            string stripeSubscriptionId, Guid subscriptionScheduleUid, PlanFeeObject feeObject, WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return RegistrantSubscriptionPlanService.CreateNew(
                 registrant,
@@ -481,6 +481,7 @@ namespace AfterSchoolLibrary.Services
                 startDateTime.IfEmpty(DateTime.UtcNow),
                 purchase.ID,
                 stripeSubscriptionId,
+                subscriptionScheduleUid,
                 feeObject,
                 loggedInUser,
                 msgs,

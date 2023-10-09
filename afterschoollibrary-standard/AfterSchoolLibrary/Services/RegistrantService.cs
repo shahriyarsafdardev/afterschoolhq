@@ -270,6 +270,7 @@ namespace AfterSchoolLibrary.Services
                 startDateTime,
                 purchase,
                 subscription.Id,
+                subscriptionSchedule.Uid,
                 feeObject,
                 loggedInUser,
                 msgs,
