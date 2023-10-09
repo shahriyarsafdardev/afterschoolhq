@@ -113,7 +113,6 @@ namespace AfterSchoolLibrary.Services
                 newGroup.CreateDate = DateTime.UtcNow;
                 newGroup.LastModifiedBy = newGroup.CreatedBy = loggedInUserId;
                 newGroup.FormId = formCopy.ID;
-                newGroup.IsDeleted = false;
                 msgs.AddRange(newGroup.Save(dc: dc));
 
                 questions.ForEach(question => {
@@ -124,6 +123,8 @@ namespace AfterSchoolLibrary.Services
                     newQuestion.FormId = formCopy.ID;
                     newQuestion.IsTemplate = false;
                     msgs.AddRange(newQuestion.Save(dc: dc));
+
+                    var formQuestionSettings = FormQuestionSettings.Copy(question.ID.Value, newQuestion.ID.Value, loggedInUserId, msgs);
                 });
             }
 
