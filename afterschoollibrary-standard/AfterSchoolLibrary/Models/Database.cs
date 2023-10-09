@@ -754,8 +754,8 @@ namespace AfterSchoolLibrary.Models
                 dq.ExecuteSql("CREATE INDEX IX_AccountProperty_ActivityId ON [AccountProperty] (ActivityId)"));
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId ON [AccountProperty] (AccountId,AccountPropertyTypeId)"));
-            msgs.AddRange(dq.ExecuteSql(
-                "CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId_Value ON [AccountProperty] (AccountId,AccountPropertyTypeId,Value)"));
+            //msgs.AddRange(dq.ExecuteSql(
+            //    "CREATE INDEX IX_AccountProperty_AccountId_AccountPropertyTypeId_Value ON [AccountProperty] (AccountId,AccountPropertyTypeId,Value)"));
             msgs.AddRange(dq.ExecuteSql(
                 "CREATE INDEX IX_AccountProperty_AccountPropertyTypeId_ActivityGroupId ON [AccountProperty] (ActivityGroupId,AccountPropertyTypeId)"));
             msgs.AddRange(dq.ExecuteSql(
@@ -1334,6 +1334,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230731_UpdateRegistrantWebUserAuthorizationType.Do(amsgs,adc);
             Migration_20230811_AddCouponIsDeletedDefault.Do(amsgs,adc);
             Migration_20230918_StudentNotes.Do(amsgs,adc);
+            Migration_20231010_DropAccountPropertyValueIndex.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()
