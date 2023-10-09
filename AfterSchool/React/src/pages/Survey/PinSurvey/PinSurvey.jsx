@@ -78,7 +78,7 @@ export default function Survey() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    // validate: values => validator(values),
+    validate: values => validator(values),
     onSubmit: async values => {
       let errors = [];
       setSaveDisabled(true);
