@@ -257,6 +257,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static SubscriptionSchedule LoadByUid(Guid id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], id);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static List<SubscriptionSchedule> LoadActiveSubscriptionSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
