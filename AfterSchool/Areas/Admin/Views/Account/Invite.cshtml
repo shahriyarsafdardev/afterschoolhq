@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Invite Organization";
 
     var account = (Account)ViewBag.Account;
@@ -175,6 +175,7 @@
                         </div>
                         <div class="col-sm-6">
                             <input type="text" maxlength="50" name="email" id="email" class="form-control" value="@Request["email"]" />
+                            <p class="emailvalidation text-danger"></p>
                         </div>
                     </div>                   
                 </div>
@@ -199,15 +200,30 @@
         });
 
         $('#isunclaimed').click(toggleIsUnclaimed);
+
+        $('#email').on('input', function () {
+            var emailValue = $(this).val();
+            var suspiciousDomains = ['yopmail.com'];
+  
+            if (emailValue.toLowerCase().includes(suspiciousDomains)) {
+                $('#submit-btn').prop('disabled', true);
+                $("#email").css('border', '1px solid red');
+                $('.emailvalidation').text("This email domain is not permitted. Please enter a different email address.");
+            } else {
+                $('#submit-btn').prop('disabled', false);
+                $("#email").css('border', ''); 
+                $('.emailvalidation').text(""); 
+            }
+});
     });
 
     function toggleIsUnclaimed() {
         if ($('#isunclaimed').is(':checked')) {
-            $('#personal-info').addClass('hide');            
+            $('#personal-info').addClass('hide');
             $('#btn-add-account-text').html('Add Account');
-            $('#divClaimEmailDomain').removeClass('hide');            
+            $('#divClaimEmailDomain').removeClass('hide');
         } else {
-            $('#personal-info').removeClass('hide');            
+            $('#personal-info').removeClass('hide');
             $('#btn-add-account-text').html('Send Invite');
             $('#divClaimEmailDomain').addClass('hide');
         }

@@ -650,7 +650,7 @@
             var emailvalue = $(this).val();
             var suspiciousdomains = ['yopmail.com'];
 
-            if (emailvalue.tolowercase().includes(suspiciousdomains)) {
+            if (emailvalue.toLowerCase().includes(suspiciousdomains)) {
                 $('.emailvalidation').text("This email domain is not permitted.please enter a different email address.");
                 $('.register-continue').prop('disabled', true);
                 $("#email").attr('style', 'border: 1px solid red;');

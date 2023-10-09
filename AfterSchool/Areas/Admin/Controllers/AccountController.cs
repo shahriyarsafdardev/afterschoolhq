@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -96,6 +96,10 @@ namespace AfterSchool.Areas.Admin.Controllers
             WebUser user = null;
             Account account = null;
             WebUser currentUser = SessionVariables.CurrentUser;
+            List<string> suspiciousdomains = new List<string>
+            {
+                "yopmail.com",
+            };
 
             if (!id.IsGuid())
             {
@@ -116,6 +120,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 if (!email.IsEmail())
                     msgs.Add("Email is required and must be valid", MessageType.UserError);
+                else if(email.ToLower().Contains(suspiciousdomains))
+                    msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
                 if (firstname.IsBlank())
                     msgs.Add("First Name is required", MessageType.UserError);
                 if (lastname.IsBlank())

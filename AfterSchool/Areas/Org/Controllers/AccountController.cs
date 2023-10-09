@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Models;
@@ -459,6 +460,10 @@ namespace AfterSchool.Areas.Org.Controllers
             var account = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = SessionVariables.AccountPackage;
+            List<string> suspiciousdomains = new List<string>
+            {
+                "yopmail.com",
+            };
 
             if (usertype.IsEmpty())
                 msgs.Add("Account type is required", MessageType.UserError);
@@ -466,12 +471,21 @@ namespace AfterSchool.Areas.Org.Controllers
             if (emails.IsEmpty())
                 msgs.Add("Please enter at least one email address", MessageType.UserError);
             else
-                emails.Split(',')
+            {
+                var emailRegex = new Regex(BasicLibrary.Utilities.EmailRegEx);
+                var invalidEmails = emails.Split(',')
                     .Select(x => x.Trim())
-                    .Where(email => !email.IsMatch(BasicLibrary.Utilities.EmailRegEx))
-                    .ToList()
-                    .ForEach(email => msgs.Add(string.Format("{0} is not a valid email address", email),
-                        MessageType.UserError));
+                    .Where(email => !emailRegex.IsMatch(email) || suspiciousdomains.Any(domain => email.EndsWith(domain, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+
+                foreach (var invalidEmail in invalidEmails)
+                {
+                    if (!emailRegex.IsMatch(invalidEmail))
+                        msgs.Add($"{invalidEmail} is not a valid email address", MessageType.UserError);
+                    else if (suspiciousdomains.Any(domain => invalidEmail.ToLower().Contains(domain.ToLower())))
+                        msgs.Add($"{invalidEmail} is a not a permitted email domain. Please enter a different email address.", MessageType.UserError);
+                }
+            }
 
             if (msgs.HasNoErrors())
                 emails.Split(',')
