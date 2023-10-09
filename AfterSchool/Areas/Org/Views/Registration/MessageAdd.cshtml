@@ -12,6 +12,14 @@
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
     var sendButtonText = $"Send Messages";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
+    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
+    var accountPackage = SessionVariables.AccountPackage;
+    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
+        ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+        : 0;
+    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging, accountPackage);
+    var currentEmailCount = (int)ViewBag.currentEmailCount;
+    var emailQuotaExceeded = totalCount + currentEmailCount >= maxEmailCount;
     var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
 }
 
@@ -174,6 +182,9 @@
                         </div>
                     </div>
                 </div>
+                <div id="message" class="msg-count-text xs-p-20 h5">
+                    <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">@totalCount</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">@(maxEmailCount - totalCount - currentEmailCount < 0 ? 0 : maxEmailCount - totalCount - currentEmailCount)</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
+                </div>
 
                 <div class="form-group">
                     <label class="control-label"></label>
@@ -183,11 +194,22 @@
                                 &laquo; Cancel
                             </a>
                         </div>
-                        <div class="pull-right">
-                            <button id="send-btn" type="submit" onclick="checkForm()" class="btn btn-primary btn-lg btn-block pull-right">
-                                <i class="s7-mail"></i> @sendButtonText &raquo;
-                            </button>
-                        </div>
+                        @if (!emailQuotaExceeded)
+                        {
+                            <div class="pull-right">
+                                <button id="send-btn" type="submit" onclick="checkForm()" class="btn btn-primary btn-lg btn-block pull-right">
+                                    <i class="s7-mail"></i> @sendButtonText &raquo;
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pull-right">
+                                <button id="send-btn" onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))" class="btn btn-primary btn-lg btn-block pull-right">
+                                    <i class="s7-mail"></i> @sendButtonText &raquo;
+                                </button>
+                            </div>
+                        }
                     </div>
                 </div>
             </form>
