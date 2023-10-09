@@ -9,6 +9,7 @@ using Stripe;
 using Account = AfterSchoolLibrary.Models.Account;
 using Coupon = AfterSchoolLibrary.Models.Coupon;
 using Product = Stripe.Product;
+using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchoolLibrary.Services
@@ -360,6 +361,13 @@ namespace AfterSchoolLibrary.Services
 
             StripeHelper.GetStripeHelperConnectAccount().CancelSubscription(rsp.StripeSubscriptionId);
             rsp.MarkAsCancelled(loggedInUser, msgs, dc);
+
+            if (rsp.SubscriptionScheduleUid.HasValue)
+            {
+                var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)rsp.SubscriptionScheduleUid, msgs, dc);
+                subscriptionSchedule.IsCancelled = true;
+                msgs.AddRange(subscriptionSchedule.Save());
+            }
 
             if (msgs.HasNoErrors())
                 return true;
