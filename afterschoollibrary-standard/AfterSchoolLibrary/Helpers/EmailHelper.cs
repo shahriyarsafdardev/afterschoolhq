@@ -1321,13 +1321,7 @@ namespace AfterSchoolLibrary.Helpers
             //}
 
             if (customMessage.IsEmpty())
-            {
-                customMessage = "<p>";
                 customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
-                if (showTable)
-                    customMessage += " for the following:";
-                customMessage += "</p>";
-            }
 
             var virtualInfo = "";
             if (participationObject.ActivityLocationType == ActivityLocationType.Virtual &&
