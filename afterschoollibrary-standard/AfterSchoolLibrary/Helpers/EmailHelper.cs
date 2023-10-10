@@ -750,7 +750,7 @@ namespace AfterSchoolLibrary.Helpers
             var masterRegistrant = checkoutObject.MasterRegistrant;
 
             if (customMessage.IsEmpty())
-                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
 
             var model = new NameValueCollection
             {
@@ -910,6 +910,7 @@ namespace AfterSchoolLibrary.Helpers
             var subscription = checkoutObject.SubscriptionPlan;
             var postPayPlan = checkoutObject.PostPayPlan;
             var masterRegistrant = checkoutObject.MasterRegistrant;
+            var currentUserRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
@@ -1321,7 +1322,11 @@ namespace AfterSchoolLibrary.Helpers
             //}
 
             if (customMessage.IsEmpty())
-                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+            {
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    customMessage += $" by {currentUserRegistrant.DisplayName}";
+            }
 
             var virtualInfo = "";
             if (participationObject.ActivityLocationType == ActivityLocationType.Virtual &&
@@ -1645,6 +1650,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccount = checkoutObject.BillingAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var masterRegistrant = checkoutObject.MasterRegistrant;
+            var currentUserRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
             var parentOrGuardian = masterRegistrant?.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
@@ -1723,7 +1729,11 @@ namespace AfterSchoolLibrary.Helpers
                 msgs);
 
             if (customMessage.IsEmpty())
-                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+            {
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    customMessage += $" by {currentUserRegistrant.DisplayName}";
+            }
 
             var model = new NameValueCollection
             {
