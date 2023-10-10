@@ -221,7 +221,7 @@ namespace AfterSchool.Controllers
 
             if (!model.Email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (model.Email.ToLower().Contains(Utilities.suspiciousdomains))
+            else if (model.Email.ToLower().Contains(Utilities.SuspiciousDomains))
                 msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
             else if (WebUser.ExistsByEmail(model.Email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);

@@ -353,7 +353,7 @@ namespace AfterSchool.Controllers
 
             if (!email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (email.ToLower().Contains(HelperUtilities.suspiciousdomains))
+            else if (email.ToLower().Contains(HelperUtilities.SuspiciousDomains))
                 msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
 
             if (msgs.HasNoErrors())

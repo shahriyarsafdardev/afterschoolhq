@@ -116,7 +116,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 if (!email.IsEmail())
                     msgs.Add("Email is required and must be valid", MessageType.UserError);
-                else if(email.ToLower().Contains(Utilities.suspiciousdomains))
+                else if(email.ToLower().Contains(Utilities.SuspiciousDomains))
                     msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
                 if (firstname.IsBlank())
                     msgs.Add("First Name is required", MessageType.UserError);
