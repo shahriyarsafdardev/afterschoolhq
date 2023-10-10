@@ -165,9 +165,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ForEach(qvm =>
                     {
                     if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
-                    {
                         msgs.Add($"{qvm.Question.Text} is required SR", MessageType.UserError);
-                    }
                 });
 
                 Database.ExecuteTransaction

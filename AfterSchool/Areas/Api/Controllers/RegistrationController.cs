@@ -470,12 +470,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ToList()
                     .ForEach(ques =>
                     {
-                        var question = FormQuestion.Load(ques.ID);
+                        var question = FormQuestion.Load(ques.ID, msgs);
                         var answer = question.ToFormQuestionViewModel(collection);
                         if (ques.IsRequired && answer.Value.IsEmpty())
-                        {
                             msgs.Add($"{ques.Text} is required", MessageType.UserError);
-                        }
                     });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
@@ -645,7 +643,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
 
                 // Get URL of client side
-                string FormSection = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
+                var FormSection = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
 
                 GetAllFormQuestions(currentUserRegistrant, questions)
                     .Where(ques => ((int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger() &&
@@ -655,12 +653,10 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ToList()
                     .ForEach(ques =>
                     {
-                        var question = FormQuestion.Load(ques.ID);
+                        var question = FormQuestion.Load(ques.ID, msgs);
                         var answer = question.ToFormQuestionViewModel(collection);
                         if (ques.IsRequired && answer.Value.IsEmpty())
-                        {
                             msgs.Add($"{ques.Text} is required", MessageType.UserError);
-                        }
                     });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
