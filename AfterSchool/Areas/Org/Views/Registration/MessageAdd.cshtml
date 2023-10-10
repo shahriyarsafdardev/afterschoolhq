@@ -194,22 +194,11 @@
                                 &laquo; Cancel
                             </a>
                         </div>
-                        @if (!emailQuotaExceeded)
-                        {
-                            <div class="pull-right">
-                                <button id="send-btn" type="submit" onclick="checkForm()" class="btn btn-primary btn-lg btn-block pull-right">
-                                    <i class="s7-mail"></i> @sendButtonText &raquo;
-                                </button>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="pull-right">
-                                <button id="send-btn" onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))" class="btn btn-primary btn-lg btn-block pull-right">
-                                    <i class="s7-mail"></i> @sendButtonText &raquo;
-                                </button>
-                            </div>
-                        }
+                        <div class="pull-right">
+                            <button id="send-btn" type="submit" onclick="checkForm()" class="btn btn-primary btn-lg btn-block pull-right">
+                                <i class="s7-mail"></i> @sendButtonText &raquo;
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
