@@ -262,8 +262,17 @@ namespace AfterSchoolLibrary.Services
             else
                 nextBillDate = firstRenewalDate;
 
+            var metaData = new Dictionary<string, string>
+            {
+                {"ActivityName", activity.Name},
+                {"ActivityUid", activity.Uid.ToString()},
+                {"RegistrantName", submittedRecord.DisplayName},
+                {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+                {"BillingAccountUid", billingAccount.Uid.ToString()},
+            };
+
             var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, endDateTime, nextBillDate, lastDateToBill, feeObject,
-                firstRenewalDate, loggedInUser, msgs, dc);
+                firstRenewalDate, metaData.ToString(), loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 submittedRecord,
@@ -294,17 +303,7 @@ namespace AfterSchoolLibrary.Services
                     totalAmount: subscriptionFees,
                     description: subscriptionSchedule.Description,
                     statementDescriptor: "AHQ Subscription charge",
-                    metaData: new Dictionary<string, string>
-                    {
-                        //{"ActivityUid", ""},
-                        //{"BillingAccountUid", ""},
-                        //{"PayingAccountUid", ""},
-                        //{"RegistrationUid", ""},
-                        //{"CreditCardFeePayer", ""},
-                        //{"ConvenienceFeePayer", ""},
-                        //{"PurchasedBy", ""},
-                        //{"BilledBy", ""},
-                    },
+                    metaData: metaData,
                     msgs: msgs
                 );
 

@@ -81,6 +81,7 @@ namespace AfterSchool.Controllers
         {
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, null);
+            //var metaData = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.Metadata);
             // TODO: Platform fees
             //var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, null);
 
@@ -95,15 +96,7 @@ namespace AfterSchool.Controllers
                 statementDescriptor: "AHQ Subscription charge",
                 metaData: new Dictionary<string, string>
                 {
-                    // TODO: MetaData for charge
-                    //{"ActivityUid", ""},
-                    //{"BillingAccountUid", ""},
-                    //{"PayingAccountUid", ""},
-                    //{"RegistrationUid", ""},
-                    //{"CreditCardFeePayer", ""},
-                    //{"ConvenienceFeePayer", ""},
-                    //{"PurchasedBy", ""},
-                    //{"BilledBy", ""},
+                    // TODO: MetaData
                 },
                 msgs: msgs
             );
