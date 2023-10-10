@@ -288,7 +288,7 @@ namespace AfterSchoolLibrary.Services
                 //make seperate function for this
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
-                    destinationAccountId: null,
+                    destinationAccountId: stripeAccountId,
                     platformFee: null,
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
                     totalAmount: subscriptionFees,

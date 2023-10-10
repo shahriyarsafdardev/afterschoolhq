@@ -31,7 +31,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
                 var subscriptionSchedule = webhookPayload.Schedule;
                 var charge = webhookPayload.Charge;
-                //var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                 ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
@@ -71,7 +70,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var billingAccount = plan.GetAccount(msgs);
             var participationObject = plan.GetParticipationObject(msgs);
 
-
             Account convenienceFeePayer;
             Account creditCardFeePayer;
 
@@ -92,8 +90,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             
             var amountPaidByParent = subscriptionSchedule.AmountInCents;
 
-            // get the original price
-            // have to get real data
             var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(rsp.StripeSubscriptionId, msgs);
             var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
             var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
@@ -129,7 +125,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
 
-            //commenting for now as dont have stripeInvoice
+            // TODO: commenting for now as dont have stripeInvoice
             //if (stripeInvoice.TransferData.IsNotEmpty())
             //{
             //    amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
@@ -168,6 +164,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
+
                 //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
 
                 if(subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed)) 
@@ -180,6 +177,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 if (subscriptionPaymentHistory.RetryNumber < 3)
                     subscriptionPaymentHistory.RetryNumber += 1;
 
+                // TODO: 
                 //what should be updated in Subscription Schedule in this case????
                 //send email to customer and provider notifying user of charge failure
                 //if Bad card or insufficient funds??????
@@ -194,6 +192,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             msgs.AddRange(subscriptionPaymentHistory.Save());
         }
 
+        // TODO: update next bill date
         //public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
         //{
         //    //What to do for ongoing activities as they don't have LastDateToBill?
