@@ -50,14 +50,16 @@ namespace AfterSchool.Controllers
             {
                 if (schedule.StripeSourceId.HasValue())
                 {
+                    var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+
                     var amount = schedule.AmountInCents / 100.0m;
 
                     if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
                     {
-                        amount = CalculateProratedAmount(schedule, msgs);
+                        amount = CalculateProratedAmount(schedule, rsp, msgs);
                     }
 
-                    var charge = CreateCharge(schedule, amount, msgs);
+                    var charge = CreateCharge(schedule, rsp, amount, msgs);
 
                     if (charge.IsEmpty())
                         msgs.Add("Error in running the charge", MessageType.Error);
@@ -69,26 +71,31 @@ namespace AfterSchool.Controllers
             }
         }
 
-        private decimal CalculateProratedAmount(SubscriptionSchedule schedule, SystemMessages msgs)
+        private decimal CalculateProratedAmount(SubscriptionSchedule schedule, RegistrantSubscriptionPlan rsp, SystemMessages msgs)
         {
-            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
             var enddate = rsp.GetSubscriptionPlan()?.EndDate;
             return SubscriptionScheduleService.CalculateProratedAmount((DateTime) enddate, DateTime.UtcNow, schedule.AmountInCents / 100.0m);
         }
 
-        private Charge CreateCharge(SubscriptionSchedule schedule, decimal amount, SystemMessages msgs)
+        private Charge CreateCharge(SubscriptionSchedule schedule, RegistrantSubscriptionPlan rsp, decimal amount, SystemMessages msgs)
         {
+            var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
+            var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, null);
+            // TODO: Platform fees
+            //var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, null);
+
             // Create a charge for the current schedule
             return StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                 fromCustomerId: schedule.StripeCustomerId,
-                destinationAccountId: null,
-                platformFee: null,
+                destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
+                platformFee: null, //useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
                 tokenOrSourceId: schedule.StripeSourceId,
                 totalAmount: amount,
                 description: schedule.Description,
                 statementDescriptor: "AHQ Subscription charge",
                 metaData: new Dictionary<string, string>
                 {
+                    // TODO: MetaData for charge
                     //{"ActivityUid", ""},
                     //{"BillingAccountUid", ""},
                     //{"PayingAccountUid", ""},
@@ -134,11 +141,11 @@ namespace AfterSchool.Controllers
 
             if (response.IsNotEmpty() /*&& response.IsSuccessStatusCode*/) //have to make Lambda Async
             {
-                //?????
+                // TODO: What if webhook is successful
             }
             else
             {
-                //????
+                // TODO: What if webhook is failed
             }
         }
 
@@ -168,12 +175,14 @@ namespace AfterSchool.Controllers
             {
                 if (schedule.StripeSourceId.HasValue())
                 {
+                    var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+
                     var amount = schedule.AmountInCents / 100.0m;
 
                     if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                        amount = CalculateProratedAmount(schedule, msgs);
+                        amount = CalculateProratedAmount(schedule, rsp, msgs);
 
-                    var charge = CreateCharge(schedule, amount, msgs);
+                    var charge = CreateCharge(schedule, rsp, amount, msgs);
                     var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
 
                     if (charge.IsEmpty())
