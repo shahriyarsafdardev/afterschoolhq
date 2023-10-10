@@ -12,10 +12,10 @@ namespace AfterSchoolLibrary.Services
     public static class SubscriptionScheduleService
     {
         public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime startDateTime, DateTime? endDateTime,
-            DateTime? nextBillDate, DateTime? lastDateToBill, PlanFeeObject feeObject, DateTime? firstRenewalDate, WebUser loggedInUser, 
-            SystemMessages msgs, DatabaseConnection dc = null)
+            DateTime? nextBillDate, DateTime? lastDateToBill, PlanFeeObject feeObject, DateTime? firstRenewalDate, 
+            string metaData, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            //remove hard coded values
+            // TODO: remove hard coded values
             if (msgs.IsEmpty()) msgs = new SystemMessages();
             var subscriptionSchedule = new SubscriptionSchedule()
             {
@@ -40,7 +40,7 @@ namespace AfterSchoolLibrary.Services
                 NextBillDate = nextBillDate,
                 LastChargeFailed = false,
                 CancelledReason = "reason",
-                Metadata = "metadata", //?????
+                Metadata = metaData,
             };
             msgs.AddRange(subscriptionSchedule.Save(dc));
             return subscriptionSchedule;
