@@ -17,7 +17,6 @@
     var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
         ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
         : 0;
-    var emailMessagingPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.EmailMessaging, accountPackage);
     var currentEmailCount = (int)ViewBag.currentEmailCount;
     var emailQuotaExceeded = totalCount + currentEmailCount >= maxEmailCount;
     var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
