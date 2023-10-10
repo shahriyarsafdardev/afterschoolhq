@@ -620,7 +620,10 @@ namespace AfterSchool.Controllers
 
             var registrantActivity = registrantActivities.Count == 1
                 ? registrantActivities.Single()
-                : registrantActivities.First(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
+                : registrantActivities.FirstOrDefault(x => x.ParticipationObjectTypeId == ParticipationObjectType.ActivityGroup);
+
+            if (registrantActivity.IsEmpty())
+                return (null, RegistrationAssignmentType.NotSet);
 
             var assignmentType = registrantActivity.AssignmentTypeId;
 

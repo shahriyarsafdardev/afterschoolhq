@@ -1036,6 +1036,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var registration = Registration.LoadByUid(id.ToGuid(), msgs);
                 var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+                if (participationObject.IsEmpty())
+                    throw new Exception("No activity found for the current user");
                 var registrant = registration.GetRegistrant(msgs);
                 var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
 
