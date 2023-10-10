@@ -34,7 +34,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                 ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
-                return ReturnOK(msgs);
+
+                if (msgs.HasNoErrors())
+                    return ReturnOK(msgs);
+                else
+                    return Return500(msgs);
             }
             catch (Exception ex)
             {
@@ -44,21 +48,39 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
         }
 
-        private IHttpActionResult ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule,
+        private void ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule,
             SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+            var checkoutObject = GetCheckoutObjectForMailing(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
 
-            HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, chargeStatus, msgs);
-            CreateTransaction(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, chargeStatus, msgs);
+                    CreateTransaction(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
 
-            if (msgs.HasNoErrors())
-                return ReturnOK(msgs);
-            else
-                return Return500(msgs);
+                    if (msgs.HasNoErrors())
+                        if (chargeStatus.Equals(LastChargeStatus.succeeded))
+                            checkoutObject.PayingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
+                        else
+                            checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                },
+                onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+            );
+
+            //if (msgs.HasNoErrors())
+            //    return ReturnOK(msgs);
+            //else
+            //    return Return500(msgs);
         }
-        
-        private void CreateTransaction(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory, 
+
+        private void CreateTransaction(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
             SystemMessages msgs, DatabaseConnection dc)
         {
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
@@ -87,16 +109,16 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var usePlatformFees = useConnectedAccount && subscriptionPaymentHistory.AmountInCents.IsEmpty();
             var platFormFlatFee = (!participationObject.IsRegistrationFree) ? billingAccount.GetPlatformConvenienceFlatFee(msgs, dc) : 0;
             var platformPercentFee = billingAccount.GetPlatformConveniencePercentFee(msgs, dc);
-            
+
             var amountPaidByParent = subscriptionSchedule.AmountInCents;
 
             var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(rsp.StripeSubscriptionId, msgs);
             var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
             var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
-            
+
             var paymentType = rsp.PaymentTypeId;
             var isAmountProrated = false;
-            
+
             // TODO: potentially problematic as the plan may have changed
             var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
             var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
@@ -107,7 +129,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 stripeSubscriptionPrice -= calculatedFullCCFee;
 
             isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
-            
+
             if (isAmountProrated)
             {
                 if (paymentType == PaymentType.CreditCard)
@@ -157,6 +179,36 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 null,
                 msgs,
                 dc);
+
+        }
+
+        public CheckoutObject GetCheckoutObjectForMailing(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+            SystemMessages msgs, DatabaseConnection dc)
+        {
+
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
+
+            var plan = rsp.GetSubscriptionPlan(msgs);
+            var registrant = rsp.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var purchasingAccount = masterRegistrant.GetAccount(msgs);
+            var billingAccount = plan.GetAccount(msgs);
+            var participationObject = plan.GetParticipationObject(msgs);
+            var amountPaidByParent = subscriptionSchedule.AmountInCents;
+
+            //creating checkout object
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                OverrideAmount = amountPaidByParent,
+                ParticipationObject = participationObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = rsp.PaymentTypeId,
+                RegistrantSubscriptionPlan = rsp
+            };
+
+            return checkoutObject;
         }
 
         private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,
@@ -167,7 +219,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
 
-                if(subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed)) 
+                if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
                     subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
             }
             else if (charge.Status.Equals(LastChargeStatus.failed))
