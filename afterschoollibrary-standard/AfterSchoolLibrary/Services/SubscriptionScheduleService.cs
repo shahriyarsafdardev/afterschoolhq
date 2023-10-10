@@ -160,7 +160,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     var startDate = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? subscriptionPlan.StartDate : participationObject.StartDate;
                     var chargeDates = GetPaymentDates((DateTime) startDate, (DateTime) endDate, billingPeriodType);
-                    firstRenewalDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter(checkoutDateProviderTimeZone));
+                    firstRenewalDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter((DateTime)(startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)));
                 }
             }
             else
