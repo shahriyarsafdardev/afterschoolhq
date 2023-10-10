@@ -13,6 +13,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using Email = AfterSchoolLibrary.Helpers.Email;
+using HelperUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
 namespace AfterSchool.Controllers
@@ -344,10 +345,6 @@ namespace AfterSchool.Controllers
 
         public ActionResult CheckAccountStatus(string email)
         {
-            List<string> suspiciousdomains = new List<string>
-            {
-                "yopmail.com",
-            };
 
             if (!IsRequestFromApp())
                 return Json(new {status = "error", messages = new SystemMessages()}, JsonRequestBehavior.AllowGet);
@@ -356,7 +353,7 @@ namespace AfterSchool.Controllers
 
             if (!email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (email.ToLower().Contains(suspiciousdomains))
+            else if (email.ToLower().Contains(HelperUtilities.suspiciousdomains))
                 msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
 
             if (msgs.HasNoErrors())

@@ -212,10 +212,6 @@ namespace AfterSchool.Controllers
             Account invitingAccount = null;
             Account referrerAccount = null;
 
-            List<string> suspiciousdomains = new List<string>
-            {
-                "yopmail.com",
-            };
 
             if (model.FirstName.IsEmpty())
                 msgs.Add("First Name is required", MessageType.UserError);
@@ -225,7 +221,7 @@ namespace AfterSchool.Controllers
 
             if (!model.Email.IsEmail())
                 msgs.Add("Please enter a valid email address", MessageType.UserError);
-            else if (model.Email.ToLower().Contains(suspiciousdomains))
+            else if (model.Email.ToLower().Contains(Utilities.suspiciousdomains))
                 msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
             else if (WebUser.ExistsByEmail(model.Email, msgs))
                 msgs.Add("This email has already been registered", MessageType.UserError);
