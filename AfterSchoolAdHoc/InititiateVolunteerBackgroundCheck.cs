@@ -284,7 +284,9 @@ internal class InititiateVolunteerBackgroundCheck
 
     public static void RunCallbackFix(SterlingCredentials credentials, SystemMessages msgs, DatabaseConnection dc)
     {
-        var bgClients = BackgroundCheck.LoadByStatusAndActive(BackgroundCheckStatus.EmailSentToVolunteer, dc: dc, msgs: msgs);//.Where(c => c.SterlingCandidateId == "462eb932-e2ef-4e71-82f4-dfec38f7efff");
+        var prevClients = ReadLatest($"C:\\Prod-LocalhostRecords(09-10-2023 20-49-37).csv");
+        var prevClientIds = prevClients.Select(x => x.WebUserId);    
+        var bgClients = BackgroundCheck.LoadByStatusAndActive(BackgroundCheckStatus.EmailSentToVolunteer, dc: dc, msgs: msgs).Where(x=>prevClientIds.Contains(x.WebUserId));//.Where(c => c.SterlingCandidateId == "462eb932-e2ef-4e71-82f4-dfec38f7efff");
         //var bgClients = new List<BackgroundCheck>() { BackgroundCheck.LoadByCandidateIdActive("462eb932-e2ef-4e71-82f4-dfec38f7efff", dc: dc, msgs: msgs) };
         var sToken = CreateSterlingToken(credentials);
         var filePath = $"C:\\Prod-LocalhostRecords({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
@@ -310,7 +312,7 @@ internal class InititiateVolunteerBackgroundCheck
 
                 count++;
                 Console.WriteLine($"Current Count : {count}");
-                if (clientScreening.Result == "Consider" || clientScreening.Result == "Passed")
+                if (clientScreening.Result == "Consider" || clientScreening.Result == "Passed" && false)
                 {
                     var rmsgs = Update(jsonRes, dc);
                     if (rmsgs.HasErrors())
@@ -402,6 +404,20 @@ internal class InititiateVolunteerBackgroundCheck
             return msgs;
         }
 
+    }
+
+    private static IEnumerable<bgRecord> ReadLatest(string path)
+    {
+        try
+        {
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            {
+                return csv.GetRecords<bgRecord>().ToList();
+            }
+        }
+        catch (FileNotFoundException) { }
+        return new List<bgRecord>();
     }
 
     private record bgRecord
