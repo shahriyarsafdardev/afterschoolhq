@@ -483,7 +483,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     if (!emailRegex.IsMatch(invalidEmail))
                         msgs.Add($"{invalidEmail} is not a valid email address", MessageType.UserError);
                     else if (suspiciousdomains.Any(domain => invalidEmail.ToLower().Contains(domain.ToLower())))
-                        msgs.Add($"{invalidEmail} is a not a permitted email domain. Please enter a different email address.", MessageType.UserError);
+                        msgs.Add($"{invalidEmail} is not a permitted email domain. Please enter a different email address.", MessageType.UserError);
                 }
             }
 
