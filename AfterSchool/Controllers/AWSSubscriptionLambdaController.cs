@@ -64,7 +64,7 @@ namespace AfterSchool.Controllers
                     if (charge.IsEmpty())
                         msgs.Add("Error in running the charge", MessageType.Error);
                     else
-                        ProcessCharge(charge, schedule, null, msgs);
+                        ProcessCharge(charge, schedule, null, rsp, msgs);
                 }
                 else
                     msgs.Add("StripeSourceId is empty", MessageType.Error);
@@ -111,11 +111,14 @@ namespace AfterSchool.Controllers
             );
         }
 
-        private void ProcessCharge(Charge charge, SubscriptionSchedule schedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,  SystemMessages msgs)
+        private void ProcessCharge(Charge charge, SubscriptionSchedule schedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,
+            RegistrantSubscriptionPlan rsp, SystemMessages msgs)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+            var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
+            var amountToStripe = StripeHelper.CalculateStripeFee(schedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
-            if(subscriptionPaymentHistory.IsEmpty())
+            if (subscriptionPaymentHistory.IsEmpty())
             {
                 subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(
                 schedule.ID.Value,
@@ -126,7 +129,7 @@ namespace AfterSchool.Controllers
                 chargeStatus,
                 charge.StripeResponse.ToString(),
                 schedule.AmountToConnectAccountInCents,
-                50,
+                amountToStripe,
                 0
                 );
             }
@@ -156,6 +159,7 @@ namespace AfterSchool.Controllers
             foreach (var paymentHistory in paymentHistories)
             {
                 var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
+                var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
                 var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
 
                 if (charge.IsEmpty())
@@ -166,7 +170,7 @@ namespace AfterSchool.Controllers
                     paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     msgs.AddRange(paymentHistory.Save());
 
-                    ProcessCharge(charge, schedule, paymentHistory, msgs);
+                    ProcessCharge(charge, schedule, paymentHistory, rsp, msgs);
                 }
             }
         }
@@ -191,7 +195,7 @@ namespace AfterSchool.Controllers
                         msgs.Add("Error in running the charge", MessageType.Error);
 
                     else
-                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, msgs);
+                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, msgs);
                 }
                 else
                     msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
