@@ -52,7 +52,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-            var checkoutObject = GetCheckoutObjectForMailing(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
+            var checkoutObject = GetCheckoutObject(subscriptionSchedule, subscriptionPaymentHistory, msgs, dc);
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -73,11 +73,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 onFailure: (SystemMessages fmsgs) => { msgs.AddRange(fmsgs); },
                 onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
             );
-
-            //if (msgs.HasNoErrors())
-            //    return ReturnOK(msgs);
-            //else
-            //    return Return500(msgs);
         }
 
         private void CreateTransaction(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
@@ -182,7 +177,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         }
 
-        public CheckoutObject GetCheckoutObjectForMailing(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+        public CheckoutObject GetCheckoutObject(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
             SystemMessages msgs, DatabaseConnection dc)
         {
 
@@ -241,6 +236,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 // Handle pending status (pending status is already saved in payment history)
             }
+            subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
+
+            msgs.AddRange(subscriptionSchedule.Save());
             msgs.AddRange(subscriptionPaymentHistory.Save());
         }
 

@@ -81,7 +81,19 @@ namespace AfterSchool.Controllers
         {
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, null);
-            //var metaData = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.Metadata);
+            var metaData = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.Metadata);
+
+            metaData["PaymentNumber"] = (SubscriptionPaymentHistory.GetCountBySubscriptionScheduleIdByStatus(schedule.Uid,
+                LastChargeStatus.succeeded, msgs) + 1).ToString();
+
+            var paymentNumber = metaData["PaymentNumber"].ToInteger();
+            if (paymentNumber > 1)
+            {
+                metaData["WasProrated"] = schedule.NextBillDate.Equals(schedule.LastDateToBill)
+                    ? schedule.ProrateLastCharge.ToString()
+                    : "false";
+            }
+
             // TODO: Platform fees
             //var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, null);
 
@@ -94,10 +106,7 @@ namespace AfterSchool.Controllers
                 totalAmount: amount,
                 description: schedule.Description,
                 statementDescriptor: "AHQ Subscription charge",
-                metaData: new Dictionary<string, string>
-                {
-                    // TODO: MetaData
-                },
+                metaData: metaData,
                 msgs: msgs
             );
         }
@@ -113,7 +122,7 @@ namespace AfterSchool.Controllers
                 schedule.AmountInCents,
                 DateTime.UtcNow,
                 charge.Id,
-                false,
+                charge.Metadata["WasProrated"].ToBoolean(),
                 chargeStatus,
                 charge.StripeResponse.ToString(),
                 schedule.AmountToConnectAccountInCents,
