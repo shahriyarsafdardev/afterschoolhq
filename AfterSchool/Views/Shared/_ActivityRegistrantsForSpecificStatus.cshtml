@@ -55,10 +55,25 @@
                             }
                         </td>
                         <td>
-                            @(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail)
-                                : ra.RegistrantEmail?.Length < 3 ?
-                                    ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
-                                    : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
+                            @if(!isTechSupport)
+                            {
+                                @ra.RegistrantName.IfBlank(ra.RegistrantEmail)
+                            }
+                            else
+                            {
+                                if (ra.RegistrantName.Length < 5)
+                                {
+                                    @ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
+                                }
+                                else if (ra.RegistrantName.Length >= 5 && ra.RegistrantName.Length < 7)
+                                {
+                                    @ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(2, 2)
+                                }
+                                else if (ra.RegistrantName.Length >= 7)
+                                {
+                                    @ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3)
+                                }
+                            }
                         </td>
                         @if (!participationObject.CanRegisterPerClass)
                         {
