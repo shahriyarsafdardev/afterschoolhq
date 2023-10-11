@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Newtonsoft.Json;
 using Stripe;
 using Twilio.Rest.Api.V2010.Account;
 using Account = AfterSchoolLibrary.Models.Account;
@@ -262,17 +263,23 @@ namespace AfterSchoolLibrary.Services
             else
                 nextBillDate = firstRenewalDate;
 
+            var totalPayments = endDateTime.HasValue ? 
+                (SubscriptionScheduleService.GetPaymentDates(startDateTime, (DateTime) endDateTime, plan.BillingPeriodTypeId).Count).ToString() : "";
+
             var metaData = new Dictionary<string, string>
             {
                 {"ActivityName", activity.Name},
                 {"ActivityUid", activity.Uid.ToString()},
                 {"RegistrantName", submittedRecord.DisplayName},
+                {"PaymentNumber", "1"},
+                {"TotalSubscriptionPayments", totalPayments},
+                {"WasProrated", plan.ProrateFirstCharge.ToString()},
                 {"PayingAccountUid", purchasingAccount.Uid.ToString()},
                 {"BillingAccountUid", billingAccount.Uid.ToString()},
             };
 
             var subscriptionSchedule = SubscriptionScheduleService.CreateNew(checkoutObject, startDateTime, endDateTime, nextBillDate, lastDateToBill, feeObject,
-                firstRenewalDate, metaData.ToString(), loggedInUser, msgs, dc);
+                firstRenewalDate, JsonConvert.SerializeObject(metaData), loggedInUser, msgs, dc);
 
             checkoutObject.RegistrantSubscriptionPlan = plan.AddRegistrant(
                 submittedRecord,
@@ -315,7 +322,7 @@ namespace AfterSchoolLibrary.Services
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                     var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount, DateTime.UtcNow,
-                                charge.Id, false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, 50, 0, msgs);
+                                charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, 50, 0, msgs);
 
                     if(subscriptionPaymentHistory.IsEmpty())
                         msgs.Add("Payment history record not created", MessageType.Error);
