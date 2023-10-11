@@ -72,7 +72,7 @@
                     <div class="col-sm-6">
                         @if (Request["regstatus"].IsNotEmpty() && Request["regstatus"].IsNumber())
                         {
-                            <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
+                            <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationStatus>().ToString().SplitByUpperCase())" />
                         }
                         else
                         {
