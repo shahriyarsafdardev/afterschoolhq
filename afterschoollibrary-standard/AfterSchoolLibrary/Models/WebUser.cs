@@ -326,6 +326,19 @@ namespace AfterSchoolLibrary.Models
             return LoadByPhone(phone, null, msgs, dc);
         }
 
+        public static WebUser LoadByOnlyPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return LoadByUnformattedPhoneNumber(phone, msgs, dc);
+        }
+
+        public static WebUser LoadByUnformattedPhoneNumber(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            var sql = $@"SELECT * FROM WebUser WHERE REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', '') = '{phone}'";
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static WebUser LoadByPhone(string phone, bool? hasPassword, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -342,6 +355,24 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
         
+        public static WebUser LoadByOnlyPhoneByPin(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return LoadByUnformattedPhoneNumberByPin(phone, pinCode, msgs, dc);
+        }
+        public static WebUser LoadByUnformattedPhoneNumberByPin(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = $@"
+                SELECT * 
+                FROM WebUser 
+                WHERE REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', '') = '{phone}' 
+                AND PinCode = {pinCode}";
+
+            return dq.ExecuteSelect(sql, msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static WebUser LoadByPhoneByPinCode(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
