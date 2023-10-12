@@ -201,6 +201,7 @@ namespace AfterSchool.Controllers
                 ReferrerAccount = referrerAccount,
                 ReferralCode = referrer,
             };
+            ViewBag.SuspiciousDomains = Utilities.SuspiciousDomains;
             return View(model);
         }
 

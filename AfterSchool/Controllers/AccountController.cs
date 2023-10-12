@@ -222,7 +222,6 @@ namespace AfterSchool.Controllers
         public ActionResult GetStarted(string regaccount)
         {
             var msgs = new SystemMessages();
-
             // handles admin accounts that have or need parent accounts
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
             if (redirectResult.IsNotEmpty())
@@ -251,6 +250,7 @@ namespace AfterSchool.Controllers
             var result = getStartedAssembler.AssembleGetStartedResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            ViewBag.SuspiciousDomains = LibraryUtilities.SuspiciousDomains;
             return View(result);
         }
         
@@ -289,6 +289,7 @@ namespace AfterSchool.Controllers
             var result = getStartedAssembler.AssembleGetStartedAllAgeResult(msgs, participationObject, registrationAccount,
                 SessionVariables.CurrentUser, questions, isAllowedToRegisterSelf, Request.Params);
             ViewBag.AccountProfile = participationObject.OwnerAccount.GetAccountProfile(msgs);
+            ViewBag.SuspiciousDomains = LibraryUtilities.SuspiciousDomains;
             return View(result);
         }
 

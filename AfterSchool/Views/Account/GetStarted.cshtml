@@ -13,6 +13,7 @@
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
     var isStudentRegistrationEnabled = Model.StudentRegistrationEnabled;
     var cleverSsoEnabled = Model.CleverSsoEnabled;
+    var suspiciousDomains = (List<string>)ViewBag.SuspiciousDomains;
 }
 
 @{
@@ -236,7 +237,7 @@
         });
         $('#email-check').on('input', function () {
             var emailvalue = $(this).val();
-            var suspiciousDomains = ['yopmail.com'];
+            var suspiciousDomains = @Html.Raw(Json.Encode(@suspiciousDomains));
             if (emailvalue.toLowerCase().includes(suspiciousDomains)) {
                 $('#btn-check-email').prop('disabled', true);
                 $("#email-check").attr('style', 'border: 1px solid red;');

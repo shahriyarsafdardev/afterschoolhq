@@ -1,7 +1,7 @@
 @using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model SignUpIndexViewModel
 @{
-    Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
+ Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
     var clientSuccessManagerName = "Tatiana Givens";
     var signupType = Model.SignupType.IsNotEmpty() ? Model.SignupType : SignUpType.NotSet;
@@ -19,6 +19,7 @@
     };
 
     var showInviteWelcome = Model.InvitingAccount.IsNotEmpty();
+    var suspiciousDomains = (List<string>)ViewBag.SuspiciousDomains;
 }
 
 @helper PrintWelcomeParagraph1()
@@ -648,9 +649,12 @@
 
         $('#email').on('input', function () {
             var emailvalue = $(this).val();
-            var suspiciousdomains = ['yopmail.com'];
+      
+            var suspiciousDomains = @Html.Raw(Json.Encode(@suspiciousDomains));
 
-            if (emailvalue.toLowerCase().includes(suspiciousdomains)) {
+
+
+            if (emailvalue.toLowerCase().includes(suspiciousDomains)) {
                 $('.emailvalidation').text("This email domain is not permitted. Please enter a different email address.");
                 $('.register-continue').prop('disabled', true);
                 $("#email").attr('style', 'border: 1px solid red;');

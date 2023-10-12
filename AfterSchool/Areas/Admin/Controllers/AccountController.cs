@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             ViewBag.Account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
             ViewBag.Messages = msgs;
-
+            ViewBag.SuspiciousDomains = Utilities.SuspiciousDomains;
             return View();
         }
 
