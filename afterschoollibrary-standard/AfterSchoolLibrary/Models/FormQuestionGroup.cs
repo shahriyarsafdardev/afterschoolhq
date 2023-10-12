@@ -283,6 +283,7 @@ namespace AfterSchoolLibrary.Models
             newGroup.DisplayOrder = DisplayOrder;
             newGroup.RegistrantTypeId = RegistrantTypeId;
             newGroup.QuestionGroupDataTypeId = QuestionGroupDataTypeId;
+            newGroup.IsDeleted = IsDeleted;
             return newGroup;
         }
 

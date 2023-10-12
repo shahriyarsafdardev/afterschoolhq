@@ -118,6 +118,33 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static List<FormQuestionSettings> Copy(int questionId, int newQuestionId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var formQuestionSettings = FormQuestionSettings.LoadByQuestionIds(questionId, msgs, dc);
+
+            List<FormQuestionSettings> newFormQuestionSettings = new List<FormQuestionSettings>();
+           
+            formQuestionSettings.ForEach(questionSetting =>
+            {
+                var newQuestionSetting = new FormQuestionSettings
+                {
+                    CreatedBy = loggedInUserId,
+                    QuestionId = newQuestionId,
+                    Show = questionSetting.Show,
+                    Audience = questionSetting.Audience,
+                    Required = questionSetting.Required
+                };
+
+                newFormQuestionSettings.Add(
+                   newQuestionSetting
+                );
+
+                msgs.AddRange(newQuestionSetting.Save(dc: dc));
+            });
+
+            return newFormQuestionSettings;
+        }
+
         public static SystemMessages Create(DatabaseConnection dc = null)
         {
             return _Create(DatabaseQuery, dc, ObjectMap);
