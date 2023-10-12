@@ -876,17 +876,8 @@ namespace AfterSchool.Areas.Api.Controllers
                                         if (!registrantWebUser.IsDeleted && !authorizedPerson.HasAccess)
                                         {
                                             amsgs.AddRange(EmailHelper.SendCheckInCheckOutRevokeAccessEmail(user.DisplayName, masterRegistrant.FirstName, currentUserRegistrant.Email, currentUserRegistrant.FirstName));
-
-                                            var smsBody = $"This is an automated message from AfterSchool HQ. " +
-                                            $"You are no longer an authorized person for {masterRegistrant.DisplayName}. " +
-                                            $"If you believe this is an error,  please contact {masterRegistrant.FirstName}’s parent or guardian.";
-
-                                            TwilioHelper.SendSMS(
-                                                user.Phone,
-                                                smsBody,
-                                                null,
-                                                null,
-                                                amsgs);
+                                            if(user.Phone.IsNotEmpty())
+                                                TextHelper.SendCheckInCheckOutRevokeAccessText(user.Phone, masterRegistrant.DisplayName, masterRegistrant.FirstName);
                                         }
 
                                         registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
