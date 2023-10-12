@@ -223,6 +223,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 if (subscriptionPaymentHistory.RetryNumber < 3)
                     subscriptionPaymentHistory.RetryNumber += 1;
+                else
+                {
+                    subscriptionSchedule.IsCancelled = true;
+                    subscriptionSchedule.NextBillDate = null;
+                    subscriptionSchedule.CancelledReason = "Payment for subscription failed";
+                }
 
                 // TODO: 
                 //what should be updated in Subscription Schedule in this case????
