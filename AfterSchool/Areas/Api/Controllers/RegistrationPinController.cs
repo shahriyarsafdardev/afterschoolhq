@@ -527,7 +527,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (pinCode.IsEmpty())
                     throw new Exception("Invalid Pin");
 
-                var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
+                var currentUser = WebUser.LoadByOnlyPhoneByPin(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("You are not authorized to access this page");
 
