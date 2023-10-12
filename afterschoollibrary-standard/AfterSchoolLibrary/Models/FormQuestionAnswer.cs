@@ -98,6 +98,7 @@ namespace AfterSchoolLibrary.Models
         public string FormQuestionGroupName => (string) MDV["FormQuestionGroupName"].Value;
         public int? FormQuestionGroupDisplayOrder => (int?) MDV["FormQuestionGroupDisplayOrder"].Value;
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId => (QuestionGroupDataType) MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value;
+        public bool FormQuestionGroupIsDeleted => (bool) MDV["FormQuestionGroupIsDeleted"].Value;
         public int? RegistrationAccountId => (int?) MDV["RegistrationAccountId"].Value;
         public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
         public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
@@ -139,6 +140,8 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionGroupName", typeof(FormQuestionGroup).Name, "Name", SqlDbType.NVarChar, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupDisplayOrder", typeof(FormQuestionGroup).Name, "DisplayOrder", SqlDbType.Int, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
+                    "FormQuestionGroup");
+                _dp.Add(className, "FormQuestionGroupIsDeleted", typeof(FormQuestionGroup).Name, "IsDeleted", SqlDbType.Bit,
                     "FormQuestionGroup");
                 _dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", SqlDbType.Int, "Registration");
                 _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.NVarChar, "Registrant");
@@ -396,6 +399,7 @@ namespace AfterSchoolLibrary.Models
                 Name = FormQuestionGroupName,
                 DisplayOrder = FormQuestionGroupDisplayOrder,
                 QuestionGroupDataTypeId = FormQuestionGroupQuestionGroupDataTypeId,
+                IsDeleted = FormQuestionGroupIsDeleted,
             };
         }
 
