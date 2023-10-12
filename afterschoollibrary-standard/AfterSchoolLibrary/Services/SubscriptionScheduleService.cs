@@ -39,7 +39,6 @@ namespace AfterSchoolLibrary.Services
                 Description = "description", //???
                 NextBillDate = nextBillDate,
                 LastChargeFailed = false,
-                CancelledReason = "reason",
                 Metadata = metaData,
             };
             msgs.AddRange(subscriptionSchedule.Save(dc));
