@@ -351,8 +351,8 @@ namespace AfterSchoolLibrary.Services
             };
         }
 
-        public static bool CancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, WebUser loggedInUser,
-            SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static bool CancelPlan(this SubscriptionPlan plan, RegistrantSubscriptionPlan rsp, Account billingAccount, bool isParent,
+            WebUser loggedInUser, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             string stripeUserId = null;
 
@@ -366,6 +366,8 @@ namespace AfterSchoolLibrary.Services
             {
                 var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)rsp.SubscriptionScheduleUid, msgs, dc);
                 subscriptionSchedule.IsCancelled = true;
+                subscriptionSchedule.NextBillDate = null;
+                subscriptionSchedule.CancelledReason = "Cancelled by " + (isParent ? "Parent" : "Provider");
                 msgs.AddRange(subscriptionSchedule.Save());
             }
 
