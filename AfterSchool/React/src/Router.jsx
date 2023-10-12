@@ -24,6 +24,10 @@ function Router() {
           element: <Registration />
         },
         {
+          path: 'reactapp/session-registration/:accountName/:sessionName/:regUid',
+          element: <SessionRegistration />
+        },
+        {
           path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
           element: <Registration newChild={true} />
         },
@@ -139,7 +143,9 @@ const PinSetup = Loadable(lazy(() => import('pages/CheckInCheckOut/PinSetup')));
 const CheckInOut = Loadable(lazy(() => import('pages/CheckInCheckOut/CheckInOut')));
 const RequestPinReset = Loadable(lazy(() => import('pages/CheckInCheckOut/RequestPinReset')));
 const ResetPin = Loadable(lazy(() => import('pages/CheckInCheckOut/ResetPin')));
-
+const SessionRegistration = Loadable(
+  lazy(() => import('pages/SessionRegistration/SessionRegistration'))
+);
 const AlreadyPaidSection = Loadable(
   lazy(() => import('sections/AlreadyPaidSection/AlreadyPaidSection'))
 );

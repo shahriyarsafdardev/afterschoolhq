@@ -17,6 +17,16 @@ export default {
   getNewChildFormDataAPI: (accountName, activityName, registrantUid) =>
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
+  // Session APIs
+  submitSessionFormDataAPI: 'Api/SessionRegistration/AddUpdateAnswers',
+  getNewChildSessionFormDataAPI: (accountName, sessionName, registrantUid) =>
+    `Api/SessionRegistration/GetNewChildForm/?accountName=${accountName}&sessionName=${sessionName}&registrantUid=${registrantUid}`,
+  getSessionFormDataAPI: (accountName, sessionName, registrantUid) =>
+    `Api/SessionRegistration/GetForm/?accountName=${accountName}&sessionName=${sessionName}&registrantUid=${registrantUid}`,
+  sessionSchoolAPI: 'Api/SessionRegistration/CreateOrUpdateFromGoogle',
+  exitSessionAPI: uid => `Api/SessionRegistration/Exit?uid=${uid}`,
+  SessionAPI: 'Api/SessionRegistration/Session',
+
   //PinSetup APIs
   createNewPinForParentAPI: 'Api/RegistrationPin/CreateNewPinForParent',
   updateExistingPinForParentAPI: 'Api/RegistrationPin/UpdateExistingPinForParent',
