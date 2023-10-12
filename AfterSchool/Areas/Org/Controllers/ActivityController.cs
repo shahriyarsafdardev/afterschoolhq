@@ -2424,7 +2424,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            if (registrationthankyouemail.Length > 4000 || applicationthankyouemail.Length > 4000)
+            if (registrationthankyouemail?.Length > 4000 || applicationthankyouemail?.Length > 4000)
                 msgs.Add("Message cannot be greater than 4000 characters", MessageType.UserError);
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
