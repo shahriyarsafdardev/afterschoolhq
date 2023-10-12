@@ -645,23 +645,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
 
                 // Get URL of client side
-                string FormSection = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
+                var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
 
-                GetAllFormQuestions(currentUserRegistrant, questions)
-                    .Where(ques => ((int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger() &&
-                        json.groupid.ToInteger() != (int) QuestionGroupDataType.NotSet) ||
-                        ((json.groupid.ToInteger() == 0 || json.groupid.ToInteger() == -1) &&
-                        FormSection == ques.GroupTitle))
-                    .ToList()
-                    .ForEach(ques =>
-                    {
-                        var question = FormQuestion.Load(ques.ID);
-                        var answer = question.ToFormQuestionViewModel(collection);
-                        if (ques.IsRequired && answer.Value.IsEmpty())
-                        {
-                            msgs.Add($"{ques.Text} is required", MessageType.UserError);
-                        }
-                    });
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions), collection, formSectionURL, json, null, msgs);
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {

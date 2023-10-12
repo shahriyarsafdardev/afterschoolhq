@@ -166,7 +166,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     {
                     if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
                     {
-                        msgs.Add($"{qvm.Question.Text} is required SR", MessageType.UserError);
+                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
                     }
                 });
 
