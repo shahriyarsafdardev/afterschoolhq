@@ -20,7 +20,7 @@
     var isVolunteers = Request.QueryString["volunteers"] == "true" || viewBagIsVolunteer;
     var routeValues = isVolunteers ? new { volunteers = "true" } : null;
     var body = Model.Body;
-    int startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var startIndex = body.IndexOf("<div class=\"attachments text-left\">");
     var attachments = "";
     var bodyText = "";
     if (startIndex != -1)

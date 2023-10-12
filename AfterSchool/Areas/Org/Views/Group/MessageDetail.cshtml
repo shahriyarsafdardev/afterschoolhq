@@ -13,7 +13,7 @@
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
     }
     var body = Model.Body;
-    int startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var startIndex = body.IndexOf("<div class=\"attachments text-left\">");
     var attachments = "";
     var bodyText = "";
     if (startIndex != -1)

@@ -15,7 +15,7 @@
     var accountPackage = SessionVariables.AccountPackage;
     var currentUser = SessionVariables.CurrentUser;
     var body = Model.Body;
-    int startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var startIndex = body.IndexOf("<div class=\"attachments text-left\">");
     var attachments = "";
     var bodyText = "";
     if (startIndex != -1)

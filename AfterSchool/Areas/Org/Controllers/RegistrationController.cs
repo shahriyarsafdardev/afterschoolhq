@@ -924,7 +924,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
                 msgs.Add("Message Body is required", MessageType.UserError);
-            MessageValidationHelper.ValidateAttachments(importedFiles, msgs);
+            msgs.AddRange(AttachmentUploadHelper.ValidateAttachments(importedFiles));
             ActivityMessage am = null;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
@@ -938,25 +938,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
-                if (importedFiles.Count >= 1 && importedFiles[0].IsNotEmpty())
-                {
-                    var attachmentLabel = importedFiles.Count == 1 ? "Attachment" : "Attachments";
-                    var downloadLabel = importedFiles.Count == 1 ? "Download" : "Download All";
-                    body += $@"<div class=""attachments text-left""><p> <span class=""text-muted "">{importedFiles.Count} {attachmentLabel}</span> <span class=""color-green margin-l-10 download-link"">{downloadLabel}</span></p>";
-                    foreach (var file in importedFiles)
-                    {
-                        double fileSize = ((double)file.ContentLength / (1024 * 1024));
-                        string formattedSize = fileSize.ToString("F2") + "mb";
-                        if (fileSize == 0)
-                        {
-                            fileSize = (double)file.ContentLength / 1024;
-                            formattedSize = fileSize.ToString("F2") + "kb";
-                        }
-                        var fileLink = currentAccount.UploadFile(file.InputStream, file.FileName, msgs);
-                        body += $@"<div class=""file-box""><div class=""file-box-icon""><i class=""icon icon-left s7-file attachment-icon""></i></div><div class=""file-box-info""><a class=""file-link"" href=""{fileLink}"" data-file-name=""{file.FileName}"" TARGET = ""_blank"">{file.FileName}</a><span class=""text-muted"">{formattedSize}</span></div></div>";
-                    }
-                    body += @"</div>";
-                }
+                body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
                 am = currentAccount.AddMessage(
                     subject,
                     body,
