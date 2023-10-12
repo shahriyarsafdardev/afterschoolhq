@@ -124,7 +124,7 @@ namespace AfterSchoolLibrary.Services
                     newQuestion.IsTemplate = false;
                     msgs.AddRange(newQuestion.Save(dc: dc));
 
-                    var formQuestionSettings = FormQuestionSettings.Copy(question.ID.Value, newQuestion.ID.Value, loggedInUserId, msgs);
+                    var formQuestionSettings = FormQuestionSettings.Copy(question.ID.Value, newQuestion.ID.Value, loggedInUserId, msgs, dc);
                 });
             }
 

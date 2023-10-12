@@ -118,9 +118,9 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<FormQuestionSettings> Copy(int questionId, int newQuestionId, int userId, SystemMessages msgs = null)
+        public static List<FormQuestionSettings> Copy(int questionId, int newQuestionId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            var formQuestionSettings = FormQuestionSettings.LoadByQuestionIds(questionId, msgs);
+            var formQuestionSettings = FormQuestionSettings.LoadByQuestionIds(questionId, msgs, dc);
 
             List<FormQuestionSettings> newFormQuestionSettings = new List<FormQuestionSettings>();
            
@@ -128,7 +128,7 @@ namespace AfterSchoolLibrary.Models
             {
                 var newQuestionSetting = new FormQuestionSettings
                 {
-                    CreatedBy = userId,
+                    CreatedBy = loggedInUserId,
                     QuestionId = newQuestionId,
                     Show = questionSetting.Show,
                     Audience = questionSetting.Audience,
@@ -139,9 +139,8 @@ namespace AfterSchoolLibrary.Models
                    newQuestionSetting
                 );
 
-                msgs.AddRange(newQuestionSetting.Save());
+                msgs.AddRange(newQuestionSetting.Save(dc: dc));
             });
-
 
             return newFormQuestionSettings;
         }
