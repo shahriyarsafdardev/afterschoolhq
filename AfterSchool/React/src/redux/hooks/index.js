@@ -9,10 +9,11 @@ import { useCheckInOutActions } from 'redux/slices/CheckInOutSlice';
 import { useFormBuilderActions } from 'redux/slices/FormBuilderSlice';
 import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
 import { useRegistrantNotesActions } from 'redux/slices/RegistrantNotesSlice';
-import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
 import { useVolunteerProfileActions } from 'redux/slices/VolunteerProfileSlice';
 import { useSelectRegistrantActions } from 'redux/slices/SelectRegistrantSlice';
 import { useUpdateRegistrationActions } from 'redux/slices/UpdateRegistrationSlice';
+import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
+import { useSessionRegistrationActions } from 'redux/slices/SessionRegistrationSlice';
 import { useVolunteerRegistrationActions } from 'redux/slices/VolunteerRegistrationSlice';
 
 export const useUser = () => ({
@@ -92,4 +93,9 @@ export const useErrorMessages = () => ({
 export const useSelectRegistrant = () => ({
   ...useSelector(state => state.selectRegistrantSlice),
   ...useSelectRegistrantActions()
+});
+
+export const useSession = () => ({
+  ...useSelector(state => state.sessionRegistrationSlice),
+  ...useSessionRegistrationActions()
 });

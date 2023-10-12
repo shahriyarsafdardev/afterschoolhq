@@ -14,6 +14,7 @@ import RegistrantNotesSlice from './slices/RegistrantNotesSlice';
 import VolunteerProfileSlice from './slices/VolunteerProfileSlice';
 import SelectRegistrantSlice from './slices/SelectRegistrantSlice';
 import UpdateRegistrationSlice from './slices/UpdateRegistrationSlice';
+import SessionRegistrationSlice from './slices/SessionRegistrationSlice';
 import PostRegistrationSetupSlice from './slices/PostRegistrationSetupSlice';
 import VolunteerRegistrationSlice from './slices/VolunteerRegistrationSlice';
 const { getEnv } = utils;
@@ -24,9 +25,9 @@ export default configureStore({
     [HeaderSlice.name]: HeaderSlice.reducer,
     [SurveySlice.name]: SurveySlice.reducer,
     [ProfileSlice.name]: ProfileSlice.reducer,
-    [CheckInOutSlice.name]: CheckInOutSlice.reducer,
-    [APAccessSlice.name]: APAccessSlice.reducer,
     [ThankYouSlice.name]: ThankYouSlice.reducer,
+    [APAccessSlice.name]: APAccessSlice.reducer,
+    [CheckInOutSlice.name]: CheckInOutSlice.reducer,
     [FormBuilderSlice.name]: FormBuilderSlice.reducer,
     [RegistrationSlice.name]: RegistrationSlice.reducer,
     [ErrorMessagesSlice.name]: ErrorMessagesSlice.reducer,
@@ -34,6 +35,7 @@ export default configureStore({
     [SelectRegistrantSlice.name]: SelectRegistrantSlice.reducer,
     [VolunteerProfileSlice.name]: VolunteerProfileSlice.reducer,
     [UpdateRegistrationSlice.name]: UpdateRegistrationSlice.reducer,
+    [SessionRegistrationSlice.name]: SessionRegistrationSlice.reducer,
     [PostRegistrationSetupSlice.name]: PostRegistrationSetupSlice.reducer,
     [VolunteerRegistrationSlice.name]: VolunteerRegistrationSlice.reducer
   },
