@@ -40,7 +40,7 @@ namespace AfterSchool.Controllers
 
             if (subscriptionSchedulesAfterThreeDays.IsNotEmpty())
             {
-                // Send an email for upcoming payments.
+                // TODO: Send an email for upcoming payments.
             }
         }
 

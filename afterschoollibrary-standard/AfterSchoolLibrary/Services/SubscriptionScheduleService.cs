@@ -32,13 +32,11 @@ namespace AfterSchoolLibrary.Services
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,
-                LastChargeStatus = LastChargeStatus.succeeded, //run the charge and then pass the status
                 StripeConnectId = "scid123",
                 AmountToConnectAccountInCents = feeObject.Amount - feeObject.ConvenienceFee,
                 LastDateToBill = lastDateToBill,
                 Description = "description", //???
                 NextBillDate = nextBillDate,
-                LastChargeFailed = false,
                 Metadata = metaData,
             };
             msgs.AddRange(subscriptionSchedule.Save(dc));
