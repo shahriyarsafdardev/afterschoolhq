@@ -187,7 +187,7 @@ namespace AfterSchoolLibrary.Services
             var lastDateToBill = new DateTime?();
             var nextBillDate = new DateTime();
 
-            endDateTime = (activity.GetSchedule() != null && activity.GetSchedule().IsOngoing) ? null : 
+            endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
 
             var stripeMetaData = new Dictionary<string, string>
