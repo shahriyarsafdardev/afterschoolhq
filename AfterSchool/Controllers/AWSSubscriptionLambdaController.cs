@@ -54,10 +54,7 @@ namespace AfterSchool.Controllers
 
                     var amount = schedule.AmountInCents / 100.0m;
 
-                    if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                    {
-                        amount = CalculateProratedAmount(schedule, rsp, msgs);
-                    }
+                    amount = GetProratedAmount(schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
 
@@ -71,10 +68,22 @@ namespace AfterSchool.Controllers
             }
         }
 
-        private decimal CalculateProratedAmount(SubscriptionSchedule schedule, RegistrantSubscriptionPlan rsp, SystemMessages msgs)
+        private Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount)
         {
-            var enddate = rsp.GetSubscriptionPlan()?.EndDate;
-            return SubscriptionScheduleService.CalculateProratedAmount((DateTime) enddate, DateTime.UtcNow, schedule.AmountInCents / 100.0m);
+            //if this is last payment
+            if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
+                return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.LastDateToBill, amount);
+
+            //if this is first payment
+            if (schedule.StartDate.Equals(DateTime.UtcNow) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
+                return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.FirstRenewal, amount);
+
+            return amount;
+        }
+
+        private decimal CalculateProratedAmount(DateTime startDate, DateTime endDate, Decimal amount)
+        {
+            return SubscriptionScheduleService.CalculateProratedAmount(endDate, startDate, amount);
         }
 
         private Charge CreateCharge(SubscriptionSchedule schedule, RegistrantSubscriptionPlan rsp, decimal amount, SystemMessages msgs)
@@ -93,11 +102,13 @@ namespace AfterSchool.Controllers
                     ? schedule.ProrateLastCharge.ToString()
                     : "false";
             }
+            else
+                metaData["WasProrated"] = schedule.ProrateFirstCharge.ToString() ?? "false";
 
             // TODO: Platform fees
             //var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, null);
 
-            // Create a charge for the current schedule
+                // Create a charge for the current schedule
             return StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                 fromCustomerId: schedule.StripeCustomerId,
                 destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
@@ -185,8 +196,7 @@ namespace AfterSchool.Controllers
 
                     var amount = schedule.AmountInCents / 100.0m;
 
-                    if (schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                        amount = CalculateProratedAmount(schedule, rsp, msgs);
+                    amount = GetProratedAmount(schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
                     var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
