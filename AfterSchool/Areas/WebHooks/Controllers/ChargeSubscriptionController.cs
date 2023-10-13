@@ -221,8 +221,18 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
-
-                //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+                //if this is last payment
+                if (subscriptionSchedule.StartDate.Equals(subscriptionSchedule.LastDateToBill) || (subscriptionSchedule.LastDateToBill.HasValue 
+                    && subscriptionSchedule.NextBillDate.Equals(subscriptionSchedule.LastDateToBill)))
+                {
+                    subscriptionSchedule.NextBillDate = null;
+                    subscriptionSchedule.LastChargeFailed = false;
+                }
+                //if this is first payment
+                else
+                {
+                    //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
+                }
 
                 if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
                     subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
