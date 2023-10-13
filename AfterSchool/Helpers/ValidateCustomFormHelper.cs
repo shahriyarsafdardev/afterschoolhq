@@ -27,7 +27,7 @@ namespace AfterSchool.Helpers
                 .ToList()
                 .ForEach(ques =>
                 {
-                    var question = FormQuestion.Load(ques.ID);
+                    var question = FormQuestion.Load(ques.ID, msgs);
                     var answer = question.ToFormQuestionViewModel(collection);
                     if (ques.IsRequired && answer.Value.IsEmpty())
                         msgs.Add($"{ques.Text} is required", MessageType.UserError);

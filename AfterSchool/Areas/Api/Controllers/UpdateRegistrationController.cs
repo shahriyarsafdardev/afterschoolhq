@@ -417,8 +417,8 @@ namespace AfterSchool.Areas.Api.Controllers
             foreach (var question in questions)
             {
                 var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
+
                 if (audienceSettings?.Show ?? question.IsActive)
-                {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
                         {
@@ -438,7 +438,6 @@ namespace AfterSchool.Areas.Api.Controllers
                             Link = question.Link,
                         }
                     );
-                }
             }
             return formQuestionDtoList;
         }

@@ -139,9 +139,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupId.ToInteger()).ToList().ForEach(qvm =>
                 {
                     if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
-                    {
                         msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
-                    }
                 });
 
                 Database.ExecuteTransaction
@@ -273,52 +271,6 @@ namespace AfterSchool.Areas.Api.Controllers
                 return question.Text;
             var amazonHelper = Utilities.GetNewAmazonHelper();
             return amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false);
-        }
-
-        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
-        {
-            var msgs = new SystemMessages();
-            var formQuestionDtoList = new List<FormQuestionDto>();
-            var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
-            foreach (var question in questions)
-            {
-                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
-                if (audienceSettings?.Show ?? question.IsActive)
-                {
-                    formQuestionDtoList.Add(
-                        new FormQuestionDto()
-                        {
-                            ID = question.ID.Value,
-                            FormQuestionGroupId = question.FormQuestionGroupId,
-                            Text = question.Text,
-                            Description = question.Description,
-                            GroupTitle = question.FormQuestionGroupName,
-                            Options = question.Options,
-                            IsRequired = audienceSettings?.Required ?? question.IsRequired,
-                            DisplayOrder = question.DisplayOrder,
-                            IsActive = question.IsActive,
-                            IsDeleted = question.IsDeleted,
-                            QuestionTypeId = question.QuestionTypeId,
-                            QuestionDataTypeId = question.QuestionDataTypeId,
-                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
-                            Link = question.Link,
-                        }
-                    );
-                }
-            }
-            return formQuestionDtoList;
-        }
-
-        private static AudienceType GetAudienceType(RegistrantPersonType type)
-        {
-            return type switch
-            {
-                RegistrantPersonType.Parent => AudienceType.Parents,
-                RegistrantPersonType.Student => AudienceType.Students,
-                RegistrantPersonType.Adult => AudienceType.Adults,
-                RegistrantPersonType.Volunteer => AudienceType.Volunteer,
-                _ => AudienceType.NotSet,
-            };
         }
     }
 }
