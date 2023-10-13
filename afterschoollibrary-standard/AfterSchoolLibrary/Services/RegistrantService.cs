@@ -258,7 +258,7 @@ namespace AfterSchoolLibrary.Services
             else
                 endDateTime = null;
 
-            if (startDateTime.IsAfter(DateTime.UtcNow))
+            if (startDateTime.Date.IsAfter(DateTime.UtcNow.Date))
                 nextBillDate = startDateTime;
             else
                 nextBillDate = firstRenewalDate;
@@ -327,9 +327,23 @@ namespace AfterSchoolLibrary.Services
 
                     if(subscriptionPaymentHistory.IsEmpty())
                         msgs.Add("Payment history record not created", MessageType.Error);
+
+                    //was this first and last payment
+                    // TODO: Have to figure out how to update schedule here
+                    //var nextPaymentDate = (DateTime) new SubscriptionPlan
+                    //{
+                    //    BillingPeriodTypeId = plan.BillingPeriodTypeId
+                    //}.CalculateEndDateFromNumberOfPeriods(DateTime.UtcNow, 1);
+
+                    //if(plan.EndDate.HasValue && nextPaymentDate.IsBefore((DateTime)plan.EndDate))
+                    //{
+                    //    subscriptionSchedule.NextBillDate = nextPaymentDate;
+                    //    subscriptionSchedule.LastChargeStatus = chargeStatus;
+                    //    subscriptionSchedule.LastChargeFailed = chargeStatus.Equals(LastChargeStatus.failed) ? true : false;
+                    //    msgs.AddRange(subscriptionSchedule.Save());
+                    //}
                 }
             }
-
             checkoutObject.ProratingCalculation = proratingCalculation;
         }
 
