@@ -1,7 +1,7 @@
 @model AfterSchool.Models.ReportPageResults
 @{
     ViewBag.Title = "Report";
-    var questions = Model.Questions;
+    var questions = Model.Questions.Where(x => !x.ToFormQuestionGroup().IsDeleted);
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
 
@@ -161,7 +161,7 @@
                 </div>
 
                 @{
-                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);                   
                 }
                 @foreach (var group in searchGroups)
                 {
