@@ -468,10 +468,8 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ForEach(qvm =>
                     {
                         if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
-                        {
                             msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
-                        }
-                });
+                    });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {

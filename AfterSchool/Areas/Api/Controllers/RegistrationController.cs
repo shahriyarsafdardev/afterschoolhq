@@ -86,7 +86,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
                     ).ToList();
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -214,7 +214,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -350,7 +350,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 Registration registration = null;
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
@@ -465,17 +465,15 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
 
-                GetAllFormQuestions(currentUserRegistrant, questions)
+                GetAllFormQuestions(currentUserRegistrant, questions, msgs)
                     .Where(ques => (int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger())
                     .ToList()
                     .ForEach(ques =>
                     {
-                        var question = FormQuestion.Load(ques.ID);
+                        var question = FormQuestion.Load(ques.ID, msgs);
                         var answer = question.ToFormQuestionViewModel(collection);
                         if (ques.IsRequired && answer.Value.IsEmpty())
-                        {
                             msgs.Add($"{ques.Text} is required", MessageType.UserError);
-                        }
                     });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
@@ -647,7 +645,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 // Get URL of client side
                 var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
 
-                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions), collection, formSectionURL, json, null, msgs);
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions, msgs), collection, formSectionURL, json, null, msgs);
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
@@ -1106,16 +1104,14 @@ namespace AfterSchool.Areas.Api.Controllers
             };
         }
 
-        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
             var formQuestionDtoList = new List<FormQuestionDto>();
             var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
             foreach (var question in questions)
             {
                 var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
                 if (audienceSettings?.Show ?? question.IsActive)
-                {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
                         {
@@ -1135,7 +1131,6 @@ namespace AfterSchool.Areas.Api.Controllers
                             Link = question.Link,
                         }
                     );
-                }
             }
             return formQuestionDtoList;
         }
