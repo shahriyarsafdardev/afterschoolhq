@@ -66,6 +66,7 @@ namespace AfterSchoolLibrary.Services
                     attendance.IsCompleted = true;
                     attendance.LastModifiedBy = loggedInUser.ID;
                     attendance.LastModifiedDate = DateTime.UtcNow;
+                    attendance.Date = DateTime.UtcNow;
                     amsgs.AddRange(attendance.Save(adc));
 
                     attendance.GetAttendanceRegistrants(amsgs, adc).ForEach(attendanceRegistrant =>
