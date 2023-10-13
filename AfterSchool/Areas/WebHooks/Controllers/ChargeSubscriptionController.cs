@@ -221,12 +221,13 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
+                subscriptionSchedule.LastChargeFailed = false;
+
                 //if this is last payment
                 if (subscriptionSchedule.StartDate.Equals(subscriptionSchedule.LastDateToBill) || (subscriptionSchedule.LastDateToBill.HasValue 
                     && subscriptionSchedule.NextBillDate.Equals(subscriptionSchedule.LastDateToBill)))
                 {
-                    subscriptionSchedule.NextBillDate = null;
-                    subscriptionSchedule.LastChargeFailed = false;
+                    //subscriptionSchedule.NextBillDate = null;
                 }
                 //if this is first payment
                 else
@@ -251,12 +252,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 }
 
                 // TODO: 
-                //what should be updated in Subscription Schedule in this case????
-                //send email to customer and provider notifying user of charge failure
                 //if Bad card or insufficient funds??????
                 //redirect to Card details which should require login
-                //if Need to cancel?    
-                //Cancel subscription, notify main AHQ system
             }
             else
             {
@@ -269,25 +266,25 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         }
 
         // TODO: update next bill date
-        //public void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
-        //{
-        //    //What to do for ongoing activities as they don't have LastDateToBill?
-        //    if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
-        //    {
-        //        //check if it was the final payment
-        //        if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
-        //            subscriptionSchedule.NextBillDate = null;
-        //        else
-        //        {
-        //            subscriptionSchedule.NextBillDate = new SubscriptionPlan
-        //            {
-        //                BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
-        //            }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
-        //        }
-        //    }
+        private void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            //What to do for ongoing activities as they don't have LastDateToBill?
+            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
+            {
+                //check if it was the final payment
+                if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+                    subscriptionSchedule.NextBillDate = null;
+                else
+                {
+                    subscriptionSchedule.NextBillDate = new SubscriptionPlan
+                    {
+                        BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
+                    }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
+                }
+            }
 
-        //    msgs.AddRange(subscriptionSchedule.Save(dc));
-        //}
+            //    msgs.AddRange(subscriptionSchedule.Save(dc));
+        }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
         {
