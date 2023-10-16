@@ -13,6 +13,7 @@ using System.Web.Http;
 using static AfterSchool.Controllers.AWSSubscriptionLambdaController;
 using Account = AfterSchoolLibrary.Models.Account;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
+using SubscriptionScheduleService = AfterSchoolLibrary.Services.SubscriptionScheduleService;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
@@ -57,7 +58,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, chargeStatus, msgs);
-                    CreateTransaction(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, dc);
+                    CreatePaymentRecords(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, dc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -68,7 +69,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             );
         }
 
-        private void CreateTransaction(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+        private void CreatePaymentRecords(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
             Charge charge, SystemMessages msgs, DatabaseConnection dc)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
@@ -221,17 +222,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
-                //if this is last payment
-                if (subscriptionSchedule.StartDate.Equals(subscriptionSchedule.LastDateToBill) || (subscriptionSchedule.LastDateToBill.HasValue 
-                    && subscriptionSchedule.NextBillDate.Equals(subscriptionSchedule.LastDateToBill)))
-                {
-                    //subscriptionSchedule.NextBillDate = null;
-                }
-                //if this is first payment
-                else
-                {
-                    //UpdateNextBillDateOnSuccess(subscriptionSchedule, msgs);
-                }
+                subscriptionSchedule.PaymentsDone += 1;
+
+                subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
+
+                //UpdateNextBillDateOnSuccess(subscriptionSchedule);
 
                 if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
                     subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
@@ -241,47 +236,41 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 msgs.Add("Charge failed", MessageType.Error);
 
                 if (subscriptionPaymentHistory.RetryNumber < 3)
+                {
+                    subscriptionSchedule.LastChargeStatus = LastChargeStatus.failed;
                     subscriptionPaymentHistory.RetryNumber += 1;
+                }
                 else
                 {
                     subscriptionSchedule.IsCancelled = true;
                     subscriptionSchedule.NextBillDate = null;
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
                 }
-
-                // TODO: 
-                //if Bad card or insufficient funds??????
-                //redirect to Card details which should require login
             }
             else
             {
-                // Handle pending status (pending status is already saved in payment history)
+                subscriptionPaymentHistory.Status = LastChargeStatus.pending;
             }
-            subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
 
             msgs.AddRange(subscriptionSchedule.Save());
             msgs.AddRange(subscriptionPaymentHistory.Save());
         }
 
-        // TODO: update next bill date
-        private void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule, SystemMessages msgs, DatabaseConnection dc = null)
+        private void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule)
         {
-            //What to do for ongoing activities as they don't have LastDateToBill?
-            if (subscriptionSchedule.NextBillDate.HasValue && subscriptionSchedule.LastDateToBill.HasValue)
-            {
-                //check if it was the final payment
-                if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
-                    subscriptionSchedule.NextBillDate = null;
-                else
-                {
-                    subscriptionSchedule.NextBillDate = new SubscriptionPlan
-                    {
-                        BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
-                    }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
-                }
-            }
+            // was first payment 
+            if (subscriptionSchedule.PaymentsDone.Equals(1))
+                subscriptionSchedule.NextBillDate = subscriptionSchedule.FirstRenewal;
 
-            //    msgs.AddRange(subscriptionSchedule.Save(dc));
+            //was last payment
+            else if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+                subscriptionSchedule.NextBillDate = null;
+
+            else
+                subscriptionSchedule.NextBillDate = new SubscriptionPlan
+                {
+                    BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
+                }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)

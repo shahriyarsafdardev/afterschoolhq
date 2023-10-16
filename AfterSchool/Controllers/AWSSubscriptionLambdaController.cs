@@ -75,7 +75,7 @@ namespace AfterSchool.Controllers
                 return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.LastDateToBill, amount);
 
             //if this is first payment
-            if (schedule.StartDate.Equals(DateTime.UtcNow) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
+            if (schedule.PaymentsDone < 1 && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
                 return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.FirstRenewal, amount);
 
             return amount;
