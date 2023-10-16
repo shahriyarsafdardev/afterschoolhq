@@ -89,10 +89,8 @@ export const handleRedirection = ({
 export const setStatuses = questionsGroups => {
   const lastCompletedSectionId = localStorage.getItem('lastCompletedSectionId');
   return questionsGroups.map((section, index) => {
-    if (lastCompletedSectionId && index <= lastCompletedSectionId) {
-      return { ...section, Status: 'completed' };
-    } else {
-      return { ...section, Status: 'notStarted' };
-    }
+    const status =
+      lastCompletedSectionId && index <= lastCompletedSectionId ? 'completed' : 'notStarted';
+    return { ...section, Status: status };
   });
 };
