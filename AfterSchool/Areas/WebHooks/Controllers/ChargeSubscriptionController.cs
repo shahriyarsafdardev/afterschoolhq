@@ -221,8 +221,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
-                subscriptionSchedule.LastChargeFailed = false;
-
                 //if this is last payment
                 if (subscriptionSchedule.StartDate.Equals(subscriptionSchedule.LastDateToBill) || (subscriptionSchedule.LastDateToBill.HasValue 
                     && subscriptionSchedule.NextBillDate.Equals(subscriptionSchedule.LastDateToBill)))
