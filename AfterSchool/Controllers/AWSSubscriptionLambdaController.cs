@@ -1,4 +1,5 @@
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -40,7 +41,10 @@ namespace AfterSchool.Controllers
 
             if (subscriptionSchedulesAfterThreeDays.IsNotEmpty())
             {
-                // TODO: Send an email for upcoming payments.
+                foreach (var schedule in subscriptionSchedulesAfterThreeDays) 
+                {
+                    EmailHelper.SendUpcomingSubscriptionPaymentReminder(schedule, null);
+                }
             }
         }
 

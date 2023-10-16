@@ -287,10 +287,13 @@
     <value>EmailTemplates\Volunteer-BackgroundCheck.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Volunteer_Background_Approved" type="System.Resources.ResXFileRef, System.Windows.Forms">
-      <value>EmailTemplates\VolunteerBackground-Approved.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>EmailTemplates\VolunteerBackground-Approved.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Volunteer_Background_Denied" type="System.Resources.ResXFileRef, System.Windows.Forms">
-      <value>EmailTemplates\VolunteerBackground-Denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>EmailTemplates\VolunteerBackground-Denied.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Upcoming_Subscription_Payment" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>EmailTemplates\Upcoming-Subscription-Payment.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
     <data name="CheckInCheckOut_RevokeAccess" type="System.Resources.ResXFileRef, System.Windows.Forms">
         <value>EmailTemplates\CheckInCheckOut-RevokeAccess.template;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
