@@ -339,7 +339,6 @@ namespace AfterSchoolLibrary.Services
                     //{
                     //    subscriptionSchedule.NextBillDate = nextPaymentDate;
                     //    subscriptionSchedule.LastChargeStatus = chargeStatus;
-                    //    subscriptionSchedule.LastChargeFailed = chargeStatus.Equals(LastChargeStatus.failed) ? true : false;
                     //    msgs.AddRange(subscriptionSchedule.Save());
                     //}
                 }
