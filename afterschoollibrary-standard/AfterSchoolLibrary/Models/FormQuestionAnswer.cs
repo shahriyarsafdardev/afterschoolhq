@@ -95,6 +95,7 @@ namespace AfterSchoolLibrary.Models
         public int? FormQuestionFormQuestionGroupId => (int?) MDV["FormQuestionFormQuestionGroupId"].Value;
         public int? FormQuestionDisplayOrder => (int?) MDV["FormQuestionDisplayOrder"].Value;
         public string FormQuestionText => (string) MDV["FormQuestionText"].Value;
+        public bool FormQuestionIsDeleted => (bool) MDV["FormQuestionIsDeleted"].Value;
         public string FormQuestionGroupName => (string) MDV["FormQuestionGroupName"].Value;
         public int? FormQuestionGroupDisplayOrder => (int?) MDV["FormQuestionGroupDisplayOrder"].Value;
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId => (QuestionGroupDataType) MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value;
@@ -137,6 +138,8 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionFormQuestionGroupId", typeof(FormQuestion).Name, "FormQuestionGroupId", SqlDbType.Int, "FormQuestion");
                 _dp.Add(className, "FormQuestionDisplayOrder", typeof(FormQuestion).Name, "DisplayOrder", SqlDbType.Int, "FormQuestion");
                 _dp.Add(className, "FormQuestionText", typeof(FormQuestion).Name, "Text", SqlDbType.NVarChar, "FormQuestion");
+                _dp.Add(className, "FormQuestionIsDeleted", typeof(FormQuestion).Name, "IsDeleted", SqlDbType.Bit,
+                  "FormQuestion");
                 _dp.Add(className, "FormQuestionGroupName", typeof(FormQuestionGroup).Name, "Name", SqlDbType.NVarChar, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupDisplayOrder", typeof(FormQuestionGroup).Name, "DisplayOrder", SqlDbType.Int, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
@@ -417,6 +420,7 @@ namespace AfterSchoolLibrary.Models
                 DisplayOrder = FormQuestionDisplayOrder,
                 FormId = FormQuestionFormId,
                 FormQuestionGroupId = FormQuestionFormQuestionGroupId,
+                IsDeleted = FormQuestionIsDeleted
             };
         }
 
