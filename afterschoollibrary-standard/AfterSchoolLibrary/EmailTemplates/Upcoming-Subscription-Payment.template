@@ -1,0 +1,16 @@
+<div>
+    <p>Hey @Model.FirstName,</p>
+    <p>
+        Payment for your monthly subscription with @Model.ActivityName by @Model.Provider will be processed in three days. You will receive a confirmation email when payment has been made.
+    </p>
+
+    @Model.RegistrationTable
+
+    <p>
+        <a href="@Model.LoginLink">@Model.RegistrationDetails</a>
+    </p>
+
+    <p>
+        If you have any questions or concerns, please contact @Model.ActivityContactName @Model.ActivityContactPhone email (<a href="mailto:@Model.ActivityContactEmail">@Model.ActivityContactEmail</a>).
+    </p>
+</div>
