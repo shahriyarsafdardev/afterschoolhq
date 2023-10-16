@@ -40,6 +40,11 @@ namespace AfterSchoolLibrary.Helpers
             _ => "http://localhost:54849",
         };
 
+        public static List<string> SuspiciousDomains = new List<string>()
+        {
+            "yopmail.com",
+        };
+
         public static string Environment
         {
             get

@@ -13,6 +13,7 @@
     var isDuringProfileSetup = currentUser.IsNotEmpty() || savedEmail.IsNotBlank();
     var isStudentRegistrationEnabled = Model.StudentRegistrationEnabled;
     var cleverSsoEnabled = Model.CleverSsoEnabled;
+    var suspiciousDomains = (List<string>)ViewBag.SuspiciousDomains;
 }
 
 @{
@@ -79,7 +80,8 @@
                                                    onfocus="this.select()"
                                                    required="required"
                                                    value=""
-                                                   data-test="register-email"/>
+                                                   data-test="register-email" />
+                                            <p class="emailvalidation text-danger"></p>
                                         </div>
                                     </div>
 
@@ -264,15 +266,29 @@
             $('#form-submit').html('Saving...');
             $('#form-submit').prop('disabled', true);
         });
-        
+
         $("input[type='radio']").click(function(){
             var radioValue = $("input[name='optionSelected']:checked").attr("id");
             if(radioValue === 'student'){
                 $('#birthdate').removeClass("hidden");
             }
-            else 
+            else
             {
                 $('#birthdate').addClass("hidden");
+            }
+        });
+        $('#email-check').on('input', function () {
+            var emailvalue = $(this).val();
+            var suspiciousDomains = @Html.Raw(Json.Encode(@suspiciousDomains));
+            if (emailvalue.toLowerCase().includes(suspiciousDomains)) {
+                $('#btn-check-email').prop('disabled', true);
+                $("#email-check").attr('style', 'border: 1px solid red;');
+                $('.emailvalidation').text("This email domain is not permitted. Please enter a different email address.");
+
+            } else {
+                $('#btn-check-email').prop('disabled', false);
+                $("#email-check").attr('style', '');
+                $('.emailvalidation').text("");
             }
         });
     });

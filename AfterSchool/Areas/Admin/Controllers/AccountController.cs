@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
@@ -82,7 +82,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             ViewBag.Packages = Package.LoadByIsActiveByIsAfterSchool(true, SessionVariables.IsAfterSchool.Value);
             ViewBag.Account = id.IsGuid() ? Account.LoadByUid(id.ToGuid(), msgs) : null;
             ViewBag.Messages = msgs;
-
+            ViewBag.SuspiciousDomains = Utilities.SuspiciousDomains;
             return View();
         }
 
@@ -96,7 +96,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             WebUser user = null;
             Account account = null;
             WebUser currentUser = SessionVariables.CurrentUser;
-
+            
             if (!id.IsGuid())
             {
                 if (orgname.IsBlank())
@@ -116,6 +116,8 @@ namespace AfterSchool.Areas.Admin.Controllers
             {
                 if (!email.IsEmail())
                     msgs.Add("Email is required and must be valid", MessageType.UserError);
+                else if(email.ToLower().Contains(Utilities.SuspiciousDomains))
+                    msgs.Add("This email domain is not permitted. Please enter a different email address.", MessageType.UserError);
                 if (firstname.IsBlank())
                     msgs.Add("First Name is required", MessageType.UserError);
                 if (lastname.IsBlank())
