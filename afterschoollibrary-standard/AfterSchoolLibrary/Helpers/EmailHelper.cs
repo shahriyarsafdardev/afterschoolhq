@@ -900,17 +900,13 @@ namespace AfterSchoolLibrary.Helpers
         {
             var msgs = new SystemMessages();
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
-            ;
             var parent = rsp.GetRegistrant().GetParentOrGuardian(msgs);
             var participationObject = rsp.GetParticipationObject();
             var activity = participationObject.GetActivity();
             var description = $"{activity.Name}";
 
-            //description +=
-            //        $"<br />&nbsp;&bull;&nbsp;{rsp.BillingPeriodTypeId}";
-            description +=
-                $"<br /><small>{(schedule.BillingPeriodType == @BillingPeriodType.Day ? "Daily" : schedule.BillingPeriodType.ToString() + "ly") + " subscription"}</small>";
-            //(schedule.BillingPeriodType == @BillingPeriodType.Day ? "daily" : schedule.BillingPeriodType.ToString().SplitByUpperCase().ToLower() + "ly") +" subscription";
+            description += $"<br /><small>{(schedule.BillingPeriodType == @BillingPeriodType.Day ? "Daily" : 
+                schedule.BillingPeriodType.ToString() + "ly") + " subscription"}</small>";
 
             var registrationDetails = "Login to your account to view more details about this registration.";
             var loginLink = Utilities.LoginUrl();
@@ -940,7 +936,6 @@ namespace AfterSchoolLibrary.Helpers
                     },
                     "Registration_Confirmation_Table-1.0",
                     msgs);
-
 
             var model = new NameValueCollection
             {
