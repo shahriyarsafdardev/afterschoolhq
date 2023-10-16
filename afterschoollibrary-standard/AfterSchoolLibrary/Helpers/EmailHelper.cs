@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using AfterSchoolLibrary.Enums;
-
+using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 namespace AfterSchoolLibrary.Helpers
 {
     public class EmailHelper
@@ -896,8 +896,88 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static void SendUpcomingSubscriptionPaymentReminder(SubscriptionSchedule schedule, DatabaseConnection dc = null)
+        {
+            var msgs = new SystemMessages();
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+            ;
+            var parent = rsp.GetRegistrant().GetParentOrGuardian(msgs);
+            var participationObject = rsp.GetParticipationObject();
+            var activity = participationObject.GetActivity();
+            var description = $"{activity.Name}";
+
+            //description +=
+            //        $"<br />&nbsp;&bull;&nbsp;{rsp.BillingPeriodTypeId}";
+            description +=
+                $"<br /><small>{(schedule.BillingPeriodType == @BillingPeriodType.Day ? "Daily" : schedule.BillingPeriodType.ToString() + "ly") + " subscription"}</small>";
+            //(schedule.BillingPeriodType == @BillingPeriodType.Day ? "daily" : schedule.BillingPeriodType.ToString().SplitByUpperCase().ToLower() + "ly") +" subscription";
+
+            var registrationDetails = "Login to your account to view more details about this registration.";
+            var loginLink = Utilities.LoginUrl();
+
+            var chargeFeeModel = new NameValueCollection
+            {
+                {"Description", description},
+                {"Quantity", "1"},
+                {"Cost", (schedule.AmountInCents/ 100.0m).ToCurrency()},
+                {"AdditionalDetails", ""},
+            };
+
+            var receiptRows = ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Rows,
+                    chargeFeeModel,
+                    "Registration_Confirmation_Rows",
+                    msgs);
+
+            var registrationTable = ProcessTemplate(
+                    EmailTemplates.Registration_Confirmation_Table,
+                    new NameValueCollection
+                    {
+                        {"AmountDueOrPaid", ""},
+                        {"TotalCost", ""},
+                        {"BodyRows", receiptRows},
+                        {"CreditCardFee", ""},
+                    },
+                    "Registration_Confirmation_Table-1.0",
+                    msgs);
+
+
+            var model = new NameValueCollection
+            {
+                {"FirstName", parent.FirstName},
+                {"RegistrationTable", registrationTable},
+                {"ActivityName", activity.Name},
+                {"Provider", participationObject.OwnerAccount.Name},
+                {"ActivityContactName", activity.ContactName},
+                {"ActivityContactPhone", participationObject.ContactPhone.IsNotEmpty() ?
+                    $"either by phone ({participationObject.ContactPhone}) or": "by"},
+                {"ActivityContactEmail", activity.ContactEmail},
+                { "LoginLink", loginLink},
+                {"RegistrationDetails", registrationDetails},
+            };
+
+            var subject = $"Upcoming subscription payment for {activity.Name}";
+            var body = ProcessTemplate(
+                EmailTemplates.Upcoming_Subscription_Payment,
+                model,
+                "Upcoming_Subscription_Payment_1.0.1",
+                msgs);
+
+            // SEND EMAILS
+            var mailMsgs = new SystemMessages();
+
+            mailMsgs.AddRange(SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(true),
+                new EmailAddress(parent.Email),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()));
+
+            msgs.AddRange(mailMsgs);
+        }
+
         public static SystemMessages SendRegistrationConfirmed(CheckoutObject checkoutObject, string customMessage,
-            WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
+        WebUser loggedInUser, bool isParentCopy, bool sendBcc, DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var isAfterSchool = checkoutObject.PayingAccount.IsAfterSchool;
