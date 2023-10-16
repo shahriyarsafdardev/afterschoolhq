@@ -73,7 +73,7 @@ export default function UpdateVolunteerProfile() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values),
+    // validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       let errorMsgs = [];
       if (dirty) {

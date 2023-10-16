@@ -135,6 +135,13 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var surveyFeedbackStatusType = isLastSection ? SurveyFeedbackStatus.Completed : SurveyFeedbackStatus.InProgress;
+
+                qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupId.ToInteger()).ToList().ForEach(qvm =>
+                {
+                    if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
+                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+                });
+
                 Database.ExecuteTransaction
                 (
                     (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -265,6 +272,5 @@ namespace AfterSchool.Areas.Api.Controllers
             var amazonHelper = Utilities.GetNewAmazonHelper();
             return amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false);
         }
-
     }
 }

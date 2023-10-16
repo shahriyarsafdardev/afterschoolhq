@@ -86,7 +86,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         group.QuestionGroupDataTypeId.NotIn(FormConstants.QuestionsGroupToNotIncludeInAdultPanel())
                     ).ToList();
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -214,7 +214,7 @@ namespace AfterSchool.Areas.Api.Controllers
                     ).ToList();
                 }
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
                 foreach (var questionGroup in questionGroups)
@@ -350,7 +350,7 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 Registration registration = null;
 
-                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions);
+                var formQuestionDtoList = GetAllFormQuestions(currentUserRegistrant, questions, msgs);
                 var formQuestionAnswerDtoList = new List<FormQuestionAnswerDto>();
                 var formQuestionGroupDtoList = new List<FormQuestionGroupDto>();
 
@@ -444,7 +444,8 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUser = SessionVariables.CurrentUser;
                 var form = FormService.GetAdministratorAccountStudentForm(msgs);
                 var questions = form.GetAllQuestions(msgs);
-                var currentUserPersonType = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs)?.PersonTypeId;
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+                var currentUserPersonType = currentUserRegistrant?.PersonTypeId;
                 registrant = Registrant.LoadByUid(json.registrantId.ToGuid(), msgs);
                 var studentRegistrants = currentUser.GetStudentRegistrants(msgs);
                 var parent2Registrant = currentAccount.GetSecondParentOrGuardianRegistrant(msgs);
@@ -463,6 +464,17 @@ namespace AfterSchool.Areas.Api.Controllers
                 var collection = HttpUtility.ParseQueryString(json.answers);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
+                GetAllFormQuestions(currentUserRegistrant, questions, msgs)
+                    .Where(ques => (int) ques.FormQuestionGroupQuestionGroupDataTypeId == json.groupid.ToInteger())
+                    .ToList()
+                    .ForEach(ques =>
+                    {
+                        var question = FormQuestion.Load(ques.ID, msgs);
+                        var answer = question.ToFormQuestionViewModel(collection);
+                        if (ques.IsRequired && answer.Value.IsEmpty())
+                            msgs.Add($"{ques.Text} is required", MessageType.UserError);
+                    });
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
@@ -609,6 +621,7 @@ namespace AfterSchool.Areas.Api.Controllers
             try
             {
                 var currentUser = SessionVariables.CurrentUser;
+                var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(json.accountName, msgs);
                 var activity = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs);
@@ -628,6 +641,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
+
+                // Get URL of client side
+                var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
+
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions, msgs), collection, formSectionURL, json, null, msgs);
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
@@ -1086,16 +1104,14 @@ namespace AfterSchool.Areas.Api.Controllers
             };
         }
 
-        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions, SystemMessages msgs = null)
         {
-            var msgs = new SystemMessages();
             var formQuestionDtoList = new List<FormQuestionDto>();
             var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
             foreach (var question in questions)
             {
                 var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
                 if (audienceSettings?.Show ?? question.IsActive)
-                {
                     formQuestionDtoList.Add(
                         new FormQuestionDto()
                         {
@@ -1115,7 +1131,6 @@ namespace AfterSchool.Areas.Api.Controllers
                             Link = question.Link,
                         }
                     );
-                }
             }
             return formQuestionDtoList;
         }
