@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Models
 
         public DateTime? NextBillDate { get { return (DateTime?) MDV["NextBillDate"].Value; } set { MDV["NextBillDate"].Value = value; } }
 
-        public bool LastChargeFailed { get { return (bool) MDV["LastChargeFailed"].Value; } set { MDV["LastChargeFailed"].Value = value; } }
+        public int PaymentsDone { get { return (int) MDV["PaymentsDone"].Value; } set { MDV["PaymentsDone"].Value = value; } }
 
         public string CancelledReason { get { return (string) MDV["CancelledReason"].Value; } set { MDV["CancelledReason"].Value = value; } }
 
@@ -66,8 +66,8 @@ namespace AfterSchoolLibrary.Models
             ProrateLastCharge = false;
             BillingPeriodType = BillingPeriodType.NotSet;
             LastChargeStatus = LastChargeStatus.NotSet;
+            PaymentsDone = 0;
             DateCancelled = null;
-            LastChargeFailed = false;
             IsCancelled = false;
             IsDeleted = false;
         }
@@ -97,7 +97,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "LastDateToBill", System.Data.SqlDbType.DateTime);
                 _dp.Add(className, "Description", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "NextBillDate", System.Data.SqlDbType.DateTime);
-                _dp.Add(className, "LastChargeFailed", System.Data.SqlDbType.Bit);
+                _dp.Add(className, "PaymentsDone", SqlDbType.Int);
                 _dp.Add(className, "CancelledReason", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "Metadata", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "IsDeleted", System.Data.SqlDbType.Bit);
@@ -223,7 +223,7 @@ namespace AfterSchoolLibrary.Models
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
-            dps.Add(ObjectMap["LastChargeFailed"]);
+            dps.Add(ObjectMap["PaymentsDone"]);
             msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
             dps = new BasicLibrary.DataAccess.DatabaseParameters();
