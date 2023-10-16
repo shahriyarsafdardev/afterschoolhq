@@ -7,6 +7,8 @@ using BasicLibrary;
 using BasicLibrary.DataAccess;
 using System.Data;
 using System.Collections;
+using AfterSchoolLibrary.Services;
+using System.Numerics;
 
 namespace AfterSchoolLibrary.Models
 {
@@ -206,13 +208,90 @@ namespace AfterSchoolLibrary.Models
                 );
         }
 
+        private bool IsValidCartItem(PurchaseableObjectType purchaseableObjectType, int participationObjectId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            if (purchaseableObjectType is PurchaseableObjectType.Activity)
+            {
+                var cartItems = GetCartItems(msgs, dc);
+                if (cartItems.Count == 0)
+                    return true;
+                var newActivity = Activity.Load(participationObjectId, msgs, dc);
+                foreach (var item in cartItems)
+                {
+                    var cartActivity = Activity.Load(item.ParticipationObjectId??0, msgs, dc);
+                    if(!ValidateActivityRestriction(newActivity, cartActivity, msgs))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        private bool ValidateActivityRestriction(Activity activity1, Activity activity2, SystemMessages msgs)
+        {
+            var isRestrictedByGrade = activity1.IsRestrictedByGrade() || activity2.IsRestrictedByGrade();
+            var isRestrictedByAge = activity1.IsRestrictedByAge() || activity2.IsRestrictedByAge();
+
+            var isValidAgeRestriction = activity1.IsRestrictedByAge() && activity2.IsRestrictedByAge();
+            var isValidGradeRestriction = activity1.IsRestrictedByGrade() && activity2.IsRestrictedByGrade();
+
+            var gradeValidated = false;
+            var ageValidated = false;
+
+            if (isValidAgeRestriction || isValidGradeRestriction)
+            {
+                if (isRestrictedByGrade)
+                    gradeValidated = ValidateOverlap(
+                        new Vector2 { X = activity1.GradeLevelStart ?? 0, Y = activity1.GradeLevelEnd ?? 0 }, 
+                        new Vector2 { X = activity2.GradeLevelStart ?? 0, Y = activity2.GradeLevelEnd ?? 0 }
+                        );
+                else if (isRestrictedByAge)
+                    ageValidated = ValidateOverlap(
+                        new Vector2 { X = activity1.AgeStart ?? 0, Y = activity1.AgeEnd ?? 0 },
+                        new Vector2 { X = activity2.AgeStart ?? 0, Y = activity2.AgeEnd ?? 0 }
+                        );
+                else
+                    ageValidated = gradeValidated = false;
+            }
+
+            bool genderValidated = ValidateGender(activity1, activity2);
+
+            if (!gradeValidated && isRestrictedByGrade)
+                msgs.Add(new SystemMessage($"Conflicting Activity Grade with cart items!", MessageType.UserError));
+            if (!ageValidated && isRestrictedByAge)
+                msgs.Add(new SystemMessage($"Conflicting Activity Age with cart items!", MessageType.UserError));
+            if (!genderValidated)
+                msgs.Add(new SystemMessage($"Conflicting Activity Gender with cart items!", MessageType.UserError));
+
+            return genderValidated && (ageValidated || gradeValidated);
+        }
+
+        private bool ValidateOverlap(Vector2 vector1, Vector2 vector2)
+        {
+            return Math.Max(vector1.X,vector2.X)<=Math.Min(vector1.Y,vector2.Y);
+        }
+
+        private bool ValidateGender(Activity activity1, Activity activity2)
+        {
+            if(activity1.IsGenderEnforced && activity2.IsGenderEnforced)
+            {
+                var activity1AllowedGenders = activity1.GetAllowedGenders();
+                return activity2.GetAllowedGenders().All(gender => activity1AllowedGenders.Contains(gender));
+            }
+            else if (activity1.IsGenderEnforced || activity2.IsGenderEnforced)
+                return false;
+            return true;
+        }
+
         public CartItem AddCartItem(PurchaseableObject purchaseableObject, int participationObjectId, ParticipationObjectType participationObjectType, int? registrantActivityId, List<DateTime> selectedDates, SystemMessages msgs, DatabaseConnection dc = null)
         {
             if(msgs.IsEmpty()) msgs = new SystemMessages();
 
+            if (!IsValidCartItem(purchaseableObject.ObjectType, participationObjectId, msgs, dc))
+                return null;
+
             var alreadyExistsInCart = this.GetCartItems(msgs, dc)
-                .Where(x => 
-                    x.ParticipationObjectId == participationObjectId && 
+                .Where(x =>
+                    x.ParticipationObjectId == participationObjectId &&
                     x.ParticipationObjectTypeId == participationObjectType
                 )
                 .Any();

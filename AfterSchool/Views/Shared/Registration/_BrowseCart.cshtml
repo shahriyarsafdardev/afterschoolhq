@@ -1,4 +1,4 @@
-﻿@model ParticipationObject
+@model ParticipationObject
 
 @{ 
     var duringCheckout = false;
@@ -229,8 +229,11 @@
         }
 
         function markItemAsNotInCart(btnCart, uid) {
-            decrementCartCount();
-            $('.cart-bar-item[uid="' + uid + '"]').remove();
+            var cartItem = $('.cart-bar-item[uid="' + uid + '"]');
+            if (cartItem.length > 0) {
+                decrementCartCount();
+                cartItem.remove();
+            }
             if ($('.cart-activities').children().length == 0) {
                 $('.cart-activities-none').removeClass('hide');
                 $('.btn-checkout').prop('disabled', true);

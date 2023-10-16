@@ -2885,6 +2885,16 @@ namespace AfterSchoolLibrary.Services
             return activity.AgeStart.IsEmpty();
         }
 
+        public static bool IsRestrictedByGrade(this Activity activity)
+        {
+            return activity.GradeLevelStart.IsNotEmpty() && activity.GradeLevelEnd.IsNotEmpty();
+        }
+
+        public static bool IsRestrictedByAge(this Activity activity)
+        {
+            return activity.AgeStart.IsNotEmpty() && activity.AgeEnd.IsNotEmpty();
+        }
+
         public static (DateTime? paymentStart, DateTime? paymentEnd) FinalizeStartAndEndDateForSubscription(
             this Activity activity, BillingPeriodType billingPeriodType, DateTime dayOfWeek, DateTime dayOfMonth,
             SystemMessages msgs = null, DatabaseConnection dc = null)
