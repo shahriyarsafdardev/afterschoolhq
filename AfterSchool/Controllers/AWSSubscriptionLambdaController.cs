@@ -43,7 +43,7 @@ namespace AfterSchool.Controllers
             {
                 foreach (var schedule in subscriptionSchedulesAfterThreeDays) 
                 {
-                    EmailHelper.SendUpcomingSubscriptionPaymentReminder(schedule, null);
+                    EmailHelper.SendUpcomingSubscriptionPaymentReminder(schedule);
                 }
             }
         }

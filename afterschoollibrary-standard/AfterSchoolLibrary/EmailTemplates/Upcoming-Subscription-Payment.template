@@ -1,7 +1,7 @@
 <div>
     <p>Hey @Model.FirstName,</p>
     <p>
-        Payment for your monthly subscription with @Model.ActivityName by @Model.Provider will be processed in three days. You will receive a confirmation email when payment has been made.
+        @Model.Content
     </p>
 
     @Model.RegistrationTable
