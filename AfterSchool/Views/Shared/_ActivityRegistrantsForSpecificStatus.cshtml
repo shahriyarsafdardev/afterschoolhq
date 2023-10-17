@@ -55,11 +55,7 @@
                             }
                         </td>
                         <td>
-
-                            @if (ra.RegistrantName.IsNotEmpty())
-                             {
                                 @(isTechSupport ? ra.GetRegistrant().GetFirstNameLastInitial() : ra.RegistrantName)
-                             }
                         </td>
                         @if (!participationObject.CanRegisterPerClass)
                         {
