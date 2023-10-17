@@ -76,7 +76,7 @@ export default function UpdateProfile() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    // validate: values => validator(values),
+    validate: values => validator(values),
     onSubmit: async (values, { resetForm }) => {
       const errorMsgs = [];
       if (dirty) {
