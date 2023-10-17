@@ -120,7 +120,7 @@ export default function Registration({ newChild = false }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    // validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
+    validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
       const errorMsgs = [];
       setSaveDisabled(true);
