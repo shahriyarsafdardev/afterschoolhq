@@ -367,6 +367,7 @@ namespace AfterSchoolLibrary.Services
                 var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)rsp.SubscriptionScheduleUid, msgs, dc);
                 subscriptionSchedule.IsCancelled = true;
                 subscriptionSchedule.NextBillDate = null;
+                subscriptionSchedule.EndDate = DateTime.UtcNow;
                 subscriptionSchedule.CancelledReason = "Cancelled by " + (isParent ? "Parent" : "Provider");
                 msgs.AddRange(subscriptionSchedule.Save());
             }
