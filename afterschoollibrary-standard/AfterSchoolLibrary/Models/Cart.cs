@@ -12,24 +12,24 @@ using System.Numerics;
 
 namespace AfterSchoolLibrary.Models
 {
-	/// <summary>
+    /// <summary>
     /// Way to keep track of a user cart. A cart contains one or more activities.
     /// </summary>
-	[Serializable]
+    [Serializable]
     public class Cart : BasicObjectWithModified
     {
-		#region "ClassGenerator"
+        #region "ClassGenerator"
 
 		public Guid Uid { get { return (Guid)MDV["Uid"].Value; } set { MDV["Uid"].Value = value; } }
 		public int? RegistrationId { get { return (int?)MDV["RegistrationId"].Value; } set { MDV["RegistrationId"].Value = value; } }
-		
+
 
         public Cart()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(Cart).Name, "ID");
             this.LoadObjectValues(ObjectMap);
-			this.Uid = Guid.NewGuid();
-			
+            this.Uid = Guid.NewGuid();
+
         }
 
         public static BasicLibrary.DataAccess.DatabaseParameters ObjectMap
@@ -39,9 +39,9 @@ namespace AfterSchoolLibrary.Models
                 BasicLibrary.DataAccess.DatabaseParameters _dp = new BasicLibrary.DataAccess.DatabaseParameters();
                 string className = typeof(Cart).Name;
                 _dp = BasicObjectWithModified.get_BaseObjectMap(className);
-				_dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
-				_dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
-				
+                _dp.Add(className, "Uid", System.Data.SqlDbType.UniqueIdentifier);
+                _dp.Add(className, "RegistrationId", System.Data.SqlDbType.Int);
+
                 return _dp;
             }
         }
@@ -58,7 +58,7 @@ namespace AfterSchoolLibrary.Models
             get
             {
                 BasicLibrary.DataAccess.DatabaseQuery dq = BaseObject.get_DatabaseQuery(ObjectMap, typeof(Cart).Name);
-				
+
                 return dq;
             }
         }
@@ -75,9 +75,9 @@ namespace AfterSchoolLibrary.Models
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
-			dq.UseParameterizedQuery = false;
-			dq.SelectRange.Start = start;
-			dq.SelectRange.Length = length;
+            dq.UseParameterizedQuery = false;
+            dq.SelectRange.Start = start;
+            dq.SelectRange.Length = length;
             return Cart.BaseLoad(criterias, ObjectMap, dq, msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
@@ -88,15 +88,15 @@ namespace AfterSchoolLibrary.Models
             return Cart.BaseGetCount(criterias, ObjectMap, dq, msgs);
         }
 
-		public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public SystemMessages Save(BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
-			var msgs = new SystemMessages();
+            var msgs = new SystemMessages();
 
-			
-			if (msgs.HasNoErrors())
-				msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Cart).Name));
 
-			return msgs;
+            if (msgs.HasNoErrors())
+                msgs.AddRange(base._Save2(DatabaseQuery, dc, ObjectMap, typeof(Cart).Name));
+
+            return msgs;
         }
 
         public SystemMessages Delete(BasicLibrary.DataAccess.DatabaseConnection dc = null)
@@ -114,37 +114,37 @@ namespace AfterSchoolLibrary.Models
             SystemMessages msgs = new SystemMessages();
             BasicLibrary.DataAccess.DatabaseParameters dps;
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["Uid"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["Uid"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			dps = new BasicLibrary.DataAccess.DatabaseParameters();
-			dps.Add(ObjectMap["RegistrationId"]);
-			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
+            dps = new BasicLibrary.DataAccess.DatabaseParameters();
+            dps.Add(ObjectMap["RegistrationId"]);
+            msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+
 
             return msgs;
         }
 
-		public Cart Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			return Cart.Load(this.ID.Value, msgs, dc: dc);
-		}
-		
-		public static Cart LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
-		{
-			var dq = DatabaseQuery;
-			dq.Connection = dc;
-			dq.Criterias.Add(ObjectMap["Uid"], Uid);
-			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-		}
+        public Cart Reload(SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            return Cart.Load(this.ID.Value, msgs, dc: dc);
+        }
 
-		
+        public static Cart LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public int? GradeLevel { get; set; }
         public GenderType? Gender { get; set; }
@@ -221,6 +221,8 @@ namespace AfterSchoolLibrary.Models
                     var cartActivity = Activity.Load(item.ParticipationObjectId??0, msgs, dc);
                     if(!ValidateActivityRestriction(newActivity, cartActivity, msgs))
                         return false;
+                    if(!ValidateActivityBySchedule(newActivity, cartActivity, msgs))
+                        return false;
                 }
             }
             return true;
@@ -241,7 +243,7 @@ namespace AfterSchoolLibrary.Models
             {
                 if (isRestrictedByGrade)
                     gradeValidated = ValidateOverlap(
-                        new Vector2 { X = activity1.GradeLevelStart ?? 0, Y = activity1.GradeLevelEnd ?? 0 }, 
+                        new Vector2 { X = activity1.GradeLevelStart ?? 0, Y = activity1.GradeLevelEnd ?? 0 },
                         new Vector2 { X = activity2.GradeLevelStart ?? 0, Y = activity2.GradeLevelEnd ?? 0 }
                         );
                 else if (isRestrictedByAge)
@@ -254,15 +256,113 @@ namespace AfterSchoolLibrary.Models
             }
 
             bool genderValidated = ValidateGender(activity1, activity2);
-
+            var errorMsg = "";
             if (!gradeValidated && isRestrictedByGrade)
-                msgs.Add(new SystemMessage($"Conflicting Activity Grade with cart items!", MessageType.UserError));
+                errorMsg += "Grade";
             if (!ageValidated && isRestrictedByAge)
-                msgs.Add(new SystemMessage($"Conflicting Activity Age with cart items!", MessageType.UserError));
+                errorMsg += errorMsg.IsNotEmpty() ? ", Age" : "Age";
             if (!genderValidated)
-                msgs.Add(new SystemMessage($"Conflicting Activity Gender with cart items!", MessageType.UserError));
-
+                errorMsg += errorMsg.IsNotEmpty() ? " & Gender" : "Gender";
+            if (errorMsg.IsNotEmpty())
+                msgs.Add(new SystemMessage($"Conflicting Activity {errorMsg} with cart items!", MessageType.UserError));
             return genderValidated && (ageValidated || gradeValidated);
+        }
+
+        private bool ValidateActivityBySchedule(Activity activity1, Activity activity2, SystemMessages msgs)
+        {
+            var hasError = false;
+            if (activity1.HasSchedule || activity2.HasSchedule)
+            {
+                if (activity1.HasSchedule && activity2.HasSchedule)
+                {
+                    var activity1Schedule = activity1.GetSchedule(msgs);
+                    var activity2Schedule = activity2.GetSchedule(msgs);
+                    if (!activity1Schedule.RepeatsWeekly && !activity2Schedule.RepeatsWeekly)
+                    {
+                        var sessionInstance1 = activity1Schedule.GetUpcomingInstance(msgs);
+                        var sessionInstance2 = activity2Schedule.GetUpcomingInstance(msgs);
+                        var overlappingInstance = GetOverlappingInstanceDates(sessionInstance1, sessionInstance2);
+                        if (HasOverlapingInstanceTimes(overlappingInstance))
+                            hasError = true;
+                    }
+                    else if (!activity1Schedule.RepeatsWeekly || !activity2Schedule.RepeatsWeekly)
+                    {
+                        var sessionInstance = activity1Schedule.RepeatsWeekly ? activity1Schedule.GetUpcomingInstance() : activity2Schedule.GetUpcomingInstance(); ;
+                        var dateRangeActivity = activity1Schedule.RepeatsWeekly ? activity2Schedule : activity1Schedule;
+                        var dateRange = new DateRange()
+                        {
+                            StartDate = dateRangeActivity.StartDate ?? DateTime.MinValue,
+                            EndDate = dateRangeActivity.EndDate ?? DateTime.MaxValue
+                        };
+                        var matchingDates = sessionInstance.Where(ins => DateInRange(dateRange, ins.StartDateTime?.Date ?? DateTime.MinValue));
+                        hasError = matchingDates.Any(dates => InstanceScheduleTimeOverlaps(dates, dateRangeActivity));
+                    }
+                }
+                else
+                    hasError = true;
+            }
+            if (hasError)
+                msgs.Add(new SystemMessage("Conflicting Activity Schedule with cart items!", MessageType.UserError));
+            return !hasError;
+        }
+
+        private bool DateInRange(DateRange dateRange, DateTime date)
+        {
+            return date.Date >= dateRange.StartDate.Date && date.Date <= dateRange.EndDate;
+        }
+
+        private bool InstanceScheduleTimeOverlaps(ActivityInstance activityInstance, ActivitySchedule activitySchedule)
+        {
+            var instanceStart = (activityInstance.StartDateTime ?? DateTime.MinValue).TimeOfDay;
+            var instanceEnd = (activityInstance.EndDateTime ?? DateTime.MaxValue).TimeOfDay;
+            var scheduleStart = (activitySchedule.DailyStartTime ?? DateTime.MinValue).TimeOfDay;
+            var scheduleEnd = (activitySchedule.DailyEndTime ?? DateTime.MaxValue).TimeOfDay;
+            return (instanceStart > scheduleStart ? instanceStart : scheduleStart) <
+                   (instanceEnd < scheduleEnd ? instanceEnd : scheduleEnd);
+        }
+
+        private List<(ActivityInstance, ActivityInstance)> GetOverlappingInstanceDates(IEnumerable<ActivityInstance> sessionInstance1, IEnumerable<ActivityInstance> sessionInstance2)
+        {
+            var overlappingInstance = new List<(ActivityInstance, ActivityInstance)>();
+            foreach(var ins1 in sessionInstance1)
+            {
+                foreach(var ins2 in sessionInstance2)
+                {
+                    if(ins1.StartDateTime?.Date == ins2.StartDateTime?.Date)
+                    {
+                        overlappingInstance.Add((ins1,ins2));
+                        break;
+                    }
+                }
+            }
+            return overlappingInstance;
+        }
+
+        private bool HasOverlapingInstanceTimes(List<(ActivityInstance, ActivityInstance)> overlappedSessionInstance)
+        {
+            foreach (var sessionInstance in overlappedSessionInstance)
+            {
+                if (DateRangesOverlap(
+                    new DateRange()
+                    {
+                        StartDate = sessionInstance.Item1.StartDateTime ?? DateTime.MinValue,
+                        EndDate = sessionInstance.Item1.EndDateTime ?? DateTime.MaxValue,
+                    },
+                    new DateRange()
+                    {
+                        StartDate = sessionInstance.Item2.StartDateTime ?? DateTime.MinValue,
+                        EndDate = sessionInstance.Item2.EndDateTime ?? DateTime.MaxValue,
+                    }
+                ))
+                    return true;
+            }
+            return false;
+        }
+
+        private bool DateRangesOverlap(DateRange dateRange1, DateRange dateRange2)
+        {
+            return (dateRange1.StartDate > dateRange2.StartDate ? dateRange1.StartDate : dateRange2.StartDate) <
+                   (dateRange1.EndDate < dateRange2.EndDate ? dateRange1.EndDate : dateRange2.EndDate);
         }
 
         private bool ValidateOverlap(Vector2 vector1, Vector2 vector2)
