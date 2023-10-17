@@ -10,19 +10,20 @@ function GoogleLocation({ handlePlaceChanged, ...fieldProps }) {
     const script = document.createElement('script');
     script.src = googleLocationAPI;
     script.async = true;
+    const placeChangeHandler = () => {
+      const selectedPlace = autocomplete.getPlace();
+      handlePlaceChanged(selectedPlace);
+    };
+    document.head.appendChild(script);
     script.onload = () => {
       autocomplete = new window.google.maps.places.Autocomplete(inputRef.current);
-
-      autocomplete.addListener('place_changed', () => {
-        const selectedPlace = autocomplete.getPlace();
-        handlePlaceChanged(selectedPlace);
-      });
+      autocomplete.addListener('place_changed', placeChangeHandler);
     };
 
-    document.head.appendChild(script);
-
     return () => {
+      window.removeEventListener('place_changed', placeChangeHandler);
       document.head.removeChild(script);
+      window.google.maps = {};
     };
   }, []);
 
