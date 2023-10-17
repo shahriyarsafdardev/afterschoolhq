@@ -21,9 +21,9 @@ namespace AfterSchool.Helpers
             var groupId = (int.TryParse(json?.groupid, out int parsedGroupId) ? parsedGroupId : 0);
 
             questions
-                .Where(ques => ((int) ques.FormQuestionGroupQuestionGroupDataTypeId == groupId &&
+                .Where(ques => ((((int) ques.FormQuestionGroupQuestionGroupDataTypeId == groupId &&
                     groupId != (int) QuestionGroupDataType.NotSet) ||
-                    ((groupId == 0 || groupId == -1) && formSectionUrl == ques.GroupTitle))
+                    ((groupId == 0 || groupId == -1) && formSectionUrl == ques.GroupTitle) ) && ques.IsActive))
                 .ToList()
                 .ForEach(ques =>
                 {
