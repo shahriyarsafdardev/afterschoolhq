@@ -11,6 +11,8 @@ using System.Linq;
 using System.Web;
 using AfterSchoolLibrary.Enums;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
+using AfterSchoolLibrary.Billing;
+
 namespace AfterSchoolLibrary.Helpers
 {
     public class EmailHelper
@@ -896,7 +898,8 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static void SendUpcomingSubscriptionPaymentReminder(SubscriptionSchedule schedule, DatabaseConnection dc = null)
+        public static void SendUpcomingSubscriptionPaymentReminder(SubscriptionSchedule schedule, bool isPendingChargeStatus = false,
+            DatabaseConnection dc = null)
         {
             var msgs = new SystemMessages();
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
@@ -904,18 +907,29 @@ namespace AfterSchoolLibrary.Helpers
             var participationObject = rsp.GetParticipationObject();
             var activity = participationObject.GetActivity();
             var description = $"{activity.Name}";
+            var ccFees = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(schedule.AmountInCents / 100.0m);
+            var content = "";
 
-            description += $"<br /><small>{(schedule.BillingPeriodType == @BillingPeriodType.Day ? "Daily" : 
-                schedule.BillingPeriodType.ToString() + "ly") + " subscription"}</small>";
+            if(isPendingChargeStatus)
+                content = "Payment for your monthly subscription with " + activity.Name + " by " + participationObject.OwnerAccount.Name + " is pending. You will receive another email when payment has cleared.";
+            else
+                content = "Payment for your monthly subscription with " + activity.Name + " by " + participationObject.OwnerAccount.Name + " will be processed in three days. You will receive a confirmation email when payment has been made.";
+            
+            description += $"<br /><small>" +
+                $"{(schedule.BillingPeriodType == @BillingPeriodType.Day ? "Daily" : schedule.BillingPeriodType.ToString() + "ly") + " subscription"}</small>";
 
             var registrationDetails = "Login to your account to view more details about this registration.";
+
+            var cost = schedule.AmountInCents / 100.0m;
+            var totalCost = isPendingChargeStatus ? cost + ccFees : cost;
+
             var loginLink = Utilities.LoginUrl();
 
             var chargeFeeModel = new NameValueCollection
             {
                 {"Description", description},
                 {"Quantity", "1"},
-                {"Cost", (schedule.AmountInCents/ 100.0m).ToCurrency()},
+                {"Cost", cost.ToCurrency()},
                 {"AdditionalDetails", ""},
             };
 
@@ -929,20 +943,19 @@ namespace AfterSchoolLibrary.Helpers
                     EmailTemplates.Registration_Confirmation_Table,
                     new NameValueCollection
                     {
-                        {"AmountDueOrPaid", ""},
-                        {"TotalCost", ""},
+                        {"AmountDueOrPaid", "Total Cost"},
+                        {"TotalCost", totalCost.ToCurrency()},
                         {"BodyRows", receiptRows},
-                        {"CreditCardFee", ""},
+                        {"CreditCardFee", isPendingChargeStatus ? ccFees.ToCurrency() : "-"},
                     },
                     "Registration_Confirmation_Table-1.0",
                     msgs);
 
             var model = new NameValueCollection
             {
+                {"Content", content},
                 {"FirstName", parent.FirstName},
                 {"RegistrationTable", registrationTable},
-                {"ActivityName", activity.Name},
-                {"Provider", participationObject.OwnerAccount.Name},
                 {"ActivityContactName", activity.ContactName},
                 {"ActivityContactPhone", participationObject.ContactPhone.IsNotEmpty() ?
                     $"either by phone ({participationObject.ContactPhone}) or": "by"},
@@ -951,7 +964,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"RegistrationDetails", registrationDetails},
             };
 
-            var subject = $"Upcoming subscription payment for {activity.Name}";
+            var subject = $"{(isPendingChargeStatus ? "Pending" : "Upcoming")} subscription payment for {activity.Name}";
             var body = ProcessTemplate(
                 EmailTemplates.Upcoming_Subscription_Payment,
                 model,

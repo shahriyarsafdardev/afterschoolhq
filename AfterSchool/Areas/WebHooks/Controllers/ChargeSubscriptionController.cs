@@ -1,5 +1,6 @@
 using AfterSchool.Models;
 using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -244,12 +245,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 {
                     subscriptionSchedule.IsCancelled = true;
                     subscriptionSchedule.NextBillDate = null;
+                    subscriptionSchedule.EndDate = DateTime.UtcNow;
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
                 }
             }
             else
             {
                 subscriptionPaymentHistory.Status = LastChargeStatus.pending;
+                EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
             }
 
             msgs.AddRange(subscriptionSchedule.Save());
