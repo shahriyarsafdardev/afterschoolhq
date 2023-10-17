@@ -816,21 +816,22 @@ namespace AfterSchoolLibrary.Models
                 ? $"a.ActivityTypeId = {(int) ActivityType.VolunteerOpportunity}"
                 : $"a.ActivityTypeId != {(int) ActivityType.VolunteerOpportunity}";
 
+            var regStatusCondition = "";
             if (hasRegStatus)
             {
-                regStatusJoin = "inner join ActivitySchedule acts on a.ActivityScheduleId = acts.ID";
+                regStatusJoin = "left join ActivitySchedule acts on a.ActivityScheduleId = acts.ID";
                 var firstDateOfWeek = DateTime.UtcNow.FirstDateOfWeek().Date;
                 var lastDateOfWeek = firstDateOfWeek.AddDays(7);
                 switch (regStatus)
                 {
                     case RegistrationStatus.Past:
-                        regStatusWhere = $"acts.EndDate < '{firstDateOfWeek}'";
+                        regStatusCondition = $"(acts.StartDate < '{firstDateOfWeek}') or (a.ActivityScheduleId is null and r2.CreateDate <= DATEADD(day, -90, GETDATE()))";
                         break;
                     case RegistrationStatus.Current:
-                        regStatusWhere = $"acts.StartDate < '{lastDateOfWeek}' and acts.EndDate >= '{firstDateOfWeek}'";
+                        regStatusCondition = $"(acts.StartDate < '{lastDateOfWeek}' and acts.EndDate >= '{firstDateOfWeek}') or (a.ActivityScheduleId is null and r2.CreateDate > DATEADD(day, -90, GETDATE()))";
                         break;
                     case RegistrationStatus.Future:
-                        regStatusWhere = $"acts.StartDate >= '{lastDateOfWeek}'";
+                        regStatusCondition = $"acts.StartDate >= '{lastDateOfWeek}'";
                         break;
                 }
             }
@@ -846,23 +847,35 @@ namespace AfterSchoolLibrary.Models
                 ? (whereClause.IsNotEmpty() ? " and " : "") + regStatusWhere
                 : "";
             whereClause += (whereClause.IsNotEmpty() ? " and " : "") + activityTypeWhere;
+
+            if (regStatusCondition.IsNotEmpty())
+            {
+                if (whereClause.IsNotEmpty())
+                {
+                    whereClause = "(" + whereClause + ") and (" + regStatusCondition + ")";
+                }
+                else
+                {
+                    whereClause = regStatusCondition;
+                }
+            }
             whereClause = $@"where 
-                                r2.AccountId = {accountId} and 
-                                r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList()})" +
-                          (whereClause.IsNotEmpty() ? $" and {whereClause}" : "");
+                        r2.AccountId = {accountId} and 
+                        r2.CompletionStatusId in ({ValidCompletionStatus.Select(x => (int) x).ToStrings().ToStringList()})" +
+                          (whereClause.IsNotEmpty() ? $" and ({whereClause})" : "");
 
             var select = @"r.*,
-                            reg.FirstName as RegistrantFirstName,
-                            reg.LastName as RegistrantLastName,
-                            reg.Email as RegistrantEmail,
-                            reg.RegistrantTypeId as RegistrantRegistrantTypeId,
-                            reg.Uid as RegistrantUid,
-                            reg.Phone as RegistrantPhone,
-                            reg.Company as RegistrantCompany";
+                    reg.FirstName as RegistrantFirstName,
+                    reg.LastName as RegistrantLastName,
+                    reg.Email as RegistrantEmail,
+                    reg.RegistrantTypeId as RegistrantRegistrantTypeId,
+                    reg.Uid as RegistrantUid,
+                    reg.Phone as RegistrantPhone,
+                    reg.Company as RegistrantCompany";
 
             var orderBy = @"order by
-                                reg.FirstName,
-                                reg.LastName";
+                    reg.FirstName,
+                    reg.LastName";
 
             if (getCount)
             {
@@ -871,25 +884,25 @@ namespace AfterSchoolLibrary.Models
             }
 
             var sql = $@"select {select}
-                        from 
-	                        Registration r inner join
-                            Registrant reg on r.RegistrantId = reg.ID
-                        where
-	                        r.FirstRegistrationId is null and
-                            r.IsDeleted = {isDeleted.ToInteger()} and
-                            r.AccountId = {accountId} and
-	                        r.ID in 
-	                        (
-		                        select 
-			                        isnull(r2.FirstRegistrationId, r2.ID)
-		                        from
-			                        Registration r2
-                                    {searchTextJoin}
-			                        {activityJoin}
-			                        {regStatusJoin}
-		                        {whereClause}
-	                        )
-                        {orderBy}";
+                from 
+                    Registration r inner join
+                    Registrant reg on r.RegistrantId = reg.ID
+                where
+                    r.FirstRegistrationId is null and
+                    r.IsDeleted = {isDeleted.ToInteger()} and
+                    r.AccountId = {accountId} and
+                    r.ID in 
+                    (
+                        select 
+                            isnull(r2.FirstRegistrationId, r2.ID)
+                        from
+                            Registration r2
+                            {searchTextJoin}
+                            {activityJoin}
+                            {regStatusJoin}
+                        {whereClause}
+                    )
+                {orderBy}";
 
             return sql;
         }
