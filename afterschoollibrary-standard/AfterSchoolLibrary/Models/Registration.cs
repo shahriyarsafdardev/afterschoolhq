@@ -164,6 +164,12 @@ namespace AfterSchoolLibrary.Models
             set => MDV["PaymentTypeFeePayerAccountId"].Value = value;
         }
 
+        public int? CouponUsedByAccountId
+        {
+            get => (int?) MDV["CouponUsedByAccountId"].Value;
+            set => MDV["CouponUsedByAccountId"].Value = value;
+        }
+
         /// <summary>
         ///     which account is paying the convenience fee
         /// </summary>
@@ -239,6 +245,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "StripeSourceId", SqlDbType.NVarChar, "100");
                 _dp.Add(className, "CostPerClass", SqlDbType.Money);
                 _dp.Add(className, "PaymentTypeFeePayerAccountId", SqlDbType.Int);
+                _dp.Add(className, "CouponUsedByAccountId", SqlDbType.Int);
                 _dp.Add(className, "ConvenienceFeePayerAccountId", SqlDbType.Int);
                 _dp.Add(className, "CouponId", SqlDbType.Int);
                 _dp.Add(className, "CouponValue", SqlDbType.Decimal, "10,2");
@@ -436,6 +443,10 @@ namespace AfterSchoolLibrary.Models
 
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["PaymentTypeFeePayerAccountId"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["CouponUsedByAccountId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
             dps = new DatabaseParameters();
@@ -1156,7 +1167,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["CouponId"], CouponId);
             dq.Criterias.Add(ObjectMap["IsDeleted"], false);
-            dq.Criterias.Add(ObjectMap["PaymentTypeFeePayerAccountId"], PurchaserAccountId);
+            dq.Criterias.Add(ObjectMap["CouponUsedByAccountId"], PurchaserAccountId);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
         
