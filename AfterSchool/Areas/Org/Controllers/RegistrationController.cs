@@ -39,11 +39,16 @@ namespace AfterSchool.Areas.Org.Controllers
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
             var (registrations, totalCount) =
-                LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, msgs, pageNumber, recordsPerPage);
+                LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, currentUser.ID.Value, msgs, pageNumber, recordsPerPage);
             var activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
-            var groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            var groups = new List<ActivityGroup>();
+            if (currentUserType.IsNotEmpty() && currentUserType == UserType.ProgramDirector)
+                groups = GetActivityGroups(getVolunteers, currentAccount, currentUser.ID.Value, activities, msgs);
+            else
+                groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
@@ -756,7 +761,7 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         private static (List<Registration> registrations, int totalCount) LoadSearch(string activity, List<ActivityGroup> selectedGroups, string searchText,
-            string registrationStatusNumber, string at, bool getVolunteers, Account currentAccount, SystemMessages msgs = null, int? pageNumber = null,
+            string registrationStatusNumber, string at, bool getVolunteers, Account currentAccount, int? currentUserId = null, SystemMessages msgs = null, int? pageNumber = null,
             int? recordsPerPage = null)
         {
             if (msgs.IsEmpty())
@@ -787,10 +792,10 @@ namespace AfterSchool.Areas.Org.Controllers
                 : RegistrationStatus.NotSet;
 
             var registrations = currentAccount.SearchRegistrations(searchText, null, activityIds, ParticipationObjectType.Activity, registrationStatus,
-                registrationAssignmentTypes, start, recordsPerPage, getVolunteers, msgs);
+                registrationAssignmentTypes, start, recordsPerPage, getVolunteers, currentUserId, msgs);
 
             var totalCount = currentAccount.SearchRegistrationCount(searchText, null, activityIds, ParticipationObjectType.Activity, registrationStatus,
-                registrationAssignmentTypes, getVolunteers, msgs);
+                registrationAssignmentTypes, getVolunteers, currentUserId, msgs);
 
             return (registrations, totalCount);
         }
@@ -819,9 +824,16 @@ namespace AfterSchool.Areas.Org.Controllers
 
         private static List<Activity> GetActivities(bool getVolunteers, Account currentAccount, WebUser currentUser, SystemMessages msgs)
         {
-            var allActivities = currentAccount
-                .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
-                .OrderBy(x => x.Name).ToList();
+            var allActivities = new List<Activity>();
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            if(userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+                allActivities = currentAccount
+                       .GetActivities(UserType.ProgramDirector, currentUser, null, null, false, false, null, msgs: msgs)
+                       .OrderBy(x => x.Name).ToList();
+            else 
+                allActivities = currentAccount
+                    .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
+                    .OrderBy(x => x.Name).ToList();
 
             return getVolunteers
                 ? allActivities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
@@ -833,12 +845,23 @@ namespace AfterSchool.Areas.Org.Controllers
             return getVolunteers ? new List<ActivityGroup>() : currentAccount.GetActivityGroups(msgs);
         }
 
+        private static List<ActivityGroup> GetActivityGroups(bool getVolunteers, Account currentAccount,int userId, List<Activity> activities, SystemMessages msgs)
+        {
+            var groups = new List<ActivityGroup>();
+            var groupIds = activities.Where(x => x.ActivityGroupId.IsNotEmpty()).Select(group => group.ActivityGroupId.Value).ToList();
+            groupIds.AddRange(currentAccount.GetActivityGroups(msgs).Where(x => x.CreatedBy == userId && !groupIds.Contains(x.ID.Value)).Select(x => x.ID.Value).ToList());
+            if(msgs.HasNoErrors() && groupIds.IsNotEmpty() && groupIds.Any())
+                groups = currentAccount.GetActivityGroups(groupIds, msgs);
+
+            return getVolunteers ? new List<ActivityGroup>() : groups;
+        }
         [HttpGet]
         public ActionResult Messages(string pn, string rpp, string volunteers)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -850,15 +873,30 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var start = recordsPerPage * (pageNumber - 1);
             var length = recordsPerPage;
-
-            var activityMessages = currentAccount.GetActivityMessages(start, length, msgs);
-
-            var totalCount = currentAccount.GetActivityMessageCount(msgs);
+            var activityMessages = new List<ActivityMessage>();
+            var totalCount = 0;
+            if (currentUserType.IsNotEmpty() && currentUserType == UserType.ProgramDirector)
+            {
+                activityMessages = currentAccount.GetActivityMessages(start, length, currentUser.ID.Value, msgs);
+                totalCount = currentAccount.GetActivityMessageCount(currentUser.ID.Value, msgs);
+            }   
+            else
+            {
+                activityMessages = currentAccount.GetActivityMessages(start, length, msgs: msgs);
+                totalCount = currentAccount.GetActivityMessageCount(msgs:msgs);
+            }
+                
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
 
-            ViewBag.Activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
-            ViewBag.Groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            var activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
+            var groups = new List<ActivityGroup>();
+            if (currentUserType.IsNotEmpty() && currentUserType == UserType.ProgramDirector)
+                groups = GetActivityGroups(getVolunteers, currentAccount, currentUser.ID.Value, activities, msgs);
+            else
+                groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
             ViewBag.SearchBarReadOnly = false;
 
             ViewBag.Messages = msgs;
@@ -894,11 +932,18 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
-            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, msgs);
-            ViewBag.Activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
-            ViewBag.Groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, currentUser.ID.Value, msgs);
+            var activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
+            var groups = new List<ActivityGroup>();
+            if (currentUserType.IsNotEmpty() && currentUserType == UserType.ProgramDirector)
+                groups = GetActivityGroups(getVolunteers, currentAccount, currentUser.ID.Value, activities, msgs);
+            else
+                groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
             ViewBag.SelectedActivities = GetSelectedActivities(activity, currentAccount, msgs);
             ViewBag.SelectedGroups = selectedGroups;
             ViewBag.SearchBarReadOnly = true;
@@ -918,6 +963,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
@@ -927,9 +973,15 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityMessage am = null;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
-            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, msgs);
-            ViewBag.Activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
-            ViewBag.Groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, currentUser.ID.Value, msgs);
+            var activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
+            var groups = new List<ActivityGroup>();
+            if (currentUserType.IsNotEmpty() && currentUserType == UserType.ProgramDirector)
+                groups = GetActivityGroups(getVolunteers, currentAccount, currentUser.ID.Value, activities, msgs);
+            else
+                groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
+            ViewBag.Activities = activities;
+            ViewBag.Groups = groups;
             ViewBag.SelectedActivities = GetSelectedActivities(activity, currentAccount, msgs);
             ViewBag.SelectedGroups = selectedGroups;
             ViewBag.SearchBarReadOnly = true;

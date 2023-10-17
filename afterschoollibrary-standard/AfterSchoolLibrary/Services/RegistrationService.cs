@@ -381,7 +381,7 @@ namespace AfterSchoolLibrary.Services
             var registrations = reportType == RegistrationReportType.DismissalForHostedActivities
                 ? AccountService.SearchRegistrationsByActivityIds(participationObjectIds, msgs, dc)
                 : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
-                    getVolunteers, msgs, dc);
+                    getVolunteers, msgs:msgs, dc:dc);
 
             var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, getVolunteers, msgs,
                 dc);

@@ -268,15 +268,20 @@ namespace AfterSchoolLibrary.Services
             return ActivityMessage.LoadByAccountId(account.ID.Value, msgs, dc);
         }
 
-        public static List<ActivityMessage> GetActivityMessages(this Account account, int? start, int? length,
+        public static List<ActivityMessage> GetActivityMessages(this Account account, int? start, int? length, int? userId = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
+            if(userId.IsNotEmpty())
+                return ActivityMessage.LoadByAccountIdByCreatedBy(account.ID.Value, (int)userId, start, length, msgs, dc);
+
             return ActivityMessage.LoadByAccountId(account.ID.Value, start, length, msgs, dc);
         }
 
-        public static int GetActivityMessageCount(this Account account, SystemMessages msgs = null,
+        public static int GetActivityMessageCount(this Account account, int? userId = null, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
+            if(userId.IsNotEmpty())
+                return ActivityMessage.GetCountByAccountIdByCreatedBy(account.ID.Value,(int)userId, msgs, dc);
             return ActivityMessage.GetCountByAccountId(account.ID.Value, msgs, dc);
         }
 
@@ -805,16 +810,16 @@ namespace AfterSchoolLibrary.Services
 
         #region Contacts
 
-        public static int SearchContactCount(this Account account, string searchtext, int? contactListId,
+        public static int SearchContactCount(this Account account, string searchtext, List<int> registantIds, int? contactListId,
             DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrantCount(searchtext, contactListId, account.ID.Value, dc: dc);
+            return Registrant.SearchRegistrantCount(searchtext, registantIds, contactListId, account.ID.Value, dc: dc);
         }
 
-        public static List<Registrant> SearchContacts(this Account account, string searchtext, int? contactListId,
+        public static List<Registrant> SearchContacts(this Account account, string searchtext, List<int> registrantIds, int? contactListId,
             int? start = null, int? length = null, DatabaseConnection dc = null)
         {
-            return Registrant.SearchRegistrants(searchtext, contactListId, account.ID.Value, start, length, dc: dc);
+            return Registrant.SearchRegistrants(searchtext, registrantIds, contactListId, account.ID.Value, start, length, dc: dc);
         }
 
         public static int GetContactCount(this Account account, DatabaseConnection dc = null)
@@ -828,14 +833,18 @@ namespace AfterSchoolLibrary.Services
             return Registrant.LoadByAccountIdByIsDeleted(account.ID.Value, false, start, length, dc: dc);
         }
 
-        public static List<ContactList> GetContactLists(this Account account, int? start = null, int? length = null,
+        public static List<ContactList> GetContactLists(this Account account,  int? start = null, int? length = null, int? userId = null,
             DatabaseConnection dc = null)
         {
+            if(userId.IsNotEmpty())
+                return ContactList.LoadByAccountIdByCreatedBy(account.ID.Value, (int)userId, start, length, dc: dc);
             return ContactList.LoadByAccountId(account.ID.Value, start, length, dc: dc);
         }
 
-        public static int GetContactListCount(this Account account, DatabaseConnection dc = null)
+        public static int GetContactListCount(this Account account, int? userId = null, DatabaseConnection dc = null)
         {
+            if(userId.IsNotEmpty())
+                return ContactList.GetCount(criterias: new Hashtable { { "AccountId", account.ID.Value },{"CreatedBy", (int)userId} }, dc: dc);
             return ContactList.GetCount(criterias: new Hashtable {{"AccountId", account.ID.Value}}, dc: dc);
         }
 
@@ -2169,11 +2178,11 @@ namespace AfterSchoolLibrary.Services
         public static List<Registration> SearchRegistrations(this Account account, string searchText, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length,
-            bool getVolunteers,
+            bool getVolunteers, int? currentUserId = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.Search(searchText, account.ID.Value, questionId, participationObjectIds,
-                participationObjectType, regStatus, rats, start, length, getVolunteers, msgs: msgs, dc: dc);
+                participationObjectType, regStatus, rats, start, length, getVolunteers, currentUserId, msgs, dc);
         }
 
         public static List<Registration> SearchRegistrationsByActivityIds(List<int> activityIds, SystemMessages msgs, DatabaseConnection dc)
@@ -2183,11 +2192,11 @@ namespace AfterSchoolLibrary.Services
 
         public static int SearchRegistrationCount(this Account account, string searchText, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
-            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
+            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, int? currentUserId = null, 
+            SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds,
-                participationObjectType, regStatus, rats, getVolunteers, msgs: msgs, dc: dc);
+                participationObjectType, regStatus, rats, getVolunteers, msgs, dc, currentUserId);
         }
 
         public static void CreateNewRegistrantAndRegistration(this Account account,

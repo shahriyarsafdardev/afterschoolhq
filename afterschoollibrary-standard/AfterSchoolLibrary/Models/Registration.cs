@@ -753,12 +753,14 @@ namespace AfterSchoolLibrary.Models
         private static string GetSearchSql(string searchText, int accountId, int? questionId,
             RegistrationStatus regStatus, bool getVolunteers, List<int> participationObjectIds = null,
             ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet,
-            List<RegistrationAssignmentType> rats = null, bool getCount = false, bool isDeleted= false)
+            List<RegistrationAssignmentType> rats = null, bool getCount = false, bool isDeleted= false, int? currentUserId = null)
         {
             var searchTextJoin = "";
             var whereClause = "";
             var searchTextWhere = "";
-
+            var userId = currentUserId.IsEmpty() ? 0 : (int)currentUserId;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(accountId, userId, false)?.UserTypeId;
+            
             if (searchText.IsNotBlank())
             {
                 searchTextJoin = "inner join FormQuestionAnswer fqa on r2.ID = fqa.RegistrationId";
@@ -795,10 +797,13 @@ namespace AfterSchoolLibrary.Models
             var activityJoin = "";
             var assignmentTypeWhere = "";
             var activityIdWhere = "";
-
-
-            activityJoin =
-                $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int) participationObjectType}";
+            
+            if(userId > 0 && userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+                activityJoin =
+                    $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int)participationObjectType} inner join ActivityWebUser awu on awu.WebUserId = {userId} and awu.ActivityId = a.ID";
+            else
+                activityJoin =
+                    $"inner join RegistrantActivity ra on r2.ID = ra.RegistrationId inner join Activity a on ra.ParticipationObjectId = a.ID and ra.ParticipationObjectTypeId = {(int) participationObjectType}";
 
             if (hasAssignmentTypes)
                 assignmentTypeWhere =
@@ -955,13 +960,12 @@ namespace AfterSchoolLibrary.Models
         public static List<Registration> Search(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, int? start, int? length,
-            bool getVolunteers, SystemMessages msgs = null, DatabaseConnection dc = null)
+            bool getVolunteers, int? currentUserId = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            // var dq = GetSearchQuery(searchText, accountId, questionId, regStatus, participationObjectIds, participationObjectType, rats, msgs, dc);
             var dq = DatabaseQuery;
             dq.Connection = dc;
             var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
-                participationObjectType, rats);
+                participationObjectType, rats, currentUserId:currentUserId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
 
@@ -1006,12 +1010,12 @@ namespace AfterSchoolLibrary.Models
         public static int SearchCount(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
             RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, SystemMessages msgs = null,
-            DatabaseConnection dc = null)
+            DatabaseConnection dc = null, int? currentUserId = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             var sql = GetSearchSql(searchText, accountId, questionId, regStatus, getVolunteers, participationObjectIds,
-                participationObjectType, rats, true);
+                participationObjectType, rats, getCount:true, currentUserId:currentUserId);
             return dq.ExecuteSelect(sql).Rows[0][0].ToString().ToInteger();
         }
 

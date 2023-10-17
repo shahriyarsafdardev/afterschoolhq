@@ -517,7 +517,7 @@ namespace AfterSchoolLibrary.Models
             return RegistrantActivity.LoadByRegistrantId(ID.Value, assignmentTypes, msgs, dc).ToList();
         }
 
-        private static DatabaseQuery SearchRegistrantsQuery(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
+        private static DatabaseQuery SearchRegistrantsQuery(string searchText, List<int> registrantIds, int? contactListId, int accountId, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -554,6 +554,8 @@ namespace AfterSchoolLibrary.Models
 
                 dq.Criterias.Add(dcsAnd);
             }
+            if (registrantIds.IsNotEmpty() && registrantIds.Any())
+                dq.Criterias.Add(ObjectMap["Id"], registrantIds, DatabaseCriteriaOperatorEnum.In);
 
             dq.OrderBys.Add(ObjectMap["FirstName"], OrderByDirectionEnum.Ascending);
             dq.OrderBys.Add(ObjectMap["LastName"], OrderByDirectionEnum.Ascending);
@@ -561,15 +563,15 @@ namespace AfterSchoolLibrary.Models
             return dq;
         }
 
-        public static int SearchRegistrantCount(string searchText, int? contactListId, int accountId, DatabaseConnection dc = null)
+        public static int SearchRegistrantCount(string searchText, List<int> registranrtIds, int? contactListId, int accountId, DatabaseConnection dc = null)
         {
-            return SearchRegistrantsQuery(searchText, contactListId, accountId, dc).GetCount();
+            return SearchRegistrantsQuery(searchText, registranrtIds, contactListId, accountId, dc).GetCount();
         }
 
-        public static List<Registrant> SearchRegistrants(string searchText, int? contactListId, int accountId, int? start, int? length,
+        public static List<Registrant> SearchRegistrants(string searchText, List<int> registrantIds, int? contactListId, int accountId, int? start, int? length,
             DatabaseConnection dc = null)
         {
-            var dq = SearchRegistrantsQuery(searchText, contactListId, accountId, dc);
+            var dq = SearchRegistrantsQuery(searchText, registrantIds, contactListId, accountId, dc);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);

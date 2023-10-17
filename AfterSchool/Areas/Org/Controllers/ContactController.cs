@@ -46,6 +46,10 @@ namespace AfterSchool.Areas.Org.Controllers
             int pageNumber = 1;
             int recordsPerPage = 10;
 
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+
             if (pn.IsNumber() && pn.ToInteger() > 0)
             {
                 pageNumber = pn.ToInteger();
@@ -61,13 +65,30 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalCount = 0;
             int? selectedList = Request["list"].IsNumber() ? Request["list"].ToInteger() : new int?();
             var query = Request["q"];
+            var registrantIds = new List<int>();
 
-            totalCount = SessionVariables.CurrentAccount.SearchContactCount(Request["q"], selectedList);
-            registrants = SessionVariables.CurrentAccount.SearchContacts(Request["q"], selectedList, start, length);
+            if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+            {
+                var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value)
+                .Select(a => a.ActivityId.Value).ToList();
+                foreach (var id in activityIdsByWebUser)
+                    registrantIds.AddRange(RegistrantActivity
+                    .LoadByParticipationObject(id, ParticipationObjectType.Activity)
+                    .Select(x => x.RegistrantId)
+                    .Where(x => x.HasValue)
+                    .Select(x => x.Value)
+                    .ToList());
+
+            }
+
+            totalCount = SessionVariables.CurrentAccount.SearchContactCount(Request["q"], registrantIds, selectedList);
+            registrants = SessionVariables.CurrentAccount.SearchContacts(Request["q"], registrantIds, selectedList, start, length);
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
-
-            ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value).OrderBy(x => x.Name).ToList();
+            if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value).Where(x => x.CreatedBy == (int)currentUser.ID.Value).OrderBy(x => x.Name).ToList();
+            else
+                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value).OrderBy(x => x.Name).ToList();
             ViewBag.SelectedList = selectedList;
             ViewBag.Query = query;
             ViewBag.Messages = new SystemMessages();
@@ -475,6 +496,9 @@ namespace AfterSchool.Areas.Org.Controllers
             var lists = new List<ContactList>();
             int pageNumber = 1;
             int recordsPerPage = 10;
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
             {
@@ -490,8 +514,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var length = recordsPerPage;
             var totalCount = 0;
 
-            totalCount = SessionVariables.CurrentAccount.GetContactListCount();
-            lists = SessionVariables.CurrentAccount.GetContactLists(start, length);
+            if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+            {
+                totalCount = currentAccount.GetContactListCount(currentUser.ID.Value);
+                lists = currentAccount.GetContactLists(start, length, currentUser.ID.Value);
+            }
+            else
+            {
+                totalCount = currentAccount.GetContactListCount();
+                lists = currentAccount.GetContactLists(start, length);
+            }
+            
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
