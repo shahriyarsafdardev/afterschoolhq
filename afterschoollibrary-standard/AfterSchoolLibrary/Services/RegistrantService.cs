@@ -305,7 +305,7 @@ namespace AfterSchoolLibrary.Services
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
                     destinationAccountId: stripeAccountId,
-                    platformFee: null,
+                    platformFee: checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc),
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
                     totalAmount: subscriptionFees,
                     description: subscriptionSchedule.Description,

@@ -142,15 +142,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
 
             var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
-
-            // TODO: commenting for now as dont have stripeInvoice
-            //if (stripeInvoice.TransferData.IsNotEmpty())
-            //{
-            //    amountReceivedByProvider = (decimal) stripeInvoice.TransferData.Amount / 100;
-            //    if (amountPaidByParent - paymentTypeFeeOverrideAmount - convenienceFeeOverrideAmount != amountReceivedByProvider)
-            //        convenienceFeeOverrideAmount = amountPaidByParent - paymentTypeFeeOverrideAmount.Value - amountReceivedByProvider.Value;
-            //}
-
+            
             var checkoutObject = new CheckoutObject()
             {
                 PayingAccount = purchasingAccount,
