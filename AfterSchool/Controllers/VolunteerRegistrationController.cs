@@ -282,6 +282,12 @@ namespace AfterSchool.Controllers
 
             var registration = Registration.LoadByUid(id.ToGuid(), msgs);
             var (participationObject, assignmentType) = RegistrationCommon.GetParticipationObjectFromRegistration(registration, msgs);
+            if (participationObject.IsEmpty())
+            {
+                msgs.Add("No activity found for the current user", MessageType.Error);
+                return Redirect($"~/404.html");
+            }
+                
             var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
             var profile = account.GetAccountProfile(msgs);
             var currentUser = SessionVariables.CurrentUser;
