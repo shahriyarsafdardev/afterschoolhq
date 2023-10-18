@@ -1,11 +1,8 @@
 using AfterSchoolAdHoc;
-using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Newtonsoft.Json;
-using System.Drawing.Text;
-using AfterSchoolLibrary.Integrations;
 
 internal class Program
 {
