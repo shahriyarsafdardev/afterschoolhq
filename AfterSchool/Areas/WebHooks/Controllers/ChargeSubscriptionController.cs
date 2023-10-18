@@ -116,8 +116,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var isAmountProrated = false;
 
             // TODO: potentially problematic as the plan may have changed
-            var convenienceFeeOverrideAmount = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
-            var paymentTypeFeeOverrideAmount = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
+            var convenienceFee = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
+            var paymentTypeFee = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
             var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
 
@@ -126,22 +126,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
 
-            if (isAmountProrated)
-            {
-                if (paymentType == PaymentType.CreditCard)
-                    paymentTypeFeeOverrideAmount = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(amountPaidByParent);
-                else
-                    paymentTypeFeeOverrideAmount = 0;
-                var calcObj = new FeeCalculationObject(
-                                amountPaidByParent - paymentTypeFeeOverrideAmount.Value,
-                                billingAccount,
-                                plan.IsConvenienceFeeTakenOutOfCost,
-                                msgs);
-
-                convenienceFeeOverrideAmount = calcObj.GetConvenienceFee();
-            }
-
-            var amountReceivedByProvider = amountPaidByParent - (convenienceFeeOverrideAmount + paymentTypeFeeOverrideAmount);
+            var amountReceivedByProvider = amountPaidByParent - (convenienceFee + paymentTypeFee);
             
             var checkoutObject = new CheckoutObject()
             {
@@ -151,8 +136,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 AmountPaidByParent = amountPaidByParent,
                 AmountReceivedByProvider = amountReceivedByProvider,
                 IsAmountProRated = isAmountProrated,
-                ConvenienceFeeOverrideAmount = convenienceFeeOverrideAmount,
-                PaymentTypeFeeOverrideAmount = paymentTypeFeeOverrideAmount,
+                ConvenienceFeeOverrideAmount = convenienceFee,
+                PaymentTypeFeeOverrideAmount = paymentTypeFee,
                 ParticipationObject = participationObject,
                 PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
                 PaymentType = rsp.PaymentTypeId,
@@ -191,8 +176,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 PaymentSourceType.AfterSchoolPlatform,
                 usePlatformFees ? platFormFlatFee : new decimal?(),
                 usePlatformFees ? platformPercentFee : new decimal?(),
-                convenienceFeeOverrideAmount, //need to revisit
-                paymentTypeFeeOverrideAmount ?? 0, // need to revisit
+                convenienceFee,
+                paymentTypeFee ?? 0, 
                 subscriptionPaymentHistory.StripeChargeId,
                 subscriptionSchedule.Description,
                 DateTime.UtcNow,
