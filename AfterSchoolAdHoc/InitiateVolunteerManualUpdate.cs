@@ -285,6 +285,55 @@ namespace AfterSchoolAdHoc
             return previousTask.IsNotEmpty() && previousTask.Task == TaskStatus.ReviewBackground && previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
         }
 
+        public static void UpdateVolunteerStatus(SterlingCredentials credentials, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var backgroundCheckList = BackgroundCheck.LoadByResultByIsActive(SterlingBackgroundCheckResult.Clear, dc: dc, msgs: msgs);
+            var sToken = InititiateVolunteerBackgroundCheck.CreateSterlingToken(credentials);
+            var passedCount = 0;
+            var failedCount = 0;
+            var failedWebUserIdList = new List<int>();
+            foreach (var bgCheck in backgroundCheckList)
+            {
+                var (clientScreening, jsonRes) = GetScreening(bgCheck.SterlingCandidateId, credentials, sToken.Token);
+                if (clientScreening?.ReportItems.Count >= 5)
+                {
+                    var isVolunteerPassed = clientScreening.ReportItems.All(reportItem =>
+                        reportItem.Result is "clear" or "complete" or "unperformable" or "passed"
+                        && reportItem.Status is "complete") && clientScreening.Result.ToLower() is "clear"
+                        or "passed" && clientScreening.Status.ToLower() is "complete" or "archive";
+                    if (isVolunteerPassed)
+                    {
+                        passedCount += 1;
+                    }
+                    else
+                    {
+                        failedCount += 1;
+                        failedWebUserIdList.Add(bgCheck.WebUserId);
+                    }
+
+                    if (!isVolunteerPassed)
+                    {
+                        VolunteerTaskService.CreateNewTask(bgCheck.WebUserId,
+                            TaskStatus.ReviewBackground,
+                            ApplicationStatus.FailedBackgroundCheck,
+                            bgCheck.RequestedForFiscalAccountId,
+                            null,
+                            msgs,
+                            dc);
+                    }
+                    else
+                    {
+                        bgCheck.BackgroundCheckStatusId = BackgroundCheckStatus.Archive;
+                        bgCheck.BackgroundCheckResultId = SterlingBackgroundCheckResult.Passed;
+                        msgs.AddRange(bgCheck.Save(dc));
+                    }
+                }
+            }
+
+            Console.WriteLine(
+                $"Passed Candidates Count : {passedCount} and Failed Candidates Count : {failedCount} and failed WebUserID's : {string.Join(", ", failedWebUserIdList)}");
+        }
+
         private record bgRecord
         {
             public string ScreeningId { get; set; }

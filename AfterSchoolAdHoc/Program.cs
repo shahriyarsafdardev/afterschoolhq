@@ -57,6 +57,7 @@ internal class Program
 
         // FormDataFix.Run(msgs, dc);
         //InititiateVolunteerBackgroundCheck.Run(sterlingCred, msgs, dc);
-        InitiateVolunteerManualUpdate.Run(sterlingCred, msgs, dc);
+        //InitiateVolunteerManualUpdate.Run(sterlingCred, msgs, dc);
+        InitiateVolunteerManualUpdate.UpdateVolunteerStatus(sterlingCred, msgs, dc);
     }
 }

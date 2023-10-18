@@ -282,6 +282,16 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["ID"], 1, DatabaseCriteriaOperatorEnum.NotEqualTo);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
+        
+        public static List<BackgroundCheck> LoadByResultByIsActive(SterlingBackgroundCheckResult backgroundCheckResult, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["BackgroundCheckResultId"], (int)backgroundCheckResult);
+            dq.Criterias.Add(ObjectMap["IsActive"], 1);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
 
     }
 }

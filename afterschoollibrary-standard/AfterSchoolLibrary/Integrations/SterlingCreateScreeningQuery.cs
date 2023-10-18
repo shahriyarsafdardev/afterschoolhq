@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Policy;
 using System.Threading.Tasks;
 using Emmersion.Http;
@@ -97,8 +98,34 @@ namespace AfterSchoolLibrary.Integrations
 
         [JsonProperty(PropertyName = "status")]
         public string Status { get; set; }
+        
+        [JsonProperty(PropertyName = "reportItems")]
+        
+        public List<SterlingScreenReportItems> ReportItems { get; set; }
+        
         [JsonProperty(PropertyName = "updatedAt")]
         public DateTime UpdatedAt { get; set; }
+    }
+
+    public class SterlingScreenReportItems
+    {
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+
+        [JsonProperty(PropertyName = "status")]
+        public string Status { get; set; }
+
+        [JsonProperty(PropertyName = "result")]
+        public string Result { get; set; }
+
+        [JsonProperty(PropertyName = "updatedAt")]
+        public DateTime UpdatedAt { get; set; }
+        
+        [JsonProperty(PropertyName = "estimatedCompletionTime")]
+        public DateTime EstimatedCompletionTime { get; set; }
     }
 
     public class SterlingScreeningInviteResponse
