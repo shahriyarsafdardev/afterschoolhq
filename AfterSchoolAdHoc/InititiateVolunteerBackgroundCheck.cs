@@ -345,7 +345,7 @@ internal class InititiateVolunteerBackgroundCheck
 
         try
         {
-            var responseBody = JsonConvert.DeserializeObject<Payload>(json);
+            var responseBody = (Payload)JsonConvert.DeserializeObject<Payload>(json);
 
             if (responseBody.reportItems.Count() < 5)
             {
@@ -370,7 +370,7 @@ internal class InititiateVolunteerBackgroundCheck
             if (responseBody.result != "")
             {
 
-                var passedResultCriterias = new string[] { "clear", "passed" };
+                string[] passedResultCriterias = new string[] { "clear", "passed" };
                 var passedStatusCriterias = new string[] { "complete", "archive" };
                 var considerResultCriterias = new string[] { "review", "consider" };
                 var isPassedScreen = passedResultCriterias.Contains(responseBody.result.ToLower()) && passedStatusCriterias.Contains((string) responseBody.status.ToLower());
