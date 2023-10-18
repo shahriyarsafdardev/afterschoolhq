@@ -9,6 +9,7 @@ using AfterSchoolLibrary.Services;
 using Newtonsoft.Json;
 using BasicLibrary;
 using Newtonsoft.Json.Linq;
+using BasicLibrary.DataAccess;
 
 namespace AfterSchool.Areas.WebHooks.Controllers
 {
@@ -28,8 +29,20 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var payload = parsedObject["payload"].ToString();
                 var responseBody = JsonConvert.DeserializeObject<Payload>(payload);
 
+                if (responseBody.reportItems != null && responseBody.reportItems.Count() < 5)
+                {
+                    msgs.Add(new SystemMessage("Missing report items!", MessageType.ApiError));
+                    return Ok(msgs);
+                }
+
                 List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
                 var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
+
+                if (IsPreviouslyApproved(latestBackgroundCheck.WebUserId, msgs))
+                {
+                    msgs.Add(new SystemMessage("Volunteer already approved!", MessageType.Confirmation));
+                    return Ok(msgs);
+                }
 
                 if (responseBody.result != "")
                 {
@@ -45,8 +58,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
 
-                    if (responseBody.result == "Clear")
-                    {
+                    if (IsAllClear(responseBody.reportItems) && responseBody.result == "Clear")
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -56,9 +68,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             DateTime.UtcNow,
                             msgs
                         );
-                        
-                    }
-                    if (responseBody.result == "Consider")
+
+                    else if (IsAnyConsider(responseBody.reportItems) && !IsPreviouslyTaskCreated(latestBackgroundCheck.WebUserId, msgs))
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
                             ApplicationStatus.FailedBackgroundCheck,
@@ -116,6 +127,28 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
             AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
         }
+
+        private bool IsAnyConsider(IEnumerable<ReportItem> reportItems)
+        {
+            return reportItems.Any(item=>item.Status.ToLower() == "consider");
+        }
+
+        private bool IsAllClear(IEnumerable<ReportItem> reportItems)
+        {
+            return reportItems.All(item => item.Status.ToLower() == "clear");
+        }
+
+        private bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs, dc);
+            return approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
+        }
+
+        private bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs, dc);
+            return previousTask.Task == TaskStatus.ReviewBackground && previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
+        }
     }
 
     public class Payload
@@ -131,5 +164,29 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         [JsonProperty(PropertyName = "result")]
         public string result { get; set; }
+
+        [JsonProperty(PropertyName = "reportItems")]
+        public IEnumerable<ReportItem> reportItems { get; set; }
+    }
+
+    public class ReportItem
+    {
+        [JsonProperty(PropertyName = "id")]
+        public string ID { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+        
+        [JsonProperty(PropertyName = "status")]
+        public string Status { get; set; }
+        
+        [JsonProperty(PropertyName = "result")]
+        public string Result { get; set; }
+        
+        [JsonProperty(PropertyName = "updatedAt")]
+        public DateTime UpdatedAt { get; set; }
+        
+        [JsonProperty(PropertyName = "estimatedCompletionTime")]
+        public DateTime EstimatedCompletionTime { get; set; }
     }
 }
