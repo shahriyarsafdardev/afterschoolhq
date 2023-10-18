@@ -15,6 +15,8 @@ using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
+using System.Windows.Interop;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
@@ -717,18 +719,61 @@ namespace AfterSchool.Areas.Api.Controllers
                                 if (stdRegistrant.ID != currentRegistrant.ID && stdRegistrant.IsMaster &&
                                     stdRegistrant.ProfileStatusId == RegistrantProfileStatus.NotSet)
                                 {
-                                        var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
-                                            currentUser.ID.Value, msgs, adc);
-                                        msgs.AddRange(stdRegistrant.Delete(adc));
-                                        if (registrantWebUser.IsNotEmpty())
-                                            msgs.AddRange(registrantWebUser.Delete(adc));
+                                    var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(stdRegistrant.ID.Value,
+                                        currentUser.ID.Value, msgs, adc);
+                                    msgs.AddRange(stdRegistrant.Delete(adc));
+                                    if (registrantWebUser.IsNotEmpty())
+                                        msgs.AddRange(registrantWebUser.Delete(adc));
                                 }
                             });
                         }
 
+                        if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && currentRegistrant.PersonTypeId == RegistrantPersonType.Student)
+                        {
+                            ValidateEmailsForStudentRegistration(currentUser.Email, parent1Email, amsgs);
+
+                            if (amsgs.HasNoErrors())
+                            {
+                                var parentUser = currentAccount.InviteParentUser(
+                                    firstName: parent1FirstName,
+                                    lastName: parent1LastName,
+                                    email: parent1Email,
+                                    phone: parent1Phone,
+                                    message:
+                                    $"{currentUser.FirstName} has created an account on AfterSchool HQ to register for {participationObject?.GetBrowseUrl()}.",
+                                    userType: UserType.Owner,
+                                    canUseExistingUserAccount: true,
+                                    loggedInUser: currentUser,
+                                    msgs: amsgs,
+                                    dc: adc);
+
+                                var parentRegistrant = currentAccount.CreateParentOrStudentRegistrant(
+                                     firstName: parentUser.FirstName,
+                                     lastName: parentUser.LastName,
+                                     email: parentUser.Email,
+                                     registrantOwner: parentUser,
+                                     canBeAccessedBy: parentUser.AsList(),
+                                     registrantType: RegistrantType.Individual,
+                                     isMaster: true,
+                                     isParentOrGuardian: true,
+                                     allowTextMessages: true,
+                                     schoolLocationId: null,
+                                     profileStatus: RegistrantProfileStatus.Completed,
+                                     loggedInUser: currentUser,
+                                     msgs: amsgs,
+                                     dc: adc);
+
+                                //currentRegistrant.AddUserWithAccess(
+                                //    parentUser,
+                                //    currentUser,
+                                //    amsgs);
+                            }
+
+                        }
+
                         if (currentUserPersonType != RegistrantPersonType.Adult && json.newChild != 1)
                         {
-                            if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty())
+                            if (json.groupid.ToInteger() == (int) QuestionGroupDataType.Parent1Information && parentRegistrant.IsEmpty() && currentRegistrant.PersonTypeId != RegistrantPersonType.Student)
                             {
                                 var parent1Reg = currentAccount.CreateParentOrStudentRegistrant(
                                     registrantOwner: currentUser,
@@ -1141,6 +1186,40 @@ namespace AfterSchool.Areas.Api.Controllers
                 );
 
             return formQuestionAnswerDtoList;
+        }
+        private List<KeyValuePair<FormQuestion, string>> GetQuestionAnswerModel(List<FormQuestionViewModel> qvms,
+    bool isParent = false)
+        {
+            //prepare a model of question and answers that we can pass to service layer
+            var model = new List<KeyValuePair<FormQuestion, string>>();
+            foreach (var qvm in qvms)
+                switch (qvm.Question.QuestionDataTypeId)
+                {
+                    case QuestionDataType.RegistrantFirstName:
+                    case QuestionDataType.RegistrantLastName:
+                    case QuestionDataType.RegistrantEmail:
+                        if (!isParent)
+                            model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question,
+                                qvm.Value?.Split(',')?[0].Trim()));
+                        else
+                            model.Add(new KeyValuePair<FormQuestion, string>(qvm.Question,
+                                qvm.Value?.Split(',')?[1].Trim()));
+                        break;
+                    default:
+                        if (!isParent)
+                            model.Add(
+                                new KeyValuePair<FormQuestion, string>(qvm.Question, qvm.Value.IfEmpty("").Trim()));
+                        break;
+                }
+
+            return model;
+        }
+
+        private static void ValidateEmailsForStudentRegistration(string email, string parentEmail, SystemMessages msgs)
+        {
+            if (email.IsSameAs(parentEmail))
+                msgs.Add("Parent email cannot be the same as your student email address when creating a login account",
+                    MessageType.UserError);
         }
 
     }
