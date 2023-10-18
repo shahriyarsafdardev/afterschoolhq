@@ -825,7 +825,7 @@ namespace AfterSchoolLibrary.Models
                 switch (regStatus)
                 {
                     case RegistrationStatus.Past:
-                        regStatusCondition = $"(acts.StartDate < '{firstDateOfWeek}') or (a.ActivityScheduleId is null and r2.CreateDate <= DATEADD(day, -90, GETDATE()))";
+                        regStatusCondition = $"(acts.EndDate < '{firstDateOfWeek}') or (a.ActivityScheduleId is null and r2.CreateDate <= DATEADD(day, -90, GETDATE()))";
                         break;
                     case RegistrationStatus.Current:
                         regStatusCondition = $"(acts.StartDate < '{lastDateOfWeek}' and acts.EndDate >= '{firstDateOfWeek}') or (a.ActivityScheduleId is null and r2.CreateDate > DATEADD(day, -90, GETDATE()))";
