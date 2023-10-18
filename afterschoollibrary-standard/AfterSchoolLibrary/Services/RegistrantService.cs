@@ -295,11 +295,9 @@ namespace AfterSchoolLibrary.Services
             //run first charge 
             if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
             {
-                var subscriptionFees = checkoutObject.SubscriptionPlan?.CostPerPeriod ?? 0;
+                var amount = checkoutObject.SubscriptionPlan?.CostPerPeriod ?? 0;
 
-                if (plan.PaymentStartTypeId.Equals(PlanPaymentStartType.WhenActivityStarts) || plan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) &&
-                    (subscriptionSchedule.ProrateFirstCharge ?? false))
-                    subscriptionFees = SubscriptionScheduleService.CalculateProratedAmount(firstRenewalDate, DateTime.UtcNow, subscriptionFees);
+                amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, amount);
 
                 //make seperate function for this
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
@@ -307,7 +305,7 @@ namespace AfterSchoolLibrary.Services
                     destinationAccountId: stripeAccountId,
                     platformFee: checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc),
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
-                    totalAmount: subscriptionFees,
+                    totalAmount: amount,
                     description: subscriptionSchedule.Description,
                     statementDescriptor: "AHQ Subscription charge",
                     metaData: metaData,

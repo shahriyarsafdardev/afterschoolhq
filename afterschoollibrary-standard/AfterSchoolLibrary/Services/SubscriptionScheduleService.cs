@@ -172,5 +172,18 @@ namespace AfterSchoolLibrary.Services
             var currentMonthTotalDays = DateTime.DaysInMonth(purchaseDate.Year, purchaseDate.Month);
             return (diffInDays / currentMonthTotalDays).ToDecimal() * fullChargeAmount;
         }
+
+        public static Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount)
+        {
+            //if this is last payment
+            if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
+                return CalculateProratedAmount((DateTime) schedule.LastDateToBill, DateTime.UtcNow, amount);
+
+            //if this is first payment
+            if (schedule.StartDate.Equals(DateTime.UtcNow) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
+                return CalculateProratedAmount((DateTime) schedule.FirstRenewal, DateTime.UtcNow, amount);
+
+            return amount;
+        }
     }
 }
