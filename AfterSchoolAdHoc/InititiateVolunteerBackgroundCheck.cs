@@ -19,6 +19,7 @@ using System.Globalization;
 using Org.BouncyCastle.Ocsp;
 using System.Net;
 using Amazon.DynamoDBv2.Model;
+using System.Linq;
 
 namespace AfterSchoolAdHoc;
 
@@ -346,14 +347,35 @@ internal class InititiateVolunteerBackgroundCheck
         {
             var responseBody = JsonConvert.DeserializeObject<Payload>(json);
 
-            BackgroundCheck latestBackgroundCheck = BackgroundCheck.LoadByCandidateIdActive(responseBody.candidateId, msgs, dc);
+            if (responseBody.reportItems.Count() < 5)
+            {
+                msgs.Add(new SystemMessage("Missing report items!", MessageType.ApiError));
+                return msgs;
+            }
+
+            List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
+            var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
+
+            if (IsPreviouslyApproved(latestBackgroundCheck.WebUserId, msgs))
+            {
+                msgs.Add(new SystemMessage("Volunteer already approved!", MessageType.Confirmation));
+                return msgs;
+            }
+            else if (IsPreviouslyTaskCreated(latestBackgroundCheck.WebUserId, msgs))
+            {
+                msgs.Add(new SystemMessage("Volunteer Task already created!", MessageType.Confirmation));
+                return msgs;
+            }
 
             if (responseBody.result != "")
             {
 
-                latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
-
-                if (responseBody.result == "Passed")
+                var passedResultCriterias = new string[] { "clear", "passed" };
+                var passedStatusCriterias = new string[] { "complete", "archive" };
+                var considerResultCriterias = new string[] { "review", "consider" };
+                var isPassedScreen = passedResultCriterias.Contains(responseBody.result.ToLower()) && passedStatusCriterias.Contains((string) responseBody.status.ToLower());
+                var isConsiderScreen = considerResultCriterias.Contains(responseBody.result.ToLower());
+                if (IsAllClear(responseBody.reportItems) && isPassedScreen)
                     VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                         latestBackgroundCheck.RequestedForFiscalAccountId,
                         ApprovalStatus.Approved,
@@ -361,18 +383,16 @@ internal class InititiateVolunteerBackgroundCheck
                         DateTime.UtcNow.AddYears(1),
                         null,
                         DateTime.UtcNow,
-                        msgs,
-                        dc
+                        msgs
                     );
 
-                else if (responseBody.result == "Consider")
+                else if (IsAnyConsider(responseBody.reportItems) && isConsiderScreen)
                     VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                         TaskStatus.ReviewBackground,
                         ApplicationStatus.FailedBackgroundCheck,
                         latestBackgroundCheck.RequestedForFiscalAccountId,
                         null,
-                        msgs,
-                        dc);
+                        msgs);
 
                 latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus) Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
 
@@ -419,6 +439,30 @@ internal class InititiateVolunteerBackgroundCheck
         return new List<bgRecord>();
     }
 
+    private static bool IsAnyConsider(IEnumerable<ReportItem> reportItems)
+    {
+        var criterias = new string[] { "consider", "review" };
+        return reportItems.Any(item => criterias.Contains(item.Result.ToLower()));
+    }
+
+    private static bool IsAllClear(IEnumerable<ReportItem> reportItems)
+    {
+        var criterias = new string[] { "clear", "passed", "complete", "unperformable" };
+        return reportItems.All(item => item.Status.ToLower().Equals("complete") && criterias.Contains(item.Result.ToLower()));
+    }
+
+    private static bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+    {
+        var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs, dc);
+        return approvalEntry.IsNotEmpty() && approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
+    }
+
+    private static bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+    {
+        var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs, dc);
+        return previousTask.IsNotEmpty() && previousTask.Task == TaskStatus.ReviewBackground && previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
+    }
+
     private record bgRecord
     {
         public string ScreeningId { get; set; }
@@ -444,6 +488,30 @@ internal class InititiateVolunteerBackgroundCheck
 
         [JsonProperty(PropertyName = "result")]
         public string result { get; set; }
+
+        [JsonProperty(PropertyName = "reportItems")]
+        public IEnumerable<ReportItem> reportItems { get; set; }
+    }
+
+    public class ReportItem
+    {
+        [JsonProperty(PropertyName = "id")]
+        public string ID { get; set; }
+
+        [JsonProperty(PropertyName = "type")]
+        public string Type { get; set; }
+
+        [JsonProperty(PropertyName = "status")]
+        public string Status { get; set; }
+
+        [JsonProperty(PropertyName = "result")]
+        public string Result { get; set; }
+
+        [JsonProperty(PropertyName = "updatedAt")]
+        public DateTime UpdatedAt { get; set; }
+
+        [JsonProperty(PropertyName = "estimatedCompletionTime")]
+        public DateTime EstimatedCompletionTime { get; set; }
     }
 
 }
