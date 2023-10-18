@@ -389,7 +389,7 @@ Public Class DateRange
     ''' <param name="bDateRange"></param>
     ''' <returns></returns>
     Public Function Overlaps(ByVal bDateRange As DateRange) As Boolean
-        Return If(Me.StartDate > bDateRange.StartDate, Me.StartDate, bDateRange.StartDate) < If(Me.EndDate < bDateRange.EndDate, Me.EndDate, bDateRange.EndDate)
+        Return If(Me.StartDate > bDateRange.StartDate, Me.StartDate, bDateRange.StartDate) <= If(Me.EndDate < bDateRange.EndDate, Me.EndDate, bDateRange.EndDate)
     End Function
 
     Public Function IsValid() As Boolean
@@ -422,6 +422,87 @@ Public Class DateRange
         For i As Integer = 0 To list.Count - 1
             For j As Integer = i + 1 To list.Count - 1
                 If HasOverlappingDates(list(i), list(j)) Then
+                    Return True
+                End If
+            Next
+        Next
+        Return False
+    End Function
+
+End Class
+
+<Serializable()>
+Public Class TimeRange
+
+    Private _StartTime As TimeSpan
+    Public Property StartTime() As TimeSpan
+        Get
+            Return _StartTime
+        End Get
+        Set(ByVal value As TimeSpan)
+            _StartTime = value
+        End Set
+    End Property
+
+    Private _EndTime As TimeSpan
+    Public Property EndTime() As TimeSpan
+        Get
+            Return _EndTime
+        End Get
+        Set(ByVal value As TimeSpan)
+            _EndTime = value
+        End Set
+    End Property
+
+    Public Sub New()
+
+    End Sub
+
+    Public Sub New(startTime As TimeSpan, endTime As TimeSpan)
+        Me.StartTime = startTime
+        Me.EndTime = endTime
+    End Sub
+
+    ''' <summary>
+    ''' http://stackoverflow.com/questions/325933/determine-whether-two-date-ranges-overlap#325964
+    ''' var doesOverlap = (startTime1 > startTime2 ? startTime1  startTime2) islessthan (endTime1 islessthan endTime2 ? endTime1 : endTime2);
+    ''' </summary>
+    ''' <param name="bTimeRange"></param>
+    ''' <returns></returns>
+    Public Function Overlaps(ByVal bTimeRange As TimeRange) As Boolean
+        Return If(Me.StartTime > bTimeRange.StartTime, Me.StartTime, bTimeRange.StartTime) <= If(Me.EndTime < bTimeRange.EndTime, Me.EndTime, bTimeRange.EndTime)
+    End Function
+
+    Public Function IsValid() As Boolean
+        Return If(StartTime < EndTime, True, False)
+    End Function
+
+    Public Shared Function HasOverlappingTimes(list1 As IEnumerable(Of TimeRange)) As Boolean
+        For i As Integer = 0 To list1.Count - 1
+            For j As Integer = i + 1 To list1.Count - 1
+                If list1(i).Overlaps(list1(j)) Then
+                    Return True
+                End If
+            Next
+        Next
+        Return False
+    End Function
+
+    Public Shared Function HasOverlappingTimes(list1 As IEnumerable(Of TimeRange), list2 As IEnumerable(Of TimeRange)) As Boolean
+        For i As Integer = 0 To list1.Count - 1
+            For j As Integer = 0 To list2.Count - 1
+                If list1(i).Overlaps(list2(j)) Then
+                    Return True
+                End If
+            Next
+        Next
+        Return False
+    End Function
+
+    Public Shared Function HasOverlappingTimes(list As IEnumerable(Of IEnumerable(Of TimeRange))) As Boolean
+        For i As Integer = 0 To list.Count - 1
+            For j As Integer = i + 1 To list.Count - 1
+                If HasOverlappingTimes(list(i), list(j)) Then
                     Return True
                 End If
             Next

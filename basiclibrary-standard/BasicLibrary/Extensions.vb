@@ -162,6 +162,11 @@ Public Module Extensions
     End Function
 
     <Extension>
+    Public Function IsInRange(ByVal aDate As DateTime, ByVal range As DateRange) As Boolean
+        Return aDate >= range.StartDate And aDate <= range.EndDate
+    End Function
+
+    <Extension>
     Public Function ClosestDate(ByVal aDate As DateTime, ByVal list As IEnumerable(Of DateTime)) As DateTime
         Return list.ClosestDate(aDate)
         'Return list.OrderBy(Function(x) Math.Abs((aDate - x).Ticks)).First()

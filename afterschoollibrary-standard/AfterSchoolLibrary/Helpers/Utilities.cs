@@ -10,6 +10,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -389,5 +390,81 @@ namespace AfterSchoolLibrary.Helpers
         public int ContentLength { get; set; }
         public string FileName { get; set; }
         public Stream InputStream { get; set; }
+    }
+
+    public static class OverlappingUtilities
+    {
+
+        public static bool HasOverlappingVecotorRanges(Vector2 vector1, Vector2 vector2)
+        {
+            return Math.Max(vector1.X, vector2.X) <= Math.Min(vector1.Y, vector2.Y);
+        }
+
+        public static bool HasOverlappingDateRanges(DateRange dateRange1, DateRange dateRange2)
+        {
+            return dateRange1.Overlaps(dateRange2);
+        }
+
+        public static bool HasOverlappingTimeRanges(TimeRange timeRange1, TimeRange timeRange2)
+        {
+            return timeRange1.Overlaps(timeRange2);
+        }
+
+        public static bool HasOverlappingLists<T>(IEnumerable<T> list1, IEnumerable<T> list2)
+        {
+            return list1.Intersect(list2).Count() > 0;
+        }
+
+        public static bool InstanceScheduleTimeOverlaps(ActivityInstance activityInstance, ActivitySchedule activitySchedule)
+        {
+            var timeRange1 = new TimeRange()
+            {
+                StartTime = (activityInstance.StartDateTime ?? DateTime.MinValue).TimeOfDay,
+                EndTime = (activityInstance.EndDateTime ?? DateTime.MaxValue).TimeOfDay
+            };
+            var timeRange2 = new TimeRange()
+            {
+                StartTime = (activitySchedule.DailyStartTime ?? DateTime.MinValue).TimeOfDay,
+                EndTime = (activitySchedule.DailyEndTime ?? DateTime.MaxValue).TimeOfDay
+            };
+            return OverlappingUtilities.HasOverlappingTimeRanges(timeRange1, timeRange2);
+        }
+
+        public static List<(ActivityInstance, ActivityInstance)> GetOverlappingInstanceDates(IEnumerable<ActivityInstance> sessionInstance1, IEnumerable<ActivityInstance> sessionInstance2)
+        {
+            var overlappingInstance = new List<(ActivityInstance, ActivityInstance)>();
+            foreach (var ins1 in sessionInstance1)
+            {
+                foreach (var ins2 in sessionInstance2)
+                {
+                    if (ins1.StartDateTime?.Date == ins2.StartDateTime?.Date)
+                    {
+                        overlappingInstance.Add((ins1, ins2));
+                        break;
+                    }
+                }
+            }
+            return overlappingInstance;
+        }
+
+        public static bool HasOverlapingInstanceTimes(List<(ActivityInstance, ActivityInstance)> overlappedSessionInstance)
+        {
+            foreach (var sessionInstance in overlappedSessionInstance)
+            {
+                var dateRange1 = new DateRange()
+                {
+                    StartDate = sessionInstance.Item1.StartDateTime ?? DateTime.MinValue,
+                    EndDate = sessionInstance.Item1.EndDateTime ?? DateTime.MaxValue,
+                };
+                var dateRange2 = new DateRange()
+                {
+                    StartDate = sessionInstance.Item2.StartDateTime ?? DateTime.MinValue,
+                    EndDate = sessionInstance.Item2.EndDateTime ?? DateTime.MaxValue,
+                };
+                if (OverlappingUtilities.HasOverlappingDateRanges(dateRange1, dateRange2))
+                    return true;
+            }
+            return false;
+        }
     }
 }
