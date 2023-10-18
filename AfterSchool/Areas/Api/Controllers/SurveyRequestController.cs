@@ -164,8 +164,13 @@ namespace AfterSchool.Areas.Api.Controllers
                     .ToList()
                     .ForEach(qvm =>
                     {
-                    if (qvm.Question.IsRequired && qvm.Value.IsEmpty())
-                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+                        var isFileUpload = (qvm.Question.QuestionTypeId == QuestionType.FileUpload ||
+                                                 qvm.Question.QuestionTypeId == QuestionType.Photo ||
+                                                 qvm.Question.QuestionTypeId == QuestionType.Audio ||
+                                                 qvm.Question.QuestionTypeId == QuestionType.Video);
+
+                        if (qvm.Question.IsRequired && ((isFileUpload && Request.Files["question-" + qvm.Question.ID].IsEmpty()) || (!isFileUpload && qvm.Value.IsEmpty())))
+                            msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
                 });
 
                 Database.ExecuteTransaction

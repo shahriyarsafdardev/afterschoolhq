@@ -645,7 +645,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 // Get URL of client side
                 var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
 
-                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions, msgs), collection, formSectionURL, json, null, msgs);
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions, msgs), collection, formSectionURL, json.groupid.ToInteger(), Request, msgs);
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {

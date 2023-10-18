@@ -183,7 +183,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 // Get Client app URL
                 var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
 
-                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormVolunteerQuestions(questions), collection, formSectionURL, json, null, msgs);
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormVolunteerQuestions(questions), collection, formSectionURL, json.groupid.ToInteger(), Request, msgs);
 
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
