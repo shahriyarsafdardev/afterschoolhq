@@ -52,9 +52,13 @@ internal class InititiateVolunteerBackgroundCheck
 
             backgroundCheckUrl = CreateScreen(credentials, token.Token, candidateId);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 38a809227 (Code to manually update volunteer approval status from sterling with localhost callback in the payload)
+=======
+
+>>>>>>> 5268f5a2affbce57583d77b8f79e23146ca44aec
             var status = candidateId is null || backgroundCheckUrl is null
                 ? BackgroundCheckStatus.BackgroundCheckRequested
                 : BackgroundCheckStatus.EmailSentToVolunteer;
