@@ -58,7 +58,7 @@ namespace AfterSchool.Controllers
 
                     var amount = schedule.AmountInCents / 100.0m;
 
-                    amount = GetProratedAmount(schedule, amount);
+                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
 
@@ -70,24 +70,6 @@ namespace AfterSchool.Controllers
                 else
                     msgs.Add("StripeSourceId is empty", MessageType.Error);
             }
-        }
-
-        private Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount)
-        {
-            //if this is last payment
-            if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.LastDateToBill, amount);
-
-            //if this is first payment
-            if (schedule.PaymentsDone < 1 && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
-                return CalculateProratedAmount(DateTime.UtcNow, (DateTime) schedule.FirstRenewal, amount);
-
-            return amount;
-        }
-
-        private decimal CalculateProratedAmount(DateTime startDate, DateTime endDate, Decimal amount)
-        {
-            return SubscriptionScheduleService.CalculateProratedAmount(endDate, startDate, amount);
         }
 
         private Charge CreateCharge(SubscriptionSchedule schedule, RegistrantSubscriptionPlan rsp, decimal amount, SystemMessages msgs)
@@ -200,7 +182,7 @@ namespace AfterSchool.Controllers
 
                     var amount = schedule.AmountInCents / 100.0m;
 
-                    amount = GetProratedAmount(schedule, amount);
+                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
                     var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
