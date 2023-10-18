@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using Stripe;
+using Newtonsoft.Json;
+using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -184,6 +187,67 @@ namespace AfterSchoolLibrary.Services
                 return CalculateProratedAmount((DateTime) schedule.FirstRenewal, DateTime.UtcNow, amount);
 
             return amount;
+        }
+
+        public static SystemMessages UpdateSubscriptionAndPaymentRecordsAfterCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+            SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+
+            if (chargeStatus.Equals(LastChargeStatus.succeeded))
+            {
+                subscriptionSchedule.PaymentsDone += 1;
+
+                subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
+
+                //UpdateNextBillDateOnSuccess(subscriptionSchedule);
+
+                if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
+                    subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
+            }
+            else if (charge.Status.Equals(LastChargeStatus.failed))
+            {
+                msgs.Add("Charge failed", MessageType.Error);
+
+                if (subscriptionPaymentHistory.RetryNumber < 3)
+                {
+                    subscriptionSchedule.LastChargeStatus = LastChargeStatus.failed;
+                    subscriptionPaymentHistory.RetryNumber += 1;
+                }
+                else
+                {
+                    subscriptionSchedule.IsCancelled = true;
+                    subscriptionSchedule.NextBillDate = null;
+                    subscriptionSchedule.EndDate = DateTime.UtcNow;
+                    subscriptionSchedule.CancelledReason = "Payment for subscription failed";
+                }
+            }
+            else
+            {
+                subscriptionPaymentHistory.Status = LastChargeStatus.pending;
+            }
+
+            msgs.AddRange(subscriptionSchedule.Save());
+            msgs.AddRange(subscriptionPaymentHistory.Save());
+
+            return msgs;
+        }
+
+        private static void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule)
+        {
+            // was first payment 
+            if (subscriptionSchedule.PaymentsDone.Equals(1))
+                subscriptionSchedule.NextBillDate = subscriptionSchedule.FirstRenewal;
+
+            //was last payment
+            else if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+                subscriptionSchedule.NextBillDate = null;
+
+            else
+                subscriptionSchedule.NextBillDate = new SubscriptionPlan
+                {
+                    BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
+                }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
         }
     }
 }

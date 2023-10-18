@@ -192,12 +192,20 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static int GetCountBySubscriptionScheduleIdByStatus(Guid id, LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static int GetCountBySubscriptionScheduleIdByStatus(int id, LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], id);
             dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], status);
+            return dq.GetCount(msgs);
+        }
+
+        public static int GetCountBySubscriptionScheduleId(int id, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], id);
             return dq.GetCount(msgs);
         }
         #endregion

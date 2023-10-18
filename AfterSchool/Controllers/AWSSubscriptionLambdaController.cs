@@ -78,7 +78,7 @@ namespace AfterSchool.Controllers
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, null);
             var metaData = JsonConvert.DeserializeObject<Dictionary<string, string>>(schedule.Metadata);
 
-            metaData["PaymentNumber"] = (SubscriptionPaymentHistory.GetCountBySubscriptionScheduleIdByStatus(schedule.Uid,
+            metaData["PaymentNumber"] = (SubscriptionPaymentHistory.GetCountBySubscriptionScheduleIdByStatus((int)schedule.ID,
                 LastChargeStatus.succeeded, msgs) + 1).ToString();
 
             var paymentNumber = metaData["PaymentNumber"].ToInteger();
