@@ -29,7 +29,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var payload = parsedObject["payload"].ToString();
                 var responseBody = (Payload) JsonConvert.DeserializeObject<Payload>(payload);
 
-                if (responseBody.reportItems != null && responseBody.reportItems.Count() < 5)
+                if (responseBody.reportItems.Count() < 5)
                 {
                     msgs.Add(new SystemMessage("Missing report items!", MessageType.ApiError));
                     return Ok(msgs);
@@ -41,6 +41,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 if (IsPreviouslyApproved(latestBackgroundCheck.WebUserId, msgs))
                 {
                     msgs.Add(new SystemMessage("Volunteer already approved!", MessageType.Confirmation));
+                    return Ok(msgs);
+                }
+                else if (IsPreviouslyTaskCreated(latestBackgroundCheck.WebUserId, msgs))
+                {
+                    msgs.Add(new SystemMessage("Volunteer Task already created!", MessageType.Confirmation));
                     return Ok(msgs);
                 }
 
@@ -57,8 +62,12 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                     }
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
-
-                    if (IsAllClear(responseBody.reportItems) && responseBody.result == "Clear")
+                    var passedResultCriterias = new string[] { "clear", "passed" };
+                    var passedStatusCriterias = new string[] { "complete", "archive" };
+                    var considerResultCriterias = new string[] { "review", "consider" };
+                    var isPassedScreen = passedResultCriterias.Contains(responseBody.result.ToLower()) && passedStatusCriterias.Contains((string) responseBody.status.ToLower());
+                    var isConsiderScreen = considerResultCriterias.Contains(responseBody.result.ToLower());
+                    if (IsAllClear(responseBody.reportItems) && isPassedScreen)
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -69,7 +78,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs
                         );
 
-                    else if (IsAnyConsider(responseBody.reportItems) && !IsPreviouslyTaskCreated(latestBackgroundCheck.WebUserId, msgs))
+                    else if (IsAnyConsider(responseBody.reportItems) && isConsiderScreen)
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
                             ApplicationStatus.FailedBackgroundCheck,
@@ -130,24 +139,26 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private bool IsAnyConsider(IEnumerable<ReportItem> reportItems)
         {
-            return reportItems.Any(item=>item.Status.ToLower() == "consider");
+            var criterias = new string[] { "consider", "review" };
+            return reportItems.Any(item=> criterias.Contains(item.Result.ToLower()));
         }
 
         private bool IsAllClear(IEnumerable<ReportItem> reportItems)
         {
-            return reportItems.All(item => item.Status.ToLower() == "clear");
+            var criterias = new string[] { "clear", "passed", "complete", "unperformable" };
+            return reportItems.All(item => item.Status.ToLower().Equals("complete") && criterias.Contains(item.Result.ToLower()));
         }
 
         private bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs, dc);
-            return approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
+            return approvalEntry.IsNotEmpty() && approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
         private bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs, dc);
-            return previousTask.Task == TaskStatus.ReviewBackground && previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
+            return previousTask.IsNotEmpty() && previousTask.Task == TaskStatus.ReviewBackground && previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
         }
     }
 
