@@ -53,12 +53,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         private void ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule,
             SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
         {
-            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, chargeStatus, msgs);
+                    HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs);
                     CreatePaymentRecords(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, dc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
@@ -189,68 +187,22 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 dc);
 
                 if (msgs.HasNoErrors())
-                    checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                {
+                    if (chargeStatus.Equals(LastChargeStatus.failed))
+                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                    else
+                        EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
+                }
                 else
                     msgs.Add("Error creating Transaction record", MessageType.Error);
             }
         }
 
-        private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,
-            LastChargeStatus chargeStatus, SystemMessages msgs, DatabaseConnection dc = null)
+        private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+            SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (chargeStatus.Equals(LastChargeStatus.succeeded))
-            {
-                subscriptionSchedule.PaymentsDone += 1;
-
-                subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
-
-                //UpdateNextBillDateOnSuccess(subscriptionSchedule);
-
-                if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
-                    subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
-            }
-            else if (charge.Status.Equals(LastChargeStatus.failed))
-            {
-                msgs.Add("Charge failed", MessageType.Error);
-
-                if (subscriptionPaymentHistory.RetryNumber < 3)
-                {
-                    subscriptionSchedule.LastChargeStatus = LastChargeStatus.failed;
-                    subscriptionPaymentHistory.RetryNumber += 1;
-                }
-                else
-                {
-                    subscriptionSchedule.IsCancelled = true;
-                    subscriptionSchedule.NextBillDate = null;
-                    subscriptionSchedule.EndDate = DateTime.UtcNow;
-                    subscriptionSchedule.CancelledReason = "Payment for subscription failed";
-                }
-            }
-            else
-            {
-                subscriptionPaymentHistory.Status = LastChargeStatus.pending;
-                EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
-            }
-
-            msgs.AddRange(subscriptionSchedule.Save());
-            msgs.AddRange(subscriptionPaymentHistory.Save());
-        }
-
-        private void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule)
-        {
-            // was first payment 
-            if (subscriptionSchedule.PaymentsDone.Equals(1))
-                subscriptionSchedule.NextBillDate = subscriptionSchedule.FirstRenewal;
-
-            //was last payment
-            else if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
-                subscriptionSchedule.NextBillDate = null;
-
-            else
-                subscriptionSchedule.NextBillDate = new SubscriptionPlan
-                {
-                    BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
-                }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
+            msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
+                subscriptionPaymentHistory, msgs, dc));
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)

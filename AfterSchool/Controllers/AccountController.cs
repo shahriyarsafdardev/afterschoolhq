@@ -2235,6 +2235,19 @@ namespace AfterSchool.Controllers
             };
             var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, msgs);
 
+            var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)resultCheckoutObject.RegistrantSubscriptionPlan.SubscriptionScheduleUid, msgs);
+
+            var paymentCount = SubscriptionPaymentHistory.GetCountBySubscriptionScheduleId((int)subscriptionSchedule.ID, msgs);
+
+            if(paymentCount > 0)
+            {
+                var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)subscriptionSchedule.ID, msgs);
+                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(subscriptionPaymentHistory.StripeChargeId, msgs);
+
+                msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
+                subscriptionPaymentHistory, msgs, null));
+            }
+
             if (msgs.HasErrors())
                 return View("Payment");
 

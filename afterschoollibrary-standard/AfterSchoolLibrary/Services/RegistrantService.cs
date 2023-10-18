@@ -180,7 +180,7 @@ namespace AfterSchoolLibrary.Services
             var activity = participationObject.GetActivity();
             var billingAccount = checkoutObject.BillingAccount;
             var purchasingAccount = checkoutObject.PayingAccount;
-            var useStripeConnectedAccount = billingAccount.HasAccountPackageFeature(FeatureType.UseStripeConnectedAccount, msgs, dc);
+            var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
             var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
             var endDateTime = new DateTime?();
@@ -296,14 +296,14 @@ namespace AfterSchoolLibrary.Services
             if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
             {
                 var amount = checkoutObject.SubscriptionPlan?.CostPerPeriod ?? 0;
+                var platformFee = useStripeConnectedAccount ? checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc) : new decimal?();
 
                 amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, amount);
 
-                //make seperate function for this
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
-                    destinationAccountId: stripeAccountId,
-                    platformFee: checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc),
+                    destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
+                    platformFee: platformFee,
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
                     totalAmount: amount,
                     description: subscriptionSchedule.Description,
@@ -325,20 +325,6 @@ namespace AfterSchoolLibrary.Services
 
                     if(subscriptionPaymentHistory.IsEmpty())
                         msgs.Add("Payment history record not created", MessageType.Error);
-
-                    //was this first and last payment
-                    // TODO: Have to figure out how to update schedule here
-                    //var nextPaymentDate = (DateTime) new SubscriptionPlan
-                    //{
-                    //    BillingPeriodTypeId = plan.BillingPeriodTypeId
-                    //}.CalculateEndDateFromNumberOfPeriods(DateTime.UtcNow, 1);
-
-                    //if(plan.EndDate.HasValue && nextPaymentDate.IsBefore((DateTime)plan.EndDate))
-                    //{
-                    //    subscriptionSchedule.NextBillDate = nextPaymentDate;
-                    //    subscriptionSchedule.LastChargeStatus = chargeStatus;
-                    //    msgs.AddRange(subscriptionSchedule.Save());
-                    //}
                 }
             }
             checkoutObject.ProratingCalculation = proratingCalculation;
