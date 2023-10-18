@@ -2196,7 +2196,7 @@ namespace AfterSchoolLibrary.Services
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             return Registration.SearchCount(searchText, account.ID.Value, questionId, participationObjectIds,
-                participationObjectType, regStatus, rats, getVolunteers, msgs, dc, currentUserId);
+                participationObjectType, regStatus, rats, getVolunteers, currentUserId, msgs, dc);
         }
 
         public static void CreateNewRegistrantAndRegistration(this Account account,

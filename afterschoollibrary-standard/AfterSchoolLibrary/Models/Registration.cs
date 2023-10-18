@@ -1009,8 +1009,8 @@ namespace AfterSchoolLibrary.Models
 
         public static int SearchCount(string searchText, int accountId, int? questionId,
             List<int> participationObjectIds, ParticipationObjectType participationObjectType,
-            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, SystemMessages msgs = null,
-            DatabaseConnection dc = null, int? currentUserId = null)
+            RegistrationStatus regStatus, List<RegistrationAssignmentType> rats, bool getVolunteers, int? currentUserId = null, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

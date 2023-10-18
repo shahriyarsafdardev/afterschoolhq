@@ -153,12 +153,12 @@ namespace AfterSchoolLibrary.Models
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<ContactList> LoadByAccountIdByCreatedBy(int AccountId, int userId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<ContactList> LoadByAccountIdByCreatedBy(int AccountId, int UserId, int? start, int? length, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
-            dq.Criterias.Add(ObjectMap["CreatedBy"], userId);
+            dq.Criterias.Add(ObjectMap["CreatedBy"], UserId);
             dq.SelectRange.Start = start;
             dq.SelectRange.Length = length;
             dq.OrderBys.Add(ObjectMap["Name"], OrderByDirectionEnum.Ascending);
