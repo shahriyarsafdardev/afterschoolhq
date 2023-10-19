@@ -1499,7 +1499,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Act
             account.AddContact("Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
-            var searchContact = account.SearchContactCount("Test", null, dc:dc);
+            var searchContact = account.SearchContactCount("Test", null, null, dc);
 
             // Assert
             Assert.True(searchContact > 0);
