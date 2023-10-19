@@ -19,7 +19,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         {
             var msgs = new SystemMessages();
 
-            if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
+            /*if (!AfterSchoolLibrary.Helpers.Utilities.IsProduction)
                 return ReturnOK(msgs);
 
             try
@@ -93,8 +93,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(ex);
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
-            }
-
+            }*/
+            return ReturnOK(msgs);
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
