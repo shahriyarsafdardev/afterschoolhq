@@ -93,11 +93,14 @@ namespace AfterSchoolLibrary.Services
             return subscriptionSchedules;
         }
 
-        public static List<DateTime> GetPaymentDates(DateTime startDate, DateTime endDate, BillingPeriodType billingPeriodType)
+        public static List<DateTime> GetPaymentDates(DateTime startDate, DateTime firstRenewalDate, DateTime endDate, BillingPeriodType billingPeriodType)
         {
-            List<DateTime> paymentDates = new List<DateTime>();
+            List<DateTime> paymentDates = new List<DateTime>()
+            {
+                startDate
+            };
 
-            var currentPaymentDate = startDate;
+            var currentPaymentDate = firstRenewalDate;
 
             while (currentPaymentDate.IsOnOrBefore(endDate))
             {
@@ -159,8 +162,17 @@ namespace AfterSchoolLibrary.Services
                 else
                 {
                     var startDate = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? subscriptionPlan.StartDate : participationObject.StartDate;
-                    var chargeDates = GetPaymentDates((DateTime) startDate, (DateTime) endDate, billingPeriodType);
-                    firstRenewalDate = chargeDates.FirstOrDefault(chargeDate => chargeDate.IsAfter((DateTime)(startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)));
+                    var currentPaymentDate = (DateTime) startDate; 
+
+                    while (currentPaymentDate.IsBefore((DateTime) (startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)))
+                    {
+                        currentPaymentDate = (DateTime) new SubscriptionPlan
+                        {
+                            BillingPeriodTypeId = billingPeriodType
+                        }.CalculateEndDateFromNumberOfPeriods(currentPaymentDate, 1);
+                    }
+ 
+                    firstRenewalDate = currentPaymentDate;
                 }
             }
             else
