@@ -37,7 +37,7 @@ namespace AfterSchoolLibrary.Models
 
         public LastChargeStatus LastChargeStatus { get { return (LastChargeStatus) MDV["LastChargeStatus"].Value; } set { MDV["LastChargeStatus"].Value = value; } }
 
-        public string StripeConnectId { get { return (string) MDV["StripeConnectId"].Value; } set { MDV["StripeConnectId"].Value = value; } }
+        public string? StripeConnectId { get { return (string?) MDV["StripeConnectId"].Value; } set { MDV["StripeConnectId"].Value = value; } }
 
         public decimal AmountToConnectAccountInCents { get { return (decimal) MDV["AmountToConnectAccountInCents"].Value; } set { MDV["AmountToConnectAccountInCents"].Value = value; } }
 
@@ -127,8 +127,6 @@ namespace AfterSchoolLibrary.Models
                 msgs.Add("StripeCustomerId is required on SubscriptionSchedule object", MessageType.Error);
             if (this.StripeSourceId.IsEmpty())
                 msgs.Add("StripeSourceId is required on SubscriptionSchedule object", MessageType.Error);
-            if (this.StripeConnectId.IsEmpty())
-                msgs.Add("StripeConnectId is required on SubscriptionSchedule object", MessageType.Error);
             if (this.Description.IsEmpty())
                 msgs.Add("Description is required on SubscriptionSchedule object", MessageType.Error);
 
