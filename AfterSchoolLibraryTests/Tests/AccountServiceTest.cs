@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Billing;
@@ -1499,7 +1499,7 @@ namespace AfterSchoolLibraryTests.Tests
 
             // Act
             account.AddContact("Test", "Lastname", "test@test.com", "123-123-1234", accountOwner, msgs, dc);
-            var searchContact = account.SearchContactCount("Test", null, dc);
+            var searchContact = account.SearchContactCount("Test", null, dc:dc);
 
             // Assert
             Assert.True(searchContact > 0);
