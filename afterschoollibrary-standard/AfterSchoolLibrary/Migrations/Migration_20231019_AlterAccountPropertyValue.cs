@@ -13,10 +13,7 @@ namespace AfterSchoolLibrary.Migrations
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     var dq = new DatabaseQuery { Connection = adc };
-
-                    amsgs.AddRange(dq.ExecuteSql("ALTER FULLTEXT INDEX ON AccountProperty SET STOPLIST OFF;"));
                     amsgs.AddRange(dq.ExecuteSql("ALTER table AccountProperty alter column Value nvarchar(max) null;"));
-                    amsgs.AddRange(dq.ExecuteSql("ALTER FULLTEXT INDEX ON AccountProperty SET STOPLIST SYSTEM;"));
                 },
                 uniqueIdenfier: "Migration_20231019_AlterAccountPropertyValue",
                 msgs: msgs,
