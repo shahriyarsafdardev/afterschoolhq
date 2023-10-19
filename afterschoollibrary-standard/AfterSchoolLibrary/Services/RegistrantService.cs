@@ -295,10 +295,9 @@ namespace AfterSchoolLibrary.Services
             //run first charge 
             if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
             {
-                var amount = checkoutObject.SubscriptionPlan?.CostPerPeriod ?? 0;
                 var platformFee = useStripeConnectedAccount ? checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc) : new decimal?();
 
-                amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, amount);
+                var amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, subscriptionSchedule.AmountInCents / 100m);
 
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
@@ -320,7 +319,7 @@ namespace AfterSchoolLibrary.Services
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     var amountToStripe = StripeHelper.CalculateStripeFee(subscriptionSchedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
-                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount, DateTime.UtcNow.Date,
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount *100m, DateTime.UtcNow.Date,
                                 charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, amountToStripe, 0, msgs);
 
                     if(subscriptionPaymentHistory.IsEmpty())

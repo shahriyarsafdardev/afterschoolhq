@@ -9,6 +9,9 @@ using System.Runtime.InteropServices.ComTypes;
 using Stripe;
 using Newtonsoft.Json;
 using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
+using AfterSchoolLibrary.Billing;
+using AfterSchoolLibrary.Helpers;
+using Account = AfterSchoolLibrary.Models.Account;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -27,7 +30,7 @@ namespace AfterSchoolLibrary.Services
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
                 StartDate = startDateTime.Date,
-                AmountInCents = feeObject.Amount,
+                AmountInCents = (feeObject.Amount + feeObject.PaymentTypeFee) * 100,
                 EndDate = endDateTime,
                 FirstRenewal = firstRenewalDate,
                 ProrateFirstCharge = checkoutObject.SubscriptionPlan.ProrateFirstCharge,
@@ -195,7 +198,7 @@ namespace AfterSchoolLibrary.Services
                 return CalculateProratedAmount((DateTime) schedule.LastDateToBill, DateTime.UtcNow, amount);
 
             //if this is first payment
-            if (schedule.StartDate.Equals(DateTime.UtcNow) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
+            if (schedule.StartDate.Equals(DateTime.UtcNow.Date) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
                 return CalculateProratedAmount((DateTime) schedule.FirstRenewal, DateTime.UtcNow, amount);
 
             return amount;
@@ -239,6 +242,136 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(subscriptionSchedule.Save());
             msgs.AddRange(subscriptionPaymentHistory.Save());
 
+            return msgs;
+        }
+
+        public static SystemMessages CreatePaymentRecordsAfterCharge(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
+            Charge charge, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
+
+            var plan = rsp.GetSubscriptionPlan(msgs);
+            var registrant = rsp.GetRegistrant(msgs);
+            var masterRegistrant = registrant.GetMasterRegistrant(msgs);
+            var purchasingAccount = masterRegistrant.GetAccount(msgs);
+            var billingAccount = plan.GetAccount(msgs);
+            var participationObject = plan.GetParticipationObject(msgs);
+            var registrantActivity = RegistrantActivity.LoadByParticipationObjectByRegistrant(
+                participationObject.ObjectID.Value,
+                participationObject.ObjectType,
+                registrant.ID.Value, msgs);
+            var registration = registrantActivity.GetRegistration(msgs);
+
+            Account convenienceFeePayer;
+            Account creditCardFeePayer;
+
+            if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
+                convenienceFeePayer = purchasingAccount;
+            else
+                convenienceFeePayer = billingAccount;
+            if (rsp.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
+                creditCardFeePayer = purchasingAccount;
+            else
+                creditCardFeePayer = billingAccount;
+
+
+            var useConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
+            var usePlatformFees = useConnectedAccount && subscriptionPaymentHistory.AmountInCents.IsEmpty();
+            var platFormFlatFee = (!participationObject.IsRegistrationFree) ? billingAccount.GetPlatformConvenienceFlatFee(msgs, dc) : 0;
+            var platformPercentFee = billingAccount.GetPlatformConveniencePercentFee(msgs, dc);
+
+            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(rsp.StripeSubscriptionId, msgs);
+            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
+            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
+
+            var paymentType = rsp.PaymentTypeId;
+            var isAmountProrated = false;
+
+            // TODO: potentially problematic as the plan may have changed
+            var convenienceFee = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
+            var paymentTypeFee = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
+            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
+
+            var amountPaidByParent = subscriptionSchedule.AmountInCents;
+
+            if (paymentType == PaymentType.ACH)
+                stripeSubscriptionPrice -= calculatedFullCCFee;
+
+            isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
+
+            var amountReceivedByProvider = amountPaidByParent - (convenienceFee + paymentTypeFee);
+
+            var checkoutObject = new CheckoutObject()
+            {
+                PayingAccount = purchasingAccount,
+                BillingAccount = billingAccount,
+                OverrideAmount = amountPaidByParent,
+                AmountPaidByParent = amountPaidByParent,
+                AmountReceivedByProvider = amountReceivedByProvider,
+                IsAmountProRated = isAmountProrated,
+                ConvenienceFeeOverrideAmount = convenienceFee,
+                PaymentTypeFeeOverrideAmount = paymentTypeFee,
+                ParticipationObject = participationObject,
+                PaymentSourceType = PaymentSourceType.AfterSchoolPlatform,
+                PaymentType = rsp.PaymentTypeId,
+                StripeChargeId = charge.Id,
+                SubscriptionPlan = plan.PlanTypeId == SubscriptionPlanType.Subscription ? plan : null,
+                PaymentPlan = plan.PlanTypeId == SubscriptionPlanType.PaymentPlan ? plan : null,
+                MasterRegistrant = masterRegistrant,
+                NumberOfSeats = 1,
+                Registration = registration,
+                RegistrantSubscriptionPlan = rsp,
+                ConvenienceFeePayer = convenienceFeePayer,
+                CreditCardFeePayer = creditCardFeePayer,
+            };
+
+            if (chargeStatus.Equals(LastChargeStatus.succeeded))
+            {
+                billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
+                if (msgs.HasNoErrors())
+                    checkoutObject.PayingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
+                else
+                    msgs.Add("Error creating payment records", MessageType.Error);
+            }
+            else
+            {
+                TransactionService.CreateNew(
+                purchasingAccount,
+                billingAccount,
+                convenienceFeePayer,
+                creditCardFeePayer,
+                subscriptionPaymentHistory.AmountInCents,
+                participationObject?.Name,
+                null, // as we have'nt created purchase yet.
+                TransactionType.Charge,
+                rsp.PaymentTypeId,
+                PaymentSourceType.AfterSchoolPlatform,
+                usePlatformFees ? platFormFlatFee : new decimal?(),
+                usePlatformFees ? platformPercentFee : new decimal?(),
+                convenienceFee,
+                paymentTypeFee ?? 0,
+                subscriptionPaymentHistory.StripeChargeId,
+                subscriptionSchedule.Description,
+                DateTime.UtcNow,
+                useConnectedAccount,
+                null,
+                null,
+                null,
+                msgs,
+                dc);
+
+                if (msgs.HasNoErrors())
+                {
+                    if (chargeStatus.Equals(LastChargeStatus.failed))
+                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                    else
+                        EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
+                }
+                else
+                    msgs.Add("Error creating Transaction record", MessageType.Error);
+            }
             return msgs;
         }
 

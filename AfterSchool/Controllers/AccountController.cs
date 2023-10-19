@@ -2246,6 +2246,7 @@ namespace AfterSchool.Controllers
 
                 msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
                 subscriptionPaymentHistory, msgs, null));
+                msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, null));
             }
 
             if (msgs.HasErrors())
