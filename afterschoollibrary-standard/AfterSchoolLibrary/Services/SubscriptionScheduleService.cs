@@ -35,10 +35,10 @@ namespace AfterSchoolLibrary.Services
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,
-                StripeConnectId = "scid123",
+                StripeConnectId = checkoutObject.BillingAccount.StripeUserId,
                 AmountToConnectAccountInCents = feeObject.Amount - feeObject.ConvenienceFee,
                 LastDateToBill = lastDateToBill,
-                Description = "description", //???
+                Description = "Subscription for " + checkoutObject.ParticipationObject.Name,
                 NextBillDate = nextBillDate,
                 Metadata = metaData,
             };
