@@ -26,7 +26,7 @@ namespace AfterSchoolLibrary.Services
                 CreatedBy = loggedInUser?.ID.IfEmpty(0),
                 LastModifiedDate = DateTime.UtcNow,
                 LastModifiedBy = loggedInUser?.ID.IfEmpty(0),
-                StartDate = startDateTime,
+                StartDate = startDateTime.Date,
                 AmountInCents = feeObject.Amount,
                 EndDate = endDateTime,
                 FirstRenewal = firstRenewalDate,
@@ -201,11 +201,9 @@ namespace AfterSchoolLibrary.Services
                 subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
 
                 //UpdateNextBillDateOnSuccess(subscriptionSchedule);
-
-                if (subscriptionPaymentHistory.Status.Equals(LastChargeStatus.failed))
-                    subscriptionPaymentHistory.Status = LastChargeStatus.succeeded;
             }
-            else if (charge.Status.Equals(LastChargeStatus.failed))
+            
+            if (charge.Status.Equals(LastChargeStatus.failed))
             {
                 msgs.Add("Charge failed", MessageType.Error);
 
@@ -222,10 +220,9 @@ namespace AfterSchoolLibrary.Services
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
                 }
             }
-            else
-            {
-                subscriptionPaymentHistory.Status = LastChargeStatus.pending;
-            }
+
+            subscriptionSchedule.LastChargeStatus = chargeStatus;
+            subscriptionPaymentHistory.Status = chargeStatus;
 
             msgs.AddRange(subscriptionSchedule.Save());
             msgs.AddRange(subscriptionPaymentHistory.Save());
