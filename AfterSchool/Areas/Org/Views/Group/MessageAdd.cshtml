@@ -1,3 +1,4 @@
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model ActivityGroup
 @{
     ViewBag.Title = Model.AccountName;
@@ -59,10 +60,10 @@
                         <label class="control-label text-bold">Attachment(s)</label>
                         <div>
                             <div id="selected-files"></div>
-                                <div class="border-gray-bold">
-                                    <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
-                                    <label id="file-label" class="btn attachment-btn" for="file-input"><span class="media-middle">Choose File(s)</span><i class="icon s7-upload"></i></label>
-                                </div>
+                            <div class="border-gray-bold">
+                                <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
+                                <label id="file-label" class="btn attachment-btn" for="file-input"><span class="media-middle">Choose File(s)</span><i class="icon s7-upload"></i></label>
+                            </div>
                             <p class="text-muted">Max of 25 mb per file</p>
                         </div>
                     </div>
@@ -90,7 +91,7 @@
                     <div class="form-group">
                         <label class="control-label text-bold">
                             Select @UILabel.RegistrantLabel(true)
-                            <a href="javascript:selectAll()"class="xs-ml-40">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                            <a href="javascript:selectAll()" class="xs-ml-40">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
                         <div>
                             @for (int i = 0; i < 3; i++)
@@ -150,7 +151,7 @@
         updateMessageCount();
         const fileInput = document.getElementById("file-input");
         const selectedFiles = document.getElementById("selected-files");
-             
+
         fileInput.addEventListener("change", function () {
             let validFiles = [];
             selectedFiles.innerHTML = "";
@@ -164,7 +165,7 @@
                     const fileSizeKB = (file.size / 1024).toFixed(2);
                     const fileExtension = file.name.split('.').pop().toLowerCase();
 
-                    if (file.size > 26214400) {
+                    if (file.size > @Utilities.MessageFileSize) {
                         Notifications.showBar({
                             title: 'Error',
                             message: "File size exceeds the limit 25 MB",
@@ -179,7 +180,7 @@
                         });
                     }
                     else {
-                        if (totalFileSize + file.size > 52428800) {
+                        if (totalFileSize + file.size > @Utilities.MessageTotalFileSize) {
                             Notifications.showBar({
                                 title: 'Error',
                                 message: "Total file size exceeds the limit 50 MB",

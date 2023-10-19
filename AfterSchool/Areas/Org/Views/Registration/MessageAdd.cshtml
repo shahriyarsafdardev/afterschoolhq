@@ -1,3 +1,4 @@
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     ViewBag.Title = SessionVariables.CurrentAccount.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -11,7 +12,7 @@
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
     var sendButtonText = $"Send Messages";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
-    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
+    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
@@ -206,14 +207,14 @@
             const files = this.files;
             let totalFileSize = 0;
             let validExtensions = [".jpg", ".pdf", ".jpeg", ".png"];
-            if (files.length >=1 && files.length <= 10) {
-                for (let i = 0; i < files.length; i++){
+            if (files.length >= 1 && files.length <= 10) {
+                for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const fileSizeMB = (file.size / 1048576).toFixed(2);
                     const fileSizeKB = (file.size / 1024).toFixed(2);
                     const fileExtension = file.name.split('.').pop().toLowerCase();
 
-                    if (file.size > 26214400){
+                    if (file.size > @Utilities.MessageFileSize) {
                         Notifications.showBar({
                             title: 'Error',
                             message: "File size exceeds the limit 25 MB",
@@ -228,7 +229,7 @@
                         });
                     }
                     else {
-                        if (totalFileSize + file.size > 52428800) {
+                        if (totalFileSize + file.size > @Utilities.MessageTotalFileSize) {
                             Notifications.showBar({
                                 title: 'Error',
                                 message: "Total file size exceeds the limit 50 MB",
@@ -260,8 +261,7 @@
                 });
                 fileInput.files = newFileList.files;
             }
-            else
-            {
+            else {
                 const newFileList = new DataTransfer();
                 fileInput.files = newFileList.files;
                 Notifications.showBar({

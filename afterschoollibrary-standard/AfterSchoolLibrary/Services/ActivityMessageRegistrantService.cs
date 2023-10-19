@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Services
             return registrants;
         }        
 
-        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, ActivityMessage message, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, SystemMessages msgs, string contactPhone, DatabaseConnection dc = null)
+        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, ActivityMessage message, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string contactPhone, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var allResults = new SystemMessages();
 

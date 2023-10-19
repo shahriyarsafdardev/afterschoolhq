@@ -170,6 +170,7 @@ namespace AfterSchoolLibrary.Services
                 body,
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
                 emailTemplateId: SendGridHelper.GetGenericTemplateId());
+            msgs.AddRange(mailMsgs);
 
         }
 
@@ -233,8 +234,8 @@ namespace AfterSchoolLibrary.Services
                     replyToName, 
                     activityMessage.Subject,
                     activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant), 
-                    msgs,
                     activityContactPhone,
+                    msgs,
                     dc);
             });
 
