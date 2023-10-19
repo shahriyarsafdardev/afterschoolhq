@@ -254,7 +254,7 @@ namespace AfterSchoolLibrary.Services
             var firstRenewalDate = SubscriptionScheduleService.GetFirstRenewalDate(participationObject, plan.EndDate, plan.BillingPeriodTypeId);
 
             if (activity.HasSchedule && (!activity.GetSchedule()?.IsOngoing ?? false))
-                lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
+                lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
             else
                 endDateTime = null;
 
@@ -264,7 +264,7 @@ namespace AfterSchoolLibrary.Services
                 nextBillDate = firstRenewalDate;
 
             var totalPayments = endDateTime.HasValue ? 
-                (SubscriptionScheduleService.GetPaymentDates(startDateTime, (DateTime) endDateTime, plan.BillingPeriodTypeId).Count).ToString() : "";
+                (SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).Count).ToString() : "";
 
             var metaData = new Dictionary<string, string>
             {
