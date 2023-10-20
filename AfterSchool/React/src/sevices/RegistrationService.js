@@ -49,7 +49,7 @@ export default class RegistrationService {
     const { validateEmail, validatePhone } = Validations;
     const errors = {};
     const addToErrors = (ID, msg) => {
-      errors[ID] += `\n ${msg}`;
+      errors[ID] = errors[ID] ? `${errors[ID]}\n ${msg}` : msg;
     };
 
     this.currentQuestions?.forEach(question => {
@@ -252,8 +252,9 @@ export default class RegistrationService {
     }
 
     const age = calculateAge(value);
-    const error = `Age should be between ${minAge} and ${maxAge}`;
     if (age < minAge || age > maxAge) {
+      let error = `Age should be between ${minAge} and ${maxAge}`;
+      if (this.isSession) error = `For ${this.ActivityName}: ${error}`;
       addToErrors(id, error);
     }
   }

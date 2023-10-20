@@ -138,10 +138,12 @@ export const useSessionRegistrationActions = () => {
       formData.append('eSignature', eSignature);
       dispatch(loadingFormData());
 
-      return SessionRegistrationRepository.register(formData).then(({ data: { obj, msgs } }) => {
-        dispatch(setRegistrationId(obj));
-        return msgs;
-      });
+      return SessionRegistrationRepository.sessionRegister(formData).then(
+        ({ data: { obj, msgs } }) => {
+          dispatch(setRegistrationId(obj));
+          return msgs;
+        }
+      );
     } else
       return SessionRegistrationRepository.submitFormSection(formData).then(
         ({ data: { msgs } }) => msgs

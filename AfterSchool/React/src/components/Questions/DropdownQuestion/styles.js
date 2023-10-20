@@ -78,9 +78,10 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     paddingLeft: 14
   },
-  maxWidth: {
+  errorMessages: {
     width: '100%',
-    maxWidth: 675
+    maxWidth: 675,
+    whiteSpace: 'pre-line'
   },
   outerWrapper: {
     marginBottom: '15px'

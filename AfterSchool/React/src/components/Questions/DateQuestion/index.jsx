@@ -82,7 +82,7 @@ function DateQuestion({ question, formik }) {
           <Box className={classes.flexCenter}>
             <FormHelperText
               data-testid={`${title}-${QuestionDataTypeId}-error`}
-              className={classes.maxWidth}
+              className={classes.errorMessages}
               error
             >
               {errors[ID]}
