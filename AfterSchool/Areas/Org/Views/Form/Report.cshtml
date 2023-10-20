@@ -1,7 +1,7 @@
 @model AfterSchool.Models.ReportPageResults
 @{
     ViewBag.Title = "Report";
-    var questions = Model.Questions.Where(x => !x.ToFormQuestionGroup().IsDeleted);
+    var questions = Model.Questions;
     var msgs = Model.Messages;
     Layout = "~/Views/Shared/Layouts/_PrintScreen.cshtml";
 

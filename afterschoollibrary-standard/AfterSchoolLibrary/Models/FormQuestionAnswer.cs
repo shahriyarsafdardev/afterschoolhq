@@ -95,11 +95,9 @@ namespace AfterSchoolLibrary.Models
         public int? FormQuestionFormQuestionGroupId => (int?) MDV["FormQuestionFormQuestionGroupId"].Value;
         public int? FormQuestionDisplayOrder => (int?) MDV["FormQuestionDisplayOrder"].Value;
         public string FormQuestionText => (string) MDV["FormQuestionText"].Value;
-        public bool FormQuestionIsDeleted => (bool) MDV["FormQuestionIsDeleted"].Value;
         public string FormQuestionGroupName => (string) MDV["FormQuestionGroupName"].Value;
         public int? FormQuestionGroupDisplayOrder => (int?) MDV["FormQuestionGroupDisplayOrder"].Value;
         public QuestionGroupDataType FormQuestionGroupQuestionGroupDataTypeId => (QuestionGroupDataType) MDV["FormQuestionGroupQuestionGroupDataTypeId"].Value;
-        public bool FormQuestionGroupIsDeleted => (bool) MDV["FormQuestionGroupIsDeleted"].Value;
         public int? RegistrationAccountId => (int?) MDV["RegistrationAccountId"].Value;
         public string RegistrantFirstName => (string) MDV["RegistrantFirstName"].Value;
         public string RegistrantLastName => (string) MDV["RegistrantLastName"].Value;
@@ -138,13 +136,9 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "FormQuestionFormQuestionGroupId", typeof(FormQuestion).Name, "FormQuestionGroupId", SqlDbType.Int, "FormQuestion");
                 _dp.Add(className, "FormQuestionDisplayOrder", typeof(FormQuestion).Name, "DisplayOrder", SqlDbType.Int, "FormQuestion");
                 _dp.Add(className, "FormQuestionText", typeof(FormQuestion).Name, "Text", SqlDbType.NVarChar, "FormQuestion");
-                _dp.Add(className, "FormQuestionIsDeleted", typeof(FormQuestion).Name, "IsDeleted", SqlDbType.Bit,
-                  "FormQuestion");
                 _dp.Add(className, "FormQuestionGroupName", typeof(FormQuestionGroup).Name, "Name", SqlDbType.NVarChar, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupDisplayOrder", typeof(FormQuestionGroup).Name, "DisplayOrder", SqlDbType.Int, "FormQuestionGroup");
                 _dp.Add(className, "FormQuestionGroupQuestionGroupDataTypeId", typeof(FormQuestionGroup).Name, "QuestionGroupDataTypeId", SqlDbType.Int,
-                    "FormQuestionGroup");
-                _dp.Add(className, "FormQuestionGroupIsDeleted", typeof(FormQuestionGroup).Name, "IsDeleted", SqlDbType.Bit,
                     "FormQuestionGroup");
                 _dp.Add(className, "RegistrationAccountId", typeof(Registration).Name, "AccountId", SqlDbType.Int, "Registration");
                 _dp.Add(className, "RegistrantFirstName", typeof(Registrant).Name, "FirstName", SqlDbType.NVarChar, "Registrant");
@@ -402,8 +396,7 @@ namespace AfterSchoolLibrary.Models
                 Name = FormQuestionGroupName,
                 DisplayOrder = FormQuestionGroupDisplayOrder,
                 QuestionGroupDataTypeId = FormQuestionGroupQuestionGroupDataTypeId,
-                IsDeleted = FormQuestionGroupIsDeleted,
-            };
+      };
         }
 
         public FormQuestion ToFormQuestion(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
@@ -420,7 +413,6 @@ namespace AfterSchoolLibrary.Models
                 DisplayOrder = FormQuestionDisplayOrder,
                 FormId = FormQuestionFormId,
                 FormQuestionGroupId = FormQuestionFormQuestionGroupId,
-                IsDeleted = FormQuestionIsDeleted
             };
         }
 

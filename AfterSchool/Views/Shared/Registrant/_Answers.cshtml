@@ -15,7 +15,7 @@
     }
 }
 
-@foreach (var group in Model.Select(x => x.ToFormQuestionGroup()).Where(x => !x.IsDeleted).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
+@foreach (var group in Model.Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID).OrderBy(x => x.DisplayOrder))
 {
     <div class="table-responsive">
         <table class="table table-striped @tableCondensed">
@@ -25,7 +25,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var answer in Model.Where(x => x.FormQuestionFormQuestionGroupId == group.ID && !x.ToFormQuestion().IsDeleted).OrderBy(x => x.FormQuestionDisplayOrder))
+                @foreach (var answer in Model.Where(x => x.FormQuestionFormQuestionGroupId == group.ID).OrderBy(x => x.FormQuestionDisplayOrder))
                 {
                     <tr>
                         <td valign="top" width="33%" class="text-right">@answer.FormQuestionText</td>
