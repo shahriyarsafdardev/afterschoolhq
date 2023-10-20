@@ -5,7 +5,7 @@ import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 
 import utils from 'utils';
 import apiRoutes from 'routes';
-import { useSession } from 'redux/hooks';
+import { useSessionRegistration } from 'redux/hooks';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import RegistrationService from 'sevices/RegistrationService';
 
@@ -26,29 +26,16 @@ export default function SessionRegistration({ newChild = false }) {
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
-    session: {
-      IsFree,
-      AllowToPayLater,
-      RegistrantType,
-      IsAgeRestricted,
-      MaxAge,
-      MinAge,
-      IsGradeRestricted,
-      MaxGrade,
-      MinGrade,
-      IsGenderRestricted,
-      EnforcedGender,
-      SessionUrl
-    }
-  } = useSession();
+    session: { RegistrantType, ActivityUrl: activityGroupUrl }
+  } = useSessionRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
   const [activeGroup, setActiveGroup] = useState(0);
   const [activeGroupId, setActiveGroupId] = useState(0);
   const [saveDisabled, setSaveDisabled] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { accountName, sessionName, regUid } = useParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
+  const { accountName, activityGroupName, regUid } = useParams();
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
   const registrationService = new RegistrationService(
     questions,
@@ -84,16 +71,6 @@ export default function SessionRegistration({ newChild = false }) {
     if (registrationId) navigate(thankyouUrl(registrationId));
   }, [registrationId]);
 
-  const gradeRestrictions = {
-    minGrade: MinGrade,
-    maxGrade: MaxGrade,
-    isGradeRestricted: IsGradeRestricted
-  };
-  const genderRestrictions = {
-    enforcedGender: EnforcedGender,
-    isGenderRestricted: IsGenderRestricted
-  };
-  const ageRestrictions = { isAgeRestricted: IsAgeRestricted, maxAge: MaxAge, minAge: MinAge };
   const secondLastSection = activeGroup === totalGroups - 2;
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -101,7 +78,7 @@ export default function SessionRegistration({ newChild = false }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
+    // validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions), TODO:// apply validations
     onSubmit: async (values, { resetForm }) => {
       const errorMsgs = [];
       setSaveDisabled(true);
@@ -127,7 +104,7 @@ export default function SessionRegistration({ newChild = false }) {
           schoolLocationID,
           newChild ? 1 : 0,
           accountName,
-          sessionName,
+          activityGroupName,
           regUid
         ).then(msgs => {
           if (!msgs.length) enqueueSnackbar('Submitted.', { variant: 'success' });
@@ -145,8 +122,8 @@ export default function SessionRegistration({ newChild = false }) {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(newChild, accountName, sessionName, regUid);
-  }, [newChild, accountName, sessionName]);
+    loadFormData(newChild, accountName, activityGroupName, regUid);
+  }, [newChild, accountName, activityGroupName]);
 
   useEffect(() => {
     if (questionsGroups.length)
@@ -179,12 +156,11 @@ export default function SessionRegistration({ newChild = false }) {
   }, [activeGroup, activeGroupId, questions]);
 
   const exitHandler = () => {
-    exit(regUid, SessionUrl);
+    exit(regUid, activityGroupUrl);
   };
 
   return (
     <RegistrationForm
-      allowToPayLater={AllowToPayLater}
       loading={loading}
       totalGroups={totalGroups}
       activeGroup={activeGroup}
@@ -198,7 +174,7 @@ export default function SessionRegistration({ newChild = false }) {
       handleSubmit={handleSubmit}
       skipAble={skipAble}
       registrantType={RegistrantType}
-      isFree={IsFree}
+      isFree={true}
       firstSection={activeGroup === 0}
       exitHandler={exitHandler}
     ></RegistrationForm>

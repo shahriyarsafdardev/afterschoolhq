@@ -89,7 +89,7 @@ export const useErrorMessages = () => ({
   ...useSelector(state => state.errorMessagesSlice)
 });
 
-export const useSession = () => ({
+export const useSessionRegistration = () => ({
   ...useSelector(state => state.sessionRegistrationSlice),
   ...useSessionRegistrationActions()
 });

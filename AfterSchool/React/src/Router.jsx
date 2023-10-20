@@ -24,8 +24,12 @@ function Router() {
           element: <Registration />
         },
         {
-          path: 'reactapp/session-registration/:accountName/:sessionName/:regUid',
+          path: 'reactapp/session-registration/:accountName/:activityGroupName/:regUid',
           element: <SessionRegistration />
+        },
+        {
+          path: 'reactapp/session-registration/new-child/:accountName/:activityGroupName/:regUid',
+          element: <SessionRegistration newChild={true} />
         },
         {
           path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
