@@ -43,8 +43,8 @@ namespace AfterSchoolLibrary.Services
             if (msgs.HasNoErrors() && approvalStatus == ApprovalStatus.Approved)
                 UpdateVolunteerRegistrationStatus(webUserId, msgs, dc: dc);
             
-            // if(msgs.HasNoErrors())
-            //     EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
+            if(msgs.HasNoErrors())
+                EmailHelper.SendVolunteerBackgroundApprovalDenialEmail(webUserId, approvalStatus);
             
             return volunteerApproval;
         }

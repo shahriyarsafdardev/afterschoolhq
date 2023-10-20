@@ -45,8 +45,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
 
-                    if (responseBody.result == "Clear")
-                    {
+                    if (responseBody.result == "Passed" && responseBody.status == "Archive")
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -56,9 +55,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             DateTime.UtcNow,
                             msgs
                         );
-                        
-                    }
-                    if (responseBody.result == "Consider")
+
+                    if (responseBody.result == "Consider" && responseBody.status == "Archive" || 
+                        responseBody.result == "Review" && responseBody.status == "AdverseAction")
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
                             ApplicationStatus.FailedBackgroundCheck,
