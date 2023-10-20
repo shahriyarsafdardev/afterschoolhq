@@ -599,6 +599,7 @@
     <Compile Include="Areas\Api\Controllers\FormController.cs" />
     <Compile Include="Areas\Api\Controllers\NotesController.cs" />
     <Compile Include="Areas\Api\Controllers\RegistrationPinController.cs" />
+    <Compile Include="Areas\Api\Controllers\SessionRegistrationController.cs" />
     <Compile Include="Areas\Api\Models\ActivityDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInCheckOutSetupDto.cs" />
     <Compile Include="Areas\Api\Models\CheckInCheckOutStudentInfoDto.cs" />
@@ -615,6 +616,7 @@
     <Compile Include="Areas\Api\Models\SurveyQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\SurveyRequestQuestionAnswerResponse.cs" />
     <Compile Include="Areas\Api\Models\UpdateQuestionAnswerResponse.cs" />
+    <Compile Include="Areas\Api\Models\CheckOutDto.cs" />
     <Compile Include="Areas\District\Controllers\AccountController.cs" />
     <Compile Include="Areas\District\Controllers\HomeController.cs" />
     <Compile Include="Areas\District\Controllers\LeagueController.cs" />

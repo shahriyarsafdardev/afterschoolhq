@@ -516,12 +516,15 @@ namespace AfterSchool.Controllers
                     msgs.Add("Password 2 is required", MessageType.UserError);
                 if (password1 != password2)
                     msgs.Add("Passwords must match", MessageType.UserError);
-                if(optionSelected.IsEmpty())
-                    msgs.Add("Select Registrant Type", MessageType.UserError);
-                if(optionSelected == "2" && birthdate.IsEmpty())
-                    msgs.Add("Birthdate is required", MessageType.UserError);
-                if (LibraryUtilities.IsProduction)
-                    msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+                if(participationObject.GetActivity().IsNotEmpty())
+                {
+                    if(optionSelected.IsEmpty())
+                        msgs.Add("Select Registrant Type", MessageType.UserError);
+                    if(optionSelected == "2" && birthdate.IsEmpty())
+                        msgs.Add("Birthdate is required", MessageType.UserError);
+                    if (LibraryUtilities.IsProduction)
+                        msgs.AddRange(RecaptchaHelper.Validate(Request["g-recaptcha-response"]));
+                }
             }
 
             if (msgs.HasNoErrors())
@@ -630,7 +633,9 @@ namespace AfterSchool.Controllers
             
             if(msgs.HasNoErrors() && participationObject.ObjectType == ParticipationObjectType.Activity)
                 return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrantPersonType == RegistrantPersonType.Parent ? studentReg.Uid : registrant.Uid)}");
-            
+
+            if(msgs.HasNoErrors() && participationObject.ObjectType == ParticipationObjectType.ActivityGroup)
+                return Redirect($"~/ReactApp/session-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{(registrantPersonType == RegistrantPersonType.Parent ? studentReg.Uid : registrant.Uid)}");
             Account registrationAccount = null;
             
             if (regaccount.IsGuid())

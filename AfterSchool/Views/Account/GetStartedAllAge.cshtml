@@ -112,76 +112,78 @@
                                 </div>
                             }
 
-                        <div id="account-registration" class="@(showStep1 ? "hide" : "")">
+                    <div id="account-registration" class="@(showStep1 ? "hide" : "")">
 
-                            <div class="row">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div role="alert" class="alert alert-success alert-icon">
-                                        <div class="icon">
-                                            <span class="s7-check-circle"></span>
-                                        </div>
-                                        <div class="message">
-                                            <p class="text-center reg-login new-account">
-                                                @if (currentUser.IsNotEmpty())
-                                                {
-                                                    @:Please finalize your family account setup to begin registration.
-                                                }
-                                                else
-                                                {   
-                                                    @:Please enter your info below to begin registration.
-                                                }
-                                            </p>
-                                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-3">
+                                <div role="alert" class="alert alert-success alert-icon">
+                                    <div class="icon">
+                                        <span class="s7-check-circle"></span>
+                                    </div>
+                                    <div class="message">
+                                        <p class="text-center reg-login new-account">
+                                            @if (currentUser.IsNotEmpty())
+                                            {
+                                                @:Please finalize your family account setup to begin registration.
+                                            }
+                                            else
+                                            {
+                                                @:Please enter your info below to begin registration.
+                                            }
+                                        </p>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth))
+                        @foreach (var qvm in Model.FormQuestionViewModels.Where(qvm => !qvm.Hide && qvm.Question.QuestionDataTypeId != QuestionDataType.RegistrantDateOfBirth))
+                        {
+                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && qvm.Question.IsRequired)
                             {
-                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone && qvm.Question.IsRequired)
-                                {
-                                    qvm.Question.IsRequired = false;
-                                }
-
-                                Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
-
-                                if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
-                                {
-                                    <div class="row">
-                                        <div class="col-md-6 col-md-offset-3">
-                                            <div class="am-checkbox text-center">
-                                                <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "")/>
-                                                <label for="textnotifications">
-                                                    I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
-                                                    Notifications may include information about attendance, reminders, and other important information.
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
+                                qvm.Question.IsRequired = false;
                             }
 
-                            @if (currentUser.IsEmpty())
+                            Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", qvm);
+
+                            if (qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantMobilePhone)
                             {
-                                <div class="form-group new-account">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Password <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" />
-                                        @Html.Partial("_PasswordStrengthBarLight")
+                                <div class="row">
+                                    <div class="col-md-6 col-md-offset-3">
+                                        <div class="am-checkbox text-center">
+                                            <input type="checkbox" id="textnotifications" name="textnotifications" value="1" @(UILabel.CheckAllowTextMessage(currentUser) ? " checked=\"checked\" " : "")/>
+                                            <label for="textnotifications">
+                                                I would like to receive text messages about @(UILabel.ActivityLabel(ActivityType.Activity, true).ToLower()).
+                                                Notifications may include information about attendance, reminders, and other important information.
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
+                            }
+                        }
 
-                                <div class="form-group new-account">
-                                    <label for="password1" class="control-label col-md-3">
-                                        Verify Password <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="col-md-6">
-                                        <input type="password" class="form-control" id="password2" name="password2"/>
-                                    </div>
+                        @if (currentUser.IsEmpty())
+                        {
+                            <div class="form-group new-account">
+                                <label for="password1" class="control-label col-md-3">
+                                    Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" />
+                                    @Html.Partial("_PasswordStrengthBarLight")
                                 </div>
+                            </div>
 
+                            <div class="form-group new-account">
+                                <label for="password1" class="control-label col-md-3">
+                                    Verify Password <span class="text-danger">*</span>
+                                </label>
+                                <div class="col-md-6">
+                                    <input type="password" class="form-control" id="password2" name="password2"/>
+                                </div>
+                            </div>
+
+                            if (participationObject.GetActivity().IsNotEmpty())
+                            {
                                 <div class="form-group new-account">
                                     <label for="accountType" class="control-label col-md-3">
                                         Account Type <span class="text-danger">*</span>
@@ -192,47 +194,47 @@
                                             <label for="parent">I am parent or guardian registering for my child</label>
                                         </div>
                                         <div class="am-radio">
-                                            <input @(( ((participationObject.AgeStart >= 0 && participationObject.AgeEnd <= 17) || participationObject.RestrictByGrade())  
-                                                       && !participationObject.GetActivity().IsStudentAllowedToRegister) 
-                                                       ? "disabled" : "") 
-                                                type="radio" id="student" name="optionSelected" value="2"/>
+                                            <input @(( ((participationObject.AgeStart >= 0 && participationObject.AgeEnd <= 17) || participationObject.RestrictByGrade())
+                                                        && !participationObject.GetActivity().IsStudentAllowedToRegister)
+                                                        ? "disabled" : "")
+                                                    type="radio" id="student" name="optionSelected" value="2"/>
                                             <label for="student">I am registering myself (student or adult registrant)</label>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="form-group new-account hidden" id="birthdate">
                                     @{ Html.RenderPartial("~/Views/Shared/Form/_Question.cshtml", Model.FormQuestionViewModels.First(qvm => qvm.Question.QuestionDataTypeId == QuestionDataType.RegistrantDateOfBirth)); }
                                 </div>
-                                
-                                if (Utilities.IsProduction)
-                                {
-                                    <div class="row padding-v-20">
-                                        <div class="form-group text-center">
-                                            @{
-                                                Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
-                                            }
-                                        </div>
-                                    </div>
-                                }
                             }
 
-                            <div class="row padding-v-20">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <div class="am-checkbox text-center">
-                                        <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "")/>
-                                        <label for="agree">
-                                            I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
-                                        </label>
+                            if (Utilities.IsProduction)
+                            {
+                                <div class="row padding-v-20">
+                                    <div class="form-group text-center">
+                                        @{
+                                            Html.RenderPartial("~/Views/Shared/Form/_Recaptcha.cshtml", "");
+                                        }
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row padding-v-20">
-                                <div class="col-md-6 col-md-offset-3">
-                                    <button type="submit" id="form-submit" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                            }
+                        }
+
+                        <div class="row padding-v-20">
+                            <div class="col-md-6 col-md-offset-3">
+                                <div class="am-checkbox text-center">
+                                    <input type="checkbox" id="agree" name="agree" value="1" @(Request["agree"] == "1" ? " checked=\"checked\" " : "")/>
+                                    <label for="agree">
+                                        I agree to the <a href="@Url.Action("tos", "legal")" target="_blank">terms and conditions</a> of using @UILabel.ProductName()
+                                    </label>
                                 </div>
                             </div>
                         </div>
+                        <div class="row padding-v-20">
+                            <div class="col-md-6 col-md-offset-3">
+                                <button type="submit" id="form-submit" class="btn btn-register-primary btn-lg">Save &amp; Continue &raquo;</button>
+                            </div>
+                        </div>
+                    </div>
 
                         <div class="row">
                             <div class="padding-v-20 text-center">
