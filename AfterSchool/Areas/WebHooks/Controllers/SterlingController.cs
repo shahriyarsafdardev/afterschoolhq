@@ -56,7 +56,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs
                         );
 
-                    if ((responseBody.result.ToLower() == "consider" && responseBody.status.ToLower() == "archive") || 
+                    if ((responseBody.result.ToLower() == "consider" && responseBody.status.ToLower() == "archive") ||
                         (responseBody.result.ToLower() == "review" && responseBody.status.ToLower() == "adverseaction"))
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
