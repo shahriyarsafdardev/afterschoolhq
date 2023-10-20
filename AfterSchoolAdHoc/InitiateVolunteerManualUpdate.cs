@@ -160,6 +160,16 @@ namespace AfterSchoolAdHoc
             }
 
         }
+        
+        private static void WriteVolunteerToCsv(IEnumerable<VolunteerRecord> record, string path)
+        {
+            using (var writer = new StreamWriter(path))
+            using (var csv = new CsvWriter(writer, new CsvConfiguration(CultureInfo.InvariantCulture)))
+            {
+                csv.WriteRecords(record);
+            }
+
+        }
 
         private static SystemMessages Update(dynamic json, DatabaseConnection dc)
         {
@@ -260,6 +270,20 @@ namespace AfterSchoolAdHoc
             catch (FileNotFoundException) { }
             return new List<bgRecord>();
         }
+        
+        private static IEnumerable<VolunteerRecord> ReadImportedVolunteersCsv(string path)
+        {
+            try
+            {
+                using (var reader = new StreamReader(path))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
+                {
+                    return csv.GetRecords<VolunteerRecord>().ToList();
+                }
+            }
+            catch (FileNotFoundException) { }
+            return new List<VolunteerRecord>();
+        }
 
         private static bool IsAnyConsider(IEnumerable<ReportItem> reportItems)
         {
@@ -334,6 +358,42 @@ namespace AfterSchoolAdHoc
                 $"Passed Candidates Count : {passedCount} and Failed Candidates Count : {failedCount} and failed WebUserID's : {string.Join(", ", failedWebUserIdList)}");
         }
 
+        public static void VerifyExpiredImportedVolunteers(SystemMessages msgs, DatabaseConnection dc)
+        {
+            var importedVolunteers = ReadImportedVolunteersCsv($"C:\\IPS Volunteer List (2021-2023) v4.csv")
+                .Where(x => x.Status.ToLower() == "approved").ToList();
+            var fileWritePath = $"D:\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
+            var matchedVolunteers = new List<VolunteerRecord>();
+            var count = 0;
+            importedVolunteers.ForEach(volunteer =>
+            {
+                var webUser = WebUser.LoadByEmail(volunteer.Email.Trim(),msgs,dc);
+                var expirationDate = volunteer.DateReviewed.AddYears(1);
+                if (webUser.IsNotEmpty())
+                {
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUser.ID.Value,msgs,dc).FirstOrDefault();
+                    if (volunteerApproval.IsNotEmpty())
+                    {
+                        count++;
+                        Console.WriteLine($"Current Count is: {count}");
+                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && 
+                            (volunteerApproval.ExpirationDate == DateTime.UtcNow.ToString("07/01/2023").ToDateTime() ||
+                            volunteerApproval.ExpirationDate == expirationDate))
+                        {
+                            var volRecord = new VolunteerRecord
+                            {
+                                Status = volunteer.Status,
+                                DateReviewed = volunteer.DateReviewed,
+                                Email = volunteer.Email,
+                            };
+                            matchedVolunteers.Add(volRecord);
+                        }
+                    }
+                }
+            });
+            WriteVolunteerToCsv(matchedVolunteers,fileWritePath);
+        }
+
         private record bgRecord
         {
             public string ScreeningId { get; set; }
@@ -344,6 +404,12 @@ namespace AfterSchoolAdHoc
             public string PrevBackgroundCheckResult { get; set; }
             public string NewBackgroundCheckStatus { get; set; }
             public string NewBackgroundCheckResult { get; set; }
+        }
+        private record VolunteerRecord
+        {
+            public string Status { get; set; }
+            public DateTime DateReviewed { get; set; }
+            public string Email { get; set; }
         }
 
         public class Payload
