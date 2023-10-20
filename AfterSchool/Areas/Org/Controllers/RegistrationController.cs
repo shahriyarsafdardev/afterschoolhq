@@ -941,24 +941,23 @@ namespace AfterSchool.Areas.Org.Controllers
             var willExceedQuota = true;
             if (msgs.HasNoErrors())
             {
-                var registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
+                registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
                 body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
                 registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
                 willExceedQuota = currentAccount.WillExceedEmailQuota(SessionVariables.AccountPackage, registrantIds.Count, currentUser, msgs);
-            }
+                if (!willExceedQuota)
+                {
+                    am = currentAccount.AddMessage(
+                    subject,
+                    body,
+                    registrantIds,
+                    sendtostaff.IsBoolean(),
+                    parentsonly.IsBoolean(),
+                    currentUser.ID.Value,
+                    msgs);
 
-            if (msgs.HasNoErrors() && !willExceedQuota)
-            {
-                am = currentAccount.AddMessage(
-                subject,
-                body,
-                registrantIds,
-                sendtostaff.IsBoolean(),
-                parentsonly.IsBoolean(),
-                currentUser.ID.Value,
-                msgs); 
-                
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                    BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                }
             }
 
             ViewBag.Registrations = registrations;

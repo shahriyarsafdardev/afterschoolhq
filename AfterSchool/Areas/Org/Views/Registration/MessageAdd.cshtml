@@ -19,7 +19,6 @@
         : 0;
     var currentEmailCount = (int)ViewBag.currentEmailCount;
     var emailQuotaExceeded = totalCount + currentEmailCount >= maxEmailCount;
-    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
