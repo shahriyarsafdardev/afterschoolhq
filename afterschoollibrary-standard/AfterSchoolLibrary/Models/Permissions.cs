@@ -85,6 +85,7 @@ namespace AfterSchoolLibrary.Models
                         case PermissionType.FieldTripsView:
                         case PermissionType.LearningPodsEdit:
                         case PermissionType.LearningPodsManage:
+                        case PermissionType.LearningPodsView:
                         case PermissionType.VolunteerOpportunitiesView:
                             return true;
                     }
