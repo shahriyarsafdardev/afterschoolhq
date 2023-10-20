@@ -14,6 +14,7 @@ const SessionRegistrationSlice = createSlice({
   initialState: {
     school: {},
     session: {},
+    checkOut: [],
     questions: [],
     loading: true,
     noSchool: false,
@@ -31,34 +32,40 @@ const SessionRegistrationSlice = createSlice({
     formDataLoadingFailed: state => {
       state.loading = false;
     },
-    setFormData: (state, { payload: { FormDto, sessionDto } }) => {
+    setFormData: (state, { payload: { FormDto, activityGroupDto, checkOut } }) => {
       const {
         CanAccess,
         RegistrantType,
         SchoolLocation,
-        IsAgeRestricted,
-        IsGradeRestricted,
-        IsGenderRestricted,
-        SessionIsCompleted
-      } = sessionDto;
+        RegistrationIsCompleted
+      } = activityGroupDto;
 
-      const isProhibited = SessionIsCompleted || !CanAccess;
-      if (isProhibited) return handleRedirection(sessionDto);
+      let [isAgeRestricted, isGenderRestricted, isGradeRestricted] = [false, false, false];
+
+      checkOut.forEach(({ IsAgeRestricted, IsGenderRestricted, IsGradeRestricted }) => {
+        isAgeRestricted ||= IsAgeRestricted;
+        isGenderRestricted ||= IsGenderRestricted;
+        isGradeRestricted ||= IsGradeRestricted;
+      });
+
+      const isProhibited = RegistrationIsCompleted || !CanAccess;
+      if (isProhibited) return handleRedirection(activityGroupDto);
 
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
         RegistrantType,
-        IsGradeRestricted,
-        IsAgeRestricted,
-        IsGenderRestricted
+        isGradeRestricted,
+        isAgeRestricted,
+        isGenderRestricted
       );
 
+      state.checkOut = checkOut;
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
       state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
-      state.session = sessionDto;
+      state.session = activityGroupDto;
     },
     submitFormSection: (state, { payload }) => {
       state.answeredQuestions = payload;
@@ -88,17 +95,17 @@ export const useSessionRegistrationActions = () => {
 
   const loaded = () => dispatch(formDataLoaded());
 
-  const loadFormData = async (newChild = false, accountName, sessionName, registrantUid) => {
+  const loadFormData = async (newChild = false, accountName, activityGroupName, registrantUid) => {
     dispatch(loadingFormData());
     await SessionRegistrationRepository.getFormData(
       newChild,
       accountName,
-      sessionName,
+      activityGroupName,
       registrantUid
     ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      if (!msgs.length && !obj?.sessionDto?.SessionIsCompleted) {
-        const { HeaderImageURL, Name, Organization } = obj?.sessionDto;
+      if (!msgs.length && !obj?.activityGroupDto?.RegistrationIsCompleted) {
+        const { HeaderImageURL, Name, Organization } = obj?.activityGroupDto;
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());
         dispatch(formDataLoaded());

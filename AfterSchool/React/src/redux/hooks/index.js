@@ -95,7 +95,7 @@ export const useSelectRegistrant = () => ({
   ...useSelectRegistrantActions()
 });
 
-export const useSession = () => ({
+export const useSessionRegistration = () => ({
   ...useSelector(state => state.sessionRegistrationSlice),
   ...useSessionRegistrationActions()
 });

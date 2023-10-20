@@ -5,8 +5,15 @@ import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
 import { isEqual } from 'lodash';
 
 export default class RegistrationService {
-  constructor(questions = [], currentQuestions = [], answeredQuestions = [], isSurvey = false) {
+  constructor(
+    questions = [],
+    currentQuestions = [],
+    answeredQuestions = [],
+    isSurvey = false,
+    isSession = false
+  ) {
     this.isSurvey = isSurvey;
+    this.isSession = isSession;
     this.questions = questions;
     this.answeredQuestions = answeredQuestions;
     this.currentQuestions = currentQuestions;
@@ -32,11 +39,17 @@ export default class RegistrationService {
     return initialvalues;
   };
 
-  validator = (values, genderRestrictions = {}, ageRestrictions = {}, gradeRestrictions = {}) => {
+  validator = (
+    values,
+    genderRestrictions = {},
+    ageRestrictions = {},
+    gradeRestrictions = {},
+    sessionActivities = []
+  ) => {
     const { validateEmail, validatePhone } = Validations;
     const errors = {};
     const addToErrors = (ID, msg) => {
-      errors[ID] = msg;
+      errors[ID] += `\n ${msg}`;
     };
 
     this.currentQuestions?.forEach(question => {
@@ -46,9 +59,52 @@ export default class RegistrationService {
       const value = values[ID];
       const restrictionParams = [QuestionDataTypeId, value, addToErrors, ID];
 
-      this.checkGenderRestriction(...restrictionParams, genderRestrictions);
-      this.checkAgeRestriction(...restrictionParams, ageRestrictions);
-      this.checkGradeRestriction(...restrictionParams, gradeRestrictions, Options);
+      if (this.isSession) {
+        sessionActivities.map(activity => {
+          const {
+            ActivityName,
+            IsAgeRestricted,
+            MaxAge,
+            MinAge,
+            IsGradeRestricted,
+            MaxGrade,
+            MinGrade,
+            IsGenderRestricted,
+            EnforcedGender
+          } = activity;
+          const gradeRestrictions = {
+            minGrade: MinGrade,
+            maxGrade: MaxGrade,
+            isGradeRestricted: IsGradeRestricted
+          };
+          const genderRestrictions = {
+            enforcedGender: EnforcedGender,
+            isGenderRestricted: IsGenderRestricted
+          };
+          const ageRestrictions = {
+            isAgeRestricted: IsAgeRestricted,
+            maxAge: MaxAge,
+            minAge: MinAge
+          };
+
+          this.ActivityName = ActivityName;
+          this.checkRestrictions(
+            restrictionParams,
+            genderRestrictions,
+            ageRestrictions,
+            gradeRestrictions,
+            Options
+          );
+        });
+      } else {
+        this.checkRestrictions(
+          restrictionParams,
+          genderRestrictions,
+          ageRestrictions,
+          gradeRestrictions,
+          Options
+        );
+      }
 
       if (IsRequired && QuestionTypeId === questionType.email && value) {
         if (!validateEmail(value)) addToErrors(ID, 'Please enter a valid Email address');
@@ -232,7 +288,9 @@ export default class RegistrationService {
     );
 
     if (grade && grade !== 'null' && !validOptions.includes(gradeIds[grade])) {
-      addToErrors(id, `Grade should be between ${minGrade} and ${maxGrade}`);
+      let errorMsg = `Grade should be between ${minGrade} and ${maxGrade}`;
+      if (this.isSession) errorMsg = `For ${this.ActivityName}: ${errorMsg}`;
+      addToErrors(id, errorMsg);
     }
   }
 
@@ -251,7 +309,22 @@ export default class RegistrationService {
     const validGender = enforcedGender === 1 ? 'Male' : 'Female';
 
     if (gender !== validGender) {
-      addToErrors(id, `Gender should be ${validGender} only`);
+      let errorMsg = `Gender should be ${validGender} only`;
+      if (this.isSession) errorMsg = `For ${this.ActivityName}: ${errorMsg}`;
+
+      addToErrors(id, errorMsg);
     }
+  }
+
+  checkRestrictions(
+    restrictionParams,
+    genderRestrictions,
+    ageRestrictions,
+    gradeRestrictions,
+    Options
+  ) {
+    this.checkGenderRestriction(...restrictionParams, genderRestrictions);
+    this.checkAgeRestriction(...restrictionParams, ageRestrictions);
+    this.checkGradeRestriction(...restrictionParams, gradeRestrictions, Options);
   }
 }
