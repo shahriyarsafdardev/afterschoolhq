@@ -23,6 +23,7 @@ using Hangfire;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Extensions = AfterSchoolLibrary.Extensions;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
+using AfterSchool.Helpers;
 
 namespace AfterSchool.Areas.Org.Controllers
 {
@@ -945,7 +946,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [ValidateInput(false)]
         [HttpPost]
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body,
-            string sendtostaff, string sendtextmessages, string parentsonly)
+            List<HttpPostedFileBase> importedFiles, string sendtostaff, string sendtextmessages, string parentsonly)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -955,6 +956,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
                 msgs.Add("Message Body is required", MessageType.UserError);
+            msgs.AddRange(AttachmentUploadHelper.ValidateAttachments(importedFiles));
 
             ActivityMessage am = null;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -966,6 +968,8 @@ namespace AfterSchool.Areas.Org.Controllers
                     .Where(x => Request[$"registrant-{x.ID.ToString()}"].IsNotBlank())
                     .Select(x => x.ID.Value)
                     .ToList();
+
+                body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
 
                 //.. email messaging
                 if (msgs.HasNoErrors())

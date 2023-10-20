@@ -1,0 +1,72 @@
+<div>
+    <head>
+        <style type="text/css">
+            .attachment-icon {
+            font-size: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            }
+            .attachments{
+            margin-top:15px;
+            }
+            .attachments p{
+            margin:0px;
+            }
+            .file-box {
+            display: flex;
+            border: 1px solid #DDD;
+            width: 350px;
+            padding: 20px 10px;
+            }
+            .file-box-info {
+            margin-left: 10px;
+            }
+            .file-box-info a {
+            color: #00a38a;
+            display: block;
+            text-decoration:underline;
+            font-size: 18px;
+            }
+            .color-green {
+            color: #00a38a;
+            cursor: pointer;
+            text-decoration: underline;
+            display:none;
+            }
+            .download-link{
+            display:none;
+            }
+            .sentby {
+            text-align: center;
+            margin-bottom : 60px;
+            }
+            .subject{
+            margin-bottom : 25px;
+            }
+            .more-info{
+            text-align:center;
+            margin-top:50px;
+            }
+            .f-fileicon{
+            width: 35px;
+            height: 38px;
+            margin: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="sentby">
+            Sent by <strong>@Model.replyToName</strong> at <strong>@Model.date</strong>
+        </p>
+        <h2 class="subject">@Model.subject for @Model.activityName</h2>
+        @Model.body   
+        <p class="more-info">
+            For more information, feel free to reach <strong>@Model.activityName</strong> via <strong>
+                <a style="color: black;" href="@Model.email">email</a> or <a style="color: black;" href="#">@Model.contactPhone</a></strong>
+        </p>
+    </body>
+</div>
+
+
+

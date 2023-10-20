@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
+using System.Web;
 using System.Web.Mvc;
 using AfterSchool.Areas.Org.Assemblers.Registration;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using AfterSchool.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
 using Hangfire;
@@ -912,18 +914,17 @@ namespace AfterSchool.Areas.Org.Controllers
 
         [ValidateInput(false)]
         [HttpPost]
-        public ActionResult MessageAdd(string id, string subject, string body, string sendtostaff, string activity,
+        public ActionResult MessageAdd(string id, string subject, string body, List<HttpPostedFileBase> importedFiles, string sendtostaff, string activity,
             string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at, string volunteers, string parentsonly)
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
                 msgs.Add("Message Body is required", MessageType.UserError);
-
+            msgs.AddRange(AttachmentUploadHelper.ValidateAttachments(importedFiles));
             ActivityMessage am = null;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
@@ -937,7 +938,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (msgs.HasNoErrors())
             {
                 var registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
-
+                body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
                 am = currentAccount.AddMessage(
                     subject,
                     body,

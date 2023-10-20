@@ -1,4 +1,4 @@
-﻿    using AfterSchoolLibrary.Models;
+    using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Helpers;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Twilio.Rest.Api.V2010.Account;
+using System.Collections.Specialized;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -23,8 +24,9 @@ namespace AfterSchoolLibrary.Services
             var activity = am.GetActivity(msgs, dc);
             var account = activity.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            
 
-            am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, dc);
+            am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(activity, account, loggedInUser, msgs, dc);
@@ -104,6 +106,7 @@ namespace AfterSchoolLibrary.Services
                     activityMessage.Subject,
                     body,
                     "activity_message",
+                    null,
                     msgs);
 
                 if (member.Phone.IsNotEmpty())
@@ -137,24 +140,38 @@ namespace AfterSchoolLibrary.Services
 
         }
 
-        internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, SystemMessages msgs)
+        internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, string contactPhone, SystemMessages msgs)
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
-            var header = $"<h2 style=\"margin-left: 10px;\">{subject} for {activityName}</h2>";
-            var sentBy = $"<p>&nbsp;</p><p>Sent by <strong>{replyToName}</strong> at <strong>{account.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()}</strong></p>";
-
-            body = $"<p>{body.Replace("\n", "<br />")}</p>";
-
-            msgs.AddRange(SendGridHelper.SendMail(
+            var signature = Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign);
+            body = body.Replace("<i class=\"icon icon-left s7-file attachment-icon\"></i>", "<img class=\"f-fileicon\" src=\"https://afterschoolhq-status.s3.us-east-2.amazonaws.com/img/file-icon.png\" >");
+            var model = new NameValueCollection()
+            {
+                {"subject", subject },
+                {"activityName",activityName },
+                {"body", body },
+                {"replyToName", replyToName},
+                {"date", account.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()},
+                {"siganture" , signature },
+                {"contactPhone", contactPhone },
+                { "email", replyToEmail}
+            };
+            body = EmailHelper.ProcessTemplate(
+                EmailTemplates.Email_Message,
+                model,
+                "Email_Message-1.03",
+                msgs);
+            var mailMsgs = SendGridHelper.SendMail(
                 fromEmail: new SendGrid.Helpers.Mail.EmailAddress(
-                    Helpers.Email.AppNoReplyEmailAddress,
-                    $"{fromName} via {Helpers.Utilities.AppName()}"),
+                   Helpers.Email.AppNoReplyEmailAddress,
+                   $"{fromName} via {Helpers.Utilities.AppName()}"),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail, toName),
                 subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
-                body: $"{header}{body}{sentBy}{Helpers.Email.GetAppSignature(isAfterSchool: true, utm_campaign: utmCampaign)}",
+                body,
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
-                emailTemplateId: SendGridHelper.GetGenericTemplateId()
-            ));
+                emailTemplateId: SendGridHelper.GetGenericTemplateId());
+            msgs.AddRange(mailMsgs);
+
         }
 
         private static void SendForGroup(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
@@ -163,7 +180,7 @@ namespace AfterSchoolLibrary.Services
             var account = group.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, dc);
+            am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, account.Phone, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(group, account, loggedInUser, msgs, dc);
@@ -174,7 +191,7 @@ namespace AfterSchoolLibrary.Services
             var account = am.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, loggedInUser, account.Name, account.Name, account.Email, account.Name, msgs, dc);
+            am.SendActivityMessage(account, loggedInUser, account.Name, account.Name, account.Email, account.Name, msgs, account.Phone, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(account, loggedInUser, msgs, dc);
@@ -202,7 +219,7 @@ namespace AfterSchoolLibrary.Services
             return text;
         }
 
-        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs,string activityContactPhone=null, DatabaseConnection dc = null)
         {
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
@@ -217,6 +234,7 @@ namespace AfterSchoolLibrary.Services
                     replyToName, 
                     activityMessage.Subject,
                     activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant), 
+                    activityContactPhone,
                     msgs,
                     dc);
             });
@@ -228,10 +246,10 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static void Send(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
+        {          
             msgs = msgs ?? new SystemMessages();
             var am = ActivityMessage.Load(id, msgs, dc);
-
+           
             if (am.ActivityId.HasValue)
                 ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
             else if (am.ActivityGroupId.HasValue)

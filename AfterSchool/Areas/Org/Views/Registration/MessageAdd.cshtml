@@ -1,3 +1,4 @@
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @{
     ViewBag.Title = SessionVariables.CurrentAccount.Name;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -11,7 +12,7 @@
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
     var sendButtonText = $"Send Messages";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
-    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
+    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
@@ -26,22 +27,22 @@
         <div class="panel-heading">
             Send Message
         </div>
-        <div class="panel-body">
+        <div class="panel-body form-body">
 
-            <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal">
+            <form method="post" action="@Url.Action("messageadd", "registration")" class="form-horizontal" enctype="multipart/form-data">
                 @if (Request["q"].IsNotEmpty())
                 {
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Search Term</label>
-                        <div class="col-sm-6">
+                        <label class="control-label">Search Term</label>
+                        <div>
                             <input type="text" readonly="readonly" class="form-control" value="@Request["q"]" />
                         </div>
                     </div>
                 }
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">@activityLabel</label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">@activityLabel</label>
+                    <div>
                         @if (selectedActivities.Any() || selectedGroups.Any())
                         {
                             <input type="text" readonly="readonly" class="form-control" value="@string.Join(",", selectedGroups.Select(group => group.Name).Union(selectedActivities.Select(activity => activity.Name)))" />
@@ -54,8 +55,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Seat Assignments</label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">Seat Assignments</label>
+                    <div>
                         @if (Request["at"].IsNotEmpty() && Request["at"].IsNumber())
                         {
                             <input type="text" readonly="readonly" class="form-control" value="@(Request["at"].ToInteger().ToEnum<RegistrationAssignmentType>().ToString().SplitByUpperCase())" />
@@ -68,8 +69,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Registration Status</label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">Registration Status</label>
+                    <div>
                         @if (Request["regstatus"].IsNotEmpty() && Request["regstatus"].IsNumber())
                         {
                             <input type="text" readonly="readonly" class="form-control" value="@(Request["regstatus"].ToInteger().ToEnum<RegistrationStatus>().ToString().SplitByUpperCase())" />
@@ -82,8 +83,8 @@
                 </div>
 
                 <div class="form-group" id="subject-group">
-                    <label class="col-sm-3 control-label">Message Reason</label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">Message Reason <span class="text-danger">*</span></label>
+                    <div>
                         <select name="subject" id="subject" class="form-control" required>
                             <option value="">Select a Message Reason...</option>
                             @{
@@ -106,16 +107,28 @@
                 <input type="hidden" name="volunteers" value="@isVolunteers.ToString()">
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Message Body</label>
-                    <div class="col-sm-6">
-                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control"></textarea>
+                    <label class="control-label text-bold">Message Body <span class="text-danger">*</span></label>
+                    <div>
+                        <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control" maxlength="1000"></textarea>
                         <p class="text-muted">Max of 1000 characters</p>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">Attachment(s)</label>
+                    <div>
+                        <div id="selected-files"></div>
+                        <div class="border-gray-bold">
+                            <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
+                            <label id="file-label" class="btn attachment-btn" for="file-input"><span class="media-middle">Choose File(s)</span><i class="icon s7-upload"></i></label>
+                        </div>
+                        <p class="text-muted">Max of 25 mb per file</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="control-label"></label>
+                    <div>
                         <div class="am-checkbox">
                             <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" checked="checked" />
                             <label for="sendtostaff">Send Message To Staff</label>
@@ -124,8 +137,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
+                    <label class="control-label"></label>
+                    <div>
                         <div class="am-checkbox">
                             <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
                             <label for="parentsonly">Send only to parents of selected students</label>
@@ -134,8 +147,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Selected @recipients</label>
-                    <div class="col-sm-6">
+                    <label class="control-label text-bold">Selected @recipients</label>
+                    <div>
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">
                                 <div style="height: 200px; overflow: auto;">
@@ -147,8 +160,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
+                    <label class="control-label"></label>
+                    <div>
                         <div class="panel panel-default panel-borders">
                             <div class="panel-body">
                                 <div class="am-checkbox">
@@ -163,8 +176,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-3 control-label"></label>
-                    <div class="col-sm-6">
+                    <label class="control-label"></label>
+                    <div>
                         <div class="pull-left">
                             <a href="@sendMessagesUrl" class="text-muted">
                                 &laquo; Cancel
@@ -184,11 +197,100 @@
 </div>
 
 <script>
+    PageEvent.add(PageEvent.AFTER_INIT, function () {
+        const fileInput = document.getElementById("file-input");
+        const selectedFiles = document.getElementById("selected-files");
+
+        fileInput.addEventListener("change", function () {
+            let validFiles = [];
+            selectedFiles.innerHTML = "";
+            const files = this.files;
+            let totalFileSize = 0;
+            let validExtensions = [".jpg", ".pdf", ".jpeg", ".png"];
+            if (files.length >= 1 && files.length <= 10) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSizeMB = (file.size / 1048576).toFixed(2);
+                    const fileSizeKB = (file.size / 1024).toFixed(2);
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+
+                    if (file.size > @Utilities.MessageFileSize) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: "File size exceeds the limit 25 MB",
+                            success: false
+                        });
+                    }
+                    else if (!validExtensions.includes("." + fileExtension)) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: "Please add the valid jpg, png or pdf file",
+                            success: false
+                        });
+                    }
+                    else {
+                        if (totalFileSize + file.size > @Utilities.MessageTotalFileSize) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: "Total file size exceeds the limit 50 MB",
+                                success: false
+                            });
+                            break;
+                        }
+
+                        totalFileSize += file.size;
+
+                        const fileItem = document.createElement("div");
+                        fileItem.classList.add("form-control");
+                        fileItem.classList.add("col-md-6");
+                        fileItem.innerHTML = `
+                        <span class="file-name">${file.name}</span>
+                        <span class="float-right">
+                            <span class="mr-3">${fileSizeMB > 1 ? fileSizeMB + " MB" : fileSizeKB + " KB"}</span>
+                            <i class="s7-trash text-danger" data-index="${i}" onclick="deleteFile(event)"></i>
+                        </span>`;
+                        selectedFiles.appendChild(fileItem);
+
+                        validFiles.push(file);
+                    }
+                }
+
+                const newFileList = new DataTransfer();
+                validFiles.forEach(file => {
+                    newFileList.items.add(file);
+                });
+                fileInput.files = newFileList.files;
+            }
+            else {
+                const newFileList = new DataTransfer();
+                fileInput.files = newFileList.files;
+                Notifications.showBar({
+                    title: 'Error',
+                    message: "You can't attach more than 10 files",
+                    success: false
+                });
+            }
+
+        });
+    });
     function checkForm() {
         if (!$('#confirmed').is(':checked')) {
             $('#lblconfirmed').addClass('text-danger');
         } else {
             $('#lblconfirmed').removeClass('text-danger');
         }
+    }
+    function deleteFile(event) {
+        const fileInput = document.getElementById("file-input");
+        const index = event.target.getAttribute("data-index");
+        const selectedFiles = document.getElementById("selected-files");
+        const newFileList = new DataTransfer();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (i != index) {
+                newFileList.items.add(fileInput.files[i]);
+            }
+        }
+        fileInput.files = newFileList.files;
+        selectedFiles.removeChild(event.target.parentElement.parentElement);
     }
 </script>

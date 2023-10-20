@@ -1,4 +1,4 @@
-﻿@model ActivityMessage
+@model ActivityMessage
 @{
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -7,10 +7,19 @@
     var registrantsPerColumn = 0;
     var account = SessionVariables.CurrentAccount;
     var group = Model.GetActivityGroup();
-    
+
     if(amrs.IsNotEmpty())
     {
         registrantsPerColumn = Math.Ceiling(amrs.Count / 3.0).ToInteger();
+    }
+    var body = Model.Body;
+    var startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var attachments = "";
+    var bodyText = "";
+    if (startIndex != -1)
+    {
+        attachments = body.Substring(startIndex);
+        bodyText = body.Substring(0, startIndex);
     }
 }
 
@@ -25,10 +34,10 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("_ActivityGroupTitle", Model.Subject + " - Message"); }
+            <a href="@Url.Action("messages", "group", new { id = group.Uid})" class="btn btn-default pull-right">&laquo; Back to List</a>
         </div>
-        <div class="panel-body">
+        <div class="panel-body form-body">
             <div class="col-md-10 col-md-offset-1">
-
                 <div class="row">
                     <div class="btn-group pull-right">
                         @if (Model.GetUnsentCount() > 0)
@@ -38,30 +47,35 @@
                                 Resend Message to Unreached Recipients
                             </button>
                         }
-                        <a href="@Url.Action("messages", "group", new { id = group.Uid})" class="btn btn-default">&laquo; Back to List</a>
                     </div>
                 </div>
 
                 <form method="post" action="@Url.Action("messageadd", "group", new { id = group.Uid })" class="form-horizontal">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Subject</label>
-                        <div class="col-sm-6 padding-10">
+                        <label class="control-label text-bold">Subject<span class="text-danger">*</span></label>
+                        <div>
                             @Model.Subject
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Body</label>
-                        <div class="col-sm-6 padding-10">
-                            @Html.Raw(Model.Body)
+                        <label class="control-label text-bold">Body<span class="text-danger">*</span></label>
+                        <div>
+                            @Html.Raw(@bodyText.IsNotEmpty() ? bodyText.Replace("\n", "<br />") : body.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label text-bold">Attachment(s)</label>
+                        <div>
+                            @Html.Raw(attachments)
                         </div>
                     </div>
                     @if (Model.DateSent.HasValue)
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">Date Sent</label>
-                            <div class="col-sm-6 padding-10">
+                            <label class="control-label text-bold">Date Sent</label>
+                            <div>
                                 @account.ConvertToAccountTimeZone(Model.DateSent.Value).ToLongDateTimeString()
                             </div>
                         </div>
@@ -69,16 +83,16 @@
                     @if (amrs.IsNotEmpty())
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label">
-                                Recipients
+                            <label class="control-label text-bold">
+                                    Recipients
                             </label>
-                            <div class="col-sm-6">
+                            <div>
                                 @for (int i = 0; i < 3; i++)
                                 {
                                     <div class="col-md-4">
                                         @foreach (var amr in amrs.Skip(i * registrantsPerColumn).ToList().Take(registrantsPerColumn))
                                         {
-                                            <div class="padding-10">
+                                            <div>
                                                 @if (amr.DateSent.HasValue)
                                                 {
                                                     <i class="s7-check-circle text-success text-bold"></i>
@@ -104,6 +118,31 @@
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".download-link").forEach(function (link) {
+            link.addEventListener("click", function () {
+                var fileLinks = document.querySelectorAll(".file-link");
+                fileLinks.forEach(function (fileLink) {
+                    var url = fileLink.href;
+                    var fileName = fileLink.getAttribute("data-file-name");
+                    downloadFile(url, fileName);
+                });
+            });
+        });
+    });
+    function downloadFile(url, fileName) {
+        fetch(url)
+            .then(response => response.blob())
+            .then(blob => {
+                var a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = fileName;
+                a.style.display = "none";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+    }
     function setResendLink() {
         $('#btn-confirm').attr('href', '@Url.Action("messagesresend", "group", new { id = Model.ID })');
     }

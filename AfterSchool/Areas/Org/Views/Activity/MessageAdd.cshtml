@@ -1,3 +1,4 @@
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model Activity
 @{
     ViewBag.Title = Model.AccountName;
@@ -26,7 +27,13 @@
     var activityType = Model.ActivityTypeId;
     var isVolunteer = activityType == ActivityType.VolunteerOpportunity;
     var registrantsLabel = UILabel.RegistrantLabel(activityType, true);
-    var cancelRedirectUrl = ViewBag.RedirectUrl ?? Url.Action("messages", "activity", new {id = Model.Uid});
+    var cancelRedirectUrl = ViewBag.RedirectUrl ?? Url.Action("messages", "activity", new { id = Model.Uid });
+    var startIndex = body.IndexOf("<div class=\"attachments text-left\">");
+    var bodyText= "";
+    if (startIndex != -1)
+    {
+        bodyText = body.Substring(0, startIndex);
+    }
 }
 
 @{Html.RenderPartial("OrgAccountHeader", Model.AccountId.ToString());}
@@ -36,24 +43,24 @@
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
 
     @{ Html.RenderPartial("~/Views/Shared/_ActivityHeader.cshtml", new ActivityHeaderModel
-       {
+        {
             Activity = Model,
             IsActivityLeader = (bool?) ViewData["IsActivityLeader"],
             IsFullScreen = (bool?) ViewData["IsFullScreen"],
             AccountPackage = accountPackage,
             CurrentAccount = currentAccount,
             CurrentUser = currentUser,
-       }); }
+        }); }
 
     <div class="panel panel-default">
         <div class="panel-heading">
             @{Html.RenderPartial("~/Views/Shared/_ActivityTitle.cshtml", Model.Name + " - Send Message", new ViewDataDictionary
-              {
+                  {
                   {"IconClass", AfterSchool.Helpers.IconForActivityType.GetIconClassForActivityType(activityType)},
               }); }
         </div>
-        <div class="panel-body">
-            <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal">
+        <div class="panel-body form-body">
+            <form method="post" id="message-form" action="@Url.Action("messageadd", "activity", new { id = Model.Uid })" class="form-horizontal" enctype="multipart/form-data">
 
                 @if (registrants.Count == 0)
                 {
@@ -65,8 +72,8 @@
                 else
                 {
                     <div class="form-group" id="subject-group">
-                        <label class="col-sm-3 control-label">Message Reason</label>
-                        <div class="col-sm-6">
+                        <label class="control-label text-bold">Message Reason <span class="text-danger">*</span></label>
+                        <div>
                             <select name="subject" id="subject" class="form-control">
                                 <option value="">Select a Message Reason...</option>
                                 @{
@@ -81,16 +88,28 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">Message Body</label>
-                        <div class="col-sm-6">
-                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control">@body</textarea>
+                        <label class="control-label text-bold">Message Body <span class="text-danger">*</span></label>
+                        <div>
+                            <textarea name="body" id="body" required style="width: 100%" rows="5" class="form-control" maxlength="1000">@bodyText</textarea>
                             <p class="text-muted">Max of 1000 characters</p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-3">
+                        <label class="control-label text-bold">Attachment(s)</label>
+                        <div>
+                            <div id="selected-files"></div>
+                            <div class="border-gray-bold">
+                                <input type="file" name="importedFiles" id="file-input" class="hide" multiple />
+                                <label id="file-label" class="btn attachment-btn" for="file-input"><span class="media-middle">Choose File(s)</span><i class="icon s7-upload"></i></label>
+                            </div>
+                            <p class="text-muted">Max of 25 mb per file</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label"></label>
+                        <div>
                             @if (!emailQuotaExceeded)
                             {
                                 <div class="am-checkbox">
@@ -99,14 +118,14 @@
                                 </div>
                             } else
                             {
-                                 <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
+                                <div class="am-checkbox"  onclick="return showUpgradeMyPlan('@(emailMessagingPackage?.Name)', @(emailMessagingPackage?.ID))">
                                     <input type="checkbox" id="sendtostaff" name="sendtostaff" value="1" disabled="disabled" />
                                     <label for="sendtostaff">Send Email To Staff</label>
-                                 </div>
+                                </div>
                             }
                         </div>
 
-                        <div class="col-sm-3 hidden">
+                        <div class="hidden">
                             @if (!textQuotaExceeded)
                             {
                                 <div class="am-checkbox">
@@ -126,8 +145,8 @@
                     if(Model.ActivityTypeId !=ActivityType.VolunteerOpportunity)
                     {
                         <div class="form-group">
-                            <label class="col-sm-3 control-label"></label>
-                            <div class="col-sm-6">
+                            <label class="control-label"></label>
+                            <div>
                                 <div class="am-checkbox">
                                     <input type="checkbox" id="parentsonly" name="parentsonly" value="1" />
                                     <label for="parentsonly">Send only to parents of selected students</label>
@@ -135,14 +154,14 @@
                             </div>
                         </div>
                     }
-                    
+
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label">
-                            Select @registrantsLabel<br />
-                            <a href="javascript:selectAll()">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
+                        <label class="control-label text-bold">
+                            Select @registrantsLabel
+                            <a href="javascript:selectAll()" class="xs-ml-40">Select All</a> | <a href="javascript:clearAll()">Clear All</a>
                         </label>
-                        <div class="col-sm-6">
+                        <div>
                             @for (int i = 0; i < 3; i++)
                             {
                                 <div>
@@ -173,8 +192,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label"></label>
-                        <div class="col-sm-6">
+                        <label class="control-label"></label>
+                        <div>
                             <div class="pull-left">
                                 <a href="@cancelRedirectUrl" class="text-muted">
                                     &laquo; Cancel
@@ -198,7 +217,84 @@
     PageEvent.add(PageEvent.AFTER_INIT, function () {
         $('.chk-registrant').on('click', updateMessageCount);
         updateMessageCount();
+        const fileInput = document.getElementById("file-input");
+        const selectedFiles = document.getElementById("selected-files");
+
+        fileInput.addEventListener("change", function ()
+        {
+            let validFiles = [];
+            selectedFiles.innerHTML = "";
+            const files = this.files;
+            let totalFileSize = 0;
+            let validExtensions = [".jpg", ".pdf", ".jpeg", ".png"];
+            if (files.length >= 1 && files.length <= 10) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const fileSizeMB = (file.size / 1048576).toFixed(2);
+                    const fileSizeKB = (file.size / 1024).toFixed(2);
+                    const fileExtension = file.name.split('.').pop().toLowerCase();
+
+                    if (file.size > @Utilities.MessageFileSize) {
+                        Notifications.showBar({
+                            title: 'Error',
+                            message: "File size exceeds the limit 25 MB",
+                            success: false
+                        });
+                    }
+                    else if(!validExtensions.includes("." + fileExtension)) {
+                         Notifications.showBar({
+                            title: 'Error',
+                            message: "Please add the valid jpg, png or pdf file",
+                            success: false
+                         });
+                    }
+                    else
+                    {
+                        if (totalFileSize + file.size > @Utilities.MessageTotalFileSize) {
+                            Notifications.showBar({
+                                title: 'Error',
+                                message: "Total file size exceeds the limit 50 MB",
+                                success: false
+                            });
+                            break;
+                         }
+
+                        totalFileSize += file.size;
+
+                        const fileItem = document.createElement("div");
+                        fileItem.classList.add("form-control");
+                        fileItem.classList.add("col-md-6");
+                        fileItem.innerHTML = `
+                        <span class="file-name">${file.name}</span>
+                        <span class="float-right">
+                            <span class="mr-3">${fileSizeMB > 1 ? fileSizeMB + " MB" : fileSizeKB + " KB"}</span>
+                            <i class="s7-trash text-danger" data-index="${i}" onclick="deleteFile(event)"></i>
+                        </span>`;
+                        selectedFiles.appendChild(fileItem);
+
+                        validFiles.push(file);
+                    }
+                }
+
+                const newFileList = new DataTransfer();
+                validFiles.forEach(file => {
+                    newFileList.items.add(file);
+                });
+                fileInput.files = newFileList.files;
+            }
+            else
+            {
+                const newFileList = new DataTransfer();
+                fileInput.files = newFileList.files;
+                Notifications.showBar({
+                    title: 'Error',
+                    message: "You can't attach more than 10 files",
+                    success: false
+                });
+            }
+        });
     });
+
     function selectAll() {
         $('input[type="checkbox"].chk-registrant').each(function () {
             $(this).prop('checked', true);
@@ -228,5 +324,18 @@
         else {
             $('#remaining-count').text('0');
         }
+    }
+    function deleteFile(event) {
+        const fileInput = document.getElementById("file-input");
+        const index = event.target.getAttribute("data-index");
+        const selectedFiles = document.getElementById("selected-files");
+        const newFileList = new DataTransfer();
+        for (let i = 0; i < fileInput.files.length; i++) {
+            if (i != index) {
+                newFileList.items.add(fileInput.files[i]);
+            }
+        }
+        fileInput.files = newFileList.files;
+        selectedFiles.removeChild(event.target.parentElement.parentElement);
     }
 </script>

@@ -1,4 +1,5 @@
 using System;
+using System.Web;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -7,6 +8,7 @@ using System.Web.Mvc;
 using AfterSchool.Models;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
+using AfterSchool.Helpers;
 using BasicLibrary;
 using Hangfire;
 using Extensions = AfterSchoolLibrary.Extensions;
@@ -575,7 +577,7 @@ namespace AfterSchool.Areas.Org.Controllers
         [ValidateInput(false)]
         [HttpPost]
         public ActionResult MessageAdd(string id, string deliveryMethod, string subject, string body,
-            string sendtostaff, string parentsonly)
+           List<HttpPostedFileBase> importedFiles, string sendtostaff, string parentsonly)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -589,7 +591,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 msgs.Add("Subject is required", MessageType.UserError);
             if (body.IsEmpty())
                 msgs.Add("Body is required", MessageType.UserError);
-
+            msgs.AddRange(AttachmentUploadHelper.ValidateAttachments(importedFiles));
             ActivityMessage am = null;
 
             if (id.IsNotGuid())
@@ -611,6 +613,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                     if (!willExceedQuota)
                     {
+                        body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
                         am = group.AddMessage(
                             subject,
                             body,
