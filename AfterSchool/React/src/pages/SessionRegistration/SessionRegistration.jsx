@@ -18,6 +18,7 @@ export default function SessionRegistration({ newChild = false }) {
     exit,
     school,
     loading,
+    checkOut,
     questions,
     loadFormData,
     registrationId,
@@ -40,7 +41,9 @@ export default function SessionRegistration({ newChild = false }) {
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
-    answeredQuestions
+    answeredQuestions,
+    false,
+    true
   );
   const {
     validator,
@@ -78,7 +81,7 @@ export default function SessionRegistration({ newChild = false }) {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    // validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions), TODO:// apply validations
+    validate: values => validator(values, {}, {}, {}, checkOut),
     onSubmit: async (values, { resetForm }) => {
       const errorMsgs = [];
       setSaveDisabled(true);

@@ -25,7 +25,7 @@ export default {
     `Api/SessionRegistration/GetFormAndCheckOutObject/?accountName=${accountName}&activityGroupName=${activityGroupName}&registrantUid=${registrantUid}`,
   sessionSchoolAPI: 'Api/SessionRegistration/CreateOrUpdateFromGoogle',
   exitSessionAPI: uid => `Api/SessionRegistration/Exit?uid=${uid}`,
-  SessionAPI: 'Api/SessionRegistration/Session',
+  SessionRegisterAPI: 'Api/SessionRegistration/Register',
 
   //PinSetup APIs
   createNewPinForParentAPI: 'Api/RegistrationPin/CreateNewPinForParent',
