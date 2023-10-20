@@ -26,7 +26,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             {
                 var parsedObject = JObject.Parse(json.ToString());
                 var payload = parsedObject["payload"].ToString();
-                var responseBody = JsonConvert.DeserializeObject<Payload>(payload);
+                var responseBody = (Payload) JsonConvert.DeserializeObject<Payload>(payload);
 
                 List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
                 var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
@@ -45,8 +45,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
 
-                    if (responseBody.result == "Clear")
-                    {
+                    if (responseBody.result.ToLower() == "passed" && responseBody.status.ToLower() == "archive")
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -56,9 +55,9 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             DateTime.UtcNow,
                             msgs
                         );
-                        
-                    }
-                    if (responseBody.result == "Consider")
+
+                    if ((responseBody.result.ToLower() == "consider" && responseBody.status.ToLower() == "archive") ||
+                        (responseBody.result.ToLower() == "review" && responseBody.status.ToLower() == "adverseaction"))
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
                             ApplicationStatus.FailedBackgroundCheck,
