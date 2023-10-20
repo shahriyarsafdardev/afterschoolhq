@@ -28,7 +28,7 @@ namespace AfterSchool.Helpers
                                                   ques.QuestionTypeId == QuestionType.Audio ||
                                                   ques.QuestionTypeId == QuestionType.Video);
 
-                    if (ques.IsRequired && ((isFileUpload && request.Files["question-" + ques.ID].IsEmpty()) || (!isFileUpload && answer.Value.IsEmpty())))
+                    if (ques.QuestionTypeId != QuestionType.TextBlock && (ques.IsRequired && ((isFileUpload && request.Files["question-" + ques.ID].IsEmpty()) || (!isFileUpload && answer.Value.IsEmpty()))))
                         msgs.Add($"{ques.Text} is required", MessageType.UserError);
                 });
         }
