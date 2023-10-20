@@ -3488,16 +3488,24 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
+            var account = activity.GetAccount();
+            var checkInOutAttendanceRegistrants = new List<CheckInOut>();
+            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
 
-            var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs)
+            attendanceRegistrants
             ?.Where(att => att.AttendanceIsCompleted)
             ?.ToList();
-            
+
+            if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
+                foreach (var cicoRegistrant in attendanceRegistrants)
+                    checkInOutAttendanceRegistrants.AddRange(CheckInOut.LoadByAttendanceRegistrantId(cicoRegistrant.ID.Value, msgs).ToList());
+
             var model = new AttendanceReportResults()
             {
                 AttendanceRegistrants = attendanceRegistrants,
                 Messages = msgs,
                 Activity = activity,
+                CheckInOutRegistrants = checkInOutAttendanceRegistrants
             };
 
             return View(model);
@@ -3511,26 +3519,68 @@ namespace AfterSchool.Areas.Org.Controllers
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
             var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
+            var checkInOutAttendanceRegistrants = new List<CheckInOut>();
+            var account = activity.GetAccount();
 
             var table = new List<List<string>>();
-            var row = new List<string>
-            {
-                "Date",
-                "Student First Name",
-                "Student Last Name",
-                "Status",
-            };
 
-            table.Add(row);
-
-            foreach (var attendanceRegistrant in attendanceRegistrants)
+            List<string> row;
+            if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
             {
                 row = new List<string>
                 {
-                    attendanceRegistrant.AttendanceDate.ToShortDateTimeString(),
+                    "Date",
+                    "Student First Name",
+                    "Student Last Name",
+                    "Status",
+                    "Check In Time",
+                    "Check Out Time"
+                };
+                table.Add(row);
+
+                attendanceRegistrants = attendanceRegistrants?.Where(att => att.AttendanceIsCompleted)?.ToList();
+                foreach (var cicoRegistrant in attendanceRegistrants)
+                {
+                    var checkInOut = CheckInOut.LoadByAttendanceRegistrantId(cicoRegistrant.ID.Value, msgs).ToList();
+                    checkInOutAttendanceRegistrants.AddRange(checkInOut);
+                }
+            }
+            else
+            {
+                row = new List<string>
+                {
+                    "Date",
+                    "Student First Name",
+                    "Student Last Name",
+                    "Status"
+                };
+                table.Add(row);
+            }
+
+            foreach (var attendanceRegistrant in attendanceRegistrants)
+            {
+                string checkInTime = null;
+                string checkOutTime = null;
+
+                if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
+                {
+                    checkInTime = checkInOutAttendanceRegistrants
+                        .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn)
+                        .LastOrDefault()?.Date.ToShortTimeString();
+
+                    checkOutTime = checkInOutAttendanceRegistrants
+                        .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut)
+                        .LastOrDefault()?.Date.ToShortTimeString();
+                }
+
+                row = new List<string>
+                {
+                    attendanceRegistrant.AttendanceDate.ToShortDateString(),
                     attendanceRegistrant.RegistrantFirstName,
                     attendanceRegistrant.RegistrantLastName,
                     attendanceRegistrant.NumberPresent.HasValue ? attendanceRegistrant.NumberPresent.Value > 0 ? "Present" : "Absent" : "N/A",
+                    checkInTime,
+                    checkOutTime
                 };
                 table.Add(row);
             }
@@ -3564,6 +3614,7 @@ namespace AfterSchool.Areas.Org.Controllers
             public List<AttendanceRegistrant> AttendanceRegistrants { get; set; }
             public SystemMessages Messages { get; set; }
             public Activity Activity { get; set; }
+            public List<CheckInOut> CheckInOutRegistrants { get; set; }
         }
 
         #endregion

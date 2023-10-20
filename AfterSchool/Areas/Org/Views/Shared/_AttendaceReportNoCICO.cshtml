@@ -1,0 +1,126 @@
+@model AfterSchool.Areas.Org.Controllers.ActivityController.AttendanceReportResults
+@{
+    var groupBy = (string)ViewData["groupBy"];
+    var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
+    var students = (List<Registrant>)ViewData["students"];
+    var dates = (List<DateTime?>)ViewData["dates"];
+    var checkInOutRegistrants = (List<CheckInOut>)ViewData["checkInOutRegistrants"];
+}
+
+@if (groupBy == "date")
+{
+    <div class="row">
+        <div class="col-md-12">
+            @foreach (var date in dates.OrderBy(x => x))
+            {
+                <h4>
+                    <strong>@date.ToShortDateString()</strong>
+                </h4>
+                <h5>
+                    <strong>Present:</strong> @attendanceRegistrants.Where(x => x.AttendanceDate == date).Count(x => x.NumberPresent.HasValue && x.NumberPresent.Value > 0)
+                    |
+                    <strong>Absent:</strong> @attendanceRegistrants.Where(x => x.AttendanceDate == date).Count(x => !x.NumberPresent.HasValue || x.NumberPresent.Value == 0)
+                </h5>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.Where(x => x.AttendanceDate == date))
+                        {
+                            <tr>
+                                <td>@attendanceRegistrant.RegistrantName</td>
+                                <td>
+                                    @if (attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent.Value > 0)
+                                    {
+                                        @:Present
+                                    }
+                                    else
+                                    {
+                                        @:Absent
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+        </div>
+    </div>
+}
+else if (groupBy == "student")
+{
+    <div class="row">
+        <div class="col-md-12">
+            @foreach (var student in students)
+            {
+                <h4>
+                    <strong>@student.Name</strong>
+                </h4>
+                <h5>
+                    <strong>Present:</strong> @attendanceRegistrants.Where(x => x.RegistrantId == student.ID).Count(x => x.NumberPresent.HasValue && x.NumberPresent.Value > 0)
+                    |
+                    <strong>Absent:</strong> @attendanceRegistrants.Where(x => x.RegistrantId == student.ID).Count(x => !x.NumberPresent.HasValue || x.NumberPresent.Value == 0)
+                </h5>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attendanceRegistrant in attendanceRegistrants.Where(x => x.RegistrantId == student.ID))
+                        {
+                            <tr>
+                                <td>@attendanceRegistrant.AttendanceDate.ToShortDateString()</td>
+                                <td>
+                                    @if (attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent.Value > 0)
+                                    {
+                                        @:Present
+                                    }
+                                    else
+                                    {
+                                        @:Absent
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+        </div>
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Student</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var attendanceRegistrant in attendanceRegistrants.OrderBy(x => x.AttendanceDate))
+            {
+                <tr>
+                    <td>@attendanceRegistrant.AttendanceDate.ToShortDateString()</td>
+                    <td>@attendanceRegistrant.RegistrantName</td>
+
+                    <td>
+                        @(attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent > 0 ? "Present" : "Absent")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
