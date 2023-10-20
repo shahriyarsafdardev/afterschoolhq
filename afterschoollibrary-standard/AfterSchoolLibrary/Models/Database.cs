@@ -1335,6 +1335,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230811_AddCouponIsDeletedDefault.Do(amsgs,adc);
             Migration_20230918_StudentNotes.Do(amsgs,adc);
             Migration_20231010_DropAccountPropertyValueIndex.Do(amsgs, adc);
+            Migration_20231019_AlterAccountPropertyValue.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()
