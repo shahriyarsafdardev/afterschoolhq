@@ -97,7 +97,7 @@ export default function UpdateRegistration() {
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initialvalues,
-    // validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
+    validate: values => validator(values, genderRestrictions, ageRestrictions, gradeRestrictions),
     onSubmit: async (values, { resetForm }) => {
       setSaveDisabled(true);
       let schoolLocationID = null;
