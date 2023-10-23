@@ -317,10 +317,16 @@ namespace AfterSchoolLibrary.Services
                 else
                 {
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-                    var amountToStripe = StripeHelper.CalculateStripeFee(subscriptionSchedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
+                    var amountToStripe = StripeHelper.CalculateStripeFee(charge.Amount, billingAccount.IsCreditCardFeeTakenOutOfCost);
+                    var amountToConnect = charge.Amount - new FeeCalculationObject(
+                        amount,
+                        billingAccount,
+                        plan.IsConvenienceFeeTakenOutOfCost,
+                        msgs,
+                        dc).GetConvenienceFee();
 
                     var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount , DateTime.UtcNow.Date,
-                                charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), subscriptionSchedule.AmountToConnectAccountInCents, amountToStripe, 0, msgs);
+                                charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), amountToConnect, amountToStripe, 0, msgs);
 
                     if(subscriptionPaymentHistory.IsEmpty())
                         msgs.Add("Payment history record not created", MessageType.Error);
