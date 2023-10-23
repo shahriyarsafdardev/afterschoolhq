@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AfterSchoolLibrary.Billing;
@@ -107,7 +107,7 @@ namespace AfterSchoolLibraryTests.Tests
         }
 
         [Theory(DisplayName = "ProcessStudentRegistrationTest")]
-        [InlineData("https://qa.afterschoolhq.com/testaccount/activity/testactivity")]
+        [InlineData("https://qa.afterschool.app/testaccount/activity/testactivity")]
         public void ProcessParentRegistrationTest(string url)
         {
             //Arrange

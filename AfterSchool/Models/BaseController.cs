@@ -24,7 +24,10 @@ namespace AfterSchool.Models
             {
                 var origin = (Request.Headers["Origin"] ?? Request.Headers["Referer"]).ToLower();
 
-                if (origin.StartsWith("https://afterschoolhq.com") ||
+                if (origin.StartsWith("https://afterschool.app") ||
+                    origin.StartsWith("https://qa.afterschool.app") ||
+                    origin.StartsWith("https://staging.afterschool.app") ||
+                    origin.StartsWith("https://afterschoolhq.com") ||
                     origin.StartsWith("https://qa.afterschoolhq.com") ||
                     origin.StartsWith("https://ci.afterschoolhq.com") ||
                     origin.StartsWith("https://staging.afterschoolhq.com") ||
