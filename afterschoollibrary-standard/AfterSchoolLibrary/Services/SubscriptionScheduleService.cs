@@ -39,7 +39,7 @@ namespace AfterSchoolLibrary.Services
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,
                 StripeConnectId = checkoutObject.BillingAccount.StripeUserId,
-                AmountToConnectAccountInCents = feeObject.Amount - feeObject.ConvenienceFee,
+                AmountToConnectAccountInCents = (feeObject.Amount - feeObject.ConvenienceFee) * 100,
                 LastDateToBill = lastDateToBill,
                 Description = "Subscription for " + checkoutObject.ParticipationObject.Name,
                 NextBillDate = nextBillDate,
@@ -266,15 +266,11 @@ namespace AfterSchoolLibrary.Services
             Account convenienceFeePayer;
             Account creditCardFeePayer;
 
-            if (rsp.ConvenienceFeesPaidBy == FeesPaidByType.Parent)
-                convenienceFeePayer = purchasingAccount;
-            else
-                convenienceFeePayer = billingAccount;
-            if (rsp.PaymentTypeFeesPaidBy == FeesPaidByType.Parent)
-                creditCardFeePayer = purchasingAccount;
-            else
-                creditCardFeePayer = billingAccount;
+            creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : purchasingAccount;
 
+            convenienceFeePayer =  billingAccount.IsConvenienceFeeTakenOutOfCost
+                   ? billingAccount
+                   : purchasingAccount;
 
             var useConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var usePlatformFees = useConnectedAccount && subscriptionPaymentHistory.AmountInCents.IsEmpty();
@@ -293,7 +289,7 @@ namespace AfterSchoolLibrary.Services
             var paymentTypeFee = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
             var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
-            var amountPaidByParent = subscriptionSchedule.AmountInCents;
+            var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m ;
 
             if (paymentType == PaymentType.ACH)
                 stripeSubscriptionPrice -= calculatedFullCCFee;
