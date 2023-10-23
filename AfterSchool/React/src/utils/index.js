@@ -66,9 +66,4 @@ export const getAndFormatDateTime = (now = new Date()) => {
 
 export const getTimeFromDate = date => date.getTime();
 
-export const withoutSignsPhoneNumber = phone => {
-  return phone
-    .replaceAll(' ', '')
-    .replace('+1', '')
-    .replaceAll('-', '');
-};
+export const withoutSignsPhoneNumber = phone => phone.replace(/(\+1)|[()\-+\s]/g, '');
