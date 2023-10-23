@@ -10,6 +10,7 @@ namespace AfterSchool.Areas.Api.Models
         public string registrantId { get; set; }
         public string registrantUid { get; set; }
         public string accountName { get; set; }
-        public string activityName { get; set; }
+        public string? activityName { get; set; }
+        public string? sessionName { get; set; }
     }
 }
