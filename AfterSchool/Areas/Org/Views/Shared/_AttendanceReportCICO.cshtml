@@ -46,8 +46,8 @@
                                         @:Absent
                                     }
                                 </td>
-                                <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault()?.Date.ToShortTimeString())</td>
-                                <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault()?.Date.ToShortTimeString())</td>
+                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
+                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
                             </tr>
                         }
                     </tbody>
@@ -96,8 +96,8 @@ else if (groupBy == "student")
                                         @:Absent
                                     }
                                 </td>
-                                <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault()?.Date.ToShortTimeString())</td>
-                                <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault()?.Date.ToShortTimeString())</td>
+                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
+                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
                             </tr>
                         }
                     </tbody>
@@ -129,8 +129,8 @@ else
                     <td>
                         @(attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent > 0 ? "Present" : "Absent")
                     </td>
-                    <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault()?.Date.ToShortTimeString())</td>
-                    <td>@(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault()?.Date.ToShortTimeString())</td>
+                    <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
+                    <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
                 </tr>
             }
         </tbody>

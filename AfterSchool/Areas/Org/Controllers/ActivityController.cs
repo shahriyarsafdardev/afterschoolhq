@@ -3601,6 +3601,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 AttendanceRegistrants = attendanceRegistrants,
                 Messages = msgs,
                 Activity = activity,
+                CheckInOutRegistrants = checkInOutAttendanceRegistrants
             };
 
             return View("AttendanceReport", model);
