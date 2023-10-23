@@ -1080,6 +1080,7 @@ namespace AfterSchool.Areas.Api.Controllers
             }
         }
 
+        [HttpGet]
         public ActionResult ThankYou(string id)
         {
             var currentUser = SessionVariables.CurrentUser;
@@ -1096,27 +1097,44 @@ namespace AfterSchool.Areas.Api.Controllers
                 var registrant = registration.GetRegistrant(msgs);
                 var registrantActivity = registration?.GetRegistrantActivity(participationObject, msgs);
 
-                dynamic response = new
-                {
-                    activityDto = new
+                dynamic response = null;
+                if (participationObject.IsActivityGroup())
+                    response = new
                     {
-                        ActivityName = participationObject.Name,
-                        Organization = participationObject.OwnerAccount.Name,
-                        RegistrantFirstName = registrant.FirstName,
-                        FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
-                        ActivityUrl = participationObject.GetShortHomePageUrl(),
-                        isParent = currentUserRegistrant.IsParentOrGuardian,
-                        RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
-                        AmountPaid = registrantActivity?.GetAmountPaid(msgs),
-                        ProviderEmail = participationObject.OwnerAccount.Email,
-                        RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
-                        ApplyMode = participationObject.RegistrationMode.ToString(),
-                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
-                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
-                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
-                                                   participationObject.IsRequireCheckInCheckOutEnabled,
-                    }
-                };
+                        activityGroupDto = new
+                        {
+                            SessionName = participationObject.Name,
+                            Organization = participationObject.OwnerAccount.Name,
+                            RegistrantFirstName = registrant.FirstName,
+                            FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                            SessionUrl = participationObject.GetShortHomePageUrl(),
+                            ProviderEmail = participationObject.OwnerAccount.Email,
+                            ApplyMode = participationObject.RegistrationMode.ToString(),
+                            HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
+                        }
+                    };
+                else
+                    response = new
+                    {
+                        activityDto = new
+                        {
+                            ActivityName = participationObject.Name,
+                            Organization = participationObject.OwnerAccount.Name,
+                            RegistrantFirstName = registrant.FirstName,
+                            FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                            ActivityUrl = participationObject.GetShortHomePageUrl(),
+                            isParent = currentUserRegistrant.IsParentOrGuardian,
+                            RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
+                            AmountPaid = registrantActivity?.GetAmountPaid(msgs),
+                            ProviderEmail = participationObject.OwnerAccount.Email,
+                            RegistrationStatus = registrantActivity?.AssignmentTypeId.ToString(),
+                            ApplyMode = participationObject.RegistrationMode.ToString(),
+                            HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
+                            IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
+                                                       participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                       participationObject.IsRequireCheckInCheckOutEnabled,
+                        }
+                    };
 
                 return Json(
                     new ApiResponse(msgs,response),
