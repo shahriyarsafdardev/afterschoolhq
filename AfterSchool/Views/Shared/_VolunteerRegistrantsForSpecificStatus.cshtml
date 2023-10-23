@@ -1,4 +1,4 @@
-﻿@model List<RegistrantActivity>
+@model List<RegistrantActivity>
 @{
     var activity = (Activity) ViewData["Activity"];
     var participationObject = activity.GetParticipationObject();
@@ -54,10 +54,7 @@
                                 }
                             </td>
                             <td>
-                                @(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail)
-                                    : ra.RegistrantName.Length < 6 ?
-                                        ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
-                                        : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
+                                @(isTechSupport ? ra.GetRegistrant().GetFirstNameLastInitial() : ra.RegistrantName)
                             </td>
                             @if (participationObject.IsNotEmpty() && participationObject.OwnerAccount.FiscalAccountId.IsNotEmpty() 
                                  && backgroundCheck.IsNotEmpty())

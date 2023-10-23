@@ -55,10 +55,7 @@
                             }
                         </td>
                         <td>
-                            @(!isTechSupport ? ra.RegistrantName.IfBlank(ra.RegistrantEmail)
-                                : ra.RegistrantEmail?.Length < 3 ?
-                                    ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(0, ra.RegistrantName.Length)
-                                    : ra.RegistrantName.IfBlank(ra.RegistrantEmail).MaskString(3, 3))
+                                @(isTechSupport ? ra.GetRegistrant().GetFirstNameLastInitial() : ra.RegistrantName)
                         </td>
                         @if (!participationObject.CanRegisterPerClass)
                         {
