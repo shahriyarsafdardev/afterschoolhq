@@ -12,7 +12,13 @@
     var recipients = UILabel.RegistrantLabel(isVolunteers ? ActivityType.VolunteerOpportunity : ActivityType.Activity, true);
     var sendButtonText = $"Send Messages";
     var sendMessagesUrl = isVolunteers ? Url.Action("messages", "registration", new { volunteers = "true" }) : Url.Action("messages", "registration");
-    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural: true);
+    var activityLabel = isVolunteers ? @UILabel.ActivityLabel(ActivityType.VolunteerOpportunity, true) : @UILabel.ActivityLabel(plural:true);
+    var accountPackage = SessionVariables.AccountPackage;
+    var maxEmailCount = accountPackage.HasFeature(FeatureType.EmailMessaging)
+        ? (int)accountPackage.GetFeature(FeatureType.EmailMessaging).Max.Value
+        : 0;
+    var currentEmailCount = (int)ViewBag.currentEmailCount;
+    var emailQuotaExceeded = totalCount + currentEmailCount >= maxEmailCount;
 }
 
 @{ Html.RenderPartial("OrgAccountHeader"); }
@@ -173,6 +179,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div id="message" class="msg-count-text xs-p-20 h5">
+                    <span class="color-red rotated">&#9432;</span>  You are about to send <span id="message-count" class="text-bold">@totalCount</span> messages. After these are sent, you will have <span id="remaining-count" class="text-bold">@(maxEmailCount - totalCount - currentEmailCount < 0 ? 0 : maxEmailCount - totalCount - currentEmailCount)</span><span class="text-bold">/@maxEmailCount</span> messages remaining for the month.
                 </div>
 
                 <div class="form-group">

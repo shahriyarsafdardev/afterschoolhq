@@ -541,7 +541,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             return View("edit", registration);
         }
-        
+
         [HttpPost]
         public ActionResult AddLeague(string id, string activity, string activityassignment, string r)
         {
@@ -895,6 +895,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentEmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
             var currentUser = SessionVariables.CurrentUser;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
@@ -904,7 +905,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.SelectedActivities = GetSelectedActivities(activity, currentAccount, msgs);
             ViewBag.SelectedGroups = selectedGroups;
             ViewBag.SearchBarReadOnly = true;
-
+            ViewBag.currentEmailCount = currentEmailCount;
             ViewBag.Registrations = registrations;
             ViewBag.TotalCount = totalCount;
             ViewBag.Messages = msgs;
@@ -920,6 +921,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var currentEmailCount = currentAccount.GetEmailCountForCurrentMessagePeriod(msgs);
+            
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);
             if (body.IsEmpty())
@@ -928,18 +931,23 @@ namespace AfterSchool.Areas.Org.Controllers
             ActivityMessage am = null;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
-            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, msgs);
+            var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, msgs); 
             ViewBag.Activities = GetActivities(getVolunteers, currentAccount, currentUser, msgs);
             ViewBag.Groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
             ViewBag.SelectedActivities = GetSelectedActivities(activity, currentAccount, msgs);
             ViewBag.SelectedGroups = selectedGroups;
             ViewBag.SearchBarReadOnly = true;
-
+            var registrantIds = new List<int>();
+            var willExceedQuota = true;
             if (msgs.HasNoErrors())
             {
-                var registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
+                registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
                 body = AttachmentUploadHelper.UploadAttachments(currentAccount, importedFiles, body, msgs);
-                am = currentAccount.AddMessage(
+                registrantIds = registrations.Select(registration => registration.RegistrantId.Value).ToList();
+                willExceedQuota = currentAccount.WillExceedEmailQuota(SessionVariables.AccountPackage, registrantIds.Count, currentUser, msgs);
+                if (!willExceedQuota)
+                {
+                    am = currentAccount.AddMessage(
                     subject,
                     body,
                     registrantIds,
@@ -948,13 +956,15 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentUser.ID.Value,
                     msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                    BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                }
             }
 
             ViewBag.Registrations = registrations;
             ViewBag.TotalCount = totalCount;
+            ViewBag.currentEmailCount = currentEmailCount;
 
-            if (msgs.HasNoErrors())
+            if (msgs.HasNoErrors() && !willExceedQuota)
             {
                 msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                 ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
@@ -965,7 +975,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             ViewBag.Messages = msgs;
-            return View(activity);
+            return View();
         }
 
         [HttpGet]
