@@ -224,10 +224,15 @@ namespace AfterSchool.Controllers
             var msgs = new SystemMessages();
             // handles admin accounts that have or need parent accounts
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
-            if (redirectResult.IsNotEmpty())
-                return redirectResult;
-
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            if (redirectResult.IsNotEmpty())
+            {
+                if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                    return Redirect("~/ReactApp/select-registrant");
+                return redirectResult;
+            }
+
 
             Account registrationAccount = null;
 
@@ -261,10 +266,15 @@ namespace AfterSchool.Controllers
 
             // handles admin accounts that have or need parent accounts
             var redirectResult = HandleGetStartedAccountRedirect(false, msgs);
-            if (redirectResult.IsNotEmpty())
-                return redirectResult;
-            
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
+
+            if (redirectResult.IsNotEmpty())
+            {
+                if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+                    return Redirect("~/ReactApp/select-registrant");
+                return redirectResult;
+            }
+            
 
             Account registrationAccount = null;
 

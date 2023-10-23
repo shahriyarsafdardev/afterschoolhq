@@ -11,6 +11,7 @@ import { useRegistrationActions } from 'redux/slices/RegistrationSlice';
 import { useRegistrantNotesActions } from 'redux/slices/RegistrantNotesSlice';
 import { usePostRegistrationActions } from 'redux/slices/PostRegistrationSetupSlice';
 import { useVolunteerProfileActions } from 'redux/slices/VolunteerProfileSlice';
+import { useSelectRegistrantActions } from 'redux/slices/SelectRegistrantSlice';
 import { useUpdateRegistrationActions } from 'redux/slices/UpdateRegistrationSlice';
 import { useVolunteerRegistrationActions } from 'redux/slices/VolunteerRegistrationSlice';
 
@@ -86,4 +87,9 @@ export const useRegistrantNotes = () => ({
 
 export const useErrorMessages = () => ({
   ...useSelector(state => state.errorMessagesSlice)
+});
+
+export const useSelectRegistrant = () => ({
+  ...useSelector(state => state.selectRegistrantSlice),
+  ...useSelectRegistrantActions()
 });
