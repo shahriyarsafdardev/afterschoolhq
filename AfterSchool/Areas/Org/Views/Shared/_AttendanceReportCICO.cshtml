@@ -1,12 +1,29 @@
 @model AfterSchool.Areas.Org.Controllers.ActivityController.AttendanceReportResults
-@{ 
+@{
     var groupBy = (string)ViewData["groupBy"];
     var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
     var students = (List<Registrant>)ViewData["students"];
     var dates = (List<DateTime?>)ViewData["dates"];
     var checkInOutRegistrants = (List<CheckInOut>)ViewData["checkInOutRegistrants"];
-}
 
+    @functions {
+        public string RegistrantCICO(List<CheckInOut> checkInOutRegistrants, AttendanceRegistrant attendanceRegistrant, CheckType checkType)
+        {
+            var registrantCheckinOut = checkInOutRegistrants
+                .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == checkType)
+                .ToList();
+
+            if (registrantCheckinOut.Any())
+            {
+                return SessionVariables.CurrentAccount
+                    .ConvertToAccountTimeZone(registrantCheckinOut.LastOrDefault().Date)
+                    .ToShortTimeString();
+            }
+
+            return "";
+        }
+    }
+}
 @if (groupBy == "date")
 {
     <div class="row">
@@ -46,8 +63,8 @@
                                         @:Absent
                                     }
                                 </td>
-                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
-                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
+                                <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckIn)</td>
+                                <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckOut)</td>
                             </tr>
                         }
                     </tbody>
@@ -96,8 +113,8 @@ else if (groupBy == "student")
                                         @:Absent
                                     }
                                 </td>
-                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
-                                <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
+                                <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckIn)</td>
+                                <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckOut)</td>
                             </tr>
                         }
                     </tbody>
@@ -129,8 +146,9 @@ else
                     <td>
                         @(attendanceRegistrant.NumberPresent.HasValue && attendanceRegistrant.NumberPresent > 0 ? "Present" : "Absent")
                     </td>
-                    <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()</td>
-                    <td>@SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkInOutRegistrants.Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut).LastOrDefault().Date).ToShortTimeString()</td>
+
+                    <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckIn)</td>
+                    <td>@RegistrantCICO(checkInOutRegistrants, attendanceRegistrant, CheckType.CheckOut)</td>
                 </tr>
             }
         </tbody>

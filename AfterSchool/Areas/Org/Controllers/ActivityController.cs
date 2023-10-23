@@ -3564,13 +3564,21 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
                 {
-                    checkInTime = checkInOutAttendanceRegistrants
+                    var checkIn = checkInOutAttendanceRegistrants
                         .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckIn)
-                        .LastOrDefault()?.Date.ToShortTimeString();
+                        .LastOrDefault();
 
-                    checkOutTime = checkInOutAttendanceRegistrants
+                    var checkOut = checkInOutAttendanceRegistrants
                         .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut)
-                        .LastOrDefault()?.Date.ToShortTimeString();
+                        .LastOrDefault();
+
+                    checkInTime = checkIn != null
+                        ? SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkIn.Date).ToShortTimeString()
+                        : "";
+
+                    checkOutTime = checkOut != null
+                        ? SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkOut.Date).ToShortTimeString()
+                        : "";
                 }
 
                 row = new List<string>
