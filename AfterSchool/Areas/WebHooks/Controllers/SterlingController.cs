@@ -164,7 +164,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     public class Payload
     {
-        [JsonProperty(PropertyName = "id")] public string id { get; set; }
+        [JsonProperty(PropertyName = "id")] 
+        public string id { get; set; }
 
         [JsonProperty(PropertyName = "candidateId")]
         public string candidateId { get; set; }
