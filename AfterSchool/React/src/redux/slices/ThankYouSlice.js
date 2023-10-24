@@ -10,8 +10,8 @@ const ThankYouSlice = createSlice({
     loading: true
   },
   reducers: {
-    setData: (state, { payload: { activityDto } }) => {
-      state.data = activityDto;
+    setData: (state, { payload: { activityDto, activityGroupDto } }) => {
+      state.data = activityDto || activityGroupDto;
     },
     loadingStart: state => {
       state.loading = true;
@@ -30,8 +30,11 @@ export const useThankYouActions = () => {
     dispatch(loadingStart());
     await ThankYouRepository.getThankYouScreenData(id, volunteerRegistration).then(({ obj }) => {
       if (obj) {
+        const { activityGroupDto, activityDto } = obj;
         dispatch(setData(obj));
-        const { HeaderImageURL, ActivityName: Name, Organization } = obj?.activityDto;
+        const { HeaderImageURL, ActivityName, SessionName, Organization } =
+          activityDto || activityGroupDto;
+        const Name = ActivityName || SessionName;
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());
         dispatch(loadingCompleted());

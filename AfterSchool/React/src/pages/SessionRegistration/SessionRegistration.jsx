@@ -8,11 +8,12 @@ import apiRoutes from 'routes';
 import { useSessionRegistration } from 'redux/hooks';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import RegistrationService from 'sevices/RegistrationService';
+import DrawerSidebar from 'components/DrawerSidebar/DrawerSidebar';
 
-export default function SessionRegistration({ newChild = false }) {
+export default function SessionRegistration() {
   const navigate = useNavigate();
   const { scrollToTop } = utils;
-  const { thankyouUrl } = apiRoutes;
+  const { sessionThankYouUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
     exit,
@@ -71,7 +72,7 @@ export default function SessionRegistration({ newChild = false }) {
 
   useEffect(() => {
     sessionStorage.removeItem('isSessionCompleted');
-    if (registrationId) navigate(thankyouUrl(registrationId));
+    if (registrationId) navigate(sessionThankYouUrl(registrationId));
   }, [registrationId]);
 
   const secondLastSection = activeGroup === totalGroups - 2;
@@ -105,7 +106,6 @@ export default function SessionRegistration({ newChild = false }) {
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
-          newChild ? 1 : 0,
           accountName,
           activityGroupName,
           regUid
@@ -125,8 +125,8 @@ export default function SessionRegistration({ newChild = false }) {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(newChild, accountName, activityGroupName, regUid);
-  }, [newChild, accountName, activityGroupName]);
+    loadFormData(accountName, activityGroupName, regUid);
+  }, [accountName, activityGroupName]);
 
   useEffect(() => {
     if (questionsGroups.length)
@@ -163,23 +163,27 @@ export default function SessionRegistration({ newChild = false }) {
   };
 
   return (
-    <RegistrationForm
-      loading={loading}
-      totalGroups={totalGroups}
-      activeGroup={activeGroup}
-      saveDisabled={saveDisabled}
-      currentQuestions={currentQuestions}
-      Name={Name}
-      saveButtonText={saveButtonText}
-      handleSection={handleSection}
-      lastSection={lastSection}
-      formik={formik}
-      handleSubmit={handleSubmit}
-      skipAble={skipAble}
-      registrantType={RegistrantType}
-      isFree={true}
-      firstSection={activeGroup === 0}
-      exitHandler={exitHandler}
-    ></RegistrationForm>
+    <>
+      <RegistrationForm
+        loading={loading}
+        totalGroups={totalGroups}
+        activeGroup={activeGroup}
+        saveDisabled={saveDisabled}
+        currentQuestions={currentQuestions}
+        Name={Name}
+        saveButtonText={saveButtonText}
+        handleSection={handleSection}
+        lastSection={lastSection}
+        formik={formik}
+        handleSubmit={handleSubmit}
+        skipAble={skipAble}
+        registrantType={RegistrantType}
+        isFree={true}
+        firstSection={activeGroup === 0}
+        exitHandler={exitHandler}
+        isSession={true}
+      ></RegistrationForm>
+      {!loading && <DrawerSidebar />}
+    </>
   );
 }

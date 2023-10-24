@@ -32,6 +32,7 @@ export default function RegistrationForm(props) {
     isSurvey = false,
     currentQuestions,
     handleRedirection,
+    isSession = false,
     isUpdating = false,
     isUpdatingRegistration = false
   } = props;
@@ -101,6 +102,7 @@ export default function RegistrationForm(props) {
                       ShowQuestion({
                         index,
                         formik,
+                        isSession,
                         isUpdating,
                         isUpdatingRegistration,
                         currentQuestion: question,
