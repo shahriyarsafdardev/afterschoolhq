@@ -356,11 +356,17 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
             HandleTempMessages(msgs);
 
             Form formObj = null;
             var selectedActivities = new List<Activity>();
-            var activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
+            var activityOptions = new List<Activity>();
+            if(userType == UserType.ProgramDirector)
+                activityOptions = currentAccount.GetActivities(UserType.ProgramDirector, currentUser, null, null, null, false, null, null, null, msgs);
+            else
+                activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
+
             var questions = new List<FormQuestion>();
             var forms = new List<Form>();
             var formType = personType == RegistrantPersonType.Student ? FormType.StudentForm : FormType.VolunteerForm;
@@ -434,6 +440,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
             var searchQuestionIds = new List<int>();
             var searchQuestionTypeIds = new List<QuestionDataType>();
+            var currentUser = SessionVariables.CurrentUser;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -441,8 +449,13 @@ namespace AfterSchool.Areas.Org.Controllers
             if (edate.IsDateTime())
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
-            if (activities.IsNotBlank())
-                activityIds = activities.Split(',').ToIntegerArray().ToList();
+            if (userType == UserType.ProgramDirector)
+                activityIds = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value).Select(a => a.ActivityId.Value).ToList();
+            else
+            {
+                if (activities.IsNotBlank())
+                    activityIds = activities.Split(',').ToIntegerArray().ToList();
+            }
 
             if (form.HasValue)
             {

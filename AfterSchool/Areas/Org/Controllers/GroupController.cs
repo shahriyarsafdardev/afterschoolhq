@@ -405,6 +405,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var activityIds = new List<int>();
             var questionId = new int?();
+            var currentUser = SessionVariables.CurrentUser;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -422,7 +424,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 questionId = question.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            BackgroundJob.Enqueue(() =>
+            if(userType == UserType.ProgramDirector)
+            {
+                BackgroundJob.Enqueue(() =>
                 RegistrationService.EmailCsvReport(
                     account.ID.Value,
                     q,
@@ -430,7 +434,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityIds,
                     participationObjectType,
                     filename,
-                    (RegistrationReportType) reporttype.ToInteger(),
+                    (RegistrationReportType)reporttype.ToInteger(),
                     null,
                     RegistrationStatus.NotSet,
                     UILabel.ActivityLabel(group.ActivityGroupTypeId, false),
@@ -438,9 +442,34 @@ namespace AfterSchool.Areas.Org.Controllers
                     null,
                     null,
                     getVolunteers,
+                    (WebUser)currentUser,
                     null,
                     null)
-            );
+                );
+            }
+            else 
+            { 
+                BackgroundJob.Enqueue(() =>
+                    RegistrationService.EmailCsvReport(
+                        account.ID.Value,
+                        q,
+                        questionId,
+                        activityIds,
+                        participationObjectType,
+                        filename,
+                        (RegistrationReportType) reporttype.ToInteger(),
+                        null,
+                        RegistrationStatus.NotSet,
+                        UILabel.ActivityLabel(group.ActivityGroupTypeId, false),
+                        emails,
+                        null,
+                        null,
+                        getVolunteers,
+                        null,
+                        null,
+                        null)
+                );
+            }
 
             ViewBag.Messages = msgs;
 

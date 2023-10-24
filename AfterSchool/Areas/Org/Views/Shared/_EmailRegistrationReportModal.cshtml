@@ -1,10 +1,11 @@
-﻿@model Account
+@model Account
 @{ 
     var action = ViewData["PostAction"].ToString();
     var controller = ViewData["PostController"].ToString();
     var id = ViewData["PostId"].ToString();
-    
-    var isVolunteers = Request.QueryString["Volunteers"]; 
+
+    var isVolunteers = Request.QueryString["Volunteers"];
+    var currentUser = ViewData["CurrentUser"].IsNotEmpty() ? (WebUser)ViewData["CurrentUser"] : null;
     if (isVolunteers == null)
     {
         isVolunteers = "false";
@@ -59,8 +60,11 @@
                 </div>
                 <div style="clear:both"></div>
                 <div class="col-lg-12 margin-t-10 row">
-
-                    @if (Model.Email.IsNotBlank())
+                    @if(currentUser.IsNotEmpty())
+                    {
+                        <p>An email report will be sent to <strong>@currentUser.Email</strong></p>
+                    }
+                    else if(Model.Email.IsNotBlank())
                     {
                         <p>An email report will be sent to <strong>@Model.Email</strong></p>
                     }

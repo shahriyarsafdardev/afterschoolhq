@@ -66,6 +66,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var result = RegistrationIndexAssembler.AssembleRegistrationIndexResult(isStudentCrmEnabled, studentCrmPackage, registrations, msgs, pagingModel,
                 activities, groups, currentAccount);
+            if(currentUserType==UserType.ProgramDirector)
+                ViewBag.currentUser = currentUser;
             return View(result);
         }
 
@@ -75,6 +77,8 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
             RegistrationAssignmentType? rat = null;
             var registrationStatus = RegistrationStatus.NotSet;
@@ -105,25 +109,52 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationStatus = (RegistrationStatus) regstatus.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
+            if(userType == UserType.ProgramDirector)
+            {
+                BackgroundJob.Enqueue(() =>
+                    RegistrationService.EmailCsvReport(
+                        currentAccount.ID.Value,
+                        q,
+                        questionId,
+                        activityIds,
+                        ParticipationObjectType.Activity,
+                        filename,
+                        (RegistrationReportType) reporttype.ToInteger(),
+                        rat.HasValue ? rat.Value.AsList() : null,
+                        registrationStatus,
+                        UILabel.ActivityLabel(ActivityType.Activity, false),
+                        emails,
+                        null,
+                        null,
+                        getVolunteers,
+                        (WebUser)currentUser,
+                        null,
+                        null)
+                );
+            }
+            else
+            {
             BackgroundJob.Enqueue(() =>
-                RegistrationService.EmailCsvReport(
-                    currentAccount.ID.Value,
-                    q,
-                    questionId,
-                    activityIds,
-                    ParticipationObjectType.Activity,
-                    filename,
-                    (RegistrationReportType) reporttype.ToInteger(),
-                    rat.HasValue ? rat.Value.AsList() : null,
-                    registrationStatus,
-                    UILabel.ActivityLabel(ActivityType.Activity, false),
-                    emails,
-                    null,
-                    null,
-                    getVolunteers,
-                    null,
-                    null)
-            );
+                    RegistrationService.EmailCsvReport(
+                        currentAccount.ID.Value,
+                        q,
+                        questionId,
+                        activityIds,
+                        ParticipationObjectType.Activity,
+                        filename,
+                        (RegistrationReportType)reporttype.ToInteger(),
+                        rat.HasValue ? rat.Value.AsList() : null,
+                        registrationStatus,
+                        UILabel.ActivityLabel(ActivityType.Activity, false),
+                        emails,
+                        null,
+                        null,
+                        getVolunteers,
+                        null,
+                        null,
+                        null)
+                );
+            }
 
             ViewBag.Messages = msgs;
 

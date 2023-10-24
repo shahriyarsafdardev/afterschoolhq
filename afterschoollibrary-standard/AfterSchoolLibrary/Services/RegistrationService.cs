@@ -341,18 +341,18 @@ namespace AfterSchoolLibrary.Services
 
         public static void EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
-            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers,
+            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers, WebUser? currentUser = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
 
             var account = Account.Load(accountId, msgs, dc);
-
+            
             var csvByteData = GetCsvByteArray(account, searchText, questionId, participationObjectIds, participationObjectType, reportType, rats,
                 registrationStatus,
-                getVolunteers, msgs, dc);
+                getVolunteers, msgs, dc, currentUser.ID.Value);
 
-            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData);
+            EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData, currentUser);
         }
         public static void EmailCsvReportDistrict(int accountId, string searchText, string uiActivityLabel, string emails, string subject, string body, int type,
             SystemMessages msgs , DatabaseConnection dc = null)
@@ -376,22 +376,22 @@ namespace AfterSchoolLibrary.Services
         
         public static byte[] GetCsvByteArray(Account account, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
-            RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc)
+            RegistrationStatus registrationStatus, bool getVolunteers, SystemMessages msgs, DatabaseConnection dc, int? currentUserId = null)
         {
             var registrations = reportType == RegistrationReportType.DismissalForHostedActivities
                 ? AccountService.SearchRegistrationsByActivityIds(participationObjectIds, msgs, dc)
                 : account.SearchRegistrations(searchText, questionId, participationObjectIds, participationObjectType, registrationStatus, rats, null, null,
-                    getVolunteers, msgs:msgs, dc:dc);
+                    getVolunteers, currentUserId, msgs, dc);
 
             var csvText = ExportCsvText(registrations, account, reportType, registrationStatus, participationObjectIds, participationObjectType, rats, getVolunteers, msgs,
                 dc);
 
             return Encoding.UTF8.GetBytes(csvText);
         }
-        
+
 
         private static void EmailCsv(Account account, string emails, string subject, string body,
-            string uiActivityLabel, string filename, SystemMessages msgs, byte[] byteData)
+            string uiActivityLabel, string filename, SystemMessages msgs, byte[] byteData, WebUser? currentUser = null)
         {
             if (subject.IsBlank())
                 subject = uiActivityLabel + " Report";
@@ -403,10 +403,17 @@ namespace AfterSchoolLibrary.Services
                 $"<p>Your {uiActivityLabel} report is attached.</p>{Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report")}";
 
             var emailList = new List<string>();
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
 
-            // add account email address
-            if (account.Email.IsNotBlank())
-                emailList.Add(account.Email);
+
+            if (currentUser.IsNotEmpty() && userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+                emailList.Add(currentUser.Email);
+            else
+            {
+                // add account email address
+                if (account.Email.IsNotBlank())
+                    emailList.Add(account.Email);
+            }
 
             // get additional emails the user enters
             if (emails.IsNotBlank())
@@ -415,22 +422,57 @@ namespace AfterSchoolLibrary.Services
                         .Select(x => x.Trim())
                         .Where(email => email.IsEmail() && email.NotIn(emailList)));
 
-            // send to email list
-            emailList.ForEach(email =>
+            try
             {
-                msgs.AddRange(SendGridHelper.SendMailWithAttachments(
-                    fromEmail: new EmailAddress(
-                        Email.AppNoReplyEmailAddress,
-                        $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
-                    ),
-                    toEmail: new EmailAddress(email),
-                    subject: subject,
-                    body: body,
-                    emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool),
-                    attachmentByteData: byteData,
-                    attachmentFilename: filename
-                ));
-            });
+                // send to email list
+                emailList.ForEach(email =>
+                {
+                    msgs.AddRange(SendGridHelper.SendMailWithAttachments(
+                        fromEmail: new EmailAddress(
+                            Email.AppNoReplyEmailAddress,
+                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
+                        ),
+                        toEmail: new EmailAddress(email),
+                        subject: subject,
+                        body: body,
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool),
+                        attachmentByteData: byteData,
+                        attachmentFilename: filename
+                    ));
+                });
+            }
+
+            catch (Exception ex)
+            {
+                Utilities.SystemErrorLog(ex);
+
+                if (account.IsNotEmpty() && currentUser.IsNotEmpty())
+                {
+                    // send to customer
+                    msgs.AddRange(SendGridHelper.SendMail(
+                        fromEmail: new EmailAddress(
+                            Email.AppNoReplyEmailAddress,
+                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
+                        ),
+                        toEmail: new EmailAddress(currentUser.Email),
+                        subject: "Error generating your Email Report",
+                        body: $"There has been an error while creating your report. If you continue having issues, please reach out to us at {Email.AppSupportEmailAddress}",
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    ));
+
+                    // send to internal team
+                    msgs.AddRange(SendGridHelper.SendMail(
+                        fromEmail: new EmailAddress(
+                            Email.AppNoReplyEmailAddress,
+                            $"{account.Name} via {Utilities.AppName(account.IsAfterSchool)}"
+                        ),
+                        toEmail: new EmailAddress(Email.AppCustomersEmailAddress),
+                        subject: $"Error generating Email Report for {account.Name}",
+                        body: $"Logged In User: {currentUser.DisplayName}",
+                        emailTemplateId: SendGridHelper.GetGenericTemplateId(account.IsAfterSchool)
+                    ));
+                }
+            }
         }
 
         internal static string CreateRegistrationsCsvFilename(string userProposedFilename)

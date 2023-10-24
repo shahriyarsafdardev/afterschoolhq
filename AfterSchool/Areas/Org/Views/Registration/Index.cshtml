@@ -6,6 +6,7 @@
     var studentCrmPackage = Model.StudentCrmPackage;
     var currentAccount = Model.CurrentAccount;
     var isVolunteer = Request.QueryString["Volunteers"];
+    var currentUser = ViewBag.currentUser.IsNotEmpty() ? (WebUser)ViewBag.currentUser : null;
     var returnUrlEditAction = isVolunteer.IsBool() && isVolunteer.ToBoolean() ? Url.Action("index", "registration", new
     {
         volunteers = "true",
@@ -77,7 +78,7 @@
     </div>
 </div>
 
-@{ Html.RenderPartial("_EmailRegistrationReportModal", currentAccount, new ViewDataDictionary {{"PostAction", "emailreport"}, {"PostController", "registration"}, {"PostId", ""}}); }
+@{ Html.RenderPartial("_EmailRegistrationReportModal", currentAccount, new ViewDataDictionary {{"PostAction", "emailreport"}, {"PostController", "registration"}, {"PostId", ""}, { "CurrentUser", currentUser} }); }
 
 @section scripts
 {
