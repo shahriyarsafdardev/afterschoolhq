@@ -50,6 +50,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (emailed.IsBoolean() && emailed.ToBoolean())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
+            else if (emailed.IsBoolean() && !emailed.ToBoolean())
+                msgs.Add("In order to download a report, please add a schedule to your activity", MessageType.UserError);
 
             var isStudentCrmEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
             var studentCrmPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
@@ -79,8 +81,29 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
 
             if (activity.IsNotEmpty())
+            { 
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
-
+                var activities= Activity.LoadListByIdsByAccountId(activityIds,currentAccount.ID.Value, msgs);
+                foreach (var act in activities)
+                {
+                    if(!act.HasSchedule && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                    {
+                        msgs.Add("In order to download a report, please add a schedule to your activity", MessageType.UserError);
+                        break;
+                    }
+                }
+            }
+            else 
+            { 
+                foreach (var act in currentAccount.GetActivities())
+                {
+                    if(!act.HasSchedule && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                    {
+                        msgs.Add("In order to download a report, please add a schedule to your activity", MessageType.UserError);
+                        break;
+                    }
+                }
+            }
             if (group.IsNotEmpty())
             {
                 var groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
@@ -102,29 +125,32 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationStatus = (RegistrationStatus) regstatus.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            BackgroundJob.Enqueue(() =>
-                RegistrationService.EmailCsvReport(
-                    currentAccount.ID.Value,
-                    q,
-                    questionId,
-                    activityIds,
-                    ParticipationObjectType.Activity,
-                    filename,
-                    (RegistrationReportType) reporttype.ToInteger(),
-                    rat.HasValue ? rat.Value.AsList() : null,
-                    registrationStatus,
-                    UILabel.ActivityLabel(ActivityType.Activity, false),
-                    emails,
-                    null,
-                    null,
-                    getVolunteers,
-                    null,
-                    null)
-            );
+            if (msgs.HasNoErrors())
+            {
+                BackgroundJob.Enqueue(() =>
+                    RegistrationService.EmailCsvReport(
+                        currentAccount.ID.Value,
+                        q,
+                        questionId,
+                        activityIds,
+                        ParticipationObjectType.Activity,
+                        filename,
+                        (RegistrationReportType) reporttype.ToInteger(),
+                        rat.HasValue ? rat.Value.AsList() : null,
+                        registrationStatus,
+                        UILabel.ActivityLabel(ActivityType.Activity, false),
+                        emails,
+                        null,
+                        null,
+                        getVolunteers,
+                        null,
+                        null)
+                );
+                ViewBag.Messages = msgs;
 
-            ViewBag.Messages = msgs;
-
-            return RedirectToAction("index", new {volunteers, q, activity, emailed = "1", question, group, at, regstatus});
+                return RedirectToAction("index", new {volunteers, q, activity, emailed = "1", question, group, at, regstatus});
+            }
+            return RedirectToAction("index", new { volunteers, q, activity, emailed = "0", question, group, at, regstatus });
         }
         [HttpGet]
         public ActionResult RegistrantEdit(string id, string r, string returnUrl)
