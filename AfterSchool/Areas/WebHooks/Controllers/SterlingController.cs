@@ -181,9 +181,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     public class ReportItem
     {
-        [JsonProperty(PropertyName = "id")] public string ID { get; set; }
+        [JsonProperty(PropertyName = "id")] 
+        public string ID { get; set; }
 
-        [JsonProperty(PropertyName = "type")] public string Type { get; set; }
+        [JsonProperty(PropertyName = "type")] 
+        public string Type { get; set; }
 
         [JsonProperty(PropertyName = "status")]
         public string Status { get; set; }
