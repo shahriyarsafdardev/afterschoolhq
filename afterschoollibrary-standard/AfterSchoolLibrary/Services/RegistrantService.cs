@@ -182,7 +182,7 @@ namespace AfterSchoolLibrary.Services
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
-            var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc);
+            var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc).Date;
             var endDateTime = new DateTime?();
             var lastDateToBill = new DateTime?();
             var nextBillDate = new DateTime();
@@ -222,7 +222,7 @@ namespace AfterSchoolLibrary.Services
                 stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
                 stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
-                startDateTime = proratingCalculation.GetStartDate();
+                startDateTime = proratingCalculation.GetStartDate().Date;
 
                 if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
                     endDateTime = proratingCalculation.GetEndDate();
@@ -271,7 +271,7 @@ namespace AfterSchoolLibrary.Services
                 {"ActivityName", activity.Name},
                 {"ActivityUid", activity.Uid.ToString()},
                 {"RegistrantName", submittedRecord.DisplayName},
-                {"PaymentNumber", "1"},
+                {"PaymentNumber", "0"},
                 {"TotalSubscriptionPayments", totalPayments},
                 {"WasProrated", plan.ProrateFirstCharge.ToString()},
                 {"PayingAccountUid", purchasingAccount.Uid.ToString()},
@@ -297,7 +297,11 @@ namespace AfterSchoolLibrary.Services
             {
                 var platformFee = useStripeConnectedAccount ? checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc) : new decimal?();
 
+                metaData["PaymentNumber"] = "1"; //as it will be first payment
+
                 var amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, subscriptionSchedule.AmountInCents / 100m);
+                var amountToConnect = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, 
+                    subscriptionSchedule.AmountToConnectAccountInCents);
 
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
@@ -318,12 +322,6 @@ namespace AfterSchoolLibrary.Services
                 {
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     var amountToStripe = StripeHelper.CalculateStripeFee(charge.Amount, billingAccount.IsCreditCardFeeTakenOutOfCost);
-                    var amountToConnect = charge.Amount - new FeeCalculationObject(
-                        amount,
-                        billingAccount,
-                        plan.IsConvenienceFeeTakenOutOfCost,
-                        msgs,
-                        dc).GetConvenienceFee();
 
                     var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount , DateTime.UtcNow.Date,
                                 charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), amountToConnect, amountToStripe, 0, msgs);
