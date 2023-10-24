@@ -29,11 +29,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var payload = parsedObject["payload"].ToString();
                 var responseBody = (Payload) JsonConvert.DeserializeObject<Payload>(payload);
 
-                if (responseBody.reportItems.Count() < 5)
-                    return Ok(msgs);
-
-                List<BackgroundCheck> backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
+                var backgroundChecks = BackgroundCheck.LoadByCandidateId(responseBody.candidateId);
                 var latestBackgroundCheck = backgroundChecks.OrderByDescending(x => x.CreateDate).FirstOrDefault();
+
+                if (latestBackgroundCheck.IsEmpty())
+                    return Ok(msgs);
 
                 if (IsPreviouslyApproved(latestBackgroundCheck.WebUserId, msgs))
                     return Ok(msgs);
@@ -41,25 +41,31 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 if (IsPreviouslyTaskCreated(latestBackgroundCheck.WebUserId, msgs))
                     return Ok(msgs);
 
+                responseBody.result = responseBody.result.Replace(" ", "");
+                responseBody.status = responseBody.status.Replace(" ", "");
+
                 if (responseBody.result != "")
                 {
-                    var passedResultCriterias = new string[] { "clear", "passed" };
-                    var passedStatusCriterias = new string[] { "complete", "archive" };
-                    var considerResultCriterias = new string[] { "review", "consider" };
-                    
-                    if (backgroundChecks.IsNotEmpty())
-                    {
+                    var passedStatusCriterias = new string[] {"complete"};
+                    var passedResultCriterias = new string[] {"clear"};
+                    var considerStatusCriterias = new string[] {"complete"};
+                    var considerResultCriterias = new string[] {"consider"};
+
+                    if (backgroundChecks.Count > 0)
                         foreach (var backgroundCheck in backgroundChecks)
                         {
                             backgroundCheck.IsActive = false;
                             msgs.AddRange(backgroundCheck.Save());
                         }
-                    }
 
                     latestBackgroundCheck.SterlingReviewCompleteDate = DateTime.UtcNow;
-                    var isPassedScreen = passedResultCriterias.Contains(responseBody.result.ToLower()) && passedStatusCriterias.Contains((string) responseBody.status.ToLower());
-                    var isConsiderScreen = considerResultCriterias.Contains(responseBody.result.ToLower());
-                    if (IsAllClear(responseBody.reportItems) && isPassedScreen)
+
+                    var isPassedScreen = passedResultCriterias.Contains(responseBody.result.ToLower()) &&
+                                         passedStatusCriterias.Contains(responseBody.status.ToLower());
+                    var isConsiderScreen = considerResultCriterias.Contains(responseBody.result.ToLower()) &&
+                                           considerStatusCriterias.Contains(responseBody.status.ToLower());
+
+                    if (isPassedScreen && IsAllReportsClear(responseBody.reportItems))
                         VolunteerApprovalService.CreateNewApproval(latestBackgroundCheck.WebUserId,
                             latestBackgroundCheck.RequestedForFiscalAccountId,
                             ApprovalStatus.Approved,
@@ -70,7 +76,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs
                         );
 
-                    else if (IsAnyConsider(responseBody.reportItems) && isConsiderScreen)
+                    else if (isConsiderScreen && IsAnyReportConsider(responseBody.reportItems))
                         VolunteerTaskService.CreateNewTask(latestBackgroundCheck.WebUserId,
                             TaskStatus.ReviewBackground,
                             ApplicationStatus.FailedBackgroundCheck,
@@ -79,15 +85,13 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                             msgs);
 
                     latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus) Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
-
-                    latestBackgroundCheck.BackgroundCheckResultId = (SterlingBackgroundCheckResult) Enum.Parse(typeof(SterlingBackgroundCheckResult), responseBody.result);
+                    latestBackgroundCheck.BackgroundCheckResultId =
+                        (SterlingBackgroundCheckResult) Enum.Parse(typeof(SterlingBackgroundCheckResult), responseBody.result);
                     latestBackgroundCheck.IsActive = true;
-
                     msgs.AddRange(latestBackgroundCheck.Save());
                 }
                 else
                 {
-
                     if (responseBody.status != "Expired Invite")
                         latestBackgroundCheck.BackgroundCheckStatusId = (BackgroundCheckStatus) Enum.Parse(typeof(BackgroundCheckStatus), responseBody.status);
                     else
@@ -106,7 +110,6 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 msgs.Add(ex.Message, MessageType.Error, ex);
                 return Return500(msgs);
             }
-
         }
 
         private IHttpActionResult ReturnOK(SystemMessages msgs)
@@ -122,43 +125,46 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private void SendLogEmail(SystemMessages msgs)
         {
-            string toEmail = "dev@afterschoolhq.com";
-            string subject = $"Sterling Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
-            string body = msgs.RenderMessageList(MessageOutputType.Html);
+            var toEmail = "dev@afterschoolhq.com";
+            var subject = $"Sterling Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
+            var body = msgs.RenderMessageList(MessageOutputType.Html);
 
-            AfterSchoolLibrary.Helpers.EmailHelper.SendEmail(toEmail, subject, body, true);
+            EmailHelper.SendEmail(toEmail, subject, body, true);
         }
 
-        private bool IsAnyConsider(IEnumerable<ReportItem> reportItems)
+        private static bool IsAnyReportConsider(IEnumerable<ReportItem> reportItems)
         {
-            var criterias = new string[] { "consider", "review" };
-            return reportItems.Any(item=> criterias.Contains(item.Result.ToLower()));
+            var criterias = new string[] {"consider", "review"};
+            return reportItems.Any(item => criterias.Contains(item.Result.ToLower()));
         }
 
-        private bool IsAllClear(IEnumerable<ReportItem> reportItems)
+        private static bool IsAllReportsClear(IEnumerable<ReportItem> reportItems)
         {
-            var criterias = new string[] { "clear", "passed", "complete", "unperformable" };
-            return reportItems.All(item => item.Status.ToLower().Equals("complete") && criterias.Contains(item.Result.ToLower()));
+            var criterias = new string[] {"clear", "complete"};
+            return reportItems.All(item => item.Status.ToLower().Equals("complete") &&
+                                           criterias.Contains(item.Result.ToLower()));
         }
 
-        private bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        private static bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs, dc);
-            return approvalEntry.IsNotEmpty() && approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
+            return approvalEntry.IsNotEmpty() &&
+                   approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
-        private bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        private static bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs, dc);
-            return previousTask.IsNotEmpty() && previousTask.Task == TaskStatus.ReviewBackground && 
-                   previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck;
+            return previousTask.IsNotEmpty() &&
+                   previousTask.Task == TaskStatus.ReviewBackground &&
+                   previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck &&
+                   previousTask.DateCompleted.IsEmpty();
         }
     }
 
     public class Payload
     {
-        [JsonProperty(PropertyName = "id")]
-        public string id { get; set; }
+        [JsonProperty(PropertyName = "id")] public string id { get; set; }
 
         [JsonProperty(PropertyName = "candidateId")]
         public string candidateId { get; set; }
@@ -175,21 +181,19 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
     public class ReportItem
     {
-        [JsonProperty(PropertyName = "id")]
-        public string ID { get; set; }
+        [JsonProperty(PropertyName = "id")] public string ID { get; set; }
 
-        [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
-        
+        [JsonProperty(PropertyName = "type")] public string Type { get; set; }
+
         [JsonProperty(PropertyName = "status")]
         public string Status { get; set; }
-        
+
         [JsonProperty(PropertyName = "result")]
         public string Result { get; set; }
-        
+
         [JsonProperty(PropertyName = "updatedAt")]
         public DateTime UpdatedAt { get; set; }
-        
+
         [JsonProperty(PropertyName = "estimatedCompletionTime")]
         public DateTime EstimatedCompletionTime { get; set; }
     }
