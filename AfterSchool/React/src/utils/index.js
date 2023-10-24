@@ -11,9 +11,9 @@ export default {
   redirect: link => window.location.replace(link),
   getEnv: () => {
     const envs = {
-      ['staging.afterschoolhq.com']: 'Staging',
-      ['afterschoolhq.com']: 'Production',
-      ['qa.afterschoolhq.com']: 'QA',
+      ['staging.afterschool.app']: 'Staging',
+      ['afterschool.app']: 'Production',
+      ['qa.afterschool.app']: 'QA',
       ['localhost:54849']: 'Local'
     };
     return envs[window.location.host] || 'Local';
