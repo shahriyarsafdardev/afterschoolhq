@@ -6,4 +6,5 @@ import GoogleTagManagerConfig from 'configs/googleTagManagerConfigs';
 export default function() {
   TagManager.initialize(GoogleTagManagerConfig);
   Smartlook.init(process.env.SMART_LOOK_KEY);
+  Smartlook.record({ forms: true, ips: true, emails: true, numbers: true });
 }

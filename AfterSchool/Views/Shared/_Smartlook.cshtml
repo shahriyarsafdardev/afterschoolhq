@@ -1,4 +1,4 @@
-﻿@using Utilities = AfterSchoolLibrary.Helpers.Utilities
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @if (Utilities.IsSmartlookDefined(SessionVariables.CurrentAccount, SessionVariables.OriginalLoggedInUser))
 {
     <script type='text/javascript'>
@@ -8,5 +8,6 @@
             c.charset = 'utf-8'; c.src = 'https://rec.smartlook.com/recorder.js'; h.appendChild(c);
         })(document);
         smartlook('init', '4a12ea16e5c85b6e6ec074dac9806b9588793fb2');
+        smartlook('record', { forms: true, ips: true, emails: true, numbers: true })
     </script>
 }
