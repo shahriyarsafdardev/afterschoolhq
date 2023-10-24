@@ -167,7 +167,7 @@ namespace AfterSchoolLibrary.Services
                     var startDate = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? subscriptionPlan.StartDate : participationObject.StartDate;
                     var currentPaymentDate = (DateTime) startDate; 
 
-                    while (currentPaymentDate.IsBefore((DateTime) (startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)))
+                    while (currentPaymentDate.IsOnOrBefore((DateTime) (startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)))
                     {
                         currentPaymentDate = (DateTime) new SubscriptionPlan
                         {
@@ -215,7 +215,7 @@ namespace AfterSchoolLibrary.Services
 
                 subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
 
-                //UpdateNextBillDateOnSuccess(subscriptionSchedule);
+                UpdateNextBillDateOnSuccess(subscriptionSchedule);
             }
             
             if (charge.Status.Equals(LastChargeStatus.failed))
@@ -231,7 +231,7 @@ namespace AfterSchoolLibrary.Services
                 {
                     subscriptionSchedule.IsCancelled = true;
                     subscriptionSchedule.NextBillDate = null;
-                    subscriptionSchedule.EndDate = DateTime.UtcNow;
+                    subscriptionSchedule.DateCancelled = DateTime.UtcNow;
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
                 }
             }
@@ -379,7 +379,12 @@ namespace AfterSchoolLibrary.Services
 
             //was last payment
             else if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
+            {
                 subscriptionSchedule.NextBillDate = null;
+                subscriptionSchedule.IsCancelled = true;
+                subscriptionSchedule.DateCancelled = subscriptionSchedule.LastDateToBill;
+                subscriptionSchedule.CancelledReason = "Subscription Completed";
+            }
 
             else
                 subscriptionSchedule.NextBillDate = new SubscriptionPlan
