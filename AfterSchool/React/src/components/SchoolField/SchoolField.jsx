@@ -1,10 +1,16 @@
 import cs from 'classnames';
-import useStyles from './styles';
-import SimpleCheckBox from 'components/SimpleCheckBox';
 import React, { useState, useEffect } from 'react';
 import { Typography, Box } from '@material-ui/core';
-import { useRegistration, useProfile, useUpdateRegistration } from 'redux/hooks';
+
+import useStyles from './styles';
 import { GoogleLocation } from 'components';
+import SimpleCheckBox from 'components/SimpleCheckBox';
+import {
+  useRegistration,
+  useProfile,
+  useUpdateRegistration,
+  useSessionRegistration
+} from 'redux/hooks';
 
 export const locationObject = place => {
   const latitude = place?.geometry?.location?.lat();
@@ -81,7 +87,16 @@ export const locationObject = place => {
   };
 };
 
+const getSchoolFields = (isSession, isUpdatingProfile, isUpdatingRegistration) => {
+  if (isUpdatingProfile) return useProfile();
+  if (isSession) return useSessionRegistration();
+  if (isUpdatingRegistration) return useUpdateRegistration();
+
+  return useRegistration();
+};
+
 function SchoolField({
+  isSession,
   question,
   formik,
   isUpdatingRegistration = false,
@@ -91,11 +106,11 @@ function SchoolField({
   const { touched, errors, setFieldValue } = formik;
   const [schoolValue, setSchoolValue] = useState('');
   const { ID, Text, IsRequired: required = false, QuestionDataTypeId } = question;
-  const { school, noSchool, setSchoolFieldValue } = isUpdatingRegistration
-    ? useUpdateRegistration()
-    : isUpdatingProfile
-    ? useProfile()
-    : useRegistration();
+  const { school, noSchool, setSchoolFieldValue } = getSchoolFields(
+    isSession,
+    isUpdatingProfile,
+    isUpdatingRegistration
+  );
   const [typeClass, typeText] = required
     ? [classes.fieldLabelRequired, '*']
     : [classes.fieldLabelOptional, '(Optional)'];

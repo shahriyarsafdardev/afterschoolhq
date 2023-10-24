@@ -28,10 +28,6 @@ function Router() {
           element: <SessionRegistration />
         },
         {
-          path: 'reactapp/session-registration/new-child/:accountName/:activityGroupName/:regUid',
-          element: <SessionRegistration newChild={true} />
-        },
-        {
           path: 'reactapp/registration/new-child/:accountName/:activityName/:regUid',
           element: <Registration newChild={true} />
         },
@@ -42,6 +38,10 @@ function Router() {
         {
           path: 'reactapp/registration/thankyou/:registrationId',
           element: <ThankYouSection />
+        },
+        {
+          path: 'reactapp/session-registration/thankyou/:registrationId',
+          element: <ThankYouSection isSession={true} />
         },
         {
           path: 'reactapp/volunteer-registration/thankyou/:registrationId',

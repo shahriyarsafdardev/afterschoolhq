@@ -18,14 +18,11 @@ export default {
     `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityName}&registrantUid=${registrantUid}`,
 
   // Session APIs
-  submitSessionFormDataAPI: 'Api/SessionRegistration/AddUpdateAnswers',
-  getNewChildSessionFormDataAPI: (accountName, sessionName, registrantUid) =>
-    `Api/SessionRegistration/GetNewChildForm/?accountName=${accountName}&sessionName=${sessionName}&registrantUid=${registrantUid}`,
-  getSessionFormDataAPI: (accountName, activityGroupName, registrantUid) =>
-    `Api/SessionRegistration/GetFormAndCheckOutObject/?accountName=${accountName}&activityGroupName=${activityGroupName}&registrantUid=${registrantUid}`,
-  sessionSchoolAPI: 'Api/SessionRegistration/CreateOrUpdateFromGoogle',
-  exitSessionAPI: uid => `Api/SessionRegistration/Exit?uid=${uid}`,
-  SessionRegisterAPI: 'Api/SessionRegistration/Register',
+  submitSessionFormDataAPI: 'Api/Registration/AddUpdateAnswers',
+  getSessionFormDataAPI: (accountName, activityGroupName, registrantUid, isSession) =>
+    `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityGroupName}&registrantUid=${registrantUid}&isSession=${isSession}`,
+  sessionSchoolAPI: 'Api/Registration/CreateOrUpdateFromGoogle',
+  exitSessionAPI: uid => `Api/Registration/Exit?uid=${uid}`,
 
   //PinSetup APIs
   createNewPinForParentAPI: 'Api/RegistrationPin/CreateNewPinForParent',
@@ -99,6 +96,7 @@ export default {
   surveyThankyouUrl: formUid => `/reactapp/survey/${formUid}/thankyou`,
   paymentUrl: registrationId => `/reactapp/registration/payment/${registrationId}`,
   thankyouUrl: registrationId => `/reactapp/registration/thankyou/${registrationId}`,
+  sessionThankYouUrl: registrationId => `/reactapp/session-registration/thankyou/${registrationId}`,
   postRegistrationUrl: registrationId => `/reactapp/reg/setup/${registrationId}`,
   facebookShareUrl: (activityUrl, textToShare = '') =>
     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(

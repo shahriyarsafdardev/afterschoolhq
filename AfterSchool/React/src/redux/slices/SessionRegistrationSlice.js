@@ -95,10 +95,9 @@ export const useSessionRegistrationActions = () => {
 
   const loaded = () => dispatch(formDataLoaded());
 
-  const loadFormData = async (newChild = false, accountName, activityGroupName, registrantUid) => {
+  const loadFormData = async (accountName, activityGroupName, registrantUid) => {
     dispatch(loadingFormData());
     await SessionRegistrationRepository.getFormData(
-      newChild,
       accountName,
       activityGroupName,
       registrantUid
@@ -117,15 +116,14 @@ export const useSessionRegistrationActions = () => {
     { answers, answerQuery, formData },
     lastSection,
     schoolLocationID,
-    newChild,
     accountName,
     sessionName,
     regUid
   ) => {
     const { answerQuery: answersQuery, groupId } = answerQuery;
 
+    formData.append('isSession', true);
     formData.append('groupId', groupId);
-    formData.append('newChild', newChild);
     formData.append('registrantUid', regUid);
     formData.append('accountName', accountName);
     formData.append('sessionName', sessionName);

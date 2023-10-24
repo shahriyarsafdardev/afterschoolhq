@@ -25,6 +25,7 @@ import {
 function ShowQuestion({
   index,
   formik,
+  isSession,
   isUpdating,
   currentQuestion,
   currentQuestions,
@@ -36,6 +37,7 @@ function ShowQuestion({
     case questionType.text:
       return 'School' === currentQuestion.Text ? (
         <SchoolField
+          isSession={isSession}
           question={currentQuestion}
           formik={formik}
           isUpdating={isUpdating}

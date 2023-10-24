@@ -20,6 +20,16 @@ export const gradeIds = {
   '12th': 13
 };
 
+export const weekDays = {
+  '1': 'Su',
+  '2': 'Mo',
+  '3': 'Tu',
+  '4': 'We',
+  '5': 'Th',
+  '6': 'Fr',
+  '7': 'Sa'
+};
+
 export const DEFAULT_QUESTION_SETTINGS = [
   { Audience: 1, Show: true, Required: true },
   { Audience: 2, Show: true, Required: true },

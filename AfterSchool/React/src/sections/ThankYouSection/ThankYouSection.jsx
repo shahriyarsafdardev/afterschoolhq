@@ -12,7 +12,7 @@ import ShareButton from 'components/ShareButton';
 import CopyUrlIcon from 'assets/icon-ios7-world-outline.svg';
 import { applyModes } from 'constants';
 
-function ThankYouSection({ volunteerRegistration = false }) {
+function ThankYouSection({ volunteerRegistration = false, isSession = false }) {
   const classes = useStyles();
   const { navigateTo } = utils;
   const { accountUrl } = apiRoutes;
@@ -25,7 +25,9 @@ function ThankYouSection({ volunteerRegistration = false }) {
     loading,
     data: {
       isParent,
+      SessionUrl,
       ActivityUrl,
+      SessionName,
       ActivityName,
       RegistrantFirstName,
       FindAnotherActivityUrl,
@@ -34,6 +36,9 @@ function ThankYouSection({ volunteerRegistration = false }) {
     },
     loadThankYouScreenData
   } = useThankYou();
+
+  const activityOrSessionName = ActivityName || SessionName;
+  const activityOrSessionUrl = ActivityUrl || SessionUrl;
 
   useEffect(() => {
     loadThankYouScreenData(registrationId, volunteerRegistration);
@@ -54,7 +59,7 @@ function ThankYouSection({ volunteerRegistration = false }) {
 
   const CopyButton = () => (
     <Box
-      onClick={() => copyToClipBoard(ActivityUrl)}
+      onClick={() => copyToClipBoard(activityOrSessionUrl)}
       className={classes.shareBox}
       title="Copy URL"
       data-testid={'Copy URL'}
@@ -71,20 +76,20 @@ function ThankYouSection({ volunteerRegistration = false }) {
       <ShareButton
         key={platformName}
         platformName={platformName}
-        activityName={ActivityName}
-        activityUrl={ActivityUrl}
+        activityName={activityOrSessionName}
+        activityUrl={activityOrSessionUrl}
       />
     ));
 
   const Msg = () =>
     searchParams.get('update') ? (
       <Typography variant="body1">
-        Your updated response for <b>{ActivityName}</b> has been saved.
+        Your updated response for <b>{activityOrSessionName}</b> has been saved.
       </Typography>
     ) : (
       <Typography variant="body1">
         <b>{RegistrantFirstName}</b> has {ApplyMode === Apply ? 'Applied' : 'been registered'} for{' '}
-        <b>{ActivityName}</b>
+        <b>{activityOrSessionName}</b>
       </Typography>
     );
 
@@ -130,20 +135,32 @@ function ThankYouSection({ volunteerRegistration = false }) {
           )}
         </Box>
 
-        {isParent && (
+        {isSession ? (
           <Link
-            href={RegisterForNewChildUrl}
+            href={activityOrSessionUrl}
             className={classes.link}
             variant="body1"
-            data-testid={'Register for New Child'}
+            data-testid="browse-link-for-session-activity"
           >
-            {ApplyMode === Apply ? Apply : Register} for New Child
+            Browse
           </Link>
+        ) : (
+          isParent && (
+            <Link
+              href={RegisterForNewChildUrl}
+              className={classes.link}
+              variant="body1"
+              data-testid={'Register for New Child'}
+            >
+              {ApplyMode === Apply ? Apply : Register} for New Child
+            </Link>
+          )
         )}
       </Box>
       <Box className={classes.shareBoxesWrapper}>
         <Typography variant="body1" className={classes.sharingActivity}>
-          Share <b>{ActivityName}</b> with your friends and family via link, Twitter, or Facebook!
+          Share <b>{activityOrSessionName}</b> with your friends and family via link, Twitter, or
+          Facebook!
         </Typography>
         <Box className={classes.ShareButtonsWrapper}>
           <CopyButton />
