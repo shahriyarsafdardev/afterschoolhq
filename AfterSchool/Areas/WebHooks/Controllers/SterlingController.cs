@@ -147,14 +147,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private static bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs, dc);
+            var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs);
             return approvalEntry.IsNotEmpty() &&
                    approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
         private static bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs, dc);
+            var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs);
             return previousTask.IsNotEmpty() &&
                    previousTask.Task == TaskStatus.ReviewBackground &&
                    previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck &&
