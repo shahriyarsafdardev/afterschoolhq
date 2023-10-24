@@ -197,7 +197,7 @@ namespace AfterSchoolLibrary.Models
             DatabaseQuery dq = DatabaseQuery;
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], id);
-            dq.Criterias.Add(ObjectMap["SubscriptionScheduleId"], status);
+            dq.Criterias.Add(ObjectMap["Status"], status);
             return dq.GetCount(msgs);
         }
 

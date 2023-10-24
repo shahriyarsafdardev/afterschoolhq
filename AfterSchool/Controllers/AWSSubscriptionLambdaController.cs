@@ -114,6 +114,7 @@ namespace AfterSchool.Controllers
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
             var amountToStripe = StripeHelper.CalculateStripeFee(schedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
+            var amountToConnectAccount = SubscriptionScheduleService.GetProratedAmount(schedule, schedule.AmountToConnectAccountInCents);
 
             if (subscriptionPaymentHistory.IsEmpty())
             {
@@ -125,7 +126,7 @@ namespace AfterSchool.Controllers
                 charge.Metadata["WasProrated"].ToBoolean(),
                 chargeStatus,
                 charge.StripeResponse.ToString(),
-                schedule.AmountToConnectAccountInCents,
+                amountToConnectAccount,
                 amountToStripe,
                 0
                 );
@@ -163,12 +164,7 @@ namespace AfterSchool.Controllers
                     msgs.Add("Error in running the charge", MessageType.Error);
                 
                 else
-                {
-                    paymentHistory.Status = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
-                    msgs.AddRange(paymentHistory.Save());
-
                     ProcessCharge(charge, schedule, paymentHistory, rsp, msgs);
-                }
             }
         }
 
