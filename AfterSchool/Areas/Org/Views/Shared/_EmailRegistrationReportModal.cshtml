@@ -5,7 +5,7 @@
     var id = ViewData["PostId"].ToString();
 
     var isVolunteers = Request.QueryString["Volunteers"];
-    var currentUser = ViewData["CurrentUser"].IsNotEmpty() ? (WebUser)ViewData["CurrentUser"] : null;
+    var currentUser = (WebUser)ViewData["CurrentUser"];
     if (isVolunteers == null)
     {
         isVolunteers = "false";
