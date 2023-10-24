@@ -2,7 +2,7 @@
   <p>Hi @Model.FirstName,</p>
     <br/>
   <p>
-    Someone is attempting to <a href="http://afterschool.app/login">login</a> to AfterSchool HQ using this email address. If that is you, please enter the following code to complete the login:
+    Someone is attempting to <a href="@Model.LoginLink">login</a> to AfterSchool HQ using this email address. If that is you, please enter the following code to complete the login:
   </p>
     <br/>
   <p>

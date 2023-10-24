@@ -2341,7 +2341,7 @@ namespace AfterSchoolLibrary.Helpers
                     "AuthCode",
                     $"{authCode}"
                 },
-                {"SupportEmail", Email.AppSupportEmailAddress},
+                {"LoginLink",$"{Email.BaseUrl()}login" },
             };
 
             var body = ProcessTemplate(

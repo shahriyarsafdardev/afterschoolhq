@@ -1,4 +1,5 @@
 @using AfterSchool.Helpers
+@using Utilities = AfterSchoolLibrary.Helpers.Utilities
 @model AfterSchool.Areas.Org.Assemblers.Activity.EditCostResult
 @{
     var msgs = Model.Messages;
@@ -326,7 +327,7 @@
                                         </div>
                                     </div>
                                     <div class="text-center">
-                                        <p><a href="@Url.Action("SelectPlan", "Account")">Upgrade your plan</a> to learn more about how you can reduce fees. <br/> * Full fee schedule available <a href=" https://afterschool.app/service-fee-schedule" target="_blank">here</a>.</p>
+                                        <p><a href="@Url.Action("SelectPlan", "Account")">Upgrade your plan</a> to learn more about how you can reduce fees. <br/> * Full fee schedule available <a href="@(Utilities.BaseUrl())/service-fee-schedule" target="_blank">here</a>.</p>
                                     </div>
                                 </div>
                                 <div class="modal-footer" id="confirm-pricing-form-footer">
