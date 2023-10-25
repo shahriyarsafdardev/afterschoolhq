@@ -12,6 +12,7 @@ using SubscriptionSchedule = AfterSchoolLibrary.Models.SubscriptionSchedule;
 using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Helpers;
 using Account = AfterSchoolLibrary.Models.Account;
+using RestSharp.Extensions;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -325,6 +326,10 @@ namespace AfterSchoolLibrary.Services
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
                 billingAccount.ProcessSubscriptionPlanPayment(checkoutObject, plan, rsp, msgs);
+
+                //transfer to provider stripe account
+                if (participationObject.PaymentAccount.StripeUserId.HasValue())
+                    checkoutObject.Transaction.CreateStripeTransfer(WebUser.Load(1, msgs), msgs);
 
                 if (msgs.HasNoErrors())
                     checkoutObject.PayingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);

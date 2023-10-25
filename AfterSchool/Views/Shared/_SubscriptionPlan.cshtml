@@ -112,24 +112,27 @@
             </div>
             <br />
 
-            <div class="row">
-                <label class="col-sm-3 control-label">Prorate Last Charge</label>
-                <div class="col-sm-1">
-                    @{
-                        Html.RenderPartial
-                        (
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            subscriptionPlan?.ProrateLastCharge ?? false,
-                            new ViewDataDictionary
-                            {
-                                {"checkboxname", "proratelastcharge"},
-                                {"checkboxid", "proratelastcharge"},
-                            }
-                        );
-                    }
-                </div>
-            </div>
-            <br />
+            @if (activitySchedule.IsNotEmpty() && !activitySchedule.IsOngoing)
+            {
+                <div class="row">
+                    <label class="col-sm-3 control-label">Prorate Last Charge</label>
+                    <div class="col-sm-1">
+                        @{
+                            Html.RenderPartial
+                            (
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                subscriptionPlan?.ProrateLastCharge ?? false,
+                                new ViewDataDictionary
+                                {
+                                    {"checkboxname", "proratelastcharge"},
+                                    {"checkboxid", "proratelastcharge"},
+                                }
+                            );
+                        }
+                    </div>
+                 </div>
+                 <br />
+             }
 
             <div class="">
                 <label class="col-sm-3 control-label">When should payments start?</label>
