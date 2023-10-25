@@ -15,6 +15,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using RestSharp.Extensions;
 using LibraryUtilities = AfterSchoolLibrary.Helpers.Utilities;
 using Utilities = BasicLibrary.Utilities;
 
@@ -2235,18 +2236,21 @@ namespace AfterSchool.Controllers
             };
             var resultCheckoutObject = AccountService.ProcessRegistrationWithPayment(inputCheckoutObject, currentUser, msgs);
 
-            var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)resultCheckoutObject.RegistrantSubscriptionPlan.SubscriptionScheduleUid, msgs);
-
-            var paymentCount = SubscriptionPaymentHistory.GetCountBySubscriptionScheduleId((int)subscriptionSchedule.ID, msgs);
-
-            if(paymentCount > 0)
+            if (resultCheckoutObject.RegistrantSubscriptionPlan.IsNotEmpty())
             {
-                var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)subscriptionSchedule.ID, msgs);
-                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(subscriptionPaymentHistory.StripeChargeId, msgs);
+                var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid) resultCheckoutObject.RegistrantSubscriptionPlan.SubscriptionScheduleUid, msgs);
 
-                msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
-                subscriptionPaymentHistory, msgs, null));
-                msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, null));
+                var paymentCount = SubscriptionPaymentHistory.GetCountBySubscriptionScheduleId((int) subscriptionSchedule.ID, msgs);
+
+                if (paymentCount > 0)
+                {
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) subscriptionSchedule.ID, msgs);
+                    var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(subscriptionPaymentHistory.StripeChargeId, msgs);
+
+                    msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
+                    subscriptionPaymentHistory, msgs, null));
+                    msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, null));
+                }
             }
 
             if (msgs.HasErrors())

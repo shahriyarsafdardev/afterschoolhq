@@ -45,6 +45,8 @@ namespace AfterSchoolLibrary.Models
             ProratedCharge = false;
             Status = LastChargeStatus.NotSet;
             RetryNumber = 0;
+            CreateDate = DateTime.UtcNow;
+            LastModifiedDate = DateTime.UtcNow;
         }
 
         public static DatabaseParameters ObjectMap
