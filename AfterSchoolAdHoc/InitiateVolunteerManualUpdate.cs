@@ -360,7 +360,7 @@ namespace AfterSchoolAdHoc
 
         public static void VerifyExpiredImportedVolunteers(SystemMessages msgs, DatabaseConnection dc)
         {
-            var importedVolunteers = ReadImportedVolunteersCsv($"D:\\Imported Volunteers-07-01-2022\\IPS_Volunteer_List.csv")
+            var importedVolunteers = ReadImportedVolunteersCsv($"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers_Latest_List.csv")
                 .Where(x => x.Status.ToLower() == "approved").ToList();
             var fileWritePath = $"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
             var matchedVolunteers = new List<VolunteerRecord>();
@@ -371,7 +371,7 @@ namespace AfterSchoolAdHoc
                 var expirationDate = volunteer.DateReviewed.Value.AddYears(1);
                 if (webUser.IsNotEmpty())
                 {
-                    var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUser.ID.Value,msgs,dc).FirstOrDefault();
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUser.ID.Value,msgs,dc).MaxBy(x => x.CreateDate);
                     if (volunteerApproval.IsNotEmpty())
                     {
                         count++;
