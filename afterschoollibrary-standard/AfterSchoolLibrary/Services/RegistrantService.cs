@@ -535,12 +535,34 @@ namespace AfterSchoolLibrary.Services
         internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
             string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (!registrant.AllowTextMessages)
+            var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByIsDeleted(registrant.ID.Value, false, msgs, dc).FirstOrDefault();
+            WebUser webUser = null;
+            var phoneNumber = "";
+
+            if(registrantWebUser.IsNotEmpty())
+                webUser = WebUser.Load(registrantWebUser.WebUserId.Value, msgs, dc);
+
+            if (webUser.IsNotEmpty())
+                phoneNumber = webUser.Phone;
+            else
+                phoneNumber = registrant.Phone;
+
+            var allowTextMessages = true;
+
+            if (webUser.IsNotEmpty() && !webUser.AllowTextMessages)
+            {
+                allowTextMessages = false;
                 msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
-            else if (registrant.Phone.IsEmpty())
+            }
+            else if (webUser.IsEmpty() && !registrant.AllowTextMessages)
+            {
+                allowTextMessages = false;
+                msgs.Add($"{registrant.DisplayName} does not allow text messaging", MessageType.Notice);
+            }
+            else if (phoneNumber.IsEmpty())
                 msgs.Add($"{registrant.DisplayName} has no phone number available", MessageType.Notice);
 
-            if (registrant.Phone.IsNotEmpty() && registrant.AllowTextMessages)
+            if (phoneNumber.IsNotEmpty() && allowTextMessages)
             {
                 if (!sendingAccount.IsActive)
                 {
@@ -559,14 +581,14 @@ namespace AfterSchoolLibrary.Services
                 // if user hasn't received a text from us yet, need to send standard text info
                 if (!registrant.HasReceivedTextMessages(msgs, dc))
                     TwilioHelper.SendSMS(
-                        registrant.Phone,
+                        phoneNumber,
                         $"Welcome to {Utilities.AppName()} Alerts! You are receiving this message because you enabled text notifications when you registered your child for activities. \nMsg&data rates may apply. \nReply HELP for help, STOP to cancel",
                         null,
                         null,
                         msgs);
 
                 var resource = ActivityMessageService.SendTextMessage(
-                    registrant.Phone,
+                    phoneNumber,
                     senderName,
                     subject,
                     activityName,
