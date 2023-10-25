@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -116,7 +116,17 @@ namespace AfterSchoolLibrary.Models
             dq.Criterias.Add(ObjectMap["WebUserId"], Id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
-        
+
+        public static List<VolunteerTask> LoadAllByWebUserId(int id, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.UseParameterizedQuery = false;
+            dq.Criterias.Add(ObjectMap["WebUserId"], id);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
         public static List<VolunteerTask> LoadByTaskTypeAndAppStatus(int? taskStatus, int? applicationStatus, string search, Account currentAccount,int? start, int? length, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {

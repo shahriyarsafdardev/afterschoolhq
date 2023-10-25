@@ -73,5 +73,12 @@ namespace AfterSchoolLibrary.Services
                 && volunteerApproval.ExpirationDate.IsNotEmpty()
                 && volunteerApproval.ExpirationDate >= DateTime.UtcNow;
         }
+
+        public static VolunteerApproval GetLatestPreviousApproval(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var volunteerApprovals = VolunteerApproval.LoadByWebUserId(webUserId, msgs, dc);
+            var nonExpiredApprovals = volunteerApprovals.Where(entry => entry.ExpirationDate > DateTime.UtcNow);
+            return nonExpiredApprovals.OrderByDescending(entry => entry.CreateDate).FirstOrDefault();
+        }
     }
 }

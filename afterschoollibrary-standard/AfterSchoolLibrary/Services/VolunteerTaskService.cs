@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -35,6 +35,11 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(volunteerTask.Save(dc: dc));
             return volunteerTask;
+        }
+        public static VolunteerTask GetLatestPreviousTask(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        {
+            var volunteerTasks = VolunteerTask.LoadAllByWebUserId(webUserId, msgs, dc);
+            return volunteerTasks.OrderByDescending(entry => entry.CreateDate).FirstOrDefault();
         }
     }
 }
