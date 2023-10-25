@@ -912,6 +912,7 @@
     <Content Include="Assets\js\jquery.stellar.min.js" />
     <Content Include="Assets\js\password-checker.js" />
     <Content Include="Assets\js\retina-1.1.0.min.js" />
+    <Content Include="Assets\js\smartlook.js" />
     <Content Include="Assets\js\underscore-min.js" />
     <Content Include="Assets\lib\bootstrap-markdown\bower.json" />
     <Content Include="Assets\lib\bootstrap-markdown\css\bootstrap-markdown.min.css" />
