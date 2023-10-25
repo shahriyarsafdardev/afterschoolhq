@@ -360,15 +360,15 @@ namespace AfterSchoolAdHoc
 
         public static void VerifyExpiredImportedVolunteers(SystemMessages msgs, DatabaseConnection dc)
         {
-            var importedVolunteers = ReadImportedVolunteersCsv($"C:\\IPS Volunteer List (2021-2023) v4.csv")
+            var importedVolunteers = ReadImportedVolunteersCsv($"D:\\Imported Volunteers-07-01-2022\\IPS_Volunteer_List.csv")
                 .Where(x => x.Status.ToLower() == "approved").ToList();
-            var fileWritePath = $"D:\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
+            var fileWritePath = $"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
             var matchedVolunteers = new List<VolunteerRecord>();
             var count = 0;
             importedVolunteers.ForEach(volunteer =>
             {
                 var webUser = WebUser.LoadByEmail(volunteer.Email.Trim(),msgs,dc);
-                var expirationDate = volunteer.DateReviewed.AddYears(1);
+                var expirationDate = volunteer.DateReviewed.Value.AddYears(1);
                 if (webUser.IsNotEmpty())
                 {
                     var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUser.ID.Value,msgs,dc).FirstOrDefault();
@@ -382,9 +382,13 @@ namespace AfterSchoolAdHoc
                         {
                             var volRecord = new VolunteerRecord
                             {
+                                FirstName = webUser.FirstName,
+                                LastName = webUser.LastName,
+                                WebUserId = webUser.ID,
+                                Email = volunteer.Email,
                                 Status = volunteer.Status,
                                 DateReviewed = volunteer.DateReviewed,
-                                Email = volunteer.Email,
+                                ExpirationDate = volunteerApproval.ExpirationDate,
                             };
                             matchedVolunteers.Add(volRecord);
                         }
@@ -407,9 +411,13 @@ namespace AfterSchoolAdHoc
         }
         private record VolunteerRecord
         {
-            public string Status { get; set; }
-            public DateTime DateReviewed { get; set; }
-            public string Email { get; set; }
+            public string? FirstName { get; set; }
+            public string? LastName { get; set; }
+            public string? Email { get; set; }
+            public int? WebUserId { get; set; }
+            public string? Status { get; set; }
+            public DateTime? DateReviewed { get; set; }
+            public DateTime? ExpirationDate { get; set; }
         }
 
         public class Payload
