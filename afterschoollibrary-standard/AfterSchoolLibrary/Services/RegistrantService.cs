@@ -536,21 +536,17 @@ namespace AfterSchoolLibrary.Services
             string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
         {
             WebUser registrantWebUser = null;
+            var phoneNumber = "";
+            var allowTextMessages = true;
 
             if (registrant.WebUserId.IsNotEmpty())
-                registrantWebUser = WebUser.Load(registrant.WebUserId.Value, msgs, dc); //LoadByRegistrantIdByIsDeleted(registrant.ID.Value, false, msgs, dc).FirstOrDefault();
-            //WebUser webUser = null;
-            var phoneNumber = "";
-
-            //if(registrantWebUser.IsNotEmpty())
-            //    webUser = WebUser.Load(registrantWebUser.WebUserId.Value, msgs, dc);
+                registrantWebUser = WebUser.Load(registrant.WebUserId.Value, msgs, dc); 
 
             if (registrantWebUser.IsNotEmpty())
                 phoneNumber = registrantWebUser.Phone;
             else
                 phoneNumber = registrant.Phone;
 
-            var allowTextMessages = true;
 
             if (registrantWebUser.IsNotEmpty() && !registrantWebUser.AllowTextMessages)
             {
