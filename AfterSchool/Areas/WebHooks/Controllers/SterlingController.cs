@@ -129,7 +129,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var subject = $"Sterling Webhook Errors - {AfterSchoolLibrary.Helpers.Utilities.HostName}";
             var body = msgs.RenderMessageList(MessageOutputType.Html);
 
-            EmailHelper.SendEmail(toEmail, subject, body, true);
+            msgs.AddRange(EmailHelper.SendEmail(toEmail, subject, body, true));
         }
 
         private static bool IsAnyReportConsider(IEnumerable<ReportItem> reportItems)
@@ -145,16 +145,16 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                                            criterias.Contains(item.Result.ToLower()));
         }
 
-        private static bool IsPreviouslyApproved(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        private static bool IsPreviouslyApproved(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webuserID, msgs);
+            var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webUserId, msgs);
             return approvalEntry.IsNotEmpty() &&
                    approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
         }
 
-        private static bool IsPreviouslyTaskCreated(int? webuserID, SystemMessages msgs, DatabaseConnection dc = null)
+        private static bool IsPreviouslyTaskCreated(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            var previousTask = VolunteerTaskService.GetLatestPreviousTask(webuserID, msgs);
+            var previousTask = VolunteerTaskService.GetLatestPreviousTask(webUserId, msgs);
             return previousTask.IsNotEmpty() &&
                    previousTask.Task == TaskStatus.ReviewBackground &&
                    previousTask.ApplicationStatus == ApplicationStatus.FailedBackgroundCheck &&

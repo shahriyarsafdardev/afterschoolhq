@@ -117,13 +117,13 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<VolunteerTask> LoadAllByWebUserId(int? Id, SystemMessages msgs = null,
+        public static List<VolunteerTask> LoadAllByWebUserId(int id, SystemMessages msgs = null,
             DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
             dq.UseParameterizedQuery = false;
-            dq.Criterias.Add(ObjectMap["WebUserId"], Id);
+            dq.Criterias.Add(ObjectMap["WebUserId"], id);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
