@@ -93,7 +93,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     }
                 }
             }
-            else 
+            if(activity.IsEmpty() && group.IsEmpty()) 
             { 
                 foreach (var act in currentAccount.GetActivities())
                 {
@@ -112,6 +112,15 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
                         .Select(y => y.ID.Value));
+                    var y = x.GetActivities(null, false, false, null, null, msgs: msgs);
+                    foreach (var act in y)
+                    {
+                        if (!act.HasSchedule && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                        {
+                            msgs.Add("In order to download a report, please add a schedule to your activity", MessageType.UserError);
+                            break;
+                        }
+                    }
                 });
             }
 
