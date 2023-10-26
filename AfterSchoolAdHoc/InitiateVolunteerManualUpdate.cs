@@ -358,13 +358,14 @@ namespace AfterSchoolAdHoc
                 $"Passed Candidates Count : {passedCount} and Failed Candidates Count : {failedCount} and failed WebUserID's : {string.Join(", ", failedWebUserIdList)}");
         }
 
-        public static void VerifyExpiredImportedVolunteers(SystemMessages msgs, DatabaseConnection dc)
+        public static void VerifyExpiredImportedVolunteers(SterlingCredentials credentials, SystemMessages msgs, DatabaseConnection dc)
         {
             var importedVolunteers = ReadImportedVolunteersCsv($"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers_Latest_List.csv")
                 .Where(x => x.Status.ToLower() == "approved").ToList();
             var fileWritePath = $"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
             var matchedVolunteers = new List<VolunteerRecord>();
             var count = 0;
+            var sToken = InititiateVolunteerBackgroundCheck.CreateSterlingToken(credentials);
             importedVolunteers.ForEach(volunteer =>
             {
                 var webUser = WebUser.LoadByEmail(volunteer.Email.Trim(),msgs,dc);
@@ -376,7 +377,11 @@ namespace AfterSchoolAdHoc
                     {
                         count++;
                         Console.WriteLine($"Current Count is: {count}");
-                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && 
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId(webUser.ID.Value, true, msgs, dc).FirstOrDefault();
+                        if (backgroundCheck.IsEmpty())
+                            Console.WriteLine($"Background Check is Empty");
+                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && (backgroundCheck.IsEmpty() || 
+                             IsBackgroundCheckExpired(backgroundCheck,sToken,credentials)) &&
                             (volunteerApproval.ExpirationDate == DateTime.UtcNow.ToString("07/01/2023").ToDateTime() ||
                             volunteerApproval.ExpirationDate == expirationDate))
                         {
@@ -397,7 +402,17 @@ namespace AfterSchoolAdHoc
             });
             WriteVolunteerToCsv(matchedVolunteers,fileWritePath);
         }
-
+        private static bool IsBackgroundCheckExpired(BackgroundCheck bgCheck, SterlingToken sToken, SterlingCredentials credentials)
+        {
+            if (bgCheck.IsNotEmpty())
+            {
+                var (clientScreening, jsonRes) = GetScreening(bgCheck.SterlingCandidateId, credentials, sToken.Token);
+                if (clientScreening.Result.ToLower() == "pending" && clientScreening.Status.ToLower() == "predraft")
+                    return true;
+            }
+            
+            return false;
+        }
         private record bgRecord
         {
             public string ScreeningId { get; set; }

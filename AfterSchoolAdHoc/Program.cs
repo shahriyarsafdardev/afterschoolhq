@@ -59,6 +59,6 @@ internal class Program
         //InititiateVolunteerBackgroundCheck.Run(sterlingCred, msgs, dc);
         //InitiateVolunteerManualUpdate.Run(sterlingCred, msgs, dc);
         //InitiateVolunteerManualUpdate.UpdateVolunteerStatus(sterlingCred, msgs, dc);
-        InitiateVolunteerManualUpdate.VerifyExpiredImportedVolunteers(msgs,dc);
+        InitiateVolunteerManualUpdate.VerifyExpiredImportedVolunteers(sterlingCred,msgs,dc);
     }
 }
