@@ -4878,6 +4878,7 @@ namespace AfterSchoolLibrary.Services
                     {
                         checkoutObject.PayingAccount.MarkCouponAsUsed(checkoutObject.Coupon, msgs,dc);
                         checkoutObject.Registration.CouponId = checkoutObject.Coupon?.ID;
+                        checkoutObject.Registration.CouponUsedByAccountId = checkoutObject.PayingAccount.ID;
                         msgs.AddRange(checkoutObject.Registration.Save(dc));
                     }
 
