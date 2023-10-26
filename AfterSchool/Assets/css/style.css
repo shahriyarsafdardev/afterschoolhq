@@ -23196,3 +23196,7 @@ a.text-limit span {
         margin: 0 20px;
     }
 }
+
+.pd-0 {
+    padding: 0;
+}

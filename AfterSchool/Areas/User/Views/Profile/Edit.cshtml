@@ -35,29 +35,59 @@
             </div>
             <form method="post" action="@Url.Action("edit", "profile")" class="form-horizontal">
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">First Name</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">First Name</label>
                         <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.FirstName" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Last Name</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">Last Name</label>
                         <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LastName" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group hide">
-                    <label class="col-sm-3 control-label">Username</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">Username</label>
                         <input type="text" class="form-control" id="username" name="username" value="@Model.Username" onfocus="this.select()" required readonly="readonly" />
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-6">
+                        <div>
+                            <label class="text-bold">
+                                Opt-in to Provider Text Messages?
+                                <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
+                                   data-content="You will only receive messages from activity providers you are registered with.
+                                    Notifications may include info about attendance, reminders, and other important information."
+                                   data-placement="top"></i>
+                            </label>
+                        </div>
+                        <div class="col-lg-7 pd-0">
+                            <div class="am-radio inline">
+                                <input type="radio" id="allow-messages-yes" name="allowtextmessages" class="form-control" value="1" @(Model.AllowTextMessages == true ? "checked=\"checked\"" : "") />
+                                <label for="allow-messages-yes">Yes</label>
+                            </div>
+                            <div class="am-radio inline">
+                                <input type="radio" id="allow-messages-no" name="allowtextmessages" class="form-control " value="0" @(Model.AllowTextMessages == false ? "checked=\"checked\"" : "")>
+                                <label for="allow-messages-no">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-sm-6 col-sm-offset-3 margin-v-10">
                         <hr />
@@ -65,15 +95,17 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Password</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">Password</label>
                         <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" onfocus="this.select()" />
                         @Html.Partial("_PasswordStrengthBarLight")
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label">Verify Password</label>
+                    <div class="col-sm-3"></div>
                     <div class="col-sm-6">
+                        <label class="text-bold">Verify Password</label>
                         <input type="password" class="form-control" id="password2" name="password2" value="" onfocus="this.select()" />
                     </div>
                 </div>
