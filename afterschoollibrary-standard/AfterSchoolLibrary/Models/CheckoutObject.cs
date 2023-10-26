@@ -71,6 +71,8 @@ namespace AfterSchoolLibrary.Models
 
         public int? Quantity { get; set; }
 
+        public bool? IsSubscriptionPayment { get; set; }
+
         public Transaction Transaction { get; set; }
 
         public string Description
@@ -81,8 +83,10 @@ namespace AfterSchoolLibrary.Models
                 {
                     if (ParticipationObject.CanRegisterPerClass)
                         return $"{ParticipationObject.Name} Registration - {ClassQuantity} Classes";
-
-                    return $"{ParticipationObject.Name} Registration";
+                    else if (IsSubscriptionPayment.HasValue && (bool)IsSubscriptionPayment)
+                        return $" Subscription for {ParticipationObject.Name}";
+                    else
+                        return $"{ParticipationObject.Name} Registration";
                 }
 
                 return description;
