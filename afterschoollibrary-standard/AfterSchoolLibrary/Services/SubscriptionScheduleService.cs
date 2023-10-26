@@ -13,6 +13,7 @@ using AfterSchoolLibrary.Billing;
 using AfterSchoolLibrary.Helpers;
 using Account = AfterSchoolLibrary.Models.Account;
 using RestSharp.Extensions;
+using Stripe.FinancialConnections;
 
 namespace AfterSchoolLibrary.Services
 {
@@ -283,19 +284,23 @@ namespace AfterSchoolLibrary.Services
             var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
 
             var paymentType = rsp.PaymentTypeId;
-            var isAmountProrated = false;
+            var isAmountProrated = subscriptionPaymentHistory.ProratedCharge;
 
             // TODO: potentially problematic as the plan may have changed
             var convenienceFee = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
             var paymentTypeFee = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
             var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
+            if (isAmountProrated)
+            {
+                convenienceFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, convenienceFee);
+                paymentTypeFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, (decimal)paymentTypeFee);
+            }
+
             var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m ;
 
             if (paymentType == PaymentType.ACH)
                 stripeSubscriptionPrice -= calculatedFullCCFee;
-
-            isAmountProrated = stripeSubscriptionPrice > amountPaidByParent;
 
             var amountReceivedByProvider = amountPaidByParent - (convenienceFee + paymentTypeFee);
 
