@@ -83,14 +83,14 @@
                                 if(subscriptionSchedule.IsNotEmpty() && subscriptionSchedule.EndDate.HasValue)
                                 {
                                     totalPayments = SubscriptionScheduleService.GetPaymentDates
-                                        (subscriptionSchedule.StartDate, (DateTime)subscriptionSchedule.FirstRenewal, 
+                                        (subscriptionSchedule.StartDate, (DateTime)subscriptionSchedule.FirstRenewal,
                                         (DateTime)subscriptionSchedule.EndDate, plan.BillingPeriodTypeId).Count;
                                 }
 
                                 var billingPeriodTypeId = plan.BillingPeriodTypeId;
                                 var payments = plan.GetPayments();
                                 var nextPaymentDate = "-";
-                                var endDate = (plan.DateCancelled ?? plan.GetLastPaymentDate()).ToShortDateString("-");
+                                var endDate = (plan.DateCancelled.HasValue ? (originalPlan.EndDate ?? plan.DateCancelled) : plan.DateCancelled).ToShortDateString("-");
 
                                 if (billingPeriodTypeId == BillingPeriodType.NotSet)
                                 {
@@ -101,7 +101,6 @@
                                 {
                                     if(subscriptionSchedule.IsNotEmpty())
                                     {
-                                        //var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)plan.SubscriptionScheduleUid, msgs);
                                         nextPaymentDate = subscriptionSchedule.NextBillDate.ToShortDateString();
                                     }
                                     else if (payments?.Count < (plan.TotalPeriods ?? 0) || !activity.HasSchedule)
