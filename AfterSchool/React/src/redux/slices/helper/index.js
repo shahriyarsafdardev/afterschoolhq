@@ -85,3 +85,12 @@ export const handleRedirection = ({
     }
   }
 };
+
+export const setStatuses = questionsGroups => {
+  const lastCompletedSectionId = localStorage.getItem('lastCompletedSectionId');
+  return questionsGroups.map((section, index) => {
+    const status =
+      lastCompletedSectionId && index <= lastCompletedSectionId ? 'completed' : 'notStarted';
+    return { ...section, Status: status };
+  });
+};

@@ -49,8 +49,13 @@ const UpdateRegistrationSlice = createSlice({
         IsGenderRestricted
       );
 
+      let updatedQuestionGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      updatedQuestionGroups = updatedQuestionGroups.map(section => {
+        return { ...section, Status: 'completed' };
+      });
+
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = updatedQuestionGroups;
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -144,7 +149,14 @@ export const useUpdateRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded, exit };
+  return {
+    submitFormSectionData,
+    setSchoolFieldValue,
+    clearMessages,
+    loadFormData,
+    loaded,
+    exit
+  };
 };
 
 export default UpdateRegistrationSlice;

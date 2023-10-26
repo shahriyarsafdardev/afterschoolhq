@@ -2,9 +2,9 @@ import utils from 'utils';
 import Routes from 'routes';
 import HeaderSlice from './HeaderSlice';
 import { useDispatch } from 'react-redux';
-import { responseMapper } from './helper';
 import { createSlice } from '@reduxjs/toolkit';
 import ErrorMessagesSlice from './ErrorMessagesSlice';
+import { responseMapper, setStatuses } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import VolunteerRegistrationRepository from 'repository/VolunteerRegistrationRepository';
 
@@ -46,7 +46,7 @@ const VolunteerRegistrationSlice = createSlice({
       );
 
       state.questions = [...questions, ...formQuestionUpdated];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = setStatuses([...formQuestionGroupUpdated, ...questionsGroups]);
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
     },
@@ -55,6 +55,11 @@ const VolunteerRegistrationSlice = createSlice({
     },
     setRegistrationId: (state, { payload }) => {
       state.registrationId = payload;
+    },
+    setStatusAsCompleted: (state, { payload }) => {
+      const updatedGroups = state.questionsGroups;
+      updatedGroups[payload] = { ...updatedGroups[payload], Status: 'completed' };
+      state.questionsGroups = updatedGroups;
     }
   }
 });
@@ -66,7 +71,8 @@ export const useVolunteerRegistrationActions = () => {
     formDataLoaded,
     loadingFormData,
     submitFormSection,
-    setRegistrationId
+    setRegistrationId,
+    setStatusAsCompleted
   } = VolunteerRegistrationSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
   const dispatch = useDispatch();
@@ -136,6 +142,10 @@ export const useVolunteerRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
+  const setStatusCompleted = groupId => {
+    dispatch(setStatusAsCompleted(groupId));
+  };
+
   const exit = async (uid, activityUrl) => {
     await VolunteerRegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -143,7 +153,14 @@ export const useVolunteerRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, clearMessages, loaded, exit };
+  return {
+    submitFormSectionData,
+    setStatusCompleted,
+    clearMessages,
+    loadFormData,
+    loaded,
+    exit
+  };
 };
 
 export default VolunteerRegistrationSlice;

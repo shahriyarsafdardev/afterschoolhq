@@ -5,9 +5,9 @@ import utils from 'utils';
 import HeaderSlice from './HeaderSlice';
 import schoolField from 'constants/schoolField';
 import ErrorMessagesSlice from './ErrorMessagesSlice';
-import { responseMapper, handleRedirection } from './helper';
 import ConfirmRegistrationSection from 'constants/eSignatureSection';
 import RegistrationRepository from 'repository/RegistrationRepository';
+import { responseMapper, handleRedirection, setStatuses } from './helper';
 
 const RegistrationSlice = createSlice({
   name: 'registrationSlice',
@@ -55,7 +55,7 @@ const RegistrationSlice = createSlice({
       );
 
       state.questions = [...questions, ...formQuestionUpdated, schoolField(RegistrantType)];
-      state.questionsGroups = [...formQuestionGroupUpdated, ...questionsGroups];
+      state.questionsGroups = setStatuses([...formQuestionGroupUpdated, ...questionsGroups]);
       state.school = SchoolLocation || {};
       state.answeredQuestions = formQuestionAnswer;
       state.activity = activityDto;
@@ -69,6 +69,11 @@ const RegistrationSlice = createSlice({
     setSchool: (state, { payload: { school, noSchool } }) => {
       state.school = school;
       state.noSchool = noSchool;
+    },
+    setStatusAsCompleted: (state, { payload }) => {
+      const updatedGroups = state.questionsGroups;
+      updatedGroups[payload] = { ...updatedGroups[payload], Status: 'completed' };
+      state.questionsGroups = updatedGroups;
     }
   }
 });
@@ -80,7 +85,8 @@ export const useRegistrationActions = () => {
     formDataLoaded,
     loadingFormData,
     submitFormSection,
-    setRegistrationId
+    setRegistrationId,
+    setStatusAsCompleted
   } = RegistrationSlice.actions;
   const { setMsgs } = ErrorMessagesSlice.actions;
   const { setHeaderData, loadingCompleted: headerLoadingCompleted } = HeaderSlice.actions;
@@ -152,6 +158,10 @@ export const useRegistrationActions = () => {
     dispatch(setMsgs([]));
   };
 
+  const setStatusCompleted = groupId => {
+    dispatch(setStatusAsCompleted(groupId));
+  };
+
   const exit = async (uid, activityUrl) => {
     await RegistrationRepository.exit(uid).then(({ msgs }) => {
       const { redirect } = utils;
@@ -159,7 +169,15 @@ export const useRegistrationActions = () => {
     });
   };
 
-  return { loadFormData, submitFormSectionData, setSchoolFieldValue, clearMessages, loaded, exit };
+  return {
+    submitFormSectionData,
+    setSchoolFieldValue,
+    setStatusCompleted,
+    clearMessages,
+    loadFormData,
+    loaded,
+    exit
+  };
 };
 
 export default RegistrationSlice;

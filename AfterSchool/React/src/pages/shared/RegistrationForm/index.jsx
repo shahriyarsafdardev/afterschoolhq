@@ -33,6 +33,7 @@ export default function RegistrationForm(props) {
     currentQuestions,
     handleRedirection,
     isUpdating = false,
+    showProgressBar = true,
     isUpdatingRegistration = false
   } = props;
   const outerWrapperClass =
@@ -61,9 +62,9 @@ export default function RegistrationForm(props) {
           <Loader />
         ) : (
           <Box className={outerWrapperClass}>
-            {showExit &&
-              (isUpdating ? (
-                <Box className={classes.exitButtonWrapper}>
+            <Box className={classes.exitButtonWrapper}>
+              {showExit &&
+                (isUpdating ? (
                   <Button
                     color="primary"
                     variant="outlined"
@@ -73,10 +74,8 @@ export default function RegistrationForm(props) {
                   >
                     Exit
                   </Button>
-                </Box>
-              ) : (
-                firstSection && (
-                  <Box className={classes.exitButtonWrapper}>
+                ) : (
+                  firstSection && (
                     <Button
                       color="primary"
                       variant="outlined"
@@ -86,10 +85,12 @@ export default function RegistrationForm(props) {
                     >
                       Exit
                     </Button>
-                  </Box>
-                )
-              ))}
-            <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
+                  )
+                ))}
+            </Box>
+            <Box className={showProgressBar ? '' : classes.progressBar}>
+              <ProgressBar activeGroup={activeGroup} totalGroups={totalGroups} />
+            </Box>
             <Box className={classes.formWrapper}>
               <Box className={classes.formInnerWrapper}>
                 <Typography className={classes.sectionName} variant="h6" color="primary">
