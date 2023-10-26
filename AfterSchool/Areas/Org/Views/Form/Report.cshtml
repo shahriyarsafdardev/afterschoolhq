@@ -161,7 +161,7 @@
                 </div>
 
                 @{
-                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);
+                    var searchGroups = questions.OrderBy(x => x.FormQuestionGroupDisplayOrder).Select(x => x.ToFormQuestionGroup()).DistinctBy(x => x.ID);                   
                 }
                 @foreach (var group in searchGroups)
                 {

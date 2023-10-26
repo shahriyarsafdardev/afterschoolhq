@@ -396,7 +396,7 @@ namespace AfterSchoolLibrary.Models
                 Name = FormQuestionGroupName,
                 DisplayOrder = FormQuestionGroupDisplayOrder,
                 QuestionGroupDataTypeId = FormQuestionGroupQuestionGroupDataTypeId,
-            };
+      };
         }
 
         public FormQuestion ToFormQuestion(bool loadFromDb = false, SystemMessages msgs = null, DatabaseConnection dc = null)
