@@ -357,7 +357,7 @@ namespace AfterSchool.Areas.Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetNewChildForm(string accountName, string activityName, string registrantUid)
+        public ActionResult GetNewChildForm(string accountName, string activityName, string registrantUid, bool isSession = false)
         {
             var msgs = new SystemMessages();
             try
@@ -374,8 +374,15 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var currentAccount = SessionVariables.CurrentAccount;
                 var account = Account.LoadByUniqueName(accountName, msgs);
-                var activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
-                var participationObject = activity.GetParticipationObject(msgs);
+                var activity = new Activity();
+                var participationObject = new ParticipationObject(ActivityType.NotSet);
+                if (isSession)
+                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityName, msgs).GetParticipationObject();
+                else
+                {
+                    activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
+                    participationObject = activity.GetParticipationObject();
+                }  
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
 
@@ -416,39 +423,66 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 if (currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed)
                     registration = currentRegistrant.GetRegistrations(msgs)?.LastOrDefault();
-
-                dynamic response = new
+                dynamic response = null;
+                if (isSession)
                 {
-                    FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
-                    activityDto = new
+                    var checkOut = new List<CheckOutDto>();
+                    response = new
                     {
-                        Name = activity.Name,
-                        Organization = activity.AccountName,
-                        IsFree = !participationObject.ShouldParentPay(),
-                        IsPaid = !participationObject.IsFree,
-                        RegistrantType = RegistrantPersonType.Parent.ToString(),
-                        ActivityUrl = participationObject.GetShortHomePageUrl(),
-                        IsGradeRestricted = participationObject.RestrictByGrade(),
-                        SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
-                        IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
-                        IsGenderRestricted = participationObject.IsGenderEnforced,
-                        RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
-                        CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
-                        RegistrationUid = registration?.Uid,
-                        IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
-                        MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
-                        MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
-                        MinAge = participationObject.AgeStart,
-                        MaxAge = participationObject.AgeEnd,
-                        EnforcedGender = participationObject.GenderRestriction,
-                        AllowToPayLater = participationObject.AllowToPayLater,
-                        ApplyMode = participationObject.RegistrationMode.ToString(),
-                        HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
-                        IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
-                                                   participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
-                                                   participationObject.IsRequireCheckInCheckOutEnabled,
-                    }
-                };
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                        checkOut = GetCartItems(),
+                        activityGroupDto = new
+                        {
+                            Name = participationObject.Name,
+                            Organization = participationObject.OwnerAccount.Name,
+                            RegistrantType = currentUserRegistrant.PersonTypeId.ToString(),
+                            FindAnotherActivityUrl = participationObject.OwnerAccount.ShortHomePageUrl,
+                            ActivityUrl = participationObject.GetShortHomePageUrl(),
+                            RegisterForNewChildUrl = participationObject.GetRegistrationPageUrl(),
+                            RegistrationIsCompleted = registration?.CompletionStatusId == RegistrationCompletionStatus.Completed ? true : false,
+                            CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                            RegistrationUid = registration?.Uid,
+                            ApplyMode = participationObject.RegistrationMode.ToString(),
+                            HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
+                            SchoolLocation = currentRegistrant.GetSchoolLocation(msgs),
+                        }
+                    };
+                }
+                else
+                {
+                    response = new
+                    {
+                        FormDto = new FormDto(formQuestionDtoList, formQuestionGroupDtoList, formQuestionAnswerDtoList),
+                        activityDto = new
+                        {
+                            Name = activity.Name,
+                            Organization = activity.AccountName,
+                            IsFree = !participationObject.ShouldParentPay(),
+                            IsPaid = !participationObject.IsFree,
+                            RegistrantType = RegistrantPersonType.Parent.ToString(),
+                            ActivityUrl = participationObject.GetShortHomePageUrl(),
+                            IsGradeRestricted = participationObject.RestrictByGrade(),
+                            SchoolLocation = currentRegistrant?.GetSchoolLocation(msgs),
+                            IsAgeRestricted = (participationObject.AgeStart != null ? true : false),
+                            IsGenderRestricted = participationObject.IsGenderEnforced,
+                            RegistrationIsCompleted = currentRegistrant.ProfileStatusId == RegistrantProfileStatus.Completed ? true : false,
+                            CanAccess = currentUser.HasAccessToRegistrant(currentRegistrant, msgs),
+                            RegistrationUid = registration?.Uid,
+                            IsAlreadyPaid = registration?.IsAlreadyPaidFor(msgs),
+                            MinGrade = participationObject.GetMinGradeLevel(msgs).Abbreviation,
+                            MaxGrade = participationObject.GetMaxGradeLevel().Abbreviation,
+                            MinAge = participationObject.AgeStart,
+                            MaxAge = participationObject.AgeEnd,
+                            EnforcedGender = participationObject.GenderRestriction,
+                            AllowToPayLater = participationObject.AllowToPayLater,
+                            ApplyMode = participationObject.RegistrationMode.ToString(),
+                            HeaderImageURL = AccountProfileHelper.GetHeaderImageURL(participationObject),
+                            IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
+                                                       participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
+                                                       participationObject.IsRequireCheckInCheckOutEnabled,
+                        }
+                    };
+                }
 
                 return Json(
                     new ApiResponse(msgs,response),
