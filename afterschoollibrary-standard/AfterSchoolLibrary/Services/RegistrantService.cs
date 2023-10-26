@@ -295,8 +295,6 @@ namespace AfterSchoolLibrary.Services
             //run first charge 
             if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
             {
-                var platformFee = useStripeConnectedAccount ? checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, dc) : new decimal?();
-
                 metaData["PaymentNumber"] = "1"; //as it will be first payment
 
                 var amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, subscriptionSchedule.AmountInCents / 100m);
@@ -306,7 +304,7 @@ namespace AfterSchoolLibrary.Services
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                     fromCustomerId: subscriptionSchedule.StripeCustomerId,
                     destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
-                    platformFee: platformFee,
+                    platformFee: useStripeConnectedAccount ? platformFeePercent * amount : new decimal?(),
                     tokenOrSourceId: subscriptionSchedule.StripeSourceId, // Use the StripeSourceId from the schedule
                     totalAmount: amount,
                     description: subscriptionSchedule.Description,
