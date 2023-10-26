@@ -57,7 +57,7 @@
     </head>
     <body>
         <p class="sentby">
-            Sent by <strong>@Model.replyToName</strong> at <strong>@Model.date</strong>
+            Sent by <strong>@Model.fromName</strong> at <strong>@Model.date</strong>
         </p>
         <h2 class="subject">@Model.subject for @Model.activityName</h2>
         @Model.body   

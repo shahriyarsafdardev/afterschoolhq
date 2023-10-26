@@ -154,7 +154,8 @@ namespace AfterSchoolLibrary.Services
                 {"date", account.ConvertToAccountTimeZone(DateTime.UtcNow).ToLongDateTimeString()},
                 {"siganture" , signature },
                 {"contactPhone", contactPhone },
-                { "email", replyToEmail}
+                { "email", replyToEmail},
+                {"fromName", fromName }
             };
             body = EmailHelper.ProcessTemplate(
                 EmailTemplates.Email_Message,
@@ -166,7 +167,7 @@ namespace AfterSchoolLibrary.Services
                    Helpers.Email.AppNoReplyEmailAddress,
                    $"{fromName} via {Helpers.Utilities.AppName()}"),
                 toEmail: new SendGrid.Helpers.Mail.EmailAddress(toEmail, toName),
-                subject: $"{replyToName} has sent {aOrAn} {subject} regarding {activityName}",
+                subject: $"{fromName} has sent {aOrAn} {subject} regarding {activityName}",
                 body,
                 replyTo: new SendGrid.Helpers.Mail.EmailAddress(replyToEmail, replyToName),
                 emailTemplateId: SendGridHelper.GetGenericTemplateId());
@@ -229,7 +230,7 @@ namespace AfterSchoolLibrary.Services
                     account, 
                     loggedInUser,
                     activityName,
-                    fromName, 
+                    loggedInUser.DisplayName, 
                     replyToEmail, 
                     replyToName, 
                     activityMessage.Subject,
