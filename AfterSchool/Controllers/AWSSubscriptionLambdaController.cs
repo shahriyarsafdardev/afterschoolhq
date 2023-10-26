@@ -93,13 +93,15 @@ namespace AfterSchool.Controllers
                 metaData["WasProrated"] = schedule.ProrateFirstCharge.ToString() ?? "false";
 
             // TODO: Platform fees
-            //var platformFeeAmount = checkoutObject.CalculatePlatformFeeAmountDuringCheckout(msgs, null);
+            var platformFeePercent = useStripeConnectedAccount
+                                        ? billingAccount.GetSubscriptionPlatformFeePercent(rsp.GetSubscriptionPlan(), rsp.PaymentTypeId, msgs)
+                                        : new decimal?();
 
-                // Create a charge for the current schedule
+            // Create a charge for the current schedule
             return StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
                 fromCustomerId: schedule.StripeCustomerId,
                 destinationAccountId: useStripeConnectedAccount ? billingAccount.StripeUserId : null,
-                platformFee: null, //useStripeConnectedAccount ? platformFeeAmount : new decimal?(),
+                platformFee: useStripeConnectedAccount ? platformFeePercent : new decimal?(),
                 tokenOrSourceId: schedule.StripeSourceId,
                 totalAmount: amount,
                 description: schedule.Description,
@@ -121,7 +123,7 @@ namespace AfterSchool.Controllers
             {
                 subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(
                 schedule.ID.Value,
-                schedule.AmountInCents,
+                charge.Amount,
                 DateTime.UtcNow,
                 charge.Id,
                 charge.Metadata["WasProrated"].ToBoolean(),
