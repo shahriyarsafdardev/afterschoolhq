@@ -74,11 +74,17 @@ namespace AfterSchool.Areas.Api.Controllers
                     var registrantGradeText = registrantGrade?.Text;
                     var canStillRegister = false;
                     var ineligibleText = "";
-                    var isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student, msgs);
-                    var isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student, msgs);
-                    var isGenderRestricted = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
-                                           && !participationObject.AcceptsGenderType(student.GenderId);
-
+                    bool isGradeRestricted = false;
+                    bool isAgeRestricted = false;
+                    bool isGenderRestricted = false;
+                    if(participationObject.IsActivity())
+                    {
+                        isGradeRestricted = participationObject.IsNotEmpty() && participationObject.RestrictByGrade() && !participationObject.IsStudentGradeInRange(student, msgs);
+                        isAgeRestricted = participationObject.IsNotEmpty() && !participationObject.RestrictByGrade() && !participationObject.IsStudentAgeInRange(student, msgs);
+                        isGenderRestricted = participationObject.IsNotEmpty() && participationObject.IsGenderEnforced
+                                               && !participationObject.AcceptsGenderType(student.GenderId);
+                    }
+                   
                     if (participationObject.CanRegisterPerClass)
                         canStillRegister = !student.IsReservedForAllDates(participationObject, selectedDates, null, msgs);
 
@@ -163,16 +169,29 @@ namespace AfterSchool.Areas.Api.Controllers
                     };
                     registrantsDtos.Add(newStudent);
                 }
-                var response = new
-                {
-                    Students = registrantsDtos,
-                    activityDto = new
+                dynamic response = null;
+                if (participationObject.IsActivity())
+                    response = new
                     {
-                        ActivityName = activityName,
-                        OrganizationName = orgName,
-                        HeaderImageUrl = headerImageUrl
-                    },
-                };
+                        Students = registrantsDtos,
+                        activityDto = new
+                        {
+                            ActivityName = activityName,
+                            OrganizationName = orgName,
+                            HeaderImageUrl = headerImageUrl
+                        },
+                    };
+                else
+                    response = new
+                    {
+                        Students = registrantsDtos,
+                        activityGroupDto = new
+                        {
+                            SessionName = activityName,
+                            OrganizationName = orgName,
+                            HeaderImageUrl = headerImageUrl
+                        }
+                    };
                 return Json(
                     new ApiResponse(msgs, response),
                     JsonRequestBehavior.AllowGet);
@@ -238,7 +257,11 @@ namespace AfterSchool.Areas.Api.Controllers
                            throw new Exception(emsgs.ToString());
                        }
                     );
-                var addnewStudentUrl = $"/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}";
+                var addnewStudentUrl = "";
+                if (participationObject.IsActivity())
+                    addnewStudentUrl = $"/ReactApp/registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}";
+                else
+                    addnewStudentUrl = $"/ReactApp/session-registration/new-child/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{studentReg.Uid}";
                 var response = new
                 {
                     AddNewStudentUrl = addnewStudentUrl,
