@@ -1885,10 +1885,13 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
 
-            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) &&
-                participationObject.ObjectType == ParticipationObjectType.Activity)
-                return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
-            
+            if (participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
+            {
+                if (participationObject.ObjectType == ParticipationObjectType.Activity)
+                    return Redirect($"~/ReactApp/registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
+                else if (participationObject.ObjectType == ParticipationObjectType.ActivityGroup)
+                    return Redirect($"~/ReactApp/session-registration/{participationObject.OwnerAccount.UniqueName}/{participationObject.UniqueName}/{currentRegistrant.Uid}");
+            }
             var parentOrGuardian = currentRegistrant.GetParentOrGuardian(msgs);
             var (submittedRecord, registration) = currentRegistrant.GetSubmittedRecord(participationObject, msgs);
 
