@@ -321,6 +321,7 @@ namespace AfterSchoolLibrary.Services
                 RegistrantSubscriptionPlan = rsp,
                 ConvenienceFeePayer = convenienceFeePayer,
                 CreditCardFeePayer = creditCardFeePayer,
+                IsSubscriptionPayment = true,
             };
 
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
