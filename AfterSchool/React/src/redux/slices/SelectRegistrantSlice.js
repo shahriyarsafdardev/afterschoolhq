@@ -43,13 +43,11 @@ export const useSelectRegistrantActions = () => {
     await SelectRegistrantRepository.getData().then(({ obj, msgs }) => {
       if (msgs.length > 0) return navigateTo('/login');
 
-      if (obj?.activityDto) {
-        const {
-          HeaderImageUrl,
-          ActivityName: Name,
-          OrganizationName: Organization
-        } = obj?.activityDto;
-
+      if (obj) {
+        const { activityGroupDto, activityDto } = obj;
+        const { HeaderImageUrl, ActivityName, SessionName, OrganizationName: Organization } =
+          activityDto || activityGroupDto;
+        const Name = ActivityName || SessionName;
         dispatch(setHeaderData({ Name, Organization, HeaderImageUrl }));
       }
 

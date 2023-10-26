@@ -52,7 +52,7 @@ function RegistrantCard({ index, student, handleClick }) {
           color="primary"
           data-testid={`participant-button-${index}`}
         >
-          {buttonText} &nbsp;
+          {buttonText}
         </Button>
         <Typography className={classes.enrollMsg} data-testid={`ineligible-text-${index}`}>
           {IneligibleText}

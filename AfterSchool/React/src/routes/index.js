@@ -21,6 +21,8 @@ export default {
   submitSessionFormDataAPI: 'Api/Registration/AddUpdateAnswers',
   getSessionFormDataAPI: (accountName, activityGroupName, registrantUid, isSession) =>
     `Api/Registration/GetForm/?accountName=${accountName}&activityName=${activityGroupName}&registrantUid=${registrantUid}&isSession=${isSession}`,
+  getSessionNewChildFormDataAPI: (accountName, activityGroupName, registrantUid, isSession) =>
+    `Api/Registration/GetNewChildForm/?accountName=${accountName}&activityName=${activityGroupName}&registrantUid=${registrantUid}&isSession=${isSession}`,
   sessionSchoolAPI: 'Api/Registration/CreateOrUpdateFromGoogle',
   exitSessionAPI: uid => `Api/Registration/Exit?uid=${uid}`,
 

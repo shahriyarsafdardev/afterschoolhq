@@ -4,9 +4,18 @@ import axios from './axios/axios';
 export default {
   submitFormSection: params =>
     axios.post(ApiRoutes.submitSessionFormDataAPI, params).then(res => res),
-  getFormData: (accountName, activityGroupName, registrantUid) =>
+  getFormData: (newChild, accountName, activityGroupName, registrantUid) =>
     axios
-      .get(ApiRoutes.getSessionFormDataAPI(accountName, activityGroupName, registrantUid, true))
+      .get(
+        newChild
+          ? ApiRoutes.getSessionNewChildFormDataAPI(
+              accountName,
+              activityGroupName,
+              registrantUid,
+              true
+            )
+          : ApiRoutes.getSessionFormDataAPI(accountName, activityGroupName, registrantUid, true)
+      )
       .then(res => res),
   submitSchoolData: params => axios.post(ApiRoutes.sessionSchoolAPI, params),
   exit: uid => axios.get(ApiRoutes.exitSessionAPI(uid)),

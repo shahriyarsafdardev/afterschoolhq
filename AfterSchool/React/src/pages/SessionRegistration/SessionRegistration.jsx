@@ -10,7 +10,7 @@ import RegistrationForm from 'pages/shared/RegistrationForm';
 import RegistrationService from 'sevices/RegistrationService';
 import DrawerSidebar from 'components/DrawerSidebar/DrawerSidebar';
 
-export default function SessionRegistration() {
+export default function SessionRegistration({ newChild = false }) {
   const navigate = useNavigate();
   const { scrollToTop } = utils;
   const { sessionThankYouUrl } = apiRoutes;
@@ -106,6 +106,7 @@ export default function SessionRegistration() {
           formSectionSubmitObject(values, secondLastSection ? -1 : activeGroupId),
           lastSection,
           schoolLocationID,
+          newChild ? 1 : 0,
           accountName,
           activityGroupName,
           regUid
@@ -125,8 +126,8 @@ export default function SessionRegistration() {
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
-    loadFormData(accountName, activityGroupName, regUid);
-  }, [accountName, activityGroupName]);
+    loadFormData(newChild, accountName, activityGroupName, regUid);
+  }, [newChild, accountName, activityGroupName]);
 
   useEffect(() => {
     if (questionsGroups.length)
