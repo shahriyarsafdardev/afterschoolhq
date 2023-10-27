@@ -58,6 +58,7 @@ namespace AfterSchoolLibrary.Services
             var currentDate = DateTime.UtcNow.Date;
             var subscriptionSchedulespendingToday = subscriptionSchedulesNotCancelled
                .Where(x =>
+                    x.NextBillDate.HasValue &&
                     x.NextBillDate.Value.Date.Equals(currentDate)
                 )
                 .ToList();
@@ -91,6 +92,7 @@ namespace AfterSchoolLibrary.Services
             var date = DateTime.UtcNow.AddDays(3).Date;
             var subscriptionSchedules = subscriptionSchedulesNotCancelled
                .Where(x =>
+                    x.NextBillDate.HasValue &&
                     x.NextBillDate.Value.Date.Equals(date) &&
                     (x.BillingPeriodType == BillingPeriodType.Month || x.BillingPeriodType == BillingPeriodType.Year)
                 )
@@ -346,33 +348,33 @@ namespace AfterSchoolLibrary.Services
             {
                 if (chargeStatus.Equals(LastChargeStatus.pending))
                 {
-                    TransactionService.CreateNew(
-                    purchasingAccount,
-                    billingAccount,
-                    convenienceFeePayer,
-                    creditCardFeePayer,
-                    subscriptionPaymentHistory.AmountInCents,
-                    participationObject?.Name,
-                    null, // as we have'nt created purchase yet.
-                    TransactionType.Charge,
-                    rsp.PaymentTypeId,
-                    PaymentSourceType.AfterSchoolPlatform,
-                    usePlatformFees ? platFormFlatFee : new decimal?(),
-                    usePlatformFees ? platformPercentFee : new decimal?(),
-                    convenienceFee,
-                    paymentTypeFee ?? 0,
-                    subscriptionPaymentHistory.StripeChargeId,
-                    subscriptionSchedule.Description,
-                    DateTime.UtcNow,
-                    useConnectedAccount,
-                    null,
-                    null,
-                    null,
-                    msgs,
-                    dc);
+                    if(subscriptionPaymentHistory.RetryNumber.Equals(0))
+                        TransactionService.CreateNew(
+                        purchasingAccount,
+                        billingAccount,
+                        convenienceFeePayer,
+                        creditCardFeePayer,
+                        -subscriptionPaymentHistory.AmountInCents,
+                        participationObject?.Name,
+                        null, // as we have'nt created purchase yet.
+                        TransactionType.Charge,
+                        rsp.PaymentTypeId,
+                        PaymentSourceType.AfterSchoolPlatform,
+                        usePlatformFees ? platFormFlatFee : new decimal?(),
+                        usePlatformFees ? platformPercentFee : new decimal?(),
+                        convenienceFee,
+                        paymentTypeFee ?? 0,
+                        subscriptionPaymentHistory.StripeChargeId,
+                        subscriptionSchedule.Description,
+                        DateTime.UtcNow,
+                        useConnectedAccount,
+                        null,
+                        null,
+                        null,
+                        msgs,
+                        dc);
 
                     if (msgs.HasNoErrors())
-                    
                         EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
                     else
                         msgs.Add("Error creating Transaction record", MessageType.Error);
