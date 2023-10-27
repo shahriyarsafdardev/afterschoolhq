@@ -186,6 +186,14 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
         }
 
+        public static SubscriptionPaymentHistory LoadByUid(Guid Uid, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            BasicLibrary.DataAccess.DatabaseQuery dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["Uid"], Uid);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
+        }
+
         public static List<SubscriptionPaymentHistory> LoadByStatus(LastChargeStatus status, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             DatabaseQuery dq = DatabaseQuery;
