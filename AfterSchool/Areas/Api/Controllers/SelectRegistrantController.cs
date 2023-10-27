@@ -46,8 +46,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (participationObject.IsEmpty())
                     throw new Exception("No activity found");
 
-                var studentRegisrants = currentAccount.GetStudentRegistrants(msgs);
-                var students = studentRegisrants.Where(student => student.ProfileStatusId != RegistrantProfileStatus.NotSet).ToList();
+                var students = currentAccount.GetStudentRegistrants(msgs).Where(student => student.ProfileStatusId != RegistrantProfileStatus.NotSet).ToList();
                 var registrantsDtos = new List<SelectRegistrantsDto>();
                 var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
                 var activityName = participationObject.Name;
