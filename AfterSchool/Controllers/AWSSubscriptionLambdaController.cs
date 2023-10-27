@@ -111,8 +111,50 @@ namespace AfterSchool.Controllers
             );
         }
 
+        private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
+        {
+            foreach (var paymentHistory in paymentHistories)
+            {
+                var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
+                var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
+
+                if (charge.IsEmpty())
+                    msgs.Add("Error in retrieving the charge", MessageType.Error);
+                
+                else
+                    ProcessCharge(charge, schedule, paymentHistory, rsp, msgs, true);
+            }
+        }
+
+        private void ProcessFailedSubscriptionSchedules(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
+        {
+            foreach (var schedule in schedules)
+            {
+                if (schedule.StripeSourceId.HasValue())
+                {
+                    var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+
+                    var amount = schedule.AmountInCents / 100.0m;
+
+                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
+
+                    var charge = CreateCharge(schedule, rsp, amount, msgs);
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
+
+                    if (charge.IsEmpty())
+                        msgs.Add("Error in running the charge", MessageType.Error);
+
+                    else
+                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, msgs);
+                }
+                else
+                    msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
+            }
+        }
+
         private void ProcessCharge(Charge charge, SubscriptionSchedule schedule, SubscriptionPaymentHistory? subscriptionPaymentHistory,
-            RegistrantSubscriptionPlan rsp, SystemMessages msgs)
+            RegistrantSubscriptionPlan rsp, SystemMessages msgs, bool pendingCase = false)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
@@ -140,6 +182,7 @@ namespace AfterSchool.Controllers
                 PaymentHistoryUid = subscriptionPaymentHistory.Uid,
                 ScheduleUid = schedule.Uid,
                 ChargeId = charge.Id,
+                PendingCase = pendingCase,
             };
 
             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -152,48 +195,6 @@ namespace AfterSchool.Controllers
             else
             {
                 // TODO: What if webhook is failed
-            }
-        }
-
-        private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
-        {
-            foreach (var paymentHistory in paymentHistories)
-            {
-                var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
-                var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
-                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
-
-                if (charge.IsEmpty())
-                    msgs.Add("Error in running the charge", MessageType.Error);
-                
-                else
-                    ProcessCharge(charge, schedule, paymentHistory, rsp, msgs);
-            }
-        }
-
-        private void ProcessFailedSubscriptionSchedules(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
-        {
-            foreach (var schedule in schedules)
-            {
-                if (schedule.StripeSourceId.HasValue())
-                {
-                    var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
-
-                    var amount = schedule.AmountInCents / 100.0m;
-
-                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
-
-                    var charge = CreateCharge(schedule, rsp, amount, msgs);
-                    var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
-
-                    if (charge.IsEmpty())
-                        msgs.Add("Error in running the charge", MessageType.Error);
-
-                    else
-                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, msgs);
-                }
-                else
-                    msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
             }
         }
 
@@ -230,6 +231,7 @@ namespace AfterSchool.Controllers
             public Guid PaymentHistoryUid { get; set; }
             public Guid ScheduleUid { get; set; }
             public String ChargeId { get; set; }
+            public bool PendingCase { get; set; }
         }
     }
 }

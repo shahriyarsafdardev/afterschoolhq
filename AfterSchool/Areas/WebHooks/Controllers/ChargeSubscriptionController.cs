@@ -33,10 +33,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadByUid(webhookPayload.PaymentHistoryUid, msgs);
                 var subscriptionSchedule = SubscriptionSchedule.LoadByUid(webhookPayload.ScheduleUid, msgs);
                 var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(webhookPayload.ChargeId, msgs);
+                var pendingCase = webhookPayload.PendingCase;
 
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
-                ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
+                ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, pendingCase);
 
                 if (msgs.HasNoErrors())
                     return ReturnOK(msgs);
@@ -51,14 +52,14 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             }
         }
 
-        private void ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule,
-            SubscriptionPaymentHistory subscriptionPaymentHistory, SystemMessages msgs, DatabaseConnection dc)
+        private void ChargePendingToday(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory, 
+            SystemMessages msgs, bool pendingCase = false, DatabaseConnection dc = null)
         {
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
                     HandleCharge(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs);
-                    CreatePaymentRecords(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, dc);
+                    CreatePaymentRecords(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, pendingCase, dc);
                 },
                 onSuccess: (SystemMessages smsgs) =>
                 {
@@ -70,9 +71,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         }
 
         private void CreatePaymentRecords(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
-            Charge charge, SystemMessages msgs, DatabaseConnection dc)
+            Charge charge, SystemMessages msgs, bool pendingCase = false, DatabaseConnection dc = null)
         {
-            msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, dc));
+            msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge,
+                msgs, pendingCase));
         }
 
         private void HandleCharge(Charge charge, SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
