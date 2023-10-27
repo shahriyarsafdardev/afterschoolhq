@@ -312,10 +312,6 @@ namespace AfterSchoolLibrary.Helpers
             return IsProduction && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.AfterSchool && currentUser.IsNotEmpty() && originalLoggedInUser.IsEmpty();
         }
 
-        public static string FormatPhoneNumber(string phoneNumber)
-        {
-            return Regex.Replace(phoneNumber, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
-        }
 
         public static string CleanAndFormatPhoneNumber(string phoneNumber)
         {
