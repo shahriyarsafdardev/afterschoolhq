@@ -316,6 +316,21 @@ namespace AfterSchoolLibrary.Helpers
         {
             return Regex.Replace(phoneNumber, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
         }
+
+        public static string CleanAndFormatPhoneNumber(string phoneNumber)
+        {
+            string cleanedNumber = Regex.Replace(phoneNumber, @"\D", "");
+
+            if (cleanedNumber.Length >= 10)
+            {
+                return string.Format("{0}-{1}-{2}",
+                    cleanedNumber.Substring(cleanedNumber.Length - 10, 3),
+                    cleanedNumber.Substring(cleanedNumber.Length - 7, 3),
+                    cleanedNumber.Substring(cleanedNumber.Length - 4, 4));
+            }
+
+            return phoneNumber;
+        }
     }
 
     public class Email

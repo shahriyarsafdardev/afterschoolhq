@@ -758,7 +758,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"ActivityContactEmail", participationObject.ContactEmail},
                 {"ActivityContactPhone", participationObject.ContactPhone.IsNotEmpty() ? 
-                    $"by phone ({Utilities.FormatPhoneNumber(participationObject.ContactPhone)}) or": "by"},
+                    $"by phone ({Utilities.CleanAndFormatPhoneNumber(participationObject.ContactPhone)}) or": "by"},
                 {"ActivityContactName", participationObject.ContactName},
                 {"CustomMessage", customMessage},
                 {"ActivityName", participationObject.Name},
@@ -1353,7 +1353,7 @@ namespace AfterSchoolLibrary.Helpers
             if (isRegFree || (bool) participationObject?.AllowToPayLater || postPayPlan?.NumberOfPeriodsPrePaid == 0)
                 yourRecepitText = "";
 
-            var phoneNumber = Utilities.FormatPhoneNumber(participationObject.ContactPhone.IfBlank(billingAccount.Phone));
+            var phoneNumber = Utilities.CleanAndFormatPhoneNumber(participationObject.ContactPhone.IfBlank(billingAccount.Phone));
 
             var model = new NameValueCollection
             {
@@ -1743,7 +1743,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityName", checkoutObject.ParticipationObject.Name},
                 {"ActivityContactEmail", billingAccount.Email},
                 {"ActivityContactPhone", billingAccount.Phone.IsNotEmpty() ? 
-                    $"by phone ({Utilities.FormatPhoneNumber(billingAccount.Phone)}) or": "by"},
+                    $"by phone ({Utilities.CleanAndFormatPhoneNumber(billingAccount.Phone)}) or": "by"},
                 {"ActivityContactName", billingAccount.Name},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
