@@ -2248,8 +2248,12 @@ namespace AfterSchool.Controllers
                     var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(subscriptionPaymentHistory.StripeChargeId, msgs);
 
                     msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, subscriptionSchedule,
-                    subscriptionPaymentHistory, msgs, null));
-                    msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory, charge, msgs, null));
+                    subscriptionPaymentHistory, msgs));
+
+                    var isPending = subscriptionSchedule.LastChargeStatus.Equals(LastChargeStatus.pending);
+
+                    msgs.AddRange(SubscriptionScheduleService.CreatePaymentRecordsAfterCharge(subscriptionSchedule, subscriptionPaymentHistory,
+                        charge, msgs, isPending));
                 }
             }
 

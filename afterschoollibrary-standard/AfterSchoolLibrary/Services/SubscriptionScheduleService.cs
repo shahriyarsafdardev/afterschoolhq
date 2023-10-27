@@ -250,7 +250,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         public static SystemMessages CreatePaymentRecordsAfterCharge(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,
-            Charge charge, SystemMessages msgs, DatabaseConnection dc)
+            Charge charge, SystemMessages msgs, bool pendingCase = false, DatabaseConnection dc = null)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs, dc);
@@ -346,15 +346,17 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                if (chargeStatus.Equals(LastChargeStatus.pending))
+                if (chargeStatus.Equals(LastChargeStatus.failed))
                 {
-                    if(subscriptionPaymentHistory.RetryNumber.Equals(0))
+                    if(pendingCase)
+                    {
+                        //creating negative transaction if pending charge status was updated to failed
                         TransactionService.CreateNew(
                         purchasingAccount,
                         billingAccount,
                         convenienceFeePayer,
                         creditCardFeePayer,
-                        -subscriptionPaymentHistory.AmountInCents,
+                        -amountPaidByParent,
                         participationObject?.Name,
                         null, // as we have'nt created purchase yet.
                         TransactionType.Charge,
@@ -374,13 +376,14 @@ namespace AfterSchoolLibrary.Services
                         msgs,
                         dc);
 
+                        if(msgs.HasErrors())
+                            msgs.Add("Error creating negative transaction record", MessageType.Error);
+                    }
                     if (msgs.HasNoErrors())
-                        EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
-                    else
-                        msgs.Add("Error creating Transaction record", MessageType.Error);
+                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);                        
                 }
                 else
-                    checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                    EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
             }
             return msgs;
         }
