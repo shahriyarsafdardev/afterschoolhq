@@ -921,6 +921,14 @@ namespace AfterSchoolLibrary.Helpers
             var registrationDetails = "Login to your account to view more details about this registration.";
 
             var cost = schedule.AmountInCents / 100.0m - ccFees;
+
+            if(isPendingChargeStatus)
+            {
+                var paymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs);
+                ccFees = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(paymentHistory.AmountInCents / 100.0m);
+                cost = paymentHistory.AmountInCents / 100.0m - ccFees;
+            }
+
             var totalCost = isPendingChargeStatus ? cost + ccFees : cost;
 
             var loginLink = Utilities.LoginUrl();
