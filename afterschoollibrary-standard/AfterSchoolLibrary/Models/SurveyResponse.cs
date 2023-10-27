@@ -295,7 +295,7 @@ namespace AfterSchoolLibrary.Models
                 where 
                     SurveyRequest.AccountId = {accountId} and 
                     SurveyRequest.FormId = {formId} and
-                    SurveyResponse.SurveyFeedbackStatusTypeId = 3";
+                    SurveyResponse.SurveyFeedbackStatusTypeId = {(int)SurveyFeedbackStatus.Completed}";
             }
             else
             {
@@ -308,7 +308,7 @@ namespace AfterSchoolLibrary.Models
                 sql += @$"
                 where 
                     SurveyResponse.SurveyRequestId = {formId} and
-                    SurveyResponse.SurveyFeedbackStatusTypeId = 3 and
+                    SurveyResponse.SurveyFeedbackStatusTypeId = {(int)SurveyFeedbackStatus.Completed} and
                     SurveyResponse.IsDeleted = 0";
 
             }
