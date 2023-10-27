@@ -12,9 +12,12 @@ using System.Web.Mvc;
 
 namespace AfterSchool.Areas.Api.Controllers
 {
-    public class FormController : Controller
+    public class FormController : BaseLoggedInApiController
     {
-        
+        public FormController() : base(new List<AccountType> { AccountType.ActivityProvider, AccountType.AfterSchool, AccountType.School, AccountType.SchoolDistrict, AccountType.Teacher, AccountType.Business, AccountType.CommunityCenter, AccountType.Church })
+        {
+        }
+
         [HttpGet]
         public ActionResult GetFormData(int formId)
         {
