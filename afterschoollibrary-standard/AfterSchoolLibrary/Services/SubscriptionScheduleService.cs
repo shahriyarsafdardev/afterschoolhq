@@ -20,7 +20,7 @@ namespace AfterSchoolLibrary.Services
     public static class SubscriptionScheduleService
     {
         public static SubscriptionSchedule CreateNew(CheckoutObject checkoutObject, DateTime startDateTime, DateTime? endDateTime,
-            DateTime? nextBillDate, DateTime? lastDateToBill, PlanFeeObject feeObject, DateTime? firstRenewalDate, 
+            DateTime? nextBillDate, DateTime? lastDateToBill, PlanFeeObject feeObject, DateTime? firstRenewalDate,
             string metaData, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             // TODO: remove hard coded values
@@ -79,7 +79,7 @@ namespace AfterSchoolLibrary.Services
                     schedule.NextBillDate.Value.Date == currentDate.AddDays(-paymentFailed.RetryNumber) &&
                     paymentFailed.RetryNumber < 3)
                 )
-                .ToList(); 
+                .ToList();
 
             return subscriptionSchedulesFailed;
         }
@@ -111,7 +111,7 @@ namespace AfterSchoolLibrary.Services
             {
                 paymentDates.Add(currentPaymentDate);
 
-                currentPaymentDate = (DateTime)new SubscriptionPlan
+                currentPaymentDate = (DateTime) new SubscriptionPlan
                 {
                     BillingPeriodTypeId = billingPeriodType
                 }.CalculateEndDateFromNumberOfPeriods(currentPaymentDate, 1);
@@ -137,7 +137,7 @@ namespace AfterSchoolLibrary.Services
                     if (subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart)
                     {
                         if (activity.HasSchedule)
-                            firstRenewalDate = (DateTime)(schedule.IsOngoing
+                            firstRenewalDate = (DateTime) (schedule.IsOngoing
                                 ? subscriptionPlan.StartDate
                                 : participationObject.StartDate);
                         else
@@ -148,7 +148,7 @@ namespace AfterSchoolLibrary.Services
                     else
                         firstRenewalDate = checkoutDateProviderTimeZone;
 
-                    if(firstRenewalDate.IsAfter(checkoutDateProviderTimeZone))
+                    if (firstRenewalDate.IsAfter(checkoutDateProviderTimeZone))
                         firstRenewalDate = (DateTime) new SubscriptionPlan
                         {
                             BillingPeriodTypeId = billingPeriodType
@@ -167,7 +167,7 @@ namespace AfterSchoolLibrary.Services
                 else
                 {
                     var startDate = subscriptionPlan.PaymentStartTypeId == PlanPaymentStartType.OnPeriodStart ? subscriptionPlan.StartDate : participationObject.StartDate;
-                    var currentPaymentDate = (DateTime) startDate; 
+                    var currentPaymentDate = (DateTime) startDate;
 
                     while (currentPaymentDate.IsOnOrBefore((DateTime) (startDate > checkoutDateProviderTimeZone ? startDate : checkoutDateProviderTimeZone)))
                     {
@@ -176,7 +176,7 @@ namespace AfterSchoolLibrary.Services
                             BillingPeriodTypeId = billingPeriodType
                         }.CalculateEndDateFromNumberOfPeriods(currentPaymentDate, 1);
                     }
- 
+
                     firstRenewalDate = currentPaymentDate;
                 }
             }
@@ -219,7 +219,7 @@ namespace AfterSchoolLibrary.Services
 
                 UpdateNextBillDateOnSuccess(subscriptionSchedule);
             }
-            
+
             if (charge.Status.Equals(LastChargeStatus.failed))
             {
                 msgs.Add("Charge failed", MessageType.Error);
@@ -270,7 +270,7 @@ namespace AfterSchoolLibrary.Services
 
             creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : purchasingAccount;
 
-            convenienceFeePayer =  billingAccount.IsConvenienceFeeTakenOutOfCost
+            convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost
                    ? billingAccount
                    : purchasingAccount;
 
@@ -294,10 +294,10 @@ namespace AfterSchoolLibrary.Services
             if (isAmountProrated)
             {
                 convenienceFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, convenienceFee);
-                paymentTypeFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, (decimal)paymentTypeFee);
+                paymentTypeFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, (decimal) paymentTypeFee);
             }
 
-            var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m ;
+            var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m;
 
             if (paymentType == PaymentType.ACH)
                 stripeSubscriptionPrice -= calculatedFullCCFee;
@@ -344,50 +344,51 @@ namespace AfterSchoolLibrary.Services
             }
             else
             {
-                TransactionService.CreateNew(
-                purchasingAccount,
-                billingAccount,
-                convenienceFeePayer,
-                creditCardFeePayer,
-                subscriptionPaymentHistory.AmountInCents,
-                participationObject?.Name,
-                null, // as we have'nt created purchase yet.
-                TransactionType.Charge,
-                rsp.PaymentTypeId,
-                PaymentSourceType.AfterSchoolPlatform,
-                usePlatformFees ? platFormFlatFee : new decimal?(),
-                usePlatformFees ? platformPercentFee : new decimal?(),
-                convenienceFee,
-                paymentTypeFee ?? 0,
-                subscriptionPaymentHistory.StripeChargeId,
-                subscriptionSchedule.Description,
-                DateTime.UtcNow,
-                useConnectedAccount,
-                null,
-                null,
-                null,
-                msgs,
-                dc);
-
-                if (msgs.HasNoErrors())
+                if (chargeStatus.Equals(LastChargeStatus.pending))
                 {
-                    if (chargeStatus.Equals(LastChargeStatus.failed))
-                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
-                    else
+                    TransactionService.CreateNew(
+                    purchasingAccount,
+                    billingAccount,
+                    convenienceFeePayer,
+                    creditCardFeePayer,
+                    subscriptionPaymentHistory.AmountInCents,
+                    participationObject?.Name,
+                    null, // as we have'nt created purchase yet.
+                    TransactionType.Charge,
+                    rsp.PaymentTypeId,
+                    PaymentSourceType.AfterSchoolPlatform,
+                    usePlatformFees ? platFormFlatFee : new decimal?(),
+                    usePlatformFees ? platformPercentFee : new decimal?(),
+                    convenienceFee,
+                    paymentTypeFee ?? 0,
+                    subscriptionPaymentHistory.StripeChargeId,
+                    subscriptionSchedule.Description,
+                    DateTime.UtcNow,
+                    useConnectedAccount,
+                    null,
+                    null,
+                    null,
+                    msgs,
+                    dc);
+
+                    if (msgs.HasNoErrors())
+                    
                         EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);
+                    else
+                        msgs.Add("Error creating Transaction record", MessageType.Error);
                 }
                 else
-                    msgs.Add("Error creating Transaction record", MessageType.Error);
+                    checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
             }
             return msgs;
         }
+
 
         private static void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule)
         {
             // was first payment 
             if (subscriptionSchedule.PaymentsDone.Equals(1))
                 subscriptionSchedule.NextBillDate = subscriptionSchedule.FirstRenewal;
-
             //was last payment
             else if (subscriptionSchedule.NextBillDate.Value.Date.Equals(subscriptionSchedule.LastDateToBill.Value.Date))
             {
@@ -396,7 +397,6 @@ namespace AfterSchoolLibrary.Services
                 subscriptionSchedule.DateCancelled = subscriptionSchedule.LastDateToBill;
                 subscriptionSchedule.CancelledReason = "Subscription Completed";
             }
-
             else
                 subscriptionSchedule.NextBillDate = new SubscriptionPlan
                 {
