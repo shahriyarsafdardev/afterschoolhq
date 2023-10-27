@@ -182,7 +182,7 @@ namespace AfterSchoolLibrary.Services
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
-            var startDateTime = submittedRecord.GetPlanStartDateUtc(plan, checkoutObject.ParticipationObject, msgs, dc).Date;
+            var startDateTime = SubscriptionScheduleService.GetSubscriptionStartDate(activity); 
             var endDateTime = new DateTime?();
             var lastDateToBill = new DateTime?();
             var nextBillDate = new DateTime();

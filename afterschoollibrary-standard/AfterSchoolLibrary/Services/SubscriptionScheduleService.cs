@@ -408,5 +408,20 @@ namespace AfterSchoolLibrary.Services
                     BillingPeriodTypeId = subscriptionSchedule.BillingPeriodType
                 }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
         }
+
+        public static DateTime GetSubscriptionStartDate(Activity activity)
+        {
+            var plan = activity.GetSubscriptionPlan();
+            var schedule = activity.GetSchedule(); 
+            var today = DateTime.UtcNow.Date;
+
+            return plan.PaymentStartTypeId switch
+            {
+                PlanPaymentStartType.WhenActivityStarts => schedule.IsNotEmpty() && schedule.StartDate.Value.IsAfter(today) ? schedule.StartDate.Value.Date : today ,
+                PlanPaymentStartType.OnPeriodStart => plan.StartDate.HasValue && plan.StartDate.Value.IsAfter(today) ? plan.StartDate.Value.Date : today ,
+                _ => today
+            };
+        }
     }
 }
+
