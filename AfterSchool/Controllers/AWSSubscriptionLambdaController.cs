@@ -137,9 +137,9 @@ namespace AfterSchool.Controllers
 
             var webhookPayload = new WebhookPayload
             {
-                PaymentHistory = subscriptionPaymentHistory,
-                Schedule = schedule,
-                Charge = charge,
+                PaymentHistoryUid = subscriptionPaymentHistory.Uid,
+                ScheduleUid = schedule.Uid,
+                ChargeId = charge.Id,
             };
 
             var jsonPayload = JsonConvert.SerializeObject(webhookPayload);
@@ -227,9 +227,9 @@ namespace AfterSchool.Controllers
 
         public class WebhookPayload
         {
-            public SubscriptionPaymentHistory PaymentHistory { get; set; }
-            public SubscriptionSchedule Schedule { get; set; }
-            public Charge Charge { get; set; }
+            public Guid PaymentHistoryUid { get; set; }
+            public Guid ScheduleUid { get; set; }
+            public String ChargeId { get; set; }
         }
     }
 }
