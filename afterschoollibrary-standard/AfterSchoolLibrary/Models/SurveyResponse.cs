@@ -308,7 +308,9 @@ namespace AfterSchoolLibrary.Models
                 sql += @$"
                 where 
                     SurveyResponse.SurveyRequestId = {formId} and
-                    SurveyResponse.SurveyFeedbackStatusTypeId = 3";
+                    SurveyResponse.SurveyFeedbackStatusTypeId = 3 and
+                    SurveyResponse.IsDeleted = 0";
+
             }
 
             if (search.IsNotEmpty())
