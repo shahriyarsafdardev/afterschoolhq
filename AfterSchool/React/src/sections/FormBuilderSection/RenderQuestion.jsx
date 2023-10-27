@@ -142,6 +142,52 @@ const RenderQuestion = ({
     return updatedSetting;
   };
 
+  const setShow = () => {
+    const updatedQuestion = { ...question };
+
+    if (formType === formTypeId.volunteerForm)
+      updatedQuestion.QuestionSettings = [{ ...updatedVolunteerSetting('show') }];
+    else {
+      if (question.IsActive) updatedQuestion.IsRequired = false;
+      updatedQuestion.IsActive = !question.IsActive;
+    }
+    setQuestion(updatedQuestion);
+  };
+
+  const setRequire = () => {
+    const updatedQuestion = { ...question };
+
+    if (formType === formTypeId.volunteerForm)
+      updatedQuestion.QuestionSettings = [{ ...updatedVolunteerSetting('required') }];
+    else {
+      if (!question.IsRequired) updatedQuestion.IsActive = true;
+      updatedQuestion.IsRequired = !question.IsRequired;
+    }
+
+    setQuestion(updatedQuestion);
+  };
+
+  function questionSettings(showValue, requireValue) {
+    return (
+      <>
+        <LabeledCheckBox
+          setFieldValue={setShow}
+          dataTestId={`showCheckboxOfQuestion-${ID}-${index}`}
+          value={showValue}
+          disabled={IsLocked}
+          label="Show"
+        />
+        <LabeledCheckBox
+          setFieldValue={setRequire}
+          dataTestId={`requireCheckboxOfQuestion-${ID}-${index}`}
+          value={requireValue}
+          disabled={IsLocked}
+          label="Require"
+        />
+      </>
+    );
+  }
+
   return (
     <ClickAwayListener onClickAway={() => setShowOptionsList(false)}>
       <Box className={classes.question} onClick={() => setShowOptionsList(true)}>
@@ -189,7 +235,7 @@ const RenderQuestion = ({
             </Grid>
             <Grid lg={1}></Grid>
             <>
-              {formType !== 3 ? (
+              {formType === formTypeId.studentForm ? (
                 <Grid item lg={11} md={8} sm={6} xs={6} className={cs(classes.audienceWrapper)}>
                   <Grid item lg={2} md={5} sm={12} xs={12} className={classes.positionRelative}>
                     <Button
@@ -231,30 +277,9 @@ const RenderQuestion = ({
                 </Grid>
               ) : (
                 <Grid item lg={3} md={3} sm={4} xs={7} className={cs(classes.audienceWrapper)}>
-                  <LabeledCheckBox
-                    setFieldValue={() =>
-                      setQuestion({
-                        ...question,
-                        QuestionSettings: [{ ...updatedVolunteerSetting('show') }]
-                      })
-                    }
-                    dataTestId={`showCheckboxOfQuestion-${ID}-${index}`}
-                    value={volunteerQS?.Show}
-                    disabled={IsLocked}
-                    label="Show"
-                  />
-                  <LabeledCheckBox
-                    setFieldValue={() =>
-                      setQuestion({
-                        ...question,
-                        QuestionSettings: [{ ...updatedVolunteerSetting('required') }]
-                      })
-                    }
-                    dataTestId={`requireCheckboxOfQuestion-${ID}-${index}`}
-                    value={volunteerQS?.Required}
-                    disabled={IsLocked}
-                    label="Require"
-                  />
+                  {formType === formTypeId.volunteerForm
+                    ? questionSettings(volunteerQS?.Show, volunteerQS?.Required)
+                    : questionSettings(question?.IsActive, question?.IsRequired)}
                 </Grid>
               )}
             </>
@@ -319,7 +344,16 @@ const RenderQuestion = ({
               />
               <Box>
                 <LabeledCheckBox
-                  setFieldValue={() => setQuestion({ ...question, IsActive: !question?.IsActive })}
+                  setFieldValue={() => {
+                    if (!question?.IsActive) {
+                      setQuestion({ ...question, IsActive: !question?.IsActive });
+                    } else
+                      setQuestion({
+                        ...question,
+                        IsActive: false,
+                        IsRequired: false
+                      });
+                  }}
                   dataTestId={`hideCheckboxOfQuestion-${ID}-${index}`}
                   value={!question?.IsActive}
                   disabled={IsLocked}
