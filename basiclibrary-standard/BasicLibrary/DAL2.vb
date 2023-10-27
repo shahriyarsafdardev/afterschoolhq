@@ -1,4 +1,4 @@
-﻿Option Strict On
+Option Strict On
 
 Imports System.Collections
 Imports System.Collections.Generic
@@ -1364,8 +1364,73 @@ Namespace DataAccess
                     End Select
 
                 End If
-                End If
+            End If
         End Sub
+
+        Public Function ExecuteSelectWithParameters(ByVal sql As String, parameters As Dictionary(Of String, Object), ByVal msgs As SystemMessages) As DataTable
+            Dim closeConnection As Boolean
+            Dim dt As DataTable = Nothing
+            Dim daSql As SqlDataAdapter = Nothing
+
+            If msgs Is Nothing Then
+                msgs = New SystemMessages()
+            End If
+
+            If Connection Is Nothing Then
+                Connection = New DatabaseConnection(BasicLibrary.Utilities.ConnectionString)
+                isSelfCreatedConnection = True
+            End If
+
+            closeConnection = Not Connection.IsOpen
+
+            Try
+                If SelectRange.Start.HasValue And SelectRange.Length.HasValue Then
+                    hasSelectRange = True
+                End If
+
+                Connection.Open()
+
+                dt = New DataTable
+
+                Connection.CreateSqlCommand(sql.ToString)
+                If Timeout.HasValue Then
+                    Connection.GetSqlCommand.CommandTimeout = Timeout.Value
+                End If
+
+                For Each parameter In parameters
+                    Connection.GetSqlCommand.Parameters.AddWithValue(parameter.Key, parameter.Value)
+                Next
+
+                daSql = New SqlDataAdapter(Connection.GetSqlCommand)
+                If hasSelectRange Then
+                    daSql.Fill(SelectRange.Start.Value, SelectRange.Length.Value, dt)
+                Else
+                    daSql.Fill(dt)
+                End If
+
+            Catch ex As Exception
+
+                msgs.Add(ex.Message, MessageType.Error, ex)
+
+            Finally
+                If DebugMode Then
+                    msgs.Add(sql.ToString(), MessageType.Notice)
+                End If
+
+                If daSql IsNot Nothing Then
+                    daSql.Dispose()
+                End If
+
+                If closeConnection Then
+                    Connection.Close()
+                    If isSelfCreatedConnection Then
+                        Connection.Dispose()
+                    End If
+                End If
+            End Try
+
+            Return dt
+        End Function
 
         Private Sub AddParameter(ByRef command As SqlCommand, ByVal parameterValue As DatabaseParameterValue)
             If parameterValue.Value Is Nothing Then
