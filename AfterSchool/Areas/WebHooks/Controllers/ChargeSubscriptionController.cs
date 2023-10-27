@@ -30,9 +30,10 @@ namespace AfterSchool.Areas.WebHooks.Controllers
                 var serializedJson = JsonConvert.SerializeObject(json);
                 WebhookPayload webhookPayload = JsonConvert.DeserializeObject<WebhookPayload>(serializedJson);
 
-                var subscriptionPaymentHistory = webhookPayload.PaymentHistory;
-                var subscriptionSchedule = webhookPayload.Schedule;
-                var charge = webhookPayload.Charge;
+                var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadByUid(webhookPayload.PaymentHistoryUid, msgs);
+                var subscriptionSchedule = SubscriptionSchedule.LoadByUid(webhookPayload.ScheduleUid, msgs);
+                var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(webhookPayload.ChargeId, msgs);
+
                 var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
 
                 ChargePendingToday(charge, subscriptionSchedule, subscriptionPaymentHistory, msgs, null);
