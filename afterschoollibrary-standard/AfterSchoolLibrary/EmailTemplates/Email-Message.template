@@ -63,7 +63,7 @@
         @Model.body   
         <p class="more-info">
             For more information, feel free to reach <strong>@Model.activityName</strong> via <strong>
-                <a style="color: black;" href="@Model.email">email</a> or <a style="color: black;" href="#">@Model.contactPhone</a></strong>
+                <a style="color: black;" href="mailto:@Model.email">email</a> or <a style="color: black;" href="#">@Model.contactPhone</a></strong>
         </p>
     </body>
 </div>
