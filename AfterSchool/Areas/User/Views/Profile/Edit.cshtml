@@ -35,37 +35,32 @@
             </div>
             <form method="post" action="@Url.Action("edit", "profile")" class="form-horizontal">
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">First Name</label>
                         <input type="text" class="form-control" id="firstname" name="firstname" value="@Model.FirstName" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">Last Name</label>
                         <input type="text" class="form-control" id="lastname" name="lastname" value="@Model.LastName" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="@Model.Email" onfocus="this.select()" required />
                     </div>
                 </div>
                 <div class="form-group hide">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">Username</label>
                         <input type="text" class="form-control" id="username" name="username" value="@Model.Username" onfocus="this.select()" required readonly="readonly" />
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <div>
                             <label class="text-bold">
                                 Opt-in to Provider Text Messages?
@@ -95,16 +90,14 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">Password</label>
                         <input type="password" id="password1" name="password1" class="form-control" onkeyup="checkStrength();" onfocus="this.select()" />
                         @Html.Partial("_PasswordStrengthBarLight")
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-sm-3"></div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 col-md-offset-3">
                         <label class="text-bold">Verify Password</label>
                         <input type="password" class="form-control" id="password2" name="password2" value="" onfocus="this.select()" />
                     </div>
