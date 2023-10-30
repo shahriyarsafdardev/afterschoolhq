@@ -112,8 +112,8 @@ namespace AfterSchool.Areas.Org.Controllers
                 {
                     activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
                         .Select(y => y.ID.Value));
-                    var y = x.GetActivities(null, false, false, null, null, msgs: msgs);
-                    foreach (var act in y)
+                    var groupActivities = x.GetActivities(null, false, false, null, null, msgs: msgs);
+                    foreach (var act in groupActivities)
                     {
                         if (!act.HasSchedule && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
                         {
