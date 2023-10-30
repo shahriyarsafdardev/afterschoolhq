@@ -1,4 +1,4 @@
-﻿@model List<Registration>
+@model List<Registration>
 @{ 
     var navAction = ViewData["NavAction"].ToString();
     var navController = ViewData["NavController"].ToString();
@@ -72,9 +72,9 @@
             }
             else
             {
-                <tr>
-                    <td colspan="7">There are no @UILabel.RegistrantLabel(true).ToLower()</td>
-                </tr>
+        <tr>
+            <td colspan="7">There are no  @(isVolunteerList ? UILabel.RegistrantLabel(ActivityType.VolunteerOpportunity, true).ToLower() : UILabel.RegistrantLabel(true).ToLower())</td>
+        </tr>
             }
         </tbody>
 
