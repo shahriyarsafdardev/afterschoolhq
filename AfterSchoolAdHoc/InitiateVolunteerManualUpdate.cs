@@ -453,28 +453,36 @@ namespace AfterSchoolAdHoc
         {
             var account = Account.LoadByOwnerId(webUser.ID.Value, msgs, dc).FirstOrDefault();
             var registrants = webUser.GetAllVolunteerRegistrants(msgs, dc);
-            registrants.ForEach(registrant =>
-            {
-                if (!registrant.IsMaster)
+            Database.ExecuteTransaction(
+                (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    var registration = registrant.GetRegistrations(msgs, dc).FirstOrDefault();
-                    var registrantActivity = registrant.GetRegistrantActivity(msgs, dc);
-                    if (registration.IsNotEmpty())
-                        msgs.AddRange(registration.Delete(dc));
-                    if (registrantActivity.IsNotEmpty() && msgs.HasNoErrors())
-                        msgs.AddRange(registrantActivity.Delete(dc));
-                }
+                    registrants.ForEach(registrant =>
+                    {
+                        if (!registrant.IsMaster)
+                        {
+                            var registration = registrant.GetRegistrations(amsgs, adc).FirstOrDefault();
+                            var registrantActivity = registrant.GetRegistrantActivity(amsgs, adc);
+                            if (registration.IsNotEmpty())
+                                amsgs.AddRange(registration.Delete(adc));
+                            if (registrantActivity.IsNotEmpty() && amsgs.HasNoErrors())
+                                amsgs.AddRange(registrantActivity.Delete(adc));
+                        }
 
-                msgs.AddRange(registrant.Delete(dc));
-            });
-            if (volunteerApproval.IsNotEmpty() && msgs.HasNoErrors())
-                msgs.AddRange(volunteerApproval.Delete(dc));
-            if (backgroundCheck.IsNotEmpty() && msgs.HasNoErrors())
-                msgs.AddRange(backgroundCheck.Delete(dc));
-            if (account.IsNotEmpty() && msgs.HasNoErrors())
-                msgs.AddRange(account.Delete(dc));
-            if (webUser.IsNotEmpty() && msgs.HasNoErrors())
-                msgs.AddRange(webUser.Delete(dc));
+                        amsgs.AddRange(registrant.Delete(adc));
+                    });
+                    if (volunteerApproval.IsNotEmpty() && amsgs.HasNoErrors())
+                        amsgs.AddRange(volunteerApproval.Delete(adc));
+                    if (backgroundCheck.IsNotEmpty() && amsgs.HasNoErrors())
+                        amsgs.AddRange(backgroundCheck.Delete(adc));
+                    if (account.IsNotEmpty() && amsgs.HasNoErrors())
+                        amsgs.AddRange(account.Delete(adc));
+                    if (webUser.IsNotEmpty() && amsgs.HasNoErrors())
+                        amsgs.AddRange(webUser.Delete(adc));
+                },
+                (SystemMessages smsgs) => msgs.AddRange(smsgs),
+                (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                (SystemMessages emsgs) => AfterSchoolLibrary.Helpers.Utilities.SystemErrorLog(emsgs),
+                dc);
         }
         private static bool IsBackgroundCheckExpired(BackgroundCheck bgCheck, SterlingToken sToken, SterlingCredentials credentials)
         {

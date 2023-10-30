@@ -349,7 +349,8 @@ namespace AfterSchoolLibrary.Services
         
         public static List<Registrant> GetAllVolunteerRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
-            return Registrant.LoadByWebUserIdByIsDeleted(user.ID.Value,false, msgs, dc);
+            return Registrant.LoadByWebUserIdByIsDeleted(user.ID.Value,false, msgs, dc)
+                .Where(x => x.PersonTypeId == RegistrantPersonType.Volunteer).ToList();
         }
 
         public static List<Registrant> GetStudentRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
