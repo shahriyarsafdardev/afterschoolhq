@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Helpers.GoogleHelper
+@using AfterSchoolLibrary.Helpers.GoogleHelper
 @model Account
 @{
     Layout = "~/Views/Shared/_LayoutRegistration.cshtml";
@@ -650,16 +650,15 @@
     }
 
     function validateYouTubeVideoUrl(url) {
-        let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        let regExp = /(?:youtu\.be\/|v=|\/embed\/|\/shorts\/|\/watch\?v=)([^#\&\?]+)(?:&|$)/;
         let match = url.match(regExp);
 
-        if (match && match[2] && match[2].length === 11) {
-            return match[2];
+        if (match && match[1] && match[1].length === 11) {
+            return match[1];
         }
 
         return false;
     }
-
     function validateVimeoUrl(url) {
         let regExp = /(http|https)?:\/\/(www\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|)(\d+)(?:|\/\?)/;
         let match = url.match(regExp);
