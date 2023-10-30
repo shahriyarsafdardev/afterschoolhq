@@ -186,6 +186,7 @@ namespace AfterSchoolLibrary.Services
             var endDateTime = new DateTime?();
             var lastDateToBill = new DateTime?();
             var nextBillDate = new DateTime();
+            var providerDatetimeNow = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
 
             endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
@@ -258,7 +259,7 @@ namespace AfterSchoolLibrary.Services
             else
                 endDateTime = null;
 
-            if (startDateTime.Date.IsAfter(DateTime.UtcNow.Date))
+            if (startDateTime.Date.IsAfter(providerDatetimeNow))
                 nextBillDate = startDateTime;
             else
                 nextBillDate = firstRenewalDate;
@@ -293,7 +294,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
 
             //run first charge 
-            if(startDateTime.Date.IsOnOrBefore(DateTime.UtcNow.Date))
+            if(startDateTime.Date.IsOnOrBefore(providerDatetimeNow)
             {
                 metaData["PaymentNumber"] = "1"; //as it will be first payment
 
@@ -321,7 +322,7 @@ namespace AfterSchoolLibrary.Services
                     var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
                     var amountToStripe = StripeHelper.CalculateStripeFee(charge.Amount, billingAccount.IsCreditCardFeeTakenOutOfCost);
 
-                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount , DateTime.UtcNow.Date,
+                    var subscriptionPaymentHistory = SubscriptionPaymentHistoryService.CreateNew(subscriptionSchedule.ID.Value, charge.Amount, providerDatetimeNow,
                                 charge.Id, plan.ProrateFirstCharge?? false, chargeStatus, charge.StripeResponse.ToString(), amountToConnect, amountToStripe, 0, msgs);
 
                     if(subscriptionPaymentHistory.IsEmpty())
