@@ -3488,7 +3488,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            var account = activity.GetAccount();
+            var account = activity.GetAccount(msgs);
             var checkInOutAttendanceRegistrants = new List<CheckInOut>();
             var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
 
@@ -3520,11 +3520,11 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var attendanceRegistrants = AttendanceRegistrant.LoadByActivityId(activity.ID.Value, msgs);
             var checkInOutAttendanceRegistrants = new List<CheckInOut>();
-            var account = activity.GetAccount();
+            var account = activity.GetAccount(msgs);
 
             var table = new List<List<string>>();
 
-            List<string> row;
+            var row = new List<string>();
             if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
             {
                 row = new List<string>
@@ -3559,8 +3559,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             foreach (var attendanceRegistrant in attendanceRegistrants)
             {
-                string checkInTime = null;
-                string checkOutTime = null;
+                var checkInTime = "";
+                var checkOutTime = "";
 
                 if (account.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && activity.IsRequireCheckInCheckOut)
                 {
@@ -3571,14 +3571,12 @@ namespace AfterSchool.Areas.Org.Controllers
                     var checkOut = checkInOutAttendanceRegistrants
                         .Where(x => x.AttendanceRegistrantId == attendanceRegistrant.ID && x.CheckType == CheckType.CheckOut)
                         .LastOrDefault();
+                    
+                    if (checkIn.IsNotEmpty())
+                        checkInTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkIn.Date).ToShortTimeString();
 
-                    checkInTime = checkIn != null
-                        ? SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkIn.Date).ToShortTimeString()
-                        : "";
-
-                    checkOutTime = checkOut != null
-                        ? SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkOut.Date).ToShortTimeString()
-                        : "";
+                    if (checkOut.IsNotEmpty())
+                        checkOutTime = SessionVariables.CurrentAccount.ConvertToAccountTimeZone(checkOut.Date).ToShortTimeString();
                 }
 
                 row = new List<string>
