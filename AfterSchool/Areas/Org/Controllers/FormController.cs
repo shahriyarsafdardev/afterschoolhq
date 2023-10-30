@@ -188,6 +188,20 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (formtype.IsNotBlank()) form.FormTypeId = (FormType) formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
+                        if (amsgs.HasNoErrors())
+                        {
+                            SessionVariables.WebSession.LogActivity(
+                                account: currentAccount,
+                                actor: currentUser,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Form,
+                                objectId: form.ID.Value,
+                                objectText: form.Name,
+                                indirectObjectType: ObjectType.Account,
+                                indirectObjectId: currentAccount.ID.Value,
+                                indirectObjectText: currentAccount.Name
+                            );
+                        }
 
                         if (qg.IsNumber())
                         {

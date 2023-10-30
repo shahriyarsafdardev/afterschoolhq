@@ -176,15 +176,42 @@ namespace AfterSchool.Areas.Api.Controllers
                                  )
                                 )
                             {
+                                var previousQuestionGroupName = currentQuestionGroup.Name;
                                 currentQuestionGroup.Name = formQuestionGroup.Name;
                                 currentQuestionGroup.IsDeleted = formQuestionGroup.IsDeleted ?? false;
                                 currentQuestionGroup.LastModifiedBy = currentUser.ID;
                                 currentQuestionGroup.LastModifiedDate = DateTime.UtcNow;
                                 amsgs.AddRange(currentQuestionGroup.Save(adc));
+                                if (amsgs.HasNoErrors())
+                                {
+                                    SessionVariables.WebSession.LogActivity(
+                                        account: currentAccount,
+                                        actor: currentUser,
+                                        actionType: WebSessionActionType.Updated,
+                                        objectType: ObjectType.FormQuestionGroup,
+                                        objectId: currentQuestionGroup.ID.Value,
+                                        objectText: $"From {previousQuestionGroupName} To {formQuestionGroup.Name}",
+                                        indirectObjectType: ObjectType.Form,
+                                        indirectObjectId: requestedForm.ID.Value,
+                                        indirectObjectText: requestedForm.Name
+                                    );
+                                }
                             }
                             prevQuestions = currentQuestionGroup.GetAllQuestions(amsgs, adc).Where(question => !question.IsDeleted).ToList();
                             formQuestion.ForEach(newQuestion =>
                             {
+                                if(newQuestion.IsDeleted)
+                                    SessionVariables.WebSession.LogActivity(
+                                            account: currentAccount,
+                                            actor: currentUser,
+                                            actionType: WebSessionActionType.Deleted,
+                                            objectType: ObjectType.FormQuestion,
+                                            objectId: newQuestion.ID,
+                                            objectText: $"Question Name: {newQuestion.Text}",
+                                            indirectObjectType: ObjectType.FormQuestionGroup,
+                                            indirectObjectId: currentQuestionGroup.ID.Value,
+                                            indirectObjectText: formQuestionGroup.Name
+                                        );
                                 var existingQuestion = prevQuestions.FirstOrDefault(question => question.ID == newQuestion.ID);
                                 if (existingQuestion.IsNotEmpty())
                                 {
@@ -243,30 +270,85 @@ namespace AfterSchool.Areas.Api.Controllers
                                         newFormQuestion.Description = newQuestion.Text;
                                     }
                                     amsgs.AddRange(newFormQuestion.Save(adc));
+                                    if (amsgs.HasNoErrors())
+                                    {
+                                        SessionVariables.WebSession.LogActivity(
+                                            account: currentAccount,
+                                            actor: currentUser,
+                                            actionType: WebSessionActionType.Added,
+                                            objectType: ObjectType.FormQuestion,
+                                            objectId: newFormQuestion.ID,
+                                            objectText:$"Question Name: {newQuestion.Text}",
+                                            indirectObjectType: ObjectType.FormQuestionGroup,
+                                            indirectObjectId: currentQuestionGroup.ID.Value,
+                                            indirectObjectText: formQuestionGroup.Name
+                                        );
+                                    }
                                     newQuestion.ID = newFormQuestion.ID??0;
                                 }
                                 var prevSettingsList = FormQuestionSettings.LoadByQuestionIds(newQuestion.ID, amsgs, adc);
+                                var newSettingsList = new List<FormQuestionSettings>();
                                 if (prevSettingsList.Count > 0)
-                                    prevSettingsList.ForEach(setting => amsgs.AddRange(setting.Delete(adc)));
-                                newQuestion.QuestionSettings.ForEach(setting =>
-                                {
-                                    if (!newQuestion.IsLocked)
+                                    newQuestion.QuestionSettings.ForEach(setting =>
                                     {
-                                        var questionSetting = new FormQuestionSettings()
+                                        if (!newQuestion.IsLocked)
                                         {
-                                            QuestionId = newQuestion.ID,
-                                            Audience = setting.Audience,
-                                            Show = setting.Show,
-                                            Required = setting.Required,
-                                            CreateDate = DateTime.UtcNow,
-                                            LastModifiedDate = DateTime.UtcNow,
-                                            CreatedBy = currentUser.ID,
-                                            LastModifiedBy = currentUser.ID,
-                                        };
-                                        amsgs.AddRange(questionSetting.Save(adc));
+                                            var questionSetting = new FormQuestionSettings()
+                                            {
+                                                QuestionId = newQuestion.ID,
+                                                Audience = setting.Audience,
+                                                Show = setting.Show,
+                                                Required = setting.Required,
+                                                CreateDate = DateTime.UtcNow,
+                                                LastModifiedDate = DateTime.UtcNow,
+                                                CreatedBy = currentUser.ID,
+                                                LastModifiedBy = currentUser.ID,
+                                            };
+                                            newSettingsList.Add(questionSetting);
+                                        }
+                                    });
+                                if (prevSettingsList.Count > 0)
+                                {
+                                    if (newSettingsList.IsNotEmpty() && newSettingsList.Any())
+                                    {
+                                        prevSettingsList
+                                            .Where(previousQuestionSetting => prevSettingsList.Any(newQuestionSetting => newQuestionSetting.Audience == previousQuestionSetting.Audience))
+                                            .ToList()
+                                            .ForEach(previousQuestionSetting =>
+                                            {
+                                                var newQuestionSetting = newSettingsList.First(x => x.Audience == previousQuestionSetting.Audience);
+                                                if (previousQuestionSetting.Show != newQuestionSetting.Show)
+                                                    SessionVariables.WebSession.LogActivity(
+                                                            account: currentAccount,
+                                                            actor: currentUser,
+                                                            actionType: WebSessionActionType.Updated,
+                                                            objectType: ObjectType.FormQuestion,
+                                                            objectId: newQuestion.ID,
+                                                            objectText: $" Having ID: {newQuestion.ID} -> Show: {newQuestionSetting.Show} FOR Audience: {newQuestionSetting.Audience}",
+                                                            indirectObjectType: ObjectType.FormQuestionGroup,
+                                                            indirectObjectId: currentQuestionGroup.ID.Value,
+                                                            indirectObjectText: formQuestionGroup.Name
+                                                        ); 
+                                                if (previousQuestionSetting.Required != newQuestionSetting.Required)
+                                                    SessionVariables.WebSession.LogActivity(
+                                                            account: currentAccount,
+                                                            actor: currentUser,
+                                                            actionType: WebSessionActionType.Updated,
+                                                            objectType: ObjectType.FormQuestion,
+                                                            objectId: newQuestion.ID,
+                                                            objectText: $" Having ID: {newQuestion.ID} -> Required: {newQuestionSetting.Required} FOR Audience: {newQuestionSetting.Audience}",
+                                                            indirectObjectType: ObjectType.FormQuestionGroup,
+                                                            indirectObjectId: currentQuestionGroup.ID.Value,
+                                                            indirectObjectText: formQuestionGroup.Name
+                                                        );
+                                            });
                                     }
+                                }
+                                prevSettingsList.ForEach(setting => amsgs.AddRange(setting.Delete(adc)));
+                                newSettingsList.ForEach(setting =>
+                                {
+                                    amsgs.AddRange(setting.Save(adc));
                                 });
-
                             });
                         }
                         else
@@ -338,7 +420,21 @@ namespace AfterSchool.Areas.Api.Controllers
                             };
                             amsgs.AddRange(newQuestionGroup.Save(adc));
                             if (amsgs.HasNoErrors())
+                            {
                                 newSection = FormQuestionGroupDto.MapToDto(newQuestionGroup);
+                                SessionVariables.WebSession.LogActivity(
+                                    account: currentAccount,
+                                    actor: currentUser,
+                                    actionType: WebSessionActionType.Added,
+                                    objectType: ObjectType.FormQuestionGroup,
+                                    objectId: newQuestionGroup.ID.Value,
+                                    objectText: formQuestionGroup.Name,
+                                    indirectObjectType: ObjectType.Form,
+                                    indirectObjectId: requestedForm.ID.Value,
+                                    indirectObjectText: requestedForm.Name
+                                );
+                            }
+                                
                         }
                         else
                             throw new Exception("Section with same name already exists");
