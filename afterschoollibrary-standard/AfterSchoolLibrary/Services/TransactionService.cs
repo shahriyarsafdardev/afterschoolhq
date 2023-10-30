@@ -553,7 +553,10 @@ namespace AfterSchoolLibrary.Services
 
             if (transaction.CouponId.HasValue && !hasRefundableAmount)
                 return "100% Coupon Applied";
-            
+
+            if (transaction.TransactionTypeId.Equals(TransactionType.Charge) && transaction.Amount < 0)
+                return "Failed";
+
             if (!hasRefundableAmount)
                 return "Refunded";
 

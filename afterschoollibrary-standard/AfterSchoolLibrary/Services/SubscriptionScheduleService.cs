@@ -267,12 +267,9 @@ namespace AfterSchoolLibrary.Services
                 registrant.ID.Value, msgs);
             var registration = registrantActivity.GetRegistration(msgs);
 
-            Account convenienceFeePayer;
-            Account creditCardFeePayer;
+            var creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : purchasingAccount;
 
-            creditCardFeePayer = billingAccount.IsCreditCardFeeTakenOutOfCost ? billingAccount : purchasingAccount;
-
-            convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost
+            var convenienceFeePayer = billingAccount.IsConvenienceFeeTakenOutOfCost
                    ? billingAccount
                    : purchasingAccount;
 
@@ -281,17 +278,12 @@ namespace AfterSchoolLibrary.Services
             var platFormFlatFee = (!participationObject.IsRegistrationFree) ? billingAccount.GetPlatformConvenienceFlatFee(msgs, dc) : 0;
             var platformPercentFee = billingAccount.GetPlatformConveniencePercentFee(msgs, dc);
 
-            var stripeSubscription = StripeHelper.GetStripeHelperConnectAccount().GetSubscription(rsp.StripeSubscriptionId, msgs);
-            var stripePrice = stripeSubscription.Items.FirstOrDefault(item => item.Price.IsNotEmpty()).Price;
-            var stripeSubscriptionPrice = (decimal) stripePrice.UnitAmount / 100;
-
             var paymentType = rsp.PaymentTypeId;
             var isAmountProrated = subscriptionPaymentHistory.ProratedCharge;
 
             // TODO: potentially problematic as the plan may have changed
             var convenienceFee = rsp.ConvenienceFee ?? plan.GetConvenienceFee(billingAccount, msgs);
             var paymentTypeFee = rsp.PaymentTypeFee.HasValue ? rsp.PaymentTypeFee : paymentType == PaymentType.CreditCard ? plan.GetCreditCardFee(billingAccount, msgs) : 0;
-            var calculatedFullCCFee = StripeHelper.CalculateStripeCCFeeOutOfTotalCost(stripeSubscriptionPrice);
 
             if (isAmountProrated)
             {
@@ -300,9 +292,6 @@ namespace AfterSchoolLibrary.Services
             }
 
             var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m;
-
-            if (paymentType == PaymentType.ACH)
-                stripeSubscriptionPrice -= calculatedFullCCFee;
 
             var amountReceivedByProvider = amountPaidByParent - (convenienceFee + paymentTypeFee);
 

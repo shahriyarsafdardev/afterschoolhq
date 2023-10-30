@@ -190,18 +190,18 @@ namespace AfterSchoolLibrary.Services
             endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
 
-            var stripeMetaData = new Dictionary<string, string>
-                            {
-                                {"BillingAccountUid", billingAccount.Uid.ToString()},
-                                {"BillingAccountName", billingAccount.Name},
-                                {"PayingAccountUid", purchasingAccount.Uid.ToString()},
-                                {"PayingAccountName", purchasingAccount.Name},
-                                {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
-                                {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
-                                {"SourceId", sourceId},
-                                {"ApprovedBy", loggedInUser.Uid.ToString()},
-                                {"DateRequested", DateTime.UtcNow.ToShortDateTimeString()},
-                            };
+            //var stripeMetaData = new Dictionary<string, string>
+            //                {
+            //                    {"BillingAccountUid", billingAccount.Uid.ToString()},
+            //                    {"BillingAccountName", billingAccount.Name},
+            //                    {"PayingAccountUid", purchasingAccount.Uid.ToString()},
+            //                    {"PayingAccountName", purchasingAccount.Name},
+            //                    {"ParticipationObjectType", checkoutObject.ParticipationObject.ObjectType.ToString()},
+            //                    {"ParticipationObjectName", checkoutObject.ParticipationObject.Name},
+            //                    {"SourceId", sourceId},
+            //                    {"ApprovedBy", loggedInUser.Uid.ToString()},
+            //                    {"DateRequested", DateTime.UtcNow.ToShortDateTimeString()},
+            //                };
 
             var platformFeePercent = useStripeConnectedAccount
                                         ? billingAccount.GetSubscriptionPlatformFeePercent(plan, checkoutObject.PaymentType, msgs, dc)
@@ -210,43 +210,43 @@ namespace AfterSchoolLibrary.Services
             // coupons don't apply during prorating period, but we still need to assign it to the subscription for full periods
             // ACH coupons don't need to apply during prorating either because stripe fixes the charges accordingly
             // TODO: Do we need ACH coupons? Yes apparently you still need it for the full month charges (odd)
-            var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
-            var anchorDate = new DateTime?();
-            var proratingCalculation = new ProratingCalculationHelper(plan, participationObject, billingAccount, checkoutObject.PaymentType, msgs, dc);
+            //var stripeCouponId = GetACHCoupon(checkoutObject, billingAccount, plan, null, msgs, dc);
+            //var anchorDate = new DateTime?();
+            //var proratingCalculation = new ProratingCalculationHelper(plan, participationObject, billingAccount, checkoutObject.PaymentType, msgs, dc);
 
-            if (proratingCalculation.GetIsProrated())
-            {
-                stripeMetaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
-                stripeMetaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
-                stripeMetaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
-                stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
-                stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
+            //if (proratingCalculation.GetIsProrated())
+            //{
+            //    stripeMetaData.Add("Prorated Charge With CC Fee", proratingCalculation.GetPredictedStripeCharge().ToCurrency());
+            //    stripeMetaData.Add("Prorated CC Fee", proratingCalculation.GetProratedCCFee().ToCurrency());
+            //    stripeMetaData.Add("Prorated Amount Without CC Fee", proratingCalculation.GetProratedAmountWithoutCCFee().ToCurrency());
+            //    stripeMetaData.Add("Prorated Convenience Fee", proratingCalculation.GetProratedConvenienceFee().ToCurrency());
+            //    stripeMetaData.Add("Prorated Amount Without Fees", proratingCalculation.GetProratedAmountWithoutFees().ToCurrency());
 
-                startDateTime = proratingCalculation.GetStartDate().Date;
+            //    startDateTime = proratingCalculation.GetStartDate().Date;
 
-                if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
-                    endDateTime = proratingCalculation.GetEndDate();
+            //    if(!participationObject.GetActivity().HasSchedule || (participationObject.GetActivity().HasSchedule ? !participationObject.Schedule.IsOngoing : true))
+            //        endDateTime = proratingCalculation.GetEndDate();
 
-                anchorDate = proratingCalculation.GetAnchorDate();               
-            }
+            //    anchorDate = proratingCalculation.GetAnchorDate();               
+            //}
 
             // create the subscription on the stripe account (could be added to main account or connected account)
-            var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
-                customerId: customer.Id,
-                planId: plan.StripePlanId,
-                isProrated: proratingCalculation.GetIsProrated(),
-                sourceId: sourceId,
-                platformFeePercent: platformFeePercent,
-                stripeAccountId: stripeAccountId,
-                startDate: startDateTime,
-                endDate: endDateTime,
-                billingCycleAnchor: anchorDate,
-                stripeCouponId: stripeCouponId,
-                metaData: stripeMetaData,
-                msgs: msgs);
+            //var subscription = StripeHelper.GetStripeHelperConnectAccount().CreateRegistrantSubscription(
+            //    customerId: customer.Id,
+            //    planId: plan.StripePlanId,
+            //    isProrated: proratingCalculation.GetIsProrated(),
+            //    sourceId: sourceId,
+            //    platformFeePercent: platformFeePercent,
+            //    stripeAccountId: stripeAccountId,
+            //    startDate: startDateTime,
+            //    endDate: endDateTime,
+            //    billingCycleAnchor: anchorDate,
+            //    stripeCouponId: stripeCouponId,
+            //    metaData: stripeMetaData,
+            //    msgs: msgs);
 
-            if (msgs.HasErrors())
-                return;
+            //if (msgs.HasErrors())
+            //    return;
 
             var purchase = checkoutObject.CreateOrUpdatePurchase(loggedInUser, msgs, dc);
             var feeObject = GetFeeObject(checkoutObject, billingAccount, plan, msgs, dc);
@@ -285,7 +285,7 @@ namespace AfterSchoolLibrary.Services
                 submittedRecord,
                 startDateTime,
                 purchase,
-                subscription.Id,
+                null,
                 subscriptionSchedule.Uid,
                 feeObject,
                 loggedInUser,
@@ -328,7 +328,7 @@ namespace AfterSchoolLibrary.Services
                         msgs.Add("Payment history record not created", MessageType.Error);
                 }
             }
-            checkoutObject.ProratingCalculation = proratingCalculation;
+            //checkoutObject.ProratingCalculation = proratingCalculation;
         }
 
         /// <summary>
