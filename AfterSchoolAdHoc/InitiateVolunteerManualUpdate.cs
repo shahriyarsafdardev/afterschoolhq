@@ -402,6 +402,80 @@ namespace AfterSchoolAdHoc
             });
             WriteVolunteerToCsv(matchedVolunteers,fileWritePath);
         }
+        
+        public static void VerifyAndRemoveExpiredImportedVolunteers(SterlingCredentials credentials, SystemMessages msgs, DatabaseConnection dc)
+        {
+            var importedVolunteers = ReadImportedVolunteersCsv($"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers_Latest_List.csv")
+                .Where(x => x.Status.ToLower() == "approved").ToList();
+            var fileWritePath = $"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
+            var matchedVolunteers = new List<VolunteerRecord>();
+            var count = 0;
+            var sToken = InititiateVolunteerBackgroundCheck.CreateSterlingToken(credentials);
+            importedVolunteers.ForEach(volunteer =>
+            {
+                var webUser = WebUser.LoadByEmail(volunteer.Email.Trim(),msgs,dc);
+                var expirationDate = volunteer.DateReviewed.Value.AddYears(1);
+                if (webUser.IsNotEmpty())
+                {
+                    var volunteerApproval = VolunteerApproval.LoadByWebUserId(webUser.ID.Value,msgs,dc).MaxBy(x => x.CreateDate);
+                    if (volunteerApproval.IsNotEmpty())
+                    {
+                        count++;
+                        Console.WriteLine($"Current Count is: {count}");
+                        var backgroundCheck = BackgroundCheck.LoadByWebUserId(webUser.ID.Value, true, msgs, dc).FirstOrDefault();
+                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && (backgroundCheck.IsEmpty() || 
+                                                                                        IsBackgroundCheckExpired(backgroundCheck,sToken,credentials)) &&
+                            (volunteerApproval.ExpirationDate == DateTime.UtcNow.ToString("07/01/2023").ToDateTime() ||
+                             volunteerApproval.ExpirationDate == expirationDate))
+                        {
+                            var volRecord = new VolunteerRecord
+                            {
+                                FirstName = webUser.FirstName,
+                                LastName = webUser.LastName,
+                                WebUserId = webUser.ID,
+                                Email = volunteer.Email,
+                                Status = volunteer.Status,
+                                DateReviewed = volunteer.DateReviewed,
+                                ExpirationDate = volunteerApproval.ExpirationDate,
+                            };
+                            matchedVolunteers.Add(volRecord);
+
+                            RemoveVolunteerAccount(webUser,volunteerApproval,backgroundCheck,msgs,dc);
+                        }
+                    }
+                }
+            });
+            WriteVolunteerToCsv(matchedVolunteers,fileWritePath);
+        }
+
+        private static void RemoveVolunteerAccount(WebUser webUser, VolunteerApproval volunteerApproval, BackgroundCheck? backgroundCheck,
+            SystemMessages msgs, DatabaseConnection dc)
+        {
+            var account = Account.LoadByOwnerId(webUser.ID.Value, msgs, dc).FirstOrDefault();
+            var registrants = webUser.GetAllVolunteerRegistrants(msgs, dc);
+            registrants.ForEach(registrant =>
+            {
+                if (!registrant.IsMaster)
+                {
+                    var registration = registrant.GetRegistrations(msgs, dc).FirstOrDefault();
+                    var registrantActivity = registrant.GetRegistrantActivity(msgs, dc);
+                    if (registration.IsNotEmpty())
+                        msgs.AddRange(registration.Delete(dc));
+                    if (registrantActivity.IsNotEmpty() && msgs.HasNoErrors())
+                        msgs.AddRange(registrantActivity.Delete(dc));
+                }
+
+                msgs.AddRange(registrant.Delete(dc));
+            });
+            if (volunteerApproval.IsNotEmpty() && msgs.HasNoErrors())
+                msgs.AddRange(volunteerApproval.Delete(dc));
+            if (backgroundCheck.IsNotEmpty() && msgs.HasNoErrors())
+                msgs.AddRange(backgroundCheck.Delete(dc));
+            if (account.IsNotEmpty() && msgs.HasNoErrors())
+                msgs.AddRange(account.Delete(dc));
+            if (webUser.IsNotEmpty() && msgs.HasNoErrors())
+                msgs.AddRange(webUser.Delete(dc));
+        }
         private static bool IsBackgroundCheckExpired(BackgroundCheck bgCheck, SterlingToken sToken, SterlingCredentials credentials)
         {
             if (bgCheck.IsNotEmpty())

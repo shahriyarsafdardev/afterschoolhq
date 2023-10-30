@@ -346,6 +346,11 @@ namespace AfterSchoolLibrary.Services
                 .Select(rwu => Registrant.Load(rwu.RegistrantId.Value, msgs, dc))
                 .ToList();
         }
+        
+        public static List<Registrant> GetAllVolunteerRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            return Registrant.LoadByWebUserIdByIsDeleted(user.ID.Value,false, msgs, dc);
+        }
 
         public static List<Registrant> GetStudentRegistrants(this WebUser user, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
