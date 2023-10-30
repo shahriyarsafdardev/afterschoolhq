@@ -268,7 +268,7 @@ namespace AfterSchoolLibrary.Helpers
         }
 
         public static List<KeyValuePair> GetKeyValuePairs(string s)
-        { 
+        {
             var data = new List<KeyValuePair>();
 
             if (s.IsEmpty() || (s.Trim().StartsWith("{") && !s.Trim().EndsWith("}")))
@@ -317,6 +317,22 @@ namespace AfterSchoolLibrary.Helpers
         public static bool IsSmartlookIdentifyEnabled(Account currentAccount, WebUser currentUser, WebUser originalLoggedInUser)
         {
             return IsProduction && currentAccount.IsNotEmpty() && currentAccount.AccountTypeId != AccountType.AfterSchool && currentUser.IsNotEmpty() && originalLoggedInUser.IsEmpty();
+        }
+
+
+        public static string CleanAndFormatPhoneNumber(string phoneNumber)
+        {
+            string cleanedNumber = Regex.Replace(phoneNumber, @"\D", "");
+
+            if (cleanedNumber.Length >= 10)
+            {
+                return string.Format("{0}-{1}-{2}",
+                    cleanedNumber.Substring(cleanedNumber.Length - 10, 3),
+                    cleanedNumber.Substring(cleanedNumber.Length - 7, 3),
+                    cleanedNumber.Substring(cleanedNumber.Length - 4, 4));
+            }
+
+            return phoneNumber;
         }
     }
 
@@ -381,7 +397,7 @@ namespace AfterSchoolLibrary.Helpers
             return
                 $"<p>Powered by <a href=\"{BaseUrl()}?utm_source={utm_source}&utm_medium={utm_medium}&utm_campaign={utm_campaign}\">{AppEmailFromName(isAfterSchool)}</a></p>";
         }
-        
+
         public static EmailAddress SendGridSalesEmailAddress => new EmailAddress(AppSalesEmailAddress);
     }
 

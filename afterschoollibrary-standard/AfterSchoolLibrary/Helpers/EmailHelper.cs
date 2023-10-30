@@ -750,7 +750,7 @@ namespace AfterSchoolLibrary.Helpers
             var masterRegistrant = checkoutObject.MasterRegistrant;
 
             if (customMessage.IsEmpty())
-                customMessage = "Thank you for registering ";
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
 
             var model = new NameValueCollection
             {
@@ -758,12 +758,13 @@ namespace AfterSchoolLibrary.Helpers
                 {"ProductName", Utilities.AppName(isAfterSchool)},
                 {"ActivityContactEmail", participationObject.ContactEmail},
                 {"ActivityContactPhone", participationObject.ContactPhone.IsNotEmpty() ? 
-                    $"either by phone ({participationObject.ContactPhone}) or": "by"},
+                    $"by phone ({Utilities.CleanAndFormatPhoneNumber(participationObject.ContactPhone)}) or": "by"},
                 {"ActivityContactName", participationObject.ContactName},
                 {"CustomMessage", customMessage},
                 {"ActivityName", participationObject.Name},
                 {"LoginLink", ""},
                 {"RegistrationDetails", ""},
+                {"LoginText", ""},
                 {"SplitPaymentSubscriptionInfo", ""},
                 {"RegistrationTable", ""},
                 {"YourRecepitText", ""},
@@ -909,6 +910,7 @@ namespace AfterSchoolLibrary.Helpers
             var subscription = checkoutObject.SubscriptionPlan;
             var postPayPlan = checkoutObject.PostPayPlan;
             var masterRegistrant = checkoutObject.MasterRegistrant;
+            var currentUserRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
             var parentOrGuardian = masterRegistrant.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
@@ -1271,7 +1273,8 @@ namespace AfterSchoolLibrary.Helpers
                     "Registration_Confirmation_Table-1.0",
                     msgs);
 
-            var registrationDetails = "Login to your account to view more details about this registration.";
+            var loginText = "Login";
+            var registrationDetails = "to your account to view more details about this registration.";
             var loginLink = Utilities.LoginUrl();
 
             if (isParentCopy && parentOrGuardian.IsNotEmpty())
@@ -1279,45 +1282,50 @@ namespace AfterSchoolLibrary.Helpers
                 var parentUser = parentOrGuardian.GetOwner(msgs, dc);
                 if (parentUser.IsNotEmpty() && !parentUser.IsRegistered)
                 {
-                    registrationDetails = "Create your account to review this registration.";
+                    loginText = "Create your account to review this registration.";
+                    registrationDetails = string.Empty;
                     loginLink = parentUser.GetInviteUrl(purchaserAccount);
                 }
             }
 
+            //if (customMessage.IsEmpty())
+            //{
+            //    customMessage = registrationThankYou;
+
+            //    if (customMessage == "Thank you for registering")
+            //        customMessage += ".";
+
+            //    if (customMessage.Contains("<p>Thank you for registering.</p>"))
+            //        customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
+
+            //    if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
+            //    {
+            //        var addClosingP = false;
+
+            //        if (customMessage.Contains("<p>"))
+            //        {
+            //            customMessage += "<p>";
+            //            addClosingP = true;
+            //        }
+
+            //        if (isParentCopy)
+            //            customMessage += $"{masterRegistrant.FirstName} has registered";
+            //        else if (loggedInUser.HasAccessTo(billingAccount))
+            //            customMessage =
+            //                $"{masterRegistrant.DisplayName} has been successfully registered by {loggedInUser.DisplayName}";
+            //        if (showTable)
+            //            customMessage += " for the following:";
+
+            //        if (addClosingP)
+            //            customMessage += "</p>";
+            //    }
+            //}
+
             if (customMessage.IsEmpty())
             {
-                customMessage = registrationThankYou;
-
-                if (customMessage == "Thank you for registering")
-                    customMessage += ".";
-
-                if (customMessage.Contains("<p>Thank you for registering.</p>"))
-                    customMessage = customMessage.Replace("<p>", "").Replace("</p>", "").Replace(".", "");
-
-                if (isParentCopy || loggedInUser.HasAccessTo(billingAccount))
-                {
-                    var addClosingP = false;
-
-                    if (customMessage.Contains("<p>"))
-                    {
-                        customMessage += "<p>";
-                        addClosingP = true;
-                    }
-
-                    if (isParentCopy)
-                        customMessage += $"{masterRegistrant.FirstName} has registered";
-                    else if (loggedInUser.HasAccessTo(billingAccount))
-                        customMessage +=
-                            $"{masterRegistrant.FirstName} has been registered by {loggedInUser.DisplayName} at {billingAccount.Name}";
-
-                    if (showTable)
-                        customMessage += " for the following:";
-                    else
-                        customMessage += ". ";
-
-                    if (addClosingP)
-                        customMessage += "</p>";
-                }
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    customMessage += $" by {currentUserRegistrant.DisplayName}";
             }
 
             var virtualInfo = "";
@@ -1345,6 +1353,8 @@ namespace AfterSchoolLibrary.Helpers
             if (isRegFree || (bool) participationObject?.AllowToPayLater || postPayPlan?.NumberOfPeriodsPrePaid == 0)
                 yourRecepitText = "";
 
+            var phoneNumber = Utilities.CleanAndFormatPhoneNumber(participationObject.ContactPhone.IfBlank(billingAccount.Phone));
+
             var model = new NameValueCollection
             {
                 {"FirstName", isParentCopy ? purchaser?.FirstName : loggedInUser.FirstName},
@@ -1352,12 +1362,13 @@ namespace AfterSchoolLibrary.Helpers
                 {"LoginLink", loginLink},
                 {"ActivityName", participationObject.Name},
                 {"ActivityContactEmail", participationObject.ContactEmail.IfBlank(billingAccount.Email)},
-                {"ActivityContactPhone", $"either by phone ({participationObject.ContactPhone.IfBlank(billingAccount.Phone)}) or"},
+                {"ActivityContactPhone", $"by phone ({phoneNumber}) or"},
                 {"ActivityContactName", participationObject.ContactName.IfBlank(billingAccount.Name)},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
                 {"CustomMessage", customMessage},
-                {"RegistrationDetails", registrationDetails},
+                {"LoginText", loginText},
+                {"RegistrationDetails", $"{registrationDetails}<p><br></p>"},
                 {"SubscriptionDetails", subscriptionDetails},
                 {"PaymentPlanDetails", paymentPlanDetails},
                 {"PostPlanDetails", postPayPlanDetails},
@@ -1639,6 +1650,7 @@ namespace AfterSchoolLibrary.Helpers
             var billingAccount = checkoutObject.BillingAccount;
             var billingAccountOwner = billingAccount.GetAccountOwner(msgs, dc);
             var masterRegistrant = checkoutObject.MasterRegistrant;
+            var currentUserRegistrant = loggedInUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
             var parentOrGuardian = masterRegistrant?.GetParentOrGuardian(msgs, dc);
             var canAccountAcceptPayments = billingAccount.CanProcessPayments(msgs, dc);
             var registration = checkoutObject.Registration;
@@ -1716,6 +1728,13 @@ namespace AfterSchoolLibrary.Helpers
                 "Registration_Confirmation_Table-1.0",
                 msgs);
 
+            if (customMessage.IsEmpty())
+            {
+                customMessage = $"{masterRegistrant.DisplayName} has been successfully registered";
+                if (currentUserRegistrant.PersonTypeId == RegistrantPersonType.Parent)
+                    customMessage += $" by {currentUserRegistrant.DisplayName}";
+            }
+
             var model = new NameValueCollection
             {
                 {"FirstName", purchaserWebuser.FirstName},
@@ -1724,16 +1743,17 @@ namespace AfterSchoolLibrary.Helpers
                 {"ActivityName", checkoutObject.ParticipationObject.Name},
                 {"ActivityContactEmail", billingAccount.Email},
                 {"ActivityContactPhone", billingAccount.Phone.IsNotEmpty() ? 
-                    $"either by phone ({billingAccount.Phone}) or": "by"},
+                    $"by phone ({Utilities.CleanAndFormatPhoneNumber(billingAccount.Phone)}) or": "by"},
                 {"ActivityContactName", billingAccount.Name},
                 {"BillerAccountName", billingAccount.Name},
                 {"BillerAccountLink", billingAccount.HomePageUrl},
                 {"AmountDueOrPaid", "Amount Paid"},
                 {"TotalCost", totalCostWithFees.ToCurrency()},
                 {"RegistrationTable", registrationTable},
-                {"CustomMessage", customMessage ?? "Thank you for registering"},
+                {"CustomMessage", customMessage},
                 {"CreditCardFee", checkoutObject.PaymentTypeFeeOverrideAmount.ToCurrency()},
-                {"RegistrationDetails", "Login to your account to view more details about this payment."},
+                {"LoginText", "Login"},
+                {"RegistrationDetails", "to your account to view more details about this payment.<p><br></p>"},
                 {"SubscriptionDetails", ""},
                 {"PaymentPlanDetails", ""},
                 {"PostPlanDetails", ""},
