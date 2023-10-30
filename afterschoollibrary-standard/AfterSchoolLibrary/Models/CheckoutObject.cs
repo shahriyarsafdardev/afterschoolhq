@@ -84,7 +84,7 @@ namespace AfterSchoolLibrary.Models
                     if (ParticipationObject.CanRegisterPerClass)
                         return $"{ParticipationObject.Name} Registration - {ClassQuantity} Classes";
                     else if (IsSubscriptionPayment.HasValue && (bool)IsSubscriptionPayment)
-                        return $" Subscription for {ParticipationObject.Name}";
+                        return $"Subscription for {ParticipationObject.Name}";
                     else
                         return $"{ParticipationObject.Name} Registration";
                 }

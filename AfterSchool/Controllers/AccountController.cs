@@ -2085,6 +2085,7 @@ namespace AfterSchool.Controllers
             var participationObject = RegistrationCommon.GetParticipationObjectFromCart();
             var selectedDates = RegistrationCommon.GetSelectedDatesFromCart();
             var currentRegistrant = SessionVariables.CurrentRegistrant;
+            var subscriptionPlan = participationObject.GetSubscriptionPlan();
 
             
             PaymentViewBag(id, participationObject, msgs);
@@ -2107,6 +2108,9 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select");
             }
 
+            if (subscriptionPlan.IsNotEmpty())
+                ViewBag.IsProrated = subscriptionPlan.ProrateFirstCharge ?? false;
+
             if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Any())
             {
                 var proratingCalculation = new ProratingCalculationHelper(
@@ -2115,8 +2119,6 @@ namespace AfterSchool.Controllers
                                                 participationObject.OwnerAccount,
                                                 PaymentType.CreditCard,
                                                 msgs);
-
-                ViewBag.IsProrated = proratingCalculation.GetIsProrated();
 
                 if (proratingCalculation.GetIsProrated())
                     ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
