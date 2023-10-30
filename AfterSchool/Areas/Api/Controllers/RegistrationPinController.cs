@@ -161,7 +161,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
-                if (phone.IsNotEmpty() && WebUser.LoadByOnlyPhone(phone).IsNotEmpty())
+                if (phone.IsNotEmpty() && WebUser.LoadByOnlyPhone(phone, msgs).IsNotEmpty())
                     throw new Exception("Phone is already in use");
 
                 var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
@@ -217,7 +217,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
 
 
-                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.LoadByOnlyPhone(currentPickUp.Phone).IsNotEmpty())
+                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.LoadByOnlyPhone(currentPickUp.Phone, amsgs, adc).IsNotEmpty())
                                     user = new WebUser
                                     {
                                         FirstName = currentPickUp.FirstName,
