@@ -336,8 +336,11 @@ namespace AfterSchoolLibrary.Models
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
-            var sql = @"SELECT * FROM WebUser WHERE REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', '') = @phone";
-
+            var sql = @"SELECT
+                *
+            FROM WebUser
+            WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone";
+            
             var parameters = new Dictionary<string, object>
             {
                 { "@phone", phone }
@@ -375,7 +378,7 @@ namespace AfterSchoolLibrary.Models
             var sql = @"
                 SELECT * 
                 FROM WebUser 
-                WHERE REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', '') = @phone 
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone 
                 AND PinCode = @pinCode";
 
             var parameters = new Dictionary<string, object>
