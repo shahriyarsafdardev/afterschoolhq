@@ -294,7 +294,7 @@ namespace AfterSchoolLibrary.Services
                 dc);
 
             //run first charge 
-            if(startDateTime.Date.IsOnOrBefore(providerDatetimeNow)
+            if(startDateTime.Date.IsOnOrBefore(providerDatetimeNow))
             {
                 metaData["PaymentNumber"] = "1"; //as it will be first payment
 
