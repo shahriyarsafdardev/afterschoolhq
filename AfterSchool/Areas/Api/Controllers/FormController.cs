@@ -288,25 +288,24 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
                                 var prevSettingsList = FormQuestionSettings.LoadByQuestionIds(newQuestion.ID, amsgs, adc);
                                 var newSettingsList = new List<FormQuestionSettings>();
-                                if (prevSettingsList.Count > 0)
-                                    newQuestion.QuestionSettings.ForEach(setting =>
+                                newQuestion.QuestionSettings.ForEach(setting =>
+                                {
+                                    if (!newQuestion.IsLocked)
                                     {
-                                        if (!newQuestion.IsLocked)
+                                        var questionSetting = new FormQuestionSettings()
                                         {
-                                            var questionSetting = new FormQuestionSettings()
-                                            {
-                                                QuestionId = newQuestion.ID,
-                                                Audience = setting.Audience,
-                                                Show = setting.Show,
-                                                Required = setting.Required,
-                                                CreateDate = DateTime.UtcNow,
-                                                LastModifiedDate = DateTime.UtcNow,
-                                                CreatedBy = currentUser.ID,
-                                                LastModifiedBy = currentUser.ID,
-                                            };
-                                            newSettingsList.Add(questionSetting);
-                                        }
-                                    });
+                                            QuestionId = newQuestion.ID,
+                                            Audience = setting.Audience,
+                                            Show = setting.Show,
+                                            Required = setting.Required,
+                                            CreateDate = DateTime.UtcNow,
+                                            LastModifiedDate = DateTime.UtcNow,
+                                            CreatedBy = currentUser.ID,
+                                            LastModifiedBy = currentUser.ID,
+                                        };
+                                        newSettingsList.Add(questionSetting);
+                                    }
+                                });
                                 if (prevSettingsList.Count > 0)
                                 {
                                     if (newSettingsList.IsNotEmpty() && newSettingsList.Any())
