@@ -33,12 +33,7 @@ const SessionRegistrationSlice = createSlice({
       state.loading = false;
     },
     setFormData: (state, { payload: { FormDto, activityGroupDto, checkOut } }) => {
-      const {
-        CanAccess,
-        RegistrantType,
-        SchoolLocation,
-        RegistrationIsCompleted
-      } = activityGroupDto;
+      const { CanAccess, RegistrantType, SchoolLocation } = activityGroupDto;
 
       let [isAgeRestricted, isGenderRestricted, isGradeRestricted] = [false, false, false];
 
@@ -48,9 +43,7 @@ const SessionRegistrationSlice = createSlice({
         isGradeRestricted ||= IsGradeRestricted;
       });
 
-      const isProhibited = RegistrationIsCompleted || !CanAccess;
-      if (isProhibited) return handleRedirection(activityGroupDto);
-
+      if (!CanAccess) return handleRedirection(activityGroupDto);
       const { questions, questionsGroups } = ConfirmRegistrationSection();
       const { formQuestionUpdated, formQuestionGroupUpdated, formQuestionAnswer } = responseMapper(
         FormDto,
@@ -104,11 +97,10 @@ export const useSessionRegistrationActions = () => {
       registrantUid
     ).then(({ obj, msgs }) => {
       if (obj) dispatch(setFormData(obj));
-      if (!msgs.length && !obj?.activityGroupDto?.RegistrationIsCompleted) {
+      if (obj && !msgs.length) {
         const { HeaderImageURL, Name, Organization } = obj?.activityGroupDto;
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());
-        dispatch(formDataLoaded());
       }
     });
   };

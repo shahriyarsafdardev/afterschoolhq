@@ -18,6 +18,7 @@ export default function SessionRegistration({ newChild = false }) {
   const {
     exit,
     school,
+    loaded,
     loading,
     checkOut,
     questions,
@@ -28,7 +29,7 @@ export default function SessionRegistration({ newChild = false }) {
     setSchoolFieldValue,
     submitFormSectionData,
     clearMessages,
-    session: { RegistrantType, ActivityUrl: activityGroupUrl }
+    session: { RegistrantType, ActivityUrl: activityGroupUrl, RegistrationIsCompleted }
   } = useSessionRegistration();
 
   const totalGroups = questionsGroups?.length || 1;
@@ -137,7 +138,8 @@ export default function SessionRegistration({ newChild = false }) {
   useEffect(() => {
     if (questions.length) {
       let QuestionGroupDataTypeId = '';
-      const paramsQuery = buildQueryParams();
+      const defaultGroupIndex = RegistrationIsCompleted ? questionsGroups.length - 1 : activeGroup;
+      const paramsQuery = buildQueryParams(defaultGroupIndex);
       if (searchParams.get('section')) {
         const groupIndex = questionsGroups.findIndex(
           section => section.Name === decodeURI(searchParams.get('section'))
@@ -147,6 +149,7 @@ export default function SessionRegistration({ newChild = false }) {
         setActiveGroupId(QuestionGroupDataTypeId);
         setActiveGroup(groupIndex);
       } else setSearchParams(paramsQuery);
+      loaded();
     }
   }, [questions.length, searchParams.get('section')]);
 
