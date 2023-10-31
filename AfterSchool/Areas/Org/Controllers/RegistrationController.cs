@@ -28,7 +28,9 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at,
             string volunteers)
         {
-            var msgs = new SystemMessages();
+            SystemMessages msgs = TempData["Messages"] as SystemMessages;
+            if (msgs.IsEmpty())
+                 msgs = new SystemMessages();
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -48,7 +50,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var groups = GetActivityGroups(getVolunteers, currentAccount, msgs);
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
-            if (emailed.IsBoolean() && emailed.ToBoolean())
+            if (emailed.IsBoolean() && emailed.ToBoolean() && msgs.HasNoErrors())
                 msgs.Add("An email will be sent shortly", MessageType.Success);
 
             var isStudentCrmEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
@@ -79,17 +81,38 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
 
             if (activity.IsNotEmpty())
+            {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
+                if ((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                    activityIds = currentAccount.GetActivities(activityIds).Where(x => x.HasSchedule).Select(activity => activity.ID.Value).ToList();
+            }
+
+            if (activity.IsEmpty() && group.IsEmpty() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                activityIds = currentAccount.GetActivities().Where(x => x.HasSchedule).Select(activity=>activity.ID.Value).ToList();
 
             if (group.IsNotEmpty())
             {
                 var groupIds = group.Split(',').Select(x => x.ToInteger()).ToList();
                 var groupList = currentAccount.GetActivityGroups(groupIds, msgs);
-                groupList.ForEach(x =>
-                {
-                    activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
-                        .Select(y => y.ID.Value));
-                });
+                if((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+                    groupList.ForEach(x =>
+                    {
+                        activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
+                            .Where(x => x.HasSchedule).Select(activity => activity.ID.Value));
+                    });
+                else
+                    groupList.ForEach(x =>
+                    {
+                        activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
+                            .Select(activity => activity.ID.Value));
+                    });
+            }
+            if ((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+            {
+                if (activityIds.IsNotEmpty() && !activityIds.Any())
+                    msgs.Add("No selected activities have a schedule. Only Activities with a schedule will appear in the Dismissal Report.", MessageType.UserError);
+                else
+                    msgs.Add("Only Activities with a schedule will appear in the Dismissal Report", MessageType.Notice);
             }
 
             if (at.IsNumber())
@@ -100,29 +123,32 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (regstatus.IsNumber())
                 registrationStatus = (RegistrationStatus) regstatus.ToInteger();
-
+           
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            BackgroundJob.Enqueue(() =>
-                RegistrationService.EmailCsvReport(
-                    currentAccount.ID.Value,
-                    q,
-                    questionId,
-                    activityIds,
-                    ParticipationObjectType.Activity,
-                    filename,
-                    (RegistrationReportType) reporttype.ToInteger(),
-                    rat.HasValue ? rat.Value.AsList() : null,
-                    registrationStatus,
-                    UILabel.ActivityLabel(ActivityType.Activity, false),
-                    emails,
-                    null,
-                    null,
-                    getVolunteers,
-                    null,
-                    null)
-            );
+
+            if (msgs.HasNoErrors())
+                BackgroundJob.Enqueue(() =>
+                    RegistrationService.EmailCsvReport(
+                        currentAccount.ID.Value,
+                        q,
+                        questionId,
+                        activityIds,
+                        ParticipationObjectType.Activity,
+                        filename,
+                        (RegistrationReportType) reporttype.ToInteger(),
+                        rat.HasValue ? rat.Value.AsList() : null,
+                        registrationStatus,
+                        UILabel.ActivityLabel(ActivityType.Activity, false),
+                        emails,
+                        null,
+                        null,
+                        getVolunteers,
+                        null,
+                        null)
+                );
 
             ViewBag.Messages = msgs;
+            TempData["Messages"] = msgs;
 
             return RedirectToAction("index", new {volunteers, q, activity, emailed = "1", question, group, at, regstatus});
         }
