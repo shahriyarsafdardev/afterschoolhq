@@ -167,6 +167,13 @@ namespace AfterSchool.Areas.Api.Controllers
                 if(currentRegistrant.IsEmpty())
                     throw new Exception("No Registrant");
 
+                var currentMasterRegistrant = currentRegistrant.GetMasterRegistrant(msgs);
+                if (currentMasterRegistrant.IsEmpty())
+                    throw new Exception("No Master Registrant");
+
+                var currentUserRegistrant = currentMasterRegistrant.IsVolunteer ? currentUser.GetMasterVolunteerRegistrant(msgs) :
+                    currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
+
                 var collection = HttpUtility.ParseQueryString(json.answers);
                 var participationObject = registration.GetFirstParticipationObject(msgs);
                 if(participationObject.IsEmpty())
@@ -176,6 +183,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 var questions = form.GetAllQuestions(msgs);
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 
+                // Get Client app URL
+                var formSectionURL = HttpUtility.ParseQueryString(new Uri(Request.UrlReferrer.ToString()).Query)["section"];
+
+                ValidateCustomFormHelper.ValidateFormQuestionSection(GetAllFormQuestions(currentUserRegistrant, questions), collection, formSectionURL, json.groupid.ToInteger(), Request, msgs);
+
                 qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupid.ToInteger()).ToList().ForEach(qvm =>
                 {
                     switch (qvm.Question.QuestionDataTypeId)
@@ -395,6 +407,39 @@ namespace AfterSchool.Areas.Api.Controllers
                 RegistrantPersonType.Volunteer => AudienceType.Volunteer,
                 _ => AudienceType.NotSet,
             };
+        }
+
+        private static List<FormQuestionDto> GetAllFormQuestions(Registrant currentUserRegistrant, List<FormQuestion> questions)
+        {
+            var msgs = new SystemMessages();
+            var formQuestionDtoList = new List<FormQuestionDto>();
+            var audienceType = GetAudienceType(currentUserRegistrant.PersonTypeId);
+            foreach (var question in questions)
+            {
+                var audienceSettings = FormQuestionSettings.LoadByQuestionIdByAudienceType(question.ID, audienceType, msgs);
+
+                if (audienceSettings?.Show ?? question.IsActive)
+                    formQuestionDtoList.Add(
+                        new FormQuestionDto()
+                        {
+                            ID = question.ID.Value,
+                            FormQuestionGroupId = question.FormQuestionGroupId,
+                            Text = question.Text,
+                            Description = question.Description,
+                            GroupTitle = question.FormQuestionGroupName,
+                            Options = question.Options,
+                            IsRequired = audienceSettings?.Required ?? question.IsRequired,
+                            DisplayOrder = question.DisplayOrder,
+                            IsActive = question.IsActive,
+                            IsDeleted = question.IsDeleted,
+                            QuestionTypeId = question.QuestionTypeId,
+                            QuestionDataTypeId = question.QuestionDataTypeId,
+                            FormQuestionGroupQuestionGroupDataTypeId = question.FormQuestionGroupQuestionGroupDataTypeId,
+                            Link = question.Link,
+                        }
+                    );
+            }
+            return formQuestionDtoList;
         }
     }
 }

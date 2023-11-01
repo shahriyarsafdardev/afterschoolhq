@@ -135,6 +135,18 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var qvms = questions.Select(question => question.ToFormQuestionViewModel(collection)).ToList();
                 var surveyFeedbackStatusType = isLastSection ? SurveyFeedbackStatus.Completed : SurveyFeedbackStatus.InProgress;
+
+                qvms.Where(qvm => qvm.Question.FormQuestionGroupId == json.groupId.ToInteger()).ToList().ForEach(qvm =>
+                {
+                    var isFileUpload = (qvm.Question.QuestionTypeId == QuestionType.FileUpload ||
+                                                  qvm.Question.QuestionTypeId == QuestionType.Photo ||
+                                                  qvm.Question.QuestionTypeId == QuestionType.Audio ||
+                                                  qvm.Question.QuestionTypeId == QuestionType.Video);
+
+                    if (qvm.Question.QuestionTypeId != QuestionType.TextBlock && (qvm.Question.IsRequired && ((isFileUpload && Request.Files["question-" + qvm.Question.ID].IsEmpty()) || (!isFileUpload && qvm.Value.IsEmpty()))))
+                        msgs.Add($"{qvm.Question.Text} is required", MessageType.UserError);
+                });
+
                 Database.ExecuteTransaction
                 (
                     (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -265,6 +277,5 @@ namespace AfterSchool.Areas.Api.Controllers
             var amazonHelper = Utilities.GetNewAmazonHelper();
             return amazonHelper.GetFileLink(question.Text,DateTime.UtcNow.AddMinutes(5), false);
         }
-
     }
 }
