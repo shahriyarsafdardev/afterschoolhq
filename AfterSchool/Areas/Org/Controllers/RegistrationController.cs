@@ -51,7 +51,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
             if (emailed.IsBoolean() && emailed.ToBoolean() && msgs.HasNoErrors())
-                msgs.Add("An email will be sent shortly", MessageType.Success);
+                msgs.Add("An email will be sent shortly.", MessageType.Success);
 
             var isStudentCrmEnabled = SessionVariables.CurrentAccount.HasFeature(FeatureType.StudentCRM);
             var studentCrmPackage = PackageService.GetPackageWithFeatureLowestPrice(FeatureType.StudentCRM, SessionVariables.AccountPackage);
