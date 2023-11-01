@@ -550,6 +550,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         PaymentSourceType = PaymentSourceType.ManualProvider,
                         OverrideAmount = amountpaid.ToDecimal(),
                         PaymentTypeFeeOverrideAmount = 0,
+                        ConvenienceFeeOverrideAmount = 0,
                     },
                     loggedInUser: SessionVariables.CurrentUser,
                     msgs: msgs
