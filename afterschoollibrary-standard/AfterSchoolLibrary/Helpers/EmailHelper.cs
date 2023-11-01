@@ -2409,6 +2409,42 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
+        public static SystemMessages SendSubscriptionScheduleWebhookErrors(SystemMessages msgs)
+        {
+            var errorMessages = "";
+
+            foreach (SystemMessage message in msgs)
+            {
+                errorMessages += message.Text + "<br />";
+            }
+
+            var model = new NameValueCollection
+            {
+                {"ErrorMessages", errorMessages}
+            };
+
+            var subject = $"EOD Email for Subscription Schedule Webhook Errors";
+
+            var body = ProcessTemplate(
+                EmailTemplates.SubscriptionSchedule_Webhook_Errors,
+                model,
+                "subscriptionschedulewebhookerrors-1.0.1",
+                msgs
+            );
+
+            var mailMsgs = SendGridHelper.SendMail(
+                Email.SendGridNoReplyEmailAddress(),
+                new EmailAddress(Email.AppSupportEmailAddress),
+                subject,
+                body,
+                emailTemplateId: SendGridHelper.GetGenericTemplateId()
+            );
+
+   
+            msgs.AddRange(mailMsgs);
+            return msgs;
+        }
+
         public static SystemMessages SendEmailVerification(WebUser user, string redirectUrl, bool isAfterSchool)
         {
             var msgs = new SystemMessages();
