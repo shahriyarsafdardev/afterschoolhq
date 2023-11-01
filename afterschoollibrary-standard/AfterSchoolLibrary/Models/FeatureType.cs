@@ -43,4 +43,5 @@ public enum FeatureType
     AllAgeRegistration = 42,
     ManageCheckInCheckOut = 43,
     ManageStudentNotes = 44,
+    HideTimezoneOnActivityPage = 45,
 }

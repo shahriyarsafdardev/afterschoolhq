@@ -1331,6 +1331,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230620_AddFormQuestionAnswerRidQdtidIndex.Do(amsgs,adc);
             Migration_20230628_SetAccountIsPayingCustomer.Do(amsgs, adc);
             Migration_20230713_CheckInCheckOut.Do(amsgs,adc);
+            Migration_20231101_HideTimezoneOnActivityPage.Do(amsgs,adc);
             Migration_20230731_UpdateRegistrantWebUserAuthorizationType.Do(amsgs,adc);
             Migration_20230811_AddCouponIsDeletedDefault.Do(amsgs,adc);
             Migration_20230918_StudentNotes.Do(amsgs,adc);
