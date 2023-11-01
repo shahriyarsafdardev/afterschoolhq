@@ -28,9 +28,8 @@ namespace AfterSchool.Areas.Org.Controllers
         public ActionResult Index(string activity, string group, string pn, string rpp, string q, string emailed, string question, string regstatus, string at,
             string volunteers)
         {
-            SystemMessages msgs = TempData["Messages"] as SystemMessages;
-            if (msgs.IsEmpty())
-                 msgs = new SystemMessages();
+            var msgs = new SystemMessages();
+            HandleTempMessages(msgs);
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -84,11 +83,11 @@ namespace AfterSchool.Areas.Org.Controllers
             {
                 activityIds = activity.Split(',').Select(x => x.ToInteger()).ToList();
                 if ((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
-                    activityIds = currentAccount.GetActivities(activityIds).Where(x => x.HasSchedule).Select(activity => activity.ID.Value).ToList();
+                    activityIds = currentAccount.GetActivities(activityIds,msgs).Where(x => x.HasSchedule).Select(activity => activity.ID.Value).ToList();
             }
 
             if (activity.IsEmpty() && group.IsEmpty() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
-                activityIds = currentAccount.GetActivities().Where(x => x.HasSchedule).Select(activity=>activity.ID.Value).ToList();
+                activityIds = currentAccount.GetActivities(msgs).Where(x => x.HasSchedule).Select(activity=>activity.ID.Value).ToList();
 
             if (group.IsNotEmpty())
             {
@@ -107,7 +106,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             .Select(activity => activity.ID.Value));
                     });
             }
-            if ((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+            if (msgs.HasNoErrors() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
             {
                 if (activityIds.IsNotEmpty() && !activityIds.Any())
                     msgs.Add("No selected activities have a schedule. Only Activities with a schedule will appear in the Dismissal Report.", MessageType.UserError);
@@ -148,8 +147,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 );
 
             ViewBag.Messages = msgs;
-            TempData["Messages"] = msgs;
-
+            SetTempMessages(msgs);
             return RedirectToAction("index", new {volunteers, q, activity, emailed = "1", question, group, at, regstatus});
         }
         [HttpGet]
