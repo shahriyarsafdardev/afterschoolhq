@@ -78,6 +78,11 @@ export default makeStyles(theme => ({
     textAlign: 'center',
     fontWeight: 400
   },
+  noAccessMessage: {
+    textAlign: 'center',
+    fontWeight: 900,
+    fontSize: '20px'
+  },
   marginAuto: {
     margin: 'auto'
   },
@@ -127,7 +132,7 @@ export default makeStyles(theme => ({
     }
   },
   childListWrapper: {
-    overflow: 'hidden scroll',
+    overflowY: 'auto',
     flexBasis: '100%',
     gap: 16,
     display: 'flex',

@@ -19,9 +19,11 @@ export default function ChildList({ setActiveStep, navigateToRoot }) {
         <Typography className={classes.subHeaderText}>Select all that apply.</Typography>
       </Box>
       <Box className={classes.childListWrapper}>
-        {StudentsInfo.map((student, index) => (
-          <ChildListRow student={student} key={index} />
-        ))}
+        {StudentsInfo.length > 0 ? (
+          StudentsInfo.map((student, index) => <ChildListRow student={student} key={index} />)
+        ) : (
+          <Typography className={classes.noAccessMessage}>Your access has been revoked!</Typography>
+        )}
       </Box>
       <Grid item xs={12} className={classes.listButtonWrapper}>
         <Button

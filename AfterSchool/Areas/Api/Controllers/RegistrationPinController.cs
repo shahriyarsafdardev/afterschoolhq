@@ -9,6 +9,7 @@ using AfterSchool.Helpers;
 using AfterSchool.Models;
 using AfterSchoolLibrary;
 using AfterSchoolLibrary.Enums;
+using AfterSchoolLibrary.Helpers;
 using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
@@ -872,7 +873,15 @@ namespace AfterSchool.Areas.Api.Controllers
                                         registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(masterRegistrant.ID.Value,
                                                 user.ID.Value, amsgs, adc);
 
+                                        if (!registrantWebUser.IsDeleted && !authorizedPerson.HasAccess)
+                                        {
+                                            amsgs.AddRange(EmailHelper.SendCheckInCheckOutRevokeAccessEmail(user.DisplayName, masterRegistrant.FirstName, currentUserRegistrant.Email, currentUserRegistrant.FirstName));
+                                            if(user.Phone.IsNotEmpty())
+                                                TextHelper.SendCheckInCheckOutRevokeAccessText(user.Phone, masterRegistrant.DisplayName, masterRegistrant.FirstName);
+                                        }
+
                                         registrantWebUser.IsDeleted = !authorizedPerson.HasAccess;
+
                                         amsgs.AddRange(registrantWebUser.Save(adc));
                                     }
                                 }
