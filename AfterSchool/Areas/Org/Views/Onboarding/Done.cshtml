@@ -4,16 +4,7 @@
 
     var hostAccounts = (List<Account>) ViewBag.HostAccounts;
 }
-<head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VEVES534T8"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', 'G-VEVES534T8');</script>
-</head>
+@Html.Partial("_GoogleTagScripts")
 
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">

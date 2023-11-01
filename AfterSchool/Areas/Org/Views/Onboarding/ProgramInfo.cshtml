@@ -1,15 +1,15 @@
 @model Account
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
-    var msgs = (SystemMessages) ViewBag.Messages;
-    var title = (string) ViewBag.Title;
-    var headline = (string) ViewBag.Headline;
+    var msgs = (SystemMessages)ViewBag.Messages;
+    var title = (string)ViewBag.Title;
+    var headline = (string)ViewBag.Headline;
     var isProgram = Model.AccountTypeId == AccountType.Teacher;
     var genderRestriction = ViewBag.GenderRestriction;
     var organizationLabel = Model.AccountTypeId.ToString().SplitByUpperCase();
     var organizationExampleNames = "";
     var headerText = "Enter info about your organization.";
-    var accountPackage = (AccountPackage) ViewBag.AccountPackage;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
     var totalStepCount = accountPackage.IsFree ? 6 : 5;
 
     if (Model.AccountTypeId == AccountType.ActivityProvider)
@@ -25,16 +25,8 @@
         organizationExampleNames = "Ex. Math Club, Chess Club, Elite Track &amp; Field";
     }
 }
-<head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VEVES534T8"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
+@Html.Partial("_GoogleTagScripts")
 
-        gtag('config', 'G-VEVES534T8');</script>
-</head>
 
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
@@ -51,7 +43,7 @@
                             {
                                 {"count", totalStepCount},
                                 {"activeDotNumber", 1},
-                            });
+                });
                     }
 
                     <div class="col-md-12 onboarding-form-group">
@@ -81,7 +73,7 @@
                                    name="genderrestrictions"
                                    id="genderrestrictions-@((int) GenderRestrictionType.None)"
                                    value="@((int) GenderRestrictionType.None)"
-                                   @(genderRestriction == (int) GenderRestrictionType.None ? "checked='true'" : "")/>
+                                   @(genderRestriction == (int)GenderRestrictionType.None ? "checked='true'" : "") />
                             <label for="genderrestrictions-@((int) GenderRestrictionType.None)">All Genders</label>
                         </div>
                         <div class="am-radio program-radio">
@@ -89,7 +81,7 @@
                                    name="genderrestrictions"
                                    id="genderrestrictions-@((int) GenderRestrictionType.MaleOnly)"
                                    value="@((int) GenderRestrictionType.MaleOnly)"
-                                   @(genderRestriction == (int) GenderRestrictionType.MaleOnly ? "checked='true'" : "")/>
+                                   @(genderRestriction == (int)GenderRestrictionType.MaleOnly ? "checked='true'" : "") />
                             <label for="genderrestrictions-@((int) GenderRestrictionType.MaleOnly)">Boys</label>
                         </div>
                         <div class="am-radio program-radio">
@@ -97,7 +89,7 @@
                                    name="genderrestrictions"
                                    id="genderrestrictions-@((int) GenderRestrictionType.FemaleOnly)"
                                    value="@((int) GenderRestrictionType.FemaleOnly)"
-                                   @(genderRestriction == (int) GenderRestrictionType.FemaleOnly ? "checked='true'" : "")/>
+                                   @(genderRestriction == (int)GenderRestrictionType.FemaleOnly ? "checked='true'" : "") />
                             <label for="genderrestrictions-@((int) GenderRestrictionType.FemaleOnly)">Girls</label>
                         </div>
                     </div>
@@ -109,7 +101,7 @@
                         <div class="clearfix"></div>
                         <div style="padding: 0;">
                             <select id="select-program-timezone" class="form-control onboarding-input" name="timeZone" style="height: 44px;" required>
-                                @foreach (var zone in new[] {"Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST"})
+                                @foreach (var zone in new[] { "Eastern - EST", "Central - CST", "Mountain - MST", "Pacific - PST", "Alaska - AKST", "Hawaii - HAST" })
                                 {
                                     var selected = "";
                                     if (zone == Model.TimeZone.IfEmpty(""))
@@ -142,7 +134,7 @@
 <script type="text/javascript">
      PageEvent.add(
         PageEvent.AFTER_INIT,
-         function (){             
+         function (){
             var selectClientTimeZone = $("#select-program-timezone");
             var modelTimeZone = '@Model.TimeZone';
 

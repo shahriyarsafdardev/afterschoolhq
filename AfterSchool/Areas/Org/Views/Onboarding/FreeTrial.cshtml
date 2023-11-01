@@ -1,20 +1,12 @@
 @model Account
-@{ 
+@{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     bool signedUpForDefaultPackage = (bool)ViewBag.SignedUpForDefaultPackage;
-    var trialDays = (int) ViewBag.TrialDays;
+    var trialDays = (int)ViewBag.TrialDays;
     var accountPackage = (AccountPackage)ViewBag.AccountPackage;
- }
-<head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VEVES534T8"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+}
+@Html.Partial("_GoogleTagScripts")
 
-        gtag('config', 'G-VEVES534T8');</script>
-</head>
 
 <style>
     .free-trial-border {
@@ -28,10 +20,10 @@
         background: linear-gradient(6deg, #08ecc0, transparent);
         max-width: 1040px;
     }
-    
+
     .free-trial-main {
         background: white;
-        width:  100%;
+        width: 100%;
         border-radius: 6px;
         padding: 50px;
         display: flex;
@@ -43,52 +35,50 @@
         text-align: center;
         color: #282828;
     }
-    
+
     .thumbs-up {
         width: 87px;
         height: 100px;
         object-fit: contain;
     }
-    
+
     .lets-get-started {
         font-size: 30px;
         font-weight: bold;
     }
-    
+
     .free-trial-p {
         margin: 25px;
         max-width: 600px;
     }
-    
+
     .feature-list {
         column-count: 2;
         list-style-type: none;
         padding: 0;
-        margin:  20px;
+        margin: 20px;
         text-align: left;
     }
-    
-    .feature-list li {
-        background-image: url("../../../../Assets/img/green-check-box.svg");
-        background-repeat: no-repeat;
-        padding-left: 30px;
-        margin-bottom: 10px;
-        
-    }
-    
+
+        .feature-list li {
+            background-image: url("../../../../Assets/img/green-check-box.svg");
+            background-repeat: no-repeat;
+            padding-left: 30px;
+            margin-bottom: 10px;
+        }
+
     .free-trial-continue {
         padding: 15px 104px;
         border-radius: 6px;
         border-color: transparent;
         background-color: #00c5a3;
-        color:  white;
-        margin:  20px;
+        color: white;
+        margin: 20px;
     }
-    
-    .free-trial-continue:hover {
-        color:  white;
-    }
-    
+
+        .free-trial-continue:hover {
+            color: white;
+        }
 </style>
 
 <div class="free-trial-border">
