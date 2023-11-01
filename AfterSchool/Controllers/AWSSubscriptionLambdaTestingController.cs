@@ -26,9 +26,8 @@ namespace AfterSchool.Controllers
 {
     public class AWSSubscriptionLambdaTestingController : Controller
     {
-        // GET: AWSSubscriptionLambdaTestingController/Lambda
         [HttpGet]
-        public String Lambda(DateTime dateToday, int status = 1, bool failNextPayment = false)
+        public String Lambda(DateTime dateToday, int status = 1, bool failNextPayment = false, bool pendingCase = false)
         {
             SystemMessages msgs = new SystemMessages();
 
@@ -40,8 +39,10 @@ namespace AfterSchool.Controllers
 
             schedule.NextBillDate = dateToday;
 
-            if(failNextPayment)
+            if (failNextPayment)
                 ProcessFailedSubscriptionSchedules(schedule, dateToday, status, msgs);
+            else if (pendingCase)
+                ProcessPaymentHistoryWithPendingStatus(schedule, status, dateToday, msgs);
             else
                 ProcessSubscriptionSchedulesPendingToday(schedule, dateToday.Date, status, msgs);
             
@@ -76,31 +77,48 @@ namespace AfterSchool.Controllers
         private void ProcessFailedSubscriptionSchedules(SubscriptionSchedule schedule, DateTime dateToday, int status, SystemMessages msgs)
         {
             if (schedule.StripeSourceId.HasValue())
-                {
-                    var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+            {
+                var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
 
-                    var amount = schedule.AmountInCents / 100.0m;
+                var amount = schedule.AmountInCents / 100.0m;
 
-                    amount = GetProratedAmount(schedule, amount, dateToday);
+                amount = GetProratedAmount(schedule, amount, dateToday);
 
-                    var charge = CreateCharge(schedule, rsp, amount, msgs);
+                var charge = CreateCharge(schedule, rsp, amount, msgs);
 
-                    if (status.Equals(2))
-                        charge.Status = LastChargeStatus.failed.ToString();
-                    else if (status.Equals(3))
-                        charge.Status = LastChargeStatus.pending.ToString();
+                if (status.Equals(2))
+                    charge.Status = LastChargeStatus.failed.ToString();
+                else if (status.Equals(3))
+                    charge.Status = LastChargeStatus.pending.ToString();
 
                 var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
 
-                    if (charge.IsEmpty())
-                        msgs.Add("Error in running the charge", MessageType.Error);
+                if (charge.IsEmpty())
+                    msgs.Add("Error in running the charge", MessageType.Error);
 
-                    else
-                        ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, dateToday, msgs);
-                }
                 else
-                    msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
-            
+                    ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, dateToday, msgs);
+            }
+            else
+                msgs.Add("Can not run the charge. StripeSourceId is empty", MessageType.Error);
+        }
+
+        private void ProcessPaymentHistoryWithPendingStatus(SubscriptionSchedule schedule, int status, DateTime dateToday, SystemMessages msgs)
+        {
+            var paymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs, null);
+            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
+            var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
+
+            if (status.Equals(2))
+                charge.Status = LastChargeStatus.failed.ToString();
+            else if (status.Equals(3))
+                charge.Status = LastChargeStatus.pending.ToString();
+
+            if (charge.IsEmpty())
+                msgs.Add("Error in retrieving the charge", MessageType.Error);
+
+            else
+                ProcessCharge(charge, schedule, paymentHistory, rsp, dateToday, msgs, true);
         }
 
         public static Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount, DateTime dateToday)
@@ -191,8 +209,7 @@ namespace AfterSchool.Controllers
             }
 
             msgs.AddRange(SubscriptionScheduleService.UpdateSubscriptionAndPaymentRecordsAfterCharge(charge, schedule, subscriptionPaymentHistory, msgs));
-            msgs.AddRange(CreatePaymentRecordsAfterCharge(schedule, subscriptionPaymentHistory, charge, dateToday, msgs));
-            
+            msgs.AddRange(CreatePaymentRecordsAfterCharge(schedule, subscriptionPaymentHistory, charge, dateToday, msgs, pendingCase));
         }
 
         private SystemMessages CreatePaymentRecordsAfterCharge(SubscriptionSchedule subscriptionSchedule, SubscriptionPaymentHistory subscriptionPaymentHistory,

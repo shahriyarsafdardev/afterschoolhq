@@ -103,7 +103,7 @@
                                 {
                                     if(subscriptionSchedule.IsNotEmpty())
                                     {
-                                        nextPaymentDate = subscriptionSchedule.NextBillDate.ToShortDateString();
+                                        nextPaymentDate = subscriptionSchedule.NextBillDate.ToShortDateString("-");
                                     }
                                     else if (payments?.Count < (plan.TotalPeriods ?? 0) || !activity.HasSchedule)
                                     {
@@ -149,8 +149,11 @@
                                     </td>
                                     <td>
                                         @if (regStatus != RegistrationStatus.Past)
-                                        {                                            
-                                            if (!plan.DateCancelled.HasValue && 
+                                        {
+                                            if (subscriptionSchedule.IsNotEmpty() && subscriptionSchedule.IsCancelled.Equals(true))
+                                            {
+                                            }
+                                            else if (!plan.DateCancelled.HasValue && 
                                                 registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
                                             {
                                                 <button 
