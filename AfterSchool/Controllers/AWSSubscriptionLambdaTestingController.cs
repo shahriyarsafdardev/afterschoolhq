@@ -81,7 +81,7 @@ namespace AfterSchool.Controllers
 
                     var amount = schedule.AmountInCents / 100.0m;
 
-                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
+                    amount = GetProratedAmount(schedule, amount, dateToday);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
 
@@ -172,7 +172,7 @@ namespace AfterSchool.Controllers
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
             var amountToStripe = StripeHelper.CalculateStripeFee(schedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
-            var amountToConnectAccount = SubscriptionScheduleService.GetProratedAmount(schedule, schedule.AmountToConnectAccountInCents);
+            var amountToConnectAccount = GetProratedAmount(schedule, schedule.AmountToConnectAccountInCents, dateToday);
 
             if (subscriptionPaymentHistory.IsEmpty())
             {
