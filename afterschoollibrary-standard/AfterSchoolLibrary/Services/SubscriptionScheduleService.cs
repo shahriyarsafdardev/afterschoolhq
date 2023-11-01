@@ -330,7 +330,7 @@ namespace AfterSchoolLibrary.Services
                 if (msgs.HasNoErrors())
                     checkoutObject.PayingAccount.SendSubscriptionPaymentSucceeded(checkoutObject);
                 else
-                    msgs.Add("Error creating payment records", MessageType.Error);
+                    msgs.Add("Error creating payment records for subscription schedule with Uid: " + subscriptionSchedule.Uid, MessageType.Error);
             }
             else
             {
@@ -365,7 +365,7 @@ namespace AfterSchoolLibrary.Services
                         dc);
 
                         if(msgs.HasErrors())
-                            msgs.Add("Error creating negative transaction record", MessageType.Error);
+                            msgs.Add("Error creating negative transaction record for subscription schedule with Uid: " + subscriptionSchedule.Uid, MessageType.Error);
                     }
                     if (msgs.HasNoErrors())
                         checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);                        

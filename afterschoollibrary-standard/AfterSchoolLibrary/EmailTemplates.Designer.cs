@@ -543,6 +543,16 @@ namespace AfterSchoolLibrary {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] SubscriptionSchedule_Webhook_Errors {
+            get {
+                object obj = ResourceManager.GetObject("SubscriptionSchedule_Webhook_Errors", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Survey {
             get {
                 object obj = ResourceManager.GetObject("Survey", resourceCulture);
