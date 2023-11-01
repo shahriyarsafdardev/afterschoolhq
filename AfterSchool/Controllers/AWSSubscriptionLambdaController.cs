@@ -57,8 +57,9 @@ namespace AfterSchool.Controllers
                     var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
 
                     var amount = schedule.AmountInCents / 100.0m;
+                    var account = rsp.GetSubscriptionPlan().GetAccount();
 
-                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
+                    amount = SubscriptionScheduleService.GetProratedAmount(account, schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
 
@@ -136,8 +137,8 @@ namespace AfterSchool.Controllers
                     var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
 
                     var amount = schedule.AmountInCents / 100.0m;
-
-                    amount = SubscriptionScheduleService.GetProratedAmount(schedule, amount);
+                    var account = rsp.GetSubscriptionPlan().GetAccount();
+                    amount = SubscriptionScheduleService.GetProratedAmount(account, schedule, amount);
 
                     var charge = CreateCharge(schedule, rsp, amount, msgs);
                     var subscriptionPaymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int) schedule.ID, msgs, null);
@@ -159,7 +160,7 @@ namespace AfterSchool.Controllers
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
             var billingAccount = rsp.GetSubscriptionPlan().GetActivity().GetParticipationObject().PaymentAccount;
             var amountToStripe = StripeHelper.CalculateStripeFee(schedule.AmountInCents, billingAccount.IsCreditCardFeeTakenOutOfCost);
-            var amountToConnectAccount = SubscriptionScheduleService.GetProratedAmount(schedule, schedule.AmountToConnectAccountInCents);
+            var amountToConnectAccount = SubscriptionScheduleService.GetProratedAmount(billingAccount, schedule, schedule.AmountToConnectAccountInCents);
 
             if (subscriptionPaymentHistory.IsEmpty())
             {

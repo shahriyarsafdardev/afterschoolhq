@@ -195,19 +195,16 @@ namespace AfterSchoolLibrary.Services
             return (diffInDays / currentMonthTotalDays).ToDecimal() * fullChargeAmount;
         }
 
-        public static Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount)
+        public static Decimal GetProratedAmount(Account billingAccount, SubscriptionSchedule schedule, Decimal amount)
         {
-            var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid);
-            //var account = rsp.GetSubscriptionPlan().GetAccount();
-
             //if this is last payment
             if (schedule.LastDateToBill.HasValue && (schedule.NextBillDate.IsEmpty() || schedule.NextBillDate.Equals(schedule.LastDateToBill))
                 && (schedule.ProrateLastCharge ?? false))
-                return CalculateProratedAmount((DateTime) schedule.LastDateToBill, DateTime.UtcNow, amount);
+                return CalculateProratedAmount((DateTime) schedule.LastDateToBill, billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow), amount);
 
             //if this is first payment
             if (schedule.StartDate.Equals(DateTime.UtcNow.Date) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
-                return CalculateProratedAmount((DateTime) schedule.FirstRenewal, DateTime.UtcNow, amount);
+                return CalculateProratedAmount((DateTime) schedule.FirstRenewal, billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow), amount);
 
             return amount;
         }
@@ -291,8 +288,8 @@ namespace AfterSchoolLibrary.Services
 
             if (isAmountProrated)
             {
-                convenienceFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, convenienceFee);
-                paymentTypeFee = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, (decimal) paymentTypeFee);
+                convenienceFee = SubscriptionScheduleService.GetProratedAmount(billingAccount, subscriptionSchedule, convenienceFee);
+                paymentTypeFee = SubscriptionScheduleService.GetProratedAmount(billingAccount, subscriptionSchedule, (decimal) paymentTypeFee);
             }
 
             var amountPaidByParent = subscriptionPaymentHistory.AmountInCents / 100m;
