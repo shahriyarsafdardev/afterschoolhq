@@ -271,6 +271,13 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
+        public static SubscriptionSchedule LoadLatestSubscriptionSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).LastOrDefault();
+        }
+
         #endregion
     }
 }
