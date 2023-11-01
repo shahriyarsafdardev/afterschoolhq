@@ -225,8 +225,6 @@ namespace AfterSchoolLibrary.Services
 
             if (chargeStatus.Equals(LastChargeStatus.failed))
             {
-                msgs.Add("Charge failed", MessageType.Error);
-
                 if (subscriptionPaymentHistory.RetryNumber < 3)
                 {
                     subscriptionSchedule.LastChargeStatus = LastChargeStatus.failed;
