@@ -1,10 +1,10 @@
-﻿@model Account
+@model Account
 @{
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
 
     var hostAccounts = (List<Account>) ViewBag.HostAccounts;
 }
-
+@Html.Partial("_GoogleTagScripts")
 
 <div class="row main-content main-content-welcome-pages">
     <div class="welcome-box-width">
