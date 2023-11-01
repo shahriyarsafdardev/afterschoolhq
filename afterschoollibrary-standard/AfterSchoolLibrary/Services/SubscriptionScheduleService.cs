@@ -198,15 +198,16 @@ namespace AfterSchoolLibrary.Services
         public static Decimal GetProratedAmount(SubscriptionSchedule schedule, Decimal amount)
         {
             var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid);
-            var account = rsp.GetSubscriptionPlan().GetAccount();
+            //var account = rsp.GetSubscriptionPlan().GetAccount();
 
             //if this is last payment
-            if (schedule.LastDateToBill.HasValue && schedule.NextBillDate.Equals(schedule.LastDateToBill) && (schedule.ProrateLastCharge ?? false))
-                return CalculateProratedAmount((DateTime) schedule.LastDateToBill, account.ConvertToAccountTimeZone(DateTime.UtcNow), amount);
+            if (schedule.LastDateToBill.HasValue && (schedule.NextBillDate.IsEmpty() || schedule.NextBillDate.Equals(schedule.LastDateToBill))
+                && (schedule.ProrateLastCharge ?? false))
+                return CalculateProratedAmount((DateTime) schedule.LastDateToBill, DateTime.UtcNow, amount);
 
             //if this is first payment
             if (schedule.StartDate.Equals(DateTime.UtcNow.Date) && schedule.ProrateFirstCharge.HasValue && (schedule.ProrateFirstCharge ?? false))
-                return CalculateProratedAmount((DateTime) schedule.FirstRenewal, account.ConvertToAccountTimeZone(DateTime.UtcNow), amount);
+                return CalculateProratedAmount((DateTime) schedule.FirstRenewal, DateTime.UtcNow, amount);
 
             return amount;
         }
@@ -225,7 +226,7 @@ namespace AfterSchoolLibrary.Services
                 UpdateNextBillDateOnSuccess(subscriptionSchedule);
             }
 
-            if (charge.Status.Equals(LastChargeStatus.failed))
+            if (chargeStatus.Equals(LastChargeStatus.failed))
             {
                 msgs.Add("Charge failed", MessageType.Error);
 
