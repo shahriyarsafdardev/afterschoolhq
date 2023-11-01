@@ -298,8 +298,8 @@ namespace AfterSchoolLibrary.Services
             {
                 metaData["PaymentNumber"] = "1"; //as it will be first payment
 
-                var amount = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, subscriptionSchedule.AmountInCents / 100m);
-                var amountToConnect = SubscriptionScheduleService.GetProratedAmount(subscriptionSchedule, 
+                var amount = SubscriptionScheduleService.GetProratedAmount(billingAccount, subscriptionSchedule, subscriptionSchedule.AmountInCents / 100m);
+                var amountToConnect = SubscriptionScheduleService.GetProratedAmount(billingAccount, subscriptionSchedule, 
                     subscriptionSchedule.AmountToConnectAccountInCents);
 
                 var charge = StripeHelper.GetStripeHelperConnectAccount().CreateCharge(
