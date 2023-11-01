@@ -1,4 +1,4 @@
-﻿@model string
+@model string
 
 @{
     var required = "";
@@ -15,6 +15,7 @@
     <div class="editable" id="@ViewData["id"]-div">@Html.Raw(Model)</div>
     <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide"></textarea>
     <textarea name="@(ViewData["name"])_data" id="@(ViewData["id"])_data" class="hide"></textarea>
+    <div id="@ViewData["id"]_count">Character Count: 0 / 4000</div>
 </div>
 
 <script>
@@ -46,6 +47,26 @@
 
         });
 
+
+        var quillEditor = @(javascriptVarName);
+
+        countLetters();
+
+        function countLetters() {
+            var editorContent = quillEditor.getText();
+            var letterCount = editorContent.length - 1; // Subtract 1 from the letter count
+            var countText;
+            if (letterCount > 4000) {
+                countText = "Character Limit Reached " + letterCount + " / 4000";
+                $('#@ViewData["id"]_count').css({ 'color': 'red', 'font-weight': 'bold' });
+            } else {
+                countText = "Character Count: " + letterCount + " / 4000";
+                $('#@ViewData["id"]_count').css({ 'color': 'black', 'font-weight': 'bold' });
+            }
+
+            $('#@ViewData["id"]_count').text(countText);
+        }
+
         @(javascriptVarName).getModule('toolbar').addHandler('image', () => {
             selectLocalImage@(javascriptAppendName)();
         });
@@ -53,17 +74,18 @@
         valueOnPageLoadFor_@javascriptVarName = @(javascriptVarName).getText().trim();
 
         $(".reset").on('click', function () {
-             @(javascriptVarName).root.innerHTML = valueOnPageLoadFor_@javascriptVarName;
-             $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
-             $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
+            @(javascriptVarName).root.innerHTML = valueOnPageLoadFor_@javascriptVarName;
+            $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
+            $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
         });
-    });
 
- 
 
-    @(javascriptVarName).on('text-change', function () {
-        $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
-        $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
+
+        @(javascriptVarName).on('text-change', function () {
+            $('#@ViewData["id"]').val(@(javascriptVarName).root.innerHTML);
+            $('#@ViewData["id"]').attr('data', @(javascriptVarName).getText());
+            countLetters();
+        });
     });
 
 
