@@ -49,6 +49,8 @@
         var billingType = plan.BillingPeriodTypeId == BillingPeriodType.Month || plan.BillingPeriodTypeId == BillingPeriodType.Week ?
             plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() : null;
         var planStartDate = SessionVariables.CurrentRegistrant.GetPlanStartDate(plan, participationObject);
+        var showProrateMessage = ViewBag.ShowProrateInMessage;
+
 
         var startDateText = participationObject.OwnerAccount.ConvertFromAccountTimeZone(planStartDate).Date == DateTime.UtcNow.Date
             ? "today"
@@ -57,7 +59,7 @@
         {
             var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
             <span>
-                @(includePlus ? "plus a" : "") <strong>prorated</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription <b>today</b>.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
+                @(includePlus ? "plus " : "") <strong>@(showProrateMessage ? " a prorated"  : "")</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription <b>today</b>.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
             </span>
         }
         else
