@@ -24,9 +24,10 @@ namespace AfterSchoolLibrary.Services
             var activity = am.GetActivity(msgs, dc);
             var account = activity.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
+            var fromName = loggedInUser.DisplayName;
             
 
-            am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, dc);
+            am.SendActivityMessage(account, loggedInUser, activity.Name, fromName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(activity, account, loggedInUser, msgs, dc);
@@ -230,7 +231,7 @@ namespace AfterSchoolLibrary.Services
                     account, 
                     loggedInUser,
                     activityName,
-                    loggedInUser.DisplayName, 
+                    fromName, 
                     replyToEmail, 
                     replyToName, 
                     activityMessage.Subject,

@@ -588,7 +588,7 @@ namespace AfterSchoolLibrary.Services
 
                 var resource = ActivityMessageService.SendTextMessage(
                     phoneNumber,
-                    loggedInUser.DisplayName,
+                    senderName,
                     subject,
                     activityName,
                     message.Uid.ToString(),
