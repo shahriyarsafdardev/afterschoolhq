@@ -2108,9 +2108,6 @@ namespace AfterSchool.Controllers
                     return RedirectToAction("select");
             }
 
-            if (subscriptionPlan.IsNotEmpty())
-                ViewBag.IsProrated = subscriptionPlan.ProrateFirstCharge ?? false;
-
             if (participationObject.SubscriptionPlans.IsNotEmpty() && participationObject.SubscriptionPlans.Any())
             {
                 var proratingCalculation = new ProratingCalculationHelper(
@@ -2120,10 +2117,14 @@ namespace AfterSchool.Controllers
                                                 PaymentType.CreditCard,
                                                 msgs);
 
+                ViewBag.IsProrated = proratingCalculation.GetIsProrated();
+                ViewBag.ShowProrateInMessage = participationObject.GetSubscriptionPlan().IsNotEmpty() ? 
+                    participationObject.GetSubscriptionPlan().ProrateFirstCharge ?? false : false;
+
                 if (proratingCalculation.GetIsProrated())
                     ViewBag.NextAnchorDate = proratingCalculation.GetAnchorDate();
             }
-            
+
             return View("Payment");
         }
 
