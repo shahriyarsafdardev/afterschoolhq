@@ -448,29 +448,31 @@
     function CheckFormRestrictions(formID)
     {
         if ("@Model.ID.IsNotEmpty()" == "True")
-        {
-            showLoader();
-            $.get(
-                `/org/activity/GetFormInfo?formID=${formID}`,
-                function (data)
-                {
-                    hideLoader();
-                    if (data && data.status == 'ok') {  
-                        if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
-                            $("#modal-age-restriction-error").addClass("md-show");
+        {           
+            if (formID != 0){
+                showLoader();
+                $.get(
+                    `/org/activity/GetFormInfo?formID=${formID}`,
+                    function (data)
+                    {
+                        hideLoader();
+                        if (data && data.status == 'ok') {
+                            if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
+                                $("#modal-age-restriction-error").addClass("md-show");
+                            }
+                            if (!data.isFormGradeRes && "@isActivityGradeRestricted" == "True") {
+                                $("#modal-grade-restriction-error").addClass("md-show");
+                            }
+                            if (!data.isFormGenderRes && "@isActivityGenderRestricted" !== "None") {
+                                $("#modal-gender-restriction-error").addClass("md-show");
+                            }
                         }
-                        if (!data.isFormGradeRes && "@isActivityGradeRestricted" == "True") {
-                            $("#modal-grade-restriction-error").addClass("md-show");
-                        }
-                        if (!data.isFormGenderRes && "@isActivityGenderRestricted" !== "None") {
-                            $("#modal-gender-restriction-error").addClass("md-show");
+                        else {
+                            Notifications.showErrors(data.messages);
                         }
                     }
-                    else {
-                        Notifications.showErrors(data.messages);
-                    }
-                }
-            );
+                );
+            }
         }
     };
 
