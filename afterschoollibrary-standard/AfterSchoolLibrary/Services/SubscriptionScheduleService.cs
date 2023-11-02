@@ -164,6 +164,7 @@ namespace AfterSchoolLibrary.Services
             SystemMessages msgs, DatabaseConnection dc = null)
         {
             var chargeStatus = (LastChargeStatus) Enum.Parse(typeof(LastChargeStatus), charge.Status);
+            var plan = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(subscriptionSchedule.Uid, msgs);
 
             if (chargeStatus.Equals(LastChargeStatus.succeeded))
             {
@@ -187,6 +188,9 @@ namespace AfterSchoolLibrary.Services
                     subscriptionSchedule.NextBillDate = null;
                     subscriptionSchedule.DateCancelled = DateTime.UtcNow;
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
+                    plan.DateCancelled = DateTime.UtcNow;
+
+                    msgs.AddRange(plan.Save());
                 }
             }
 

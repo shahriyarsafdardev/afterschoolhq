@@ -166,10 +166,7 @@
                                     <td>
                                         @if (regStatus != RegistrationStatus.Past)
                                         {
-                                            if (subscriptionSchedule.IsNotEmpty() && subscriptionSchedule.IsCancelled.Equals(true))
-                                            {
-                                            }
-                                            else if(!plan.DateCancelled.HasValue)
+                                            if(!plan.DateCancelled.HasValue)
                                             {
                                                 Html.RenderPartial("Activities/_WithdrawLink",
                                                     participationVM,
