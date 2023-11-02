@@ -433,7 +433,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "CostDescription", SqlDbType.NVarChar, "1000");
                 _dp.Add(className, "Uid", SqlDbType.UniqueIdentifier);
                 _dp.Add(className, "Details", SqlDbType.NVarChar, "MAX");
-                _dp.Add(className, "LocationDetails", SqlDbType.NVarChar, "4000");
+                _dp.Add(className, "LocationDetails", SqlDbType.NVarChar, "MAX");
                 _dp.Add(className, "ScheduleDetails", SqlDbType.NVarChar, "4000");
                 _dp.Add(className, "InstructorId", SqlDbType.Int);
                 _dp.Add(className, "ContactName", SqlDbType.NVarChar, "50");

@@ -47,6 +47,11 @@ namespace AfterSchoolLibrary.Helpers
             "yopmail.com",
         };
 
+        public static string CleanText(string input)
+        {
+            string cleanedText = Regex.Replace(input, @"<(img|a)[^>]*>|""[^""]*""|<.*?>", string.Empty);
+            return cleanedText;
+        }
         public static string Environment
         {
             get

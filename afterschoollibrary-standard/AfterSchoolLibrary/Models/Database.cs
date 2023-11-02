@@ -1324,8 +1324,8 @@ namespace AfterSchoolLibrary.Models
             Migration_20230327_AddDefaultStudentForm.Do(amsgs,adc);
             Migration_20230403_DefaultStudentFormMiddleNameStudentId.Do(amsgs,adc);
             Migration_20230425_UpdateRegistrationIsDeleted.Do(amsgs,adc);
-            Migration_20230525_UpdateLocationDistanceFromOrigin.Do(amsgs,adc); 
-            Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc); 
+            Migration_20230525_UpdateLocationDistanceFromOrigin.Do(amsgs,adc);
+            Migration_20230525_UpdateLocationLatitude.Do(amsgs,adc);
             Migration_20230525_UpdateLocationLongitude.Do(amsgs,adc);
             // Migration_20230525_UpdateLocationName.Do(amsgs, adc);
             Migration_20230620_AddFormQuestionAnswerRidQdtidIndex.Do(amsgs,adc);
@@ -1336,6 +1336,7 @@ namespace AfterSchoolLibrary.Models
             Migration_20230918_StudentNotes.Do(amsgs,adc);
             Migration_20231010_DropAccountPropertyValueIndex.Do(amsgs, adc);
             Migration_20231019_AlterAccountPropertyValue.Do(amsgs, adc);
+            Migration_20131101_AlterActivityLocationDetails.Do(amsgs, adc);
         }
 
         public static DatabaseConnection StartTransaction()
