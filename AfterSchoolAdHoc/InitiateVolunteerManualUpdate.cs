@@ -423,8 +423,7 @@ namespace AfterSchoolAdHoc
                         count++;
                         Console.WriteLine($"Current Count is: {count}");
                         var backgroundCheck = BackgroundCheck.LoadByWebUserId(webUser.ID.Value, true, msgs, dc).FirstOrDefault();
-                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && (backgroundCheck.IsEmpty() || 
-                                                                                        IsBackgroundCheckExpired(backgroundCheck,sToken,credentials)) &&
+                        if (volunteerApproval.ExpirationDate < DateTime.UtcNow.Date && backgroundCheck.IsEmpty() &&
                             (volunteerApproval.ExpirationDate == DateTime.UtcNow.ToString("07/01/2023").ToDateTime() ||
                              volunteerApproval.ExpirationDate == expirationDate))
                         {
