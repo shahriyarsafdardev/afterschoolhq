@@ -51,36 +51,6 @@ namespace AfterSchoolLibrary.Services
             return subscriptionSchedule;
         }
 
-        public static List<SubscriptionSchedule> GetSubscriptionSchedulePendingToday(SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            var subscriptionSchedulesNotCancelled = SubscriptionSchedule.LoadSubscriptionSchedulesForToday(msgs, dc);
-            var currentDate = DateTime.UtcNow.Date;
-            var subscriptionSchedulespendingToday = subscriptionSchedulesNotCancelled
-               .Where(x =>
-                    x.NextBillDate.HasValue &&
-                    x.NextBillDate.Value.Date.Equals(currentDate)
-                )
-                .ToList();
-
-            return subscriptionSchedulespendingToday;
-        }
-
-        public static List<SubscriptionSchedule> GetSubscriptionSchedulePendingInThreeDays(SystemMessages msgs,
-           DatabaseConnection dc = null)
-        {
-            var subscriptionSchedulesNotCancelled = SubscriptionSchedule.LoadSubscriptionSchedulesForToday(msgs, dc);
-            var date = DateTime.UtcNow.AddDays(3).Date;
-            var subscriptionSchedules = subscriptionSchedulesNotCancelled
-               .Where(x =>
-                    x.NextBillDate.HasValue &&
-                    x.NextBillDate.Value.Date.Equals(date) &&
-                    (x.BillingPeriodType == BillingPeriodType.Month || x.BillingPeriodType == BillingPeriodType.Year)
-                )
-                .ToList();
-            return subscriptionSchedules;
-        }
-
         public static List<DateTime> GetPaymentDates(DateTime startDate, DateTime firstRenewalDate, DateTime endDate, BillingPeriodType billingPeriodType)
         {
             List<DateTime> paymentDates = new List<DateTime>()
