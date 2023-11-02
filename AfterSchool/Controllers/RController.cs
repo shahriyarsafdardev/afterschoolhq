@@ -111,6 +111,7 @@ namespace AfterSchool.Controllers
                     ViewBag.AccountUniqueName = account.UniqueName;
                     ViewBag.AccountName = account.Name;
                     ViewBag.AccountId = account.ID.ToString();
+                    ViewBag.IsDirectoryTypeVolunteer = account.HasFeature(FeatureType.ManageVolunteerDirectory, msgs);
 
                     if (profile.IsNotEmpty())
                     {

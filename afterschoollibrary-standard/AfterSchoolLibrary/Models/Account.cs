@@ -1348,6 +1348,44 @@ namespace AfterSchoolLibrary.Models
                 return null;
             }
         }
+        
+        public static DataTable SearchIpsVisitorAccountsByHostAccount(int hostAccountId, string search, string enrollToday,
+            string gender, string starting, decimal? latitude, decimal? longitude, int pageNum,
+            int pageSize, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            using (var connection = new SqlConnection(BasicLibrary.Utilities.ConnectionString))
+            {
+                var sql = SearchQuery.LoadIpsAccountSearchQuery(enrollToday, starting, latitude, longitude, pageNum,
+                    pageSize, hostAccountId > 0);
+
+                var command = new SqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
+                command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : "\"\"");
+                command.Parameters.AddWithValue("@Gender", gender.IsNotEmpty() ? gender : Convert.DBNull);
+                command.Parameters.AddWithValue("@Latitude",
+                    latitude.HasValue && longitude.HasValue ? latitude.Value : Convert.DBNull);
+                command.Parameters.AddWithValue("@Longitude",
+                    latitude.HasValue && longitude.HasValue ? longitude.Value : Convert.DBNull);
+
+                try
+                {
+                    connection.Open();
+                    using (var dr = command.ExecuteReader())
+                    {
+                        var tb = new DataTable();
+                        tb.Load(dr);
+                        connection.Dispose();
+                        return tb;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                return null;
+            }
+        }
 
         public static List<string> LoadAllSubdomains(SystemMessages msgs = null, DatabaseConnection dc = null)
         {

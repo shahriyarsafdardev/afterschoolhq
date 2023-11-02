@@ -2,7 +2,9 @@
     var accountUniqueName = (string) ViewBag.AccountUniqueName;
     var accountName = (string)ViewBag.AccountName;
     var msgs = (SystemMessages) ViewBag.Messages;
-    var accountId = ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0;
+    var fiscalAccountId = 84;
+    var isVolunteerDirectory = (bool) ViewBag.IsDirectoryTypeVolunteer;
+    var accountId = isVolunteerDirectory ? fiscalAccountId : (ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0);
     var primaryColor = (string) ViewBag.PrimaryColor;
     var logoUrl = (string) ViewBag.LogoUrl;
     var headerImageUrl = (string) ViewBag.HeaderImageUrl;
@@ -125,13 +127,14 @@
 <div class="search-container">
     @{ Html.RenderPartial("~/Views/Shared/_DirectoryHeader.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"website", website}, {"logoUrl", logoUrl}}); }
 
-    @{ Html.RenderPartial("~/Views/Shared/_DirectoryContainer.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"grades", grades}}); }
+    @{ Html.RenderPartial("~/Views/Shared/_DirectoryContainer.cshtml", null, new ViewDataDictionary {{"primaryColor", primaryColor}, {"grades", grades},
+           {"isVolunteerDirectory", isVolunteerDirectory}}); }
 </div>
 @{ Html.RenderPartial("~/Views/Shared/_ISYPIntroModal.cshtml", logoUrl); }
 
 @{ Html.RenderPartial("~/Views/Shared/_DirectoryContactUs.cshtml"); }
 
-@{ Html.RenderPartial("~/Views/Shared/_DirectoryLoadScript.cshtml", accountUniqueName); }
+@{ Html.RenderPartial("~/Views/Shared/_DirectoryLoadScript.cshtml", accountUniqueName, new ViewDataDictionary {{"isVolunteerDirectory", isVolunteerDirectory}}); }
 
 @section Scripts
 {
@@ -187,12 +190,16 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-            let url = '@Url.Action("GetAccounts", "Search", new {Area = ""})';
+            let url = '@Url.Action(new Action(isVolunteerDirectory ? "GetIpsAccounts" : "GetAccounts"), "Search", new {Area = ""})';
+            let dataParams = { accountId: '@accountId', enrollToday, search, grades, ages, gender, services, timing, pricing,
+                                                 cost, starting, other, special, zipCode, latitude, longitude, pageNum: page };
+            if(@isVolunteerDirectory.ToString().ToLower() === "true")
+                dataParams = { accountId: '@accountId', enrollToday, search, gender, starting, zipCode, latitude, longitude, pageNum: page };
+            
             $.ajax({
                 type: "POST",
                 url: url,
-                data: { accountId: '@accountId', enrollToday, search, grades, ages, gender, services, timing, pricing,
-                    cost, starting, other, special, zipCode, latitude, longitude, pageNum: page },
+                data: dataParams,
                 success: function (data) {
                     if (data && data.success === true) {
 
@@ -251,7 +258,7 @@
                         else if (data && data.status === "no-result" && page <= 0) {
                             $('#notification-contact-us').show();
                             $('#search-result').html('');
-                            $('.directory-search-no-result').html('<p>There are no activities that match this criteria. <br> To find more, remove filters.</p>');
+                            $('.directory-search-no-result').html('<p>There are no '+'@(isVolunteerDirectory ? "volunteer opportunities" : "activities") that match this criteria. <br> To find more, remove filters.</p>');
                             isReachedScrollEnd = true;
                             page = 0;
                         }

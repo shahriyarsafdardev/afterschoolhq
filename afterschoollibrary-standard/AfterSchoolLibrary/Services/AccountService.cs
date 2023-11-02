@@ -3669,6 +3669,85 @@ namespace AfterSchoolLibrary.Services
 
             return null;
         }
+        
+        public static List<SearchDirectoryResponse> SearchIpsDirectoryAccounts(int hostAccountId, string search,
+            string enrollToday,string gender, string starting, decimal? latitude, decimal? longitude, int pageNum, 
+            int pageSize, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            try
+            {
+                var accountDataTable = Account.SearchIpsVisitorAccountsByHostAccount(hostAccountId, search, enrollToday,
+                    gender, starting, latitude, longitude, pageNum, pageSize, msgs: msgs);
+
+                if (!accountDataTable.IsNotEmpty() || !accountDataTable.Rows.Any())
+                {
+                    return new List<SearchDirectoryResponse>();
+                }
+
+                var listResponse = new List<SearchDirectoryResponse>();
+                foreach (DataRow row in accountDataTable.Rows)
+                {
+                    if (!row.IsNotEmpty())
+                    {
+                        continue;
+                    }
+                    var response = new SearchDirectoryResponse
+                    {
+                        AccountName = row["AccountName"].IsNotEmpty() ? row["AccountName"].ToString() : "",
+                        AccountUid = new Guid(row["AccountUid"].ToString()),
+                        HomePageUrl = $"{Utilities.BaseUrl()}/{row["AccountUniqueName"]}",
+                        IsAccountNowEnrolling = row["IsAccountNowEnrolling"].IsNotEmpty() &&
+                                                Convert.ToBoolean(row["IsAccountNowEnrolling"]),
+                        ProfileHeadline = row["Headline"].IsNotEmpty()
+                            ? row["Headline"].ToString().MaxChars(70, "...")
+                            : "",
+                        TotalDifference = accountDataTable.Columns.Contains("TotalDifference") &&
+                                          row["TotalDifference"].IsNotEmpty()
+                            ? Convert.ToDecimal(row["TotalDifference"])
+                            : 0,
+                    };
+
+                    var headerImageUrl = row["HeaderImage"].IsNotEmpty() ? row["HeaderImage"].ToString() : "";
+                    var logo = row["Logo"].IsNotEmpty() ? row["Logo"].ToString() : "";
+                    var ah = Utilities.GetNewAmazonHelper();
+
+                    if (headerImageUrl.IsNotBlank())
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(headerImageUrl);
+                    else if (logo.IsNotBlank())
+                        response.ProfileHeaderImageUrl = ah.GetFileLink(logo);
+
+                    if (row["LocationId"].IsNotEmpty())
+                    {
+                        //..Location, ProfileHeaderImageUrl
+                        var location = Location.Load(Convert.ToInt32(row["LocationId"]));
+                        response.Latitude = location.Latitude.IsNotEmpty()
+                            ? location.Latitude.Value.ToString(CultureInfo.InvariantCulture)
+                            : "";
+                        response.Longitude = location.Longitude.IsNotEmpty()
+                            ? location.Longitude.Value.ToString(CultureInfo.InvariantCulture)
+                            : "";
+                        response.Location = location.FormatCityState(false);
+
+                        if (response.ProfileHeaderImageUrl.IsEmpty())
+                            response.ProfileHeaderImageUrl = location.GetGoogleMapsImageUrl(1500, 600);
+                    }
+
+                    listResponse.Add(response);
+                }
+
+                if (latitude.IsNotEmpty() && latitude != 0 && longitude.IsNotEmpty() && longitude != 0)
+                    return listResponse.DistinctBy(m => m.AccountName).ToList();
+
+                return listResponse.OrderBy(m => m.Priority).ThenBy(m => Guid.NewGuid()).ToList();
+            }
+            catch (Exception ex)
+            {
+                msgs.Add(new SystemMessage {Exception = ex, Text = ex.Message, MessageType = MessageType.Error});
+                Utilities.SystemErrorLog(ex);
+            }
+
+            return null;
+        }
 
         public static string GetCostRangeString(decimal? costLow, decimal? costHigh)
         {

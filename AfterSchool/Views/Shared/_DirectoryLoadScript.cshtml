@@ -1,5 +1,7 @@
 ﻿@model string 
-
+@{
+    var isVolunteerDirectory = ViewData.ContainsKey("isVolunteerDirectory") && ViewData["isVolunteerDirectory"] != null ? (bool) ViewData["isVolunteerDirectory"] : false;
+}
 <style>
     .additional-card-information {
         font-size: 17px;
@@ -72,18 +74,26 @@
                         <br />
                     <% } %>
                 </h4>
-                <ul class="additional-card-information">
-                    <% if(searchResult.IsRestrictByGrade) { %>
-                        <li>Grade: <%= searchResult.GradeStart %> – <%= searchResult.GradeEnd %></li>
-                    <% } else { %>
-                        <li>Ages: <%= searchResult.AgeStart %> – <%= searchResult.AgeEnd %></li>
-                    <% } %>
-                    <% if (searchResult.CostRange) { %>
-                        <li>Cost: <%= searchResult.CostRange %></li>
-                    <% } %>
-                </ul>
-
-                <a href="<%= searchResult.HomePageUrl %>?dir=@Model" class="btn btn-register btn-block join-directory-btn">
+                @{
+                    if (!isVolunteerDirectory)
+                    {
+                        <ul class="additional-card-information">
+                            <% if(searchResult.IsRestrictByGrade) { %>
+                                <li>Grade: <%= searchResult.GradeStart %> – <%= searchResult.GradeEnd %></li>
+                            <% } else { %>
+                                <li>Ages: <%= searchResult.AgeStart %> – <%= searchResult.AgeEnd %></li>
+                            <% } %>
+                            <% if (searchResult.CostRange) { %>
+                                <li>Cost: <%= searchResult.CostRange %></li>
+                            <% } %>
+                        </ul>
+                    }
+                    else
+                    {
+                      <br>   
+                    }
+                }
+                    <a href="<%= searchResult.HomePageUrl %>?dir=@Model" class="btn btn-register btn-block join-directory-btn">
                     Learn More
                 </a>
 

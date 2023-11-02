@@ -69,6 +69,48 @@ namespace AfterSchool.Controllers
             //.. no result found
             return Json(new {success = false, status = "no-result"}, JsonRequestBehavior.AllowGet);
         }
+        
+        public JsonResult GetIpsAccounts(string accountId, string search, string enrollToday,
+            string gender, string starting, string zipCode, decimal? latitude, decimal? longitude, int pageNum = 0)
+        {
+            const int pageSize = 9;
+
+            var msgs = new SystemMessages();
+
+            var parsedGender = ParseAndLoadGender(gender);
+            var showDistance = zipCode.IsNotEmpty();
+
+            if (showDistance && !latitude.HasValue && !longitude.HasValue)
+                (latitude, longitude) = GetLatitudeAndLongitude(zipCode);
+
+            var searchedAccounts = AccountService.SearchIpsDirectoryAccounts(accountId.ToInteger(), search, enrollToday,
+                parsedGender, starting, latitude, longitude, pageNum, pageSize, msgs);
+
+            if (searchedAccounts.IsNotEmpty() && searchedAccounts.Any())
+                //.. call success and records found
+                return Json(new
+                    {
+                        success = true,
+                        status = "ok",
+                        data = searchedAccounts,
+                        pageNum,
+                        showDistance,
+                        latitude,
+                        longitude,
+                    },
+                    JsonRequestBehavior.AllowGet);
+            if (msgs.IsNotEmpty() && msgs.Count > 0)
+                //.. something went wrong, error occured
+                return Json(
+                    new
+                    {
+                        success = false, status = "error", data = msgs.ToList().Select(msg => new {msg.Text}), pageNum,
+                        showDistance,
+                    }, JsonRequestBehavior.AllowGet);
+
+            //.. no result found
+            return Json(new {success = false, status = "no-result"}, JsonRequestBehavior.AllowGet);
+        }
 
         #region Private Methods
 

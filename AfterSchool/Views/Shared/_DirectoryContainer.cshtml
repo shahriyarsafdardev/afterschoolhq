@@ -1,6 +1,7 @@
 ﻿@{
     var primaryColor = ViewData.ContainsKey("primaryColor") && ViewData["primaryColor"] != null ? ViewData["primaryColor"].ToString() : string.Empty;
     var grades = ViewData.ContainsKey("grades") && ViewData["grades"] != null ? (List<GradeLevel>) ViewData["grades"] : new List<GradeLevel>();
+    var isVolunteerDirectory =  ViewData.ContainsKey("isVolunteerDirectory") && ViewData["isVolunteerDirectory"] != null ? (bool) ViewData["isVolunteerDirectory"] : false;
 }
 
 <style>
@@ -109,7 +110,8 @@
             <i id="search-sidebar-arrow" class="fa fa-chevron-circle-left" aria-hidden="true"></i>
         </span>
 
-        @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml", null, new ViewDataDictionary {{"grades", grades}}); }
+        @{ Html.RenderPartial("~/Views/Shared/_DirectoryFilters.cshtml", null, new ViewDataDictionary {{"grades", grades},
+               {"isVolunteerDirectory", isVolunteerDirectory}}); }
 
     </div>
 
@@ -148,14 +150,18 @@
             <div id="ProgressBar">
                 <img src="~/Assets/img/loading-spinner.gif" alt="Loading more results">
             </div>
-
-            <div id="notification-contact-us" class="text-center sticky-bottom">
-                <button class="btn contact-us-button" type="button" data-toggle="modal" data-target="#ContactUsModal">
-                    <span>Looking for something else?</span>
-                    <span class="request-a-program-call-to-action-span">Request a Program</span>
-                </button>
-            </div>
-            <div class="clearfix"></div>
+@{
+    if (!isVolunteerDirectory)
+    {
+        <div id="notification-contact-us" class="text-center sticky-bottom">
+            <button class="btn contact-us-button" type="button" data-toggle="modal" data-target="#ContactUsModal">
+                <span>Looking for something else?</span>
+                <span class="request-a-program-call-to-action-span">Request a Program</span>
+            </button>
+        </div>
+        <div class="clearfix"></div>
+    }
+}
         </div>
     </div>
 

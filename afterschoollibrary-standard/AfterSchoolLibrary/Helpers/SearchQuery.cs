@@ -357,5 +357,296 @@ namespace AfterSchoolLibrary.Helpers
 
             return sql;
         }
+        
+        public static string LoadIpsAccountSearchQuery(string enrollToday, string starting,
+            decimal? latitude, decimal? longitude, int pageNum, int pageSize = 9, bool searchHostAccount = false)
+        {
+            var sql = @"
+            IF(OBJECT_ID('tempdb..#temp_accounts_1') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_1 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_3') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_3 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_4') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_4 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_5') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_5 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_6') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_6 END";
+
+            sql += "\n";
+
+            sql += $@"
+            SELECT *
+			INTO #temp_accounts_1
+			FROM (
+                SELECT 
+                    a.Id as AccountId,
+                    a.Uid as AccountUid, 
+                    a.Name as AccountName,                    
+                    a.UniqueName as AccountUniqueName,
+					ap.Headline,
+                    ap.HeaderImage,
+                    ap.Logo,
+                    ap.LocationId,
+                    {(latitude.HasValue && longitude.HasValue ? "geography::Point(@Latitude, @Longitude, 4326).STDistance(geography::Point(loc.Latitude, " +
+                                                                "loc.Longitude, 4326))/1609.34 as TotalDifference," : "0 as TotalDifference,")}
+                    CASE WHEN CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date) THEN 1 ELSE 0 END as IsAccountNowEnrolling
+                FROM 
+                    Account a ";
+
+            if (searchHostAccount)
+                sql += @"
+                    INNER JOIN AccountRelationship ar ON a.ID = ar.VisitorAccountId ";
+
+
+            sql += @"
+                    LEFT JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1";
+
+            if (starting.IsNotEmpty())
+                sql += @"
+                    LEFT JOIN ActivitySchedule acs ON act.ActivityScheduleId = acs.ID --this join will be applied only in case of Starts in filter";
+
+            sql += @"
+					LEFT JOIN ActivityRegistrationPeriod arp on arp.ActivityId = act.ID and arp.IsActive = 1
+				    LEFT JOIN RegistrationPeriod rp on rp.ID = arp.RegistrationPeriodId
+                    LEFT JOIN AccountProfile ap ON ap.AccountId = a.ID
+                    LEFT JOIN Location loc ON ap.LocationId = loc.ID
+                WHERE";
+
+            if (searchHostAccount)
+                sql += @"
+                        ((@AccountId IS NULL) OR ar.HostAccountId = @AccountId) AND";
+
+            sql += @"
+                    a.IsDeleted = 0 
+                    AND a.IsTest = 0
+                    AND a.IsActive = 1
+                    AND a.FiscalAccountId = @AccountId    
+                    AND (
+						    (@SearchTerm = '""""') OR
+						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
+                            CONTAINS((properties.Value), @SearchTerm) OR
+                            CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
+					    )
+                    AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
+            ";
+
+            if (enrollToday.IsNotEmpty() && enrollToday.Contains("enroll"))
+                sql += @"
+                    AND CAST(GETDATE() as date) BETWEEN CAST(rp.StartDateTime as date) AND CAST(rp.EndDateTime as date)
+					   ";
+
+            if (starting.IsNotEmpty())
+            {
+                sql += @"
+                    AND ((@Starting IS NULL)";
+
+                if (starting.Contains("starting_0_7"))
+                    sql +=
+                        @" OR acs.StartDate between dateadd(dd, 0, cast(getdate() as date)) AND dateadd(dd, 7, cast(getdate() as date))";
+
+                if (starting.Contains("starting_7_28"))
+                    sql +=
+                        @" OR acs.StartDate between dateadd(dd, 8, cast(getdate() as date)) AND dateadd(dd, 28, cast(getdate() as date))";
+
+                if (starting.Contains("starting_30_90"))
+                    sql +=
+                        @" OR acs.StartDate between dateadd(dd, 29, cast(getdate() as date)) AND dateadd(dd, 90, cast(getdate() as date))";
+
+                sql += @")";
+            }
+
+            sql += @"
+            ) AS fltData";
+
+            if (latitude.HasValue && longitude.HasValue)
+            {
+                sql += $@"
+            
+	            SELECT 
+					DISTINCT AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 0 as Priority, TotalDifference
+				FROM #temp_accounts_1
+				ORDER BY TotalDifference asc
+	            OFFSET {pageNum * pageSize} ROWS 
+				FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+	            
+				DROP TABLE #temp_accounts_1";
+
+                return sql;
+            }
+
+            sql += $@"
+			if ((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1) > {(pageNum + 1) * pageSize})
+			   begin 
+				   if((Select DISTINCT Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')) > 10)
+						begin
+							SELECT *
+							INTO #temp_accounts_2
+							FROM (SELECT DISTINCT 
+											AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+											Headline, HeaderImage, Logo, LocationId, 1 as Priority, TotalDifference
+											From #temp_accounts_1 
+									Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')
+							
+									) as filteredData
+								
+							SELECT DISTINCT
+								AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+								Headline, HeaderImage, Logo, LocationId, Priority, TotalDifference
+							FROM #temp_accounts_2
+							ORDER BY Priority asc
+                            OFFSET {pageNum * pageSize} ROWS 
+		                    FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+					 end                      
+
+				   else if ((Select Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND HeaderImage is not null ) > {(pageNum + 1) * pageSize})
+						begin 
+						SELECT *
+						INTO #temp_accounts_3
+						FROM(
+							 SELECT DISTINCT 
+										AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+										Headline, HeaderImage, Logo, LocationId, 1 as Priority, TotalDifference
+										From #temp_accounts_1 
+								Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')		
+								
+							 UNION ALL				
+							 
+							 SELECT DISTINCT 
+										AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+										Headline, HeaderImage, Logo, LocationId, 2 as Priority, TotalDifference
+										From #temp_accounts_1 
+								Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')	
+								
+								) as filteredData
+
+                          	SELECT DISTINCT
+								AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+								Headline, HeaderImage, Logo, LocationId, Priority, TotalDifference
+							FROM #temp_accounts_3
+							ORDER BY Priority asc
+                            OFFSET {pageNum * pageSize} ROWS 
+		                    FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+						end
+				   else if ((Select  Count(DISTINCT AccountId) FROM    #temp_accounts_1  Where IsAccountNowEnrolling = 1 AND Headline is not null  ) > {(pageNum + 1) * pageSize})
+						begin
+						 SELECT *
+						INTO #temp_accounts_4
+						FROM(
+							SELECT DISTINCT 
+												AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+												Headline, HeaderImage, Logo, LocationId, 1 as Priority, TotalDifference
+												From #temp_accounts_1 
+							   Where IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')	
+							 UNION ALL		
+							 SELECT DISTINCT 
+										AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+										Headline, HeaderImage, Logo, LocationId, 2 as Priority, TotalDifference
+										From #temp_accounts_1 
+								Where IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')								
+						   			
+																											
+						  ) as filteredData
+
+						   SELECT DISTINCT
+								AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+								Headline, HeaderImage, Logo, LocationId, Priority, TotalDifference
+							FROM #temp_accounts_4
+							ORDER BY Priority asc
+                            OFFSET {pageNum * pageSize} ROWS 
+		                    FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+						end
+				   else
+					   begin
+							SELECT *
+							INTO #temp_accounts_5
+							FROM(SELECT DISTINCT 
+											AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+											Headline, HeaderImage, Logo, LocationId, 1 as Priority, TotalDifference
+											From #temp_accounts_1 
+									Where IsAccountNowEnrolling = 1 
+							
+							
+									) as filteredData
+
+							SELECT DISTINCT
+								AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+								Headline, HeaderImage, Logo, LocationId, Priority, TotalDifference
+							FROM #temp_accounts_5
+							ORDER BY Priority asc
+                           OFFSET {pageNum * pageSize} ROWS 
+		                   FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+					  end
+		     end
+			else
+			 begin
+				SELECT * INTO #temp_accounts_6 FROM
+			    (  --accounts with current activities or now enrolling and has headerimage and has headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 1 as Priority, TotalDifference
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is not null AND Headline != '')					
+				UNION ALL
+
+				-- accounts with now enrolling and has headerimage but not headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 2 as Priority, TotalDifference
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is not null AND (Headline is null or Headline = '')
+				UNION ALL
+
+				-- accounts  with now enrolling and has no headerimage but headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 3 as Priority, TotalDifference
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is not null AND Headline != '')
+
+				UNION ALL
+
+				-- accounts  with now enrolling but without headerimage and headline
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 4 as Priority, TotalDifference
+				FROM #temp_accounts_1 
+				WHERE 
+					IsAccountNowEnrolling = 1 AND HeaderImage is null AND (Headline is null or Headline = '')
+
+				UNION ALL
+
+
+				-- all other accounts
+				SELECT DISTINCT 
+					AccountId, AccountUid, AccountName, AccountUniqueName, 0 as IsAccountNowEnrolling, 
+					Headline, HeaderImage, Logo, LocationId, 5 as Priority, TotalDifference
+				FROM #temp_accounts_1
+				WHERE
+					AccountId NOT IN (
+						SELECT DISTINCT AccountId FROM #temp_accounts_1 
+						WHERE IsAccountNowEnrolling = 1		
+					)
+
+			 ) as Filterdata
+
+			 SELECT DISTINCT
+							AccountId, AccountUid, AccountName, AccountUniqueName, IsAccountNowEnrolling, 
+							Headline, HeaderImage, Logo, LocationId, Priority, TotalDifference
+						FROM #temp_accounts_6
+						ORDER BY Priority asc
+               OFFSET {pageNum * pageSize} ROWS 
+		       FETCH {(pageNum == 0 ? "first" : "next")} {pageSize} ROWS only;
+		    end
+
+			DROP TABLE #temp_accounts_1
+            IF(OBJECT_ID('tempdb..#temp_accounts_2') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_2 END 
+			IF(OBJECT_ID('tempdb..#temp_accounts_3') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_3 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_4') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_4 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_5') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_5 END
+			IF(OBJECT_ID('tempdb..#temp_accounts_6') IS NOT NULL) BEGIN DROP TABLE #temp_accounts_6 END";
+
+            return sql;
+        }
     }
 }
