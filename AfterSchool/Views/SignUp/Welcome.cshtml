@@ -21,7 +21,7 @@
     var showInviteWelcome = Model.InvitingAccount.IsNotEmpty();
     var suspiciousDomains = (List<string>)ViewBag.SuspiciousDomains;
 }
-@Html.Partial("_GoogleTagScripts")
+@Html.Partial("~/Views/Shared/_GoogleTagsScript.cshtml")
 
 
 @helper PrintWelcomeParagraph1()
