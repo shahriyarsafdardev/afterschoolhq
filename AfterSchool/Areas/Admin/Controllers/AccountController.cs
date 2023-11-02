@@ -53,9 +53,9 @@ namespace AfterSchool.Areas.Admin.Controllers
 
         // GET: Account
         [HttpGet]
-        public ActionResult Index(string pn, string rpp, string search, AccountType type = AccountType.NotSet)
+        public ActionResult Index(string pn, string rpp, string search, AccountType type = AccountType.NotSet, SystemMessages msgs = null)
         {
-            return View(IndexViewBag(pn, rpp, search, type));
+            return View(IndexViewBag(pn, rpp, search, type, msgs));
         }
 
         [HttpGet]
@@ -263,7 +263,7 @@ namespace AfterSchool.Areas.Admin.Controllers
             }
 
             SetTempMessages(msgs);
-            return View("index", IndexViewBag(pn, rpp, search, type, msgs));
+            return RedirectToAction("index", new { pn = pn, rpp= rpp, search = search, type = type, msgs = msgs});
         }
 
         [HttpGet]
