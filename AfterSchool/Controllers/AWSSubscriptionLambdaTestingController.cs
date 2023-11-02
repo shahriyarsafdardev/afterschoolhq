@@ -339,5 +339,30 @@ namespace AfterSchool.Controllers
             }
             return msgs;
         }
+
+        public String GetLatestSubscription()
+        {
+            SystemMessages msgs = new SystemMessages();
+
+            var schedule = SubscriptionSchedule.LoadLatestSubscriptionSchedule(msgs);
+
+            if (schedule.IsNotEmpty() && msgs.HasNoErrors())
+                return JsonConvert.SerializeObject(schedule);
+            else
+                return "Error in retrieving subscription";
+        }
+
+        public String GetLatestPaymentHistory()
+        {
+            SystemMessages msgs = new SystemMessages();
+
+            var schedule = SubscriptionSchedule.LoadLatestSubscriptionSchedule(msgs);
+            var paymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs);
+
+            if (schedule.IsNotEmpty() && msgs.HasNoErrors())
+                return JsonConvert.SerializeObject(paymentHistory);
+            else
+                return "Error in retrieving subscription payment history";
+        }
     }
 }
