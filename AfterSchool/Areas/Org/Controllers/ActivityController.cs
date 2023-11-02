@@ -1482,9 +1482,13 @@ namespace AfterSchool.Areas.Org.Controllers
                     DateTime.UtcNow.Date.AddHours(17).ToString("h:mm tt"),
                     new NameValueCollection());
 
+                if (isContinuousEnrollmentEnabled == "1")
+                    values.Add("enddate", DateTime.UtcNow.AddWeeks(9).AddDays(-10));
+                else
+                    values.Add("enddate", DateTime.UtcNow.AddDays(8));
+
                 values.Add("schedule", "0");
                 values.Add("startdate", DateTime.UtcNow);
-                values.Add("enddate", DateTime.UtcNow.AddDays(8));
                 values.Add("dailystarttime", DateTime.UtcNow.Date.AddHours(15));
                 values.Add("dailyendtime", DateTime.UtcNow.Date.AddHours(17));
                 values.Add("scheduledates", inSessionDates);
