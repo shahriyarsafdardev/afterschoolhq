@@ -150,10 +150,7 @@
                                     <td>
                                         @if (regStatus != RegistrationStatus.Past)
                                         {
-                                            if (subscriptionSchedule.IsNotEmpty() && subscriptionSchedule.IsCancelled.Equals(true))
-                                            {
-                                            }
-                                            else if (!plan.DateCancelled.HasValue && 
+                                            if (!plan.DateCancelled.HasValue && 
                                                 registrantActivity.AssignmentTypeId.NotIn(new List<RegistrationAssignmentType>() { RegistrationAssignmentType.NotSet, RegistrationAssignmentType.Withdrawn, RegistrationAssignmentType.Declined }))
                                             {
                                                 <button 
