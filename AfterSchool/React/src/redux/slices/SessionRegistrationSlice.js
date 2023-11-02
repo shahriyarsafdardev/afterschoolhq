@@ -96,8 +96,8 @@ export const useSessionRegistrationActions = () => {
       activityGroupName,
       registrantUid
     ).then(({ obj, msgs }) => {
-      if (obj) dispatch(setFormData(obj));
       if (obj && !msgs.length) {
+        dispatch(setFormData(obj));
         const { HeaderImageURL, Name, Organization } = obj?.activityGroupDto;
         dispatch(setHeaderData({ HeaderImageURL, Name, Organization }));
         dispatch(headerLoadingCompleted());

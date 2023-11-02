@@ -15,5 +15,6 @@ export { default as SchoolField } from './SchoolField/SchoolField';
 export { default as ConfirmationDialog } from './ConfirmationDialog';
 export { default as ApiTextField } from './ApiTextField/ApiTextField';
 export { default as ShowQuestion } from './ShowQuestion/ShowQuestion';
+export { default as DrawerSidebar } from './DrawerSidebar/DrawerSidebar';
 export { default as RegistrantCard } from './RegistrantCard';
 export { default as AddNewParticipantCard } from './RegistrantCard/AddNewParticipantCard';

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import CloseIcon from '@material-ui/icons/Close';
 import { Box, Drawer, Fab, Typography } from '@material-ui/core';
-import ShoppingCartOutlinedIcon from '@material-ui/icons/ShoppingCartOutlined';
+import { ShoppingCartOutlined, Close } from '@material-ui/icons';
 
 import useStyles from './styles';
 import { weekDays } from 'constants';
@@ -31,7 +30,7 @@ function DrawerSidebar() {
         >
           <Box className={classes.innerWrapper}>
             <Box className={classes.closeIconWrapper}>
-              <CloseIcon onClick={() => setOpenDrawer(false)} className={classes.closeIconButton} />
+              <Close onClick={() => setOpenDrawer(false)} className={classes.closeIconButton} />
             </Box>
             <Typography variant="h6" className={classes.header}>
               Activities
@@ -50,7 +49,7 @@ function DrawerSidebar() {
       ) : (
         <Fab className={classes.cartWrapper} onClick={() => setOpenDrawer(true)}>
           <Typography className={classes.colorWhite}>{checkOut?.length}</Typography>
-          <ShoppingCartOutlinedIcon fontSize="large" />
+          <ShoppingCartOutlined fontSize="large" />
           <Typography className={classes.colorWhite}>View Cart</Typography>
         </Fab>
       )}

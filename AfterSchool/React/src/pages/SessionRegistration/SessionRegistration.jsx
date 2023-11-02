@@ -5,10 +5,10 @@ import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 
 import utils from 'utils';
 import apiRoutes from 'routes';
+import { DrawerSidebar } from 'components';
 import { useSessionRegistration } from 'redux/hooks';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import RegistrationService from 'sevices/RegistrationService';
-import DrawerSidebar from 'components/DrawerSidebar/DrawerSidebar';
 
 export default function SessionRegistration({ newChild = false }) {
   const navigate = useNavigate();
