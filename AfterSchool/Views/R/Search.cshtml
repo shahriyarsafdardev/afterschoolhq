@@ -190,7 +190,7 @@
             showLoader();
             showProgressBar();
             inCallback = true;
-            let url = '@Url.Action(new Action(isVolunteerDirectory ? "GetIpsAccounts" : "GetAccounts"), "Search", new {Area = ""})';
+            let url = '@Url.Action(isVolunteerDirectory ? "GetIpsAccounts" : "GetAccounts", "Search", new {Area = ""})';
             let dataParams = { accountId: '@accountId', enrollToday, search, grades, ages, gender, services, timing, pricing,
                                                  cost, starting, other, special, zipCode, latitude, longitude, pageNum: page };
             if(@isVolunteerDirectory.ToString().ToLower() === "true")
