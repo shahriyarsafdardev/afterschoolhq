@@ -71,7 +71,7 @@ namespace AfterSchool.Controllers
                         ProcessCharge(charge, schedule, null, rsp, msgs);
                 }
                 else
-                    msgs.Add("Due to empty stripe source Id can't run the charge for subscription schedule with Uid : " + schedule.Uid, MessageType.Error);
+                    msgs.Add("Stripe source Id not found for subscription schedule with Uid : " + schedule.Uid, MessageType.Error);
             }
         }
 
@@ -152,7 +152,7 @@ namespace AfterSchool.Controllers
                         ProcessCharge(charge, schedule, subscriptionPaymentHistory, rsp, msgs);
                 }
                 else
-                    msgs.Add("Due to empty stripe source Id can't run the charge for subscription schedule with Uid : " + schedule.Uid, MessageType.Error);
+                    msgs.Add("Stripe source Id not found for subscription schedule with Uid : " + schedule.Uid, MessageType.Error);
             }
         }
 
