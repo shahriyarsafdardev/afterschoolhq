@@ -59,7 +59,7 @@
         {
             var nextAnchorDate = ViewBag.NextAnchorDate.ToLongDateString();
             <span>
-                @(includePlus ? "plus " : "") <strong>@(showProrateMessage ? " a prorated"  : "")</strong> amount of the @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription <b>today</b>.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
+                @(includePlus ? "plus a" : "") <strong>@(showProrateMessage ? "prorated"  : "")</strong> @(showProrateMessage ? "amount of the"  : "") @plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(plan.BillingPeriodTypeId == @BillingPeriodType.Day ? "daily" : plan.BillingPeriodTypeId.ToString().SplitByUpperCase().ToLower() + "ly") subscription <b>today</b>.<br />Starting <strong>@nextAnchorDate</strong>, you will pay the full <strong>@plan.GetTotalCostWithConvenienceFee(participationObject.OwnerAccount).ToCurrency() @(billingType != null ? "every " + billingType : "").</strong>
             </span>
         }
         else
