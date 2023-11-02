@@ -8,9 +8,12 @@ const RatingQuestion = props => {
   const { options, setOptions } = props;
   const { 0: min, length, [length - 1]: max } = options;
 
+  const minAllowed = 0;
+  const maxAllowed = 10;
+
   const [values, setValues] = useState({
     minLabel: min?.value || '',
-    minValue: Number(min?.key) || 0,
+    minValue: Number(min?.key) || minAllowed,
     maxLabel: max?.value || '',
     maxValue: Number(max?.key) || 5
   });
@@ -32,7 +35,9 @@ const RatingQuestion = props => {
       const isMaxValue = name === 'maxValue';
 
       if (
-        isMaxValue ? value <= values.minValue || value > 10 : value >= values.maxValue || value < 0
+        isMaxValue
+          ? value <= values.minValue || value > maxAllowed
+          : value >= values.maxValue || value < minAllowed
       ) {
         return;
       }
@@ -69,7 +74,7 @@ const RatingQuestion = props => {
             value: values.minValue,
             'data-testid': 'min-value',
             placeholder: 'Minimum Value',
-            InputProps: { min: 0, max: 9 }
+            InputProps: { min: minAllowed, max: maxAllowed - 1 }
           })}
         </Grid>
         <Grid item lg={6} xs={12} sm={12}>
@@ -91,7 +96,7 @@ const RatingQuestion = props => {
             value: values.maxValue,
             'data-testid': 'max-value',
             placeholder: 'Maximum Value',
-            InputProps: { min: 1, max: 10 }
+            InputProps: { min: minAllowed + 1, max: maxAllowed }
           })}
         </Grid>
         <Grid item lg={6} xs={12} sm={12}>

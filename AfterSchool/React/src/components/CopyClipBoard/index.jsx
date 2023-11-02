@@ -15,7 +15,11 @@ function CopyClipBoard(props) {
     }
   };
 
-  return <Box onClick={() => copyToClipBoard(textToCopy)}>{CopyButton}</Box>;
+  return (
+    <Box onClick={() => copyToClipBoard(textToCopy)} data-testid="copy-text-button">
+      {CopyButton}
+    </Box>
+  );
 }
 
 export default CopyClipBoard;

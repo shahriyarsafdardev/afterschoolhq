@@ -212,12 +212,12 @@ export default makeStyles(theme => ({
   },
   publishBtnscolors: {
     color: 'white',
-    border: '#EF6262',
-    backgroundColor: '#EF6262',
+    border: theme.palette.red.main,
+    backgroundColor: theme.palette.red.main,
     '&:hover': {
       color: 'white',
-      border: '#EF6262',
-      backgroundColor: '#EF6262'
+      border: theme.palette.red.main,
+      backgroundColor: theme.palette.red.main
     }
   },
   publishButtonsGroup: {

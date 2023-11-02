@@ -41,5 +41,8 @@ export default {
   },
   white: {
     primary: '#FFFFFF'
+  },
+  red: {
+    main: '#EF6262'
   }
 };

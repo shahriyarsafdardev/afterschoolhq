@@ -17,7 +17,7 @@ const MoodQuestion = props => {
   const emojiOptions = mapOptions(emojis);
 
   const handleDelete = chipToDelete => {
-    const updatedEmojis = [...selectedEmojis].filter(emoji => emoji.key !== chipToDelete.key);
+    const updatedEmojis = selectedEmojis.filter(emoji => emoji.key !== chipToDelete.key);
     setSelectedEmojis(updatedEmojis);
   };
 

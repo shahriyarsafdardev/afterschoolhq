@@ -136,18 +136,21 @@ function FormSectionList() {
     setIsUnsaved(true);
   };
 
+  const setParamsAndShowSetting = value => {
+    setSearchParams(`qg=${value}`);
+    toggleShowSettings();
+  };
+
   const onSectionsClickHandler = () => {
     if (!questionsGroupsToShow.length) return;
     if (!unsavedChanges) {
-      setSearchParams(`qg=${firstSectionId}`);
-      toggleShowSettings();
+      setParamsAndShowSetting(firstSectionId);
     } else unsavedModal();
   };
 
   const showSectionHandler = key => {
     if (!unsavedChanges) {
-      setSearchParams(`qg=${key}`);
-      toggleShowSettings();
+      setParamsAndShowSetting(key);
     } else unsavedModal(key);
   };
 
