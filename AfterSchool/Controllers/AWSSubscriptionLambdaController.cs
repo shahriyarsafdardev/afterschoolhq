@@ -30,10 +30,10 @@ namespace AfterSchool.Controllers
         {
             SystemMessages msgs = new SystemMessages();
 
-            var subscriptionSchedulespendingToday = SubscriptionScheduleService.GetSubscriptionSchedulePendingToday(msgs);
-            var subscriptionSchedulesFailed = SubscriptionScheduleService.GetFailedSubscriptionSchedules(msgs);
-            var subscriptionPaymentHistoryPendingStatus = SubscriptionPaymentHistoryService.GetPendingCharges(msgs);
-            var subscriptionSchedulesAfterThreeDays = SubscriptionScheduleService.GetSubscriptionSchedulePendingInThreeDays(msgs);
+            var subscriptionSchedulespendingToday = SubscriptionSchedule.LoadSubscriptionSchedulesForToday(msgs);
+            var subscriptionSchedulesFailed = SubscriptionSchedule.LoadFailedSchedules(msgs);
+            var subscriptionPaymentHistoryPendingStatus = SubscriptionSchedule.LoadPendingSchedules(msgs);
+            var subscriptionSchedulesAfterThreeDays = SubscriptionSchedule.LoadUpcomingInThreeDays(msgs);
 
             ProcessSubscriptionSchedulesPendingToday(subscriptionSchedulespendingToday, msgs);
             ProcessPaymentHistoryWithPendingStatus(subscriptionPaymentHistoryPendingStatus, msgs);
@@ -114,11 +114,11 @@ namespace AfterSchool.Controllers
             );
         }
 
-        private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionPaymentHistory> paymentHistories, SystemMessages msgs)
+        private void ProcessPaymentHistoryWithPendingStatus(IEnumerable<SubscriptionSchedule> schedules, SystemMessages msgs)
         {
-            foreach (var paymentHistory in paymentHistories)
+            foreach (var schedule in schedules)
             {
-                var schedule = SubscriptionSchedule.Load(paymentHistory.SubscriptionScheduleId, msgs, null);
+                var paymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs, null);
                 var rsp = RegistrantSubscriptionPlan.LoadBySubscriptionScheduleUid(schedule.Uid, msgs);
                 var charge = StripeHelper.GetStripeHelperConnectAccount().GetCharge(paymentHistory.StripeChargeId, msgs);
 

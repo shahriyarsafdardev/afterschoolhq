@@ -263,10 +263,41 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
-        public static List<SubscriptionSchedule> LoadActiveSubscriptionSchedule(SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<SubscriptionSchedule> LoadSubscriptionSchedulesForToday(SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["NextBillDate"], DateTime.UtcNow.Date);
+            dq.Criterias.Add(ObjectMap["IsCancelled"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<SubscriptionSchedule> LoadFailedSchedules(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["LastChargeStatus"], LastChargeStatus.failed);
+            dq.Criterias.Add(ObjectMap["IsCancelled"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<SubscriptionSchedule> LoadPendingSchedules(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["NextBillDate"], DateTime.UtcNow.AddDays(-5).Date);
+            dq.Criterias.Add(ObjectMap["LastChargeStatus"], LastChargeStatus.pending);
+            dq.Criterias.Add(ObjectMap["IsCancelled"], false);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static List<SubscriptionSchedule> LoadUpcomingInThreeDays(SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["NextBillDate"], DateTime.UtcNow.AddDays(3).Date);
+            dq.Criterias.Add(ObjectMap["BillingPeriodType"], new List<int> { (int)BillingPeriodType.Month, (int)BillingPeriodType.Year },
+                DatabaseCriteriaOperatorEnum.In);
             dq.Criterias.Add(ObjectMap["IsCancelled"], false);
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }

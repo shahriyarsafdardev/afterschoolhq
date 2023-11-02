@@ -136,6 +136,18 @@ namespace AfterSchool
                new[] { "AfterSchool.Controllers" });
 
             routes.MapRoute(
+               "GetLatestSubscription",
+               "AWSSubscriptionLambdaTesting/GetLatestSubscription",
+               new { controller = "AWSSubscriptionLambdaTesting", action = "GetLatestSubscription" },
+               new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
+               "GetLatestPaymentHistory",
+               "AWSSubscriptionLambdaTesting/GetLatestPaymentHistory",
+               new { controller = "AWSSubscriptionLambdaTesting", action = "GetLatestPaymentHistory" },
+               new[] { "AfterSchool.Controllers" });
+
+            routes.MapRoute(
                 "RegUpdate",
                 "reg/{action}/{regUid}",
                 new {controller = "r", action = "update", regUid = UrlParameter.Optional});
