@@ -86,7 +86,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     activityIds = currentAccount.GetActivities(activityIds,msgs).Where(x => x.HasSchedule).Select(activity => activity.ID.Value).ToList();
             }
 
-            if (activity.IsEmpty() && group.IsEmpty() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
+            if (currentAccount.IsNotEmpty() && activity.IsEmpty() && group.IsEmpty() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
                 activityIds = currentAccount.GetActivities(msgs).Where(x => x.HasSchedule).Select(activity=>activity.ID.Value).ToList();
 
             if (group.IsNotEmpty())
