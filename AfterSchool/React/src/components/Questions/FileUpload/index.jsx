@@ -4,6 +4,7 @@ import { Button, Typography, Box, FormHelperText } from '@material-ui/core';
 import FieldWrapper from 'components/FieldWrapper/FieldWrapper';
 import { isValidFile } from 'constants';
 import useStyles from './styles';
+import { getError } from 'utils';
 
 const VALID_EXTENSIONS = [
   'png',
@@ -99,7 +100,7 @@ const FileUpload = ({ formik, question }) => {
               className={classes.maxWidth}
               error
             >
-              {uploadedStatus && (uploadedStatus === 'SUCCESS' ? errors[ID] : uploadedStatus)}
+              {getError(uploadedStatus, errors[ID])}
             </FormHelperText>
           </Box>
         )}
