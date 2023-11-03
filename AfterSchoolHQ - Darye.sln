@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Emmersion.InfluxDB", "Emmer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfterSchoolAdHoc", "AfterSchoolAdHoc\AfterSchoolAdHoc.csproj", "{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWSLambda", "AWSLambda\AWSLambda.csproj", "{1F2EC6AE-B0A4-46C8-B206-9A331E6C0AE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31666C99-5FDF-4281-A2F5-BD4223BD0F7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F2EC6AE-B0A4-46C8-B206-9A331E6C0AE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F2EC6AE-B0A4-46C8-B206-9A331E6C0AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F2EC6AE-B0A4-46C8-B206-9A331E6C0AE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F2EC6AE-B0A4-46C8-B206-9A331E6C0AE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

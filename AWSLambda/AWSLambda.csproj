@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AWSProjectType>Lambda</AWSProjectType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />
+    <PackageReference Include="RollbarSharp" Version="1.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\afterschoollibrary-standard\AfterSchoolLibrary\AfterSchoolLibrary.csproj" />
+    <ProjectReference Include="..\basiclibrary-standard\BasicLibrary\BasicLibrary.vbproj" />
+    <ProjectReference Include="..\Emmersion.InfluxDB\Emmersion.InfluxDB\Emmersion.InfluxDB.csproj" />
+  </ItemGroup>
+
+</Project>
