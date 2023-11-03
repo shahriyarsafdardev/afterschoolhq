@@ -1484,7 +1484,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
                 values.Add("schedule", "0");
                 values.Add("startdate", DateTime.UtcNow);
-                values.Add("enddate", DateTime.UtcNow.AddWeeks(9).AddDays(-10));
+                values.Add("enddate", DateTime.UtcNow.AddWeeks(9).AddDays(-1));
                 values.Add("dailystarttime", DateTime.UtcNow.Date.AddHours(15));
                 values.Add("dailyendtime", DateTime.UtcNow.Date.AddHours(17));
                 values.Add("scheduledates", inSessionDates);
