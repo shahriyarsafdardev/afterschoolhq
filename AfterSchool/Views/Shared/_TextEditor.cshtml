@@ -9,13 +9,25 @@
 
     var javascriptVarName = $"quill_{ViewData["name"]}";
     var javascriptAppendName = $"_{ViewData["name"]}";
+    var txtBoxMsg = ViewData["txtBoxMsg"];
 }
 
 <div class="">
     <div class="editable" id="@ViewData["id"]-div">@Html.Raw(Model)</div>
     <textarea name="@ViewData["name"]" id="@ViewData["id"]" class="hide"></textarea>
     <textarea name="@(ViewData["name"])_data" id="@(ViewData["id"])_data" class="hide"></textarea>
-    <div id="@ViewData["id"]_count">Character Count: 0 / 4000</div>
+    <div class="d-flex" style="justify-content:space-between">
+        <div>
+            <p class="text-muted">
+                <em>
+                    <span>
+                        @Html.Raw(txtBoxMsg)
+                    </span>
+                </em>
+            </p>
+        </div>
+        <div id="@ViewData["id"]_count" style="font-size: 13px; text-align:right; padding:0;" ;>0 / 4000</div>
+    </div>
 </div>
 
 <script>
@@ -55,16 +67,18 @@
         function countLetters() {
             var editorContent = quillEditor.getText();
             var letterCount = editorContent.length - 1; // Subtract 1 from the letter count
-            var countText;
+            var color = 'black';
+            var id = '#@ViewData["id"]_count';
             if (letterCount > 4000) {
-                countText = "Character Limit Reached " + letterCount + " / 4000";
-                $('#@ViewData["id"]_count').css({ 'color': 'red', 'font-weight': 'bold' });
+                color = 'red';
+                $('#SaveButton, #SaveButtonTop, #SaveAndNextButton, #SaveAndNextButtonTop').addClass('disabled');
             } else {
-                countText = "Character Count: " + letterCount + " / 4000";
-                $('#@ViewData["id"]_count').css({ 'color': 'black', 'font-weight': 'bold' });
+                $('#SaveButton, #SaveButtonTop, #SaveAndNextButton, #SaveAndNextButtonTop').removeClass('disabled');
             }
 
-            $('#@ViewData["id"]_count').text(countText);
+            $(id).css({ 'color': color, 'font-weight': 'bold' });
+            var countText = letterCount + " / 4000";
+            $(id).text(countText);
         }
 
         @(javascriptVarName).getModule('toolbar').addHandler('image', () => {

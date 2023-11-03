@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,18 +13,19 @@ namespace AfterSchool.Helpers
     public static class ActivitySetupHelper
     {
 
-        public static string SaveButton(bool isTop, bool isPrimary, bool? isDisabled = false)
+        public static string SaveButton(bool isTop, bool isPrimary, bool? isDisabled = false, string buttonId=null)
         {
-            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)} {((bool)isDisabled ? "disabled" : "")}\"><i class=\"s7-diskette\"></i> Save</button>";
+            return $"<button type=\"submit\" class=\"{ButtonStyle(isTop, isPrimary)} {((bool)isDisabled ? "disabled" : "")}\" {(buttonId.IsNotEmpty() ? $"id=\"{buttonId}\"" : "")}><i class=\"s7-diskette\"></i> Save</button>";
         }
        
-        public static string NavButton(Activity activity, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request)
+        public static string NavButton(Activity activity, string action, string cmd, bool isTop, bool isPrimary, HttpRequestBase request, string buttonId = null)
         {
             var canPublishActivity = SessionVariables.CurrentUser.CanPublishActivity(SessionVariables.CurrentAccount, activity);
 
             return $"<button " +
                    $"type=\"submit\" " +
                    $"class=\"{ButtonStyle(isTop, isPrimary)}\" " +
+                   $"{(buttonId.IsNotEmpty() ? $"id=\"{buttonId}\"" : "")}" +
                    $"onclick=\"ActivitySetup.navigateActivity('{GenerateUrl(activity, action, "activity", cmd, request)}')\">" +
                    $"{ButtonText(cmd, isTop, canPublishActivity)}" +
                    $"</button>";

@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var accountPackage = (AccountPackage) ViewData["AccountPackage"];
 }
@@ -30,17 +30,9 @@
                            {"required", false},
                            {"name", "details"},
                            {"id", "details"},
+                           {"txtBoxMsg", "<em>Tell us why we should sign up. What will we get out of it? What should we expect?</em><br><em>To ensure you are complying with activity guidelines, please see Section 6 of our<a href=\"/tos.html\" target=\"_blank\">Terms of Service</a>.</em>"},
                        }
                        ); }
-
-                <p class="text-muted">
-                    <em>Tell us why we should sign up. What will we get out of it? What should we expect?</em>
-                    <br>
-                    <em>
-                        To ensure you are complying with activity guidelines, please see Section 6 of our
-                        <a href="/tos.html" target="_blank">Terms of Service</a>.
-                    </em>
-                </p>
             </div>
         </div>
 

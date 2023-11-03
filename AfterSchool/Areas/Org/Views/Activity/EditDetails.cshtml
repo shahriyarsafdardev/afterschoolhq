@@ -46,8 +46,8 @@
             <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editdetails", "activity", new { id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"] })" class="form-horizontal">
 
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editdetails", "next", true, true, Request))
-                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editdetails", "next", true, true, Request, buttonId: "SaveAndNextButtonTop"))
+                    @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(true, false, buttonId: "SaveButtonTop"))
 
                     @{
                         if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
@@ -68,10 +68,10 @@
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false))
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.SaveButton(false, false, buttonId:"SaveButton"))
                         </div>
                         <div class="col-sm-3">
-                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editdetails", "next", false, true, Request))
+                            @Html.Raw(AfterSchool.Helpers.ActivitySetupHelper.NavButton(Model.Activity, "editdetails", "next", false, true, Request, buttonId: "SaveAndNextButton"))
                         </div>
                     </div>
 
