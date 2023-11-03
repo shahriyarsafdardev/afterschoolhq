@@ -101,6 +101,7 @@ namespace AfterSchoolLibrary.Models
         public bool IsGenderEnforced { get; set; }
         public bool IsFeatured { get; set; }
         public bool IsRequireCheckInCheckOutEnabled { get; set; }
+        public bool IsNotifyParentOfCheckInEnabled { get; set; }
 
         private void InitObject(int participationObjectId, ParticipationObjectType participationObjectType, bool loadAllDetails, SystemMessages msgs = null,
             DatabaseConnection dc = null)
@@ -161,6 +162,7 @@ namespace AfterSchoolLibrary.Models
             RegistrationCutoffHours = activity.RegistrationCutoffHours;
             IsContinuousEnrollmentEnabled = activity.IsContinuousEnrollment;
             IsRequireCheckInCheckOutEnabled = activity.IsRequireCheckInCheckOut;
+            IsNotifyParentOfCheckInEnabled = activity.IsNotifyParentOfCheckIn;
             IsGenderEnforced = activity.IsGenderEnforced;
             IsFeatured = activity.IsFeatured;
 

@@ -796,6 +796,7 @@ namespace AfterSchoolLibrary.Services
             var cutoffHours = values.GetValueOrDefault("cutoffhours");
             var isContinuousEnrollmentEnabled = values.GetValueOrDefault("isContinuousEnrollmentEnabled");
             var isRequireCheckInCheckOutEnabled = values.GetValueOrDefault("isRequireCheckInCheckOutEnabled");
+            var isNotifyParentOfCheckInEnabled = values.GetValueOrDefault("isNotifyParentOfCheckInEnabled");
             var strictgenderrestrictions = values.GetValueOrDefault("strictgenderrestrictions");
 
             var activityType = ActivityType.NotSet;
@@ -902,6 +903,9 @@ namespace AfterSchoolLibrary.Services
 
             if (isRequireCheckInCheckOutEnabled.IsNotEmpty())
                 activity.IsRequireCheckInCheckOut = isRequireCheckInCheckOutEnabled.ToString().ToBoolean();
+
+            if (isNotifyParentOfCheckInEnabled.IsNotEmpty())
+                activity.IsNotifyParentOfCheckIn = isNotifyParentOfCheckInEnabled.ToString().ToBoolean();
 
             if (ageEnd.IsNumber())
             {

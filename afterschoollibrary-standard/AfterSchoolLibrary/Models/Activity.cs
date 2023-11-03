@@ -198,7 +198,11 @@ namespace AfterSchoolLibrary.Models
             get => (bool) MDV["IsRequireCheckInCheckOut"].Value;
             set => MDV["IsRequireCheckInCheckOut"].Value = value;
         }
-
+        public bool IsNotifyParentOfCheckIn
+        {
+            get => (bool) MDV["IsNotifyParentOfCheckIn"].Value;
+            set => MDV["IsNotifyParentOfCheckIn"].Value = value;
+        }
         public int? ActivityGroupId
         {
             get => (int?) MDV["ActivityGroupId"].Value;
@@ -401,6 +405,7 @@ namespace AfterSchoolLibrary.Models
             IsInviteOnly = false;
             IsContinuousEnrollment = false;
             IsRequireCheckInCheckOut = false;
+            IsNotifyParentOfCheckIn = false;
             ActivityTypeId = ActivityType.NotSet;
             LeaderTypeId = ActivityLeaderType.NotSet;
             RequiresParentalConsent = false;
@@ -449,6 +454,7 @@ namespace AfterSchoolLibrary.Models
                 _dp.Add(className, "IsInviteOnly", SqlDbType.Bit);
                 _dp.Add(className, "IsContinuousEnrollment", SqlDbType.Bit);
                 _dp.Add(className, "IsRequireCheckInCheckOut", SqlDbType.Bit);
+                _dp.Add(className, "IsNotifyParentOfCheckIn", SqlDbType.Bit);
                 _dp.Add(className, "ActivityGroupId", SqlDbType.Int);
                 _dp.Add(className, "ActivityScheduleId", SqlDbType.Int);
                 _dp.Add(className, "UniqueName", SqlDbType.NVarChar, "100");
@@ -688,6 +694,10 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["IsRequireCheckInCheckOut"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["IsNotifyParentOfCheckIn"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+            
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["ActivityGroupId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));

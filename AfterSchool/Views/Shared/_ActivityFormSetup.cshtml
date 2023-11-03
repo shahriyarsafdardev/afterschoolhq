@@ -140,22 +140,47 @@
 
             if (Model.ActivityTypeId == ActivityType.Activity)
             {
-                <div class="form-group @(!showCheckInOut?"hide":"")">
-                    <label class="col-sm-3 control-label">
-                        Require Check In/Out?
-                    </label>
-                    <div class="col-sm-9">
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.IsRequireCheckInCheckOut,
-                                new ViewDataDictionary
-                                {
-                                    {"checkboxname", "isRequireCheckInCheckOutEnabled"},
-                                    {"checkboxid", "isRequireCheckInCheckOutEnabled"},
-                                    {"disabled", false},
-                                });
-                        }
+                <div class="@(!showCheckInOut?"hide":"")">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Require Check In/Out?
+                        </label>
+                        <div class="col-sm-9">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.IsRequireCheckInCheckOut,
+                                    new ViewDataDictionary
+                                    {
+                                        {"checkboxname", "isRequireCheckInCheckOutEnabled"},
+                                        {"checkboxid", "isRequireCheckInCheckOutEnabled"},
+                                        {"disabled", false},
+                                    });
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Notify Parents of Check In? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
+                                                        data-content="Parent will receive a text notification when their student is checked in.<br/>Parent
+                                                           must be opted in to text messages. Message sent will count towards text message limit."
+                                                        data-placement="top"></i>
+                        </label>
+                        <div class="col-sm-9">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.IsNotifyParentOfCheckIn,
+                                    new ViewDataDictionary
+                                    {
+                                        {"checkboxname", "isNotifyParentOfCheckInEnabled"},
+                                        {"checkboxid", "isNotifyParentOfCheckInEnabled"},
+                                        {"disabled", false},
+                            });
+                            }
+                        </div>
                     </div>
                 </div>
             }
