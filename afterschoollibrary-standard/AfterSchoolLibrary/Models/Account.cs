@@ -1362,6 +1362,7 @@ namespace AfterSchoolLibrary.Models
                 command.Parameters.AddWithValue("@AccountId", hostAccountId <= 0 ? Convert.DBNull : hostAccountId);
                 command.Parameters.AddWithValue("@SearchTerm", search.IsNotBlank() ? $"\"*{search}*\"" : "\"\"");
                 command.Parameters.AddWithValue("@Gender", gender.IsNotEmpty() ? gender : Convert.DBNull);
+                command.Parameters.AddWithValue("@Starting", starting.IsNotEmpty() ? "1" : Convert.DBNull);
                 command.Parameters.AddWithValue("@Latitude",
                     latitude.HasValue && longitude.HasValue ? latitude.Value : Convert.DBNull);
                 command.Parameters.AddWithValue("@Longitude",
