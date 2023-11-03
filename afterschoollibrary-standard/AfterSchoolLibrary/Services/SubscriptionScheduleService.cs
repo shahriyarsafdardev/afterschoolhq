@@ -172,7 +172,7 @@ namespace AfterSchoolLibrary.Services
 
                 subscriptionSchedule.Metadata = JsonConvert.SerializeObject(charge.Metadata);
 
-                UpdateNextBillDateOnSuccess(subscriptionSchedule);
+                UpdateRecordsOnSuccess(subscriptionSchedule, plan);
             }
 
             if (chargeStatus.Equals(LastChargeStatus.failed))
@@ -189,8 +189,6 @@ namespace AfterSchoolLibrary.Services
                     subscriptionSchedule.DateCancelled = DateTime.UtcNow;
                     subscriptionSchedule.CancelledReason = "Payment for subscription failed";
                     plan.DateCancelled = DateTime.UtcNow;
-
-                    msgs.AddRange(plan.Save());
                 }
             }
 
@@ -199,6 +197,7 @@ namespace AfterSchoolLibrary.Services
 
             msgs.AddRange(subscriptionSchedule.Save());
             msgs.AddRange(subscriptionPaymentHistory.Save());
+            msgs.AddRange(plan.Save());
 
             return msgs;
         }
@@ -332,7 +331,7 @@ namespace AfterSchoolLibrary.Services
         }
 
 
-        private static void UpdateNextBillDateOnSuccess(SubscriptionSchedule subscriptionSchedule)
+        private static void UpdateRecordsOnSuccess(SubscriptionSchedule subscriptionSchedule, RegistrantSubscriptionPlan plan)
         {
             // was first payment 
             if (subscriptionSchedule.PaymentsDone.Equals(1))
@@ -344,6 +343,7 @@ namespace AfterSchoolLibrary.Services
                 subscriptionSchedule.IsCancelled = true;
                 subscriptionSchedule.DateCancelled = subscriptionSchedule.LastDateToBill;
                 subscriptionSchedule.CancelledReason = "Subscription Completed";
+                plan.DateCancelled = DateTime.UtcNow;
             }
             else
                 subscriptionSchedule.NextBillDate = new SubscriptionPlan
