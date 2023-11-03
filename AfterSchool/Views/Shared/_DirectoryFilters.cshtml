@@ -75,7 +75,7 @@
 <div>
     <div class="am-checkbox am-filter-checkbox am-generic-checkbox no-padding">
         <input id="chk-enrolling-now" name="enrolling-now" value="enroll" valueforfilter="enroll" type="checkbox" class="schedulerepeat-checkbox"
-               onclick="return checkAndSearch(this, 'Enroll via AHQ')"/>
+               onclick="return checkAndSearch(this, 'Enroll via AHQ')" @(isVolunteerDirectory ? "checked" : "")/>
         <label for="chk-enrolling-now" class="filter-body mobile-padding">
             <span>Enroll today via AHQ</span>
             <i id="enrollNow" class="fa fa-question-circle" style="font-size: 14px; margin-left: 3px; margin-bottom: -2px;">

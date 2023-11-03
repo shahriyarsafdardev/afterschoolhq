@@ -159,7 +159,11 @@ namespace AfterSchool.Controllers
                 var photos = profile.GetPhotos(msgs);
 
                 photos.ForEach(photo => photo.Value = ah.GetFileLink(photo.Value));
-
+                var participationObjectsList = GetParticipationObjects(account, msgs)
+                    .Where(po =>
+                        po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
+                    .OrderByDescending(x => x.IsFeatured)
+                    .ToList();
                 ViewBag.AccountProfile = profile;
                 ViewBag.Location = profile.GetLocation(msgs) ?? account.GetDefaultLocation(msgs);
                 ViewBag.Awards = profile.GetAwards(msgs);
@@ -172,11 +176,10 @@ namespace AfterSchool.Controllers
                 ViewBag.GenderRestriction = profile.PrintGenderRestrictions();
                 ViewBag.RestrictByGrade = profile.RestrictByGrade();
                 ViewBag.Messages = msgs;
-                ViewBag.ParticipationObjects = GetParticipationObjects(account, msgs)
-                    .Where(po =>
-                        po.RegistrationPeriod.IsOpen(account, msgs) || po.RegistrationPeriod.WillOpen(account, msgs))
-                    .OrderByDescending(x => x.IsFeatured)
-                    .ToList();
+                ViewBag.ParticipationObjects = dir.IsNotEmpty() && regStartPageAccount.AccountTypeId == AccountType.Directory &&
+                    regStartPageAccount.HasFeature(FeatureType.ManageVolunteerDirectory)
+                    ? participationObjectsList.Where(a => a.ActivityType == ActivityType.VolunteerOpportunity).ToList()
+                    : participationObjectsList;
                 ViewBag.Locations = account.GetAllAvailableLocations(msgs);
                 ViewBag.AccountProperties = account.GetAccountProperties(
                     new List<AccountPropertyType>

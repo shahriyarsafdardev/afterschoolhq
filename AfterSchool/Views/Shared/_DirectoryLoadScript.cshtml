@@ -67,7 +67,7 @@
                     <%= searchResult.AccountName %>
                 </h3>
 
-                <h4 class="margin-bottom-zero font-weight-500 notranslate">
+                <h4 class="margin-bottom-zero font-weight-500 notranslate" style="@(isVolunteerDirectory ? "height: 55px;" : "")">
                     <% if(searchResult.Location) { %>
                         <%= searchResult.Location %>
                     <% } else { %>
@@ -87,10 +87,6 @@
                                 <li>Cost: <%= searchResult.CostRange %></li>
                             <% } %>
                         </ul>
-                    }
-                    else
-                    {
-                      <br>   
                     }
                 }
                     <a href="<%= searchResult.HomePageUrl %>?dir=@Model" class="btn btn-register btn-block join-directory-btn">
