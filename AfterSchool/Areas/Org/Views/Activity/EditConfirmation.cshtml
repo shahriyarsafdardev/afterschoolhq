@@ -50,9 +50,9 @@
 
                     @if (!Model.Activity.IsPublished)
                     {
-                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", true, true, Request))
+                        @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", true, true, Request, buttonId: "SaveAndNextButtonTop"))
                     }
-                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false, buttonId: "SaveButtonTop"))
 
                     @{
                         if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
@@ -72,16 +72,16 @@
                         @if (!Model.Activity.IsPublished)
                         {
                             <div class="col-sm-6 col-sm-offset-3">
-                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false, buttonId:"SaveButton"))
                             </div>
                             <div class="col-sm-3">
-                                @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", false, true, Request))
+                                @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editconfirmation", "publish", false, true, Request, buttonId: "SaveAndNextButton"))
                             </div>
                         }
                         else
                         {
                             <div class="col-md-offset-3 col-sm-9">
-                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                                @Html.Raw(ActivitySetupHelper.SaveButton(false, false, buttonId: "SaveButton"))
                             </div>
                         }
                     </div>

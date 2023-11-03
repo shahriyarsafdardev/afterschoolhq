@@ -48,8 +48,8 @@
             <div class="col-md-10 col-lg-9">
                 <form id="form1" method="post" action="@Url.Action("editlocation", "activity", new {id = Model.Activity.Uid, isnew = Request["isnew"], source = Request["source"]})" class="form-horizontal">
 
-                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editlocation", "next", true, true, Request))
-                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false))
+                    @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editlocation", "next", true, true, Request, buttonId: "SaveAndNextButtonTop"))
+                    @Html.Raw(ActivitySetupHelper.SaveButton(true, false, buttonId: "SaveButtonTop"))
 
                     @{
                         if (Model.Activity.ActivityTypeId == ActivityType.VolunteerOpportunity)
@@ -64,10 +64,10 @@
 
                     <div class="form-group">
                         <div class="col-sm-6 col-sm-offset-3">
-                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false))
+                            @Html.Raw(ActivitySetupHelper.SaveButton(false, false, buttonId: "SaveButton"))
                         </div>
                         <div class="col-sm-3">
-                            @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editlocation", "next", false, true, Request))
+                            @Html.Raw(ActivitySetupHelper.NavButton(Model.Activity, "editlocation", "next", false, true, Request, buttonId: "SaveAndNextButton"))
                         </div>
                     </div>
 

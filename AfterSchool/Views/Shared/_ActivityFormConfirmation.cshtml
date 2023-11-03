@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{
     var properties = Model.GetActivityProperties();
 }
@@ -30,27 +30,16 @@
         </label>
         <div class="col-md-9">
             @{ Html.RenderPartial(
-                   "~/Views/Shared/_TextEditor.cshtml",
-                   properties.FirstOrDefault(x => x.AccountPropertyTypeId == item)?.Value,
-                   new ViewDataDictionary
-                   {
+                     "~/Views/Shared/_TextEditor.cshtml",
+                     properties.FirstOrDefault(x => x.AccountPropertyTypeId == item)?.Value,
+                     new ViewDataDictionary
+                     {
                        {"id", item.ToString().ToLower()},
                        {"name", item.ToString().ToLower()},
                        {"required", true},
-                   }
-                   ); }
-
-
-            <p class="text-muted">
-                <em>
-                    <span>
-                        This thank you message is sent when the @UILabel.ActivityLabel(Model.ActivityTypeId).ToLower() is set to
-                        '@(item == AccountPropertyType.ApplicationThankYouEmail ? "Apply" : "Register")'
-                        Mode.
-                    </span>
-                </em>
-            </p>
-
+                       {"txtBoxMsg", $"This thank you message is sent when the {UILabel.ActivityLabel(Model.ActivityTypeId).ToLower()} is set to '{(item == AccountPropertyType.ApplicationThankYouEmail ? "Apply" : "Register")}' Mode."}
+                     }
+                     ); } 
         </div>
     </div>
 }

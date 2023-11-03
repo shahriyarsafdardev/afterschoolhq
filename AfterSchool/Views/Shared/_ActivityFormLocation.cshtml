@@ -1,4 +1,4 @@
-﻿@model Activity
+@model Activity
 @{ var location = ViewData["Location"]; }
 
 <style>
@@ -67,11 +67,12 @@
                 </label>
                 <div class="col-sm-9">
                     @{ Html.RenderPartial("~/Views/Shared/_TextEditor.cshtml",
-                           Model.LocationDetails,
-                           new ViewDataDictionary {{"name", "locationdetails"}, {"id", "locationdetails"}}); }
-                    <p class="text-muted">
-                        <em>Enter your room number or any special instructions or information about the location (e.g. pick up or drop off locations).</em>
-                    </p>
+                            Model.LocationDetails,
+                            new ViewDataDictionary { 
+                                { "name", "locationdetails" }, 
+                                { "id", "locationdetails" }, 
+                                { "txtBoxMsg", "Enter your room number or any special instructions or information about the location (e.g. pick up or drop off locations)." }, 
+                            }); }
                 </div>
             </div>
 
