@@ -326,20 +326,15 @@ namespace AfterSchoolLibrary.Models
             return LoadByPhone(phone, null, msgs, dc);
         }
 
-        public static WebUser LoadByOnlyPhone(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return LoadByUnformattedPhoneNumber(phone, msgs, dc);
-        }
-
         public static WebUser LoadByUnformattedPhoneNumber(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
 
-            var sql = @"SELECT
-                *
-            FROM WebUser
-            WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone";
+            var sql = @"
+                SELECT *
+                FROM WebUser
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone";
             
             var parameters = new Dictionary<string, object>
             {
@@ -363,11 +358,6 @@ namespace AfterSchoolLibrary.Models
             }
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
-        }
-        
-        public static WebUser LoadByOnlyPhoneByPin(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            return LoadByUnformattedPhoneNumberByPin(phone, pinCode, msgs, dc);
         }
 
         public static WebUser LoadByUnformattedPhoneNumberByPin(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
