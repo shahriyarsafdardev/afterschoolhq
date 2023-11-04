@@ -3061,7 +3061,9 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentUser = SessionVariables.CurrentUser;
+            var currentAccount = SessionVariables.CurrentAccount;
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(attendanceId, msgs);
+            var activity = attendance.GetActivity(msgs);
 
             checkInOutInfo.ForEach(checkInOut =>
             {
@@ -3089,6 +3091,24 @@ namespace AfterSchool.Areas.Org.Controllers
                         attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
                         attendanceRegistrant.LastModifiedBy = currentUser.ID;
                         msgs.AddRange(attendanceRegistrant.Save());
+                        if(activity.IsNotifyParentOfCheckIn)
+                        {
+                            var currentRegistrant = attendanceRegistrant.GetRegistrant(msgs);
+                            var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
+
+                            var msgBody = $"{currentRegistrant.Name} has been checked into {activity.Name} by {currentAccount.Name}. If you havs questions or concerns " +
+                                 $" please contact {currentAccount.Name} {currentAccount.Phone}";
+                            var am = activity.AddMessage(
+                                null,
+                                msgBody,
+                                new List<int>(currentRegistrant.ID.Value),
+                                false,
+                                true,
+                                currentUser.ID.Value,
+                                msgs);
+                            parentRegistrant.SendText(currentAccount, currentUser, am, activity.Name, null, msgBody, currentAccount.Name, msgs, checkInOut: true);
+                        }
+                        
                     }
                 }
 

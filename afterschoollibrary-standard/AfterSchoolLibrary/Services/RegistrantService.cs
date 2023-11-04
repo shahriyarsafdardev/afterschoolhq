@@ -532,8 +532,8 @@ namespace AfterSchoolLibrary.Services
                 dc: dc) > 0;
         }
 
-        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
-            string subject, string body, string senderName, SystemMessages msgs, DatabaseConnection dc = null)
+        public static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
+            string subject, string body, string senderName, SystemMessages msgs, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             WebUser registrantWebUser = null;
             var phoneNumber = "";
@@ -586,14 +586,23 @@ namespace AfterSchoolLibrary.Services
                         null,
                         msgs);
 
-                var resource = ActivityMessageService.SendTextMessage(
-                    phoneNumber,
-                    senderName,
-                    subject,
-                    activityName,
-                    message.Uid.ToString(),
-                    registrant.Uid.ToString(),
-                    msgs);
+                MessageResource resource = null;
+                if (checkInOut.IsNotEmpty() && checkInOut.IsTrue())
+                    resource = ActivityMessageService.SendCheckInOutSms(
+                        body,
+                        phoneNumber,
+                        msgs
+                        );
+
+                else
+                    resource = ActivityMessageService.SendTextMessage(
+                        phoneNumber,
+                        senderName,
+                        subject,
+                        activityName,
+                        message.Uid.ToString(),
+                        registrant.Uid.ToString(),
+                        msgs);
 
                 if (resource.IsEmpty())
                     return;
@@ -606,7 +615,7 @@ namespace AfterSchoolLibrary.Services
         }
 
         private static void SaveTwilioSms(this Registrant registrant, MessageResource resource, ActivityMessage message, Account sendingAccount,
-            WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
+        WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var twilioSms = new TwilioSMS()
             {

@@ -140,6 +140,22 @@ namespace AfterSchoolLibrary.Services
 
         }
 
+        internal static MessageResource SendCheckInOutSms(string body, string phone,  SystemMessages msgs)
+        {
+            if (phone.IsNotEmpty())
+            {
+               return TwilioHelper.SendSMS(
+                    phone,
+                    body,
+                    null,
+                    null,
+                    msgs);
+            }
+
+            return null;
+
+        }
+
         internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, string contactPhone, SystemMessages msgs)
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
@@ -256,6 +272,17 @@ namespace AfterSchoolLibrary.Services
                 ActivityMessageService.SendForGroup(am, loggedInUserId, msgs, dc);
             else if (am.AccountId.HasValue)
                 ActivityMessageService.SendForAccount(am, loggedInUserId, msgs, dc);
+            else
+                msgs.Add("Error sending Messages", MessageType.Error);
+        }
+
+        public static void SendCheckInOutSms(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            msgs = msgs ?? new SystemMessages();
+            var am = ActivityMessage.Load(id, msgs, dc);
+
+            if (am.ActivityId.HasValue)
+                ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
             else
                 msgs.Add("Error sending Messages", MessageType.Error);
         }
