@@ -70,7 +70,7 @@
                 </label>
                 <div class="col-md-9">
                     @{ Html.RenderPartial("_SwitchButton", Model.IsInviteOnly, new ViewDataDictionary
-                                       {
+                                               {
                            {"checkboxname", "inviteonly"},
                            {"checkboxid", "inviteonly"},
                            {"disabled", false},
@@ -106,7 +106,7 @@
                                 {"checkboxname", "isContinuousEnrollmentEnabled"},
                                 {"checkboxid", "isContinuousEnrollmentEnabled"},
                                 {"disabled", false},
-                    });
+            });
                     }
                 </div>
             </div>
@@ -156,17 +156,16 @@
                                         {"checkboxname", "isRequireCheckInCheckOutEnabled"},
                                         {"checkboxid", "isRequireCheckInCheckOutEnabled"},
                                         {"disabled", false},
-                                    });
+                        });
                             }
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div id="isNotifyParentCheckInContainer" class="form-group">
                         <label class="col-sm-3 control-label">
                             Notify Parents of Check In? <i class="s7-help1 icon-medium" data-toggle="popover" data-trigger="hover"
-                                                        data-content="Parent will receive a text notification when their student is checked in.<br/>Parent
-                                                           must be opted in to text messages. Message sent will count towards text message limit."
-                                                        data-placement="top"></i>
+                                                           data-content="Parent will receive a text notification when their student is checked in.<br>Parent must be opted in to text messages. Message sent will count towards text message limit."
+                                                           data-placement="bottom" data-html="true"></i>
                         </label>
                         <div class="col-sm-9">
                             @{
@@ -178,7 +177,7 @@
                                         {"checkboxname", "isNotifyParentOfCheckInEnabled"},
                                         {"checkboxid", "isNotifyParentOfCheckInEnabled"},
                                         {"disabled", false},
-                            });
+    });
                             }
                         </div>
                     </div>
@@ -216,7 +215,7 @@
                         </div>
                     </div>
                 </div>
-                                
+
 
                 <div class="registrationperiod-container">
 
@@ -247,7 +246,7 @@
                                         {"name", "registrationopentime"},
                                         {"id", "registrationopentime"},
                                         {"required", true},
-                                    });
+                    });
                             }
 
                         </div>
@@ -278,7 +277,7 @@
                                         {"name", "registrationclosetime"},
                                         {"id", "registrationclosetime"},
                                         {"required", true},
-                                    });
+                    });
                             }
 
                         </div>
@@ -354,37 +353,37 @@
                     </div>
                 </div>
 
-            @if (Model.ActivityTypeId == ActivityType.Activity)
-            {
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">
-                        Registration Mode <span class="text-danger">*</span>
-                    </label>
-                    <div class="col-sm-9">
-                        <div class="am-radio inline"
-                                @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
-                            @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
-                            {
-                                <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
-                                        @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                        @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
-                                <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
-                            }
+                @if (Model.ActivityTypeId == ActivityType.Activity)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Registration Mode <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="am-radio inline"
+                                 @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
+                                @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                                {
+                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
+                                           @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
+                                           @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
+                                    <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
+                                }
+                            </div>
+                            <p class="text-muted">
+                                <em>
+                                    <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
+                                    <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
+                                </em>
+                            </p>
                         </div>
-                        <p class="text-muted">
-                            <em>
-                                <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
-                                <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
-                            </em>
-                        </p>
                     </div>
-                </div>
-            }
-            else
-            {
-                <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
-            }
-        </div>
+                }
+                else
+                {
+                    <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
+                }
+            </div>
         }
         else
         {
@@ -394,8 +393,29 @@
         }
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
+
+    $(document).ready(function () {
+        // Function to handle the visibility of "isNotifyParentOfCheckInEnabled" switch
+        function toggleNotifyParentSwitchVisibility() {
+            var isRequiredChecked = $("#isRequireCheckInCheckOutEnabled").is(":checked");
+            if (isRequiredChecked) {
+                // If "isRequireCheckInCheckOutEnabled" is checked, show the "isNotifyParentOfCheckInEnabled" switch
+                $("#isNotifyParentCheckInContainer").show();
+            } else {
+                // If "isRequireCheckInCheckOutEnabled" is not checked, hide the "isNotifyParentOfCheckInEnabled" switch
+                $("#isNotifyParentCheckInContainer").hide();
+            }
+        }
+
+        // Initial setup
+        toggleNotifyParentSwitchVisibility();
+
+        // Attach an event listener to the "isRequireCheckInCheckOutEnabled" switch
+        $("#isRequireCheckInCheckOutEnabled").on("change", toggleNotifyParentSwitchVisibility);
+    });
 
     PageEvent.add(PageEvent.AFTER_INIT, function () {
 
@@ -480,7 +500,7 @@
                 function (data)
                 {
                     hideLoader();
-                    if (data && data.status == 'ok') {  
+                    if (data && data.status == 'ok') {
                         if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
                             $("#modal-age-restriction-error").addClass("md-show");
                         }

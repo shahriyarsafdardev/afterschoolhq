@@ -276,17 +276,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Error sending Messages", MessageType.Error);
         }
 
-        public static void SendCheckInOutSms(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
-        {
-            msgs = msgs ?? new SystemMessages();
-            var am = ActivityMessage.Load(id, msgs, dc);
-
-            if (am.ActivityId.HasValue)
-                ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
-            else
-                msgs.Add("Error sending Messages", MessageType.Error);
-        }
-
+      
         public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

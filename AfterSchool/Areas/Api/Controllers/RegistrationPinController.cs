@@ -622,6 +622,25 @@ namespace AfterSchool.Areas.Api.Controllers
                                 CheckType = student.CheckInOut ? CheckType.CheckIn : CheckType.CheckOut,
                             };
                             amsgs.AddRange(checkInOutInfo.Save(adc));
+                            if (activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn && student.CheckInOut)
+                            {
+                                //var currentRegistrant = attendanceRegistrant.GetRegistrant(msgs);
+                                var parentRegistrant = registrant.GetParentOrGuardian(amsgs,adc);
+                                var account = activity.GetAccount(amsgs,adc);
+
+                                var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you havs questions or concerns " +
+                                     $" please contact {account?.Name} {account?.Phone}";
+                                var am = activity.AddMessage(
+                                    null,
+                                    msgBody,
+                                    new List<int>(registrant.ID.Value),
+                                    false,
+                                    true,
+                                    currentUser.ID.Value,
+                                    amsgs,
+                                    adc);
+                                parentRegistrant.SendText(account, currentUser, am, activity.Name, null, msgBody, currentUser.DisplayName, amsgs, checkInOut: true,adc);
+                            }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

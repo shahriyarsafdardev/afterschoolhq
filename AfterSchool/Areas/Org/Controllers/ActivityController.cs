@@ -3091,7 +3091,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
                         attendanceRegistrant.LastModifiedBy = currentUser.ID;
                         msgs.AddRange(attendanceRegistrant.Save());
-                        if(activity.IsNotifyParentOfCheckIn)
+                        if(activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn)
                         {
                             var currentRegistrant = attendanceRegistrant.GetRegistrant(msgs);
                             var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
