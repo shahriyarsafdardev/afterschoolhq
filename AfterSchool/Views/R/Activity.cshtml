@@ -314,7 +314,8 @@
                     </div>
                 }
 
-                @if (!account.HasAccountPackageFeature(FeatureType.HideTimezoneOnActivityPage)) { 
+                @if (!account.HasAccountPackageFeature(FeatureType.HideTimezoneOnActivityPage)) 
+                { 
                     if (Model.OwnerAccount.IsNotEmpty() && Model.OwnerAccount.TimeZone.IsNotEmpty())
                     {
                         <div class="activity-detail-block">
