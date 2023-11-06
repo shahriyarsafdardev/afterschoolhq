@@ -410,7 +410,6 @@ namespace AfterSchoolAdHoc
             var fileWritePath = $"D:\\Imported Volunteers-07-01-2022\\Matched_Volunteers({DateTime.Now.ToString("dd-MM-yyyy HH-mm-ss")}).csv";
             var matchedVolunteers = new List<VolunteerRecord>();
             var count = 0;
-            var sToken = InititiateVolunteerBackgroundCheck.CreateSterlingToken(credentials);
             importedVolunteers.ForEach(volunteer =>
             {
                 var webUser = WebUser.LoadByEmail(volunteer.Email.Trim(),msgs,dc);
@@ -439,7 +438,7 @@ namespace AfterSchoolAdHoc
                             };
                             matchedVolunteers.Add(volRecord);
 
-                            RemoveVolunteerAccount(webUser,volunteerApproval,backgroundCheck,msgs,dc);
+                            RemoveVolunteerAccount(webUser,volunteerApproval,msgs,dc);
                         }
                     }
                 }
@@ -447,7 +446,7 @@ namespace AfterSchoolAdHoc
             WriteVolunteerToCsv(matchedVolunteers,fileWritePath);
         }
 
-        private static void RemoveVolunteerAccount(WebUser webUser, VolunteerApproval volunteerApproval, BackgroundCheck? backgroundCheck,
+        private static void RemoveVolunteerAccount(WebUser webUser, VolunteerApproval volunteerApproval,
             SystemMessages msgs, DatabaseConnection dc)
         {
             var account = Account.LoadByOwnerId(webUser.ID.Value, msgs, dc).FirstOrDefault(x => x.AccountTypeId == AccountType.Volunteer);
@@ -467,13 +466,17 @@ namespace AfterSchoolAdHoc
                             if (registrantActivity.IsNotEmpty() && amsgs.HasNoErrors())
                                 amsgs.AddRange(registrantActivity.Delete(adc));
                         }
+                        else
+                        {
+                            var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(registrant.ID.Value, webUser.ID.Value, amsgs, adc);
+                            if(registrantWebUser.IsNotEmpty())
+                                amsgs.AddRange(registrantWebUser.Delete(adc));
+                        }
 
                         amsgs.AddRange(registrant.Delete(adc));
                     });
                     if (volunteerApproval.IsNotEmpty() && amsgs.HasNoErrors())
                         amsgs.AddRange(volunteerApproval.Delete(adc));
-                    if (backgroundCheck.IsNotEmpty() && amsgs.HasNoErrors())
-                        amsgs.AddRange(backgroundCheck.Delete(adc));
                     if(accountWebUser.IsNotEmpty() && amsgs.HasNoErrors())
                         amsgs.AddRange(accountWebUser.Delete(adc));
                     if (account.IsNotEmpty() && amsgs.HasNoErrors())
