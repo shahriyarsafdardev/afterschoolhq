@@ -332,7 +332,7 @@ namespace AfterSchool.Controllers
                             msgs.Add("Error creating negative transaction record", MessageType.Error);
                     }
                     if (msgs.HasNoErrors())
-                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);
+                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, checkoutObject.OverrideAmount, dc);
                 }
                 else
                     EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);

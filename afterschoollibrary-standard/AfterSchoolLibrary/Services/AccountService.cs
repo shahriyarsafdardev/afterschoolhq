@@ -1542,13 +1542,13 @@ namespace AfterSchoolLibrary.Services
             return msgs;
         }
 
-        public static SystemMessages SendSubscriptionPaymentFailed(this Account account, SubscriptionPlan plan,
+        public static SystemMessages SendSubscriptionPaymentFailed(this Account account, SubscriptionPlan plan, Decimal? amount,
             DatabaseConnection dc)
         {
             var msgs = new SystemMessages();
             var accountOwner = account.GetAccountOwner(msgs, dc);
             msgs.AddRange(
-                EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, account.IsAfterSchool));
+                EmailHelper.SendSubscriptionPaymentFailed(account, accountOwner, plan, amount, account.IsAfterSchool));
             return msgs;
         }
 

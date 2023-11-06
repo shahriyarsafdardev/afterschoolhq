@@ -419,7 +419,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
             var plan = registrantSubscription.GetSubscriptionPlan(msgs);
 
             if (msgs.HasNoErrors())
-                account.SendSubscriptionPaymentFailed(plan, null);
+                account.SendSubscriptionPaymentFailed(plan, plan.CostPerPeriod, null);
 
             if (msgs.HasErrors())
                 return Return500(msgs);

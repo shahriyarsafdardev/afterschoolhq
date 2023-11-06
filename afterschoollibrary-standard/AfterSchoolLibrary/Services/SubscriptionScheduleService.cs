@@ -322,7 +322,7 @@ namespace AfterSchoolLibrary.Services
                             msgs.Add("Error creating negative transaction record for subscription schedule with Uid: " + subscriptionSchedule.Uid, MessageType.Error);
                     }
                     if (msgs.HasNoErrors())
-                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, dc);                        
+                        checkoutObject.PayingAccount.SendSubscriptionPaymentFailed(checkoutObject.SubscriptionPlan, checkoutObject.OverrideAmount, dc);                        
                 }
                 else
                     EmailHelper.SendUpcomingSubscriptionPaymentReminder(subscriptionSchedule, true);

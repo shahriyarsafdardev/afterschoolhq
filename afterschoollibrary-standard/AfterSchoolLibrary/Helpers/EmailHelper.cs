@@ -2324,7 +2324,7 @@ namespace AfterSchoolLibrary.Helpers
             return msgs;
         }
 
-        public static SystemMessages SendSubscriptionPaymentFailed(Account account, WebUser user, SubscriptionPlan plan,
+        public static SystemMessages SendSubscriptionPaymentFailed(Account account, WebUser user, SubscriptionPlan plan, Decimal? amount, 
             bool isAfterSchool)
         {
             var msgs = new SystemMessages();
@@ -2341,7 +2341,7 @@ namespace AfterSchoolLibrary.Helpers
                 {"FirstName", user.FirstName},
                 {"AccountName", account.Name},
                 {"Period", $"{plan.BillingPeriodTypeId.ToString().ToLower()}ly"},
-                {"PaymentAmount", plan.CostPerPeriod.ToCurrency()},
+                {"PaymentAmount", amount.ToString()},
                 {"ActivityName", activityName},
                 {"LoginLink", $"{Email.BaseUrl()}login"},
                 {"ProductName", Utilities.AppName(isAfterSchool)},
@@ -2351,7 +2351,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.SubscriptionPayment_Failed,
                 model,
-                "subscriptionpaymentfailed-1.0.0",
+                "subscriptionpaymentfailed-1.0.1",
                 msgs
             );
 
@@ -2412,10 +2412,19 @@ namespace AfterSchoolLibrary.Helpers
         public static SystemMessages SendSubscriptionScheduleWebhookErrors(SystemMessages msgs)
         {
             var errorMessages = "";
-
-            foreach (SystemMessage message in msgs)
+            
+            if (msgs.HasNoErrors())
             {
-                errorMessages += message.Text + "<br />";
+                errorMessages = "Subscription schedules due today were charged successfully.";
+            }
+            else
+            {
+                errorMessages = "Below are the error messages that occured while trying to charge the subscription schedules: <br /><br />";
+
+                foreach (SystemMessage message in msgs)
+                {
+                    errorMessages += message.Text + "<br />";
+                }
             }
 
             var model = new NameValueCollection
@@ -2428,7 +2437,7 @@ namespace AfterSchoolLibrary.Helpers
             var body = ProcessTemplate(
                 EmailTemplates.SubscriptionSchedule_Webhook_Errors,
                 model,
-                "subscriptionschedulewebhookerrors-1.0.1",
+                "subscriptionschedulewebhookerrors-1.0.2",
                 msgs
             );
 

@@ -1,7 +1,5 @@
 <div>
-    <b>Hello, AHQ Admin</b>
+    <b>Hello, AHQ Support and Dev Team !</b>
 
-    <p>Below are the error messages that occured while trying to charge the subscription schedules pending Today:</p>
-
-    <p>@Model.ErrorMessages</p>
+    <p><br />@Model.ErrorMessages</p>
 </div>
