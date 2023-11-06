@@ -373,12 +373,9 @@ namespace AfterSchool.Controllers
                 Description = schedule.Description,
                 NextBillDate = schedule.NextBillDate,
                 CancelledReason = schedule.CancelledReason,
-                Metadata = schedule.Metadata,
                 IsDeleted = schedule.IsDeleted,
                 IsCancelled = schedule.IsCancelled,
-                Uid = schedule.Uid,
                 PaymentsDone = schedule.PaymentsDone
-
             };
 
             if (schedule.IsNotEmpty() && msgs.HasNoErrors())
@@ -410,8 +407,6 @@ namespace AfterSchool.Controllers
                 AmountToConnectAccountInCents = paymentHistory.AmountToConnectAccountInCents,
                 AmountToStripeInCents = paymentHistory.AmountToStripeInCents,
                 RetryNumber = paymentHistory.RetryNumber,
-                Uid = paymentHistory.Uid,
-                StripeRawResponse = paymentHistory.StripeRawResponse
             };
 
             if (schedule.IsNotEmpty() && msgs.HasNoErrors())
@@ -446,10 +441,8 @@ public class ScheduleDto
     public string? Description { get; set; }
     public DateTime? NextBillDate { get; set; }
     public string CancelledReason { get; set; }
-    public string Metadata { get; set; }
     public bool? IsDeleted { get; set; }
     public bool? IsCancelled { get; set; }
-    public Guid Uid { get; set; }
     public int PaymentsDone { get; set; }
 }
 
@@ -469,7 +462,5 @@ public class PaymentDto
     public Decimal AmountToConnectAccountInCents { get; set; }
     public Decimal AmountToStripeInCents { get; set; }
     public int RetryNumber { get; set; }
-    public Guid Uid { get; set; }
-    public string StripeRawResponse { get; set; }
 }
 
