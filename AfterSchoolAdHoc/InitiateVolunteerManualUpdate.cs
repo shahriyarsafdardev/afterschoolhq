@@ -450,7 +450,8 @@ namespace AfterSchoolAdHoc
         private static void RemoveVolunteerAccount(WebUser webUser, VolunteerApproval volunteerApproval, BackgroundCheck? backgroundCheck,
             SystemMessages msgs, DatabaseConnection dc)
         {
-            var account = Account.LoadByOwnerId(webUser.ID.Value, msgs, dc).FirstOrDefault();
+            var account = Account.LoadByOwnerId(webUser.ID.Value, msgs, dc).FirstOrDefault(x => x.AccountTypeId == AccountType.Volunteer);
+            var accountWebUser = account.GetAccountWebUser(webUser.ID.Value,msgs,dc);
             var registrants = webUser.GetAllVolunteerRegistrants(msgs, dc);
             Database.ExecuteTransaction(
                 (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -460,7 +461,7 @@ namespace AfterSchoolAdHoc
                         if (!registrant.IsMaster)
                         {
                             var registration = registrant.GetRegistrations(amsgs, adc).FirstOrDefault();
-                            var registrantActivity = registrant.GetRegistrantActivity(amsgs, adc);
+                            var registrantActivity = registrant.GetRegistrantActivities(amsgs, adc).FirstOrDefault();
                             if (registration.IsNotEmpty())
                                 amsgs.AddRange(registration.Delete(adc));
                             if (registrantActivity.IsNotEmpty() && amsgs.HasNoErrors())
@@ -473,6 +474,8 @@ namespace AfterSchoolAdHoc
                         amsgs.AddRange(volunteerApproval.Delete(adc));
                     if (backgroundCheck.IsNotEmpty() && amsgs.HasNoErrors())
                         amsgs.AddRange(backgroundCheck.Delete(adc));
+                    if(accountWebUser.IsNotEmpty() && amsgs.HasNoErrors())
+                        amsgs.AddRange(accountWebUser.Delete(adc));
                     if (account.IsNotEmpty() && amsgs.HasNoErrors())
                         amsgs.AddRange(account.Delete(adc));
                     if (webUser.IsNotEmpty() && amsgs.HasNoErrors())

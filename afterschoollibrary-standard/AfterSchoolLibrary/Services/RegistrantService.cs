@@ -1794,15 +1794,6 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
         }
-        
-        public static RegistrantActivity GetRegistrantActivity(this Registrant registrant, SystemMessages msgs,
-            DatabaseConnection dc = null)
-        {
-            return RegistrantActivity.LoadByRegistrantId(
-                registrant.ID.Value,
-                msgs,
-                dc).FirstOrDefault();
-        }
 
         public static void MarkAsDeleted(this Registrant registrant, WebUser loggedInUser, SystemMessages msgs, DatabaseConnection dc = null)
         {
