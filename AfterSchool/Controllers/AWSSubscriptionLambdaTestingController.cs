@@ -31,6 +31,9 @@ namespace AfterSchool.Controllers
         {
             SystemMessages msgs = new SystemMessages();
 
+            if (status.NotIn(new List<int> { 1, 2, 3 }))
+                return "Invalid Status";
+
             //get lastest schedule and set its nextbilldate to the date passed to lambda
             var schedule = SubscriptionSchedule.LoadLatestSubscriptionSchedule(msgs);
 
@@ -346,8 +349,40 @@ namespace AfterSchool.Controllers
 
             var schedule = SubscriptionSchedule.LoadLatestSubscriptionSchedule(msgs);
 
+            ScheduleDto scheduleAttributes = new ScheduleDto()
+            {
+                ID = schedule.ID,
+                CreateDate = schedule.CreateDate,
+                CreatedBy = schedule.CreatedBy,
+                LastModifiedDate = schedule.LastModifiedDate,
+                LastModifiedBy = schedule.LastModifiedBy,
+                StartDate = schedule.StartDate,
+                AmountInCents = schedule.AmountInCents,
+                EndDate = schedule.EndDate,
+                FirstRenewal = schedule.FirstRenewal,
+                ProrateFirstCharge = schedule.ProrateFirstCharge,
+                ProrateLastCharge = schedule.ProrateLastCharge,
+                DateCancelled = schedule.DateCancelled,
+                BillingPeriodType = schedule.BillingPeriodType,
+                StripeCustomerId = schedule.StripeCustomerId,
+                StripeSourceId = schedule.StripeSourceId,
+                LastChargeStatus = schedule.LastChargeStatus,
+                StripeConnectId = schedule.StripeConnectId,
+                AmountToConnectAccountInCents = schedule.AmountToConnectAccountInCents,
+                LastDateToBill = schedule.LastDateToBill,
+                Description = schedule.Description,
+                NextBillDate = schedule.NextBillDate,
+                CancelledReason = schedule.CancelledReason,
+                Metadata = schedule.Metadata,
+                IsDeleted = schedule.IsDeleted,
+                IsCancelled = schedule.IsCancelled,
+                Uid = schedule.Uid,
+                PaymentsDone = schedule.PaymentsDone
+
+            };
+
             if (schedule.IsNotEmpty() && msgs.HasNoErrors())
-                return JsonConvert.SerializeObject(schedule);
+                return JsonConvert.SerializeObject(scheduleAttributes);
             else
                 return "Error in retrieving subscription";
         }
@@ -359,10 +394,82 @@ namespace AfterSchool.Controllers
             var schedule = SubscriptionSchedule.LoadLatestSubscriptionSchedule(msgs);
             var paymentHistory = SubscriptionPaymentHistory.LoadBySubscriptionScheduleId((int)schedule.ID, msgs);
 
+            PaymentDto paymentAttributes = new PaymentDto()
+            {
+                ID = paymentHistory.ID,
+                CreateDate = paymentHistory.CreateDate,
+                CreatedBy = paymentHistory.CreatedBy,
+                LastModifiedDate = paymentHistory.LastModifiedDate,
+                LastModifiedBy = paymentHistory.LastModifiedBy,
+                SubscriptionScheduleId = paymentHistory.SubscriptionScheduleId,
+                AmountInCents = paymentHistory.AmountInCents,
+                DateCharged = paymentHistory.DateCharged,
+                StripeChargeId = paymentHistory.StripeChargeId,
+                ProratedCharge = paymentHistory.ProratedCharge,
+                Status = paymentHistory.Status,
+                AmountToConnectAccountInCents = paymentHistory.AmountToConnectAccountInCents,
+                AmountToStripeInCents = paymentHistory.AmountToStripeInCents,
+                RetryNumber = paymentHistory.RetryNumber,
+                Uid = paymentHistory.Uid,
+                StripeRawResponse = paymentHistory.StripeRawResponse
+            };
+
             if (schedule.IsNotEmpty() && msgs.HasNoErrors())
-                return JsonConvert.SerializeObject(paymentHistory);
+                return JsonConvert.SerializeObject(paymentAttributes);
             else
                 return "Error in retrieving subscription payment history";
         }
     }
 }
+
+public class ScheduleDto
+{
+    public int? ID { get; set; }
+    public DateTime? CreateDate { get; set; }
+    public int? CreatedBy { get; set; }
+    public DateTime? LastModifiedDate { get; set; }
+    public int? LastModifiedBy { get; set; }
+    public DateTime StartDate { get; set; }
+    public Decimal AmountInCents { get; set; }
+    public DateTime? EndDate { get; set; }
+    public DateTime? FirstRenewal { get; set; }
+    public bool? ProrateFirstCharge { get; set; }
+    public bool? ProrateLastCharge { get; set; }
+    public DateTime? DateCancelled { get; set; }
+    public BillingPeriodType BillingPeriodType { get; set; }
+    public string StripeCustomerId { get; set; }
+    public string StripeSourceId { get; set; }
+    public LastChargeStatus LastChargeStatus { get; set; }
+    public string StripeConnectId { get; set; }
+    public Decimal AmountToConnectAccountInCents { get; set; }
+    public DateTime? LastDateToBill { get; set; }
+    public string? Description { get; set; }
+    public DateTime? NextBillDate { get; set; }
+    public string CancelledReason { get; set; }
+    public string Metadata { get; set; }
+    public bool? IsDeleted { get; set; }
+    public bool? IsCancelled { get; set; }
+    public Guid Uid { get; set; }
+    public int PaymentsDone { get; set; }
+}
+
+public class PaymentDto
+{
+    public int? ID { get; set; }
+    public DateTime? CreateDate { get; set; }
+    public int? CreatedBy { get; set; }
+    public DateTime? LastModifiedDate { get; set; }
+    public int? LastModifiedBy { get; set; }
+    public int SubscriptionScheduleId { get; set; }
+    public Decimal AmountInCents { get; set; }
+    public DateTime DateCharged { get; set; }
+    public string StripeChargeId { get; set; }
+    public bool ProratedCharge { get; set; }
+    public LastChargeStatus Status { get; set; }
+    public Decimal AmountToConnectAccountInCents { get; set; }
+    public Decimal AmountToStripeInCents { get; set; }
+    public int RetryNumber { get; set; }
+    public Guid Uid { get; set; }
+    public string StripeRawResponse { get; set; }
+}
+
