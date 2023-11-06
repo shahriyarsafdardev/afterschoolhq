@@ -624,14 +624,14 @@ namespace AfterSchool.Areas.Api.Controllers
                             amsgs.AddRange(checkInOutInfo.Save(adc));
                             if (activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn && student.CheckInOut)
                             {
-                                //var currentRegistrant = attendanceRegistrant.GetRegistrant(msgs);
                                 var parentRegistrant = registrant.GetParentOrGuardian(amsgs,adc);
                                 var account = activity.GetAccount(amsgs,adc);
 
                                 var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you havs questions or concerns " +
                                      $" please contact {account?.Name} {account?.Phone}";
+
                                 var am = activity.AddMessage(
-                                    null,
+                                    $"Attendance Messsage for {DateTime.UtcNow}",
                                     msgBody,
                                     new List<int>(registrant.ID.Value),
                                     false,
@@ -639,7 +639,9 @@ namespace AfterSchool.Areas.Api.Controllers
                                     currentUser.ID.Value,
                                     amsgs,
                                     adc);
-                                parentRegistrant.SendText(account, currentUser, am, activity.Name, null, msgBody, currentUser.DisplayName, amsgs, checkInOut: true,adc);
+
+                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null);
+                            //parentRegistrant.SendText(account, currentUser, am, activity.Name, null, msgBody, currentUser.DisplayName, amsgs, "1", adc);
                             }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),

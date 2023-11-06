@@ -990,7 +990,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             msgs);
 
                         BackgroundJob.Enqueue(() =>
-                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null, null));
 
                         msgs.Add("Your message will be sent to the selected registrants", MessageType.Success);
                         ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
@@ -3064,6 +3064,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var attendance = AfterSchoolLibrary.Models.Attendance.Load(attendanceId, msgs);
             var activity = attendance.GetActivity(msgs);
+            var registrantIds = new List<int>();
 
             checkInOutInfo.ForEach(checkInOut =>
             {
@@ -3091,28 +3092,31 @@ namespace AfterSchool.Areas.Org.Controllers
                         attendanceRegistrant.LastModifiedDate = DateTime.UtcNow;
                         attendanceRegistrant.LastModifiedBy = currentUser.ID;
                         msgs.AddRange(attendanceRegistrant.Save());
-                        if(activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn)
-                        {
-                            var currentRegistrant = attendanceRegistrant.GetRegistrant(msgs);
-                            var parentRegistrant = currentRegistrant.GetParentOrGuardian(msgs);
-
-                            var msgBody = $"{currentRegistrant.Name} has been checked into {activity.Name} by {currentAccount.Name}. If you havs questions or concerns " +
-                                 $" please contact {currentAccount.Name} {currentAccount.Phone}";
-                            var am = activity.AddMessage(
-                                null,
-                                msgBody,
-                                new List<int>(currentRegistrant.ID.Value),
-                                false,
-                                true,
-                                currentUser.ID.Value,
-                                msgs);
-                            parentRegistrant.SendText(currentAccount, currentUser, am, activity.Name, null, msgBody, currentAccount.Name, msgs, checkInOut: true);
-                        }
+                        registrantIds.Add(attendanceRegistrant.GetRegistrant(msgs).ID.Value);
                         
                     }
                 }
 
             });
+            if(registrantIds.Any() && activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn)
+            {
+                var msgBody = $"[name] has been checked into {activity.Name} by {currentUser.DisplayName}. If you havs questions or concerns " +
+                        $" please contact {currentAccount.Name} {currentAccount.Phone}";
+
+                var am = activity.AddMessage(
+                        $"Attendance Messsage for {DateTime.UtcNow}",
+                        msgBody,
+                        registrantIds,
+                        false,
+                        true,
+                        currentUser.ID.Value,
+                        msgs);
+
+                BackgroundJob.Enqueue(() =>
+                    ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null));
+            }
+                
+ 
             
             attendance.IsCompleted = true;
             attendance.LastModifiedDate = DateTime.UtcNow;

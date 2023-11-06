@@ -532,8 +532,8 @@ namespace AfterSchoolLibrary.Services
                 dc: dc) > 0;
         }
 
-        public static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
-            string subject, string body, string senderName, SystemMessages msgs, bool? checkInOut = null, DatabaseConnection dc = null)
+        internal static void SendText(this Registrant registrant, Account sendingAccount, WebUser loggedInUser, ActivityMessage message, string activityName,
+            string subject, string body, string senderName, SystemMessages msgs, string checkInOut = null, DatabaseConnection dc = null)
         {
             WebUser registrantWebUser = null;
             var phoneNumber = "";
@@ -587,10 +587,12 @@ namespace AfterSchoolLibrary.Services
                         msgs);
 
                 MessageResource resource = null;
-                if (checkInOut.IsNotEmpty() && checkInOut.IsTrue())
+                if (checkInOut.IsNotEmpty() && checkInOut == "1")
                     resource = ActivityMessageService.SendCheckInOutSms(
                         body,
                         phoneNumber,
+                        message.Uid.ToString(),
+                        registrant.Uid.ToString(),
                         msgs
                         );
 

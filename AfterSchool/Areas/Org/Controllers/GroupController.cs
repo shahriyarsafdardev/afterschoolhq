@@ -624,7 +624,7 @@ namespace AfterSchool.Areas.Org.Controllers
                             msgs);
 
                         BackgroundJob.Enqueue(() =>
-                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null, null));
 
                         if (msgs.HasNoErrors())
                         {
@@ -657,7 +657,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var am = account.GetActivityMessage(id.ToGuid(), msgs);
             var group = am.GetActivityGroup(msgs);
 
-            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, account.ID.Value, null, null));
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, account.ID.Value, null, null, null));
 
             if (msgs.HasNoErrors())
             {
