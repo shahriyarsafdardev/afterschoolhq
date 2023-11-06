@@ -43,6 +43,8 @@ builder.Services.AddSingleton(new SMTPMailTrapHelper(
 builder.Services.AddSingleton(new RollbarConfig(
                 builder.Configuration.GetValue<string>("Rollbar:AccessToken")));
 
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi);
+
 var app = builder.Build();
 
 var configuration = app.Configuration;
