@@ -46,8 +46,8 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
                 if (responseBody.result != "")
                 {
-                    var passedStatusCriterias = new string[] {"complete"};
-                    var passedResultCriterias = new string[] {"clear"};
+                    var passedStatusCriterias = new string[] {"archive"};
+                    var passedResultCriterias = new string[] {"passed"};
                     var considerStatusCriterias = new string[] {"complete"};
                     var considerResultCriterias = new string[] {"consider"};
 
