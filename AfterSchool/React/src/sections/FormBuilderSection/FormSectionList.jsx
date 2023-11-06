@@ -119,9 +119,11 @@ function FormSectionList() {
   };
 
   const addNewSection = async () => {
-    const isNameUnique = questionsGroupsToShow.every(({ Name: name }) => name !== newSectionName);
+    const isNameUnique = questionsGroupsToShow.every(
+      ({ Name: name }) => name.trim() !== newSectionName.trim()
+    );
 
-    if (newSectionName.length === 0) setNewSectionError('Section Name cannot be empty');
+    if (newSectionName.trim().length === 0) setNewSectionError('Section Name cannot be empty');
     else if (!isNameUnique) setNewSectionError('Section Name must be unique');
     else {
       await addNewSectionHandler();

@@ -211,10 +211,10 @@ function FormSectionSettings() {
 
   const sectionNameChangeHandler = value => {
     const isNameUnique = questionsGroups.every(
-      ({ Name: name, Id }) => name !== value || Id == questionGroup
+      ({ Name: name, Id }) => name.trim() !== value.trim() || Id == questionGroup
     );
 
-    if (value.length === 0) setSectionNameError('Section Name cannot be empty');
+    if (value.trim().length === 0) setSectionNameError('Section Name cannot be empty');
     else if (!isNameUnique) setSectionNameError('Section Name must be unique');
     else setSectionNameError('');
   };
@@ -345,7 +345,7 @@ function FormSectionSettings() {
                 color="primary"
                 onClick={formSaveHandler}
                 text="Save"
-                disabled={!unsavedChanges}
+                disabled={!unsavedChanges || sectionNameError.length}
                 loading={saveDisabled}
                 className={classes.saveButton}
               />
@@ -356,7 +356,7 @@ function FormSectionSettings() {
                 color="primary"
                 onClick={formSaveHandler}
                 text="Save Form"
-                disabled={!unsavedChanges}
+                disabled={!unsavedChanges || sectionNameError.length}
                 loading={saveDisabled}
                 className={classes.saveFormButton}
               />
