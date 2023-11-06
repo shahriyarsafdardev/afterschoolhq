@@ -27,7 +27,7 @@ namespace AfterSchool.Controllers
     public class AWSSubscriptionLambdaTestingController : Controller
     {
         [HttpGet]
-        public String Lambda(DateTime dateToday, int status = 1, bool failNextPayment = false, bool pendingCase = false)
+        public String Lambda(DateTime paymentDate, int status = 1, bool retryFailedPayment = false, bool pendingCase = false)
         {
             SystemMessages msgs = new SystemMessages();
 
@@ -37,14 +37,14 @@ namespace AfterSchool.Controllers
             if (schedule.IsCancelled ?? false)
                 return "Subscription payments are completed/cancelled";
 
-            schedule.NextBillDate = dateToday;
+            schedule.NextBillDate = paymentDate;
 
-            if (failNextPayment)
-                ProcessFailedSubscriptionSchedules(schedule, dateToday, status, msgs);
+            if (retryFailedPayment)
+                ProcessFailedSubscriptionSchedules(schedule, paymentDate, status, msgs);
             else if (pendingCase)
-                ProcessPaymentHistoryWithPendingStatus(schedule, status, dateToday, msgs);
+                ProcessPaymentHistoryWithPendingStatus(schedule, status, paymentDate, msgs);
             else
-                ProcessSubscriptionSchedulesPendingToday(schedule, dateToday.Date, status, msgs);
+                ProcessSubscriptionSchedulesPendingToday(schedule, paymentDate.Date, status, msgs);
             
             return JsonConvert.SerializeObject(schedule);
         }
