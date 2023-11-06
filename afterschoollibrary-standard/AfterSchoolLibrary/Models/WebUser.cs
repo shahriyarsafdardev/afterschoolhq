@@ -334,7 +334,7 @@ namespace AfterSchoolLibrary.Models
             var sql = @"
                 SELECT *
                 FROM WebUser
-                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone";
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone AND IsActive='1' " ;
             
             var parameters = new Dictionary<string, object>
             {
