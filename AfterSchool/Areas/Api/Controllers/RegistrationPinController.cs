@@ -628,7 +628,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 var parentRegistrant = registrant.GetParentOrGuardian(amsgs,adc);
                                 var account = activity.GetAccount(amsgs,adc);
 
-                                var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you havs questions or concerns " +
+                                var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you have questions or concerns " +
                                      $" please contact {account?.Name} {account?.Phone}";
 
                                 var am = activity.AddMessage(

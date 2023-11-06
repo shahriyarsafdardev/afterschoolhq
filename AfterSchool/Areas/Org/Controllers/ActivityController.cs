@@ -3100,7 +3100,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
             if(registrantIds.Any() && activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn)
             {
-                var msgBody = $"[name] has been checked into {activity.Name} by {currentUser.DisplayName}. If you havs questions or concerns " +
+                var msgBody = $"[name] has been checked into {activity.Name} by {currentUser.DisplayName}. If you have questions or concerns " +
                         $" please contact {currentAccount.Name} {currentAccount.Phone}";
 
                 var am = activity.AddMessage(
