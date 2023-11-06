@@ -421,7 +421,6 @@ namespace AfterSchoolLibrary.Helpers
                     AND (
 						    (@SearchTerm = '""""') OR
 						    CONTAINS((ap.Title, ap.Headline, ap.About), @SearchTerm)  OR
-                            CONTAINS((properties.Value), @SearchTerm) OR
                             CONTAINS((loc.Address1, loc.Address2, loc.City, loc.State, loc.PostalCode, loc.Name, loc.StreetNumber, loc.StreetName, loc.Neighborhood, loc.County), @SearchTerm)
 					    )
                     AND ((@Gender IS NULL) OR ap.GenderRestriction In (SELECT value FROM STRING_SPLIT(@Gender, ',') WHERE RTRIM(value) <> ''))
