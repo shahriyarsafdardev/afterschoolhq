@@ -68,9 +68,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 var currentUserRegistrant = currentUser.GetMasterParentOrStudentOrAdultRegistrant(msgs);
                 var account = Account.LoadByUniqueName(accountName, msgs);
                 if(isSession)
-                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityName, msgs).GetParticipationObject();
+                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityName, msgs).GetParticipationObject(msgs);
                 else
-                    participationObject = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs).GetParticipationObject();
+                    participationObject = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs).GetParticipationObject(msgs);
 
                 Registrant parentRegistrant = null;
                 Registration registration = null;
@@ -377,11 +377,11 @@ namespace AfterSchool.Areas.Api.Controllers
                 var activity = new Activity();
                 var participationObject = new ParticipationObject(ActivityType.NotSet);
                 if (isSession)
-                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityName, msgs).GetParticipationObject();
+                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, activityName, msgs).GetParticipationObject(msgs);
                 else
                 {
                     activity = Activity.LoadByUniqueNameByAccountId(activityName, account.ID.Value, msgs);
-                    participationObject = activity.GetParticipationObject();
+                    participationObject = activity.GetParticipationObject(msgs);
                 }  
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var questionGroups = participationObject.Form.GetQuestionGroups(msgs);
@@ -688,9 +688,9 @@ namespace AfterSchool.Areas.Api.Controllers
                 //var group = Regex.Match(json.groupid, @"\d+").Value;
                 var participationObject = new ParticipationObject(ActivityType.NotSet);
                 if (isSession)
-                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, json.sessionName, msgs).GetParticipationObject();
+                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, json.sessionName, msgs).GetParticipationObject(msgs);
                 else
-                    participationObject = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs).GetParticipationObject();
+                    participationObject = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs).GetParticipationObject(msgs);
 
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 var collection = HttpUtility.ParseQueryString(json.answers);
@@ -959,9 +959,9 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var participationObject = new ParticipationObject(ActivityType.NotSet);
                 if (isSession)
-                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, json.sessionName, msgs).GetParticipationObject();
+                    participationObject = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, json.sessionName, msgs).GetParticipationObject(msgs);
                 else
-                    participationObject = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs).GetParticipationObject();
+                    participationObject = Activity.LoadByUniqueNameByAccountId(json.activityName, account.ID.Value, msgs).GetParticipationObject(msgs);
 
                 var questions = participationObject.Form.GetAllQuestions(msgs);
                 NameValueCollection collection = HttpUtility.ParseQueryString(json.answers);
@@ -1241,7 +1241,7 @@ namespace AfterSchool.Areas.Api.Controllers
             foreach (var cartItem in cartItems)
             {
                 var participationObject = cartItem.GetParticipationObject(msgs);
-                if (participationObject.ObjectType == ParticipationObjectType.Activity)
+                if (msgs.HasNoErrors() && participationObject.ObjectType == ParticipationObjectType.Activity)
                     activities.Add(
                         new CheckOutDto()
                         {
