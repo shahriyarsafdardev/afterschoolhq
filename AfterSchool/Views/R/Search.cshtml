@@ -2,7 +2,7 @@
     var accountUniqueName = (string) ViewBag.AccountUniqueName;
     var accountName = (string)ViewBag.AccountName;
     var msgs = (SystemMessages) ViewBag.Messages;
-    var fiscalAccountId = 84;
+    var fiscalAccountId = Convert.ToInt32(ViewBag.IPSFiscalAccountId);
     var isVolunteerDirectory = (bool) ViewBag.IsDirectoryTypeVolunteer;
     var accountId = isVolunteerDirectory ? fiscalAccountId : (ViewBag.AccountId != null ? Convert.ToInt32(ViewBag.AccountId) : 0);
     var primaryColor = (string) ViewBag.PrimaryColor;

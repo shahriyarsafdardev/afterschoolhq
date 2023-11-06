@@ -112,7 +112,8 @@ namespace AfterSchool.Controllers
                     ViewBag.AccountName = account.Name;
                     ViewBag.AccountId = account.ID.ToString();
                     ViewBag.IsDirectoryTypeVolunteer = account.HasFeature(FeatureType.ManageVolunteerDirectory, msgs);
-
+                    ViewBag.IPSFiscalAccountId = account.FiscalAccountId ?? 84;
+                    
                     if (profile.IsNotEmpty())
                     {
                         ViewBag.PrimaryColor = profile.PrimaryColor;
