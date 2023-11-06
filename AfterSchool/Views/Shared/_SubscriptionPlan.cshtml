@@ -93,24 +93,27 @@
             <div class="clearfix"></div>
             <br />
 
-            <div class="row">
-                <label class="col-sm-3 control-label">Prorate First Charge</label>
-                <div class="col-sm-1">
-                    @{
-                        Html.RenderPartial
-                        (
-                            "~/Views/Shared/_SwitchButton.cshtml",
-                            subscriptionPlan?.ProrateFirstCharge ?? false,
-                            new ViewDataDictionary
-                            {
-                                {"checkboxname", "proratefirstcharge"},
-                                {"checkboxid", "proratefirstcharge"},
-                            }
-                        );
-                    }
+            @if (activitySchedule.IsNotEmpty())
+            {
+                <div class="row">
+                    <label class="col-sm-3 control-label">Prorate First Charge</label>
+                    <div class="col-sm-1">
+                        @{
+                            Html.RenderPartial
+                            (
+                                "~/Views/Shared/_SwitchButton.cshtml",
+                                subscriptionPlan?.ProrateFirstCharge ?? false,
+                                new ViewDataDictionary
+                                {
+                                    {"checkboxname", "proratefirstcharge"},
+                                    {"checkboxid", "proratefirstcharge"},
+                                }
+                            );
+                        }
+                    </div>
                 </div>
-            </div>
-            <br />
+                <br />
+            }
 
             @if (activitySchedule.IsNotEmpty() && !activitySchedule.IsOngoing)
             {

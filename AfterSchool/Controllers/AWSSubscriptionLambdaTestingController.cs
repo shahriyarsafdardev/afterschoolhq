@@ -40,6 +40,12 @@ namespace AfterSchool.Controllers
             if (schedule.IsCancelled ?? false)
                 return "Subscription payments are completed/cancelled";
 
+            else if (!schedule.NextBillDate.Equals(paymentDate))
+                return "The provided next payment date is not equal to subscription schedule next bill date";
+
+            else if (schedule.LastChargeStatus.Equals(1) && (retryFailedPayment || pendingCase))
+                return "Last charge was already successful";
+
             schedule.NextBillDate = paymentDate;
 
             if (retryFailedPayment)
@@ -48,8 +54,11 @@ namespace AfterSchool.Controllers
                 ProcessPaymentHistoryWithPendingStatus(schedule, status, paymentDate, msgs);
             else
                 ProcessSubscriptionSchedulesPendingToday(schedule, paymentDate.Date, status, msgs);
-            
-            return JsonConvert.SerializeObject(schedule);
+
+            if (msgs.HasNoErrors())
+                return "Payment process completed";
+            else
+                return "Error processing payment";
         }
 
         private void ProcessSubscriptionSchedulesPendingToday(SubscriptionSchedule schedule, DateTime dateToday, int status, SystemMessages msgs)

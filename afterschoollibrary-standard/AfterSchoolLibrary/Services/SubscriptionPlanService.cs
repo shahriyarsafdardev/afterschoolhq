@@ -359,12 +359,9 @@ namespace AfterSchoolLibrary.Services
             //if (billingAccount.HasFeature(FeatureType.UseStripeConnectedAccount, msgs, dc))
             //    stripeUserId = billingAccount.StripeUserId;
 
-            StripeHelper.GetStripeHelperConnectAccount().CancelSubscription(rsp.StripeSubscriptionId);
-            rsp.MarkAsCancelled(loggedInUser, msgs, dc);
-
             if (rsp.SubscriptionScheduleUid.HasValue)
             {
-                var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid)rsp.SubscriptionScheduleUid, msgs, dc);
+                var subscriptionSchedule = SubscriptionSchedule.LoadByUid((Guid) rsp.SubscriptionScheduleUid, msgs, dc);
                 subscriptionSchedule.IsCancelled = true;
                 subscriptionSchedule.NextBillDate = null;
                 subscriptionSchedule.EndDate = DateTime.UtcNow;
@@ -372,6 +369,10 @@ namespace AfterSchoolLibrary.Services
                 subscriptionSchedule.CancelledReason = "Cancelled by " + (isParent ? "Parent" : "Provider");
                 msgs.AddRange(subscriptionSchedule.Save());
             }
+            else
+                StripeHelper.GetStripeHelperConnectAccount().CancelSubscription(rsp.StripeSubscriptionId);
+
+            rsp.MarkAsCancelled(loggedInUser, msgs, dc);
 
             if (msgs.HasNoErrors())
                 return true;
