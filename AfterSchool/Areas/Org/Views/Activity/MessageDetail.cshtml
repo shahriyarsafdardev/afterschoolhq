@@ -61,9 +61,11 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label text-bold">Message Body<span class="text-danger">*</span> </label>
                         <div>
-                            @Html.Raw(@bodyText.IsNotEmpty()?bodyText.Replace("\n", "<br />"): body.Replace("\n", "<br />"))
+                        <label class="control-label text-bold">Message Body<span class="text-danger">*</span> </label>
+                        </div>
+                        <div class="text-wrap">
+                            @Html.Raw(@bodyText.IsNotEmpty()?bodyText:body)
                         </div>
                     </div>
                     <div class="form-group">

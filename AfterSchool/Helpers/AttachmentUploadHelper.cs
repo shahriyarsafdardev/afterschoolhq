@@ -27,6 +27,7 @@ namespace AfterSchool.Helpers
         }
         public static string UploadAttachments(Account account, List<HttpPostedFileBase> importedFiles, string body, SystemMessages msgs)
         {
+            body = body.Replace("\n", "<br>");
             if (importedFiles.Count >= 1 && importedFiles[0].IsNotEmpty())
             {
                 var attachmentLabel = importedFiles.Count == 1 ? "Attachment" : "Attachments";
