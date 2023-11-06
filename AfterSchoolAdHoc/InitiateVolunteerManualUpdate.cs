@@ -469,7 +469,7 @@ namespace AfterSchoolAdHoc
                         else
                         {
                             var registrantWebUser = RegistrantWebUser.LoadByRegistrantIdByWebUserId(registrant.ID.Value, webUser.ID.Value, amsgs, adc);
-                            if(registrantWebUser.IsNotEmpty())
+                            if(registrantWebUser.IsNotEmpty() && !registrantWebUser.IsDeleted)
                                 amsgs.AddRange(registrantWebUser.Delete(adc));
                         }
 
