@@ -74,7 +74,7 @@
                             if (registrantActivities.Any(registrantActivity => registrantActivity.RegistrantId == attendanceRegistrant.RegistrantId && registrantActivity.IsReservedRegistrationAssignmentType()))
                             { 
                             <tr>
-                                <td>@(isTechSupport ? $"{attendanceRegistrant.RegistrantId.ToString()} - {attendanceRegistrant.RegistrantName.MaskString(3, 3)}" : attendanceRegistrant.RegistrantName)</td>
+                                <td>@(isTechSupport ? $"{attendanceRegistrant.RegistrantId.ToString()} - {attendanceRegistrant.GetFirstNameLastInitial()}" : attendanceRegistrant.RegistrantName)</td>
                                 <td>
                                     @if (attendanceRegistrant.RegistrantRegistrantTypeId == RegistrantType.Individual)
                                     {
