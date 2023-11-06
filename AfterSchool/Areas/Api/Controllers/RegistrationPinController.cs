@@ -14,6 +14,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -633,15 +634,14 @@ namespace AfterSchool.Areas.Api.Controllers
                                 var am = activity.AddMessage(
                                     $"Attendance Messsage for {DateTime.UtcNow}",
                                     msgBody,
-                                    new List<int>(registrant.ID.Value),
+                                    new List<int> { registrant.ID.Value },
                                     false,
                                     true,
                                     currentUser.ID.Value,
                                     amsgs,
                                     adc);
-
-                            ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null);
-                            //parentRegistrant.SendText(account, currentUser, am, activity.Name, null, msgBody, currentUser.DisplayName, amsgs, "1", adc);
+                                BackgroundJob.Enqueue(() =>
+                                 ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null));
                             }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
