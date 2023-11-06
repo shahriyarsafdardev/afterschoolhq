@@ -87,7 +87,7 @@ namespace AfterSchool.Areas.Org.Controllers
             }
 
             if (currentAccount.IsNotEmpty() && activity.IsEmpty() && group.IsEmpty() && (RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
-                activityIds = currentAccount.GetActivities(msgs).Where(x => x.HasSchedule).Select(activity=>activity.ID.Value).ToList();
+                activityIds = currentAccount.GetActivitiesWithSchedule(false, msgs).Select(activity => activity.ID.Value).ToList();
 
             if (group.IsNotEmpty())
             {
@@ -96,8 +96,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if((RegistrationReportType)reporttype.ToInteger() == RegistrationReportType.Dismissal)
                     groupList.ForEach(x =>
                     {
-                        activityIds.AddRange(x.GetActivities(null, false, false, null, null, msgs: msgs)
-                            .Where(x => x.HasSchedule).Select(activity => activity.ID.Value));
+                        activityIds.AddRange(x.GetActivitiesWithSchedule(false,msgs).Select(activity => activity.ID.Value).ToList());
                     });
                 else
                     groupList.ForEach(x =>
