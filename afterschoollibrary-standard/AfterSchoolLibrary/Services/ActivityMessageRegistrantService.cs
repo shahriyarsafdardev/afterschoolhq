@@ -35,7 +35,7 @@ namespace AfterSchoolLibrary.Services
                 .ForEach(registrant =>
                 {
                     registrant.SendEmail(account, activityName, fromName, replyToEmail, replyToName, subject, body, contactPhone, "activity_message", msgs);
-                    registrant.SendText(account, loggedInUser, message, activityName, subject, body, replyToName, msgs);
+                    registrant.SendText(account, loggedInUser, message, activityName, subject, body, fromName, msgs);
                 }
             );            
 
