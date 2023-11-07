@@ -166,20 +166,18 @@ function FormSectionSettings() {
 
     const updatedValues = { ...values };
 
-    if (index !== undefined) {
-      Object.keys(updatedValues)
-        .reverse()
-        .forEach(strKey => {
-          const key = Number(strKey);
-          if (key < newDisplayOrder) return;
+    Object.keys(updatedValues)
+      .reverse()
+      .forEach(strKey => {
+        const key = Number(strKey);
+        if (key < newDisplayOrder) return;
 
-          const questionObject = {
-            ...updatedValues[key],
-            DisplayOrder: key + 1
-          };
-          updatedValues[key + 1] = questionObject;
-        });
-    }
+        const questionObject = {
+          ...updatedValues[key],
+          DisplayOrder: key + 1
+        };
+        updatedValues[key + 1] = questionObject;
+      });
 
     const lastQuestion = updatedValues[Object.keys(updatedValues).at(-1)];
     const QuestionSettings = lastQuestion?.QuestionSettings || newQuest.QuestionSettings;
