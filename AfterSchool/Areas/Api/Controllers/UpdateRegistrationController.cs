@@ -131,9 +131,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
-                        IsNotifyParentOfCheckIn = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
-                                                   participationObject.IsNotifyParentOfCheckInEnabled.IsNotEmpty() &&
-                                                   participationObject.IsNotifyParentOfCheckInEnabled,
                     },
                 };
                 

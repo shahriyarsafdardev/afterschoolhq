@@ -24,13 +24,19 @@ namespace AfterSchoolLibrary.Models
 		public int? AccountPackageId { get { return (int?)MDV["AccountPackageId"].Value; } set { MDV["AccountPackageId"].Value = value; } }
 		public FeatureType FeatureTypeId { get { return (FeatureType)MDV["FeatureTypeId"].Value; } set { MDV["FeatureTypeId"].Value = value; } }
 		public decimal? Max { get { return (decimal?)MDV["Max"].Value; } set { MDV["Max"].Value = value; } }
-		
+        public bool VisibleToCustomer
+        {
+            get => (bool) MDV["VisibleToCustomer"].Value;
+            set => MDV["VisibleToCustomer"].Value = value;
+        }
+
 
         public AccountPackageFeature()
         {
             this.Config(ObjectMap, DatabaseQuery, typeof(AccountPackageFeature).Name, "ID");
             this.LoadObjectValues(ObjectMap);
 			this.FeatureTypeId = FeatureType.NotSet;
+            this.VisibleToCustomer = false;
 			
         }
 
@@ -44,7 +50,8 @@ namespace AfterSchoolLibrary.Models
 				_dp.Add(className, "AccountPackageId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "FeatureTypeId", System.Data.SqlDbType.Int);
 				_dp.Add(className, "Max", System.Data.SqlDbType.Decimal , "10,2");
-				
+                _dp.Add(className, "VisibleToCustomer", SqlDbType.Bit);
+
                 return _dp;
             }
         }
@@ -131,7 +138,10 @@ namespace AfterSchoolLibrary.Models
 			dps.Add(ObjectMap["Max"]);
 			msgs.AddRange(BaseObject._Alter(DatabaseQuery, dc, dps));
 
-			
+            dps = new DatabaseParameters();
+            dps.Add(ObjectMap["VisibleToCustomer"]);
+            msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
+
 
             return msgs;
         }

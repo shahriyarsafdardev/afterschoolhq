@@ -1315,7 +1315,7 @@ namespace AfterSchool.Areas.Org.Controllers
             string registrationclosedate, string registrationclosetime, string timezone, string form, string regmode,
             string group, string cmd, string type, string inviteonly, string minseatsrequired,
             string isAdvanceSettingEnabled, string costfrequencytype, string cutoffhours,
-            string isContinuousEnrollmentEnabled, string isRequireCheckInCheckOutEnabled, string isNotifyParentOfCheckInEnabled)
+            string isContinuousEnrollmentEnabled, string isRequireCheckInCheckOutEnabled)
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
@@ -1388,7 +1388,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 {"cutoffhours", cutoffhours},
                 {"isContinuousEnrollmentEnabled", isContinuousEnrollmentEnabled.IsNotEmpty() && isContinuousEnrollmentEnabled.ToBoolean()},
                 {"isRequireCheckInCheckOutEnabled", isRequireCheckInCheckOutEnabled.IsNotEmpty() && isRequireCheckInCheckOutEnabled.ToBoolean()},
-                {"isNotifyParentOfCheckInEnabled", isNotifyParentOfCheckInEnabled.IsNotEmpty() && isNotifyParentOfCheckInEnabled.ToBoolean()},
                 {"activitylocationtype", activityLocationTypeId},
                 {"isparentpricecost", true},
             };
@@ -3098,13 +3097,13 @@ namespace AfterSchool.Areas.Org.Controllers
                 }
 
             });
-            if(registrantIds.Any() && activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn)
+            if(registrantIds.Any() && currentAccount.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn))
             {
                 var msgBody = $"[name] has been checked into {activity.Name} by {currentUser.DisplayName}. If you have questions or concerns " +
                         $" please contact {currentAccount.Name} {currentAccount.Phone}";
 
                 var am = activity.AddMessage(
-                        $"Attendance Messsage for {DateTime.UtcNow}",
+                        $"Attendance Message for {DateTime.UtcNow}",
                         msgBody,
                         registrantIds,
                         false,

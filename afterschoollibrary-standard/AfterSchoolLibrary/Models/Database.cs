@@ -243,8 +243,6 @@ namespace AfterSchoolLibrary.Models
                 new Hashtable {{"IsContinuousEnrollment", DBNull.Value}}, Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsRequireCheckInCheckOut", false}},
                 new Hashtable {{"IsRequireCheckInCheckOut", DBNull.Value}}, Activity.ObjectMap, dc);
-            BaseObject.Update(new Hashtable { { "IsNotifyParentOfCheckIn", false } },
-                new Hashtable { { "IsNotifyParentOfCheckIn", DBNull.Value } }, Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"ActivityTypeId", 0}}, new Hashtable {{"ActivityTypeId", DBNull.Value}},
                 Activity.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"LeaderTypeId", 0}}, new Hashtable {{"LeaderTypeId", DBNull.Value}},
@@ -590,6 +588,8 @@ namespace AfterSchoolLibrary.Models
                 new Hashtable {{"IsDeleted", DBNull.Value}}, RegistrantInviteCode.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsActive", false}}, new Hashtable {{"IsActive", DBNull.Value}},
                 RefreshToken.ObjectMap, dc);
+            BaseObject.Update(new Hashtable { { "VisibleToCustomer", false } },
+               new Hashtable { { "VisibleToCustomer", DBNull.Value } }, AccountPackageFeature.ObjectMap, dc);
 
             //**ENDUPDATES**//
 

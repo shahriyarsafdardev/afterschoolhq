@@ -125,9 +125,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
-                        IsNotifyParentOfCheckIn = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
-                                                   participationObject.IsNotifyParentOfCheckInEnabled.IsNotEmpty() &&
-                                                   participationObject.IsNotifyParentOfCheckInEnabled,
                         StudentFirstName = currentRegistrant.FirstName,
                         StudentLastName = currentRegistrant.LastName,
                     },
@@ -557,6 +554,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             var attendance = new Attendance();
                             var activityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(amsgs, adc) : null;
+                            var account = activity.GetAccount(amsgs, adc);
 
                             if (activity.HasSchedule)
                                 attendance = Attendance.LoadByActivityInstanceId(activityInstance.ID.Value, amsgs, adc).FirstOrDefault();
@@ -623,16 +621,15 @@ namespace AfterSchool.Areas.Api.Controllers
                                 CheckType = student.CheckInOut ? CheckType.CheckIn : CheckType.CheckOut,
                             };
                             amsgs.AddRange(checkInOutInfo.Save(adc));
-                            if (activity.IsNotifyParentOfCheckIn.IsNotEmpty() && activity.IsNotifyParentOfCheckIn && student.CheckInOut)
+                            if (account.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn) && student.CheckInOut)
                             {
                                 var parentRegistrant = registrant.GetParentOrGuardian(amsgs,adc);
-                                var account = activity.GetAccount(amsgs,adc);
 
                                 var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you have questions or concerns " +
                                      $" please contact {account?.Name} {account?.Phone}";
 
                                 var am = activity.AddMessage(
-                                    $"Attendance Messsage for {DateTime.UtcNow}",
+                                    $"Attendance Message for {DateTime.UtcNow}",
                                     msgBody,
                                     new List<int> { registrant.ID.Value },
                                     false,

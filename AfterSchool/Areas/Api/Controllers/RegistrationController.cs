@@ -154,9 +154,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
-                        isNotifyParentOfCheckInEnabled = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled.IsNotEmpty() &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled,
                     }
                 };
 
@@ -419,9 +416,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
-                        isNotifyParentOfCheckInEnabled = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled.IsNotEmpty() &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled,
                     }
                 };
 
@@ -1082,9 +1076,6 @@ namespace AfterSchool.Areas.Api.Controllers
                         IsRequireCheckInCheckOut = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) && 
                                                    participationObject.IsRequireCheckInCheckOutEnabled.IsNotEmpty() &&
                                                    participationObject.IsRequireCheckInCheckOutEnabled,
-                        isNotifyParentOfCheckInEnabled = participationObject.OwnerAccount.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut) &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled.IsNotEmpty() &&
-                                                         participationObject.IsNotifyParentOfCheckInEnabled,
                     }
                 };
 
