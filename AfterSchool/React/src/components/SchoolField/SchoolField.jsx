@@ -115,8 +115,11 @@ function SchoolField({
 
   useEffect(() => {
     setSchoolValue(school?.locationName || school?.Name || '');
-    setFieldValue(ID, school?.locationName || school?.Name || (noSchool ? 'School Not Found' : ''));
   }, [school?.locationName, school?.Name]);
+
+  useEffect(() => {
+    setFieldValue(ID, schoolValue || (noSchool ? 'School Not Found' : ''));
+  }, [schoolValue]);
 
   return (
     <>
