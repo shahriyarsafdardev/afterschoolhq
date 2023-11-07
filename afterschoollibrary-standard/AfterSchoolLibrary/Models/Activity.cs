@@ -793,7 +793,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Activity> LoadByAccountIdBySchedule(int AccountId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> LoadByAccountIdWithSchedule(int AccountId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;
@@ -803,7 +803,7 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
         }
 
-        public static List<Activity> LoadByAccountIdByGroupIdBySchedule(int AccountId, int ActivityGroupId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static List<Activity> LoadByAccountIdByGroupIdWithSchedule(int AccountId, int ActivityGroupId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
             dq.Connection = dc;

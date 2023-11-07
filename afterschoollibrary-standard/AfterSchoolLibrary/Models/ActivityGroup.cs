@@ -640,7 +640,7 @@ namespace AfterSchoolLibrary.Models
         {
 
             if (_Activities.IsEmpty())
-                _Activities = Activity.LoadByAccountIdByGroupIdBySchedule(this.AccountId.Value, this.ID.Value, isDeleted, msgs, dc);
+                _Activities = Activity.LoadByAccountIdByGroupIdWithSchedule(this.AccountId.Value, this.ID.Value, isDeleted, msgs, dc);
 
             return _Activities;
         }

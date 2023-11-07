@@ -572,7 +572,7 @@ namespace AfterSchoolLibrary.Services
             DatabaseConnection dc = null)
         {
             if (account.IsNotEmpty())
-                return Activity.LoadByAccountIdBySchedule(account.ID.Value, isDeleted, msgs, dc);
+                return Activity.LoadByAccountIdWithSchedule(account.ID.Value, isDeleted, msgs, dc);
 
             return null;
         }
