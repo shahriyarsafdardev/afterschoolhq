@@ -165,11 +165,65 @@ namespace AfterSchool.Areas.Org.Controllers
         }
 
         [HttpGet]
-        public ActionResult settings()
+        public ActionResult Settings()
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             ViewBag.msgs = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpPost]
+        public ActionResult Settings(string x)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var featuresVisibleToCustomer = currentAccount.GetAccountPackageFeatures(msgs).Where(x => x.VisibleToCustomer);
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    foreach (var featureType in featuresVisibleToCustomer)
+                    {
+                        var featureTypeId = (int)featureType.FeatureTypeId;
+                        var type = featureTypeId.ToEnum<FeatureType>(); 
+                        var value = Request[type.ToString()].IsNotEmpty() ? 1 : 0;
+                        var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(
+                                                accountPackage.ID.Value,
+                                                type,
+                                                msgs: amsgs,
+                                                dc: adc);
+
+                        if (accountFeature.IsEmpty())
+                            accountFeature = new AccountPackageFeature
+                            {
+                                AccountPackageId = accountPackage.ID,
+                                CreateDate = DateTime.UtcNow,
+                                CreatedBy = currentUser.ID,
+                                FeatureTypeId = type
+                            };
+
+                        accountFeature.Max = value;
+                        accountFeature.LastModifiedBy = currentUser.ID;
+                        accountFeature.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(accountFeature.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Saved Successfully", MessageType.Success);
+                    SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage();
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+            );
+
+           
+            ViewBag.msgs = msgs;
+
             return View(currentAccount);
         }
 

@@ -231,6 +231,7 @@ namespace AfterSchoolLibrary.Services
             text = text.Replace("[firstname]", firstName);
             text = text.Replace("[lastname]", lastName);
             text = text.Replace("[name]", name);
+            text = text.Replace("<span class = \"text-bold\">[RegistrantName]</span>", name);
 
             return text;
         }

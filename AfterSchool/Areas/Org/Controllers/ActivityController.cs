@@ -3099,7 +3099,7 @@ namespace AfterSchool.Areas.Org.Controllers
             });
             if(registrantIds.Any() && currentAccount.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn))
             {
-                var msgBody = $"[name] has been checked into {activity.Name} by {currentUser.DisplayName}. If you have questions or concerns " +
+                var msgBody = $"<span class = \"text-bold\">[RegistrantName]</span> has been checked into {activity.Name} by {currentUser.DisplayName}. If you have questions or concerns " +
                         $" please contact {currentAccount.Name} {currentAccount.Phone}";
 
                 var am = activity.AddMessage(

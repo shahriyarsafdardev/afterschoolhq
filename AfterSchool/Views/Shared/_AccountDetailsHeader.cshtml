@@ -22,7 +22,10 @@
             <a href="@Url.Action("style", "account")" class="btn btn-alt6@(actionName == "style" ? "-active" : "")">Profile Setup</a>
             <a href="@Url.Action("integrations", "account")" class="hide btn btn-alt6@(actionName == "integrations" ? "-active" : "")">Integrations</a>
             <a href="@Url.Action(defaultPaymentsAction, "account")" class="btn btn-alt6@(actionName == defaultPaymentsAction ? "-active" : "")">Accept Payments</a>
-            <a href="@Url.Action("settings", "account")" class="btn btn-alt6@(actionName == "settings" ? "-active" : "")">Settings</a>
+            @if(Model.HasAccountPackageFeature(FeatureType.ManageCheckInCheckOut))
+             {
+                <a href="@Url.Action("settings", "account")" class="btn btn-alt6@(actionName == "settings" ? "-active" : "")">Settings</a>
+             }
 
             @if (SessionVariables.CurrentAccount.AccountTypeId.In(FormConstants.LocationProviderAccountTypes))
             {

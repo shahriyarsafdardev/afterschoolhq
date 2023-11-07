@@ -184,6 +184,16 @@ namespace AfterSchoolLibrary.Models
             return dq.GetCount(msgs) > 0;
         }
 
+        public static bool IsVisibleToCustomer(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
+            dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeId);
+            dq.Criterias.Add(ObjectMap["VisibleToCustomer"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
+            return dq.GetCount(msgs) > 0;
+        }
+
         public static bool HasAccountPackageByFeatureTypeIds(int AccountPackageId, List<FeatureType> FeatureTypeIds, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

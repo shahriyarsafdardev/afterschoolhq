@@ -4,11 +4,8 @@
     var msgs = (SystemMessages)ViewBag.msgs;
 }
 @{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
-
 <div class="main-content">
-
     @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
-
     @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model); }
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -16,17 +13,19 @@
         </div>
         <div class="panel-body">
             <div class="col-md-8 col-lg-9">
+                <form method="post" action="@Url.Action("settings", "account")" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="lg-ml-150 text-bold font-size-20">Check In / Check Out</label>
+                    </div>
+                    <div class="form-group">
+                        @if (Model.IsAccountPackageFeatureVisibleToCustomer(FeatureType.SendNotificationWhenStudentIsCheckedIn))
+                        { 
+                            <label class="lg-ml-150" for="cico-checkbox">Send Notification When Student is Checked In</label>
+                            <input id="@FeatureType.SendNotificationWhenStudentIsCheckedIn" class="cico-checkbox" name="@FeatureType.SendNotificationWhenStudentIsCheckedIn" type="checkbox" class="text-bold" @(Model.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn) ? "checked" : "") />
+                        }
+                    </div>
 
-                
-                <form method="post" action="@Url.Action("edit", "account")" class="form-horizontal">
-                    <div class="form-group">
-                        <label class="col-sm-5 control-label text-bold font-size-20">Check In / Check Out</label>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-5 control-label text-bold  " for="cico-checkbox">Send Notification When Student is Checked In</label>
-                        <input type="checkbox"class="text-bold" id="cico-checkbox" />
-                    </div>
-                    <div class="form-group">
+                    <div class="form-group lg-mt-200">
                         <label class="col-sm-3 control-label"></label>
                         <div class="col-sm-9">
                             <button type="submit" class="btn btn-primary">Save</button>
@@ -35,8 +34,18 @@
                     </div>
                 </form>
             </div>
-            
-
-
-
         </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    var checkbox = document.getElementById("@FeatureType.SendNotificationWhenStudentIsCheckedIn");
+    checkbox.addEventListener("change", function () {
+        if (this.checked)
+        {
+            this.value = 1;
+        } else {
+            this.value = 0;
+        }
+    });
+</script>
