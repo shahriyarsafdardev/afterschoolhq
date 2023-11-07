@@ -17,8 +17,9 @@ function App() {
 
   useEffect(() => {
     injectStore(store);
-    if (getEnv() === 'Local') return;
-    InitAnalytics();
+    const env = getEnv();
+    if (env === 'Local') return;
+    InitAnalytics(env);
     loadZendeskWidget();
   }, []);
 
