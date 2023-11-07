@@ -164,6 +164,15 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(currentAccount);
         }
 
+        [HttpGet]
+        public ActionResult settings()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            ViewBag.msgs = msgs;
+            return View(currentAccount);
+        }
+
         [HttpPost]
         public ActionResult Location(string id, string location, string locationname, string address1, string address2,
             string city, string state, string postalcode, string country, string mylocation, string locationtype)

@@ -1,0 +1,42 @@
+@model Account
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.msgs;
+}
+@{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
+
+<div class="main-content">
+
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+
+    @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Settings
+        </div>
+        <div class="panel-body">
+            <div class="col-md-8 col-lg-9">
+
+                
+                <form method="post" action="@Url.Action("edit", "account")" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label text-bold font-size-20">Check In / Check Out</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-5 control-label text-bold  " for="cico-checkbox">Send Notification When Student is Checked In</label>
+                        <input type="checkbox"class="text-bold" id="cico-checkbox" />
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+
+
+
+        </div>
