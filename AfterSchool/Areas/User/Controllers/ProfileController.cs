@@ -36,7 +36,7 @@ namespace AfterSchool.Areas.User.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(string id, string firstname, string lastname, string email, string password1, string password2, string isactive)
+        public ActionResult Edit(string id, string firstname, string lastname, string email, string password1, string password2, string isactive, string allowtextmessages)
         {
             var msgs = new SystemMessages();
 
@@ -56,6 +56,7 @@ namespace AfterSchool.Areas.User.Controllers
                 user.FirstName = firstname;
                 user.LastName = lastname;
                 user.Email = email;
+                user.AllowTextMessages = allowtextmessages == "1" ? true : false;
                 user.LastModifiedDate = DateTime.UtcNow;
                 user.LastModifiedBy = SessionVariables.CurrentUser.ID;
 
