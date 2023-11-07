@@ -1,4 +1,4 @@
-﻿@using AfterSchoolLibrary.Helpers
+@using AfterSchoolLibrary.Helpers
 @model AccountProfile
 @{
     var account = (Account) ViewBag.Account;
@@ -114,7 +114,7 @@
             <div class="col-sm-6">
                 <input type="file" class="form-control" name="logo" id="logo" accept=".jpg,.jpeg,.png"/>
                 <p class="text-muted">
-                    <em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 1MB</em>
+                    <em>Please upload your logo. A square logo is best with a size of 400px x 400px. File size should be no larger than 5MB</em>
                 </p>
             </div>
             <div class="col-sm-3">
@@ -130,7 +130,7 @@
             <div class="col-sm-6">
                 <input type="file" class="form-control" name="headerimage" id="headerimage" accept=".jpg,.jpeg,.png"/>
                 <p class="text-muted">
-                    <em>Please select a header image, no larger than 2MB</em>
+                    <em>Please select a header image, no larger than 5MB</em>
                 </p>
             </div>
             <div class="col-sm-3">

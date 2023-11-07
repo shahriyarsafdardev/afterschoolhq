@@ -1,4 +1,4 @@
-﻿@model Account
+@model Account
 @{ 
     Layout = "~/Views/Shared/Layouts/_FullScreen_Onboarding.cshtml";
     var msgs = (SystemMessages)ViewBag.Messages;
@@ -47,7 +47,7 @@
                         <label class="onboarding-label"> PROFILE IMAGE</label>
 
                         <input type="file" class="form-control onboarding-input" name="logo" id="logo" accept=".jpg,.jpeg,.png" style="height: 44px;" />
-                        <p class="text-muted" style="padding: 5px 0;">Please upload your logo or headshot. A square logo is best with a size of 400px x 400px. File size should be no larger than 4MB</p>
+                        <p class="text-muted" style="padding: 5px 0;">Please upload your logo or headshot. A square logo is best with a size of 400px x 400px. File size should be no larger than 5MB</p>
                         <div class="col-sm-3">
                             @if (logoUrl.IsNotBlank())
                             {
@@ -61,7 +61,7 @@
                         <label class="onboarding-label"> PROFILE HEADER IMAGE</label>
 
                         <input type="file" class="form-control onboarding-input" name="headerimage" id="headerimage" accept=".jpg,.jpeg,.png" style="height: 44px;" />
-                        <p class="text-muted" style="padding: 5px 0;">Please select a header image, no larger than 4MB</p>
+                        <p class="text-muted" style="padding: 5px 0;">Please select a header image, no larger than 5MB</p>
                         <div class="col-sm-3">
                             @if (headerImageUrl.IsNotBlank())
                             {
