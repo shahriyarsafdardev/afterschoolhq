@@ -182,11 +182,6 @@
 
         function loadAccounts(search, enrollToday, grades, ages, gender, services, timing, pricing, cost, starting,
             other, special, zipCode, latitude, longitude) {
-
-            if (inCallback) {
-                return false;
-            }
-
             showLoader();
             showProgressBar();
             inCallback = true;
