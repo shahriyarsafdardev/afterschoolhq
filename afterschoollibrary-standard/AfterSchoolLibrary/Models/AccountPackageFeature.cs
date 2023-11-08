@@ -159,7 +159,16 @@ namespace AfterSchoolLibrary.Models
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
 		}
 
-		public static AccountPackageFeature LoadByAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        public static List<AccountPackageFeature> LoadByAccountPackageIdByVisibleToCustomer(int AccountPackageId, bool visibleToCustomer, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
+            dq.Criterias.Add(ObjectMap["VisibleToCustomer"], visibleToCustomer);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
+        }
+
+        public static AccountPackageFeature LoadByAccountPackageIdByFeatureTypeId(int AccountPackageId, FeatureType FeatureTypeId, SystemMessages msgs = null, BasicLibrary.DataAccess.DatabaseConnection dc = null)
 		{
 			var dq = DatabaseQuery;
 			dq.Connection = dc;

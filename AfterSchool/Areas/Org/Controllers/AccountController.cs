@@ -169,7 +169,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
-            ViewBag.msgs = msgs;
+            ViewBag.Messages = msgs;
             return View(currentAccount);
         }
 
@@ -180,7 +180,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
-            var featuresVisibleToCustomer = currentAccount.GetAccountPackageFeatures(msgs).Where(x => x.VisibleToCustomer);
+            var featuresVisibleToCustomer = currentAccount.GetVisibleAccountPackageFeatures(msgs);
 
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
@@ -222,7 +222,7 @@ namespace AfterSchool.Areas.Org.Controllers
             );
 
            
-            ViewBag.msgs = msgs;
+            ViewBag.Messages = msgs;
 
             return View(currentAccount);
         }

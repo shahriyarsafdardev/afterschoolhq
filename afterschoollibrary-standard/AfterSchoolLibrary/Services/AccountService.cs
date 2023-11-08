@@ -1118,6 +1118,17 @@ namespace AfterSchoolLibrary.Services
             return new List<AccountPackageFeature>();
         }
 
+        public static List<AccountPackageFeature> GetVisibleAccountPackageFeatures(this Account account,
+          SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var accountPackage = account.GetActiveAccountPackage(msgs, dc);
+
+            if (accountPackage.IsNotEmpty())
+                return AccountPackageFeature.LoadByAccountPackageIdByVisibleToCustomer(accountPackage.ID.Value,true, msgs, dc);
+
+            return new List<AccountPackageFeature>();
+        }
+
         public static AccountPackageFeature GetAccountPackageFeature(this Account account, FeatureType featureType,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
