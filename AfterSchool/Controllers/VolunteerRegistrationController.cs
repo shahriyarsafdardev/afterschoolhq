@@ -285,7 +285,7 @@ namespace AfterSchool.Controllers
             if (participationObject.IsEmpty())
             {
                 msgs.Add("No activity found for the current user", MessageType.Error);
-                return Redirect($"~/404.html");
+                return HttpNotFound();
             }
                 
             var account = SessionVariables.RegistrationStartPageAccount ?? participationObject.OwnerAccount;
