@@ -395,7 +395,7 @@ namespace AfterSchoolLibrary.Helpers
     public static class OverlappingUtilities
     {
 
-        public static bool HasOverlappingVecotorRanges(Vector2 vector1, Vector2 vector2)
+        public static bool HasOverlappingVectorRanges(Vector2 vector1, Vector2 vector2)
         {
             return Math.Max(vector1.X, vector2.X) <= Math.Min(vector1.Y, vector2.Y);
         }

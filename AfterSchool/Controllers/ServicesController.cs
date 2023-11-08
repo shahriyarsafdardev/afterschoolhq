@@ -485,6 +485,11 @@ namespace AfterSchool.Controllers
 
             var participationObject = Activity.LoadByUid(uid.ToGuid(), msgs).GetParticipationObject(msgs);
 
+            var purchaseableObject = PurchaseableObject.FromParticipationObject(participationObject, msgs);
+            var cartItems = SessionVariables.Cart.GetCartItems();
+            if (!CartItemService.AreAllCartItemsValid(purchaseableObject.ObjectType, participationObject.ObjectID.Value, cartItems, msgs))
+                return Json(new { status = "error", messages = msgs }, JsonRequestBehavior.AllowGet);
+
             SessionVariables.Cart.AddCartItem(participationObject, null, msgs);
 
             if (msgs.HasNoErrors())
