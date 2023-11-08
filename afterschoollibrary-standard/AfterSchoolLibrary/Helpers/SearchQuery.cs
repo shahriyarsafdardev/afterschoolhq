@@ -396,7 +396,7 @@ namespace AfterSchoolLibrary.Helpers
 
 
             sql += @"
-                    LEFT JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1";
+                    INNER JOIN Activity act ON act.AccountId = a.ID AND act.IsDeleted <> 1 AND act.IsPublished = 1 AND act.ActivityTypeId = 6";
 
             if (starting.IsNotEmpty())
                 sql += @"
