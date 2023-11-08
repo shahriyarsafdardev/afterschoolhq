@@ -1,4 +1,4 @@
-import { questionType } from 'constants';
+import { questionTypes as allQuestionTypes } from 'constants';
 import { styled } from '@material-ui/core/styles';
 
 export const newQuestion = formType => {
@@ -49,7 +49,7 @@ export const infoText =
   'Selecting one of these options will apply it to existing questions (except for locked questions). Changing or de-selecting an option will override and apply it to existing questions. New questions will be shown/required for all audiences bu default. If an option below is selected, you can still make changes to individual questuions.';
 
 export const getMaxLimit = questionTypeId =>
-  questionTypeId === questionType.textBlock ? 4000 : 400;
+  questionTypeId === allQuestionTypes.textBlock ? 4000 : 400;
 
 export const StyledImage = styled('img')(() => ({
   width: '20px',
@@ -64,3 +64,31 @@ export const filterNotDeletedQuestions = values =>
 
     return qs;
   }, []);
+
+export const setMinMaxLabel = value => {
+  const updatedValue = { ...value };
+  if (updatedValue.QuestionTypeId === allQuestionTypes.rating) {
+    const { 0: min, length, [length - 1]: max } = updatedValue.Options;
+
+    if (!min.value) {
+      updatedValue.Options.at(0).value = updatedValue.Options.at(0).key;
+    }
+    if (!max.value) {
+      updatedValue.Options.at(-1).value = updatedValue.Options.at(-1).key;
+    }
+  }
+  return updatedValue;
+};
+
+export const mapOptions = options => {
+  const optionsArr = options.split(',').map(option => {
+    const [key, value] = option.includes('|') ? option.split('|') : [option, option];
+    return { key, value };
+  });
+  return optionsArr;
+};
+
+export const emojiContent = key => (key === ':slight_frown:' ? ':slightly_frowning:' : key);
+
+export const getQuestionGroupsToShow = questionsGroups =>
+  questionsGroups.filter(questionsGroup => !questionsGroup.IsDeleted);

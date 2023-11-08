@@ -1,0 +1,25 @@
+import React from 'react';
+import { Box } from '@material-ui/core';
+import { useSnackbar } from 'notistack';
+
+function CopyClipBoard(props) {
+  const { enqueueSnackbar } = useSnackbar();
+  const { children: CopyButton, textToCopy } = props;
+
+  const copyToClipBoard = async copyUrl => {
+    try {
+      await navigator.clipboard.writeText(copyUrl);
+      enqueueSnackbar('URL has been Copied!', { variant: 'success' });
+    } catch (err) {
+      enqueueSnackbar('Failed to copy!', { variant: 'error' });
+    }
+  };
+
+  return (
+    <Box onClick={() => copyToClipBoard(textToCopy)} data-testid="copy-text-button">
+      {CopyButton}
+    </Box>
+  );
+}
+
+export default CopyClipBoard;

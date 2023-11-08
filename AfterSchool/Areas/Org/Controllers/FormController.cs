@@ -107,7 +107,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
-            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form.FormTypeId != FormType.Survey)
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
             {
                 var bundlePath = Server.MapPath("~/React/dist/bundle.js");
                 var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
