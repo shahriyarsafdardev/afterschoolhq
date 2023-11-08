@@ -185,30 +185,14 @@ namespace AfterSchool.Areas.Org.Controllers
             Database.ExecuteTransaction(
                 action: (SystemMessages amsgs, DatabaseConnection adc) =>
                 {
-                    foreach (var featureType in featuresVisibleToCustomer)
+                    foreach (var accountPackageFeature in featuresVisibleToCustomer)
                     {
-                        var featureTypeId = (int)featureType.FeatureTypeId;
-                        var type = featureTypeId.ToEnum<FeatureType>(); 
-                        var value = Request[type.ToString()].IsNotEmpty() ? 1 : 0;
-                        var accountFeature = AccountPackageFeature.LoadByAccountPackageIdByFeatureTypeId(
-                                                accountPackage.ID.Value,
-                                                type,
-                                                msgs: amsgs,
-                                                dc: adc);
+                        var value = Request[accountPackageFeature.FeatureTypeId.ToString()].IsNotEmpty() ? 1 : 0;
 
-                        if (accountFeature.IsEmpty())
-                            accountFeature = new AccountPackageFeature
-                            {
-                                AccountPackageId = accountPackage.ID,
-                                CreateDate = DateTime.UtcNow,
-                                CreatedBy = currentUser.ID,
-                                FeatureTypeId = type
-                            };
-
-                        accountFeature.Max = value;
-                        accountFeature.LastModifiedBy = currentUser.ID;
-                        accountFeature.LastModifiedDate = DateTime.UtcNow;
-                        amsgs.AddRange(accountFeature.Save(adc));
+                        accountPackageFeature.Max = value;
+                        accountPackageFeature.LastModifiedBy = currentUser.ID;
+                        accountPackageFeature.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(accountPackageFeature.Save(adc));
                     }
                 },
                 onSuccess: (SystemMessages smsgs) =>

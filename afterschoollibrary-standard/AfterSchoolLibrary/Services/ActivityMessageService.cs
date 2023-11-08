@@ -19,15 +19,14 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(activityMessage.Save(dc));
         }
 
-        private static void SendForActivity(ActivityMessage am, int loggedInUserId, SystemMessages msgs, string checkInOut = null, DatabaseConnection dc = null)
+        private static void SendForActivity(ActivityMessage am, int loggedInUserId, SystemMessages msgs, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             var activity = am.GetActivity(msgs, dc);
             var account = activity.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
-            var fromName = loggedInUser.DisplayName;
+            var fromName = activity.ContactName;
             
-
-            am.SendActivityMessage(account, loggedInUser, activity.Name, activity.ContactName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, checkInOut, dc);
+            am.SendActivityMessage(account, loggedInUser, activity.Name, fromName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, checkInOut, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(activity, account, loggedInUser, msgs, dc);
@@ -238,7 +237,7 @@ namespace AfterSchoolLibrary.Services
             return text;
         }
 
-        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs,string activityContactPhone=null, string checkInOut = null, DatabaseConnection dc = null)
+        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs,string activityContactPhone=null, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
@@ -265,7 +264,7 @@ namespace AfterSchoolLibrary.Services
                 Helpers.Utilities.SystemErrorLog(msgs);
         }
 
-        public static void Send(int id, int loggedInUserId, string checkInOut = null, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void Send(int id, int loggedInUserId, bool? checkInOut = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {          
             msgs = msgs ?? new SystemMessages();
             var am = ActivityMessage.Load(id, msgs, dc);

@@ -199,7 +199,7 @@ namespace AfterSchoolLibrary.Models
             dq.Connection = dc;
             dq.Criterias.Add(ObjectMap["AccountPackageId"], AccountPackageId);
             dq.Criterias.Add(ObjectMap["FeatureTypeId"], FeatureTypeId);
-            dq.Criterias.Add(ObjectMap["VisibleToCustomer"], 0, DatabaseCriteriaOperatorEnum.DBValueIsGreaterThanParameter);
+            dq.Criterias.Add(ObjectMap["VisibleToCustomer"], true);
             return dq.GetCount(msgs) > 0;
         }
 

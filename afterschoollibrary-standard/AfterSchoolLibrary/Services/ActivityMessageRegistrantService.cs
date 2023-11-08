@@ -27,7 +27,7 @@ namespace AfterSchoolLibrary.Services
             return registrants;
         }        
 
-        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, ActivityMessage message, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string contactPhone, SystemMessages msgs, string checkInOut = null, DatabaseConnection dc = null)
+        internal static void SendMessage(this ActivityMessageRegistrant activityMessageRegistrant, ActivityMessage message, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, string subject, string body, string contactPhone, SystemMessages msgs, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             var allResults = new SystemMessages();
 
@@ -38,8 +38,8 @@ namespace AfterSchoolLibrary.Services
                         registrant.SendEmail(account, activityName, fromName, replyToEmail, replyToName, subject, body, contactPhone, "activity_message", msgs);
                     registrant.SendText(account, loggedInUser, message, activityName, subject, body, replyToName, msgs, checkInOut);
                 }
-            );            
-
+            );
+            allResults.AddRange(msgs);
             activityMessageRegistrant.UpdateSendResults(allResults, msgs, dc);
 
             msgs.AddRange(allResults);
@@ -47,7 +47,7 @@ namespace AfterSchoolLibrary.Services
 
         private static void UpdateSendResults(this ActivityMessageRegistrant activityMessageRegistrant, SystemMessages sendResultMessages, SystemMessages msgs, DatabaseConnection dc = null)
         {
-            if (sendResultMessages.HasNoErrors())
+            if (sendResultMessages.HasNoErrors() && !sendResultMessages.Has(MessageType.Notice))
             {
                 activityMessageRegistrant.DateSent = DateTime.UtcNow;
                 activityMessageRegistrant.SentEmail = true;

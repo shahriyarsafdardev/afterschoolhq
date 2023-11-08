@@ -3103,7 +3103,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         $" please contact {currentAccount.Name} {currentAccount.Phone}";
 
                 var am = activity.AddMessage(
-                        $"Attendance Message for {DateTime.UtcNow}",
+                        $"Attendance Message for {currentAccount.ConvertToAccountTimeZone(DateTime.UtcNow)}",
                         msgBody,
                         registrantIds,
                         false,
@@ -3112,7 +3112,7 @@ namespace AfterSchool.Areas.Org.Controllers
                         msgs);
 
                 BackgroundJob.Enqueue(() =>
-                    ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null));
+                    ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, true, null, null));
             }
                 
  

@@ -629,7 +629,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                      $" please contact {account?.Name} {account?.Phone}";
 
                                 var am = activity.AddMessage(
-                                    $"Attendance Message for {DateTime.UtcNow}",
+                                    $"Attendance Message for {account.ConvertToAccountTimeZone(DateTime.UtcNow)}",
                                     msgBody,
                                     new List<int> { registrant.ID.Value },
                                     false,
@@ -638,7 +638,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     amsgs,
                                     adc);
                                 BackgroundJob.Enqueue(() =>
-                                 ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, "1", null, null));
+                                 ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, true, null, null));
                             }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
