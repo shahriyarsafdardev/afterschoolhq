@@ -755,11 +755,12 @@ namespace AfterSchoolLibrary.Models
             ParticipationObjectType participationObjectType = ParticipationObjectType.NotSet,
             List<RegistrationAssignmentType> rats = null, bool getCount = false, bool isDeleted= false, int? currentUserId = null)
         {
+            var msgs = new SystemMessages();
             var searchTextJoin = "";
             var whereClause = "";
             var searchTextWhere = "";
             var userId = currentUserId.IsEmpty() ? 0 : (int)currentUserId;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(accountId, userId, false)?.UserTypeId;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(accountId, userId, false, msgs)?.UserTypeId;
             
             if (searchText.IsNotBlank())
             {

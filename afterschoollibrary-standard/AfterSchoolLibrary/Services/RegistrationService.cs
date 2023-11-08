@@ -403,7 +403,7 @@ namespace AfterSchoolLibrary.Services
                 $"<p>Your {uiActivityLabel} report is attached.</p>{Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report")}";
 
             var emailList = new List<string>();
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false, msgs)?.UserTypeId;
 
 
             if (currentUser.IsNotEmpty() && userType.IsNotEmpty() && userType == UserType.ProgramDirector)

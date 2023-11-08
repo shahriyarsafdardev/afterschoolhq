@@ -356,7 +356,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = SessionVariables.AccountUserType;
             HandleTempMessages(msgs);
 
             Form formObj = null;
@@ -441,7 +441,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var searchQuestionIds = new List<int>();
             var searchQuestionTypeIds = new List<QuestionDataType>();
             var currentUser = SessionVariables.CurrentUser;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = SessionVariables.AccountUserType;
 
             if (sdate.IsDateTime())
                 startDate = sdate.ToDateTime();
@@ -450,7 +450,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 endDate = edate.ToDateTime().AddDays(1).AddMilliseconds(-1);
 
             if (userType == UserType.ProgramDirector)
-                activityIds = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value).Select(a => a.ActivityId.Value).ToList();
+                activityIds = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value, msgs).Select(a => a.ActivityId.Value).ToList();
             else
             {
                 if (activities.IsNotBlank())

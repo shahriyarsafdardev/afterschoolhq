@@ -60,7 +60,7 @@
                 </div>
                 <div style="clear:both"></div>
                 <div class="col-lg-12 margin-t-10 row">
-                    @if(currentUser.IsNotEmpty())
+                    @if(currentUser.IsNotEmpty() && SessionVariables.AccountUserType == UserType.ProgramDirector)
                     {
                         <p>An email report will be sent to <strong>@currentUser.Email</strong></p>
                     }

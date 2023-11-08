@@ -39,7 +39,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var currentUserType = SessionVariables.AccountUserType;
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
             var (registrations, totalCount) =
                 LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, currentUser.ID.Value, msgs, pageNumber, recordsPerPage);
@@ -66,8 +66,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var result = RegistrationIndexAssembler.AssembleRegistrationIndexResult(isStudentCrmEnabled, studentCrmPackage, registrations, msgs, pagingModel,
                 activities, groups, currentAccount);
-            if(currentUserType==UserType.ProgramDirector)
-                ViewBag.currentUser = currentUser;
+            ViewBag.CurrentUser = currentUser;
             return View(result);
         }
 
@@ -78,7 +77,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = SessionVariables.AccountUserType;
 
             RegistrationAssignmentType? rat = null;
             var registrationStatus = RegistrationStatus.NotSet;
@@ -856,8 +855,9 @@ namespace AfterSchool.Areas.Org.Controllers
         private static List<Activity> GetActivities(bool getVolunteers, Account currentAccount, WebUser currentUser, SystemMessages msgs)
         {
             var allActivities = new List<Activity>();
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
-            if(userType.IsNotEmpty() && userType == UserType.ProgramDirector)
+            var userType = SessionVariables.AccountUserType;
+
+            if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
                 allActivities = currentAccount
                        .GetActivities(UserType.ProgramDirector, currentUser, null, null, false, false, null, msgs: msgs)
                        .OrderBy(x => x.Name).ToList();
@@ -892,7 +892,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var currentUserType = SessionVariables.AccountUserType; 
+            
             var pageNumber = 1;
             var recordsPerPage = 10;
 
@@ -963,7 +964,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var currentUserType = SessionVariables.AccountUserType;
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
             var selectedGroups = GetSelectedGroups(group, currentAccount, msgs);
             var (registrations, totalCount) = LoadSearch(activity, selectedGroups, q, regstatus, at, getVolunteers, currentAccount, currentUser.ID.Value, msgs);
@@ -994,7 +995,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var msgs = new SystemMessages();
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var currentUserType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var currentUserType = SessionVariables.AccountUserType;
 
             if (subject.IsEmpty())
                 msgs.Add("Message Reason is required", MessageType.UserError);

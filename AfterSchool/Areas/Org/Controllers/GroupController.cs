@@ -406,7 +406,7 @@ namespace AfterSchool.Areas.Org.Controllers
             var activityIds = new List<int>();
             var questionId = new int?();
             var currentUser = SessionVariables.CurrentUser;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = SessionVariables.AccountUserType;
 
             if (id.IsNotGuid())
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);

@@ -45,11 +45,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var registrants = new List<Registrant>();
             int pageNumber = 1;
             int recordsPerPage = 10;
+            var msgs = new SystemMessages();
 
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
-
+            var userType = SessionVariables.AccountUserType;
             if (pn.IsNumber() && pn.ToInteger() > 0)
             {
                 pageNumber = pn.ToInteger();
@@ -69,16 +69,19 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
             {
-                var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value)
+                var activityIdsByWebUser = ActivityWebUser.LoadByWebUserId(currentUser.ID.Value, msgs)
                 .Select(a => a.ActivityId.Value).ToList();
-                foreach (var id in activityIdsByWebUser)
-                    registrantIds.AddRange(RegistrantActivity
-                    .LoadByParticipationObject(id, ParticipationObjectType.Activity)
-                    .Select(x => x.RegistrantId)
-                    .Where(x => x.HasValue)
-                    .Select(x => x.Value)
-                    .ToList());
+                if(msgs.HasNoErrors())
+                {
+                    foreach (var id in activityIdsByWebUser)
+                        registrantIds.AddRange(RegistrantActivity
+                        .LoadByParticipationObject(id, ParticipationObjectType.Activity,msgs)
+                        .Select(x => x.RegistrantId)
+                        .Where(x => x.HasValue)
+                        .Select(x => x.Value)
+                        .ToList());
 
+                }
             }
 
             totalCount = SessionVariables.CurrentAccount.SearchContactCount(Request["q"], registrantIds, selectedList);
@@ -86,12 +89,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
             if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
-                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value).Where(x => x.CreatedBy == (int)currentUser.ID.Value).OrderBy(x => x.Name).ToList();
+                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs).Where(x => x.CreatedBy == (int)currentUser.ID.Value).OrderBy(x => x.Name).ToList();
             else
-                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value).OrderBy(x => x.Name).ToList();
+                ViewBag.Lists = ContactList.LoadByAccountId(SessionVariables.CurrentAccount.ID.Value, msgs).OrderBy(x => x.Name).ToList();
             ViewBag.SelectedList = selectedList;
             ViewBag.Query = query;
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalCount,
@@ -493,12 +496,13 @@ namespace AfterSchool.Areas.Org.Controllers
         [HttpGet]
         public ActionResult Lists(string pn, string rpp)
         {
+            var msgs = new SystemMessages();
             var lists = new List<ContactList>();
             int pageNumber = 1;
             int recordsPerPage = 10;
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(currentAccount.ID.Value, currentUser.ID.Value, false)?.UserTypeId;
+            var userType = SessionVariables.AccountUserType;
 
             if (pn.IsNumber() && pn.ToInteger() > 0)
             {
@@ -528,8 +532,8 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var totalPages = Math.Ceiling(totalCount.ToDouble() / recordsPerPage).ToInteger();
 
-            ViewBag.Groups = SessionVariables.CurrentAccount.GetSessions(false, null, null);
-            ViewBag.Messages = new SystemMessages();
+            ViewBag.Groups = SessionVariables.CurrentAccount.GetSessions(false, null, null, msgs:msgs);
+            ViewBag.Messages = msgs;
             ViewBag.PagingModel = new PagingModel()
             {
                 TotalCount = totalCount,

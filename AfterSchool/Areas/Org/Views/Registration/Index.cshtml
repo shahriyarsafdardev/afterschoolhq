@@ -6,7 +6,7 @@
     var studentCrmPackage = Model.StudentCrmPackage;
     var currentAccount = Model.CurrentAccount;
     var isVolunteer = Request.QueryString["Volunteers"];
-    var currentUser = (WebUser)ViewBag.currentUser;
+    var currentUser = (WebUser)ViewBag.CurrentUser;
     var returnUrlEditAction = isVolunteer.IsBool() && isVolunteer.ToBoolean() ? Url.Action("index", "registration", new
     {
         volunteers = "true",
