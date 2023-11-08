@@ -11,6 +11,7 @@ import recordButton from 'assets/recordButton.svg';
 import pauseButton from 'assets/pauseWhite.svg';
 import { isValidFile } from 'constants';
 import useStyles from './styles';
+import { getError } from 'utils';
 
 const VALID_EXTENSIONS = ['mp4', 'webm', 'video/ogg'];
 
@@ -284,11 +285,7 @@ const VideoQuestion = ({ question, formik }) => {
           />
         </Box>
         {((touched[ID] && errors[ID]) || uploadingStatus) && (
-          <ErrorBand
-            error={
-              uploadingStatus && (uploadingStatus === 'SUCCESS' ? errors[ID] : uploadingStatus)
-            }
-          />
+          <ErrorBand error={getError(uploadingStatus, errors[ID])} />
         )}
       </Box>
     </FieldWrapper>

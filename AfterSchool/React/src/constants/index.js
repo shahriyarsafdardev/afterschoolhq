@@ -1,4 +1,4 @@
-export { simpleQuestionTypes as questionType } from './questionType';
+export { default as questionTypes, simpleQuestionTypes as questionType } from './questionType';
 export const restrictedQuestionsDataTypeIds = { dateOfBirth: 4, grade: 44, gender: 45 };
 
 export const DEFAULT_PAGE = 1;
@@ -28,6 +28,7 @@ export const DEFAULT_QUESTION_SETTINGS = [
 
 export const audienceTypes = ['All', 'Parent', 'Student', 'Adult'];
 export const formTypes = { 0: 'Not Set', 1: 'StudentForm', 2: 'Survey', 3: 'VolunteerForm' };
+export const formTypeId = { notSet: 0, studentForm: 1, survey: 2, volunteerForm: 3 };
 
 export const isFileTypeValid = (file, validExtensions) => {
   const fileExtension = file.type.split('/')[1];
@@ -59,3 +60,5 @@ export const statusIcons = {
   currentlyEditing: '✏️',
   notStarted: '⏹️'
 };
+export const emojis =
+  ':grinning:|Happy,:grin:|Thrilled,:blush:|Pleased,:laughing:|Laughing,:sweat_smile:|Relieved,:joy:|Funny,:wink:|Playful,:slight_smile:|Content,:upside_down:|Upside Down,:heart_eyes:|Love,:innocent:|Innocent,:stuck_out_tongue:|Goofy,:thinking:|Unsure,:neutral_face:|Neutral,:sleeping:|Tired,:mask:|Sick,:slight_frown:|Sad,:cold_sweat:|Anxious,:angry:|Angry,:grimacing:|Yikes';

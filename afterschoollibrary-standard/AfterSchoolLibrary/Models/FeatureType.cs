@@ -43,5 +43,6 @@ public enum FeatureType
     AllAgeRegistration = 42,
     ManageCheckInCheckOut = 43,
     ManageStudentNotes = 44,
-    SendNotificationWhenStudentIsCheckedIn = 45,
+    HideTimezoneOnActivityPage = 45,
+    SendNotificationWhenStudentIsCheckedIn = 46,
 }

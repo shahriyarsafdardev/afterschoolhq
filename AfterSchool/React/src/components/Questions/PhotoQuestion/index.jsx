@@ -10,6 +10,7 @@ import WebCamera from 'components/WebCamera';
 import { isValidFile } from 'constants';
 import capture from 'assets/capture.svg';
 import useStyles from './styles';
+import { getError } from 'utils';
 
 const VALID_EXTENSIONS = ['png', 'jpeg', 'jpg', 'gif', 'bmp', 'webp'];
 
@@ -242,11 +243,7 @@ const PhotoQuestion = ({ question, formik }) => {
           </Dialog>
         </Box>
         {((touched[ID] && errors[ID]) || uploadingStatus) && (
-          <ErrorBand
-            error={
-              uploadingStatus && (uploadingStatus === 'SUCCESS' ? errors[ID] : uploadingStatus)
-            }
-          />
+          <ErrorBand error={getError(uploadingStatus, errors[ID])} />
         )}
       </Box>
     </FieldWrapper>

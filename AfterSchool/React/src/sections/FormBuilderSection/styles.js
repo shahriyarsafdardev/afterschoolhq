@@ -33,7 +33,7 @@ export default makeStyles(theme => ({
       marginTop: props => (props.questionGroup ? '104px' : '0px')
     },
     [theme.breakpoints.down('sm')]: {
-      backgroundColor: '#F9F9F9',
+      backgroundColor: theme.palette.gray.light,
       boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
       zIndex: 1,
       maxHeight: '600px',
@@ -127,7 +127,7 @@ export default makeStyles(theme => ({
   question: {
     width: '100%',
     justifyContent: 'space-evenly',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     flexDirection: 'row',
     borderRadius: '3px',
     display: 'flex',
@@ -170,12 +170,12 @@ export default makeStyles(theme => ({
     }
   },
   saveButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     '& .MuiCircularProgress-colorPrimary': {
-      color: '#494949'
+      color: theme.palette.text.secondary
     }
   },
   saveFormButton: {
@@ -206,6 +206,40 @@ export default makeStyles(theme => ({
       color: '#FFFFFF'
     }
   },
+  publishButton: {
+    width: '100%',
+    fontSize: 14
+  },
+  publishBtnscolors: {
+    color: 'white',
+    border: theme.palette.red.main,
+    backgroundColor: theme.palette.red.main,
+    '&:hover': {
+      color: 'white',
+      border: theme.palette.red.main,
+      backgroundColor: theme.palette.red.main
+    }
+  },
+  publishButtonsGroup: {
+    position: 'absolute',
+    left: '84.1%',
+    top: '60px',
+    right: '10px',
+    [theme.breakpoints.down('md')]: {
+      top: '60px'
+    },
+    [theme.breakpoints.only('md')]: {
+      width: '17%'
+    },
+    [theme.breakpoints.down('sm')]: {
+      left: 'unset',
+      top: '20px'
+    },
+    '& .MuiButtonGroup-groupedOutlinedHorizontal:not(:first-child)': {
+      borderLeft: 'none',
+      marginLeft: 0
+    }
+  },
   backButton: {
     fontSize: 14,
     width: 90,
@@ -218,7 +252,7 @@ export default makeStyles(theme => ({
     fontSize: 14,
     width: 120,
     height: '40px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     margin: '8px 12px'
   },
   setAudienceButton: {
@@ -228,7 +262,7 @@ export default makeStyles(theme => ({
     width: 120,
     fontSize: 14,
     margin: '20px 0px 25px 0px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     [theme.breakpoints.down('sm')]: {
       width: '100%'
     }
@@ -244,11 +278,11 @@ export default makeStyles(theme => ({
     position: 'absolute'
   },
   audienceList: {
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     borderRadius: '3px',
     marginTop: '-45px',
     marginLeft: '110px',
-    backgroundColor: '#F9F9F9',
+    backgroundColor: theme.palette.gray.light,
     boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
     minWidth: '350px',
     padding: '8px 12px',
@@ -289,7 +323,6 @@ export default makeStyles(theme => ({
     }
   },
   applyToAllControlsItem: {
-    padiing: '5px',
     display: 'flex',
     alignItems: 'center',
     [theme.breakpoints.up('md')]: {
@@ -373,17 +406,22 @@ export default makeStyles(theme => ({
   dialogContentText: { fontSize: '16px', padding: '20px', textAlign: 'center' },
   dialogActions: { display: 'flex', justifyContent: 'center' },
   addNewSectionButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
     marginTop: '25px',
-    border: '1px solid #E4E4E4'
+    border: `1px solid ${theme.palette.gray.main}`
   },
   addNewQuestionButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     fontSize: '14px',
     fontWeight: 'bold',
-    border: '1px solid #E4E4E4'
+    border: `1px solid ${theme.palette.gray.main}`
+  },
+  selectMood: {
+    color: theme.palette.text.secondary,
+    fontSize: '14px',
+    border: `1px solid ${theme.palette.gray.main}`
   },
   dropDownIcon: { width: '20px', height: 'auto', marginLeft: '2px' },
   checkboxWrapper: {
@@ -413,13 +451,13 @@ export default makeStyles(theme => ({
     flexWrap: 'wrap'
   },
   applyToAllButton: {
-    color: '#494949',
+    color: theme.palette.text.secondary,
     margin: '8px 12px',
     width: '100px',
     fontSize: '14px',
-    border: '1px solid #E4E4E4',
+    border: `1px solid ${theme.palette.gray.main}`,
     '& .MuiCircularProgress-colorPrimary': {
-      color: '#494949'
+      color: theme.palette.text.secondary
     }
   },
   questionCheckbox: {
@@ -447,5 +485,65 @@ export default makeStyles(theme => ({
   },
   marginTop: {
     marginTop: 30
+  },
+  marginAuto: {
+    margin: 'auto'
+  },
+  moodSelector: {
+    marginLeft: '10%',
+    marginBottom: '15px',
+    [theme.breakpoints.down('md')]: {
+      marginLeft: '2%'
+    }
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'space-evenly'
+  },
+  emojisWrapper: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center'
+  },
+  emojisList: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    listStyle: 'none',
+    padding: theme.spacing(0.5)
+  },
+  chip: {
+    margin: theme.spacing(0.5),
+    '& .MuiChip': {
+      root: {
+        backgroundColor: theme.palette.text.disabled
+      }
+    }
+  },
+  chipRoot: {
+    backgroundColor: `${theme.palette.text.disabled} !important`
+  },
+  emojiContent: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  emojiOuterWrapper: {
+    border: `1px solid ${theme.palette.gray.main}`,
+    borderRadius: '3px',
+    marginTop: '4px',
+    marginLeft: '-15px',
+    backgroundColor: theme.palette.gray.light,
+    boxShadow: '4px 1px 10px rgba(0, 0, 0, 0.1)',
+    minWidth: '350px',
+    padding: '8px 12px',
+    zIndex: 1,
+    [theme.breakpoints.down('sm')]: {
+      minWidth: '250px',
+      marginTop: '35px',
+      marginLeft: '-120px'
+    }
+  },
+  emoji: {
+    backgroundColor: '#e0e0e0'
   }
 }));

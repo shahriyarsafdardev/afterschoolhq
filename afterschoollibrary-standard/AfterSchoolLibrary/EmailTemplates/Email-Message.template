@@ -57,13 +57,13 @@
     </head>
     <body>
         <p class="sentby">
-            Sent by <strong>@Model.replyToName</strong> at <strong>@Model.date</strong>
+            Sent by <strong>@Model.fromName</strong> at <strong>@Model.date</strong>
         </p>
         <h2 class="subject">@Model.subject for @Model.activityName</h2>
         @Model.body   
         <p class="more-info">
             For more information, feel free to reach <strong>@Model.activityName</strong> via <strong>
-                <a style="color: black;" href="@Model.email">email</a> or <a style="color: black;" href="#">@Model.contactPhone</a></strong>
+                <a style="color: black;" href="mailto:@Model.email">email</a> or <a style="color: black;" href="#">@Model.contactPhone</a></strong>
         </p>
     </body>
 </div>

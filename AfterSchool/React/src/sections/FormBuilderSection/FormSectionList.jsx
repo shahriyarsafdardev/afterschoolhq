@@ -15,9 +15,10 @@ import {
   Popover
 } from '@material-ui/core';
 
-import { unSavedDialogProps, deleteItemDialogProps } from './helper';
+import { unSavedDialogProps, deleteItemDialogProps, getQuestionGroupsToShow } from './helper';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
 import { useFormBuilder } from 'redux/hooks';
+import { formTypeId } from 'constants';
 import useStyles from './styles';
 import Dialog from './Dialog';
 import paths from 'routes';
@@ -35,20 +36,25 @@ function FormSectionList() {
   const [newSectionName, setNewSectionName] = useState('');
   const [newSearchParams, setNewSearchParams] = useState('');
   const [newSectionError, setNewSectionError] = useState('');
-  const [deleteSectionId, setdeleteSectionId] = useState(null);
+  const [deleteSectionId, setDeleteSectionId] = useState(null);
   const [showNewSectionField, setShowNewSectionField] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const questionGroup = searchParams.get('qg');
-  const classes = useStyles({ questionGroup });
+
+  const {
+    questionsGroups,
+    saveNewSectionData,
+    deleteSectionData,
+    form: { FormType: formType }
+  } = useFormBuilder();
+
+  const classes = useStyles({ questionGroup: questionGroup || formType === formTypeId.survey });
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showSettings, setShowSettings] = useState(!isMobile);
   const { unsavedChanges } = useUnsavedChanges();
-  const { questionsGroups, saveNewSectionData, deleteSectionData } = useFormBuilder();
 
-  const questionsGroupsToShow = questionsGroups.filter(
-    questionsGroup => questionsGroup.IsDeleted === false
-  );
+  const questionsGroupsToShow = getQuestionGroupsToShow(questionsGroups);
 
   const firstSectionId = questionsGroupsToShow.length ? questionsGroupsToShow[0].Id : -1;
 
@@ -68,6 +74,8 @@ function FormSectionList() {
       FormQuestion: null,
       FormQuestionGroups: updatedQuestionGroups
     }).then(() => enqueueSnackbar('Deleted.', { variant: 'success' }));
+
+    return updatedQuestionGroups;
   };
 
   const addNewSectionHandler = async () => {
@@ -80,20 +88,27 @@ function FormSectionList() {
   };
 
   const handleDeleteSection = async () => {
-    await handleDelete(deleteSectionId);
-    handleCloseDialog();
+    const updatedQuestionGroups = await handleDelete(deleteSectionId);
 
     if (questionGroup == deleteSectionId) {
-      if (questionsGroupsToShow.length > 0) {
-        setSearchParams(`qg=${firstSectionId}`);
+      const updatedQuestionsGroupsToShow = getQuestionGroupsToShow(updatedQuestionGroups);
+
+      if (updatedQuestionsGroupsToShow.length > 0) {
+        const updatedFirstSectionId = updatedQuestionsGroupsToShow.length
+          ? updatedQuestionsGroupsToShow[0].Id
+          : -1;
+
+        setSearchParams(`qg=${updatedFirstSectionId}`);
       } else {
         navigate(formSettingsPath(formId));
       }
     }
+
+    handleCloseDialog();
   };
 
   const handleCloseDialog = () => {
-    setdeleteSectionId(null);
+    setDeleteSectionId(null);
     setIsOpen(false);
   };
 
@@ -121,6 +136,24 @@ function FormSectionList() {
     setIsUnsaved(true);
   };
 
+  const setParamsAndShowSetting = value => {
+    setSearchParams(`qg=${value}`);
+    toggleShowSettings();
+  };
+
+  const onSectionsClickHandler = () => {
+    if (!questionsGroupsToShow.length) return;
+    if (!unsavedChanges) {
+      setParamsAndShowSetting(firstSectionId);
+    } else unsavedModal();
+  };
+
+  const showSectionHandler = key => {
+    if (!unsavedChanges) {
+      setParamsAndShowSetting(key);
+    } else unsavedModal(key);
+  };
+
   const SectionList = () => (
     <Grid item lg={2} md={2} xs={12} sm={12} className={classes.sectionListWrapper}>
       {!isMobile && (
@@ -138,12 +171,7 @@ function FormSectionList() {
           <Typography
             variant="h6"
             className={classes.sectionsListHeading}
-            onClick={() => {
-              if (!unsavedChanges) {
-                setSearchParams(`qg=${firstSectionId}`);
-                toggleShowSettings();
-              } else unsavedModal();
-            }}
+            onClick={onSectionsClickHandler}
             data-testid={'formSections'}
           >
             Sections
@@ -156,12 +184,7 @@ function FormSectionList() {
             <Typography
               variant="body1"
               className={questionGroup == key ? classes.currentSection : classes.sectionName}
-              onClick={() => {
-                if (!unsavedChanges) {
-                  setSearchParams(`qg=${key}`);
-                  toggleShowSettings();
-                } else unsavedModal(key);
-              }}
+              onClick={() => showSectionHandler(key)}
               data-testid={`formSection-${Name}`}
             >
               {Name}
@@ -174,7 +197,7 @@ function FormSectionList() {
                 style={{ cursor: 'pointer', color: '#B2B2B4' }}
                 onClick={() => {
                   setIsOpen(true);
-                  setdeleteSectionId(key);
+                  setDeleteSectionId(key);
                 }}
               />
             )}

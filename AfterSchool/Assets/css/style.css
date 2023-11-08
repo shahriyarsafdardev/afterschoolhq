@@ -23200,3 +23200,7 @@ a.text-limit span {
     vertical-align: text-bottom;
     margin-left: 7px;
 }
+
+.pd-0 {
+    padding: 0;
+}

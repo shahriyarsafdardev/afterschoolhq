@@ -222,20 +222,28 @@ namespace AfterSchoolLibrary.Models
 			dq.Criterias.Add(ObjectMap["AttendanceId"], AttendanceId);
 			dq.Criterias.Add(ObjectMap["RegistrantId"], RegistrantId);
 			return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject);
-		}
+        }
 
-		
+
 
         #endregion
 
-		#region "UserDefined"
+        #region "UserDefined"
 
         public string RegistrantName
         {
             get
             {
-                return  BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
+                return BaseWebUser.BuildDisplayName(this.RegistrantFirstName, this.RegistrantLastName);
             }
+        }
+
+        public string GetFirstNameLastInitial()
+        {
+            if (this.RegistrantFirstName.Length < 3)
+                return $"{this.RegistrantFirstName} {this.RegistrantLastName.MaskString(1)}.";
+
+            return $"{this.RegistrantFirstName.MaskString(Math.Max(this.RegistrantFirstName.Length - 3, 3))} {this.RegistrantLastName.MaskString(1)}.";
         }
 
         public bool IsAlreadyBilled

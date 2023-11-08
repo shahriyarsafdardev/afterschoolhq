@@ -8,6 +8,7 @@ const useStyles = makeStyles(theme => ({
   innerWrapper: {
     display: 'grid',
     gridTemplateColumns: 'auto auto auto',
+    marginBottom: '50px',
     gap: '20px',
     [theme.breakpoints.up('xl')]: {
       maxWidth: '80%'

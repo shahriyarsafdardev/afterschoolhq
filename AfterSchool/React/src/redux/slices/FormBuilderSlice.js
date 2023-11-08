@@ -44,6 +44,9 @@ const FormBuilderSlice = createSlice({
     },
     clearFormQuestions: state => {
       state.questions = [];
+    },
+    setIsPublishedSurvey: (state, { payload }) => {
+      state.form = { ...state.form, IsPublished: payload };
     }
   }
 });
@@ -59,6 +62,7 @@ export const useFormBuilderActions = () => {
     clearFormQuestions,
     saveNewQuestionsGroup,
     loadingSectionData,
+    setIsPublishedSurvey,
     updateQuestionsGroups
   } = FormBuilderSlice.actions;
   const dispatch = useDispatch();
@@ -77,6 +81,15 @@ export const useFormBuilderActions = () => {
       if (obj) dispatch(setSectionData(obj));
       if (!msgs.length) dispatch(sectionDataLoaded());
     });
+  };
+
+  const publishOrUnpublishSurvey = async formId => {
+    return await FormBuilderRepository.publishUnpublishSurvey({ formId }).then(
+      ({ data: { obj, msgs } }) => {
+        if (!msgs.length) dispatch(setIsPublishedSurvey(obj));
+        return obj;
+      }
+    );
   };
 
   const submitFormSectionData = async ({ FormQuestionGroups, ...values }) => {
@@ -133,7 +146,8 @@ export const useFormBuilderActions = () => {
     deleteSectionData,
     updateFormSettings,
     saveNewSectionData,
-    submitFormSectionData
+    submitFormSectionData,
+    publishOrUnpublishSurvey
   };
 };
 

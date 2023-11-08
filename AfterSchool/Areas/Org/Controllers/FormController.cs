@@ -107,7 +107,7 @@ namespace AfterSchool.Areas.Org.Controllers
             ViewBag.IndividualGroups = individualGroups;
             ViewBag.QuestionGroup = questionGroup;
             ViewBag.FormUrl = formUrl;
-            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration) && form.FormTypeId != FormType.Survey)
+            if (currentAccount.HasAccountPackageFeature(FeatureType.AllAgeRegistration))
             {
                 var bundlePath = Server.MapPath("~/React/dist/bundle.js");
                 var lastModifiedDate = System.IO.File.GetLastWriteTime(bundlePath);
@@ -188,6 +188,20 @@ namespace AfterSchool.Areas.Org.Controllers
                         if (formtype.IsNotBlank()) form.FormTypeId = (FormType) formtype.ToInteger();
 
                         amsgs.AddRange(form.Save(adc));
+                        if (amsgs.HasNoErrors())
+                        {
+                            SessionVariables.WebSession.LogActivity(
+                                account: currentAccount,
+                                actor: currentUser,
+                                actionType: WebSessionActionType.Created,
+                                objectType: ObjectType.Form,
+                                objectId: form.ID.Value,
+                                objectText: form.Name,
+                                indirectObjectType: ObjectType.Account,
+                                indirectObjectId: currentAccount.ID.Value,
+                                indirectObjectText: currentAccount.Name
+                            );
+                        }
 
                         if (qg.IsNumber())
                         {

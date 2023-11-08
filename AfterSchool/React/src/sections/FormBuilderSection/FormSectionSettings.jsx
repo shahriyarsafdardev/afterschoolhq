@@ -6,10 +6,15 @@ import { useSearchParams, useParams } from 'react-router-dom';
 import React, { useEffect, useState, useCallback } from 'react';
 import { Grid, Typography, TextField, Box, Button } from '@material-ui/core';
 
+import {
+  newQuestion,
+  setMinMaxLabel,
+  unSavedDialogProps,
+  filterNotDeletedQuestions
+} from './helper';
+import { DEFAULT_QUESTION_SETTINGS, formTypeId } from 'constants';
 import { useUnsavedChanges } from './UnsavedChangesProvider';
-import { newQuestion, unSavedDialogProps, filterNotDeletedQuestions } from './helper';
 import formValidationSchema from './formValidationSchema';
-import { DEFAULT_QUESTION_SETTINGS } from 'constants';
 import ApplyToAllControls from './ApplyToAllControls';
 import { LoadingButton } from 'components/Overrides';
 import { usePrompt } from 'utils/hooks/usePrompt';
@@ -54,6 +59,7 @@ function FormSectionSettings() {
     loadSectionData(formId, questionGroup);
     return () => {
       clearQuestions();
+      resetForm();
     };
   }, [formId, questionGroup]);
 
@@ -86,7 +92,7 @@ function FormSectionSettings() {
     onSubmit: async values => {
       setSaveDisabled(true);
       const formQuestions = Object.keys(values).map(key => {
-        const updatedValue = { ...values[key] };
+        const updatedValue = { ...setMinMaxLabel(values[key]) };
 
         const optionsString =
           (updatedValue.Options &&
@@ -124,7 +130,7 @@ function FormSectionSettings() {
     }
   });
 
-  const { handleSubmit, values, setFieldValue, setValues, dirty } = formik;
+  const { handleSubmit, values, setFieldValue, setValues, dirty, resetForm } = formik;
   const formDirty = dirty || currentSection?.Name !== sectionName;
   const [showPrompt, cancelNavigation, confirmNavigation] = usePrompt(formDirty);
 
@@ -166,20 +172,18 @@ function FormSectionSettings() {
 
     const updatedValues = { ...values };
 
-    if (index !== undefined) {
-      Object.keys(updatedValues)
-        .reverse()
-        .forEach(strKey => {
-          const key = Number(strKey);
-          if (key < newDisplayOrder) return;
+    Object.keys(updatedValues)
+      .reverse()
+      .forEach(strKey => {
+        const key = Number(strKey);
+        if (key < newDisplayOrder) return;
 
-          const questionObject = {
-            ...updatedValues[key],
-            DisplayOrder: key + 1
-          };
-          updatedValues[key + 1] = questionObject;
-        });
-    }
+        const questionObject = {
+          ...updatedValues[key],
+          DisplayOrder: key + 1
+        };
+        updatedValues[key + 1] = questionObject;
+      });
 
     const lastQuestion = updatedValues[Object.keys(updatedValues).at(-1)];
     const QuestionSettings = lastQuestion?.QuestionSettings || newQuest.QuestionSettings;
@@ -301,7 +305,7 @@ function FormSectionSettings() {
             />
           </Box>
           <Box>
-            {form?.FormType !== 3 && renderApplyToAll && (
+            {form?.FormType !== formTypeId.volunteerForm && renderApplyToAll && (
               <ApplyToAllControls
                 values={values}
                 allHide={hideAll}

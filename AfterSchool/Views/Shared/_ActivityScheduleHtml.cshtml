@@ -53,7 +53,7 @@ else if (instances.Any())
                 {
                     <tr>
                         <td>@instance.StartDateTime.Value.ToString("M/d/yy")</td>
-                        <td>@instance.StartDateTime.Value.DayOfWeek.ToString().MaxChars(2)</td>
+                        <td>@instance.StartDateTime.Value.DayOfWeek.ToString().MaxChars(3)</td>
                         <td>@instance.StartDateTime.ToShortTimeString()</td>
                         <td>@instance.EndDateTime.ToShortTimeString()</td>
                     </tr>

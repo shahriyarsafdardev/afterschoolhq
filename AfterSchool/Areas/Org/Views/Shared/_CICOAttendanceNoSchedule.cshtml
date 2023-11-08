@@ -77,7 +77,7 @@
                                 var checkInOutInfo = CheckInOut.LoadByAttendanceRegistrantId(attendanceRegistrant.ID.Value);
                                 <tr>
                                     <td>
-                                        @(isTechSupport ? $"{attendanceRegistrant.RegistrantName.MaskString(3, 3)}"
+                                        @(isTechSupport ? $"{attendanceRegistrant.GetFirstNameLastInitial()}"
                                                 : attendanceRegistrant.RegistrantName)
                                     </td>
                                     <td>

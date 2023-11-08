@@ -65,3 +65,8 @@ export const getAndFormatDateTime = (now = new Date()) => {
 };
 
 export const getTimeFromDate = date => date.getTime();
+
+export const getError = (uploadingStatus, errorId) => {
+  if (uploadingStatus) return uploadingStatus === 'SUCCESS' ? errorId : uploadingStatus;
+  else return errorId;
+};
