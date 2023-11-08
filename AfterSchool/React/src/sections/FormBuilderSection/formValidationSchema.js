@@ -18,10 +18,12 @@ const formValidationSchema = values => {
           is: val => val !== textBlock,
           then: () =>
             Yup.string()
+              .trim()
               .required('Text is Required')
               .max(400, 'Text cannot be longer than 400 characters'),
           otherwise: () =>
             Yup.string()
+              .trim()
               .required('Text is Required')
               .max(4000, 'Text cannot be longer than 4000 characters')
         }),
@@ -32,7 +34,9 @@ const formValidationSchema = values => {
               .required('Options are required')
               .of(
                 Yup.object().shape({
-                  key: Yup.string().required('Text is required'),
+                  key: Yup.string()
+                    .trim()
+                    .required('Text is required'),
                   value: Yup.string()
                 })
               )
