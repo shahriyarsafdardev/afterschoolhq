@@ -1112,7 +1112,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (Request.Files["logo"].ContentLength == 0 ||
                     !Request.Files["logo"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["logo"].ContentLength > Utilities.ImageUploadMaxBytes)
-                    msgs.Add("Please upload a valid jpg or png file, must be less than 4MB", MessageType.UserError);
+                    msgs.Add("Please upload a valid jpg or png file, must be less than 5MB", MessageType.UserError);
             }
 
             if (headerimage.IsNotEmpty())
@@ -1120,7 +1120,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 if (Request.Files["headerimage"].ContentLength == 0 ||
                     !Request.Files["headerimage"].FileName.ToLower().Contains(allowedFiles) ||
                     Request.Files["headerimage"].ContentLength > Utilities.ImageUploadMaxBytes)
-                    msgs.Add("Please upload a valid jpg or png file", MessageType.UserError);
+                    msgs.Add("Please upload a valid jpg or png file,must be less than 5MB ", MessageType.UserError);
             }
 
             if (collectregistration == "1")

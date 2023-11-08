@@ -29,7 +29,7 @@ namespace AfterSchoolLibrary.Helpers
             "with",
         };
 
-        public static int ImageUploadMaxBytes => 1024 * 1024 * 4;
+        public static int ImageUploadMaxBytes => 1024 * 1024 *5;
         public const int MaxFileSize = 5242880;
 
         public static int MessageFileSize => 1024 * 1024 * 25;
