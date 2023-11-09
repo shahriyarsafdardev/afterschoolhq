@@ -3,11 +3,19 @@ import Validations from 'constants/regex';
 import questionType from 'constants/questionType';
 import { gradeIds, restrictedQuestionsDataTypeIds } from 'constants';
 import { isEqual } from 'lodash';
+import utils from 'utils';
 
 export default class RegistrationService {
-  constructor(questions = [], currentQuestions = [], answeredQuestions = [], isSurvey = false) {
+  constructor(
+    questions = [],
+    currentQuestions = [],
+    answeredQuestions = [],
+    isSurvey = false,
+    stateSetters = {}
+  ) {
     this.isSurvey = isSurvey;
     this.questions = questions;
+    this.stateSetters = stateSetters;
     this.answeredQuestions = answeredQuestions;
     this.currentQuestions = currentQuestions;
   }
@@ -144,6 +152,51 @@ export default class RegistrationService {
       buttonText = 'Save & Continue';
     }
     return buttonText;
+  };
+
+  buildQueryParams = (index, questionsGroups) =>
+    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
+
+  handleSectionNavigation = (action, activeGroup, clearMessages, questionsGroups) => {
+    const { setActiveGroupId, setSearchParams, setActiveGroup } = this.stateSetters;
+    if (action === 'next') {
+      setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
+      setSearchParams(this.buildQueryParams(activeGroup + 1, questionsGroups));
+      setActiveGroup(activeGroup + 1);
+    } else if (action === 'previous') {
+      setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
+      setSearchParams(this.buildQueryParams(activeGroup - 1, questionsGroups));
+      setActiveGroup(activeGroup - 1);
+      clearMessages();
+    }
+  };
+
+  setCurrentSectionQuestions = (questions, activeGroup, questionsGroups, groupedQuestions) => {
+    const { scrollToTop } = utils;
+    const { setSaveDisabled, setCurrentQuestions } = this.stateSetters;
+    setSaveDisabled(false);
+    if (questions?.length) {
+      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
+      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
+    }
+    scrollToTop();
+  };
+
+  setCurrentSectionParams = (questions, activeGroup, searchParams, questionsGroups) => {
+    const { setActiveGroupId, setSearchParams, setActiveGroup } = this.stateSetters;
+    if (questions.length) {
+      let QuestionGroupDataTypeId = '';
+      const paramsQuery = this.buildQueryParams(activeGroup, questionsGroups);
+      if (searchParams.get('section')) {
+        const groupIndex = questionsGroups.findIndex(
+          section => section.Name === decodeURI(searchParams.get('section'))
+        );
+        if (groupIndex < 0) return this.stateSetters.setSearchParams(paramsQuery);
+        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
+        setActiveGroupId(QuestionGroupDataTypeId);
+        setActiveGroup(groupIndex);
+      } else setSearchParams(paramsQuery);
+    }
   };
 
   //Private methods, only being called within the class

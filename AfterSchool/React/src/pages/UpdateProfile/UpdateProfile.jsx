@@ -3,16 +3,15 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { completeLoadingAndRedirect } from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import { useUser, useProfile } from 'redux/hooks/index';
 import apiRoutes from 'routes';
-import utils from 'utils';
 
 export default function UpdateProfile() {
   const { loadUser } = useUser();
   const { familyUrl } = apiRoutes;
-  const { scrollToTop, redirect } = utils;
   const { enqueueSnackbar } = useSnackbar();
   const {
     loaded,
@@ -37,38 +36,34 @@ export default function UpdateProfile() {
   const userUid = window.location.pathname.split('/')[3];
 
   const { Name } = questionsGroups?.length ? questionsGroups[activeGroup] : {};
+  const stateSetters = {
+    setActiveGroup,
+    setSearchParams,
+    setActiveGroupId,
+    setSaveDisabled,
+    setCurrentQuestions
+  };
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
-    answeredQuestions
+    answeredQuestions,
+    false,
+    stateSetters
   );
   const {
     validator,
     initialValues,
     groupedQuestions,
-    formSectionSubmitObject
+    formSectionSubmitObject,
+    handleSectionNavigation,
+    setCurrentSectionParams,
+    setCurrentSectionQuestions
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) =>
-    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
+  const handleSection = action =>
+    handleSectionNavigation(action, activeGroup, clearMessages, questionsGroups);
 
-  const handleSection = action => {
-    if (action === 'next') {
-      setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup + 1));
-      setActiveGroup(activeGroup + 1);
-    } else if (action === 'previous') {
-      setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup - 1));
-      setActiveGroup(activeGroup - 1);
-      clearMessages();
-    }
-  };
-
-  const handleRedirection = () => {
-    loaded();
-    redirect(familyUrl);
-  };
+  const handleRedirection = () => completeLoadingAndRedirect(loaded, familyUrl);
 
   const lastSection = activeGroup === totalGroups - 1;
   const initialvalues = initialValues();
@@ -129,28 +124,11 @@ export default function UpdateProfile() {
   }, [questionsGroups?.length]);
 
   useEffect(() => {
-    if (questions.length) {
-      let QuestionGroupDataTypeId = '';
-      const paramsQuery = buildQueryParams();
-      if (searchParams.get('section')) {
-        const groupIndex = questionsGroups.findIndex(
-          section => section.Name === decodeURI(searchParams.get('section'))
-        );
-        if (groupIndex < 0) return setSearchParams(paramsQuery);
-        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
-        setActiveGroupId(QuestionGroupDataTypeId);
-        setActiveGroup(groupIndex);
-      } else setSearchParams(paramsQuery);
-    }
+    setCurrentSectionParams(questions, activeGroup, searchParams, questionsGroups);
   }, [questions?.length, searchParams.get('section')]);
 
   useEffect(() => {
-    setSaveDisabled(false);
-    if (questions.length) {
-      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
-      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
-    }
-    scrollToTop();
+    setCurrentSectionQuestions(questions, activeGroup, questionsGroups, groupedQuestions);
   }, [activeGroup, activeGroupId, questions]);
 
   const saveButtonText = () => (dirty ? 'Save' : 'Skip');

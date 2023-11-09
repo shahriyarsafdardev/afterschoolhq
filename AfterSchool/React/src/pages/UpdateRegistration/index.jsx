@@ -6,13 +6,12 @@ import { useFormik } from 'formik';
 
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
+import { checkEmptyValues } from 'pages/shared/helper';
 import { useUpdateRegistration } from 'redux/hooks';
 import SidebarSection from 'pages/shared/Sidebar';
 import apiRoutes from 'routes';
-import utils from 'utils';
 
 export default function UpdateRegistration() {
-  const { scrollToTop } = utils;
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const { thankyouUrl, volunteerThankYouUrl } = apiRoutes;
@@ -48,34 +47,33 @@ export default function UpdateRegistration() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
+  const stateSetters = {
+    setActiveGroup,
+    setActiveGroupId,
+    setSearchParams,
+    setSaveDisabled,
+    setCurrentQuestions
+  };
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
-    answeredQuestions
+    answeredQuestions,
+    false,
+    stateSetters
   );
   const {
     validator,
     initialValues,
     saveButtonText,
     groupedQuestions,
-    formSectionSubmitObject
+    formSectionSubmitObject,
+    handleSectionNavigation,
+    setCurrentSectionParams,
+    setCurrentSectionQuestions
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) =>
-    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
-
-  const handleSection = action => {
-    if (action === 'next') {
-      setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup + 1));
-      setActiveGroup(activeGroup + 1);
-    } else if (action === 'previous') {
-      setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup - 1));
-      setActiveGroup(activeGroup - 1);
-      clearMessages();
-    }
-  };
+  const handleSection = action =>
+    handleSectionNavigation(action, activeGroup, clearMessages, questionsGroups);
 
   const handleRedirection = () => {
     const url = RegistrantType === 'Volunteer' ? volunteerThankYouUrl(regUid) : thankyouUrl(regUid);
@@ -142,7 +140,7 @@ export default function UpdateRegistration() {
     }
   });
   const { handleSubmit, dirty, values } = formik;
-  const isEmpty = !Object.values(values).some(x => x !== '');
+  const isEmpty = checkEmptyValues(values);
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
@@ -155,28 +153,11 @@ export default function UpdateRegistration() {
   }, [questionsGroups.length]);
 
   useEffect(() => {
-    if (questions.length) {
-      let QuestionGroupDataTypeId = '';
-      const paramsQuery = buildQueryParams();
-      if (searchParams.get('section')) {
-        const groupIndex = questionsGroups.findIndex(
-          section => section.Name === decodeURI(searchParams.get('section'))
-        );
-        if (groupIndex < 0) return setSearchParams(paramsQuery);
-        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
-        setActiveGroupId(QuestionGroupDataTypeId);
-        setActiveGroup(groupIndex);
-      } else setSearchParams(paramsQuery);
-    }
+    setCurrentSectionParams(questions, activeGroup, searchParams, questionsGroups);
   }, [questions.length, searchParams.get('section')]);
 
   useEffect(() => {
-    setSaveDisabled(false);
-    if (questions.length) {
-      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
-      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
-    }
-    scrollToTop();
+    setCurrentSectionQuestions(questions, activeGroup, questionsGroups, groupedQuestions);
   }, [activeGroup, activeGroupId, questions]);
 
   const updatedSaveButton = () => 'E-Sign';

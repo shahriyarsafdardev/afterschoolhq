@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 
-import { handleStatusAndRedirection, setSectionIndexToStorage } from 'pages/shared/helper';
+import {
+  checkEmptyValues,
+  setSectionIndexToStorage,
+  handleStatusAndRedirection
+} from 'pages/shared/helper';
 import RegistrationService from 'sevices/RegistrationService';
 import RegistrationForm from 'pages/shared/RegistrationForm';
 import SidebarSection from 'pages/shared/Sidebar';
@@ -14,7 +18,7 @@ import utils from 'utils';
 
 export default function Registration({ newChild = false }) {
   const navigate = useNavigate();
-  const { scrollToTop, redirect } = utils;
+  const { redirect } = utils;
   const { paymentScreenPath, thankyouUrl, postRegistrationUrl } = apiRoutes;
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -56,34 +60,33 @@ export default function Registration({ newChild = false }) {
   const { accountName, activityName, regUid } = useParams();
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const { sectionSkipAble, Name } = questionsGroups[activeGroup] || {};
+  const stateSetters = {
+    setActiveGroup,
+    setSearchParams,
+    setActiveGroupId,
+    setSaveDisabled,
+    setCurrentQuestions
+  };
   const registrationService = new RegistrationService(
     questions,
     currentQuestions,
-    answeredQuestions
+    answeredQuestions,
+    false,
+    stateSetters
   );
   const {
     validator,
     initialValues,
     saveButtonText,
     groupedQuestions,
-    formSectionSubmitObject
+    handleSectionNavigation,
+    formSectionSubmitObject,
+    setCurrentSectionParams,
+    setCurrentSectionQuestions
   } = registrationService;
 
-  const buildQueryParams = (index = activeGroup) =>
-    `section=${encodeURIComponent(questionsGroups[index].Name)}`;
-
-  const handleSection = action => {
-    if (action === 'next') {
-      setActiveGroupId(questionsGroups[activeGroup + 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup + 1));
-      setActiveGroup(activeGroup + 1);
-    } else if (action === 'previous') {
-      setActiveGroupId(questionsGroups[activeGroup - 1].QuestionGroupDataTypeId);
-      setSearchParams(buildQueryParams(activeGroup - 1));
-      setActiveGroup(activeGroup - 1);
-      clearMessages();
-    }
-  };
+  const handleSection = action =>
+    handleSectionNavigation(action, activeGroup, clearMessages, questionsGroups);
 
   useEffect(() => {
     sessionStorage.removeItem('isSessionCompleted');
@@ -169,7 +172,7 @@ export default function Registration({ newChild = false }) {
   });
 
   const { handleSubmit, dirty, values } = formik;
-  const isEmpty = !Object.values(values).some(x => x !== '');
+  const isEmpty = checkEmptyValues(values);
   const skipAble = sectionSkipAble && isEmpty && !dirty;
 
   useEffect(() => {
@@ -182,28 +185,11 @@ export default function Registration({ newChild = false }) {
   }, [questionsGroups.length]);
 
   useEffect(() => {
-    if (questions.length) {
-      let QuestionGroupDataTypeId = '';
-      const paramsQuery = buildQueryParams();
-      if (searchParams.get('section')) {
-        const groupIndex = questionsGroups.findIndex(
-          section => section.Name === decodeURI(searchParams.get('section'))
-        );
-        if (groupIndex < 0) return setSearchParams(paramsQuery);
-        QuestionGroupDataTypeId = questionsGroups[groupIndex].QuestionGroupDataTypeId;
-        setActiveGroupId(QuestionGroupDataTypeId);
-        setActiveGroup(groupIndex);
-      } else setSearchParams(paramsQuery);
-    }
+    setCurrentSectionParams(questions, activeGroup, searchParams, questionsGroups);
   }, [questions.length, searchParams.get('section')]);
 
   useEffect(() => {
-    setSaveDisabled(false);
-    if (questions.length) {
-      const { QuestionGroupDataTypeId, Name } = questionsGroups[activeGroup];
-      setCurrentQuestions(groupedQuestions(QuestionGroupDataTypeId, Name));
-    }
-    scrollToTop();
+    setCurrentSectionQuestions(questions, activeGroup, questionsGroups, groupedQuestions);
   }, [activeGroup, activeGroupId, questions]);
 
   const exitHandler = () => {
