@@ -182,14 +182,19 @@ namespace AfterSchoolLibrary.Services
             var purchasingAccount = checkoutObject.PayingAccount;
             var useStripeConnectedAccount = billingAccount.UseStripeConnectDuringCheckout(msgs, dc);
             var (customer, sourceId) = GetCustomerAndSourceForSubscription(checkoutObject, msgs);
-            var startDateTime = SubscriptionScheduleService.GetSubscriptionStartDate(activity); 
+            var startDateTime = SubscriptionScheduleService.GetSubscriptionStartDate(activity, plan); 
             var endDateTime = new DateTime?();
             var lastDateToBill = new DateTime?();
             var nextBillDate = new DateTime();
             var providerDatetimeNow = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
 
-            endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
+            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+                endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+                endDateTime = (activity.HasSchedule && plan.PaymentStartTypeId.Equals(PlanPaymentStartType.WhenActivityStarts)) ? plan.GetPlanEndDateForRegistrantSubscription((DateTime) participationObject.StartDate, checkoutObject.ParticipationObject, msgs) :
+                plan.GetPlanEndDateForRegistrantSubscription( providerDatetimeNow, checkoutObject.ParticipationObject, msgs);
 
             //var stripeMetaData = new Dictionary<string, string>
             //                {
@@ -258,6 +263,15 @@ namespace AfterSchoolLibrary.Services
                 lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
             else
                 endDateTime = null;
+
+            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            {
+                if (!activity.HasSchedule)
+                {
+                    endDateTime = plan.GetPlanEndDateForRegistrantSubscription(providerDatetimeNow, checkoutObject.ParticipationObject, msgs);
+                    lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
+                }
+            }
 
             if (startDateTime.Date.IsAfter(providerDatetimeNow))
                 nextBillDate = startDateTime;

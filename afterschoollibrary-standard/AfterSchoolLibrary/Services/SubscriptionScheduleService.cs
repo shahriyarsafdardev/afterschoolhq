@@ -35,8 +35,8 @@ namespace AfterSchoolLibrary.Services
                 AmountInCents = (feeObject.Amount + feeObject.PaymentTypeFee) * 100,
                 EndDate = endDateTime,
                 FirstRenewal = firstRenewalDate,
-                ProrateFirstCharge = checkoutObject.SubscriptionPlan.ProrateFirstCharge,
-                ProrateLastCharge = checkoutObject.SubscriptionPlan.ProrateLastCharge,
+                ProrateFirstCharge = checkoutObject.SubscriptionPlan?.ProrateFirstCharge ?? false,
+                ProrateLastCharge = checkoutObject.SubscriptionPlan?.ProrateLastCharge ?? false,
                 BillingPeriodType = feeObject.BillingPeriodType,
                 StripeCustomerId = checkoutObject.PayingAccount.StripeCustomerId,
                 StripeSourceId = checkoutObject.StripeSourceId,
@@ -60,7 +60,7 @@ namespace AfterSchoolLibrary.Services
 
             var currentPaymentDate = firstRenewalDate;
 
-            while (currentPaymentDate.IsOnOrBefore(endDate))
+            while (currentPaymentDate.IsBefore(endDate))
             {
                 paymentDates.Add(currentPaymentDate);
 
@@ -79,11 +79,11 @@ namespace AfterSchoolLibrary.Services
             var checkoutDateProviderTimeZone = participationObject.OwnerAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
             var firstRenewalDate = new DateTime();
             var activity = participationObject.GetActivity();
+            var subscriptionPlan = activity.HasPaymentPlan() ? activity.GetPaymentPlan() : activity.GetSubscriptionPlan();
             var schedule = activity.GetSchedule();
-            if (activity?.GetSubscriptionPlan() != null)
+            if (subscriptionPlan.IsNotEmpty())
             {
-                var subscriptionPlan = participationObject.GetActivity()?.GetSubscriptionPlan();
-                if (subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnCheckout) ||
+                if (subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnCheckout) || subscriptionPlan.PlanTypeId.Equals(SubscriptionPlanType.PaymentPlan) ||
                     (subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) && schedule.IsEmpty()) ||
                      subscriptionPlan.PaymentStartTypeId.Equals(PlanPaymentStartType.OnPeriodStart) && schedule.IsNotEmpty() && schedule.IsOngoing)
                 {
@@ -352,9 +352,8 @@ namespace AfterSchoolLibrary.Services
                 }.CalculateEndDateFromNumberOfPeriods((DateTime) subscriptionSchedule.NextBillDate, 1);
         }
 
-        public static DateTime GetSubscriptionStartDate(Activity activity)
+        public static DateTime GetSubscriptionStartDate(Activity activity, SubscriptionPlan plan)
         {
-            var plan = activity.GetSubscriptionPlan();
             var schedule = activity.GetSchedule(); 
             var today = plan.GetAccount().ConvertToAccountTimeZone(DateTime.UtcNow).Date;
 
