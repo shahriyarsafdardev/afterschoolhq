@@ -1848,11 +1848,11 @@ namespace AfterSchool.Areas.Org.Controllers
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
            
-            string cleanedDetails = Utilities.CleanText(details);
+            var cleanedDetails = Utilities.CleanText(details);
             if (cleanedDetails?.Length > 4000)
                 msgs.Add("Details cannot be greater than 4000 characters", MessageType.UserError);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            if (activity.IsNotEmpty())
+            if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>
                 {
@@ -2164,7 +2164,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (location.IsEmpty())
                 msgs.Add("Location is required", MessageType.UserError);
 
-            string cleanedLocationDetails = Utilities.CleanText(locationdetails);
+            var cleanedLocationDetails = Utilities.CleanText(locationdetails);
             if (cleanedLocationDetails?.Length > 4000)
                 msgs.Add("Location details cannot be greater than 4000 characters", MessageType.UserError);
 
@@ -2437,14 +2437,14 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();            
-            string registrationCleanedEmail = Utilities.CleanText(registrationthankyouemail);
-            string applicationCleanedEmail = Utilities.CleanText(applicationthankyouemail);
+            var registrationCleanedEmail = Utilities.CleanText(registrationthankyouemail);
+            var applicationCleanedEmail = Utilities.CleanText(applicationthankyouemail);
             if (registrationCleanedEmail?.Length > 4000 || applicationCleanedEmail?.Length > 4000)
                 msgs.Add("Email content cannot be greater than 4000 characters", MessageType.UserError);
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            if (id.IsGuid())
+            if (id.IsGuid() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>
                 {
