@@ -356,16 +356,11 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();
-            var userType = SessionVariables.AccountUserType;
             HandleTempMessages(msgs);
 
             Form formObj = null;
             var selectedActivities = new List<Activity>();
-            var activityOptions = new List<Activity>();
-            if(userType == UserType.ProgramDirector)
-                activityOptions = currentAccount.GetActivities(UserType.ProgramDirector, currentUser, null, null, null, false, null, null, null, msgs);
-            else
-                activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
+            var activityOptions = currentAccount.GetActivities(SessionVariables.AccountUserType, currentUser, null, null, null, false, null, null, null, msgs);
 
             var questions = new List<FormQuestion>();
             var forms = new List<Form>();
