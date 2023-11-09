@@ -1626,11 +1626,9 @@ namespace AfterSchoolLibrary.Services
                 msgs,
                 dc);
 
-            activity.LocationId = activityLocation.ID;
-
-            if (locationdetails.IsNotEmpty())
-                activity.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
-
+            activity.LocationId = activityLocation.ID;         
+            activity.LocationDetails = locationdetails.IfBlank("").MaxChars(4000);
+                    
             msgs.AddRange(activity.Save(dc));
 
             return msgs;
