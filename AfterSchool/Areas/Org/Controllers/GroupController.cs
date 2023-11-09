@@ -424,9 +424,7 @@ namespace AfterSchool.Areas.Org.Controllers
                 questionId = question.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            if(userType == UserType.ProgramDirector)
-            {
-                BackgroundJob.Enqueue(() =>
+            BackgroundJob.Enqueue(() =>
                 RegistrationService.EmailCsvReport(
                     account.ID.Value,
                     q,
@@ -442,34 +440,10 @@ namespace AfterSchool.Areas.Org.Controllers
                     null,
                     null,
                     getVolunteers,
-                    (WebUser)currentUser,
+                    userType == UserType.ProgramDirector ? (WebUser)currentUser : null,
                     null,
                     null)
                 );
-            }
-            else 
-            { 
-                BackgroundJob.Enqueue(() =>
-                    RegistrationService.EmailCsvReport(
-                        account.ID.Value,
-                        q,
-                        questionId,
-                        activityIds,
-                        participationObjectType,
-                        filename,
-                        (RegistrationReportType) reporttype.ToInteger(),
-                        null,
-                        RegistrationStatus.NotSet,
-                        UILabel.ActivityLabel(group.ActivityGroupTypeId, false),
-                        emails,
-                        null,
-                        null,
-                        getVolunteers,
-                        null,
-                        null,
-                        null)
-                );
-            }
 
             ViewBag.Messages = msgs;
 

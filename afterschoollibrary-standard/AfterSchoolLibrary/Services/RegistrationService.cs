@@ -341,7 +341,7 @@ namespace AfterSchoolLibrary.Services
 
         public static void EmailCsvReport(int accountId, string searchText, int? questionId, List<int> participationObjectIds,
             ParticipationObjectType participationObjectType, string filename, RegistrationReportType reportType, List<RegistrationAssignmentType> rats,
-            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers, WebUser? currentUser = null,
+            RegistrationStatus registrationStatus, string uiActivityLabel, string emails, string subject, string body, bool getVolunteers, WebUser currentUser = null,
             SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             msgs ??= new SystemMessages();
@@ -350,7 +350,7 @@ namespace AfterSchoolLibrary.Services
             
             var csvByteData = GetCsvByteArray(account, searchText, questionId, participationObjectIds, participationObjectType, reportType, rats,
                 registrationStatus,
-                getVolunteers, msgs, dc, currentUser.ID.Value);
+                getVolunteers, msgs, dc, currentUser?.ID.Value);
 
             EmailCsv(account, emails, subject, body, uiActivityLabel, CreateRegistrationsCsvFilename(filename), msgs, csvByteData, currentUser);
         }
@@ -391,7 +391,7 @@ namespace AfterSchoolLibrary.Services
 
 
         private static void EmailCsv(Account account, string emails, string subject, string body,
-            string uiActivityLabel, string filename, SystemMessages msgs, byte[] byteData, WebUser? currentUser = null)
+            string uiActivityLabel, string filename, SystemMessages msgs, byte[] byteData, WebUser currentUser = null)
         {
             if (subject.IsBlank())
                 subject = uiActivityLabel + " Report";
@@ -403,7 +403,9 @@ namespace AfterSchoolLibrary.Services
                 $"<p>Your {uiActivityLabel} report is attached.</p>{Email.GetAppSignature(isAfterSchool: account.IsAfterSchool, utm_campaign: "student_report")}";
 
             var emailList = new List<string>();
-            var userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false, msgs)?.UserTypeId;
+            var userType = UserType.NotSet;
+            if(currentUser.IsNotEmpty())
+                userType = AccountWebUser.LoadByAccountIdByWebUserIdByIsDeleted(account.ID.Value, currentUser.ID.Value, false, msgs).UserTypeId;
 
 
             if (currentUser.IsNotEmpty() && userType.IsNotEmpty() && userType == UserType.ProgramDirector)

@@ -108,31 +108,6 @@ namespace AfterSchool.Areas.Org.Controllers
                 registrationStatus = (RegistrationStatus) regstatus.ToInteger();
 
             var getVolunteers = volunteers.IsBoolean() && volunteers.ToBoolean();
-            if(userType == UserType.ProgramDirector)
-            {
-                BackgroundJob.Enqueue(() =>
-                    RegistrationService.EmailCsvReport(
-                        currentAccount.ID.Value,
-                        q,
-                        questionId,
-                        activityIds,
-                        ParticipationObjectType.Activity,
-                        filename,
-                        (RegistrationReportType) reporttype.ToInteger(),
-                        rat.HasValue ? rat.Value.AsList() : null,
-                        registrationStatus,
-                        UILabel.ActivityLabel(ActivityType.Activity, false),
-                        emails,
-                        null,
-                        null,
-                        getVolunteers,
-                        (WebUser)currentUser,
-                        null,
-                        null)
-                );
-            }
-            else
-            {
             BackgroundJob.Enqueue(() =>
                     RegistrationService.EmailCsvReport(
                         currentAccount.ID.Value,
@@ -149,11 +124,10 @@ namespace AfterSchool.Areas.Org.Controllers
                         null,
                         null,
                         getVolunteers,
-                        null,
+                        userType == UserType.ProgramDirector ? (WebUser)currentUser : null,
                         null,
                         null)
                 );
-            }
 
             ViewBag.Messages = msgs;
 
@@ -855,17 +829,12 @@ namespace AfterSchool.Areas.Org.Controllers
         private static List<Activity> GetActivities(bool getVolunteers, Account currentAccount, WebUser currentUser, SystemMessages msgs)
         {
             var allActivities = new List<Activity>();
-            var userType = SessionVariables.AccountUserType;
+            var userType = SessionVariables.AccountUserType == UserType.ProgramDirector ? UserType.ProgramDirector: UserType.Administrator;
 
-            if (userType.IsNotEmpty() && userType == UserType.ProgramDirector)
-                allActivities = currentAccount
-                       .GetActivities(UserType.ProgramDirector, currentUser, null, null, false, false, null, msgs: msgs)
-                       .OrderBy(x => x.Name).ToList();
-            else 
-                allActivities = currentAccount
-                    .GetActivities(UserType.Administrator, currentUser, null, null, false, false, null, msgs: msgs)
+            allActivities = currentAccount
+                    .GetActivities(userType, currentUser, null, null, false, false, null, msgs: msgs)
                     .OrderBy(x => x.Name).ToList();
-
+            
             return getVolunteers
                 ? allActivities.Where(a => a.ActivityTypeId == ActivityType.VolunteerOpportunity).ToList()
                 : allActivities.Where(a => a.ActivityTypeId != ActivityType.VolunteerOpportunity).ToList();
