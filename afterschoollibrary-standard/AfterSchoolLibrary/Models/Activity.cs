@@ -908,6 +908,16 @@ namespace AfterSchoolLibrary.Models
             return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
 
+        public static Activity LoadByUniqueNameByAccountIdByIsDeleted(string UniqueName, int AccountId, bool IsDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+            dq.Criterias.Add(ObjectMap["UniqueName"], UniqueName);
+            dq.Criterias.Add(ObjectMap["AccountId"], AccountId);
+            dq.Criterias.Add(ObjectMap["IsDeleted"], IsDeleted);
+            return dq.Select(msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         private static string GetAllActivitiesByDistrict(int hostAccountId, int OrderBy, int? start, int? length)
         {
             var sql = $@"select

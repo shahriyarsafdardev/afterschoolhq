@@ -461,7 +461,7 @@ namespace AfterSchool.Controllers
                     return Redirect($"~/404.html");
 
                 var activity =
-                    AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountId(activityname, account.ID.Value,
+                    AfterSchoolLibrary.Models.Activity.LoadByUniqueNameByAccountIdByIsDeleted(activityname, account.ID.Value, false,
                         msgs);
 
                 if (activity.IsEmpty())
@@ -793,7 +793,7 @@ namespace AfterSchool.Controllers
                 return HttpNotFound();
 
             var featuredProviders = new List<Account>();
-            var session = ActivityGroup.LoadByAccountIdByUniqueName(account.ID.Value, sessionname, msgs);
+            var session = ActivityGroup.LoadByAccountIdByUniqueNameByIdDeleted(account.ID.Value, sessionname, false, msgs);
             if (session.IsEmpty())
                 return HttpNotFound();
 
