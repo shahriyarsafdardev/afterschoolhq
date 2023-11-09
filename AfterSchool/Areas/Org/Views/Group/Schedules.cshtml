@@ -1,4 +1,4 @@
-﻿@model ActivityGroup
+@model ActivityGroup
 @{
     var msgs = (SystemMessages)ViewBag.Messages;
     var schedules = (List<ActivitySchedule>)ViewBag.Schedules;
@@ -142,13 +142,13 @@
                 if (data && data.status == 'ok') {
                     Notifications.showBar({
                         title: 'Success',
-                        message: 'The schedule has been added to the selected @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true).ToLower()',
+                        message: 'Saved successfully.',
                         success: true
                     });
                 } else {
                     Notifications.showBar({
                         title: 'Error',
-                        message: 'The schedule has NOT been added to the selected @UILabel.ActivityLabel(Model.ActivityGroupTypeId, true).ToLower()',
+                        message: 'Your changes could not be saved.',
                         success: false
                     });
                 }
