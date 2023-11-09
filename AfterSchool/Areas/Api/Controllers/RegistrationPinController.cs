@@ -162,7 +162,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (!registrationUid.IsGuid())
                     throw new Exception("Invalid Id");
 
-                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
+                if (phone.IsNotEmpty() && WebUser.LoadByUnformattedPhoneNumber(phone, msgs).IsNotEmpty())
                     throw new Exception("Phone is already in use");
 
                 var registration = Registration.LoadByUid(registrationUid.ToGuid(), msgs);
@@ -218,7 +218,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 }
 
 
-                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.ExistsByPhone(currentPickUp.Phone.Trim(), amsgs, adc))
+                                if (currentPickUp.Phone.IsNotEmpty() && !WebUser.LoadByUnformattedPhoneNumber(currentPickUp.Phone, amsgs, adc).IsNotEmpty())
                                     user = new WebUser
                                     {
                                         FirstName = currentPickUp.FirstName,
@@ -228,7 +228,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                         LastModifiedDate = DateTime.UtcNow,
                                     };
                                 else if (currentPickUp.Phone.IsNotEmpty())
-                                    user = WebUser.LoadByPhone(currentPickUp.Phone, amsgs, adc);
+                                    user = WebUser.LoadByUnformattedPhoneNumber(currentPickUp.Phone, amsgs, adc);
                                 
                                 if (user.IsNotEmpty())
                                 {
@@ -291,7 +291,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Master Registrant");
 
-                var currentUser = WebUser.LoadByPhone(phone, msgs);
+                var currentUser = WebUser.LoadByUnformattedPhoneNumber(phone, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("Invalid User");
 
@@ -361,7 +361,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentMasterRegistrant.IsEmpty())
                     throw new Exception("No Master Registrant");
 
-                var currentUser = WebUser.LoadByPhone(phone, msgs);
+                var currentUser = WebUser.LoadByUnformattedPhoneNumber(phone, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("Invalid User");
 
@@ -413,10 +413,10 @@ namespace AfterSchool.Areas.Api.Controllers
 
                 var phoneCheck = phone;
                 phoneCheck = phone.Contains("-") ? phoneCheck.Replace("-", "") : phoneCheck.Insert(3, "-").Insert(7, "-");
-                var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
+                var currentUser = WebUser.LoadByUnformattedPhoneNumberByPin(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
                 {
-                    var currentUserNewPhone = WebUser.LoadByPhoneByPinCode(phoneCheck, pinCode, msgs);
+                    var currentUserNewPhone = WebUser.LoadByUnformattedPhoneNumberByPin(phone, pinCode, msgs);
                     if (currentUserNewPhone.IsEmpty())
                         throw new Exception("You are not authorized to access this page");
                     else
@@ -528,7 +528,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (pinCode.IsEmpty())
                     throw new Exception("Invalid Pin");
 
-                var currentUser = WebUser.LoadByPhoneByPinCode(phone, pinCode, msgs);
+                var currentUser = WebUser.LoadByUnformattedPhoneNumberByPin(phone, pinCode, msgs);
                 if (currentUser.IsEmpty())
                     throw new Exception("You are not authorized to access this page");
 
@@ -670,7 +670,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (phone.IsEmpty())
                     throw new Exception("Invalid Phone");
 
-                var webUser = WebUser.LoadByPhone(phone, msgs);
+                var webUser = WebUser.LoadByUnformattedPhoneNumber(phone, msgs);
 
                 if(webUser.IsEmpty())
                     throw new Exception("Phone not registered");
@@ -832,7 +832,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                 if (authorizedPerson.ID == -1 && amsgs.HasNoErrors())
                                 {
                                     if (WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs))
-                                        user = WebUser.LoadByPhone(authorizedPerson.Phone, amsgs, adc);
+                                        user = WebUser.LoadByUnformattedPhoneNumber(authorizedPerson.Phone, amsgs, adc);
                                     else
                                     {  
                                         user = new WebUser
@@ -876,7 +876,7 @@ namespace AfterSchool.Areas.Api.Controllers
                                     user = WebUser.Load(authorizedPerson.ID, amsgs, adc);
 
                                     if(!user.Phone.Equals(authorizedPerson.Phone))
-                                        if(!WebUser.ExistsByPhone(authorizedPerson.Phone, amsgs))
+                                        if(!WebUser.LoadByUnformattedPhoneNumber(authorizedPerson.Phone, amsgs).IsNotEmpty())
                                             user.Phone = authorizedPerson.Phone;
                                         else
                                         {
@@ -992,7 +992,7 @@ namespace AfterSchool.Areas.Api.Controllers
                 if (currentUser.IsEmpty())
                     throw new Exception("Unauthorized User");
 
-                if (phone.IsNotEmpty() && WebUser.ExistsByPhone(phone.Trim(), msgs))
+                if (phone.IsNotEmpty() && WebUser.LoadByUnformattedPhoneNumber(phone, msgs).IsNotEmpty())
                     throw new Exception("Phone is already in use");
                 
                 Database.ExecuteTransaction

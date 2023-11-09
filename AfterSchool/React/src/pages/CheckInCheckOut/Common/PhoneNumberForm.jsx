@@ -1,12 +1,13 @@
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
-import useStyles from '../Common/styles';
-import TextField from 'components/Overrides/TextField';
-import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import LoadingButton from 'components/Overrides/LoadingButton';
+import { useFormik } from 'formik';
+import { Box, Typography } from '@material-ui/core';
 
+import useStyles from '../Common/styles';
+import { withoutSignsPhoneNumber } from 'utils';
 import { phoneValidationRegex } from 'constants/regex';
+import TextField from 'components/Overrides/TextField';
+import LoadingButton from 'components/Overrides/LoadingButton';
 
 function PhoneNumberForm({
   handleSubmit: submitHandler,
@@ -28,7 +29,7 @@ function PhoneNumberForm({
     },
     validationSchema: ValidationSchema,
     onSubmit: values => {
-      submitHandler(values.phone);
+      submitHandler(withoutSignsPhoneNumber(values.phone));
     }
   });
 

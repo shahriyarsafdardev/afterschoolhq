@@ -70,3 +70,5 @@ export const getError = (uploadingStatus, errorId) => {
   if (uploadingStatus) return uploadingStatus === 'SUCCESS' ? errorId : uploadingStatus;
   else return errorId;
 };
+
+export const withoutSignsPhoneNumber = phone => phone.replace(/(\+1)|[()\-+\s]/g, '');

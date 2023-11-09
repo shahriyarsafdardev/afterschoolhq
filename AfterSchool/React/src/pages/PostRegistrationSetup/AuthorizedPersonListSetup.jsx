@@ -7,6 +7,7 @@ import { phoneValidationRegex } from 'constants/regex';
 import { usePostRegistration } from 'redux/hooks';
 import AuthorizedPersonListRow from './AuthorizedPersonListRow';
 import AddAuthorizedUserForm from './AddAuthorizedUserForm';
+import { withoutSignsPhoneNumber } from 'utils';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import useStyles from './styles';
@@ -87,7 +88,14 @@ function AuthorizedPersonListSetup({ authorizedPersons, setActiveStep }) {
       Object.keys(values).forEach(key => {
         const { ID, FirstName, LastName, Phone, HasAccess, PersonPhoneDataType } = values[key];
         if (ID !== -1 || (ID == -1 && HasAccess)) {
-          const user = { ID, FirstName, LastName, Phone, HasAccess, PersonPhoneDataType };
+          const user = {
+            ID,
+            FirstName,
+            LastName,
+            Phone: withoutSignsPhoneNumber(Phone),
+            HasAccess,
+            PersonPhoneDataType
+          };
           filteredAuthorizedPersons.push(user);
         }
       });

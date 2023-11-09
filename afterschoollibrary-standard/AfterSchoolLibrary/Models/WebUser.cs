@@ -326,6 +326,24 @@ namespace AfterSchoolLibrary.Models
             return LoadByPhone(phone, null, msgs, dc);
         }
 
+        public static WebUser LoadByUnformattedPhoneNumber(string phone, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+                SELECT *
+                FROM WebUser
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone AND IsActive='1' " ;
+            
+            var parameters = new Dictionary<string, object>
+            {
+                { "@phone", phone }
+            };
+
+            return dq.ExecuteSelectWithParameters(sql, parameters, msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static WebUser LoadByPhone(string phone, bool? hasPassword, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;
@@ -341,7 +359,27 @@ namespace AfterSchoolLibrary.Models
 
             return dq.Select().AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
         }
-        
+
+        public static WebUser LoadByUnformattedPhoneNumberByPin(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+            var dq = DatabaseQuery;
+            dq.Connection = dc;
+
+            var sql = @"
+                SELECT * 
+                FROM WebUser 
+                WHERE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(Phone, '+1', ''), '-', ''), ' ', ''), '(', ''), ')', '') = @phone 
+                AND PinCode = @pinCode";
+
+            var parameters = new Dictionary<string, object>
+            {
+                { "@phone", phone },
+                { "@pinCode", pinCode }
+            };
+
+            return dq.ExecuteSelectWithParameters(sql, parameters, msgs).AsEnumerable().ToList().ConvertAll(LoadObject).FirstOrDefault();
+        }
+
         public static WebUser LoadByPhoneByPinCode(string phone, string pinCode, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             var dq = DatabaseQuery;

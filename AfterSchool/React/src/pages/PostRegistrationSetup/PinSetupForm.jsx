@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import * as Yup from 'yup';
-import { Box } from '@material-ui/core';
-import useStyles from './styles';
-import TextField from 'components/Overrides/TextField';
-import LoadingButton from 'components/Overrides/LoadingButton';
-import { useFormik } from 'formik';
-import { phoneValidationRegex } from 'constants/regex';
 import { usePostRegistration } from 'redux/hooks';
 import { useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
+import { Box } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+import useStyles from './styles';
+import { withoutSignsPhoneNumber } from 'utils';
+import { phoneValidationRegex } from 'constants/regex';
+import TextField from 'components/Overrides/TextField';
+import LoadingButton from 'components/Overrides/LoadingButton';
+
 function PinSetupForm(props) {
   const classes = useStyles();
   const { setActiveStep, RegistrantType } = props;
@@ -50,7 +53,7 @@ function PinSetupForm(props) {
       setSaveDisabled(true);
       await updateData({
         registrationUid,
-        phone: values.phone,
+        phone: withoutSignsPhoneNumber(values.phone),
         pinCode: values.pin,
         peopleList: []
       }).then(apiErrors => {
