@@ -568,6 +568,15 @@ namespace AfterSchoolLibrary.Services
             return null;
         }
 
+        public static List<Activity> GetActivitiesWithSchedule(this Account account, bool isDeleted, SystemMessages msgs = null,
+            DatabaseConnection dc = null)
+        {
+            if (account.IsNotEmpty())
+                return Activity.LoadByAccountIdWithSchedule(account.ID.Value, isDeleted, msgs, dc);
+
+            return null;
+        }
+
         public static List<Activity> GetActivities(this Account account, UserType userType, WebUser user, string q,
             ActivityType? activityType, bool? isArchived, bool? isDeleted, bool? ungroupedOnly, int? start = null,
             int? length = null, SystemMessages msgs = null, DatabaseConnection dc = null)

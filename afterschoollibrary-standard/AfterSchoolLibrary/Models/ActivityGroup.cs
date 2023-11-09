@@ -636,6 +636,15 @@ namespace AfterSchoolLibrary.Models
             return _Activities;
         }
 
+        public List<Activity> GetActivitiesWithSchedule(bool isDeleted, SystemMessages msgs = null, DatabaseConnection dc = null)
+        {
+
+            if (_Activities.IsEmpty())
+                _Activities = Activity.LoadByAccountIdByGroupIdWithSchedule(this.AccountId.Value, this.ID.Value, isDeleted, msgs, dc);
+
+            return _Activities;
+        }
+
         public List<Activity> GetInvitedToActivities(Guid inviteUid, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var activities = GetActivities(msgs, dc);
