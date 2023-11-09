@@ -198,7 +198,6 @@ namespace AfterSchoolLibrary.Models
             get => (bool) MDV["IsRequireCheckInCheckOut"].Value;
             set => MDV["IsRequireCheckInCheckOut"].Value = value;
         }
-
         public int? ActivityGroupId
         {
             get => (int?) MDV["ActivityGroupId"].Value;
@@ -688,6 +687,7 @@ namespace AfterSchoolLibrary.Models
             dps.Add(ObjectMap["IsRequireCheckInCheckOut"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));
 
+            
             dps = new DatabaseParameters();
             dps.Add(ObjectMap["ActivityGroupId"]);
             msgs.AddRange(_Alter(DatabaseQuery, dc, dps));

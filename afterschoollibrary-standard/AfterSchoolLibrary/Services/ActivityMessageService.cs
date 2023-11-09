@@ -19,15 +19,14 @@ namespace AfterSchoolLibrary.Services
             msgs.AddRange(activityMessage.Save(dc));
         }
 
-        private static void SendForActivity(ActivityMessage am, int loggedInUserId, SystemMessages msgs, DatabaseConnection dc = null)
+        private static void SendForActivity(ActivityMessage am, int loggedInUserId, SystemMessages msgs, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             var activity = am.GetActivity(msgs, dc);
             var account = activity.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
-            var fromName = loggedInUser.DisplayName;
+            var fromName = activity.ContactName;
             
-
-            am.SendActivityMessage(account, loggedInUser, activity.Name, fromName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, dc);
+            am.SendActivityMessage(account, loggedInUser, activity.Name, fromName, activity.ContactEmail, activity.ContactName, msgs, activity.ContactPhone, checkInOut, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(activity, account, loggedInUser, msgs, dc);
@@ -141,6 +140,22 @@ namespace AfterSchoolLibrary.Services
 
         }
 
+        internal static MessageResource SendCheckInOutSms(string body, string phone, string messageUid, string registrantUid, SystemMessages msgs)
+        {
+            if (phone.IsNotEmpty())
+            {
+               return TwilioHelper.SendSMS(
+                    phone,
+                    body,
+                    messageUid,
+                    registrantUid,
+                    msgs);
+            }
+
+            return null;
+
+        }
+
         internal static void SendEmailMessage(Account account, string activityName, string fromName, string toEmail, string toName, string replyToEmail, string replyToName, string subject, string body, string utmCampaign, string contactPhone, SystemMessages msgs)
         {
             var aOrAn = subject[0].In("aeiouAEIOU") ? "an" : "a";
@@ -182,7 +197,7 @@ namespace AfterSchoolLibrary.Services
             var account = group.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, account.Phone, dc);
+            am.SendActivityMessage(account, loggedInUser, group.Name, account.Name, account.Email, account.Name, msgs, account.Phone, null, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(group, account, loggedInUser, msgs, dc);
@@ -193,7 +208,7 @@ namespace AfterSchoolLibrary.Services
             var account = am.GetAccount(msgs, dc);
             var loggedInUser = WebUser.Load(loggedInUserId, msgs, dc);
 
-            am.SendActivityMessage(account, loggedInUser, account.Name, account.Name, account.Email, account.Name, msgs, account.Phone, dc);
+            am.SendActivityMessage(account, loggedInUser, account.Name, account.Name, account.Email, account.Name, msgs, account.Phone, null, dc);
 
             if (msgs.HasNoErrors() && am.SendToStaff)
                 am.SendMessageToTeamMembers(account, loggedInUser, msgs, dc);
@@ -217,11 +232,12 @@ namespace AfterSchoolLibrary.Services
             text = text.Replace("[firstname]", firstName);
             text = text.Replace("[lastname]", lastName);
             text = text.Replace("[name]", name);
+            text = text.Replace("<span class = \"text-bold\">[RegistrantName]</span>", name);
 
             return text;
         }
 
-        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs,string activityContactPhone=null, DatabaseConnection dc = null)
+        private static void SendActivityMessage(this ActivityMessage activityMessage, Account account, WebUser loggedInUser, string activityName, string fromName, string replyToEmail, string replyToName, SystemMessages msgs,string activityContactPhone=null, bool? checkInOut = null, DatabaseConnection dc = null)
         {
             var amrs = activityMessage.GetActivityMessageRegistrants(msgs, dc);
 
@@ -238,6 +254,7 @@ namespace AfterSchoolLibrary.Services
                     activityMessage.SearchAndReplaceNameInBodyText(activityMessageRegistrant), 
                     activityContactPhone,
                     msgs,
+                    checkInOut,
                     dc);
             });
 
@@ -247,13 +264,13 @@ namespace AfterSchoolLibrary.Services
                 Helpers.Utilities.SystemErrorLog(msgs);
         }
 
-        public static void Send(int id, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
+        public static void Send(int id, int loggedInUserId, bool? checkInOut = null, SystemMessages msgs = null, DatabaseConnection dc = null)
         {          
             msgs = msgs ?? new SystemMessages();
             var am = ActivityMessage.Load(id, msgs, dc);
            
             if (am.ActivityId.HasValue)
-                ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, dc);
+                ActivityMessageService.SendForActivity(am, loggedInUserId, msgs, checkInOut, dc);
             else if (am.ActivityGroupId.HasValue)
                 ActivityMessageService.SendForGroup(am, loggedInUserId, msgs, dc);
             else if (am.AccountId.HasValue)
@@ -262,6 +279,7 @@ namespace AfterSchoolLibrary.Services
                 msgs.Add("Error sending Messages", MessageType.Error);
         }
 
+      
         public static ActivityMessageRegistrant AddRegistrant(this ActivityMessage activityMessage, int registrantId, int loggedInUserId, SystemMessages msgs = null, DatabaseConnection dc = null)
         {
             if (msgs.IsEmpty()) msgs = new SystemMessages();

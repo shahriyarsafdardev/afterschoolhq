@@ -588,6 +588,8 @@ namespace AfterSchoolLibrary.Models
                 new Hashtable {{"IsDeleted", DBNull.Value}}, RegistrantInviteCode.ObjectMap, dc);
             BaseObject.Update(new Hashtable {{"IsActive", false}}, new Hashtable {{"IsActive", DBNull.Value}},
                 RefreshToken.ObjectMap, dc);
+            BaseObject.Update(new Hashtable { { "VisibleToCustomer", false } },
+               new Hashtable { { "VisibleToCustomer", DBNull.Value } }, AccountPackageFeature.ObjectMap, dc);
 
             //**ENDUPDATES**//
 

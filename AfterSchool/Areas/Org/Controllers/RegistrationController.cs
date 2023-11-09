@@ -956,7 +956,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     currentUser.ID.Value,
                     msgs);
 
-                    BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                    BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null, null));
                 }
             }
 
@@ -990,7 +990,7 @@ namespace AfterSchool.Areas.Org.Controllers
 
             var am = currentAccount.GetActivityMessage(id.ToGuid(), msgs);
 
-            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+            BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null, null));
 
             ViewBag.Registrants = am.GetActivityMessageRegistrants(msgs);
 

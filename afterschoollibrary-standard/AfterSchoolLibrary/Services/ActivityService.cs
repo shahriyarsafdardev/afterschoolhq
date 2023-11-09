@@ -903,6 +903,7 @@ namespace AfterSchoolLibrary.Services
             if (isRequireCheckInCheckOutEnabled.IsNotEmpty())
                 activity.IsRequireCheckInCheckOut = isRequireCheckInCheckOutEnabled.ToString().ToBoolean();
 
+
             if (ageEnd.IsNumber())
             {
                 if (ageEnd.ToString().ToInteger() < 0)

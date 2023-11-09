@@ -70,7 +70,7 @@
                 </label>
                 <div class="col-md-9">
                     @{ Html.RenderPartial("_SwitchButton", Model.IsInviteOnly, new ViewDataDictionary
-                                       {
+                                               {
                            {"checkboxname", "inviteonly"},
                            {"checkboxid", "inviteonly"},
                            {"disabled", false},
@@ -106,7 +106,7 @@
                                 {"checkboxname", "isContinuousEnrollmentEnabled"},
                                 {"checkboxid", "isContinuousEnrollmentEnabled"},
                                 {"disabled", false},
-                    });
+            });
                     }
                 </div>
             </div>
@@ -140,22 +140,25 @@
 
             if (Model.ActivityTypeId == ActivityType.Activity)
             {
-                <div class="form-group @(!showCheckInOut?"hide":"")">
-                    <label class="col-sm-3 control-label">
-                        Require Check In/Out?
-                    </label>
-                    <div class="col-sm-9">
-                        @{
-                            Html.RenderPartial(
-                                "~/Views/Shared/_SwitchButton.cshtml",
-                                Model.IsRequireCheckInCheckOut,
-                                new ViewDataDictionary
-                                {
-                                    {"checkboxname", "isRequireCheckInCheckOutEnabled"},
-                                    {"checkboxid", "isRequireCheckInCheckOutEnabled"},
-                                    {"disabled", false},
-                                });
-                        }
+                <div class="@(!showCheckInOut?"hide":"")">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Require Check In/Out?
+                        </label>
+                        <div class="col-sm-9">
+                            @{
+                                Html.RenderPartial(
+                                    "~/Views/Shared/_SwitchButton.cshtml",
+                                    Model.IsRequireCheckInCheckOut,
+                                    new ViewDataDictionary
+                                    {
+                                        {"checkboxname", "isRequireCheckInCheckOutEnabled"},
+                                        {"checkboxid", "isRequireCheckInCheckOutEnabled"},
+                                        {"disabled", false},
+                        });
+                            }
+                        </div>
                     </div>
                 </div>
             }
@@ -191,7 +194,7 @@
                         </div>
                     </div>
                 </div>
-                                
+
 
                 <div class="registrationperiod-container">
 
@@ -222,7 +225,7 @@
                                         {"name", "registrationopentime"},
                                         {"id", "registrationopentime"},
                                         {"required", true},
-                                    });
+                    });
                             }
 
                         </div>
@@ -253,7 +256,7 @@
                                         {"name", "registrationclosetime"},
                                         {"id", "registrationclosetime"},
                                         {"required", true},
-                                    });
+                    });
                             }
 
                         </div>
@@ -329,37 +332,37 @@
                     </div>
                 </div>
 
-            @if (Model.ActivityTypeId == ActivityType.Activity)
-            {
-                <div class="form-group">
-                    <label class="col-sm-3 control-label">
-                        Registration Mode <span class="text-danger">*</span>
-                    </label>
-                    <div class="col-sm-9">
-                        <div class="am-radio inline"
-                                @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
-                            @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
-                            {
-                                <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
-                                        @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
-                                        @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
-                                <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
-                            }
+                @if (Model.ActivityTypeId == ActivityType.Activity)
+                {
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">
+                            Registration Mode <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="am-radio inline"
+                                 @if (!showAllowApplications) { <text> onclick="return showUpgradeMyPlan('@(allowApplicationsPackage?.Name)',@(allowApplicationsPackage?.ID))" </text> }>
+                                @foreach (var item in Enum.GetValues(typeof(RegistrationMode)).Cast<RegistrationMode>().Where(x => x != RegistrationMode.NotSet))
+                                {
+                                    <input type="radio" name="regmode" id="regmode-@item.ToString()" value="@((int) item)" class="regmode"
+                                           @(item == Model.RegistrationModeId ? "checked=\"checked\"" : "")
+                                           @if (!showAllowApplications) { <text> disabled="disabled" </text> } />
+                                    <label for="regmode-@item.ToString()" class="margin-h-10">@item.ToString()</label>
+                                }
+                            </div>
+                            <p class="text-muted">
+                                <em>
+                                    <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
+                                    <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
+                                </em>
+                            </p>
                         </div>
-                        <p class="text-muted">
-                            <em>
-                                <strong>Register Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will be given a &lsquo;reserved&rsquo; seat on a first come first serve basis.<br />
-                                <strong>Apply Mode</strong> means a @UILabel.RegistrantLabel().ToLower() will only &lsquo;apply&rsquo; and will be given a reserved seat either via lottery or by being placed manually by you in a reserved seat.
-                            </em>
-                        </p>
                     </div>
-                </div>
-            }
-            else
-            {
-                <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
-            }
-        </div>
+                }
+                else
+                {
+                    <input type="hidden" name="regmode" value="@((int) RegistrationMode.Register)" />
+                }
+            </div>
         }
         else
         {
@@ -455,7 +458,7 @@
                 function (data)
                 {
                     hideLoader();
-                    if (data && data.status == 'ok') {  
+                    if (data && data.status == 'ok') {
                         if (!data.isFormAgeRes && "@isActivityGradeRestricted" == "False") {
                             $("#modal-age-restriction-error").addClass("md-show");
                         }

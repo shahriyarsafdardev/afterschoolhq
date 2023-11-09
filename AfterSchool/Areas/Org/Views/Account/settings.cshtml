@@ -1,0 +1,50 @@
+@model Account
+@{
+    ViewBag.Title = Model.Name;
+    var msgs = (SystemMessages)ViewBag.Messages;
+}
+@{ Html.RenderPartial("OrgAccountHeader", Model.ID.ToString()); }
+<div class="main-content">
+    @{ Html.RenderPartial("~/Views/Shared/_RenderMessages.cshtml", msgs); }
+    @{ Html.RenderPartial("~/Views/Shared/_AccountDetailsHeader.cshtml", Model); }
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="s7-edit"></i> Settings
+        </div>
+        <div class="panel-body">
+            <div class="col-md-8 col-lg-9">
+                <form method="post" action="@Url.Action("settings", "account")" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="lg-ml-150 text-bold font-size-20">Check In / Check Out</label>
+                    </div>
+                    <div class="form-group">
+                        @if (Model.IsAccountPackageFeatureVisibleToCustomer(FeatureType.SendNotificationWhenStudentIsCheckedIn))
+                        { 
+                            <label class="lg-ml-150" for="cico-checkbox">Send Notification When Student is Checked In</label>
+                            <input id="@FeatureType.SendNotificationWhenStudentIsCheckedIn" class="cico-checkbox" name="@FeatureType.SendNotificationWhenStudentIsCheckedIn" type="checkbox" class="text-bold" @(Model.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn) ? "checked" : "") />
+                        }
+                    </div>
+
+                    <div class="form-group lg-mt-200">
+                        <label class="col-sm-3 control-label"></label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="reset" class="btn btn-default">Discard Changes</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var checkbox = document.getElementById("@FeatureType.SendNotificationWhenStudentIsCheckedIn");
+    checkbox.addEventListener("change", function () {
+        if (this.checked)
+        {
+            this.value = 1;
+        } else {
+            this.value = 0;
+        }
+    });
+</script>

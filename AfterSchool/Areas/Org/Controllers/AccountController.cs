@@ -164,6 +164,53 @@ namespace AfterSchool.Areas.Org.Controllers
             return View(currentAccount);
         }
 
+        [HttpGet]
+        public ActionResult Settings()
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            ViewBag.Messages = msgs;
+            return View(currentAccount);
+        }
+
+        [HttpPost]
+        public ActionResult Settings(string x)
+        {
+            var msgs = new SystemMessages();
+            var currentAccount = SessionVariables.CurrentAccount;
+            var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = currentAccount.GetActiveAccountPackage(msgs);
+            var featuresVisibleToCustomer = currentAccount.GetVisibleAccountPackageFeatures(msgs);
+
+            Database.ExecuteTransaction(
+                action: (SystemMessages amsgs, DatabaseConnection adc) =>
+                {
+                    foreach (var accountPackageFeature in featuresVisibleToCustomer)
+                    {
+                        var value = Request[accountPackageFeature.FeatureTypeId.ToString()].IsNotEmpty() ? 1 : 0;
+
+                        accountPackageFeature.Max = value;
+                        accountPackageFeature.LastModifiedBy = currentUser.ID;
+                        accountPackageFeature.LastModifiedDate = DateTime.UtcNow;
+                        amsgs.AddRange(accountPackageFeature.Save(adc));
+                    }
+                },
+                onSuccess: (SystemMessages smsgs) =>
+                {
+                    msgs.AddRange(smsgs);
+                    msgs.Add("Saved Successfully", MessageType.Success);
+                    SessionVariables.AccountPackage = currentAccount.GetActiveAccountPackage();
+                },
+                onFailure: (SystemMessages fmsgs) => msgs.AddRange(fmsgs),
+                onException: (SystemMessages emsgs) => Utilities.SystemErrorLog(emsgs)
+            );
+
+           
+            ViewBag.Messages = msgs;
+
+            return View(currentAccount);
+        }
+
         [HttpPost]
         public ActionResult Location(string id, string location, string locationname, string address1, string address2,
             string city, string state, string postalcode, string country, string mylocation, string locationtype)

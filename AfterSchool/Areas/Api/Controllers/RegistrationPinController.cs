@@ -14,6 +14,7 @@ using AfterSchoolLibrary.Models;
 using AfterSchoolLibrary.Services;
 using BasicLibrary;
 using BasicLibrary.DataAccess;
+using Hangfire;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
 
 namespace AfterSchool.Areas.Api.Controllers
@@ -553,6 +554,7 @@ namespace AfterSchool.Areas.Api.Controllers
                         {
                             var attendance = new Attendance();
                             var activityInstance = activity.HasSchedule ? activity.GetClosestActivityInstance(amsgs, adc) : null;
+                            var account = activity.GetAccount(amsgs, adc);
 
                             if (activity.HasSchedule)
                                 attendance = Attendance.LoadByActivityInstanceId(activityInstance.ID.Value, amsgs, adc).FirstOrDefault();
@@ -619,6 +621,25 @@ namespace AfterSchool.Areas.Api.Controllers
                                 CheckType = student.CheckInOut ? CheckType.CheckIn : CheckType.CheckOut,
                             };
                             amsgs.AddRange(checkInOutInfo.Save(adc));
+                            if (account.HasAccountPackageFeature(FeatureType.SendNotificationWhenStudentIsCheckedIn) && student.CheckInOut)
+                            {
+                                var parentRegistrant = registrant.GetParentOrGuardian(amsgs,adc);
+
+                                var msgBody = $"{registrant.Name} has been checked into {activity.Name} by {currentUser?.DisplayName}. If you have questions or concerns " +
+                                     $" please contact {account?.Name} {account?.Phone}";
+
+                                var am = activity.AddMessage(
+                                    $"Attendance Message for {account.ConvertToAccountTimeZone(DateTime.UtcNow)}",
+                                    msgBody,
+                                    new List<int> { registrant.ID.Value },
+                                    false,
+                                    true,
+                                    currentUser.ID.Value,
+                                    amsgs,
+                                    adc);
+                                BackgroundJob.Enqueue(() =>
+                                 ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, true, null, null));
+                            }
                         },
                         (SystemMessages smsgs) => msgs.AddRange(smsgs),
                         (SystemMessages fmsgs) => msgs.AddRange(fmsgs),

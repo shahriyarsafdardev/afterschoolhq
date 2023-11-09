@@ -1502,7 +1502,7 @@ namespace AfterSchool.Areas.Org.Controllers
                     .ToList();
                 am = activity.AddMessage(subject, body, registrantIds, sendtostaff.IsBoolean(), parentsonly.IsBoolean(), currentUser.ID.Value, msgs);
 
-                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null));
+                BackgroundJob.Enqueue(() => ActivityMessageService.Send(am.ID.Value, currentUser.ID.Value, null, null, null));
             }
 
             ViewBag.Messages = msgs;
