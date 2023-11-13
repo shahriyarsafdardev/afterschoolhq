@@ -188,11 +188,11 @@ namespace AfterSchoolLibrary.Services
             var nextBillDate = new DateTime();
             var providerDatetimeNow = billingAccount.ConvertToAccountTimeZone(DateTime.UtcNow).Date;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.Subscription)
+            if (subscriptionPlanType.Equals(SubscriptionPlanType.Subscription))
                 endDateTime = (activity.HasSchedule && activity.GetSchedule().IsOngoing) ? null : 
                 plan.GetPlanEndDateForRegistrantSubscription(startDateTime, checkoutObject.ParticipationObject, msgs);
 
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
+            if (subscriptionPlanType.Equals(SubscriptionPlanType.PaymentPlan))
                 endDateTime = (activity.HasSchedule && plan.PaymentStartTypeId.Equals(PlanPaymentStartType.WhenActivityStarts)) ? plan.GetPlanEndDateForRegistrantSubscription((DateTime) participationObject.StartDate, checkoutObject.ParticipationObject, msgs) :
                 plan.GetPlanEndDateForRegistrantSubscription( providerDatetimeNow, checkoutObject.ParticipationObject, msgs);
 
@@ -264,13 +264,10 @@ namespace AfterSchoolLibrary.Services
             else
                 endDateTime = null;
 
-            if (plan.PlanTypeId == SubscriptionPlanType.PaymentPlan)
-            {
-                if (!activity.HasSchedule)
-                {
-                    endDateTime = plan.GetPlanEndDateForRegistrantSubscription(providerDatetimeNow, checkoutObject.ParticipationObject, msgs);
-                    lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
-                }
+            if (subscriptionPlanType.Equals(SubscriptionPlanType.PaymentPlan) && !activity.HasSchedule)
+            { 
+                endDateTime = plan.GetPlanEndDateForRegistrantSubscription(providerDatetimeNow, checkoutObject.ParticipationObject, msgs);
+                lastDateToBill = SubscriptionScheduleService.GetPaymentDates(startDateTime, firstRenewalDate, (DateTime) endDateTime, plan.BillingPeriodTypeId).LastOrDefault();
             }
 
             if (startDateTime.Date.IsAfter(providerDatetimeNow))
