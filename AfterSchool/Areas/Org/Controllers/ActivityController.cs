@@ -1848,7 +1848,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
            
-            var cleanedDetails = Utilities.CleanText(details);
+            var cleanedDetails = BasicLibrary.Utilities.RemoveHTMLAndEntities(details);
             if (cleanedDetails?.Length > 4000)
                 msgs.Add("Details cannot be greater than 4000 characters", MessageType.UserError);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
@@ -2164,7 +2164,7 @@ namespace AfterSchool.Areas.Org.Controllers
             if (location.IsEmpty())
                 msgs.Add("Location is required", MessageType.UserError);
 
-            var cleanedLocationDetails = Utilities.CleanText(locationdetails);
+            var cleanedLocationDetails = BasicLibrary.Utilities.RemoveHTMLAndEntities(locationdetails);
             if (cleanedLocationDetails?.Length > 4000)
                 msgs.Add("Location details cannot be greater than 4000 characters", MessageType.UserError);
 
@@ -2437,8 +2437,8 @@ namespace AfterSchool.Areas.Org.Controllers
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
             var msgs = new SystemMessages();            
-            var registrationCleanedEmail = Utilities.CleanText(registrationthankyouemail);
-            var applicationCleanedEmail = Utilities.CleanText(applicationthankyouemail);
+            var registrationCleanedEmail = BasicLibrary.Utilities.RemoveHTMLAndEntities(registrationthankyouemail);
+            var applicationCleanedEmail = BasicLibrary.Utilities.RemoveHTMLAndEntities(applicationthankyouemail);
             if (registrationCleanedEmail?.Length > 4000 || applicationCleanedEmail?.Length > 4000)
                 msgs.Add("Email content cannot be greater than 4000 characters", MessageType.UserError);
 
