@@ -140,7 +140,7 @@ namespace AfterSchool.Areas.WebHooks.Controllers
 
         private static bool IsAllReportsClear(IEnumerable<ReportItem> reportItems)
         {
-            var criterias = new string[] {"clear", "complete"};
+            var criterias = new string[] {"clear", "complete","passed"};
             return reportItems.All(item => item.Status.ToLower().Equals("complete") &&
                                            criterias.Contains(item.Result.ToLower()));
         }
@@ -148,8 +148,11 @@ namespace AfterSchool.Areas.WebHooks.Controllers
         private static bool IsPreviouslyApproved(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
         {
             var approvalEntry = VolunteerApprovalService.GetLatestPreviousApproval(webUserId, msgs);
-            return approvalEntry.IsNotEmpty() &&
-                   approvalEntry.ApprovalStatusId == ApprovalStatus.Approved;
+            var backgroundCheckEntry = BackgroundCheck.LoadByWebUserId(webUserId,true, msgs).FirstOrDefault();
+            return approvalEntry.IsNotEmpty() && backgroundCheckEntry.IsNotEmpty() &&
+                   approvalEntry.ApprovalStatusId == ApprovalStatus.Approved && 
+                   backgroundCheckEntry.BackgroundCheckStatusId == BackgroundCheckStatus.Archive && 
+                   backgroundCheckEntry.BackgroundCheckResultId == SterlingBackgroundCheckResult.Passed;
         }
 
         private static bool IsPreviouslyTaskCreated(int webUserId, SystemMessages msgs, DatabaseConnection dc = null)
