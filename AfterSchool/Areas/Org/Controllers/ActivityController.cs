@@ -2869,6 +2869,7 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
+            var accountPackage = SessionVariables.AccountPackage;
             var msgs = new SystemMessages();
             var nonScheduleDate = att.IsNotEmpty() ? AfterSchoolLibrary.Models.Attendance.Load(att.ToInteger(),msgs).Date : DateTime.UtcNow.Date;
             var attendanceId = att.IsNumber() ? att.ToInteger() : new int?();
@@ -2893,6 +2894,9 @@ namespace AfterSchool.Areas.Org.Controllers
                 return RedirectToAction("Attendance", new { id, msg = "Error: No classes have taken place yet" });
 
 
+            ViewBag.CurrentUser = currentUser;
+            ViewBag.CurrentAccount = currentAccount;
+            ViewBag.AccountPackage = accountPackage;
             ViewBag.AttendanceRegistrants = attendanceRegistrants;
             ViewBag.AttendanceList = AfterSchoolLibrary.Models.Attendance.LoadByActivityId(activity.ID.Value, msgs);
             ViewBag.Schedule = activitySchedule;

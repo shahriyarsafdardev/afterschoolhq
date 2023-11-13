@@ -1,7 +1,7 @@
 @model Attendance
 @{
     var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
-    var account = SessionVariables.CurrentAccount;
+    var account = (Account)ViewData["CurrentAccount"];
     var controller = (string)ViewData["controller"];
     var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
     var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
