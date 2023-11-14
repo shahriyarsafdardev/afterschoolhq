@@ -20,6 +20,7 @@ using BasicLibrary.DataAccess;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Hangfire;
+using System.Text.RegularExpressions;
 using Email = AfterSchoolLibrary.Helpers.Email;
 using Extensions = AfterSchoolLibrary.Extensions;
 using Utilities = AfterSchoolLibrary.Helpers.Utilities;
@@ -1846,9 +1847,12 @@ namespace AfterSchool.Areas.Org.Controllers
 
             if (details.IsEmpty())
                 msgs.Add($"{UILabel.ActivityLabel()} Details is required", MessageType.UserError);
-
+           
+            var cleanedDetails = BasicLibrary.Utilities.RemoveHTMLAndEntities(details);
+            if (cleanedDetails?.Length > 4000)
+                msgs.Add("Details cannot be greater than 4000 characters", MessageType.UserError);
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
-            if (activity.IsNotEmpty())
+            if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>
                 {
@@ -2160,6 +2164,10 @@ namespace AfterSchool.Areas.Org.Controllers
             if (location.IsEmpty())
                 msgs.Add("Location is required", MessageType.UserError);
 
+            var cleanedLocationDetails = BasicLibrary.Utilities.RemoveHTMLAndEntities(locationdetails);
+            if (cleanedLocationDetails?.Length > 4000)
+                msgs.Add("Location details cannot be greater than 4000 characters", MessageType.UserError);
+
             if (activity.IsNotEmpty() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>
@@ -2428,13 +2436,15 @@ namespace AfterSchool.Areas.Org.Controllers
         {
             var currentAccount = SessionVariables.CurrentAccount;
             var currentUser = SessionVariables.CurrentUser;
-            var msgs = new SystemMessages();
-            if (registrationthankyouemail?.Length > 5000 || applicationthankyouemail?.Length > 5000)
-                msgs.Add("Message cannot be greater than 5000 characters", MessageType.UserError);
+            var msgs = new SystemMessages();            
+            var registrationCleanedEmail = BasicLibrary.Utilities.RemoveHTMLAndEntities(registrationthankyouemail);
+            var applicationCleanedEmail = BasicLibrary.Utilities.RemoveHTMLAndEntities(applicationthankyouemail);
+            if (registrationCleanedEmail?.Length > 4000 || applicationCleanedEmail?.Length > 4000)
+                msgs.Add("Email content cannot be greater than 4000 characters", MessageType.UserError);
 
             var activity = currentAccount.GetActivity(id.ToGuid(), msgs);
 
-            if (id.IsGuid())
+            if (id.IsGuid() && msgs.HasNoErrors())
             {
                 var values = new Dictionary<string, object>
                 {

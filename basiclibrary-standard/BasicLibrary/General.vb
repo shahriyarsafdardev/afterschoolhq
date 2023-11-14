@@ -1172,15 +1172,13 @@ Public Class Utilities
     End Function
 
     Public Shared Function RemoveHTMLAndEntities(ByVal html As String, Optional ByVal removeWhiteSpace As Boolean = True) As String
-        Dim reg As Text.RegularExpressions.Regex = New Text.RegularExpressions.Regex("<.+?>|</.+?>|<.+?/>")
+        Dim reg As Text.RegularExpressions.Regex = New Text.RegularExpressions.Regex("<(img|a)[^>]*>|""[^""]*""|<.*?>")
         Dim reg2 As Text.RegularExpressions.Regex = New Text.RegularExpressions.Regex("[ ]{2,}", Text.RegularExpressions.RegexOptions.None)
         Dim reg3 As Text.RegularExpressions.Regex = New Text.RegularExpressions.Regex("\s")
         If html.IsEmpty() = False Then
+            html = reg.Replace(html, String.Empty)
             If removeWhiteSpace Then
                 html = Web.HttpUtility.HtmlDecode(html).Replace(vbCrLf, " ")
-            End If
-            html = reg.Replace(html, " ")
-            If removeWhiteSpace Then
                 html = reg3.Replace(html, " ")
                 html = reg2.Replace(html, " ")
             End If
