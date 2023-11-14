@@ -2,9 +2,9 @@
 @{
     ViewBag.Title = Model.AccountName;
     var msgs = (SystemMessages)ViewBag.Messages;
-    var accountPackage = SessionVariables.AccountPackage;
-    var currentAccount = SessionVariables.CurrentAccount;
-    var currentUser = SessionVariables.CurrentUser;
+    var accountPackage = (AccountPackage)ViewBag.AccountPackage;
+    var currentAccount = (Account)ViewBag.CurrentAccount;
+    var currentUser = (WebUser)ViewBag.CurrentUser;
     var activity = Model.ToActivity(true);
 }
 
@@ -50,6 +50,7 @@
                                 { "Schedule", ViewBag.Schedule },
                                 { "RegistrantActivities", ViewBag.RegistrantActivities },
                                 { "Controller", "activity" },
+                                { "CurrentAccount", ViewBag.CurrentAccount },
                            });
                         }
                         else {
@@ -78,6 +79,7 @@
                                 { "RegistrantActivities", ViewBag.RegistrantActivities },
                                 { "Controller", "activity" },
                                  {"AttendanceList",ViewBag.AttendanceList },
+                                {"CurrentAccount", ViewBag.CurrentAccount },
                             });
                         }
                         else
@@ -91,6 +93,7 @@
                                 { "Schedule", ViewBag.Schedule },
                                 { "RegistrantActivities", ViewBag.RegistrantActivities },
                                 { "Controller", "activity" },
+                                { "CurrentAccount", ViewBag.CurrentAccount },
                             });
                         }
                     }

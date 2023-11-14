@@ -3,11 +3,12 @@
     var attendanceRegistrants = (List<AttendanceRegistrant>)ViewData["AttendanceRegistrants"];
     var schedule = (ActivitySchedule)ViewData["schedule"];
     var controller = (string)ViewData["controller"];
-    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(SessionVariables.CurrentAccount);
+    var currentAccount = (Account)ViewData["CurrentAccount"];
+    var isTechSupport = (bool)SessionVariables.CurrentUser.IsTechSupport(currentAccount);
     var registrantActivities = (List<RegistrantActivity>)ViewData["RegistrantActivities"];
     var isAttendanceDisabled = attendanceRegistrants.Count == 0 || registrantActivities.Where(a =>
         a.AssignmentTypeId == RegistrationAssignmentType.Reserved || a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingParentalConsent ||
-        a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : "";
+        a.AssignmentTypeId == RegistrationAssignmentType.ReservedPendingPayment).Count() == 0 ? "disabled=\"disabled\"" : ""; 
 }
 <style media="all and (max-width: 479px)">
     .attendance-table {
@@ -88,7 +89,7 @@
                                             else
                                             {
                                                 <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
-                                                    @checkInOutInfo.Where(check => check.CheckType == CheckType.CheckIn).LastOrDefault().Date.ToShortTimeString()
+                                                    @currentAccount.ConvertToAccountTimeZone(checkInOutInfo.Where(check => check.CheckType == CheckType.CheckIn).LastOrDefault().Date).ToShortTimeString()
                                                 </label>
                                             }
                                         </td>
@@ -104,7 +105,7 @@
                                                 if (checkInOutInfo.Count >=2  && checkInOutInfo.LastOrDefault().CheckType == CheckType.CheckOut)
                                                 {
                                                     <label for="@attendanceRegistrant.ID" class="margin-h-10 mobile-padding checkin-date">
-                                                        @checkInOutInfo.LastOrDefault().Date.ToShortTimeString()
+                                                        @currentAccount.ConvertToAccountTimeZone(checkInOutInfo.LastOrDefault().Date).ToShortTimeString()
                                                     </label>
                                                 }
                                             }
